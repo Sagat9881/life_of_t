@@ -7,7 +7,6 @@ import ru.lifegame.backend.domain.ending.*;
 import ru.lifegame.backend.domain.event.*;
 import ru.lifegame.backend.domain.exception.*;
 import ru.lifegame.backend.domain.quest.*;
-import ru.lifegame.backend.domain.service.*;
 
 import java.util.*;
 
