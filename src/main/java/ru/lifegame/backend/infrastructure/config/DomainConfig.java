@@ -2,12 +2,13 @@ package ru.lifegame.backend.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.lifegame.backend.domain.action.ActionProvider;
 import ru.lifegame.backend.domain.action.GameAction;
 import ru.lifegame.backend.domain.action.impl.*;
-import ru.lifegame.backend.domain.service.GameEngine;
-import ru.lifegame.backend.domain.service.ConflictTriggers;
-import ru.lifegame.backend.domain.service.GameOverChecker;
-import ru.lifegame.backend.domain.service.EndingEvaluator;
+import ru.lifegame.backend.domain.conflict.ConflictTriggers;
+import ru.lifegame.backend.domain.ending.EndingEvaluator;
+import ru.lifegame.backend.domain.model.GameOverChecker;
+import ru.lifegame.backend.infrastructure.game.GameEngineAdapter;
 
 import java.util.List;
 
@@ -36,16 +37,22 @@ public class DomainConfig {
     public RestAtHomeAction restAtHomeAction() { return new RestAtHomeAction(); }
 
     @Bean
-    public GameEngine gameEngine(List<GameAction> actions) {
-        return new GameEngine(actions, conflictTriggers(), gameOverChecker());
+    public ActionProvider actionProvider(List<GameAction> actions) {
+        return new GameEngineAdapter(actions);
     }
 
     @Bean
-    public ConflictTriggers conflictTriggers() { return new ConflictTriggers(); }
+    public ConflictTriggers conflictTriggers() { 
+        return new ConflictTriggers(); 
+    }
 
     @Bean
-    public GameOverChecker gameOverChecker() { return new GameOverChecker(); }
+    public GameOverChecker gameOverChecker() { 
+        return new GameOverChecker(); 
+    }
 
     @Bean
-    public EndingEvaluator endingEvaluator() { return new EndingEvaluator(); }
+    public EndingEvaluator endingEvaluator() { 
+        return new EndingEvaluator(); 
+    }
 }
