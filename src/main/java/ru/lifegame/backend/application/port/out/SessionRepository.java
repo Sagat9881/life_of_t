@@ -1,10 +1,13 @@
 package ru.lifegame.backend.application.port.out;
 
-import ru.lifegame.backend.domain.model.GameSession;
-import java.util.Optional;
+import ru.lifegame.backend.domain.model.session.GameSession;
+import ru.lifegame.backend.domain.model.session.GameSessionRepository;
 
-public interface SessionRepository {
-    Optional<GameSession> findByTelegramUserId(String telegramUserId);
-    void save(GameSession gameSession);
-    void delete(String telegramUserId);
+/**
+ * Application port for session repository.
+ * Extends domain repository interface for consistency.
+ */
+public interface SessionRepository extends GameSessionRepository {
+    // Inherits all methods from GameSessionRepository
+    // Can add application-specific methods if needed
 }
