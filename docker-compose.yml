@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  backend:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SESSION_PERSISTENCE_FILE=/app/data/sessions.json
+      - SESSION_PERSISTENCE_INTERVAL=10

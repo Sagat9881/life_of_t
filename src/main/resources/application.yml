@@ -4,6 +4,13 @@ server:
 spring:
   application:
     name: lifegame-backend
+  jackson:
+    default-property-inclusion: non_null
+
+session:
+  persistence:
+    file: ${SESSION_PERSISTENCE_FILE:/app/data/sessions.json}
+    interval: ${SESSION_PERSISTENCE_INTERVAL:10}
 
 management:
   endpoints:
