@@ -8,6 +8,7 @@ import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.service.*;
 import ru.lifegame.backend.domain.action.GameAction;
 import ru.lifegame.backend.domain.service.GameEngine;
+import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
 
 import java.util.List;
 
