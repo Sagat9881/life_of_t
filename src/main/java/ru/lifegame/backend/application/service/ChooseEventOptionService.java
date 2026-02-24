@@ -6,7 +6,7 @@ import ru.lifegame.backend.application.port.out.EventPublisher;
 import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.view.GameStateView;
 import ru.lifegame.backend.domain.exception.SessionNotFoundException;
-import ru.lifegame.backend.domain.model.GameSession;
+import ru.lifegame.backend.domain.model.session.GameSession;
 import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
 
 public class ChooseEventOptionService implements ChooseEventOptionUseCase {
