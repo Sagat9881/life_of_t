@@ -1,10 +1,12 @@
 package ru.lifegame.backend.application.command;
 
-public record ExecuteActionCommand(String telegramUserId, String actionCode) {
+import ru.lifegame.backend.domain.action.ActionType;
+
+public record ExecuteActionCommand(String telegramUserId, ActionType actionType) {
     public ExecuteActionCommand {
         if (telegramUserId == null || telegramUserId.isBlank())
             throw new IllegalArgumentException("telegramUserId must not be blank");
-        if (actionCode == null || actionCode.isBlank())
-            throw new IllegalArgumentException("actionCode must not be blank");
+        if (actionType == null)
+            throw new IllegalArgumentException("actionType must not be null");
     }
 }
