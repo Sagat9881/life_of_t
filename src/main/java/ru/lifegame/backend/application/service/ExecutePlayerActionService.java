@@ -9,7 +9,7 @@ import ru.lifegame.backend.domain.action.ActionProvider;
 import ru.lifegame.backend.domain.action.ActionResult;
 import ru.lifegame.backend.domain.action.GameAction;
 import ru.lifegame.backend.domain.exception.SessionNotFoundException;
-import ru.lifegame.backend.domain.model.GameSession;
+import ru.lifegame.backend.domain.model.session.GameSession;
 import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
 
 public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
