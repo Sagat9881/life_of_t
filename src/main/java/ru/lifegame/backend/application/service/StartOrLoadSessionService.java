@@ -4,7 +4,7 @@ import ru.lifegame.backend.application.command.StartSessionCommand;
 import ru.lifegame.backend.application.port.in.StartOrLoadSessionUseCase;
 import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.view.GameStateView;
-import ru.lifegame.backend.domain.model.GameSession;
+import ru.lifegame.backend.domain.model.session.GameSession;
 import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
 
 public class StartOrLoadSessionService implements StartOrLoadSessionUseCase {
