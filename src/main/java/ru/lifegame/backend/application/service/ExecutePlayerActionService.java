@@ -6,6 +6,7 @@ import ru.lifegame.backend.application.port.out.EventPublisher;
 import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.view.GameStateView;
 import ru.lifegame.backend.domain.action.ActionResult;
+import ru.lifegame.backend.domain.action.GameAction;
 import ru.lifegame.backend.domain.exception.SessionNotFoundException;
 import ru.lifegame.backend.domain.model.GameSession;
 import ru.lifegame.backend.domain.service.GameEngine;
@@ -31,11 +32,13 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
     public GameStateView execute(ExecuteActionCommand command) {
         GameSession session = sessionRepository.findByTelegramUserId(command.telegramUserId())
                 .orElseThrow(() -> new SessionNotFoundException(command.telegramUserId()));
-        session.executeAction()
-        ActionResult result = session.executeAction(command.actionType());
-        session.clearDomainEvents();
-
+        
+        GameAction action = gameEngine.getAction(command.actionType().code());
+        ActionResult result = session.executeAction(action);
+        
+        session.drainDomainEvents().forEach(eventPublisher::publish);
         sessionRepository.save(session);
+        
         return mapper.toView(session, result);
     }
 }
