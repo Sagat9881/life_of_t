@@ -38,4 +38,18 @@ public class ApplicationConfig {
     public GetGameStateUseCase getGameStateUseCase(SessionRepository repo, GameStateViewMapper mapper) {
         return new GetGameStateService(repo, mapper);
     }
+
+    @Bean
+    public ChooseConflictTacticUseCase chooseConflictTacticUseCase(SessionRepository repo,
+                                                                     EventPublisher publisher,
+                                                                     GameStateViewMapper mapper) {
+        return new ChooseConflictTacticService(repo, publisher, mapper);
+    }
+
+    @Bean
+    public ChooseEventOptionUseCase chooseEventOptionUseCase(SessionRepository repo,
+                                                               EventPublisher publisher,
+                                                               GameStateViewMapper mapper) {
+        return new ChooseEventOptionService(repo, publisher, mapper);
+    }
 }
