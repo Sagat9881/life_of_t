@@ -6,8 +6,8 @@ import ru.lifegame.backend.application.port.in.*;
 import ru.lifegame.backend.application.port.out.EventPublisher;
 import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.service.*;
+import ru.lifegame.backend.domain.action.ActionProvider;
 import ru.lifegame.backend.domain.action.GameAction;
-import ru.lifegame.backend.domain.service.GameEngine;
 import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
 
 import java.util.List;
@@ -16,8 +16,8 @@ import java.util.List;
 public class ApplicationConfig {
 
     @Bean
-    public GameStateViewMapper gameStateViewMapper(List<GameAction> allActions) {
-        return new GameStateViewMapper(allActions);
+    public GameStateViewMapper gameStateViewMapper(ActionProvider actionProvider) {
+        return new GameStateViewMapper(actionProvider.allActions().stream().toList());
     }
 
     @Bean
@@ -28,10 +28,10 @@ public class ApplicationConfig {
 
     @Bean
     public ExecutePlayerActionUseCase executePlayerActionUseCase(SessionRepository repo,
-                                                                  GameEngine engine,
+                                                                  ActionProvider actionProvider,
                                                                   EventPublisher publisher,
                                                                   GameStateViewMapper mapper) {
-        return new ExecutePlayerActionService(repo, engine, publisher, mapper);
+        return new ExecutePlayerActionService(repo, actionProvider, publisher, mapper);
     }
 
     @Bean
