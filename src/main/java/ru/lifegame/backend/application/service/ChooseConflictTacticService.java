@@ -6,6 +6,7 @@ import ru.lifegame.backend.application.port.out.EventPublisher;
 import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.view.GameStateView;
 import ru.lifegame.backend.domain.conflict.tactics.ConflictTactic;
+import ru.lifegame.backend.domain.conflict.tactics.ConflictTacticRegistry;
 import ru.lifegame.backend.domain.exception.SessionNotFoundException;
 import ru.lifegame.backend.domain.model.session.GameSession;
 import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
@@ -29,7 +30,7 @@ public class ChooseConflictTacticService implements ChooseConflictTacticUseCase 
         GameSession session = sessionRepository.findByTelegramUserId(command.telegramUserId())
                 .orElseThrow(() -> new SessionNotFoundException(command.telegramUserId()));
 
-        ConflictTactic tactic = ConflictTactic.valueOf(command.tacticCode());
+        ConflictTactic tactic = ConflictTacticRegistry.getByCode(command.tacticCode());
         session.applyTacticToActiveConflict(tactic);
 
         session.drainDomainEvents().forEach(eventPublisher::publish);
