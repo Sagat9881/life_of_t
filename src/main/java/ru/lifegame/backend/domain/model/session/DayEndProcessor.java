@@ -1,7 +1,8 @@
 package ru.lifegame.backend.domain.model.session;
 
 import ru.lifegame.backend.domain.balance.GameBalance;
-import ru.lifegame.backend.domain.conflict.*;
+import ru.lifegame.backend.domain.conflict.core.Conflict;
+import ru.lifegame.backend.domain.conflict.triggers.ConflictTriggers;
 import ru.lifegame.backend.domain.ending.*;
 import ru.lifegame.backend.domain.event.*;
 

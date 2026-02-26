@@ -2,8 +2,8 @@ package ru.lifegame.backend.domain.scenario;
 
 import org.junit.jupiter.api.Test;
 import ru.lifegame.backend.domain.action.impl.*;
-import ru.lifegame.backend.domain.model.GameSession;
-import ru.lifegame.backend.domain.model.NpcCode;
+import ru.lifegame.backend.domain.model.relationship.NpcCode;
+import ru.lifegame.backend.domain.model.session.GameSession;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

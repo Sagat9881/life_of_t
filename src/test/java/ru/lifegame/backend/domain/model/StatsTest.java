@@ -2,10 +2,10 @@ package ru.lifegame.backend.domain.model;
 
 import org.junit.jupiter.api.Test;
 import ru.lifegame.backend.domain.balance.GameBalance;
-import ru.lifegame.backend.domain.model.StatChanges;
-import ru.lifegame.backend.domain.model.Stats;
+import ru.lifegame.backend.domain.model.stats.StatChanges;
+import ru.lifegame.backend.domain.model.stats.Stats;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class StatsTest {
 

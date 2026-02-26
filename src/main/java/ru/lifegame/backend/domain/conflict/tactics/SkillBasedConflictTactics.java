@@ -1,7 +1,13 @@
-package ru.lifegame.backend.domain.conflict;
+package ru.lifegame.backend.domain.conflict.tactics;
 
 import ru.lifegame.backend.domain.balance.GameBalance;
-import ru.lifegame.backend.domain.model.*;
+import ru.lifegame.backend.domain.conflict.core.Conflict;
+import ru.lifegame.backend.domain.conflict.core.CspChanges;
+import ru.lifegame.backend.domain.model.character.PlayerCharacter;
+import ru.lifegame.backend.domain.model.relationship.NpcCode;
+import ru.lifegame.backend.domain.model.relationship.RelationshipChanges;
+import ru.lifegame.backend.domain.model.relationship.Relationships;
+import ru.lifegame.backend.domain.model.stats.StatChanges;
 
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;

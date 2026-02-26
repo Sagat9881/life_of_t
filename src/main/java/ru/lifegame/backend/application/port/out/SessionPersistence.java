@@ -1,6 +1,7 @@
 package ru.lifegame.backend.application.port.out;
 
-import ru.lifegame.backend.domain.model.GameSession;
+import ru.lifegame.backend.domain.model.session.GameSession;
+
 import java.util.Map;
 
 public interface SessionPersistence {

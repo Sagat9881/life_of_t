@@ -5,9 +5,9 @@ import org.springframework.context.annotation.Configuration;
 import ru.lifegame.backend.domain.action.ActionProvider;
 import ru.lifegame.backend.domain.action.GameAction;
 import ru.lifegame.backend.domain.action.impl.*;
-import ru.lifegame.backend.domain.conflict.ConflictTriggers;
+import ru.lifegame.backend.domain.conflict.triggers.ConflictTriggers;
 import ru.lifegame.backend.domain.ending.EndingEvaluator;
-import ru.lifegame.backend.domain.model.GameOverChecker;
+import ru.lifegame.backend.domain.model.session.GameOverChecker;
 import ru.lifegame.backend.infrastructure.game.GameEngineAdapter;
 
 import java.util.List;
@@ -47,7 +47,7 @@ public class DomainConfig {
     }
 
     @Bean
-    public GameOverChecker gameOverChecker() { 
+    public GameOverChecker gameOverChecker() {
         return new GameOverChecker(); 
     }
 

@@ -2,9 +2,9 @@ package ru.lifegame.backend.domain.model.character;
 
 import ru.lifegame.backend.domain.action.ActionType;
 import ru.lifegame.backend.domain.balance.GameBalance;
-import ru.lifegame.backend.domain.conflict.ConflictTactic;
-import ru.lifegame.backend.domain.conflict.BaseConflictTactics;
-import ru.lifegame.backend.domain.conflict.SkillBasedConflictTactics;
+import ru.lifegame.backend.domain.conflict.tactics.BaseConflictTactics;
+import ru.lifegame.backend.domain.conflict.tactics.ConflictTactic;
+import ru.lifegame.backend.domain.conflict.tactics.SkillBasedConflictTactics;
 import ru.lifegame.backend.domain.model.common.*;
 import ru.lifegame.backend.domain.model.stats.*;
 import ru.lifegame.backend.domain.model.session.GameTime;

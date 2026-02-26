@@ -3,13 +3,17 @@ package ru.lifegame.backend.infrastructure.web.mapper;
 import ru.lifegame.backend.application.view.*;
 import ru.lifegame.backend.domain.action.ActionResult;
 import ru.lifegame.backend.domain.action.GameAction;
-import ru.lifegame.backend.domain.action.GameSessionReadModel;
-import ru.lifegame.backend.domain.conflict.Conflict;
-import ru.lifegame.backend.domain.model.*;
+import ru.lifegame.backend.domain.conflict.core.Conflict;
+import ru.lifegame.backend.domain.model.character.PlayerCharacter;
+import ru.lifegame.backend.domain.model.pet.Pet;
+import ru.lifegame.backend.domain.model.pet.Pets;
+import ru.lifegame.backend.domain.model.relationship.Relationship;
+import ru.lifegame.backend.domain.model.relationship.Relationships;
+import ru.lifegame.backend.domain.model.session.GameSession;
+import ru.lifegame.backend.domain.model.stats.Stats;
 import ru.lifegame.backend.domain.quest.Quest;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class GameStateViewMapper {
 

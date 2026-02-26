@@ -1,6 +1,6 @@
 package ru.lifegame.backend.domain.action;
 
-import ru.lifegame.backend.domain.model.StatChanges;
+import ru.lifegame.backend.domain.model.stats.StatChanges;
 
 import java.util.Map;
 

@@ -2,6 +2,10 @@ package ru.lifegame.backend.domain.model.session;
 
 import ru.lifegame.backend.domain.action.*;
 import ru.lifegame.backend.domain.conflict.*;
+import ru.lifegame.backend.domain.conflict.core.Conflict;
+import ru.lifegame.backend.domain.conflict.core.ConflictType;
+import ru.lifegame.backend.domain.conflict.tactics.ConflictTactic;
+import ru.lifegame.backend.domain.conflict.tactics.TacticEffects;
 import ru.lifegame.backend.domain.ending.*;
 import ru.lifegame.backend.domain.event.*;
 import ru.lifegame.backend.domain.exception.InvalidGameStateException;
@@ -10,6 +14,7 @@ import ru.lifegame.backend.domain.model.pet.Pets;
 import ru.lifegame.backend.domain.model.relationship.NpcCode;
 import ru.lifegame.backend.domain.model.relationship.RelationshipChanges;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
+import ru.lifegame.backend.domain.model.*;
 import ru.lifegame.backend.domain.quest.*;
 
 import java.util.*;
@@ -23,7 +28,7 @@ public class GameSession implements GameSessionReadModel {
     // --- Identity and immutable data ---
     private final String sessionId;
     private final String telegramUserId;
-    
+
     // --- Game state ---
     private final PlayerCharacter player;
     private final Relationships relationships;
@@ -35,7 +40,7 @@ public class GameSession implements GameSessionReadModel {
     private Ending ending;
     private GameOverReason gameOverReason;
     private ActionResult lastActionResult;
-    
+
     // --- Domain services (stateless) ---
     private final ActionExecutor actionExecutor;
     private final ConflictManager conflictManager;
@@ -59,7 +64,7 @@ public class GameSession implements GameSessionReadModel {
         this.activeConflicts = new ArrayList<>();
         this.questLog = new QuestLog();
         this.events = new ArrayList<>();
-        
+
         // Initialize domain services
         this.actionExecutor = new ActionExecutor();
         this.conflictManager = new ConflictManager();
@@ -77,16 +82,16 @@ public class GameSession implements GameSessionReadModel {
         
         GameSessionContext context = createContext();
         ActionResult result = actionExecutor.execute(action, context, eventPublisher);
-        
+
         // Synchronize time back to session state
         this.time = context.time();
         this.lastActionResult = result;
-        
+
         // Check if day is over and trigger end-of-day processing
         if (time.isDayOver()) {
             endDay();
         }
-        
+
         return result;
     }
 
@@ -131,7 +136,7 @@ public class GameSession implements GameSessionReadModel {
                 ));
 
         EventResult result = event.applyOption(optionCode);
-        
+
         // Apply event effects
         if (result.statChanges() != null) {
             player.applyStatChanges(result.statChanges());
@@ -140,7 +145,7 @@ public class GameSession implements GameSessionReadModel {
             NpcCode npc = NpcCode.valueOf(result.relationshipNpc());
             relationships.applyChanges(npc, new RelationshipChanges(npc, result.relationshipDelta(), 0, 0, 0));
         }
-        
+
         return result;
     }
 
@@ -150,7 +155,7 @@ public class GameSession implements GameSessionReadModel {
     public void endDay() {
         GameSessionContext context = createContext();
         dayEndProcessor.processEndOfDay(context, eventPublisher);
-        
+
         // Synchronize state back to session
         this.time = context.time();
         this.ending = context.ending();
