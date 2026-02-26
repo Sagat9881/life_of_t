@@ -1,7 +1,7 @@
 package ru.lifegame.backend.domain.conflict;
 
-import ru.lifegame.backend.domain.model.StatChanges;
-import ru.lifegame.backend.domain.model.RelationshipChanges;
+import ru.lifegame.backend.domain.model.stats.StatChanges;
+import ru.lifegame.backend.domain.model.relationship.RelationshipChanges;
 
 public record ConflictResolution(
         ConflictOutcome outcome,
