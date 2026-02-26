@@ -1,17 +1,15 @@
 package ru.lifegame.backend.domain.model.session;
 
 import ru.lifegame.backend.domain.action.*;
-import ru.lifegame.backend.domain.balance.GameBalance;
 import ru.lifegame.backend.domain.conflict.*;
 import ru.lifegame.backend.domain.ending.*;
 import ru.lifegame.backend.domain.event.*;
-import ru.lifegame.backend.domain.exception.*;
+import ru.lifegame.backend.domain.exception.InvalidGameStateException;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.pet.Pets;
-import ru.lifegame.backend.domain.model.pet.PetCode;
-import ru.lifegame.backend.domain.model.relationship.Relationships;
-import ru.lifegame.backend.domain.model.relationship.RelationshipChanges;
 import ru.lifegame.backend.domain.model.relationship.NpcCode;
+import ru.lifegame.backend.domain.model.relationship.RelationshipChanges;
+import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.quest.*;
 
 import java.util.*;
@@ -19,11 +17,14 @@ import java.util.*;
 /**
  * Root entity of the GameSession aggregate.
  * Manages the complete state of a player's game session.
- * Enforces consistency across all game entities within the session.
+ * Delegates business logic to domain services while maintaining aggregate consistency.
  */
 public class GameSession implements GameSessionReadModel {
+    // --- Identity and immutable data ---
     private final String sessionId;
     private final String telegramUserId;
+    
+    // --- Game state ---
     private final PlayerCharacter player;
     private final Relationships relationships;
     private final Pets pets;
@@ -34,11 +35,21 @@ public class GameSession implements GameSessionReadModel {
     private Ending ending;
     private GameOverReason gameOverReason;
     private ActionResult lastActionResult;
-    private final List<DomainEvent> domainEvents;
+    
+    // --- Domain services (stateless) ---
+    private final ActionExecutor actionExecutor;
+    private final ConflictManager conflictManager;
+    private final DayEndProcessor dayEndProcessor;
+    private final DomainEventPublisher eventPublisher;
 
-    public GameSession(String sessionId, String telegramUserId,
-                       PlayerCharacter player, Relationships relationships,
-                       Pets pets, GameTime time) {
+    public GameSession(
+            String sessionId,
+            String telegramUserId,
+            PlayerCharacter player,
+            Relationships relationships,
+            Pets pets,
+            GameTime time
+    ) {
         this.sessionId = Objects.requireNonNull(sessionId, "sessionId cannot be null");
         this.telegramUserId = Objects.requireNonNull(telegramUserId, "telegramUserId cannot be null");
         this.player = Objects.requireNonNull(player, "player cannot be null");
@@ -48,145 +59,80 @@ public class GameSession implements GameSessionReadModel {
         this.activeConflicts = new ArrayList<>();
         this.questLog = new QuestLog();
         this.events = new ArrayList<>();
-        this.domainEvents = new ArrayList<>();
+        
+        // Initialize domain services
+        this.actionExecutor = new ActionExecutor();
+        this.conflictManager = new ConflictManager();
+        this.dayEndProcessor = new DayEndProcessor();
+        this.eventPublisher = new DomainEventPublisher();
     }
 
+    // --- Public API ---
+
+    /**
+     * Execute a game action.
+     */
     public ActionResult executeAction(GameAction action) {
         validateNotFinished();
         
-        int timeCost = action.calculateTimeCost(this);
-        if (!time.hasEnoughTime(timeCost)) {
-            throw new NotEnoughTimeException("Not enough time for action: " + action.type().code());
-        }
-        if (!player.canPerformAction(action.type(), time, timeCost)) {
-            throw new InvalidActionException("Cannot perform action: " + action.type().code());
-        }
-
-        ActionResult result = action.calculate(this);
-        applyActionResult(result);
+        GameSessionContext context = createContext();
+        ActionResult result = actionExecutor.execute(action, context, eventPublisher);
+        
+        // Synchronize time back to session state
+        this.time = context.time();
         this.lastActionResult = result;
-        domainEvents.add(new ActionExecutedEvent(sessionId, action.type().code()));
-
+        
+        // Check if day is over and trigger end-of-day processing
         if (time.isDayOver()) {
             endDay();
         }
+        
         return result;
     }
 
-    private void applyActionResult(ActionResult result) {
-        player.applyStatChanges(result.statChanges());
-        time = time.advanceHours(result.timeCost());
-
-        if (result.rested()) player.markRested();
-        if (result.workedToday()) player.markWorked();
-
-        result.relationshipChanges().forEach((npcStr, delta) -> {
-            NpcCode npc = NpcCode.valueOf(npcStr);
-            relationships.applyChanges(npc, new RelationshipChanges(npc, delta, 0, 0, 0));
-            relationships.markInteraction(npc, time.day());
-        });
-
-        if (result.interactedWithHusband()) {
-            relationships.markInteraction(NpcCode.HUSBAND, time.day());
-        }
-        if (result.interactedWithFather()) {
-            relationships.markInteraction(NpcCode.FATHER, time.day());
-        }
-
-        result.petMoodChanges().forEach((petStr, delta) -> {
-            PetCode pet = PetCode.valueOf(petStr);
-            pets.applyMoodChange(pet, delta);
-            pets.applyAttentionChange(pet, Math.abs(delta));
-        });
-    }
-
+    /**
+     * Start a new conflict.
+     */
     public Conflict startConflict(ConflictType type) {
         validateNotFinished();
-        
-        if (hasActiveConflictOfType(type)) {
-            throw new InvalidGameStateException(
-                "Conflict of type '" + type.code() + "' is already active"
-            );
-        }
-
-        String conflictId = UUID.randomUUID().toString();
-        Conflict conflict = new Conflict(conflictId, type);
-        activeConflicts.add(conflict);
-        domainEvents.add(new ConflictTriggeredEvent(sessionId, conflictId));
-        
-        return conflict;
+        GameSessionContext context = createContext();
+        return conflictManager.startConflict(type, context, eventPublisher);
     }
 
+    /**
+     * Avoid a brewing conflict.
+     */
     public void avoidConflict(String conflictId) {
         validateNotFinished();
-        
-        Conflict conflict = findConflictById(conflictId);
-        
-        if (conflict.stage() != ConflictStage.BREWING) {
-            throw new InvalidGameStateException(
-                "Cannot avoid conflict '" + conflictId + "': conflict is not in BREWING stage"
-            );
-        }
-        
-        conflict.avoidAtBrewingStage();
-        domainEvents.add(new ConflictResolvedEvent(sessionId, conflictId, "AVOIDED"));
+        GameSessionContext context = createContext();
+        conflictManager.avoidConflict(conflictId, context, eventPublisher);
     }
 
-    private Conflict findConflictById(String conflictId) {
-        return activeConflicts.stream()
-            .filter(c -> c.id().equals(conflictId))
-            .findFirst()
-            .orElseThrow(() -> new InvalidGameStateException(
-                "Conflict with id '" + conflictId + "' not found"
-            ));
-    }
-
-    private boolean hasActiveConflictOfType(ConflictType type) {
-        return activeConflicts.stream()
-            .anyMatch(c -> c.type().code().equals(type.code()) && !c.isResolved());
-    }
-
+    /**
+     * Apply a tactic to the active conflict.
+     */
     public TacticEffects applyTacticToActiveConflict(ConflictTactic tactic) {
         validateNotFinished();
-        
-        Conflict conflict = activeConflicts.stream()
-                .filter(c -> !c.isResolved())
-                .findFirst()
-                .orElseThrow(() -> new InvalidGameStateException("No active conflict"));
-
-        TacticEffects effects = conflict.applyTactic(tactic, player, relationships);
-        if (effects.statChanges() != null) player.applyStatChanges(effects.statChanges());
-        if (effects.relationshipChanges() != null) {
-            relationships.applyChanges(effects.relationshipChanges().npcCode(), effects.relationshipChanges());
-        }
-
-        domainEvents.add(new ConflictTacticAppliedEvent(sessionId, conflict.id(), tactic.code()));
-
-        if (conflict.isResolved()) {
-            handleConflictResolution(conflict);
-        }
-        return effects;
+        GameSessionContext context = createContext();
+        return conflictManager.applyTactic(tactic, context, eventPublisher);
     }
 
-    private void handleConflictResolution(Conflict conflict) {
-        ConflictResolution res = conflict.resolution();
-        domainEvents.add(new ConflictResolvedEvent(sessionId, conflict.id(), res.outcome().name()));
-        if (res.relationshipBreak() && conflict.type().opponent().isPresent()) {
-            NpcCode npc = conflict.type().opponent().get();
-            relationships.breakRelationship(npc);
-            domainEvents.add(new RelationshipBrokenEvent(sessionId, npc.name()));
-        }
-    }
-
+    /**
+     * Apply a choice to a triggered event.
+     */
     public EventResult applyEventChoice(String eventId, String optionCode) {
         validateNotFinished();
         
         GameEvent event = events.stream()
                 .filter(e -> e.id().equals(eventId) && e.isTriggered())
                 .findFirst()
-                .orElseThrow(() -> new InvalidGameStateException("Event not found or not triggered: " + eventId));
+                .orElseThrow(() -> new InvalidGameStateException(
+                    "Event not found or not triggered: " + eventId
+                ));
 
         EventResult result = event.applyOption(optionCode);
+        
+        // Apply event effects
         if (result.statChanges() != null) {
             player.applyStatChanges(result.statChanges());
         }
@@ -194,41 +140,34 @@ public class GameSession implements GameSessionReadModel {
             NpcCode npc = NpcCode.valueOf(result.relationshipNpc());
             relationships.applyChanges(npc, new RelationshipChanges(npc, result.relationshipDelta(), 0, 0, 0));
         }
+        
         return result;
     }
 
+    /**
+     * Process end of day.
+     */
     public void endDay() {
-        player.applyEndOfDayDecay();
-        relationships.applyDailyDecay(time.day());
-        pets.applyDailyDecay();
+        GameSessionContext context = createContext();
+        dayEndProcessor.processEndOfDay(context, eventPublisher);
+        
+        // Synchronize state back to session
+        this.time = context.time();
+        this.ending = context.ending();
+        this.gameOverReason = context.gameOverReason();
+    }
 
-        ConflictTriggers triggers = new ConflictTriggers();
-        List<Conflict> newConflicts = triggers.checkTriggers(player, relationships, time);
-        for (Conflict c : newConflicts) {
-            if (activeConflicts.stream().noneMatch(
-                    existing -> existing.type().code().equals(c.type().code()) && !existing.isResolved())) {
-                activeConflicts.add(c);
-                domainEvents.add(new ConflictTriggeredEvent(sessionId, c.id()));
-            }
-        }
+    /**
+     * Drain accumulated domain events.
+     */
+    public List<DomainEvent> drainDomainEvents() {
+        return eventPublisher.drainEvents();
+    }
 
-        GameOverChecker checker = new GameOverChecker();
-        checker.check(player, relationships, pets).ifPresent(reason -> {
-            this.gameOverReason = reason;
-            domainEvents.add(new GameOverEvent(sessionId, reason.name()));
-        });
+    // --- State queries ---
 
-        if (gameOverReason == null && time.day() >= GameBalance.MAX_GAME_DAYS) {
-            EndingEvaluator evaluator = new EndingEvaluator();
-            evaluator.findBestEnding(player, relationships, pets, questLog, time)
-                    .ifPresent(e -> {
-                        this.ending = e;
-                        domainEvents.add(new EndingAchievedEvent(sessionId, e.type().name()));
-                    });
-        }
-
-        domainEvents.add(new DayEndedEvent(sessionId, time.day()));
-        time = time.startNewDay();
+    public boolean isFinished() {
+        return gameOverReason != null || ending != null;
     }
 
     private void validateNotFinished() {
@@ -237,23 +176,26 @@ public class GameSession implements GameSessionReadModel {
         }
     }
 
-    public boolean isFinished() {
-        return gameOverReason != null || ending != null;
+    private GameSessionContext createContext() {
+        return new GameSessionContext(
+            sessionId,
+            player,
+            relationships,
+            pets,
+            time,
+            activeConflicts,
+            questLog,
+            events
+        );
     }
 
-    public List<DomainEvent> drainDomainEvents() {
-        List<DomainEvent> copy = List.copyOf(domainEvents);
-        domainEvents.clear();
-        return copy;
-    }
-
-    // GameSessionReadModel implementation
+    // --- GameSessionReadModel implementation ---
     @Override public PlayerCharacter player() { return player; }
     @Override public Relationships relationships() { return relationships; }
     @Override public Pets pets() { return pets; }
     @Override public GameTime time() { return time; }
 
-    // Getters
+    // --- Getters ---
     public String sessionId() { return sessionId; }
     public String telegramUserId() { return telegramUserId; }
     public List<Conflict> activeConflicts() { return Collections.unmodifiableList(activeConflicts); }
@@ -263,6 +205,7 @@ public class GameSession implements GameSessionReadModel {
     public GameOverReason gameOverReason() { return gameOverReason; }
     public ActionResult lastActionResult() { return lastActionResult; }
 
+    // --- Factory method ---
     public static GameSession createNew(String telegramUserId) {
         if (telegramUserId == null || telegramUserId.isBlank()) {
             throw new IllegalArgumentException("telegramUserId cannot be null or blank");
