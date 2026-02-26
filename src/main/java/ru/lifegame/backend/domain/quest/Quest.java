@@ -52,6 +52,7 @@ public class Quest {
     public boolean isActive() { return status == QuestStatus.IN_PROGRESS; }
     public boolean isCompleted() { return status == QuestStatus.COMPLETED; }
 
+    // Accessor methods
     public String id() { return id; }
     public QuestType type() { return type; }
     public String title() { return title; }

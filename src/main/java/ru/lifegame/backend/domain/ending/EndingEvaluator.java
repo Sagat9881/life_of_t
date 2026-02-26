@@ -13,8 +13,13 @@ import java.util.Optional;
 
 public class EndingEvaluator {
 
-    public Optional<Ending> findBestEnding(PlayerCharacter player, Relationships relationships,
-                                            Pets pets, QuestLog questLog, GameTime time) {
+    public Optional<Ending> findBestEnding(
+            PlayerCharacter player,
+            Relationships relationships,
+            Pets pets,
+            QuestLog questLog,
+            GameTime time
+    ) {
         if (time.day() < GameBalance.MAX_GAME_DAYS) {
             return Optional.empty();
         }
