@@ -2,12 +2,12 @@ package ru.lifegame.backend.domain.model.session;
 
 import ru.lifegame.backend.domain.action.GameSessionReadModel;
 import ru.lifegame.backend.domain.conflict.core.Conflict;
+import ru.lifegame.backend.domain.event.game.GameEvent;
+import ru.lifegame.backend.domain.ending.Ending;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.pet.Pets;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.quest.QuestLog;
-import ru.lifegame.backend.domain.event.GameEvent;
-import ru.lifegame.backend.domain.ending.Ending;
 
 import java.util.List;
 
