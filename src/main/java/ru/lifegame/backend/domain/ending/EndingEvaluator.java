@@ -1,7 +1,11 @@
 package ru.lifegame.backend.domain.ending;
 
 import ru.lifegame.backend.domain.balance.GameBalance;
-import ru.lifegame.backend.domain.model.*;
+import ru.lifegame.backend.domain.model.character.PlayerCharacter;
+import ru.lifegame.backend.domain.model.pet.Pets;
+import ru.lifegame.backend.domain.model.relationship.NpcCode;
+import ru.lifegame.backend.domain.model.relationship.Relationships;
+import ru.lifegame.backend.domain.model.session.GameTime;
 import ru.lifegame.backend.domain.quest.QuestLog;
 import ru.lifegame.backend.domain.quest.QuestType;
 
