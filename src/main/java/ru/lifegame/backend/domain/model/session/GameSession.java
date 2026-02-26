@@ -100,6 +100,28 @@ public class GameSession implements GameSessionReadModel {
         });
     }
 
+    public Conflict startConflict(ConflictType type) {
+        validateNotFinished();
+        
+        if (hasActiveConflictOfType(type)) {
+            throw new InvalidGameStateException(
+                "Conflict of type '" + type.code() + "' is already active"
+            );
+        }
+
+        String conflictId = UUID.randomUUID().toString();
+        Conflict conflict = new Conflict(conflictId, type);
+        activeConflicts.add(conflict);
+        domainEvents.add(new ConflictTriggeredEvent(sessionId, conflictId));
+        
+        return conflict;
+    }
+
+    private boolean hasActiveConflictOfType(ConflictType type) {
+        return activeConflicts.stream()
+            .anyMatch(c -> c.type().code().equals(type.code()) && !c.isResolved());
+    }
+
     public TacticEffects applyTacticToActiveConflict(ConflictTactic tactic) {
         validateNotFinished();
         
