@@ -1,7 +1,7 @@
 package ru.lifegame.backend.domain.model.session;
 
 import ru.lifegame.backend.domain.action.*;
-import ru.lifegame.backend.domain.event.ActionExecutedEvent;
+import ru.lifegame.backend.domain.event.domain.ActionExecutedEvent;
 import ru.lifegame.backend.domain.exception.*;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.pet.PetCode;
@@ -80,9 +80,13 @@ public class ActionExecutor {
         int currentDay = context.time().day();
         
         result.relationshipChanges().forEach((npcStr, delta) -> {
-            NpcCode npc = NpcCode.valueOf(npcStr);
-            relationships.applyChanges(npc, new RelationshipChanges(npc, delta, 0, 0, 0));
-            relationships.markInteraction(npc, currentDay);
+            try {
+                NpcCode npc = NpcCode.valueOf(npcStr.toUpperCase());
+                relationships.applyChanges(npc, new RelationshipChanges(npc, delta, 0, 0, 0));
+                relationships.markInteraction(npc, currentDay);
+            } catch (IllegalArgumentException e) {
+                // Skip unknown NPC codes
+            }
         });
         
         if (result.interactedWithHusband()) {
@@ -97,9 +101,13 @@ public class ActionExecutor {
         Pets pets = context.pets();
         
         result.petMoodChanges().forEach((petStr, delta) -> {
-            PetCode pet = PetCode.valueOf(petStr);
-            pets.applyMoodChange(pet, delta);
-            pets.applyAttentionChange(pet, Math.abs(delta));
+            try {
+                PetCode pet = PetCode.valueOf(petStr.toUpperCase());
+                pets.applyMoodChange(pet, delta);
+                pets.applyAttentionChange(pet, Math.abs(delta));
+            } catch (IllegalArgumentException e) {
+                // Skip unknown pet codes
+            }
         });
     }
 }

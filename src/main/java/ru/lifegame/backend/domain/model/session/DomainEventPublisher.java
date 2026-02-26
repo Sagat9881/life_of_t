@@ -1,23 +1,19 @@
 package ru.lifegame.backend.domain.model.session;
 
-import ru.lifegame.backend.domain.event.DomainEvent;
+import ru.lifegame.backend.domain.event.domain.DomainEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Domain service for accumulating and publishing domain events.
- * Provides a clean separation between event production and consumption.
+ * Domain service for accumulating and draining domain events.
+ * Used for Event Sourcing and integration with external systems.
  */
 public class DomainEventPublisher {
-    private final List<DomainEvent> events;
-
-    public DomainEventPublisher() {
-        this.events = new ArrayList<>();
-    }
+    private final List<DomainEvent> events = new ArrayList<>();
 
     /**
-     * Publish a domain event by adding it to the accumulator.
+     * Publish a domain event to the accumulator.
      */
     public void publish(DomainEvent event) {
         events.add(event);
@@ -25,25 +21,10 @@ public class DomainEventPublisher {
 
     /**
      * Drain all accumulated events and clear the buffer.
-     * This method should be called after a transaction completes.
      */
     public List<DomainEvent> drainEvents() {
-        List<DomainEvent> copy = List.copyOf(events);
+        List<DomainEvent> drained = new ArrayList<>(events);
         events.clear();
-        return copy;
-    }
-
-    /**
-     * Check if there are any pending events.
-     */
-    public boolean hasEvents() {
-        return !events.isEmpty();
-    }
-
-    /**
-     * Get the number of pending events without draining.
-     */
-    public int eventCount() {
-        return events.size();
+        return drained;
     }
 }
