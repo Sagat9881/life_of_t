@@ -1,0 +1,26 @@
+package ru.lifegame.backend.domain.conflict.triggers;
+
+import ru.lifegame.backend.domain.balance.GameBalance;
+import ru.lifegame.backend.domain.conflict.*;
+import ru.lifegame.backend.domain.model.*;
+
+import java.util.Optional;
+import java.util.UUID;
+
+public class FatherConcernTrigger implements ConflictTrigger {
+    @Override
+    public Optional<Conflict> check(PlayerCharacter player, Relationships relationships, GameTime time) {
+        Relationship father = relationships.get(NpcCode.FATHER);
+        if (father == null || father.broken()) {
+            return Optional.empty();
+        }
+        
+        boolean triggered = player.stats().money() < GameBalance.FATHER_CONCERN_MONEY
+            || player.stats().health() < GameBalance.FATHER_CONCERN_HEALTH;
+        
+        if (triggered) {
+            return Optional.of(new Conflict(UUID.randomUUID().toString(), FatherConflicts.CONCERN_FOR_WELLBEING));
+        }
+        return Optional.empty();
+    }
+}
