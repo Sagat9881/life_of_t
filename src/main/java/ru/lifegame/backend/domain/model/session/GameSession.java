@@ -117,6 +117,30 @@ public class GameSession implements GameSessionReadModel {
         return conflict;
     }
 
+    public void avoidConflict(String conflictId) {
+        validateNotFinished();
+        
+        Conflict conflict = findConflictById(conflictId);
+        
+        if (conflict.stage() != ConflictStage.BREWING) {
+            throw new InvalidGameStateException(
+                "Cannot avoid conflict '" + conflictId + "': conflict is not in BREWING stage"
+            );
+        }
+        
+        conflict.avoidAtBrewingStage();
+        domainEvents.add(new ConflictResolvedEvent(sessionId, conflictId, "AVOIDED"));
+    }
+
+    private Conflict findConflictById(String conflictId) {
+        return activeConflicts.stream()
+            .filter(c -> c.id().equals(conflictId))
+            .findFirst()
+            .orElseThrow(() -> new InvalidGameStateException(
+                "Conflict with id '" + conflictId + "' not found"
+            ));
+    }
+
     private boolean hasActiveConflictOfType(ConflictType type) {
         return activeConflicts.stream()
             .anyMatch(c -> c.type().code().equals(type.code()) && !c.isResolved());
