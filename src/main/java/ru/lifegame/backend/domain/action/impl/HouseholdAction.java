@@ -3,6 +3,8 @@ package ru.lifegame.backend.domain.action.impl;
 import ru.lifegame.backend.domain.action.*;
 import ru.lifegame.backend.domain.balance.GameBalance;
 import ru.lifegame.backend.domain.model.*;
+import ru.lifegame.backend.domain.model.relationship.NpcCode;
+import ru.lifegame.backend.domain.model.stats.StatChanges;
 
 import java.util.Map;
 
