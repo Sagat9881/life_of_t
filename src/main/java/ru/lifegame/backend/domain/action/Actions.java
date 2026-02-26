@@ -7,7 +7,8 @@ public enum Actions implements ActionType {
     PLAY_WITH_CAT("PLAY_WITH_CAT", "Поиграть с Гарфилдом", "Время с котом"),
     WALK_DOG("WALK_DOG", "Погулять с Сэмом", "Прогулка с собакой"),
     SELF_CARE("SELF_CARE", "Заняться собой", "Время для себя"),
-    REST_AT_HOME("REST_AT_HOME", "Отдохнуть дома", "Отдых и восстановление");
+    REST_AT_HOME("REST_AT_HOME", "Отдохнуть дома", "Отдых и восстановление"),
+    HOUSEHOLD("HOUSEHOLD", "Домашние дела", "Уборка, готовка, уют в доме");
 
     private final String code;
     private final String label;
