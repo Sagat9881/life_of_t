@@ -121,9 +121,6 @@ public class DayEndProcessor {
         if (context.gameOverReason() == null 
             && context.time().day() >= GameBalance.MAX_GAME_DAYS) {
             
-            // EndingEvaluator uses old class structure - temporarily comment out
-            // TODO: Fix EndingEvaluator to use new package structure
-            /*
             endingEvaluator.findBestEnding(
                 context.player(),
                 context.relationships(),
@@ -136,7 +133,6 @@ public class DayEndProcessor {
                     new EndingAchievedEvent(context.sessionId(), ending.type().name())
                 );
             });
-            */
         }
     }
 }
