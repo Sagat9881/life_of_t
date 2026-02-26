@@ -8,10 +8,10 @@ import ru.lifegame.backend.domain.event.*;
 import ru.lifegame.backend.domain.exception.*;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.pet.Pets;
+import ru.lifegame.backend.domain.model.pet.PetCode;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.model.relationship.RelationshipChanges;
-import ru.lifegame.backend.domain.model.NpcCode;
-import ru.lifegame.backend.domain.model.PetCode;
+import ru.lifegame.backend.domain.model.relationship.NpcCode;
 import ru.lifegame.backend.domain.quest.*;
 
 import java.util.*;
