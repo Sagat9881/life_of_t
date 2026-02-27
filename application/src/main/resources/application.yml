@@ -1,0 +1,44 @@
+# Application configuration
+
+spring:
+  application:
+    name: life-of-t
+
+server:
+  port: 8080
+  compression:
+    enabled: true
+    mime-types:
+      - application/json
+      - application/javascript
+      - text/css
+      - text/html
+
+# Spring MVC
+spring.mvc:
+  static-path-pattern: /**
+
+spring.web.resources:
+  static-locations:
+    - classpath:/static/
+  cache:
+    cachecontrol:
+      max-age: 365d # Cache static resources for 1 year
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Logging
+logging:
+  level:
+    ru.lifegame: INFO
+    org.springframework: WARN
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} - %msg%n'
