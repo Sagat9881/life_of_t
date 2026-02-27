@@ -38,7 +38,7 @@ public class GameControllerImpl implements GameController {
 
     @Override
     public ResponseEntity<GameStateView> startSession(StartSessionRequestDto request) {
-        StartSessionCommand command = new StartSessionCommand(String.valueOf(request.telegramUserId()));
+        StartSessionCommand command = new StartSessionCommand(request.telegramUserId());
         GameStateView view = startOrLoadSession.execute(command);
         return ResponseEntity.status(HttpStatus.OK).body(view);
     }
@@ -53,7 +53,7 @@ public class GameControllerImpl implements GameController {
     @Override
     public ResponseEntity<GameStateView> executeAction(ExecuteActionRequestDto request) {
         ExecuteActionCommand command = new ExecuteActionCommand(
-                String.valueOf(request.telegramUserId()),
+                request.telegramUserId(),
                 request.actionCode()
         );
         GameStateView view = executeAction.execute(command);
@@ -63,7 +63,7 @@ public class GameControllerImpl implements GameController {
     @Override
     public ResponseEntity<GameStateView> chooseConflictTactic(ChooseConflictTacticRequestDto request) {
         ChooseConflictTacticCommand command = new ChooseConflictTacticCommand(
-                 String.valueOf(request.telegramUserId()), request.conflictId(), request.tacticCode()
+                request.telegramUserId(), request.conflictId(), request.tacticCode()
         );
         GameStateView view = chooseConflictTactic.execute(command);
         return ResponseEntity.ok(view);
@@ -72,7 +72,7 @@ public class GameControllerImpl implements GameController {
     @Override
     public ResponseEntity<GameStateView> chooseEventOption(ChooseEventOptionRequestDto request) {
         ChooseEventOptionCommand command = new ChooseEventOptionCommand(
-                 String.valueOf(request.telegramUserId()), request.eventId(), request.optionCode()
+                request.telegramUserId(), request.eventId(), request.optionCode()
         );
         GameStateView view = chooseEventOption.execute(command);
         return ResponseEntity.ok(view);
