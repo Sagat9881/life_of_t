@@ -7,39 +7,35 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * In-memory implementation of SessionRepository.
- * For development and testing purposes.
- */
 public class InMemorySessionRepository implements SessionRepository {
-    
-    private final Map<String, GameSession> sessions = new ConcurrentHashMap<>();
-    private final SessionPersistence persistence;
 
-    public InMemorySessionRepository(SessionPersistence persistence) {
-        this.persistence = persistence;
-    }
+    private final Map<String, GameSession> sessions = new ConcurrentHashMap<>();
 
     @Override
-    public Optional<GameSession> findByTelegramUserId(String telegramUserId) {
-        GameSession cached = sessions.get(telegramUserId);
-        if (cached != null) {
-            return Optional.of(cached);
-        }
-        
-        Optional<GameSession> loaded = persistence.load(telegramUserId);
-        loaded.ifPresent(session -> sessions.put(telegramUserId, session));
-        return loaded;
+    public Optional<GameSession> findBySessionId(String sessionId) {
+        return Optional.ofNullable(sessions.get(sessionId));
+    }
+    
+    @Override
+    public Optional<GameSession> findByTelegramUserId(long telegramUserId) {
+        return sessions.values().stream()
+                .filter(s -> s.telegramUserId() == telegramUserId)
+                .findFirst();
     }
 
     @Override
     public void save(GameSession session) {
-        sessions.put(session.telegramUserId(), session);
-        persistence.persist(session);
+        sessions.put(session.sessionId(), session);
     }
 
     @Override
-    public boolean exists(String telegramUserId) {
-        return sessions.containsKey(telegramUserId) || persistence.exists(telegramUserId);
+    public void delete(String sessionId) {
+        sessions.remove(sessionId);
+    }
+
+    @Override
+    public boolean existsByTelegramUserId(long telegramUserId) {
+        return sessions.values().stream()
+                .anyMatch(s -> s.telegramUserId() == telegramUserId);
     }
 }

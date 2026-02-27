@@ -11,9 +11,10 @@ public record GameStateView(
         TimeView time,
         List<ActionOptionView> availableActions,
         List<QuestView> activeQuests,
-        List<String> completedQuests,
+        List<String> completedQuestIds,
         List<ConflictView> activeConflicts,
-        EventView pendingEvent,
+        EventView currentEvent,
         EndingView ending,
         ActionResultView lastActionResult
-) {}
+) {
+}

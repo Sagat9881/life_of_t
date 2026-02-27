@@ -27,7 +27,7 @@ public class GameStateViewMapper {
     public GameStateView toView(GameSession session, ActionResult lastResult) {
         return new GameStateView(
                 session.sessionId(),
-                session.telegramUserId(),
+                String.valueOf(session.telegramUserId()),
                 toPlayerView(session.player()),
                 toRelationshipViews(session.relationships()),
                 toPetViews(session.pets()),
@@ -87,7 +87,7 @@ public class GameStateViewMapper {
     private List<ActionOptionView> toActionOptionViews(GameSession session) {
         return allActions.stream()
                 .map(action -> {
-                    int timeCost = action.calculateTimeCost(session);
+                    int timeCost = action.calculateTimeCost(session.context().asReadModel());
                     boolean available = session.player().canPerformAction(action.type(), session.time(), timeCost);
                     String reason = available ? null : resolveUnavailableReason(session, timeCost);
                     return new ActionOptionView(
