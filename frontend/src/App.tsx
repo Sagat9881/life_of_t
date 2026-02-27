@@ -4,7 +4,7 @@ import { HomePage } from './pages/HomePage';
 import { RelationshipsPage } from './pages/RelationshipsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import type { NavItem } from './components/layout/BottomNav';
-import './styles/global.css';
+import './styles/globals.css';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<NavItem>('home');

@@ -1,8 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import './styles/global.css';
-import './styles/variables.css';
+import './styles/globals.css';
 
 // Telegram WebApp initialization
 if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
