@@ -7,11 +7,13 @@ import { ErrorMessage } from './components/shared/ErrorMessage';
 import { type NavItem } from './components/layout/BottomNav';
 import { AppLayout } from './components/layout/AppLayout';
 import type { Stats } from './types/game';
+import { Power } from 'lucide-react';
 
 function ComponentTest() {
   const [currentNav, setCurrentNav] = useState<NavItem>('home');
   const [isLoading, setIsLoading] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [isShuttingDown, setIsShuttingDown] = useState(false);
 
   const mockStats: Stats = {
     energy: 75,
@@ -27,12 +29,52 @@ function ComponentTest() {
     setTimeout(() => setIsLoading(false), 2000);
   };
 
+  const handleShutdown = async () => {
+    if (!confirm('Выключить демо-приложение?')) {
+      return;
+    }
+
+    setIsShuttingDown(true);
+    try {
+      await fetch('/api/shutdown', { method: 'POST' });
+      // Показываем сообщение пользователю
+      alert('Приложение выключается... Окно можно закрыть.');
+    } catch (error) {
+      console.error('Ошибка при выключении:', error);
+      setIsShuttingDown(false);
+      alert('Не удалось выключить приложение. Используйте Ctrl+C в консоли.');
+    }
+  };
+
   return (
     <AppLayout currentNav={currentNav} onNavigate={setCurrentNav}>
       <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-        <h1 style={{ fontFamily: 'Comfortaa, sans-serif', color: '#FF6B9D' }}>
-          🎮 Component Test
-        </h1>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: '1rem'
+        }}>
+          <h1 style={{ fontFamily: 'Comfortaa, sans-serif', color: '#FF6B9D', margin: 0 }}>
+            🎮 Component Test
+          </h1>
+          <Button 
+            variant="outline" 
+            size="small"
+            onClick={handleShutdown}
+            disabled={isShuttingDown}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              color: '#e74c3c',
+              borderColor: '#e74c3c'
+            }}
+          >
+            <Power size={16} />
+            {isShuttingDown ? 'Выключение...' : 'Выключить'}
+          </Button>
+        </div>
 
         <Card variant="elevated" padding="large">
           <h2>Buttons</h2>
@@ -139,6 +181,7 @@ function ComponentTest() {
             <li>Все кнопки должны откликаться на клики</li>
             <li>Проверь hover эффекты на десктопе</li>
             <li>Цвета: 🌸 Розовый, 🌿 Мятный, ☀️ Жёлтый</li>
+            <li>Кнопка "Выключить" завершает работу приложения</li>
           </ul>
         </Card>
       </div>

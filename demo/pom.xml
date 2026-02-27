@@ -63,7 +63,7 @@
                             <goal>launch4j</goal>
                         </goals>
                         <configuration>
-                            <headerType>gui</headerType>
+                            <headerType>console</headerType>
                             <outfile>target/life-of-t-demo.exe</outfile>
                             <jar>target/life-of-t-demo.jar</jar>
                             <errTitle>Life of T Demo</errTitle>
