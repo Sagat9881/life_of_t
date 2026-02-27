@@ -1,24 +1,19 @@
-import { type ReactNode } from 'react';
 import { BottomNav, type NavItem } from '../BottomNav';
-import styles from './AppLayout.module.css';
+import './AppLayout.css';
 
 interface AppLayoutProps {
-  children: ReactNode;
+  children: React.ReactNode;
   currentNav: NavItem;
   onNavigate: (item: NavItem) => void;
-  showNav?: boolean;
 }
 
-export const AppLayout = ({
-  children,
-  currentNav,
-  onNavigate,
-  showNav = true,
-}: AppLayoutProps) => {
+export function AppLayout({ children, currentNav, onNavigate }: AppLayoutProps) {
   return (
-    <div className={styles.layout}>
-      <main className={styles.main}>{children}</main>
-      {showNav && <BottomNav activeItem={currentNav} onNavigate={onNavigate} />}
+    <div className="app-layout">
+      <main className="app-layout__content">
+        {children}
+      </main>
+      <BottomNav current={currentNav} onNavigate={onNavigate} />
     </div>
   );
-};
+}
