@@ -1,0 +1,33 @@
+# Demo Application Configuration
+
+spring:
+  application:
+    name: life-of-t-demo
+
+server:
+  port: 3000
+  compression:
+    enabled: true
+    mime-types:
+      - application/javascript
+      - text/css
+      - text/html
+
+# Spring MVC
+spring.mvc:
+  static-path-pattern: /**
+
+spring.web.resources:
+  static-locations:
+    - classpath:/static/
+  cache:
+    cachecontrol:
+      no-cache: true  # No caching for demo
+
+# Logging
+logging:
+  level:
+    ru.lifegame: INFO
+    org.springframework: WARN
+  pattern:
+    console: '%d{HH:mm:ss} - %msg%n'

@@ -17,6 +17,7 @@
         <module>backend</module>
         <module>frontend</module>
         <module>application</module>
+        <module>demo</module>
     </modules>
 
     <properties>
