@@ -1,0 +1,54 @@
+.relationship-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.relationship-list__section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.relationship-list__title {
+  font-family: 'Comfortaa', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.relationship-list__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.relationship-list__loading,
+.relationship-list__error,
+.relationship-list__empty {
+  padding: 3rem 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.relationship-list__empty p {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 639px) {
+  .relationship-list__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .relationship-list__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

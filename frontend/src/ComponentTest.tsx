@@ -6,9 +6,10 @@ import { LoadingSpinner } from './components/shared/LoadingSpinner';
 import { ErrorMessage } from './components/shared/ErrorMessage';
 import { PlayerPanel } from './components/game/PlayerPanel';
 import { ActionList } from './components/game/ActionList';
+import { RelationshipList } from './components/game/RelationshipList';
 import { type NavItem } from './components/layout/BottomNav';
 import { AppLayout } from './components/layout/AppLayout';
-import type { Stats, Player, GameAction } from './types/game';
+import type { Stats, Player, GameAction, NPC, Pet } from './types/game';
 import { Power } from 'lucide-react';
 
 function ComponentTest() {
@@ -92,6 +93,42 @@ function ComponentTest() {
     },
   ];
 
+  const mockNPCs: NPC[] = [
+    {
+      id: 'npc-husband',
+      name: 'Александр',
+      type: 'husband',
+      relationship: 85,
+      avatarUrl: '',
+    },
+    {
+      id: 'npc-father',
+      name: 'Папа',
+      type: 'father',
+      relationship: 65,
+      avatarUrl: '',
+    },
+  ];
+
+  const mockPets: Pet[] = [
+    {
+      id: 'pet-garfield',
+      name: 'Гарфилд',
+      type: 'cat',
+      mood: 90,
+      hunger: 30,
+      avatarUrl: '',
+    },
+    {
+      id: 'pet-sam',
+      name: 'Сэм',
+      type: 'dog',
+      mood: 75,
+      hunger: 50,
+      avatarUrl: '',
+    },
+  ];
+
   const handleButtonClick = () => {
     setIsLoading(true);
     setTimeout(() => setIsLoading(false), 2000);
@@ -100,6 +137,16 @@ function ComponentTest() {
   const handleActionExecute = (actionCode: string) => {
     console.log('Execute action:', actionCode);
     alert(`Выполнено действие: ${actionCode}`);
+  };
+
+  const handleNPCClick = (npcId: string) => {
+    console.log('NPC clicked:', npcId);
+    alert(`Открыть диалог с: ${npcId}`);
+  };
+
+  const handlePetClick = (petId: string) => {
+    console.log('Pet clicked:', petId);
+    alert(`Взаимодействие с питомцем: ${petId}`);
   };
 
   const handleShutdown = async () => {
@@ -125,8 +172,22 @@ function ComponentTest() {
           🎮 Component Test
         </h1>
 
-        {/* ActionList Demo */}
+        {/* RelationshipList Demo */}
         <Card variant="elevated" padding="large">
+          <h2>RelationshipList</h2>
+          <p style={{ marginBottom: '1rem', color: '#666' }}>
+            Список персонажей и питомцев с показателями отношений
+          </p>
+          <RelationshipList 
+            npcs={mockNPCs}
+            pets={mockPets}
+            onNPCClick={handleNPCClick}
+            onPetClick={handlePetClick}
+          />
+        </Card>
+
+        {/* ActionList Demo */}
+        <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
           <h2>ActionList</h2>
           <p style={{ marginBottom: '1rem', color: '#666' }}>
             Список действий с поиском и фильтрацией по категориям
@@ -258,6 +319,7 @@ function ComponentTest() {
             <li>Цвета: 🌸 Розовый, 🌿 Мятный, ☀️ Жёлтый</li>
             <li>PlayerPanel адаптируется под размер экрана</li>
             <li>ActionList поддерживает поиск и фильтрацию</li>
+            <li>RelationshipList показывает NPCs и питомцев с прогресс-барами</li>
           </ul>
         </Card>
 
