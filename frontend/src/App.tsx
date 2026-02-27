@@ -3,6 +3,7 @@ import { AppLayout } from './components/layout/AppLayout';
 import { HomePage } from './pages/HomePage';
 import { RelationshipsPage } from './pages/RelationshipsPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { ShutdownButton } from './components/demo/ShutdownButton';
 import type { NavItem } from './components/layout/BottomNav';
 import './styles/globals.css';
 
@@ -23,9 +24,13 @@ function App() {
   };
 
   return (
-    <AppLayout currentNav={currentPage} onNavigate={setCurrentPage}>
-      {renderPage()}
-    </AppLayout>
+    <>
+      <AppLayout currentNav={currentPage} onNavigate={setCurrentPage}>
+        {renderPage()}
+      </AppLayout>
+      {/* Кнопка выключения демо */}
+      <ShutdownButton />
+    </>
   );
 }
 
