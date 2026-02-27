@@ -1,106 +1,58 @@
-import type { GameState } from '../types/game';
+import { gameApi, ApiError } from '../api/client';
+import type { GameStateResponse } from '../types/api';
 
-const API_BASE_URL = '/api/v1/game';
-
-// Fallback telegramUserId для demo
 const getTelegramUserId = (): string => {
-  if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
-    const tg = (window as any).Telegram.WebApp;
-    return tg.initDataUnsafe?.user?.id?.toString() || 'demo-user';
+  // В Telegram Mini App
+  if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+    return window.Telegram.WebApp.initDataUnsafe.user.id.toString();
   }
+  // Fallback для demo
   return 'demo-user';
 };
 
-interface ActionResult {
-  player: GameState['player'];
-  time: GameState['time'];
-  actions: GameState['actions'];
-  currentConflict?: GameState['currentConflict'];
-  currentEvent?: GameState['currentEvent'];
-}
-
-interface TacticResult {
-  player: GameState['player'];
-}
-
-interface ChoiceResult {
-  player: GameState['player'];
-}
-
-class ApiClient {
-  private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
-
-    return response.json();
-  }
-
-  async startSession(): Promise<GameState> {
-    const telegramUserId = getTelegramUserId();
-    return await this.request<GameState>('/session/start', {
-      method: 'POST',
-      body: JSON.stringify({ telegramUserId }),
-    });
-  }
-
-  async getGameState(): Promise<GameState> {
+/**
+ * API wrapper с автоматическим созданием сессии
+ */
+export const api = {
+  /**
+   * Получить состояние игры (с автоматическим созданием сессии при 404)
+   */
+  async getGameState(): Promise<GameStateResponse> {
     const telegramUserId = getTelegramUserId();
     
     try {
-      // Попытка получить существующую сессию
-      return await this.request<GameState>(`/state?telegramUserId=${encodeURIComponent(telegramUserId)}`);
+      return await gameApi.getState(telegramUserId as any);
     } catch (error) {
-      // Если сессии нет (404), создаём новую
-      if (error instanceof Error && error.message.includes('404')) {
-        return await this.startSession();
+      // Если сессия не найдена - создаём новую
+      if (error instanceof ApiError && error.status === 404) {
+        console.log('Session not found, creating new session...');
+        return await gameApi.startSession({ telegramUserId });
       }
       throw error;
     }
-  }
+  },
 
-  async executeAction(actionCode: string): Promise<ActionResult> {
+  /**
+   * Выполнить действие
+   */
+  async executeAction(actionCode: string): Promise<GameStateResponse> {
     const telegramUserId = getTelegramUserId();
-    return this.request<ActionResult>('/action', {
-      method: 'POST',
-      body: JSON.stringify({ 
-        telegramUserId,
-        actionCode 
-      }),
-    });
-  }
+    return gameApi.executeAction({ telegramUserId, actionCode });
+  },
 
-  async resolveTactic(conflictId: string, tacticCode: string): Promise<TacticResult> {
+  /**
+   * Разрешить конфликт тактикой
+   */
+  async resolveTactic(conflictId: string, tacticCode: string): Promise<GameStateResponse> {
     const telegramUserId = getTelegramUserId();
-    return this.request<TacticResult>('/conflict/tactic', {
-      method: 'POST',
-      body: JSON.stringify({ 
-        telegramUserId,
-        conflictId, 
-        tacticCode 
-      }),
-    });
-  }
+    return gameApi.chooseConflictTactic({ telegramUserId, conflictId, tacticCode });
+  },
 
-  async selectChoice(eventId: string, choiceCode: string): Promise<ChoiceResult> {
+  /**
+   * Выбрать вариант в событии
+   */
+  async selectChoice(eventId: string, choiceCode: string): Promise<GameStateResponse> {
     const telegramUserId = getTelegramUserId();
-    return this.request<ChoiceResult>('/event-choice', {
-      method: 'POST',
-      body: JSON.stringify({ 
-        telegramUserId,
-        eventId, 
-        choiceCode 
-      }),
-    });
-  }
-}
-
-export const api = new ApiClient();
+    return gameApi.chooseEventOption({ telegramUserId, eventId, choiceCode });
+  },
+};
