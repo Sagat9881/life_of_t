@@ -46,13 +46,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const state = await api.getGameState();
+      
+      // Map backend DTO to frontend store
       set({
         player: state.player,
         time: state.time,
-        actions: state.actions,
-        npcs: state.npcs,
-        pets: state.pets,
-        currentConflict: state.currentConflict ?? null,
+        // Backend: availableActions -> Frontend: actions
+        actions: (state as any).availableActions || [],
+        // Backend: relationships -> Frontend: npcs (temporary mapping)
+        npcs: ((state as any).relationships || []).map((rel: any) => ({
+          id: rel.id || rel.npcCode,
+          name: rel.name,
+          relationship: rel.closeness || 0,
+          type: rel.npcCode?.toLowerCase() || 'friend'
+        })),
+        pets: state.pets || [],
+        // Backend: activeConflicts[0] -> Frontend: currentConflict
+        currentConflict: ((state as any).activeConflicts && (state as any).activeConflicts.length > 0)
+          ? (state as any).activeConflicts[0]
+          : null,
         currentEvent: state.currentEvent ?? null,
         isLoading: false,
       });
