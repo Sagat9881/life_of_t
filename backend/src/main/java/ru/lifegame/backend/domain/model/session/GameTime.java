@@ -18,7 +18,9 @@ public record GameTime(int day, int hour) {
     }
 
     public boolean hasEnoughTime(int hours) {
-        return hour + hours <= GameBalance.HOURS_PER_DAY;
+        // Рассчитываем оставшееся время в дне от текущего часа
+        int remainingHours = GameBalance.HOURS_PER_DAY - hour;
+        return hours <= remainingHours;
     }
 
     public GameTime advanceHours(int hours) {
@@ -37,10 +39,10 @@ public record GameTime(int day, int hour) {
     }
 
     public GameTime startNewDay() {
-        return new GameTime(day + 1, 0);
+        return new GameTime(day + 1, GameBalance.DAY_START_HOUR);
     }
 
     public static GameTime initial() {
-        return new GameTime(0, 0);
+        return new GameTime(1, GameBalance.DAY_START_HOUR);
     }
 }
