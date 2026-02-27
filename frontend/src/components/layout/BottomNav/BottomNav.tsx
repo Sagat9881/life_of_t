@@ -1,61 +1,48 @@
-import { Home, Zap, Heart } from 'lucide-react';
-import { useHaptic } from '@/hooks/useHaptic';
-import styles from './BottomNav.module.css';
+import { Home, Users, User } from 'lucide-react';
+import { useTelegram } from '../../../hooks/useTelegram';
+import './BottomNav.css';
 
-export type NavItem = 'home' | 'actions' | 'relationships';
+export type NavItem = 'home' | 'relationships' | 'profile';
 
 interface BottomNavProps {
-  activeItem: NavItem;
+  current: NavItem;
   onNavigate: (item: NavItem) => void;
 }
 
-const navItems = [
-  {
-    id: 'home' as const,
-    label: 'Главная',
-    icon: Home,
-  },
-  {
-    id: 'actions' as const,
-    label: 'Действия',
-    icon: Zap,
-  },
-  {
-    id: 'relationships' as const,
-    label: 'Отношения',
-    icon: Heart,
-  },
-];
+const NAV_ITEMS = [
+  { id: 'home' as NavItem, icon: Home, label: 'Главная' },
+  { id: 'relationships' as NavItem, icon: Users, label: 'Отношения' },
+  { id: 'profile' as NavItem, icon: User, label: 'Профиль' },
+] as const;
 
-export const BottomNav = ({ activeItem, onNavigate }: BottomNavProps) => {
-  const { selection } = useHaptic();
+export function BottomNav({ current, onNavigate }: BottomNavProps) {
+  const { hapticFeedback } = useTelegram();
 
   const handleClick = (item: NavItem) => {
-    if (item !== activeItem) {
-      selection();
+    if (item !== current) {
+      hapticFeedback?.selectionChanged();
       onNavigate(item);
     }
   };
 
   return (
-    <nav className={styles.nav}>
-      {navItems.map((item) => {
-        const Icon = item.icon;
-        const isActive = item.id === activeItem;
-
-        return (
+    <nav className="bottom-nav">
+      <div className="bottom-nav__container">
+        {NAV_ITEMS.map(({ id, icon: Icon, label }) => (
           <button
-            key={item.id}
-            className={`${styles.item} ${isActive ? styles.active : ''}`}
-            onClick={() => handleClick(item.id)}
-            aria-label={item.label}
-            aria-current={isActive ? 'page' : undefined}
+            key={id}
+            onClick={() => handleClick(id)}
+            className={`bottom-nav__item ${
+              current === id ? 'bottom-nav__item--active' : ''
+            }`}
+            aria-label={label}
+            aria-current={current === id ? 'page' : undefined}
           >
-            <Icon className={styles.icon} size={24} />
-            <span className={styles.label}>{item.label}</span>
+            <Icon size={24} className="bottom-nav__icon" />
+            <span className="bottom-nav__label">{label}</span>
           </button>
-        );
-      })}
+        ))}
+      </div>
     </nav>
   );
-};
+}
