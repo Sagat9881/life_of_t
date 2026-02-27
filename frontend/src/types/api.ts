@@ -4,22 +4,22 @@ import type { GameState } from './game';
 
 // Request DTOs
 export interface StartSessionRequest {
-  telegramUserId: number;
+  telegramUserId: string;
 }
 
 export interface ExecuteActionRequest {
-  telegramUserId: number;
+  telegramUserId: string;
   actionCode: string;
 }
 
 export interface ChooseConflictTacticRequest {
-  telegramUserId: number;
+  telegramUserId: string;
   conflictId: string;
   tacticCode: string;
 }
 
 export interface ChooseEventOptionRequest {
-  telegramUserId: number;
+  telegramUserId: string;
   eventId: string;
   optionCode: string;
 }
@@ -57,7 +57,7 @@ export interface ApiConfig {
 // API методы
 export interface GameApi {
   startSession: (request: StartSessionRequest) => Promise<StartSessionResponse>;
-  getState: (telegramUserId: number) => Promise<GameStateResponse>;
+  getState: (telegramUserId: string) => Promise<GameStateResponse>;
   executeAction: (request: ExecuteActionRequest) => Promise<ExecuteActionResponse>;
   chooseConflictTactic: (request: ChooseConflictTacticRequest) => Promise<ChooseConflictTacticResponse>;
   chooseEventOption: (request: ChooseEventOptionRequest) => Promise<ChooseEventOptionResponse>;

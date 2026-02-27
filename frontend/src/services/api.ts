@@ -21,7 +21,7 @@ export const api = {
     const telegramUserId = getTelegramUserId();
     
     try {
-      return await gameApi.getState(telegramUserId as any);
+      return await gameApi.getState(telegramUserId);
     } catch (error) {
       // Если сессия не найдена - создаём новую
       if (error instanceof ApiError && error.status === 404) {
