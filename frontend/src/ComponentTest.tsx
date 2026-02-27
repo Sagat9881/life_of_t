@@ -7,9 +7,10 @@ import { ErrorMessage } from './components/shared/ErrorMessage';
 import { PlayerPanel } from './components/game/PlayerPanel';
 import { ActionList } from './components/game/ActionList';
 import { RelationshipList } from './components/game/RelationshipList';
+import { ConflictResolver } from './components/game/ConflictResolver';
 import { type NavItem } from './components/layout/BottomNav';
 import { AppLayout } from './components/layout/AppLayout';
-import type { Stats, Player, GameAction, NPC, Pet } from './types/game';
+import type { Stats, Player, GameAction, NPC, Pet, Conflict } from './types/game';
 import { Power } from 'lucide-react';
 
 function ComponentTest() {
@@ -129,6 +130,39 @@ function ComponentTest() {
     },
   ];
 
+  const mockConflict: Conflict = {
+    id: 'conflict-1',
+    description: 'Муж недоволен тем, что вы слишком много времени проводите за работой и мало внимания уделяете семье.',
+    csp: 65,
+    maxCSP: 100,
+    tactics: [
+      {
+        code: 'apologize',
+        name: '🙏 Извиниться',
+        description: 'Признать свою ошибку и попросить прощения',
+        successChance: 70,
+      },
+      {
+        code: 'explain',
+        name: '💬 Объяснить',
+        description: 'Спокойно объяснить причины своего поведения',
+        successChance: 55,
+      },
+      {
+        code: 'compromise',
+        name: '🤝 Найти компромисс',
+        description: 'Предложить решение, устраивающее обоих',
+        successChance: 80,
+      },
+      {
+        code: 'ignore',
+        name: '🚪 Игнорировать',
+        description: 'Сделать вид, что ничего не произошло',
+        successChance: 20,
+      },
+    ],
+  };
+
   const handleButtonClick = () => {
     setIsLoading(true);
     setTimeout(() => setIsLoading(false), 2000);
@@ -147,6 +181,11 @@ function ComponentTest() {
   const handlePetClick = (petId: string) => {
     console.log('Pet clicked:', petId);
     alert(`Взаимодействие с питомцем: ${petId}`);
+  };
+
+  const handleTacticSelect = (tacticCode: string) => {
+    console.log('Tactic selected:', tacticCode);
+    alert(`Выбрана тактика: ${tacticCode}`);
   };
 
   const handleShutdown = async () => {
@@ -172,8 +211,21 @@ function ComponentTest() {
           🎮 Component Test
         </h1>
 
-        {/* RelationshipList Demo */}
+        {/* ConflictResolver Demo */}
         <Card variant="elevated" padding="large">
+          <h2>ConflictResolver</h2>
+          <p style={{ marginBottom: '1rem', color: '#666' }}>
+            Компонент для разрешения конфликтов с CSP-шкалой и выбором тактик
+          </p>
+          <ConflictResolver
+            conflict={mockConflict}
+            onSelectTactic={handleTacticSelect}
+            onCancel={() => alert('Конфликт отменён')}
+          />
+        </Card>
+
+        {/* RelationshipList Demo */}
+        <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
           <h2>RelationshipList</h2>
           <p style={{ marginBottom: '1rem', color: '#666' }}>
             Список персонажей и питомцев с показателями отношений
@@ -320,6 +372,7 @@ function ComponentTest() {
             <li>PlayerPanel адаптируется под размер экрана</li>
             <li>ActionList поддерживает поиск и фильтрацию</li>
             <li>RelationshipList показывает NPCs и питомцев с прогресс-барами</li>
+            <li>ConflictResolver с динамической CSP-шкалой и тактиками</li>
           </ul>
         </Card>
 

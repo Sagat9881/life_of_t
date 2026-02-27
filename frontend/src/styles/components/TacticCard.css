@@ -1,0 +1,89 @@
+.tactic-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 4px solid var(--color-primary);
+}
+
+.tactic-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  border-left-color: var(--color-secondary);
+}
+
+.tactic-card:active {
+  transform: scale(0.98);
+}
+
+.tactic-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.tactic-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.tactic-card__title {
+  font-family: 'Comfortaa', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+  flex: 1;
+}
+
+.tactic-card__description {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 1rem 0;
+}
+
+.tactic-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.tactic-card__chance {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tactic-card__chance-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.tactic-card__chance-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Pulse animation on hover */
+.tactic-card:hover .tactic-card__icon {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
