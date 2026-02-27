@@ -49,32 +49,9 @@ function ComponentTest() {
   return (
     <AppLayout currentNav={currentNav} onNavigate={setCurrentNav}>
       <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          marginBottom: '1rem'
-        }}>
-          <h1 style={{ fontFamily: 'Comfortaa, sans-serif', color: '#FF6B9D', margin: 0 }}>
-            🎮 Component Test
-          </h1>
-          <Button 
-            variant="outline" 
-            size="small"
-            onClick={handleShutdown}
-            disabled={isShuttingDown}
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '0.5rem',
-              color: '#e74c3c',
-              borderColor: '#e74c3c'
-            }}
-          >
-            <Power size={16} />
-            {isShuttingDown ? 'Выключение...' : 'Выключить'}
-          </Button>
-        </div>
+        <h1 style={{ fontFamily: 'Comfortaa, sans-serif', color: '#FF6B9D' }}>
+          🎮 Component Test
+        </h1>
 
         <Card variant="elevated" padding="large">
           <h2>Buttons</h2>
@@ -174,15 +151,40 @@ function ComponentTest() {
           <p>Переключай вкладки внизу экрана и почувствуй haptic feedback!</p>
         </Card>
 
-        <Card variant="outlined" padding="medium" style={{ marginTop: '1rem', marginBottom: '2rem' }}>
+        <Card variant="outlined" padding="medium" style={{ marginTop: '1rem' }}>
           <h3>💡 Информация</h3>
           <ul style={{ paddingLeft: '1.5rem' }}>
             <li>Haptic feedback работает только в Telegram Mini App</li>
             <li>Все кнопки должны откликаться на клики</li>
             <li>Проверь hover эффекты на десктопе</li>
             <li>Цвета: 🌸 Розовый, 🌿 Мятный, ☀️ Жёлтый</li>
-            <li>Кнопка "Выключить" завершает работу приложения</li>
           </ul>
+        </Card>
+
+        {/* Кнопка выключения в конце */}
+        <Card variant="elevated" padding="large" style={{ marginTop: '1rem', marginBottom: '2rem' }}>
+          <h2 style={{ color: '#e74c3c' }}>⚙️ Управление демо</h2>
+          <p style={{ marginBottom: '1rem' }}>Завершить работу демо-приложения:</p>
+          <Button 
+            variant="outline" 
+            onClick={handleShutdown}
+            disabled={isShuttingDown}
+            fullWidth
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              gap: '0.5rem',
+              color: '#e74c3c',
+              borderColor: '#e74c3c'
+            }}
+          >
+            <Power size={20} />
+            {isShuttingDown ? 'Выключение...' : 'Выключить приложение'}
+          </Button>
+          <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#666', textAlign: 'center' }}>
+            Также можно использовать Ctrl+C в консоли
+          </p>
         </Card>
       </div>
     </AppLayout>
