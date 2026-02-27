@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import ru.lifegame.backend.application.port.in.*;
 import ru.lifegame.backend.application.port.out.EventPublisher;
 import ru.lifegame.backend.application.port.out.SessionRepository;
+import ru.lifegame.backend.application.service.*;
 import ru.lifegame.backend.domain.action.ActionProvider;
 import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
 

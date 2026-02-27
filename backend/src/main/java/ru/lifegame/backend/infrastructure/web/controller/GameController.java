@@ -10,6 +10,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.lifegame.backend.application.view.GameStateView;
+import ru.lifegame.backend.infrastructure.web.dto.ChooseConflictTacticRequestDto;
+import ru.lifegame.backend.infrastructure.web.dto.ChooseEventOptionRequestDto;
+import ru.lifegame.backend.infrastructure.web.dto.ExecuteActionRequestDto;
+import ru.lifegame.backend.infrastructure.web.dto.StartSessionRequestDto;
 
 @Tag(name = "Game API", description = "API для управления игровой сессией Life of T")
 @RequestMapping("/api/v1/game")

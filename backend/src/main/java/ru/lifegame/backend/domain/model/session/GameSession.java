@@ -1,7 +1,6 @@
 package ru.lifegame.backend.domain.model.session;
 
 import ru.lifegame.backend.domain.action.ActionResult;
-import ru.lifegame.backend.domain.action.ActionType;
 import ru.lifegame.backend.domain.action.GameAction;
 import ru.lifegame.backend.domain.balance.GameBalance;
 import ru.lifegame.backend.domain.conflict.core.Conflict;
@@ -12,12 +11,14 @@ import ru.lifegame.backend.domain.event.game.EventResult;
 import ru.lifegame.backend.domain.event.game.GameEvent;
 import ru.lifegame.backend.domain.exception.InvalidGameStateException;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
-import ru.lifegame.backend.domain.model.common.PlayerId;
 import ru.lifegame.backend.domain.model.pet.Pets;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.quest.QuestLog;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Root aggregate for game session.

@@ -1,7 +1,5 @@
 package ru.lifegame.backend.domain.model.pet;
 
-import ru.lifegame.backend.domain.balance.GameBalance;
-
 public record Pet(
     String id,
     String name,
