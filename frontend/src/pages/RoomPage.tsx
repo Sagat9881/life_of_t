@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import { useGameState } from '../hooks/useGameState';
-import { executeAction } from '../api/game';
+import React, { useState, useEffect } from 'react';
+import { useGameStore } from '../store/gameStore';
 import styles from './RoomPage.module.css';
 
 interface RoomObject {
@@ -21,32 +20,39 @@ const ROOM_OBJECTS: RoomObject[] = [
 ];
 
 export const RoomPage: React.FC = () => {
-  const { gameState, refreshGameState } = useGameState();
+  const { player, isLoading, error, fetchGameState, executeAction } = useGameStore();
   const [selectedObject, setSelectedObject] = useState<RoomObject | null>(null);
-  const [isExecuting, setIsExecuting] = useState(false);
+
+  useEffect(() => {
+    fetchGameState();
+  }, [fetchGameState]);
 
   const handleObjectClick = async (obj: RoomObject) => {
     setSelectedObject(obj);
   };
 
   const handleActionConfirm = async () => {
-    if (!selectedObject || !gameState) return;
+    if (!selectedObject || !player) return;
     
-    setIsExecuting(true);
     try {
-      await executeAction(gameState.telegramUserId, selectedObject.actionCode);
-      await refreshGameState();
+      await executeAction(selectedObject.actionCode);
       setSelectedObject(null);
     } catch (error: any) {
       console.error('Action failed:', error);
-      alert(error.response?.data?.message || 'Действие не удалось');
-    } finally {
-      setIsExecuting(false);
+      alert(error.message || 'Действие не удалось');
     }
   };
 
-  if (!gameState) {
+  if (isLoading && !player) {
     return <div className={styles.loading}>Загрузка...</div>;
+  }
+
+  if (error) {
+    return <div className={styles.loading}>Ошибка: {error}</div>;
+  }
+
+  if (!player) {
+    return <div className={styles.loading}>Нет данных об игроке</div>;
   }
 
   return (
@@ -56,27 +62,27 @@ export const RoomPage: React.FC = () => {
         <div className={styles.hudLeft}>
           <div className={styles.stat}>
             <span className={styles.statIcon}>⚡</span>
-            <span className={styles.statValue}>{gameState.player.energy}/100</span>
+            <span className={styles.statValue}>{player.energy}/100</span>
           </div>
           <div className={styles.stat}>
             <span className={styles.statIcon}>❤️</span>
-            <span className={styles.statValue}>{gameState.player.health}/100</span>
+            <span className={styles.statValue}>{player.health}/100</span>
           </div>
           <div className={styles.stat}>
             <span className={styles.statIcon}>😊</span>
-            <span className={styles.statValue}>{gameState.player.mood}/100</span>
+            <span className={styles.statValue}>{player.mood}/100</span>
           </div>
         </div>
         <div className={styles.hudCenter}>
           <div className={styles.timeDisplay}>
-            <span className={styles.day}>День {gameState.time.day}</span>
-            <span className={styles.hour}>{gameState.time.hour}:00</span>
+            <span className={styles.day}>День {player.day}</span>
+            <span className={styles.hour}>{player.hour}:00</span>
           </div>
         </div>
         <div className={styles.hudRight}>
           <div className={styles.money}>
             <span className={styles.moneyIcon}>💰</span>
-            <span className={styles.moneyValue}>{gameState.player.money} ₽</span>
+            <span className={styles.moneyValue}>{player.money} ₽</span>
           </div>
         </div>
       </div>
@@ -111,14 +117,14 @@ export const RoomPage: React.FC = () => {
               <button
                 className={styles.confirmButton}
                 onClick={handleActionConfirm}
-                disabled={isExecuting}
+                disabled={isLoading}
               >
-                {isExecuting ? 'Выполняется...' : 'Да'}
+                {isLoading ? 'Выполняется...' : 'Да'}
               </button>
               <button
                 className={styles.cancelButton}
                 onClick={() => setSelectedObject(null)}
-                disabled={isExecuting}
+                disabled={isLoading}
               >
                 Отмена
               </button>
