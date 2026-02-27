@@ -32,9 +32,9 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
                 .orElseThrow(() -> new SessionNotFoundException(command.telegramUserId()));
 
         GameAction action = allActions.stream()
-                .filter(a -> a.type().code().equals(command.actionType().code()))
+                .filter(a -> a.type().code().equals(command.actionCode()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown action: " + command.actionType().code()));
+                .orElseThrow(() -> new IllegalArgumentException("Unknown action: " + command.actionCode()));
 
         ActionResult result = session.executeAction(action);
 

@@ -2,10 +2,10 @@ package ru.lifegame.backend.infrastructure.web.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 import ru.lifegame.backend.application.command.ChooseConflictTacticCommand;
 import ru.lifegame.backend.application.command.ChooseEventOptionCommand;
-import ru.lifegame.backend.application.command.ExecutePlayerActionCommand;
+import ru.lifegame.backend.application.command.ExecuteActionCommand;
 import ru.lifegame.backend.application.command.StartSessionCommand;
 import ru.lifegame.backend.application.port.in.*;
 import ru.lifegame.backend.application.query.GetStateQuery;
@@ -38,7 +38,7 @@ public class GameControllerImpl implements GameController {
 
     @Override
     public ResponseEntity<GameStateView> startSession(StartSessionRequestDto request) {
-        StartSessionCommand command = new StartSessionCommand(request.telegramUserId());
+        StartSessionCommand command = new StartSessionCommand(String.valueOf(request.telegramUserId()));
         GameStateView view = startOrLoadSession.execute(command);
         return ResponseEntity.status(HttpStatus.OK).body(view);
     }
@@ -52,8 +52,8 @@ public class GameControllerImpl implements GameController {
 
     @Override
     public ResponseEntity<GameStateView> executeAction(ExecuteActionRequestDto request) {
-        ExecutePlayerActionCommand command = new ExecutePlayerActionCommand(
-                request.telegramUserId(),
+        ExecuteActionCommand command = new ExecuteActionCommand(
+                String.valueOf(request.telegramUserId()),
                 request.actionCode()
         );
         GameStateView view = executeAction.execute(command);
@@ -63,7 +63,7 @@ public class GameControllerImpl implements GameController {
     @Override
     public ResponseEntity<GameStateView> chooseConflictTactic(ChooseConflictTacticRequestDto request) {
         ChooseConflictTacticCommand command = new ChooseConflictTacticCommand(
-                request.telegramUserId(), request.conflictId(), request.tacticCode()
+                 String.valueOf(request.telegramUserId()), request.conflictId(), request.tacticCode()
         );
         GameStateView view = chooseConflictTactic.execute(command);
         return ResponseEntity.ok(view);
@@ -72,7 +72,7 @@ public class GameControllerImpl implements GameController {
     @Override
     public ResponseEntity<GameStateView> chooseEventOption(ChooseEventOptionRequestDto request) {
         ChooseEventOptionCommand command = new ChooseEventOptionCommand(
-                request.telegramUserId(), request.eventId(), request.optionCode()
+                 String.valueOf(request.telegramUserId()), request.eventId(), request.optionCode()
         );
         GameStateView view = chooseEventOption.execute(command);
         return ResponseEntity.ok(view);
