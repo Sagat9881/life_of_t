@@ -66,7 +66,7 @@ public interface GameController {
     @GetMapping("/state")
     ResponseEntity<GameStateView> getState(
         @Parameter(description = "ID пользователя Telegram", required = true, example = "123456789")
-        @RequestParam String telegramUserId
+        @RequestParam("telegramUserId") String telegramUserId
     );
 
     @Operation(
