@@ -27,16 +27,22 @@ export function ActionList({
   const categories = useMemo(() => {
     const cats = new Set(['all']);
     (actions || []).forEach(action => {
-      if (action.category) cats.add(action.category);
+      if (action?.category) cats.add(action.category);
     });
     return Array.from(cats);
   }, [actions]);
 
   const filteredActions = useMemo(() => {
     return (actions || []).filter(action => {
-      const matchesSearch = action.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          action.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = categoryFilter === 'all' || action.category === categoryFilter;
+      if (!action) return false;
+      
+      const actionName = action.name || '';
+      const actionDesc = action.description || '';
+      const actionCategory = action.category || '';
+      
+      const matchesSearch = actionName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          actionDesc.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = categoryFilter === 'all' || actionCategory === categoryFilter;
       return matchesSearch && matchesCategory;
     });
   }, [actions, searchQuery, categoryFilter]);
