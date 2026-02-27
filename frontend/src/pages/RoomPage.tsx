@@ -20,7 +20,7 @@ const ROOM_OBJECTS: RoomObject[] = [
 ];
 
 export const RoomPage: React.FC = () => {
-  const { player, isLoading, error, fetchGameState, executeAction } = useGameStore();
+  const { player, time, isLoading, error, fetchGameState, executeAction } = useGameStore();
   const [selectedObject, setSelectedObject] = useState<RoomObject | null>(null);
 
   useEffect(() => {
@@ -55,6 +55,9 @@ export const RoomPage: React.FC = () => {
     return <div className={styles.loading}>Нет данных об игроке</div>;
   }
 
+  const stats = player.stats;
+  const gameTime = time || { day: 1, hour: 7 };
+
   return (
     <div className={styles.roomContainer}>
       {/* HUD - Stats Bar */}
@@ -62,27 +65,27 @@ export const RoomPage: React.FC = () => {
         <div className={styles.hudLeft}>
           <div className={styles.stat}>
             <span className={styles.statIcon}>⚡</span>
-            <span className={styles.statValue}>{player.energy}/100</span>
+            <span className={styles.statValue}>{stats.energy}/100</span>
           </div>
           <div className={styles.stat}>
             <span className={styles.statIcon}>❤️</span>
-            <span className={styles.statValue}>{player.health}/100</span>
+            <span className={styles.statValue}>{stats.health}/100</span>
           </div>
           <div className={styles.stat}>
             <span className={styles.statIcon}>😊</span>
-            <span className={styles.statValue}>{player.mood}/100</span>
+            <span className={styles.statValue}>{stats.mood}/100</span>
           </div>
         </div>
         <div className={styles.hudCenter}>
           <div className={styles.timeDisplay}>
-            <span className={styles.day}>День {player.day}</span>
-            <span className={styles.hour}>{player.hour}:00</span>
+            <span className={styles.day}>День {gameTime.day}</span>
+            <span className={styles.hour}>{gameTime.hour}:00</span>
           </div>
         </div>
         <div className={styles.hudRight}>
           <div className={styles.money}>
             <span className={styles.moneyIcon}>💰</span>
-            <span className={styles.moneyValue}>{player.money} ₽</span>
+            <span className={styles.moneyValue}>{stats.money} ₽</span>
           </div>
         </div>
       </div>
