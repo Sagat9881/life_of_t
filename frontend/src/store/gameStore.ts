@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { api } from '../services/api';
-import type { GameState, Player, NPC, Pet, GameAction, Conflict, GameEvent, GameTime } from '../types/game';
+import type { Player, NPC, Pet, GameAction, Conflict, GameEvent, GameTime } from '../types/game';
 
 interface GameStore {
   // State
@@ -52,8 +52,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         actions: state.actions,
         npcs: state.npcs,
         pets: state.pets,
-        currentConflict: state.currentConflict,
-        currentEvent: state.currentEvent,
+        currentConflict: state.currentConflict ?? null,
+        currentEvent: state.currentEvent ?? null,
         isLoading: false,
       });
     } catch (error) {
@@ -72,8 +72,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         player: result.player,
         time: result.time,
         actions: result.actions,
-        currentConflict: result.currentConflict,
-        currentEvent: result.currentEvent,
+        currentConflict: result.currentConflict ?? null,
+        currentEvent: result.currentEvent ?? null,
         isLoading: false,
       });
     } catch (error) {
