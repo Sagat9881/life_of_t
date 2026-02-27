@@ -87,12 +87,22 @@ export interface GameTime {
   timeSlot: TimeSlot;
 }
 
+export interface Relationship {
+  npcId: string;
+  level: number;
+  trust: number;
+  romance?: number;
+}
+
 export interface GameState {
   player: Player;
   time: GameTime;
   actions: GameAction[];
   npcs: NPC[];
   pets: Pet[];
+  relationships: Relationship[];
+  availableActions: GameAction[];
+  activeConflicts: Conflict[];
   currentConflict?: Conflict;
   currentEvent?: GameEvent;
 }

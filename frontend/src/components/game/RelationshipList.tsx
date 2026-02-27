@@ -35,7 +35,7 @@ export function RelationshipList({
   if (error) {
     return (
       <div className="relationship-list__error">
-        <ErrorMessage message={error} onRetry={onRetry} />
+        <ErrorMessage message={error} {...(onRetry && { onRetry })} />
       </div>
     );
   }
@@ -57,7 +57,11 @@ export function RelationshipList({
           <h2 className="relationship-list__title">👥 Люди</h2>
           <div className="relationship-list__grid">
             {npcs.map(npc => (
-              <NPCCard key={npc.id} npc={npc} onClick={onNPCClick} />
+              <NPCCard
+                key={npc.id}
+                npc={npc}
+                {...(onNPCClick && { onClick: onNPCClick })}
+              />
             ))}
           </div>
         </section>
@@ -68,7 +72,11 @@ export function RelationshipList({
           <h2 className="relationship-list__title">🐾 Питомцы</h2>
           <div className="relationship-list__grid">
             {pets.map(pet => (
-              <PetCard key={pet.id} pet={pet} onClick={onPetClick} />
+              <PetCard
+                key={pet.id}
+                pet={pet}
+                {...(onPetClick && { onClick: onPetClick })}
+              />
             ))}
           </div>
         </section>

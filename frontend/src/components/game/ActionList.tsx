@@ -52,7 +52,7 @@ export function ActionList({
   if (error) {
     return (
       <div className="action-list__error">
-        <ErrorMessage message={error} onRetry={onRetry} />
+        <ErrorMessage message={error} {...(onRetry && { onRetry })} />
       </div>
     );
   }
@@ -94,7 +94,7 @@ export function ActionList({
             <ActionCard
               key={action.code}
               action={action}
-              onExecute={onExecuteAction}
+              {...(onExecuteAction && { onExecute: onExecuteAction })}
             />
           ))
         ) : (

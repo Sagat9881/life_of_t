@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 
+interface HapticFeedback {
+  impactOccurred: (style: 'light' | 'medium' | 'heavy') => void;
+  notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
+  selectionChanged: () => void;
+}
+
 export interface UseTelegramResult {
   webApp: any;
   user: any;
-  hapticFeedback?: {
-    impactOccurred: (style: 'light' | 'medium' | 'heavy') => void;
-    notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
-    selectionChanged: () => void;
-  };
+  hapticFeedback?: HapticFeedback | undefined;
 }
 
 export function useTelegram(): UseTelegramResult {
@@ -27,7 +29,7 @@ export function useTelegram(): UseTelegramResult {
     }
   }, []);
 
-  const hapticFeedback = webApp?.HapticFeedback ? {
+  const hapticFeedback: HapticFeedback | undefined = webApp?.HapticFeedback ? {
     impactOccurred: (style: 'light' | 'medium' | 'heavy') => {
       webApp.HapticFeedback.impactOccurred(style);
     },

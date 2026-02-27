@@ -19,3 +19,21 @@ export function formatMoney(amount: number): string {
 export function formatStat(value: number, max: number): string {
   return `${Math.round(value)}/${max}`;
 }
+
+// Цвета для статов
+export function getStatColor(value: number, max: number): string {
+  const percentage = (value / max) * 100;
+  
+  if (percentage >= 70) return 'var(--color-success)';
+  if (percentage >= 40) return 'var(--color-warning)';
+  return 'var(--color-danger)';
+}
+
+// Цвет для стресса (инвертированный: чем меньше, тем лучше)
+export function getStressColor(value: number, max: number): string {
+  const percentage = (value / max) * 100;
+  
+  if (percentage <= 30) return 'var(--color-success)';
+  if (percentage <= 60) return 'var(--color-warning)';
+  return 'var(--color-danger)';
+}
