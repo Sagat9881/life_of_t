@@ -1,76 +1,155 @@
 package ru.lifegame.backend.infrastructure.web.controller;
 
-import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.lifegame.backend.application.command.*;
-import ru.lifegame.backend.application.port.in.*;
-import ru.lifegame.backend.application.query.GetStateQuery;
 import ru.lifegame.backend.application.view.GameStateView;
-import ru.lifegame.backend.domain.action.Actions;
 import ru.lifegame.backend.infrastructure.web.dto.*;
 
-@RestController
+@Tag(name = "Game API", description = "API для управления игровой сессией Life of T")
 @RequestMapping("/api/v1/game")
-public class GameController {
+public interface GameController {
 
-    private final StartOrLoadSessionUseCase startOrLoadSession;
-    private final ExecutePlayerActionUseCase executeAction;
-    private final GetGameStateUseCase getGameState;
-    private final ChooseConflictTacticUseCase chooseConflictTactic;
-    private final ChooseEventOptionUseCase chooseEventOption;
-
-    public GameController(StartOrLoadSessionUseCase startOrLoadSession,
-                          ExecutePlayerActionUseCase executeAction,
-                          GetGameStateUseCase getGameState,
-                          ChooseConflictTacticUseCase chooseConflictTactic,
-                          ChooseEventOptionUseCase chooseEventOption) {
-        this.startOrLoadSession = startOrLoadSession;
-        this.executeAction = executeAction;
-        this.getGameState = getGameState;
-        this.chooseConflictTactic = chooseConflictTactic;
-        this.chooseEventOption = chooseEventOption;
-    }
-
+    @Operation(
+        summary = "Начать или загрузить игровую сессию",
+        description = "Создаёт новую игровую сессию для пользователя или загружает существующую, если она уже была создана"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Сессия успешно создана или загружена",
+            content = @Content(schema = @Schema(implementation = GameStateView.class))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Некорректные данные запроса"
+        ),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Внутренняя ошибка сервера"
+        )
+    })
     @PostMapping("/session/start")
-    public ResponseEntity<GameStateView> startSession(@RequestBody StartSessionRequestDto request) {
-        StartSessionCommand command = new StartSessionCommand(request.telegramUserId());
-        GameStateView view = startOrLoadSession.execute(command);
-        return ResponseEntity.status(HttpStatus.OK).body(view);
-    }
+    ResponseEntity<GameStateView> startSession(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Данные для начала сессии",
+            required = true,
+            content = @Content(schema = @Schema(implementation = StartSessionRequestDto.class))
+        )
+        @RequestBody StartSessionRequestDto request
+    );
 
+    @Operation(
+        summary = "Получить текущее состояние игры",
+        description = "Возвращает полное состояние игровой сессии: персонаж, отношения, питомцы, квесты, конфликты и события"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Состояние игры успешно получено",
+            content = @Content(schema = @Schema(implementation = GameStateView.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Сессия не найдена"
+        )
+    })
     @GetMapping("/state")
-    public ResponseEntity<GameStateView> getState(@RequestParam String telegramUserId) {
-        GetStateQuery query = new GetStateQuery(telegramUserId);
-        GameStateView view = getGameState.execute(query);
-        return ResponseEntity.ok(view);
-    }
+    ResponseEntity<GameStateView> getState(
+        @Parameter(description = "ID пользователя Telegram", required = true, example = "123456789")
+        @RequestParam String telegramUserId
+    );
 
+    @Operation(
+        summary = "Выполнить игровое действие",
+        description = "Выполняет действие игрока: работа, свидание с мужем, уход за питомцами, визит к отцу и т.д."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Действие успешно выполнено",
+            content = @Content(schema = @Schema(implementation = GameStateView.class))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Неизвестное действие или действие недоступно"
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Сессия не найдена"
+        )
+    })
     @PostMapping("/action")
-    public ResponseEntity<GameStateView> executeAction(@RequestBody ExecuteActionRequestDto request) {
-        ExecuteActionCommand command = new ExecuteActionCommand(
-                request.telegramUserId(),
-                Actions.valueOf(request.actionCode())
-        );
-        GameStateView view = executeAction.execute(command);
-        return ResponseEntity.ok(view);
-    }
+    ResponseEntity<GameStateView> executeAction(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Запрос на выполнение действия",
+            required = true,
+            content = @Content(schema = @Schema(implementation = ExecuteActionRequestDto.class))
+        )
+        @RequestBody ExecuteActionRequestDto request
+    );
 
+    @Operation(
+        summary = "Выбрать тактику разрешения конфликта",
+        description = "Применяет выбранную тактику для активного конфликта: уступить, настоять, компромисс, избежать, эмпатия и т.д."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Тактика успешно применена",
+            content = @Content(schema = @Schema(implementation = GameStateView.class))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Неизвестная тактика или нет активного конфликта"
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Сессия не найдена"
+        )
+    })
     @PostMapping("/conflict/tactic")
-    public ResponseEntity<GameStateView> chooseConflictTactic(@RequestBody ChooseConflictTacticRequestDto request) {
-        ChooseConflictTacticCommand command = new ChooseConflictTacticCommand(
-                request.telegramUserId(), request.conflictId(), request.tacticCode()
-        );
-        GameStateView view = chooseConflictTactic.execute(command);
-        return ResponseEntity.ok(view);
-    }
+    ResponseEntity<GameStateView> chooseConflictTactic(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Запрос на выбор тактики конфликта",
+            required = true,
+            content = @Content(schema = @Schema(implementation = ChooseConflictTacticRequestDto.class))
+        )
+        @RequestBody ChooseConflictTacticRequestDto request
+    );
 
+    @Operation(
+        summary = "Выбрать вариант ответа на событие",
+        description = "Делает выбор в текущем игровом событии, который влияет на развитие сюжета и отношения"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Выбор успешно сделан",
+            content = @Content(schema = @Schema(implementation = GameStateView.class))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Неизвестный вариант или событие не активно"
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Сессия не найдена"
+        )
+    })
     @PostMapping("/event-choice")
-    public ResponseEntity<GameStateView> chooseEventOption(@RequestBody ChooseEventOptionRequestDto request) {
-        ChooseEventOptionCommand command = new ChooseEventOptionCommand(
-                request.telegramUserId(), request.eventId(), request.optionCode()
-        );
-        GameStateView view = chooseEventOption.execute(command);
-        return ResponseEntity.ok(view);
-    }
+    ResponseEntity<GameStateView> chooseEventOption(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Запрос на выбор варианта события",
+            required = true,
+            content = @Content(schema = @Schema(implementation = ChooseEventOptionRequestDto.class))
+        )
+        @RequestBody ChooseEventOptionRequestDto request
+    );
 }

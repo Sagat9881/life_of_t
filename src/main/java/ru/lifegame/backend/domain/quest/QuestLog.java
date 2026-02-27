@@ -13,10 +13,30 @@ public class QuestLog {
         quests.put(quest.id(), quest);
     }
 
-    public List<Quest> getActiveQuests() {
+    /**
+     * Get all active quests.
+     */
+    public List<Quest> activeQuests() {
         return quests.values().stream().filter(Quest::isActive).toList();
     }
 
+    /**
+     * Get all completed quests.
+     */
+    public List<Quest> completedQuests() {
+        return quests.values().stream().filter(Quest::isCompleted).toList();
+    }
+
+    /**
+     * Get all active quests (alias for compatibility).
+     */
+    public List<Quest> getActiveQuests() {
+        return activeQuests();
+    }
+
+    /**
+     * Get completed quest IDs.
+     */
     public List<String> getCompletedQuestIds() {
         return quests.values().stream().filter(Quest::isCompleted).map(Quest::id).toList();
     }

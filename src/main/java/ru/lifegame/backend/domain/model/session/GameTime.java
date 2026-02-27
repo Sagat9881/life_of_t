@@ -2,8 +2,6 @@ package ru.lifegame.backend.domain.model.session;
 
 import ru.lifegame.backend.domain.balance.GameBalance;
 
-import java.util.Objects;
-
 /**
  * Value object representing game time.
  * Immutable - all operations return new instances.

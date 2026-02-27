@@ -1,6 +1,7 @@
 package ru.lifegame.backend.domain.quest;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Quest {
     private final String id;
@@ -52,6 +53,7 @@ public class Quest {
     public boolean isActive() { return status == QuestStatus.IN_PROGRESS; }
     public boolean isCompleted() { return status == QuestStatus.COMPLETED; }
 
+    // Accessor methods
     public String id() { return id; }
     public QuestType type() { return type; }
     public String title() { return title; }

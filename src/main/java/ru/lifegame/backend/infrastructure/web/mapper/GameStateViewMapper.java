@@ -3,13 +3,19 @@ package ru.lifegame.backend.infrastructure.web.mapper;
 import ru.lifegame.backend.application.view.*;
 import ru.lifegame.backend.domain.action.ActionResult;
 import ru.lifegame.backend.domain.action.GameAction;
-import ru.lifegame.backend.domain.action.GameSessionReadModel;
-import ru.lifegame.backend.domain.conflict.Conflict;
-import ru.lifegame.backend.domain.model.*;
+import ru.lifegame.backend.domain.conflict.core.Conflict;
+import ru.lifegame.backend.domain.model.character.PlayerCharacter;
+import ru.lifegame.backend.domain.model.pet.Pet;
+import ru.lifegame.backend.domain.model.pet.Pets;
+import ru.lifegame.backend.domain.model.relationship.NpcCode;
+import ru.lifegame.backend.domain.model.relationship.Relationship;
+import ru.lifegame.backend.domain.model.relationship.Relationships;
+import ru.lifegame.backend.domain.model.session.GameSession;
+import ru.lifegame.backend.domain.model.stats.Stats;
 import ru.lifegame.backend.domain.quest.Quest;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
 
 public class GameStateViewMapper {
 
@@ -22,7 +28,7 @@ public class GameStateViewMapper {
     public GameStateView toView(GameSession session, ActionResult lastResult) {
         return new GameStateView(
                 session.sessionId(),
-                session.telegramUserId(),
+                String.valueOf(session.telegramUserId()),
                 toPlayerView(session.player()),
                 toRelationshipViews(session.relationships()),
                 toPetViews(session.pets()),
@@ -59,8 +65,9 @@ public class GameStateViewMapper {
         return rels.all().entrySet().stream()
                 .map(e -> {
                     Relationship r = e.getValue();
+                    NpcCode npc = e.getKey();
                     return new RelationshipView(
-                            e.getKey().name(), e.getKey().name(),
+                            npc.name(), npc.name(),
                             r.closeness(), r.trust(), r.stability(), r.romance()
                     );
                 })
@@ -71,7 +78,8 @@ public class GameStateViewMapper {
         return pets.all().entrySet().stream()
                 .map(e -> {
                     Pet p = e.getValue();
-                    return new PetView(e.getKey().name(), e.getKey().name(),
+                    String petId = e.getKey();
+                    return new PetView(petId, petId,
                             p.name(), p.satiety(), p.attention(), p.health(), p.mood());
                 })
                 .toList();
@@ -80,7 +88,7 @@ public class GameStateViewMapper {
     private List<ActionOptionView> toActionOptionViews(GameSession session) {
         return allActions.stream()
                 .map(action -> {
-                    int timeCost = action.calculateTimeCost(session);
+                    int timeCost = action.calculateTimeCost(session.context().asReadModel());
                     boolean available = session.player().canPerformAction(action.type(), session.time(), timeCost);
                     String reason = available ? null : resolveUnavailableReason(session, timeCost);
                     return new ActionOptionView(

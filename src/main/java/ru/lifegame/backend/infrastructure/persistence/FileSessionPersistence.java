@@ -9,9 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.lifegame.backend.application.port.out.SessionPersistence;
-import ru.lifegame.backend.domain.model.GameSession;
+import ru.lifegame.backend.domain.model.session.GameSession;
 
-import jakarta.annotation.PreDestroy;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
