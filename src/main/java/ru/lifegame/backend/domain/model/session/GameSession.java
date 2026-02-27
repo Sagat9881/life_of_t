@@ -2,6 +2,7 @@ package ru.lifegame.backend.domain.model.session;
 
 import ru.lifegame.backend.domain.action.ActionResult;
 import ru.lifegame.backend.domain.action.ActionType;
+import ru.lifegame.backend.domain.action.GameAction;
 import ru.lifegame.backend.domain.balance.GameBalance;
 import ru.lifegame.backend.domain.conflict.core.Conflict;
 import ru.lifegame.backend.domain.conflict.tactics.ConflictTactic;
@@ -11,7 +12,7 @@ import ru.lifegame.backend.domain.event.game.EventResult;
 import ru.lifegame.backend.domain.event.game.GameEvent;
 import ru.lifegame.backend.domain.exception.InvalidGameStateException;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
-import ru.lifegame.backend.domain.model.character.PlayerId;
+import ru.lifegame.backend.domain.model.common.PlayerId;
 import ru.lifegame.backend.domain.model.pet.Pets;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.quest.QuestLog;
@@ -24,7 +25,7 @@ import java.util.*;
  */
 public class GameSession {
     private final String sessionId;
-    private final long telegramUserId;
+    private final String telegramUserId;
     private final GameSessionContext context;
     private final DomainEventPublisher eventPublisher;
     private final List<DomainEvent> domainEvents;
@@ -32,7 +33,7 @@ public class GameSession {
 
     public GameSession(
             String sessionId,
-            long telegramUserId,
+            String telegramUserId,
             PlayerCharacter player,
             Relationships relationships,
             Pets pets,
@@ -50,36 +51,66 @@ public class GameSession {
     }
 
     // === Factory method ===
-    public static GameSession createNew(long telegramUserId) {
+    public static GameSession createNew(String telegramUserId) {
         String sessionId = UUID.randomUUID().toString();
-        PlayerCharacter player = PlayerCharacter.createInitial(
-            new PlayerId(UUID.randomUUID().toString())
-        );
+        PlayerCharacter player = PlayerCharacter.initial();
         Relationships relationships = Relationships.initial();
         Pets pets = Pets.initial();
-        QuestLog questLog = QuestLog.initial();
+        QuestLog questLog = new QuestLog();
         GameTime time = new GameTime(1, GameBalance.DAY_START_HOUR);
         return new GameSession(sessionId, telegramUserId, player, relationships, pets, questLog, time);
     }
 
     // === Accessors ===
-    public String sessionId() { return sessionId; }
-    public long telegramUserId() { return telegramUserId; }
-    public PlayerCharacter player() { return context.player(); }
-    public Relationships relationships() { return context.relationships(); }
-    public Pets pets() { return context.pets(); }
-    public QuestLog questLog() { return context.questLog(); }
-    public GameTime time() { return context.time(); }
-    public List<Conflict> activeConflicts() { return context.activeConflicts(); }
-    public List<GameEvent> events() { return context.events(); }
-    public Ending ending() { return ending; }
-    public GameSessionContext context() { return context; }
+    public String sessionId() {
+        return sessionId;
+    }
+
+    public String telegramUserId() {
+        return telegramUserId;
+    }
+
+    public PlayerCharacter player() {
+        return context.player();
+    }
+
+    public Relationships relationships() {
+        return context.relationships();
+    }
+
+    public Pets pets() {
+        return context.pets();
+    }
+
+    public QuestLog questLog() {
+        return context.questLog();
+    }
+
+    public GameTime time() {
+        return context.time();
+    }
+
+    public List<Conflict> activeConflicts() {
+        return context.activeConflicts();
+    }
+
+    public List<GameEvent> events() {
+        return context.events();
+    }
+
+    public Ending ending() {
+        return ending;
+    }
+
+    public GameSessionContext context() {
+        return context;
+    }
 
     // === Actions ===
-    public ActionResult executeAction(ActionType actionType) {
+    public ActionResult executeAction(GameAction actionType) {
         ActionExecutor executor = new ActionExecutor();
         ActionResult result = executor.execute(actionType, context, eventPublisher);
-        eventPublisher.publish(new ActionExecutedEvent(sessionId, actionType.code()));
+        eventPublisher.publish(new ActionExecutedEvent(sessionId, actionType.type().code()));
         return result;
     }
 
@@ -148,10 +179,10 @@ public class GameSession {
                 // Find NPC by name and apply changes
                 relationships().all().forEach((npc, rel) -> {
                     if (npc.name().equals(npcName)) {
-                        relationships().applyChanges(npc, 
-                            new ru.lifegame.backend.domain.model.relationship.RelationshipChanges(
-                                npc, delta, 0, 0, 0
-                            ));
+                        relationships().applyChanges(npc,
+                                new ru.lifegame.backend.domain.model.relationship.RelationshipChanges(
+                                        npc, delta, 0, 0, 0
+                                ));
                     }
                 });
             });
@@ -161,11 +192,13 @@ public class GameSession {
     // === Game Over ===
     public void checkGameOver() {
         GameOverChecker checker = new GameOverChecker();
-        Optional<Ending> gameOverEnding = checker.check(context);
+        Optional<GameOverReason> gameOverEnding = checker.check(player(),relationships(),pets());
         gameOverEnding.ifPresent(end -> {
-            this.ending = end;
+            this.ending = end.ending();
+            this.context.setGameOverReason(end);
+            this.context.setEnding(this.ending);
             eventPublisher.publish(
-                    new GameOverEvent(sessionId, end.type().name())
+                    new GameOverEvent(sessionId, ending.type().name())
             );
         });
     }
@@ -176,8 +209,7 @@ public class GameSession {
 
     // === Event Sourcing ===
     public List<DomainEvent> drainDomainEvents() {
-        List<DomainEvent> events = new ArrayList<>(eventPublisher.getEvents());
-        eventPublisher.clear();
+        List<DomainEvent> events = new ArrayList<>(eventPublisher.drainEvents());
         domainEvents.addAll(events);
         return events;
     }

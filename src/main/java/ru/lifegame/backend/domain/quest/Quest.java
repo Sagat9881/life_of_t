@@ -1,6 +1,7 @@
 package ru.lifegame.backend.domain.quest;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Quest {
     private final String id;

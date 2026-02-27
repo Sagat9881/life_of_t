@@ -4,11 +4,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.lifegame.backend.application.command.StartSessionCommand;
 import ru.lifegame.backend.application.port.out.SessionRepository;
-import ru.lifegame.backend.application.service.GameStateViewMapper;
+
 import ru.lifegame.backend.application.service.StartOrLoadSessionService;
 import ru.lifegame.backend.application.view.GameStateView;
 import ru.lifegame.backend.domain.action.GameAction;
-import ru.lifegame.backend.domain.model.GameSession;
+import ru.lifegame.backend.domain.model.session.GameSession;
+import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,6 +1,7 @@
 package ru.lifegame.backend.infrastructure.game;
 
-import ru.lifegame.backend.domain.action.*;
+import ru.lifegame.backend.domain.action.ActionProvider;
+import ru.lifegame.backend.domain.action.GameAction;
 import ru.lifegame.backend.domain.exception.InvalidActionException;
 
 import java.util.Collection;

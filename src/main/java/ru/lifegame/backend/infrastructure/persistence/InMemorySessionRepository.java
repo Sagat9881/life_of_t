@@ -1,5 +1,6 @@
 package ru.lifegame.backend.infrastructure.persistence;
 
+import org.springframework.stereotype.Component;
 import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.domain.model.session.GameSession;
 
@@ -7,19 +8,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Component
 public class InMemorySessionRepository implements SessionRepository {
-
     private final Map<String, GameSession> sessions = new ConcurrentHashMap<>();
 
     @Override
-    public Optional<GameSession> findBySessionId(String sessionId) {
-        return Optional.ofNullable(sessions.get(sessionId));
-    }
-    
-    @Override
-    public Optional<GameSession> findByTelegramUserId(long telegramUserId) {
+    public Optional<GameSession> findByTelegramUserId(String telegramUserId) {
         return sessions.values().stream()
-                .filter(s -> s.telegramUserId() == telegramUserId)
+                .filter(s -> telegramUserId.equals(s.telegramUserId()))
                 .findFirst();
     }
 
@@ -29,13 +25,8 @@ public class InMemorySessionRepository implements SessionRepository {
     }
 
     @Override
-    public void delete(String sessionId) {
-        sessions.remove(sessionId);
-    }
-
-    @Override
-    public boolean existsByTelegramUserId(long telegramUserId) {
+    public boolean exists(String telegramUserId) {
         return sessions.values().stream()
-                .anyMatch(s -> s.telegramUserId() == telegramUserId);
+                .anyMatch(s -> telegramUserId.equals(s.telegramUserId()));
     }
 }

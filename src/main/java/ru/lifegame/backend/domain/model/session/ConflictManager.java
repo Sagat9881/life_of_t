@@ -1,8 +1,15 @@
 package ru.lifegame.backend.domain.model.session;
 
-import ru.lifegame.backend.domain.conflict.core.*;
-import ru.lifegame.backend.domain.conflict.tactics.*;
-import ru.lifegame.backend.domain.event.domain.*;
+import ru.lifegame.backend.domain.conflict.core.Conflict;
+import ru.lifegame.backend.domain.conflict.core.ConflictResolution;
+import ru.lifegame.backend.domain.conflict.core.ConflictStage;
+import ru.lifegame.backend.domain.conflict.core.ConflictType;
+import ru.lifegame.backend.domain.conflict.tactics.ConflictTactic;
+import ru.lifegame.backend.domain.conflict.tactics.TacticEffects;
+import ru.lifegame.backend.domain.event.domain.ConflictResolvedEvent;
+import ru.lifegame.backend.domain.event.domain.ConflictTacticAppliedEvent;
+import ru.lifegame.backend.domain.event.domain.ConflictTriggeredEvent;
+import ru.lifegame.backend.domain.event.domain.RelationshipBrokenEvent;
 import ru.lifegame.backend.domain.exception.InvalidGameStateException;
 import ru.lifegame.backend.domain.model.relationship.NpcCode;
 

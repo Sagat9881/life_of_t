@@ -3,12 +3,18 @@ package ru.lifegame.backend.infrastructure.web.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.lifegame.backend.application.command.*;
+import ru.lifegame.backend.application.command.ChooseConflictTacticCommand;
+import ru.lifegame.backend.application.command.ChooseEventOptionCommand;
+import ru.lifegame.backend.application.command.ExecuteActionCommand;
+import ru.lifegame.backend.application.command.StartSessionCommand;
 import ru.lifegame.backend.application.port.in.*;
 import ru.lifegame.backend.application.query.GetStateQuery;
 import ru.lifegame.backend.application.view.GameStateView;
 import ru.lifegame.backend.domain.action.Actions;
-import ru.lifegame.backend.infrastructure.web.dto.*;
+import ru.lifegame.backend.infrastructure.web.dto.ChooseConflictTacticRequestDto;
+import ru.lifegame.backend.infrastructure.web.dto.ChooseEventOptionRequestDto;
+import ru.lifegame.backend.infrastructure.web.dto.ExecuteActionRequestDto;
+import ru.lifegame.backend.infrastructure.web.dto.StartSessionRequestDto;
 
 @RestController
 @RequestMapping("/api/v1/game")

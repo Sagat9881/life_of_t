@@ -1,6 +1,6 @@
 package ru.lifegame.backend.domain.conflict.tactics;
 
-import ru.lifegame.backend.domain.conflict.core.*;
+import ru.lifegame.backend.domain.conflict.core.Conflict;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 

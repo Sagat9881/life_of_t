@@ -23,7 +23,7 @@ public class ChooseEventOptionService implements ChooseEventOptionUseCase {
         GameSession session = sessionRepository.findByTelegramUserId(command.telegramUserId())
                 .orElseThrow(() -> new SessionNotFoundException(command.telegramUserId()));
 
-        session.chooseEventOption(command.eventId(), command.optionId());
+        session.chooseEventOption(command.eventId(), command.optionCode());
 
         sessionRepository.save(session);
 

@@ -3,7 +3,9 @@ package ru.lifegame.backend.domain.model.relationship;
 import ru.lifegame.backend.domain.balance.GameBalance;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
 
 public class Relationships {
     private final Map<NpcCode, Relationship> map;

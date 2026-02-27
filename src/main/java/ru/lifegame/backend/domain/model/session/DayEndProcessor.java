@@ -1,10 +1,13 @@
 package ru.lifegame.backend.domain.model.session;
 
 import ru.lifegame.backend.domain.balance.GameBalance;
-import ru.lifegame.backend.domain.conflict.core.*;
+import ru.lifegame.backend.domain.conflict.core.Conflict;
 import ru.lifegame.backend.domain.conflict.triggers.ConflictTriggers;
-import ru.lifegame.backend.domain.ending.*;
-import ru.lifegame.backend.domain.event.domain.*;
+import ru.lifegame.backend.domain.ending.EndingEvaluator;
+import ru.lifegame.backend.domain.event.domain.ConflictTriggeredEvent;
+import ru.lifegame.backend.domain.event.domain.DayEndedEvent;
+import ru.lifegame.backend.domain.event.domain.EndingAchievedEvent;
+import ru.lifegame.backend.domain.event.domain.GameOverEvent;
 
 import java.util.List;
 

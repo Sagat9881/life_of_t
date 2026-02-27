@@ -1,6 +1,5 @@
 package ru.lifegame.backend.application.port.out;
 
-import ru.lifegame.backend.domain.model.session.GameSession;
 import ru.lifegame.backend.domain.model.session.GameSessionRepository;
 
 /**

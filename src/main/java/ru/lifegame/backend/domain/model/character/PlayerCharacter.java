@@ -5,9 +5,11 @@ import ru.lifegame.backend.domain.balance.GameBalance;
 import ru.lifegame.backend.domain.conflict.tactics.BaseConflictTactics;
 import ru.lifegame.backend.domain.conflict.tactics.ConflictTactic;
 import ru.lifegame.backend.domain.conflict.tactics.SkillBasedConflictTactics;
-import ru.lifegame.backend.domain.model.common.*;
-import ru.lifegame.backend.domain.model.stats.*;
+import ru.lifegame.backend.domain.model.common.Location;
+import ru.lifegame.backend.domain.model.common.PlayerId;
 import ru.lifegame.backend.domain.model.session.GameTime;
+import ru.lifegame.backend.domain.model.stats.StatChanges;
+import ru.lifegame.backend.domain.model.stats.Stats;
 
 import java.util.*;
 
@@ -56,8 +58,7 @@ public class PlayerCharacter {
     }
 
     public List<ConflictTactic> availableConflictTactics() {
-        List<ConflictTactic> result = new ArrayList<>();
-        for (BaseConflictTactics t : BaseConflictTactics.values()) result.add(t);
+        List<ConflictTactic> result = new ArrayList<>(Arrays.asList(BaseConflictTactics.values()));
         for (SkillBasedConflictTactics t : SkillBasedConflictTactics.values()) {
             if (canUseTactic(t)) result.add(t);
         }

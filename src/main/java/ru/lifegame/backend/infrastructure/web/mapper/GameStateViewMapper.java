@@ -14,7 +14,8 @@ import ru.lifegame.backend.domain.model.session.GameSession;
 import ru.lifegame.backend.domain.model.stats.Stats;
 import ru.lifegame.backend.domain.quest.Quest;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 public class GameStateViewMapper {
 

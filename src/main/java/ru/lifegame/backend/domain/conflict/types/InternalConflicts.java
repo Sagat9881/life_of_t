@@ -1,7 +1,9 @@
 package ru.lifegame.backend.domain.conflict.types;
 
-import ru.lifegame.backend.domain.conflict.core.*;
+import ru.lifegame.backend.domain.conflict.core.ConflictCategory;
+import ru.lifegame.backend.domain.conflict.core.ConflictType;
 import ru.lifegame.backend.domain.model.relationship.NpcCode;
+
 import java.util.Optional;
 
 public enum InternalConflicts implements ConflictType {
