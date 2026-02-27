@@ -5,18 +5,18 @@ public enum PetCode {
     SAM("sam", "Сэм");
 
     private final String code;
-    private final String name;
+    private final String displayName;
 
-    PetCode(String code, String name) {
+    PetCode(String code, String displayName) {
         this.code = code;
-        this.name = name;
+        this.displayName = displayName;
     }
 
     public String code() {
         return code;
     }
 
-    public String name() {
-        return name;
+    public String displayName() {
+        return displayName;
     }
 }

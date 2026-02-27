@@ -7,6 +7,7 @@ import ru.lifegame.backend.domain.conflict.core.Conflict;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.pet.Pet;
 import ru.lifegame.backend.domain.model.pet.Pets;
+import ru.lifegame.backend.domain.model.relationship.NpcCode;
 import ru.lifegame.backend.domain.model.relationship.Relationship;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.model.session.GameSession;
@@ -63,8 +64,9 @@ public class GameStateViewMapper {
         return rels.all().entrySet().stream()
                 .map(e -> {
                     Relationship r = e.getValue();
+                    NpcCode npc = e.getKey();
                     return new RelationshipView(
-                            e.getKey().name(), e.getKey().name(),
+                            npc.name(), npc.name(),
                             r.closeness(), r.trust(), r.stability(), r.romance()
                     );
                 })
@@ -75,7 +77,8 @@ public class GameStateViewMapper {
         return pets.all().entrySet().stream()
                 .map(e -> {
                     Pet p = e.getValue();
-                    return new PetView(e.getKey().name(), e.getKey().name(),
+                    String petId = e.getKey();
+                    return new PetView(petId, petId,
                             p.name(), p.satiety(), p.attention(), p.health(), p.mood());
                 })
                 .toList();

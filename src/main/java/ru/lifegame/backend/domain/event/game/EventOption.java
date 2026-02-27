@@ -10,4 +10,8 @@ public record EventOption(
     StatChanges statChanges,
     Map<String, Integer> relationshipChanges
 ) {
+    // Compatibility methods for view mapper
+    public String code() { return id; }
+    public String label() { return text; }
+    public String description() { return text; }
 }
