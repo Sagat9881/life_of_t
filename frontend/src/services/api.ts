@@ -28,6 +28,8 @@ interface ChoiceResult {
 }
 
 class ApiClient {
+  private sessionStarted = false;
+
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
@@ -44,9 +46,29 @@ class ApiClient {
     return response.json();
   }
 
+  async startSession(): Promise<GameState> {
+    const telegramUserId = getTelegramUserId();
+    const state = await this.request<GameState>('/session/start', {
+      method: 'POST',
+      body: JSON.stringify({ telegramUserId }),
+    });
+    this.sessionStarted = true;
+    return state;
+  }
+
   async getGameState(): Promise<GameState> {
     const telegramUserId = getTelegramUserId();
-    return this.request<GameState>(`/state?telegramUserId=${encodeURIComponent(telegramUserId)}`);
+    
+    try {
+      // Попытка получить существующую сессию
+      return await this.request<GameState>(`/state?telegramUserId=${encodeURIComponent(telegramUserId)}`);
+    } catch (error) {
+      // Если сессии нет (404), создаём новую
+      if (error instanceof Error && error.message.includes('404')) {
+        return await this.startSession();
+      }
+      throw error;
+    }
   }
 
   async executeAction(actionCode: string): Promise<ActionResult> {
