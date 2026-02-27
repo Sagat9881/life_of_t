@@ -42,7 +42,7 @@ export const HomePage = () => {
   }, [fetchGameState]);
 
   // Обработчик выполнения действия
-  const handleActionClick = async (actionCode: string) => {
+  const handleActionExecute = async (actionCode: string) => {
     await executeAction(actionCode);
   };
 
@@ -102,9 +102,9 @@ export const HomePage = () => {
         <div className={styles.conflictSection}>
           <ConflictResolver
             conflict={currentConflict}
+            isLoading={isLoading}
             onSelectTactic={handleTacticSelect}
             onCancel={cancelConflict}
-            disabled={isLoading}
           />
         </div>
       )}
@@ -114,9 +114,9 @@ export const HomePage = () => {
         <div className={styles.eventSection}>
           <EventChoice
             event={currentEvent}
+            isLoading={isLoading}
             onSelectChoice={handleChoiceSelect}
             onCancel={cancelEvent}
-            disabled={isLoading}
           />
         </div>
       )}
@@ -127,8 +127,8 @@ export const HomePage = () => {
           <h2 className={styles.sectionTitle}>🎯 Доступные действия</h2>
           <ActionList
             actions={actions}
-            onActionClick={handleActionClick}
-            disabled={isLoading}
+            isLoading={isLoading}
+            onExecuteAction={handleActionExecute}
           />
         </div>
       )}
