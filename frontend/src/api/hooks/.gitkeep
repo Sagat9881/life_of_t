@@ -1,0 +1,4 @@
+# This folder is deprecated.
+# All API logic has been moved to:
+# - src/store/gameStore.ts (Zustand store with API methods)
+# - src/services/api.ts (API client)
