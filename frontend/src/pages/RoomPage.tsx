@@ -12,11 +12,11 @@ interface RoomObject {
 }
 
 const ROOM_OBJECTS: RoomObject[] = [
-  { id: 'bed', name: 'Кровать', actionCode: 'REST_AT_HOME', x: 20, y: 30, icon: '🛏️' },
-  { id: 'computer', name: 'Компьютер', actionCode: 'WORK_ON_PROJECT', x: 70, y: 35, icon: '💻' },
-  { id: 'phone', name: 'Телефон', actionCode: 'CALL_HUSBAND', x: 50, y: 60, icon: '📱' },
-  { id: 'mirror', name: 'Зеркало', actionCode: 'BEAUTY_ROUTINE', x: 80, y: 70, icon: '🪞' },
-  { id: 'dogs', name: 'Собаки', actionCode: 'WALK_DOG', x: 30, y: 70, icon: '🐕' },
+  { id: 'bed', name: 'Кровать', actionCode: 'REST_AT_HOME', x: 15, y: 25, icon: '🛏️' },
+  { id: 'computer', name: 'Компьютер', actionCode: 'WORK_ON_PROJECT', x: 75, y: 30, icon: '💻' },
+  { id: 'phone', name: 'Телефон', actionCode: 'CALL_HUSBAND', x: 25, y: 65, icon: '📱' },
+  { id: 'mirror', name: 'Зеркало', actionCode: 'BEAUTY_ROUTINE', x: 80, y: 65, icon: '🪞' },
+  { id: 'dogs', name: 'Сэм', actionCode: 'WALK_DOG', x: 60, y: 75, icon: '🐕' },
 ];
 
 export const RoomPage: React.FC = () => {
@@ -92,8 +92,18 @@ export const RoomPage: React.FC = () => {
 
       {/* Room with Objects */}
       <div className={styles.room}>
-        <div className={styles.roomTitle}>Комната Татьяны</div>
+        <div className={styles.roomTitle}>✨ Комната Татьяны ✨</div>
         <div className={styles.roomScene}>
+          {/* Tatyana Character */}
+          <div className={styles.character}>
+            <div className={styles.characterSprite}>👩‍💼</div>
+            <div className={styles.characterName}>Татьяна</div>
+            <div className={styles.characterStatus}>
+              {stats.mood >= 70 ? '😊' : stats.mood >= 40 ? '😐' : '😔'}
+            </div>
+          </div>
+
+          {/* Room Objects */}
           {ROOM_OBJECTS.map((obj) => (
             <button
               key={obj.id}
