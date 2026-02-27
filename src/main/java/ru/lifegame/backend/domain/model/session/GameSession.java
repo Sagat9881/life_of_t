@@ -73,6 +73,7 @@ public class GameSession {
     public List<Conflict> activeConflicts() { return context.activeConflicts(); }
     public List<GameEvent> events() { return context.events(); }
     public Ending ending() { return ending; }
+    public GameSessionContext context() { return context; }
 
     // === Actions ===
     public ActionResult executeAction(ActionType actionType) {
