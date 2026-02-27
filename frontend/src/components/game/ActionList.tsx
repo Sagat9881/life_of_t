@@ -15,7 +15,7 @@ interface ActionListProps {
 }
 
 export function ActionList({
-  actions,
+  actions = [],
   isLoading = false,
   error = null,
   onExecuteAction,
@@ -26,14 +26,14 @@ export function ActionList({
 
   const categories = useMemo(() => {
     const cats = new Set(['all']);
-    actions.forEach(action => {
+    (actions || []).forEach(action => {
       if (action.category) cats.add(action.category);
     });
     return Array.from(cats);
   }, [actions]);
 
   const filteredActions = useMemo(() => {
-    return actions.filter(action => {
+    return (actions || []).filter(action => {
       const matchesSearch = action.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           action.description?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = categoryFilter === 'all' || action.category === categoryFilter;
