@@ -18,6 +18,12 @@
     <description>Component showcase and documentation demo</description>
 
     <dependencies>
+        <!-- Backend module -->
+        <dependency>
+            <groupId>ru.lifegame</groupId>
+            <artifactId>backend</artifactId>
+        </dependency>
+
         <!-- Frontend module (static resources with ComponentTest) -->
         <dependency>
             <groupId>ru.lifegame</groupId>

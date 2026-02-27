@@ -8,10 +8,10 @@ import java.awt.Desktop;
 import java.net.URI;
 
 /**
- * Демо-приложение для презентации UI компонентов.
+ * Демо-приложение для презентации UI компонентов и тестирования backend API.
  * Запускает веб-сервер и автоматически открывает браузер.
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"ru.lifegame.demo", "ru.lifegame.backend"})
 public class DemoApplication {
 
     public static void main(String[] args) {
@@ -32,12 +32,15 @@ public class DemoApplication {
             "└──────────────────────────────────────────────────┘\n" +
             "\n" +
             "🌐 Демо доступно: " + url + "\n" +
+            "🚀 Backend API: " + url + "/api/v1/game\n" +
+            "📝 Swagger UI: " + url + "/swagger-ui.html\n" +
             "\n" +
-            "📝 Что внутри:\n" +
+            "📋 Что внутри:\n" +
             "   • Все UI компоненты с интерактивными примерами\n" +
             "   • Цветовая палитра и типографика\n" +
             "   • Анимации и переходы\n" +
             "   • Haptic feedback демо\n" +
+            "   • Backend REST API с игровой логикой\n" +
             "\n" +
             "⏸️  Для остановки: Ctrl+C или кнопка 'Выключить' в браузере\n" +
             "\n"
