@@ -1,0 +1,124 @@
+.stat-bar {
+  width: 100%;
+}
+
+.stat-bar__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.stat-bar__label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.stat-bar__icon {
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.stat-bar__name {
+  font-size: 0.9rem;
+}
+
+.stat-bar__value {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-bar__max {
+  color: var(--color-text-secondary);
+  font-weight: 400;
+}
+
+.stat-bar__track {
+  height: 12px;
+  background-color: var(--color-bg-secondary);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-bar__fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-bar__fill--animated {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.stat-bar__fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+/* Size variants */
+.stat-bar--small .stat-bar__track {
+  height: 8px;
+}
+
+.stat-bar--small .stat-bar__name {
+  font-size: 0.8rem;
+}
+
+.stat-bar--small .stat-bar__value {
+  font-size: 0.75rem;
+}
+
+.stat-bar--small .stat-bar__icon {
+  font-size: 1em;
+}
+
+.stat-bar--large .stat-bar__track {
+  height: 16px;
+}
+
+.stat-bar--large .stat-bar__name {
+  font-size: 1rem;
+}
+
+.stat-bar--large .stat-bar__value {
+  font-size: 1rem;
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}

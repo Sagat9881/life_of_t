@@ -4,9 +4,10 @@ import { Card } from './components/shared/Card';
 import { StatBar } from './components/shared/StatBar';
 import { LoadingSpinner } from './components/shared/LoadingSpinner';
 import { ErrorMessage } from './components/shared/ErrorMessage';
+import { PlayerPanel } from './components/game/PlayerPanel';
 import { type NavItem } from './components/layout/BottomNav';
 import { AppLayout } from './components/layout/AppLayout';
-import type { Stats } from './types/game';
+import type { Stats, Player } from './types/game';
 import { Power } from 'lucide-react';
 
 function ComponentTest() {
@@ -24,6 +25,14 @@ function ComponentTest() {
     selfEsteem: 70,
   };
 
+  const mockPlayer: Player = {
+    id: 'demo-player',
+    name: 'Таня',
+    level: 5,
+    stats: mockStats,
+    avatarUrl: '',
+  };
+
   const handleButtonClick = () => {
     setIsLoading(true);
     setTimeout(() => setIsLoading(false), 2000);
@@ -37,7 +46,6 @@ function ComponentTest() {
     setIsShuttingDown(true);
     try {
       await fetch('/api/shutdown', { method: 'POST' });
-      // Показываем сообщение пользователю
       alert('Приложение выключается... Окно можно закрыть.');
     } catch (error) {
       console.error('Ошибка при выключении:', error);
@@ -53,7 +61,21 @@ function ComponentTest() {
           🎮 Component Test
         </h1>
 
+        {/* PlayerPanel Demo */}
         <Card variant="elevated" padding="large">
+          <h2>PlayerPanel</h2>
+          <p style={{ marginBottom: '1rem', color: '#666' }}>
+            Панель игрока с аватаром, именем, уровнем и статами
+          </p>
+          <PlayerPanel player={mockPlayer} />
+          
+          <div style={{ marginTop: '1.5rem' }}>
+            <h3 style={{ marginBottom: '0.5rem' }}>Компактная версия:</h3>
+            <PlayerPanel player={mockPlayer} compact />
+          </div>
+        </Card>
+
+        <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
           <h2>Buttons</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <Button variant="primary" onClick={handleButtonClick}>
@@ -86,12 +108,12 @@ function ComponentTest() {
         <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
           <h2>StatBars</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <StatBar statKey="energy" value={mockStats.energy} />
-            <StatBar statKey="health" value={mockStats.health} />
-            <StatBar statKey="stress" value={mockStats.stress} />
-            <StatBar statKey="mood" value={mockStats.mood} />
-            <StatBar statKey="money" value={mockStats.money} />
-            <StatBar statKey="selfEsteem" value={mockStats.selfEsteem} />
+            <StatBar statKey="energy" value={mockStats.energy} showLabel />
+            <StatBar statKey="health" value={mockStats.health} showLabel />
+            <StatBar statKey="stress" value={mockStats.stress} showLabel />
+            <StatBar statKey="mood" value={mockStats.mood} showLabel />
+            <StatBar statKey="money" value={mockStats.money} showLabel />
+            <StatBar statKey="selfEsteem" value={mockStats.selfEsteem} showLabel />
           </div>
         </Card>
 
@@ -158,6 +180,7 @@ function ComponentTest() {
             <li>Все кнопки должны откликаться на клики</li>
             <li>Проверь hover эффекты на десктопе</li>
             <li>Цвета: 🌸 Розовый, 🌿 Мятный, ☀️ Жёлтый</li>
+            <li>PlayerPanel адаптируется под размер экрана</li>
           </ul>
         </Card>
 
