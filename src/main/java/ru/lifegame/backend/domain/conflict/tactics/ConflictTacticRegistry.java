@@ -11,16 +11,15 @@ public class ConflictTacticRegistry {
     private static final Map<String, ConflictTactic> TACTICS = new HashMap<>();
 
     static {
-        // Register all tactics
-        register(new Surrender());
-        register(new Assert());
-        register(new Compromise());
-        register(new Avoid());
-        register(new Listen());
-        register(new Humor());
-        register(new Logical());
-        register(new Emotional());
-        register(new Boundaries());
+        // Register all base tactics
+        for (BaseConflictTactics tactic : BaseConflictTactics.values()) {
+            register(tactic);
+        }
+        
+        // Register all skill-based tactics
+        for (SkillBasedConflictTactics tactic : SkillBasedConflictTactics.values()) {
+            register(tactic);
+        }
     }
 
     private static void register(ConflictTactic tactic) {
