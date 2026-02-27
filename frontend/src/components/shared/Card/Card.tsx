@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, type CSSProperties } from 'react';
 import styles from './Card.module.css';
 
 interface CardProps {
@@ -7,6 +7,7 @@ interface CardProps {
   padding?: 'none' | 'small' | 'medium' | 'large';
   onClick?: () => void;
   className?: string;
+  style?: CSSProperties;
 }
 
 export const Card = ({
@@ -15,6 +16,7 @@ export const Card = ({
   padding = 'medium',
   onClick,
   className = '',
+  style,
 }: CardProps) => {
   const classNames = [
     styles.card,
@@ -27,7 +29,12 @@ export const Card = ({
     .join(' ');
 
   return (
-    <div className={classNames} onClick={onClick} role={onClick ? 'button' : undefined}>
+    <div 
+      className={classNames} 
+      onClick={onClick} 
+      role={onClick ? 'button' : undefined}
+      style={style}
+    >
       {children}
     </div>
   );
