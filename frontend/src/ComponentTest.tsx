@@ -8,9 +8,10 @@ import { PlayerPanel } from './components/game/PlayerPanel';
 import { ActionList } from './components/game/ActionList';
 import { RelationshipList } from './components/game/RelationshipList';
 import { ConflictResolver } from './components/game/ConflictResolver';
+import { EventChoice } from './components/game/EventChoice';
 import { type NavItem } from './components/layout/BottomNav';
 import { AppLayout } from './components/layout/AppLayout';
-import type { Stats, Player, GameAction, NPC, Pet, Conflict } from './types/game';
+import type { Stats, Player, GameAction, NPC, Pet, Conflict, GameEvent } from './types/game';
 import { Power } from 'lucide-react';
 
 function ComponentTest() {
@@ -163,6 +164,34 @@ function ComponentTest() {
     ],
   };
 
+  const mockEvent: GameEvent = {
+    id: 'event-1',
+    title: '🎁 Неожиданный подарок',
+    description: 'Во время прогулки с Гарфилдом вы нашли коробку с котятами у подъезда. Они выглядят голодными и напуганными. Что вы сделаете?',
+    choices: [
+      {
+        code: 'take_home',
+        text: 'Забрать домой всех котят',
+        consequences: '+20 настроение, +15 самооценка, -500 деньги (корм и ветеринар)',
+      },
+      {
+        code: 'call_shelter',
+        text: 'Позвонить в приют',
+        consequences: '+10 настроение, +5 самооценка',
+      },
+      {
+        code: 'ask_neighbors',
+        text: 'Спросить у соседей',
+        consequences: '+5 настроение, +10 отношения с соседями',
+      },
+      {
+        code: 'ignore',
+        text: 'Пройти мимо',
+        consequences: '-10 настроение, -5 самооценка',
+      },
+    ],
+  };
+
   const handleButtonClick = () => {
     setIsLoading(true);
     setTimeout(() => setIsLoading(false), 2000);
@@ -188,6 +217,11 @@ function ComponentTest() {
     alert(`Выбрана тактика: ${tacticCode}`);
   };
 
+  const handleChoiceSelect = (choiceCode: string) => {
+    console.log('Choice selected:', choiceCode);
+    alert(`Выбран вариант: ${choiceCode}`);
+  };
+
   const handleShutdown = async () => {
     if (!confirm('Выключить демо-приложение?')) {
       return;
@@ -211,8 +245,21 @@ function ComponentTest() {
           🎮 Component Test
         </h1>
 
-        {/* ConflictResolver Demo */}
+        {/* EventChoice Demo */}
         <Card variant="elevated" padding="large">
+          <h2>EventChoice</h2>
+          <p style={{ marginBottom: '1rem', color: '#666' }}>
+            Компонент для выбора варианта действия в событиях
+          </p>
+          <EventChoice
+            event={mockEvent}
+            onSelectChoice={handleChoiceSelect}
+            onCancel={() => alert('Событие отменено')}
+          />
+        </Card>
+
+        {/* ConflictResolver Demo */}
+        <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
           <h2>ConflictResolver</h2>
           <p style={{ marginBottom: '1rem', color: '#666' }}>
             Компонент для разрешения конфликтов с CSP-шкалой и выбором тактик
@@ -373,6 +420,7 @@ function ComponentTest() {
             <li>ActionList поддерживает поиск и фильтрацию</li>
             <li>RelationshipList показывает NPCs и питомцев с прогресс-барами</li>
             <li>ConflictResolver с динамической CSP-шкалой и тактиками</li>
+            <li>EventChoice с цветными кнопками и последствиями</li>
           </ul>
         </Card>
 
