@@ -1,94 +1,47 @@
 import { useEffect, useState } from 'react';
 
-interface TelegramWebApp {
-  initData: string;
-  initDataUnsafe: {
-    user?: {
-      id: number;
-      first_name: string;
-      last_name?: string;
-      username?: string;
-      language_code?: string;
-    };
-  };
-  ready: () => void;
-  expand: () => void;
-  close: () => void;
-  MainButton: {
-    text: string;
-    color: string;
-    textColor: string;
-    isVisible: boolean;
-    isActive: boolean;
-    show: () => void;
-    hide: () => void;
-    enable: () => void;
-    disable: () => void;
-    showProgress: (leaveActive?: boolean) => void;
-    hideProgress: () => void;
-    setText: (text: string) => void;
-    onClick: (callback: () => void) => void;
-    offClick: (callback: () => void) => void;
-  };
-  BackButton: {
-    isVisible: boolean;
-    show: () => void;
-    hide: () => void;
-    onClick: (callback: () => void) => void;
-    offClick: (callback: () => void) => void;
-  };
-  HapticFeedback: {
-    impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;
+export interface UseTelegramResult {
+  webApp: any;
+  user: any;
+  hapticFeedback?: {
+    impactOccurred: (style: 'light' | 'medium' | 'heavy') => void;
     notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
     selectionChanged: () => void;
   };
-  colorScheme: 'light' | 'dark';
-  themeParams: {
-    bg_color?: string;
-    text_color?: string;
-    hint_color?: string;
-    link_color?: string;
-    button_color?: string;
-    button_text_color?: string;
-  };
 }
 
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp: TelegramWebApp;
-    };
-  }
-}
-
-interface UseTelegramResult {
-  webApp: TelegramWebApp | null;
-  user: TelegramWebApp['initDataUnsafe']['user'] | null;
-  isReady: boolean;
-}
-
-/**
- * Хук для работы с Telegram WebApp SDK
- */
-export const useTelegram = (): UseTelegramResult => {
-  const [isReady, setIsReady] = useState(false);
+export function useTelegram(): UseTelegramResult {
+  const [webApp, setWebApp] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const tg = window.Telegram?.WebApp;
+    // Проверяем наличие Telegram WebApp
+    if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
+      const tg = (window as any).Telegram.WebApp;
+      setWebApp(tg);
+      setUser(tg.initDataUnsafe?.user);
 
-    if (tg) {
+      // Расширяем WebApp
       tg.ready();
       tg.expand();
-      setIsReady(true);
     }
   }, []);
 
-  const webApp = window.Telegram?.WebApp ?? null;
-  const user = webApp?.initDataUnsafe.user ?? null;
+  const hapticFeedback = webApp?.HapticFeedback ? {
+    impactOccurred: (style: 'light' | 'medium' | 'heavy') => {
+      webApp.HapticFeedback.impactOccurred(style);
+    },
+    notificationOccurred: (type: 'error' | 'success' | 'warning') => {
+      webApp.HapticFeedback.notificationOccurred(type);
+    },
+    selectionChanged: () => {
+      webApp.HapticFeedback.selectionChanged();
+    },
+  } : undefined;
 
   return {
     webApp,
     user,
-    isReady,
+    hapticFeedback,
   };
-};
+}

@@ -73,3 +73,26 @@ export interface EventChoice {
   text: string;
   consequences?: string;
 }
+
+// Дополнительные типы для API и store
+export type ActionCode = string;
+export type TacticCode = string;
+export type EventChoiceCode = string;
+
+export type TimeSlot = 'MORNING' | 'DAY' | 'EVENING' | 'NIGHT';
+
+export interface GameTime {
+  day: number;
+  hour: number;
+  timeSlot: TimeSlot;
+}
+
+export interface GameState {
+  player: Player;
+  time: GameTime;
+  actions: GameAction[];
+  npcs: NPC[];
+  pets: Pet[];
+  currentConflict?: Conflict;
+  currentEvent?: GameEvent;
+}
