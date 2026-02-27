@@ -1,4 +1,4 @@
-import { Heart, Coffee } from 'lucide-react';
+import { Heart, AlertCircle } from 'lucide-react';
 import { Card } from '../shared/Card';
 import { useTelegram } from '../../hooks/useTelegram';
 import type { Pet } from '../../types/game';
@@ -11,21 +11,27 @@ interface PetCardProps {
 
 const PET_TYPE_EMOJI: Record<Pet['type'], string> = {
   cat: '🐱',
-  dog: '🐶',
+  dog: '🐕',
 };
 
-const PET_TYPE_LABEL: Record<Pet['type'], string> = {
+const PET_TYPE_LABELS: Record<Pet['type'], string> = {
   cat: 'Кот',
-  dog: 'Собака',
+  dog: 'Цвергпинчер',
 };
 
 export function PetCard({ pet, onClick }: PetCardProps) {
   const { hapticFeedback } = useTelegram();
-  const { id, name, type, mood, hunger, avatarUrl } = pet;
+  const { id, name, type, mood, hunger } = pet;
 
-  const getStatusColor = (value: number) => {
+  const getMoodColor = (value: number) => {
     if (value >= 70) return 'var(--color-success)';
     if (value >= 40) return 'var(--color-warning)';
+    return 'var(--color-danger)';
+  };
+
+  const getHungerColor = (value: number) => {
+    if (value <= 30) return 'var(--color-success)';
+    if (value <= 60) return 'var(--color-warning)';
     return 'var(--color-danger)';
   };
 
@@ -43,25 +49,18 @@ export function PetCard({ pet, onClick }: PetCardProps) {
     >
       <div className="pet-card__header">
         <div className="pet-card__avatar">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt={name} className="pet-card__avatar-image" />
-          ) : (
-            <div className="pet-card__avatar-placeholder">
-              <span className="pet-card__emoji">{PET_TYPE_EMOJI[type]}</span>
-            </div>
-          )}
+          <span className="pet-card__emoji">{PET_TYPE_EMOJI[type]}</span>
         </div>
-
         <div className="pet-card__info">
           <h3 className="pet-card__name">{name}</h3>
-          <div className="pet-card__type">{PET_TYPE_LABEL[type]}</div>
+          <span className="pet-card__type">{PET_TYPE_LABELS[type]}</span>
         </div>
       </div>
 
       <div className="pet-card__stats">
         <div className="pet-card__stat">
           <div className="pet-card__stat-header">
-            <Heart size={14} />
+            <Heart size={16} className="pet-card__stat-icon" />
             <span className="pet-card__stat-label">Настроение</span>
           </div>
           <div className="pet-card__stat-bar">
@@ -69,26 +68,28 @@ export function PetCard({ pet, onClick }: PetCardProps) {
               className="pet-card__stat-fill"
               style={{
                 width: `${mood}%`,
-                backgroundColor: getStatusColor(mood),
+                backgroundColor: getMoodColor(mood),
               }}
             />
           </div>
+          <span className="pet-card__stat-value">{mood}%</span>
         </div>
 
         <div className="pet-card__stat">
           <div className="pet-card__stat-header">
-            <Coffee size={14} />
+            <AlertCircle size={16} className="pet-card__stat-icon" />
             <span className="pet-card__stat-label">Голод</span>
           </div>
           <div className="pet-card__stat-bar">
             <div
               className="pet-card__stat-fill"
               style={{
-                width: `${100 - hunger}%`,
-                backgroundColor: getStatusColor(100 - hunger),
+                width: `${hunger}%`,
+                backgroundColor: getHungerColor(hunger),
               }}
             />
           </div>
+          <span className="pet-card__stat-value">{hunger}%</span>
         </div>
       </div>
     </Card>
