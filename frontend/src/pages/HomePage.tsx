@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Button } from '../components/ui/Button';
 import { gameApi } from '../api/client';
 
 export const HomePage = () => {
@@ -52,13 +51,24 @@ export const HomePage = () => {
         <p style={{ marginBottom: '10px', color: '#666' }}>
           Статус: <strong>{apiStatus}</strong>
         </p>
-        <Button 
+        <button 
           onClick={testApi}
           disabled={isLoading}
-          style={{ width: '100%' }}
+          style={{
+            width: '100%',
+            padding: '12px',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            color: '#fff',
+            background: isLoading ? '#ccc' : '#FF6B9D',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: isLoading ? 'not-allowed' : 'pointer',
+            transition: 'background 0.2s'
+          }}
         >
           {isLoading ? '⏳ Загрузка...' : '🚀 Проверить подключение'}
-        </Button>
+        </button>
       </div>
 
       <div style={{ 
