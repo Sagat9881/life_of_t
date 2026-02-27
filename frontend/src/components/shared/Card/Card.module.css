@@ -1,0 +1,52 @@
+.card {
+  background: white;
+  border-radius: 16px;
+  transition: all 0.2s ease;
+}
+
+/* Variants */
+.default {
+  background: white;
+}
+
+.elevated {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.elevated:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.outlined {
+  background: white;
+  border: 2px solid var(--color-background);
+}
+
+/* Padding */
+.padding-none {
+  padding: 0;
+}
+
+.padding-small {
+  padding: 0.75rem;
+}
+
+.padding-medium {
+  padding: 1rem;
+}
+
+.padding-large {
+  padding: 1.5rem;
+}
+
+/* Clickable */
+.clickable {
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.clickable:active {
+  transform: scale(0.98);
+}
