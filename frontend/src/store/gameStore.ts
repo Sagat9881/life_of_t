@@ -80,11 +80,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const result = await api.executeAction(actionCode);
+      
+      // Map backend response properly
       set({
         player: result.player,
         time: result.time,
-        actions: result.actions,
-        currentConflict: result.currentConflict ?? null,
+        actions: (result as any).availableActions || [],
+        npcs: ((result as any).relationships || []).map((rel: any) => ({
+          id: rel.id || rel.npcCode,
+          name: rel.name,
+          relationship: rel.closeness || 0,
+          type: rel.npcCode?.toLowerCase() || 'friend'
+        })),
+        pets: result.pets || [],
+        currentConflict: ((result as any).activeConflicts && (result as any).activeConflicts.length > 0)
+          ? (result as any).activeConflicts[0]
+          : null,
         currentEvent: result.currentEvent ?? null,
         isLoading: false,
       });
@@ -105,6 +116,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const result = await api.resolveTactic(currentConflict.id, tacticCode);
       set({
         player: result.player,
+        time: result.time,
+        actions: (result as any).availableActions || [],
         currentConflict: null, // Конфликт разрешён
         isLoading: false,
       });
@@ -125,6 +138,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const result = await api.selectChoice(currentEvent.id, choiceCode);
       set({
         player: result.player,
+        time: result.time,
+        actions: (result as any).availableActions || [],
         currentEvent: null, // Событие завершено
         isLoading: false,
       });
