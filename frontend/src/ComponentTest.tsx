@@ -5,9 +5,10 @@ import { StatBar } from './components/shared/StatBar';
 import { LoadingSpinner } from './components/shared/LoadingSpinner';
 import { ErrorMessage } from './components/shared/ErrorMessage';
 import { PlayerPanel } from './components/game/PlayerPanel';
+import { ActionList } from './components/game/ActionList';
 import { type NavItem } from './components/layout/BottomNav';
 import { AppLayout } from './components/layout/AppLayout';
-import type { Stats, Player } from './types/game';
+import type { Stats, Player, GameAction } from './types/game';
 import { Power } from 'lucide-react';
 
 function ComponentTest() {
@@ -33,9 +34,72 @@ function ComponentTest() {
     avatarUrl: '',
   };
 
+  const mockActions: GameAction[] = [
+    {
+      code: 'work_design',
+      name: '💼 Работа (Дизайн)',
+      description: 'Поработать над проектом на Tilda',
+      timeCost: 2,
+      energyCost: 20,
+      effects: { energy: -20, money: 500, stress: 10 },
+      available: true,
+      category: 'Работа',
+    },
+    {
+      code: 'rest_tv',
+      name: '📺 Смотреть сериал',
+      description: 'Расслабиться перед телевизором',
+      timeCost: 1,
+      effects: { energy: 10, mood: 15, stress: -10 },
+      available: true,
+      category: 'Отдых',
+    },
+    {
+      code: 'social_husband',
+      name: '💑 Время с мужем',
+      description: 'Провести время вместе',
+      timeCost: 2,
+      effects: { mood: 20, stress: -15 },
+      available: true,
+      category: 'Отношения',
+    },
+    {
+      code: 'hobby_reading',
+      name: '📚 Почитать книгу',
+      description: 'Погрузиться в увлекательный роман',
+      timeCost: 1,
+      effects: { mood: 10, stress: -5, selfEsteem: 5 },
+      available: true,
+      category: 'Хобби',
+    },
+    {
+      code: 'pet_garfield',
+      name: '🐱 Поиграть с Гарфилдом',
+      description: 'Уделить время любимому коту',
+      timeCost: 1,
+      effects: { mood: 15, stress: -10 },
+      available: true,
+      category: 'Питомцы',
+    },
+    {
+      code: 'sleep',
+      name: '😴 Спать',
+      description: 'Восстановить силы',
+      timeCost: 8,
+      effects: { energy: 100, health: 20, stress: -20 },
+      available: false,
+      category: 'Базовое',
+    },
+  ];
+
   const handleButtonClick = () => {
     setIsLoading(true);
     setTimeout(() => setIsLoading(false), 2000);
+  };
+
+  const handleActionExecute = (actionCode: string) => {
+    console.log('Execute action:', actionCode);
+    alert(`Выполнено действие: ${actionCode}`);
   };
 
   const handleShutdown = async () => {
@@ -56,13 +120,25 @@ function ComponentTest() {
 
   return (
     <AppLayout currentNav={currentNav} onNavigate={setCurrentNav}>
-      <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <h1 style={{ fontFamily: 'Comfortaa, sans-serif', color: '#FF6B9D' }}>
           🎮 Component Test
         </h1>
 
-        {/* PlayerPanel Demo */}
+        {/* ActionList Demo */}
         <Card variant="elevated" padding="large">
+          <h2>ActionList</h2>
+          <p style={{ marginBottom: '1rem', color: '#666' }}>
+            Список действий с поиском и фильтрацией по категориям
+          </p>
+          <ActionList 
+            actions={mockActions}
+            onExecuteAction={handleActionExecute}
+          />
+        </Card>
+
+        {/* PlayerPanel Demo */}
+        <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
           <h2>PlayerPanel</h2>
           <p style={{ marginBottom: '1rem', color: '#666' }}>
             Панель игрока с аватаром, именем, уровнем и статами
@@ -181,6 +257,7 @@ function ComponentTest() {
             <li>Проверь hover эффекты на десктопе</li>
             <li>Цвета: 🌸 Розовый, 🌿 Мятный, ☀️ Жёлтый</li>
             <li>PlayerPanel адаптируется под размер экрана</li>
+            <li>ActionList поддерживает поиск и фильтрацию</li>
           </ul>
         </Card>
 
