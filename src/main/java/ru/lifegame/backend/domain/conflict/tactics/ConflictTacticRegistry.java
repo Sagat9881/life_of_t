@@ -12,15 +12,15 @@ public class ConflictTacticRegistry {
 
     static {
         // Register all tactics
-        register(new SurrenderTactic());
-        register(new AssertTactic());
-        register(new CompromiseTactic());
-        register(new AvoidTactic());
-        register(new ListenTactic());
-        register(new HumorTactic());
-        register(new LogicalTactic());
-        register(new EmotionalTactic());
-        register(new BoundariesTactic());
+        register(new Surrender());
+        register(new Assert());
+        register(new Compromise());
+        register(new Avoid());
+        register(new Listen());
+        register(new Humor());
+        register(new Logical());
+        register(new Emotional());
+        register(new Boundaries());
     }
 
     private static void register(ConflictTactic tactic) {

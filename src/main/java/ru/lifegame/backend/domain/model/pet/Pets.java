@@ -2,52 +2,51 @@ package ru.lifegame.backend.domain.model.pet;
 
 import ru.lifegame.backend.domain.balance.GameBalance;
 
-import java.util.*;
+import java.util.Map;
 
 public class Pets {
-    private final Map<PetCode, Pet> map;
+    private final Map<String, Pet> pets;
 
-    public Pets(Map<PetCode, Pet> map) {
-        this.map = new EnumMap<>(map);
+    public Pets(Map<String, Pet> pets) {
+        this.pets = pets;
     }
 
-    public Pet get(PetCode code) {
-        return map.get(code);
-    }
-
-    public void applyMoodChange(PetCode code, int delta) {
-        Pet pet = map.get(code);
-        if (pet != null) {
-            map.put(code, pet.applyMoodChange(delta));
-        }
-    }
-
-    public void applyAttentionChange(PetCode code, int delta) {
-        Pet pet = map.get(code);
-        if (pet != null) {
-            map.put(code, pet.applyAttentionChange(delta));
-        }
+    public Pet get(String petId) {
+        return pets.get(petId);
     }
 
     public void applyDailyDecay() {
-        for (PetCode code : map.keySet()) {
-            Pet pet = map.get(code);
-            map.put(code, pet.applyDailyDecay());
-        }
+        pets.values().forEach(Pet::applyDailyDecay);
     }
 
-    public Map<PetCode, Pet> all() {
-        return Collections.unmodifiableMap(map);
+    public boolean hasDeadPet() {
+        return pets.values().stream().anyMatch(pet -> pet.health() <= 0);
+    }
+
+    public Map<String, Pet> all() {
+        return Map.copyOf(pets);
     }
 
     public static Pets initial() {
-        var m = new EnumMap<PetCode, Pet>(PetCode.class);
-        m.put(PetCode.GARFIELD, new Pet(PetCode.GARFIELD, "Гарфилд",
-                GameBalance.PET_INITIAL_SATIETY, GameBalance.PET_INITIAL_ATTENTION,
-                GameBalance.PET_INITIAL_HEALTH, GameBalance.PET_INITIAL_MOOD));
-        m.put(PetCode.SAM, new Pet(PetCode.SAM, "Сэм",
-                GameBalance.PET_SAM_INITIAL_SATIETY, GameBalance.PET_SAM_INITIAL_ATTENTION,
-                GameBalance.PET_SAM_INITIAL_HEALTH, GameBalance.PET_SAM_INITIAL_MOOD));
-        return new Pets(m);
+        return new Pets(Map.of(
+            "barsik", new Pet(
+                "barsik",
+                "Барсик",
+                PetType.CAT,
+                GameBalance.PET_INITIAL_SATIETY,
+                GameBalance.PET_INITIAL_ATTENTION,
+                GameBalance.PET_INITIAL_HEALTH,
+                GameBalance.PET_INITIAL_MOOD
+            ),
+            "sam", new Pet(
+                "sam",
+                "Сэм",
+                PetType.DOG,
+                GameBalance.PET_SAM_INITIAL_SATIETY,
+                GameBalance.PET_SAM_INITIAL_ATTENTION,
+                GameBalance.PET_SAM_INITIAL_HEALTH,
+                GameBalance.PET_SAM_INITIAL_MOOD
+            )
+        ));
     }
 }

@@ -12,6 +12,8 @@ public class GameEvent {
     private final Map<String, Object> context;
     private final int priority;
     private final int dayTriggered;
+    private boolean triggered;
+    private boolean resolved;
 
     public GameEvent(
             String id,
@@ -31,6 +33,12 @@ public class GameEvent {
         this.context = context;
         this.priority = priority;
         this.dayTriggered = dayTriggered;
+        this.triggered = false;
+        this.resolved = false;
+    }
+
+    public void applyOption(String optionId) {
+        this.resolved = true;
     }
 
     public String id() { return id; }
@@ -41,4 +49,8 @@ public class GameEvent {
     public Map<String, Object> context() { return context; }
     public int priority() { return priority; }
     public int dayTriggered() { return dayTriggered; }
+    public boolean isTriggered() { return triggered; }
+    public boolean isResolved() { return resolved; }
+    
+    public void markTriggered() { this.triggered = true; }
 }

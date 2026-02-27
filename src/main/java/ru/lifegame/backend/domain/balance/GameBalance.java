@@ -62,6 +62,7 @@ public final class GameBalance {
 
     // --- Conflict ---
     public static final int CSP_BASE = 50;
+    public static final int INITIAL_CSP = 50;
     public static final int MAX_CONFLICT_ROUNDS = 3;
 
     // --- Conflict triggers ---
@@ -185,6 +186,7 @@ public final class GameBalance {
     // --- Time ---
     public static final int DAY_START_HOUR = 8;
     public static final int DAY_END_HOUR = 24;
+    public static final int HOURS_PER_DAY = 24;
 
     // --- Game limits ---
     public static final int MAX_GAME_DAYS = 30;
