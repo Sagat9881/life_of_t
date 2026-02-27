@@ -10,6 +10,7 @@ import ru.lifegame.backend.application.command.StartSessionCommand;
 import ru.lifegame.backend.application.port.in.*;
 import ru.lifegame.backend.application.query.GetStateQuery;
 import ru.lifegame.backend.application.view.GameStateView;
+import ru.lifegame.backend.domain.exception.SessionNotFoundException;
 import ru.lifegame.backend.infrastructure.web.dto.ChooseConflictTacticRequestDto;
 import ru.lifegame.backend.infrastructure.web.dto.ChooseEventOptionRequestDto;
 import ru.lifegame.backend.infrastructure.web.dto.ExecuteActionRequestDto;
@@ -45,9 +46,16 @@ public class GameControllerImpl implements GameController {
 
     @Override
     public ResponseEntity<GameStateView> getState(String telegramUserId) {
-        GetStateQuery query = new GetStateQuery(telegramUserId);
-        GameStateView view = getGameState.execute(query);
-        return ResponseEntity.ok(view);
+        try {
+            GetStateQuery query = new GetStateQuery(telegramUserId);
+            GameStateView view = getGameState.execute(query);
+            return ResponseEntity.ok(view);
+        } catch (SessionNotFoundException e) {
+            // Автоматически создаем новую сессию
+            StartSessionCommand command = new StartSessionCommand(telegramUserId);
+            GameStateView view = startOrLoadSession.execute(command);
+            return ResponseEntity.ok(view);
+        }
     }
 
     @Override
