@@ -1,5 +1,6 @@
 package ru.lifegame.backend.domain.event.game;
 
+import ru.lifegame.backend.domain.model.stats.StatChanges;
 import java.util.List;
 import java.util.Map;
 
@@ -37,8 +38,20 @@ public class GameEvent {
         this.resolved = false;
     }
 
-    public void applyOption(String optionId) {
+    public EventResult applyOption(String optionId) {
+        EventOption option = options.stream()
+            .filter(o -> o.id().equals(optionId))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Option not found: " + optionId));
+        
         this.resolved = true;
+        
+        return new EventResult(
+            option.resultText(),
+            option.statChanges(),
+            option.relationshipChanges(),
+            null
+        );
     }
 
     public String id() { return id; }

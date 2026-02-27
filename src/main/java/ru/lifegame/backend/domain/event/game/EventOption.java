@@ -1,12 +1,13 @@
 package ru.lifegame.backend.domain.event.game;
 
 import ru.lifegame.backend.domain.model.stats.StatChanges;
+import java.util.Map;
 
 public record EventOption(
-        String code,
-        String label,
-        String description,
-        StatChanges statChanges,
-        String relationshipNpc,
-        int relationshipDelta
-) {}
+    String id,
+    String text,
+    String resultText,
+    StatChanges statChanges,
+    Map<String, Integer> relationshipChanges
+) {
+}

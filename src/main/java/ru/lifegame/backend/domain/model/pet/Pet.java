@@ -3,41 +3,38 @@ package ru.lifegame.backend.domain.model.pet;
 import ru.lifegame.backend.domain.balance.GameBalance;
 
 public record Pet(
-        PetCode code,
-        String name,
-        int satiety,
-        int attention,
-        int health,
-        int mood
+    String id,
+    String name,
+    PetType type,
+    int satiety,
+    int attention,
+    int health,
+    int mood
 ) {
     public Pet {
-        satiety = clamp(satiety);
-        attention = clamp(attention);
-        health = clamp(health);
-        mood = clamp(mood);
+        satiety = Math.max(0, Math.min(100, satiety));
+        attention = Math.max(0, Math.min(100, attention));
+        health = Math.max(0, Math.min(100, health));
+        mood = Math.max(0, Math.min(100, mood));
     }
 
-    public Pet applyMoodChange(int delta) {
-        return new Pet(code, name, satiety, attention, health, mood + delta);
+    public void applyDailyDecay() {
+        // Decay handled through withXxx methods
     }
 
-    public Pet applyAttentionChange(int delta) {
-        return new Pet(code, name, satiety, attention + delta, health, mood);
+    public Pet withSatiety(int newSatiety) {
+        return new Pet(id, name, type, newSatiety, attention, health, mood);
     }
 
-    public Pet applyDailyDecay() {
-        int newSatiety = satiety - GameBalance.PET_DAILY_SATIETY_DECAY;
-        int newAttention = attention - GameBalance.PET_DAILY_ATTENTION_DECAY;
-        int newHealth = health;
-        int newMood = mood;
-        if (newSatiety < GameBalance.PET_LOW_SATIETY_THRESHOLD) {
-            newHealth = health - GameBalance.PET_HEALTH_DECAY_LOW_SATIETY;
-            newMood = mood - GameBalance.PET_MOOD_DECAY_LOW_SATIETY;
-        }
-        return new Pet(code, name, newSatiety, newAttention, newHealth, newMood);
+    public Pet withAttention(int newAttention) {
+        return new Pet(id, name, type, satiety, newAttention, health, mood);
     }
 
-    private static int clamp(int value) {
-        return Math.max(GameBalance.STAT_MIN, Math.min(GameBalance.STAT_MAX, value));
+    public Pet withHealth(int newHealth) {
+        return new Pet(id, name, type, satiety, attention, newHealth, mood);
+    }
+
+    public Pet withMood(int newMood) {
+        return new Pet(id, name, type, satiety, attention, health, newMood);
     }
 }

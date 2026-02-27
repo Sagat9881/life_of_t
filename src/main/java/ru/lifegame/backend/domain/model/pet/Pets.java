@@ -2,13 +2,14 @@ package ru.lifegame.backend.domain.model.pet;
 
 import ru.lifegame.backend.domain.balance.GameBalance;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Pets {
     private final Map<String, Pet> pets;
 
     public Pets(Map<String, Pet> pets) {
-        this.pets = pets;
+        this.pets = new HashMap<>(pets);
     }
 
     public Pet get(String petId) {
@@ -21,6 +22,20 @@ public class Pets {
 
     public boolean hasDeadPet() {
         return pets.values().stream().anyMatch(pet -> pet.health() <= 0);
+    }
+
+    public void applyMoodChange(PetCode petCode, int moodDelta) {
+        Pet pet = pets.get(petCode.code());
+        if (pet != null) {
+            pets.put(petCode.code(), pet.withMood(pet.mood() + moodDelta));
+        }
+    }
+
+    public void applyAttentionChange(PetCode petCode, int attentionDelta) {
+        Pet pet = pets.get(petCode.code());
+        if (pet != null) {
+            pets.put(petCode.code(), pet.withAttention(pet.attention() + attentionDelta));
+        }
     }
 
     public Map<String, Pet> all() {
