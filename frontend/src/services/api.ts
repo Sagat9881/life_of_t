@@ -51,8 +51,8 @@ export const api = {
   /**
    * Выбрать вариант в событии
    */
-  async selectChoice(eventId: string, choiceCode: string): Promise<GameStateResponse> {
+  async selectChoice(eventId: string, optionCode: string): Promise<GameStateResponse> {
     const telegramUserId = getTelegramUserId();
-    return gameApi.chooseEventOption({ telegramUserId, eventId, choiceCode });
+    return gameApi.chooseEventOption({ telegramUserId, eventId, optionCode });
   },
 };

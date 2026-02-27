@@ -91,7 +91,7 @@ export const gameApi: GameApi = {
   /**
    * Получить текущее состояние игры
    */
-  getState: async (telegramUserId: number): Promise<GameStateResponse> => {
+  getState: async (telegramUserId: string): Promise<GameStateResponse> => {
     return request<GameStateResponse>(
       `/api/v1/game/state?telegramUserId=${telegramUserId}`,
       {
