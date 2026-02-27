@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AppLayout } from './components/layout/AppLayout';
-import { HomePage } from './pages/HomePage';
+import { RoomPage } from './pages/RoomPage';
 import { RelationshipsPage } from './pages/RelationshipsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ShutdownButton } from './components/demo/ShutdownButton';
@@ -13,13 +13,13 @@ function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <HomePage />;
+        return <RoomPage />;
       case 'relationships':
         return <RelationshipsPage />;
       case 'profile':
         return <ProfilePage />;
       default:
-        return <HomePage />;
+        return <RoomPage />;
     }
   };
 
