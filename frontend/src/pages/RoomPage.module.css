@@ -1,0 +1,362 @@
+/* Main Container */
+.roomContainer {
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* HUD - Top Bar */
+.hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background: rgba(0, 0, 0, 0.7);
+  border-bottom: 3px solid #f093fb;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+
+.hudLeft,
+.hudRight {
+  display: flex;
+  gap: 20px;
+}
+
+.hudCenter {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.statIcon {
+  font-size: 20px;
+}
+
+.statValue {
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.timeDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(240, 147, 251, 0.2);
+  padding: 10px 30px;
+  border-radius: 15px;
+  border: 2px solid #f093fb;
+}
+
+.day {
+  color: #f093fb;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.hour {
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.money {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 215, 0, 0.2);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 2px solid #ffd700;
+}
+
+.moneyIcon {
+  font-size: 20px;
+}
+
+.moneyValue {
+  color: #ffd700;
+  font-weight: bold;
+  font-size: 16px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Room Scene */
+.room {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 20px;
+}
+
+.roomTitle {
+  position: absolute;
+  top: 30px;
+  color: white;
+  font-size: 32px;
+  font-weight: bold;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+  z-index: 10;
+}
+
+.roomScene {
+  width: 80%;
+  max-width: 900px;
+  height: 70%;
+  background: linear-gradient(145deg, #e879f9 0%, #c084fc 50%, #a78bfa 100%);
+  border-radius: 30px;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 -10px 30px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Room Objects */
+.roomObject {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border: 3px solid #f093fb;
+  border-radius: 20px;
+  padding: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.roomObject:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  background: rgba(255, 255, 255, 1);
+  border-color: #e879f9;
+  box-shadow: 0 8px 25px rgba(232, 121, 249, 0.6);
+}
+
+.roomObject.selected {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border-color: white;
+  transform: translate(-50%, -50%) scale(1.15);
+}
+
+.objectIcon {
+  font-size: 48px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.objectLabel {
+  color: #333;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.roomObject.selected .objectLabel {
+  color: white;
+}
+
+/* Action Dialog */
+.actionDialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.dialogContent {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 4px solid #f093fb;
+  border-radius: 25px;
+  padding: 40px;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.dialogContent h3 {
+  color: white;
+  font-size: 28px;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.dialogContent p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 18px;
+  margin-bottom: 30px;
+}
+
+.dialogButtons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.confirmButton,
+.cancelButton {
+  padding: 15px 40px;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.confirmButton {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.confirmButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(245, 87, 108, 0.5);
+}
+
+.confirmButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancelButton {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.cancelButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Loading */
+.loading {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hud {
+    padding: 10px 15px;
+    flex-wrap: wrap;
+  }
+
+  .hudLeft,
+  .hudRight {
+    gap: 10px;
+  }
+
+  .stat,
+  .money {
+    padding: 6px 12px;
+  }
+
+  .statValue,
+  .moneyValue {
+    font-size: 14px;
+  }
+
+  .hour {
+    font-size: 20px;
+  }
+
+  .roomTitle {
+    font-size: 24px;
+    top: 20px;
+  }
+
+  .roomScene {
+    width: 95%;
+    height: 60%;
+  }
+
+  .objectIcon {
+    font-size: 36px;
+  }
+
+  .objectLabel {
+    font-size: 12px;
+  }
+
+  .dialogContent {
+    padding: 30px 20px;
+    margin: 20px;
+  }
+
+  .dialogContent h3 {
+    font-size: 22px;
+  }
+
+  .dialogContent p {
+    font-size: 16px;
+  }
+
+  .confirmButton,
+  .cancelButton {
+    padding: 12px 30px;
+    font-size: 16px;
+  }
+}
