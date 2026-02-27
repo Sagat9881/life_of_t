@@ -29,13 +29,13 @@ export const StatBar = ({
 
   const color = useMemo(() => {
     if (statKey === 'stress') {
-      return getStressColor(value);
+      return getStressColor(value, maxValue);
     }
     if (statKey === 'money') {
       return 'var(--color-accent)';
     }
-    return getStatColor(value);
-  }, [statKey, value]);
+    return getStatColor(value, maxValue);
+  }, [statKey, value, maxValue]);
 
   const label = STAT_NAMES[statKey];
 
