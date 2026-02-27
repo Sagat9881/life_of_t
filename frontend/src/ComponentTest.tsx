@@ -4,7 +4,7 @@ import { Card } from './components/shared/Card';
 import { StatBar } from './components/shared/StatBar';
 import { LoadingSpinner } from './components/shared/LoadingSpinner';
 import { ErrorMessage } from './components/shared/ErrorMessage';
-import { BottomNav, type NavItem } from './components/layout/BottomNav';
+import { type NavItem } from './components/layout/BottomNav';
 import { AppLayout } from './components/layout/AppLayout';
 import type { Stats } from './types/game';
 
@@ -34,7 +34,6 @@ function ComponentTest() {
           🎮 Component Test
         </h1>
 
-        {/* Buttons Section */}
         <Card variant="elevated" padding="large">
           <h2>Buttons</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -65,7 +64,6 @@ function ComponentTest() {
           </div>
         </Card>
 
-        {/* Stats Section */}
         <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
           <h2>StatBars</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -78,7 +76,6 @@ function ComponentTest() {
           </div>
         </Card>
 
-        {/* Cards Section */}
         <div style={{ marginTop: '1rem', display: 'grid', gap: '1rem' }}>
           <Card variant="default" padding="medium">
             <h3>Default Card</h3>
@@ -100,7 +97,6 @@ function ComponentTest() {
           </Card>
         </div>
 
-        {/* Loading Spinner */}
         <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
           <h2>Loading Spinners</h2>
           <div style={{ display: 'flex', gap: '2rem', justifyContent: 'space-around' }}>
@@ -110,7 +106,6 @@ function ComponentTest() {
           </div>
         </Card>
 
-        {/* Error Message */}
         <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
           <h2>Error Message</h2>
           <Button 
@@ -131,14 +126,12 @@ function ComponentTest() {
           )}
         </Card>
 
-        {/* Navigation Info */}
         <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
           <h2>Bottom Navigation</h2>
           <p>Текущая вкладка: <strong>{currentNav}</strong></p>
           <p>Переключай вкладки внизу экрана и почувствуй haptic feedback!</p>
         </Card>
 
-        {/* Info */}
         <Card variant="outlined" padding="medium" style={{ marginTop: '1rem', marginBottom: '2rem' }}>
           <h3>💡 Информация</h3>
           <ul style={{ paddingLeft: '1.5rem' }}>
