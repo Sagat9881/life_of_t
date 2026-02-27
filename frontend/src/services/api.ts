@@ -28,8 +28,6 @@ interface ChoiceResult {
 }
 
 class ApiClient {
-  private sessionStarted = false;
-
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
@@ -48,12 +46,10 @@ class ApiClient {
 
   async startSession(): Promise<GameState> {
     const telegramUserId = getTelegramUserId();
-    const state = await this.request<GameState>('/session/start', {
+    return await this.request<GameState>('/session/start', {
       method: 'POST',
       body: JSON.stringify({ telegramUserId }),
     });
-    this.sessionStarted = true;
-    return state;
   }
 
   async getGameState(): Promise<GameState> {
