@@ -11,7 +11,7 @@ interface ActionCardProps {
 }
 
 export function ActionCard({ action, onExecute }: ActionCardProps) {
-  const { impactOccurred } = useTelegram();
+  const { hapticFeedback } = useTelegram();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -20,7 +20,7 @@ export function ActionCard({ action, onExecute }: ActionCardProps) {
     if (!onExecute || isProcessing) return;
 
     // Тактильный отклик
-    impactOccurred('medium');
+    hapticFeedback?.impactOccurred('medium');
 
     // Начало обработки
     setIsProcessing(true);
@@ -32,7 +32,7 @@ export function ActionCard({ action, onExecute }: ActionCardProps) {
       
       // Успех
       setIsSuccess(true);
-      impactOccurred('light');
+      hapticFeedback?.impactOccurred('light');
       
       // Сброс через 1.5с
       setTimeout(() => {
@@ -42,7 +42,7 @@ export function ActionCard({ action, onExecute }: ActionCardProps) {
     } catch (error) {
       // Ошибка
       setIsError(true);
-      impactOccurred('heavy');
+      hapticFeedback?.impactOccurred('heavy');
       
       // Сброс через 2с
       setTimeout(() => {
@@ -52,7 +52,8 @@ export function ActionCard({ action, onExecute }: ActionCardProps) {
     }
   };
 
-  const isDisabled = action.energyCost > 100 || isProcessing;
+  const energyCost = action.energyCost ?? 0;
+  const isDisabled = energyCost > 100 || isProcessing;
 
   return (
     <motion.div
@@ -128,19 +129,14 @@ export function ActionCard({ action, onExecute }: ActionCardProps) {
       {/* Основной контент */}
       <div className="action-card__header">
         <h3 className="action-card__title">{action.name}</h3>
-        {action.cooldown && action.cooldown > 0 && (
-          <span className="action-card__cooldown">
-            {action.cooldown}ч
-          </span>
-        )}
       </div>
 
       <p className="action-card__description">{action.description}</p>
 
       <div className="action-card__costs">
-        {action.energyCost > 0 && (
+        {energyCost > 0 && (
           <span className="action-card__cost action-card__cost--energy">
-            ⚡ {action.energyCost}
+            ⚡ {energyCost}
           </span>
         )}
         {action.timeCost > 0 && (
@@ -150,13 +146,11 @@ export function ActionCard({ action, onExecute }: ActionCardProps) {
         )}
       </div>
 
-      {action.requirements && action.requirements.length > 0 && (
-        <div className="action-card__requirements">
-          {action.requirements.map((req, idx) => (
-            <span key={idx} className="action-card__requirement">
-              {req}
-            </span>
-          ))}
+      {action.category && (
+        <div className="action-card__category">
+          <span className="action-card__category-badge">
+            {action.category}
+          </span>
         </div>
       )}
 
