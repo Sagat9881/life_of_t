@@ -33,16 +33,33 @@ echo.
 
 echo [3/3] Starting application...
 echo.
-echo 🚀 Opening at http://localhost:8080
+
+set JAR_PATH=application\target\life-of-t.jar
+
+if not exist "%JAR_PATH%" (
+    echo ❌ ERROR: JAR file not found!
+    echo Expected location: %JAR_PATH%
+    echo.
+    echo Checking application\target\ directory:
+    dir application\target\*.jar
+    echo.
+    pause
+    exit /b 1
+)
+
+echo ✅ Found JAR: %JAR_PATH%
+echo 🚀 Starting server at http://localhost:8080
 echo.
 echo Press Ctrl+C to stop the server
 echo ========================================
 echo.
-java -jar application/target/life-of-t.jar
+
+java -jar "%JAR_PATH%"
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo ❌ ERROR: Application failed to start!
+    echo Exit code: %ERRORLEVEL%
     pause
     exit /b 1
 )
