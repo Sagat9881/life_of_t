@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ANIMATION SYSTEM PROMPT
+  Системный контекст для анимаций в игре Life of Tatyana
+  Определяет строгие правила для спрайтов, атласов, тайминга и производительности
+  
+  Версия: 1.0
+  Последнее обновление: 2026-03-01
+-->
+
+<animation-system version="1.0" project="life-of-t">
+
+  <!-- ОБЩИЕ ПРИНЦИПЫ АНИМАЦИИ -->
+  <animation-principles reference="Punch Club">
+    <style>Pixel Art Frame-by-Frame Animation</style>
+    <inspiration primary="Punch Club" secondary="Stardew Valley, Undertale" />
+    <mood>Плавная, уютная, выразительная, современная</mood>
+    <performance-priority>60 FPS на мобильных устройствах</performance-priority>
+  </animation-principles>
+
+  <!-- ТЕХНИЧЕСКИЕ ОГРАНИЧЕНИЯ -->
+  <technical-constraints>
+    <frame-rate target="60fps" min="30fps" reason="Плавность на всех устройствах" />
+    <sprite-sheet-size max="2048x2048" reason="Поддержка старых GPU" />
+    <individual-sprite-size max="256x256" recommended="64x64 - 128x128" />
+    <max-animation-frames recommended="20-30" max="50" reason="Баланс плавности и размера файла" />
+    <format primary="WebP" fallback="PNG" reason="Оптимальное сжатие с прозрачностью" />
+    <compression quality="85-90%" reason="Баланс качества и размера" />
+  </technical-constraints>
+
+  <!-- АРХИТЕКТУРА СПРАЙТОВ -->
+  <sprite-architecture>
+    <atlas-format type="horizontal-strip" reason="Простота парсинга и рендеринга">
+      <description>Все кадры анимации в одну горизонтальную полоску</description>
+      <frame-separator width="0px" reason="Без разделителей для экономии места" />
+      <background transparency="true" alpha-channel="required" />
+    </atlas-format>
+
+    <naming-convention>
+      <pattern>{character}-{animation}-{state}.webp</pattern>
+      <examples>
+        <example>tatyana-idle-happy.webp</example>
+        <example>sam-walk-normal.webp</example>
+        <example>husband-work-focused.webp</example>
+      </examples>
+    </naming-convention>
+
+    <organization>
+      <structure>
+        /sprites/
+          /characters/
+            /tatyana/
+              idle.webp
+              walk.webp
+              work.webp
+              sleep.webp
+            /sam/
+              idle.webp
+              walk.webp
+              run.webp
+            /husband/
+              idle.webp
+              work.webp
+          /objects/
+            /interactive/
+              bed-states.webp
+              computer-states.webp
+          /ui/
+            /effects/
+              sparkle.webp
+              heart.webp
+      </structure>
+    </organization>
+  </sprite-architecture>
+
+  <!-- ATLAS CONFIGURATION -->
+  <atlas-configuration>
+    <metadata-file path="/assets/atlas-config.json" format="JSON">
+      <description>Центральный файл конфигурации всех атласов</description>
+      <structure>
+        {
+          "characters": {
+            "tatyana": {
+              "idle": { "frames": 6, "fps": 8, "loop": true },
+              "walk": { "frames": 8, "fps": 10, "loop": true },
+              "work": { "frames": 10, "fps": 6, "loop": true }
+            }
+          }
+        }
+      </structure>
+    </metadata-file>
+
+    <frame-data required="true">
+      <field name="frameWidth" type="number" required="true" />
+      <field name="frameHeight" type="number" required="true" />
+      <field name="frames" type="number" description="Количество кадров в атласе" />
+      <field name="fps" type="number" description="Кадров в секунду" />
+      <field name="loop" type="boolean" description="Зацикливать анимацию" />
+      <field name="reverse" type="boolean" description="Проигрывать в обратном направлении после окончания" />
+    </frame-data>
+  </atlas-configuration>
+
+  <!-- ТИПЫ АНИМАЦИЙ -->
+  <animation-types>
+    <!-- ПЕРСОНАЖИ -->
+    <character-animations>
+      <animation name="idle" priority="high">
+        <description>Анимация ожидания в покое</description>
+        <frames min="4" recommended="6-8" max="12" />
+        <fps recommended="6-8" />
+        <loop required="true" />
+        <variations>
+          <variation name="normal" mood="нейтральный" />
+          <variation name="happy" mood="счастливый" />
+          <variation name="sad" mood="грустный" />
+          <variation name="tired" mood="уставший" />
+        </variations>
+        <details>
+          <detail>Лёгкое покачивание тела</detail>
+          <detail>Моргание глаз (каждые 2-3 секунды)</detail>
+          <detail>Дыхание (плавный подъём/опускание груди)</detail>
+          <detail>Микро-движения волос/одежды</detail>
+        </details>
+      </animation>
+
+      <animation name="walk" priority="high">
+        <description>Анимация ходьбы</description>
+        <frames min="6" recommended="8-10" max="16" />
+        <fps recommended="10-12" />
+        <loop required="true" />
+        <details>
+          <detail>Полный цикл шага (левая-правая нога)</detail>
+          <detail>Движение рук в противофазе с ногами</detail>
+          <detail>Лёгкое покачивание головы/тела</detail>
+          <detail>Изометрический угол (4 направления: вверх, вниз, влево, вправо)</detail>
+        </details>
+      </animation>
+
+      <animation name="work" priority="medium">
+        <description>Анимация работы (за компьютером, готовка, уборка)</description>
+        <frames min="8" recommended="10-12" max="20" />
+        <fps recommended="6-8" />
+        <loop required="true" />
+        <variations>
+          <variation name="computer" context="работа за компьютером" />
+          <variation name="cooking" context="готовка" />
+          <variation name="cleaning" context="уборка" />
+        </variations>
+      </animation>
+
+      <animation name="sleep" priority="medium">
+        <description>Анимация сна</description>
+        <frames min="4" recommended="6" max="8" />
+        <fps recommended="4" />
+        <loop required="true" />
+        <details>
+          <detail>Медленное дыхание</detail>
+          <detail>Лёгкое движение волос</detail>
+          <detail>Периодическое изменение позы (опционально)</detail>
+        </details>
+      </animation>
+
+      <animation name="interaction" priority="medium">
+        <description>Взаимодействие с объектами</description>
+        <frames min="6" recommended="8-10" max="15" />
+        <fps recommended="8" />
+        <loop required="false" />
+        <variations>
+          <variation name="pickup" context="поднять предмет" />
+          <variation name="use-phone" context="использовать телефон" />
+          <variation name="open-door" context="открыть дверь" />
+          <variation name="pet-animal" context="погладить животное" />
+        </variations>
+      </animation>
+
+      <animation name="emotion" priority="low">
+        <description>Эмоциональные реакции</description>
+        <frames min="6" recommended="8" max="12" />
+        <fps recommended="8" />
+        <loop required="false" />
+        <variations>
+          <variation name="joy" emoji="😊" />
+          <variation name="love" emoji="❤️" />
+          <variation name="surprise" emoji="😲" />
+          <variation name="anger" emoji="😠" />
+        </variations>
+      </animation>
+    </character-animations>
+
+    <!-- ОБЪЕКТЫ И ОКРУЖЕНИЕ -->
+    <object-animations>
+      <animation name="ambient" priority="low">
+        <description>Фоновая анимация окружения</description>
+        <frames min="4" recommended="6-8" max="12" />
+        <fps recommended="4-6" />
+        <loop required="true" />
+        <examples>
+          <example>Мерцание экрана компьютера</example>
+          <example>Покачивание штор от ветра</example>
+          <example>Мигание уведомления на телефоне</example>
+          <example>Тикающие часы</example>
+        </examples>
+      </animation>
+
+      <animation name="interactive-highlight" priority="high">
+        <description>Подсветка интерактивных объектов</description>
+        <frames min="4" recommended="6" max="8" />
+        <fps recommended="6" />
+        <loop required="true" />
+        <effect>
+          <type>Плавное свечение по контуру</type>
+          <color>var(--color-primary) с opacity 0.3-0.7</color>
+          <pulse>Пульсация 1-1.5 секунды</pulse>
+        </effect>
+      </animation>
+
+      <animation name="state-change" priority="medium">
+        <description>Изменение состояния объекта</description>
+        <frames min="3" recommended="5-6" max="10" />
+        <fps recommended="10" />
+        <loop required="false" />
+        <examples>
+          <example>Кровать: опрятная → помятая</example>
+          <example>Компьютер: выключен → включен</example>
+          <example>Окно: день → ночь</example>
+        </examples>
+      </animation>
+    </object-animations>
+
+    <!-- UI ЭФФЕКТЫ -->
+    <ui-animations>
+      <animation name="particle-effect" priority="low">
+        <description>Частицы для наград и достижений</description>
+        <frames min="8" recommended="12-16" max="24" />
+        <fps recommended="12-15" />
+        <loop required="false" />
+        <examples>
+          <example>Конфетти при достижении</example>
+          <example>Звёздочки при повышении навыка</example>
+          <example>Сердечки при улучшении отношений</example>
+        </examples>
+      </animation>
+
+      <animation name="notification" priority="medium">
+        <description>Анимация уведомлений</description>
+        <frames min="6" recommended="8" max="12" />
+        <fps recommended="10" />
+        <loop required="false" />
+        <flow>
+          <phase name="enter" duration="300ms" easing="ease-out" />
+          <phase name="hold" duration="2000ms" />
+          <phase name="exit" duration="300ms" easing="ease-in" />
+        </flow>
+      </animation>
+    </ui-animations>
+  </animation-types>
+
+  <!-- ПРОИЗВОДИТЕЛЬНОСТЬ -->
+  <performance-optimization>
+    <sprite-batching enabled="true">
+      <description>Группировка спрайтов для минимизации draw calls</description>
+      <max-batch-size sprites="100" reason="Баланс производительности" />
+    </sprite-batching>
+
+    <animation-pooling enabled="true">
+      <description>Переиспользование анимационных объектов</description>
+      <pool-size initial="20" max="50" />
+    </animation-pooling>
+
+    <culling enabled="true">
+      <viewport-culling>Не рендерить анимации вне viewport</viewport-culling>
+      <distance-culling>Упрощать анимации вдали от камеры</distance-culling>
+    </culling>
+
+    <frame-skip adaptive="true">
+      <description>Пропуск кадров при низком FPS</description>
+      <threshold fps="30" action="reduce-quality" />
+      <threshold fps="20" action="skip-frames" />
+    </frame-skip>
+
+    <preloading strategy="critical-first">
+      <critical priority="high">
+        <asset>tatyana-idle.webp</asset>
+        <asset>tatyana-walk.webp</asset>
+        <asset>interactive-highlights.webp</asset>
+      </critical>
+      <deferred priority="low" load="on-demand">
+        <asset>emotion-animations</asset>
+        <asset>particle-effects</asset>
+      </deferred>
+    </preloading>
+  </performance-optimization>
+
+  <!-- СИСТЕМА ТАЙМИНГА -->
+  <timing-system>
+    <frame-timing method="requestAnimationFrame" reason="Синхронизация с browser refresh rate" />
+    
+    <interpolation enabled="true">
+      <description>Сглаживание между кадрами для плавности</description>
+      <method>Linear interpolation для позиций</method>
+      <method>No interpolation для pixel art спрайтов (чёткость)</method>
+    </interpolation>
+
+    <synchronization>
+      <rule>Все анимации синхронизируются с game loop</rule>
+      <rule>Delta time для независимости от FPS</rule>
+      <rule>Паузы и замедления влияют на все анимации одновременно</rule>
+    </synchronization>
+
+    <fps-adjustment adaptive="true">
+      <description>Автоматическая подстройка под производительность</description>
+      <monitor interval="1000ms" />
+      <action threshold="<45fps" response="reduce-animation-complexity" />
+      <action threshold=">55fps" response="restore-full-quality" />
+    </fps-adjustment>
+  </timing-system>
+
+  <!-- ПЕРЕХОДЫ МЕЖДУ АНИМАЦИЯМИ -->
+  <animation-transitions>
+    <blend-mode type="immediate" reason="Pixel art не требует блендинга">
+      <description>Мгновенная смена кадра между анимациями</description>
+    </blend-mode>
+
+    <state-machine enabled="true">
+      <description>Конечный автомат для управления переходами</description>
+      <transitions>
+        <transition from="idle" to="walk" condition="movement-started" />
+        <transition from="walk" to="idle" condition="movement-stopped" />
+        <transition from="any" to="sleep" condition="sleep-action" />
+        <transition from="sleep" to="idle" condition="wake-up" priority="immediate" />
+      </transitions>
+      <rule>Приоритет: emotion > interaction > work > walk > idle</rule>
+    </state-machine>
+
+    <interruption policy="allow-with-priority">
+      <description>Высокоприоритетные анимации прерывают текущие</description>
+      <priority-order>
+        <level value="1" name="critical" examples="death, damage" />
+        <level value="2" name="high" examples="emotion, interaction" />
+        <level value="3" name="normal" examples="work, walk" />
+        <level value="4" name="low" examples="idle, ambient" />
+      </priority-order>
+    </interruption>
+  </animation-transitions>
+
+  <!-- ПРАВИЛА СОЗДАНИЯ СПРАЙТОВ -->
+  <sprite-creation-rules>
+    <pixel-art-guidelines>
+      <rule>Чёткие пиксельные границы, без anti-aliasing</rule>
+      <rule>Консистентная палитра цветов (из DESIGN_SYSTEM_PROMPT)</rule>
+      <rule>Изометрический угол 2:1 (45°) для персонажей и объектов</rule>
+      <rule>Единый источник света (верхний левый угол)</rule>
+      <rule>Ограниченная палитра: 16-32 цвета на спрайт</rule>
+    </pixel-art-guidelines>
+
+    <frame-consistency>
+      <rule>Все кадры одной анимации ОДИНАКОВОГО размера</rule>
+      <rule>Персонаж в одной позиции по вертикали (для плавности)</rule>
+      <rule>Центр масс не прыгает между кадрами</rule>
+      <rule>Пиксельная сетка выровнена одинаково</rule>
+    </frame-consistency>
+
+    <animation-smoothness>
+      <rule>Минимум 6 кадров для плавной loop анимации</rule>
+      <rule>Ease-in/ease-out для начала/конца цикла</rule>
+      <rule>Промежуточные кадры для критических движений</rule>
+      <rule>Тестирование на разных скоростях (4-12 fps)</rule>
+    </animation-smoothness>
+
+    <size-optimization>
+      <rule>Минимальный bounding box вокруг спрайта</rule>
+      <rule>Обрезка прозрачных областей</rule>
+      <rule>Использование индексированных цветов где возможно</rule>
+      <rule>Компрессия WebP с quality 85-90%</rule>
+    </size-optimization>
+  </sprite-creation-rules>
+
+  <!-- ОТЛАДКА И ТЕСТИРОВАНИЕ -->
+  <debugging-tools>
+    <fps-counter visible="dev-mode" position="top-right" />
+    <sprite-bounds visible="dev-mode" color="red" />
+    <animation-state-display visible="dev-mode" position="bottom-left" />
+    <frame-timeline visible="dev-mode" show="current-frame, fps, loop-count" />
+    
+    <hotkeys dev-only="true">
+      <key name="F1" action="toggle-fps-counter" />
+      <key name="F2" action="toggle-sprite-bounds" />
+      <key name="F3" action="slow-motion" factor="0.25x" />
+      <key name="F4" action="frame-by-frame" />
+    </hotkeys>
+  </debugging-tools>
+
+  <!-- ЗАПРЕТЫ -->
+  <forbidden>
+    <practice name="gif-animations" reason="Не контролируется timing, большой размер" />
+    <practice name="video-sprites" reason="Overhead, нет frame control" />
+    <practice name="css-sprite-animations" reason="Не подходит для canvas/game engine" />
+    <practice name="different-frame-sizes" reason="Нарушает рендеринг и производительность" />
+    <practice name="anti-aliasing" reason="Размывает pixel art" />
+    <practice name="rotation-scaling" reason="Искажает pixel art, генерировать все углы" />
+    <practice name="> 2048px atlas" reason="Не поддерживается на старых GPU" />
+    <library name="lottie" reason="Не подходит для pixel art game" />
+    <library name="anime.js" reason="Избыточно, используем custom animation loop" />
+  </forbidden>
+
+  <!-- ЧЕКЛИСТ ПЕРЕД КОММИТОМ -->
+  <commit-checklist>
+    <check>✅ Все кадры анимации одного размера</check>
+    <check>✅ Atlas < 500KB после компрессии</check>
+    <check>✅ FPS указан в atlas-config.json</check>
+    <check>✅ Анимация плавная при целевом FPS</check>
+    <check>✅ Прозрачность корректная (alpha channel)</check>
+    <check>✅ Нет anti-aliasing на пиксельных краях</check>
+    <check>✅ Цвета из утверждённой палитры</check>
+    <check>✅ Naming convention соблюдён</check>
+    <check>✅ Тестирование на мобильном разрешении</check>
+    <check>✅ Loop анимация зацикливается плавно</check>
+  </commit-checklist>
+
+  <!-- РЕФЕРЕНСЫ И ВДОХНОВЕНИЕ -->
+  <references>
+    <primary>
+      <game name="Punch Club" reason="Основная стилистика анимаций" />
+      <game name="Stardew Valley" reason="Уютная атмосфера, плавность" />
+    </primary>
+    <secondary>
+      <game name="Undertale" reason="Выразительность при ограниченной анимации" />
+      <game name="Celeste" reason="Плавность pixel art анимаций" />
+    </secondary>
+  </references>
+
+</animation-system>
