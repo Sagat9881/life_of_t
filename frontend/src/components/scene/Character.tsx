@@ -1,6 +1,8 @@
 /**
- * Character - PixiJS v8 HEAD + TORSO (Layers 1-2)
- * Pure PixiJS rendering, no CSS placeholders
+ * Character - PixiJS v8 FULL BODY (Layers 1-3)
+ * Layer 1: Head
+ * Layer 2: Torso + Arms
+ * Layer 3: Legs + Shoes
  */
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -61,7 +63,7 @@ export const Character: React.FC<CharacterProps> = ({
         // Main character container
         const character = new PIXI.Container();
         character.x = 100;
-        character.y = 180;
+        character.y = 220; // lowered to fit legs
         app.stage.addChild(character);
         console.log('[Character] Container created');
 
@@ -74,6 +76,40 @@ export const Character: React.FC<CharacterProps> = ({
         const hairDark = 0x6B1515;
         const shirtWhite = 0xFFFFFF;
         const shirtShadow = 0xEEEEEE;
+        const jeansBlue = 0x4A6FA5;
+        const jeansDark = 0x3A5A8A;
+        const shoeWhite = 0xF8F8F8;
+        const shoePink = 0xFFB6C1;
+
+        // === LAYER 3: LEGS + SHOES ===
+
+        // LEFT LEG (jeans)
+        g.roundRect(-14, 50, 12, 35, 2);
+        g.fill({ color: jeansBlue });
+        // Left leg shadow
+        g.rect(-14, 78, 12, 7);
+        g.fill({ color: jeansDark, alpha: 0.4 });
+
+        // RIGHT LEG (jeans)
+        g.roundRect(2, 50, 12, 35, 2);
+        g.fill({ color: jeansBlue });
+        // Right leg shadow
+        g.rect(2, 78, 12, 7);
+        g.fill({ color: jeansDark, alpha: 0.4 });
+
+        // LEFT SHOE
+        g.roundRect(-15, 85, 13, 8, 3);
+        g.fill({ color: shoeWhite });
+        // Left shoe accent
+        g.rect(-14, 87, 2, 4);
+        g.fill({ color: shoePink });
+
+        // RIGHT SHOE
+        g.roundRect(2, 85, 13, 8, 3);
+        g.fill({ color: shoeWhite });
+        // Right shoe accent
+        g.rect(3, 87, 2, 4);
+        g.fill({ color: shoePink });
 
         // === LAYER 2: TORSO + ARMS ===
 
@@ -141,19 +177,19 @@ export const Character: React.FC<CharacterProps> = ({
         g.fill({ color: hairBase });
 
         character.addChild(g);
-        console.log('[Character] Head + Torso drawn (Layers 1-2)');
+        console.log('[Character] Full body drawn (Layers 1-3)');
 
         // Breathing animation
         if (state === 'idle') {
           let time = 0;
           app.ticker.add(() => {
             time += 0.02;
-            character.y = 180 + Math.sin(time) * 3;
+            character.y = 220 + Math.sin(time) * 3;
           });
           console.log('[Character] Animation started');
         }
 
-        console.log('[Character] ✅ FULLY LOADED');
+        console.log('[Character] ✅ FULLY LOADED (HEAD + TORSO + LEGS)');
 
       } catch (err: any) {
         console.error('[Character] ❌ ERROR:', err);
@@ -178,7 +214,6 @@ export const Character: React.FC<CharacterProps> = ({
         zIndex: position.zIndex,
       }}
     >
-      {/* Only show error, no loading placeholder */}
       {error && (
         <div style={{
           width: '200px',
@@ -200,7 +235,6 @@ export const Character: React.FC<CharacterProps> = ({
         </div>
       )}
 
-      {/* PixiJS canvas only */}
       <div ref={canvasRef} />
     </div>
   );
