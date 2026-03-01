@@ -1,0 +1,156 @@
+/* Character.module.css - CSS-based character representation */
+/* Based on character-visual-specs.xml and tatyana.xml */
+
+.character {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+/* Head */
+.head {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 4px;
+}
+
+.face {
+  width: 100%;
+  height: 100%;
+  background: #F5D5B8; /* skin tone from visual-specs */
+  border-radius: 50%;
+  position: relative;
+  z-index: 1;
+}
+
+.hair {
+  position: absolute;
+  top: -4px;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  background: #8B1A1A; /* burgundy from visual-specs */
+  border-radius: 50% 50% 0 0;
+  z-index: 2;
+}
+
+.eyes {
+  position: absolute;
+  top: 40%;
+  left: 20%;
+  width: 60%;
+  height: 4px;
+  background: #6B8E23; /* olive green from visual-specs */
+  border-radius: 2px;
+}
+
+.mouth {
+  position: absolute;
+  bottom: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 4px;
+  background: #FFB6C1; /* rose pink */
+  border-radius: 0 0 4px 4px;
+}
+
+/* Body */
+.body {
+  position: relative;
+  width: 32px;
+  height: 28px;
+}
+
+.torso {
+  width: 100%;
+  height: 100%;
+  background: #6B7280; /* casual top color */
+  border-radius: 4px 4px 8px 8px;
+}
+
+.arms {
+  position: absolute;
+  top: 2px;
+  left: -4px;
+  width: calc(100% + 8px);
+  height: 4px;
+  background: #6B7280;
+  border-radius: 2px;
+}
+
+/* Shadow */
+.shadow {
+  position: absolute;
+  bottom: -8px;
+  width: 40px;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  filter: blur(4px);
+}
+
+/* State animations - based on tatyana.xml animation specs */
+.character.idle {
+  animation: idleBreathe 2000ms ease-in-out infinite;
+}
+
+@keyframes idleBreathe {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.character.walking {
+  animation: walkBounce 600ms ease-in-out infinite;
+}
+
+@keyframes walkBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Emotion variants */
+.character.happy .mouth {
+  border-radius: 4px 4px 4px 4px;
+  height: 6px;
+}
+
+.character.happy .eyes {
+  height: 2px;
+  top: 35%;
+}
+
+.character.tired .eyes {
+  height: 2px;
+}
+
+.character.tired .body {
+  opacity: 0.9;
+}
+
+.character.sad .mouth {
+  border-radius: 4px 4px 0 0;
+  bottom: 30%;
+}
+
+.character.love .face {
+  background: #FFD5E5;
+}
+
+.character.focused .eyes {
+  width: 40%;
+  left: 30%;
+}

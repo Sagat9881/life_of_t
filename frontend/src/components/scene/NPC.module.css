@@ -1,0 +1,53 @@
+/* NPC.module.css - NPC visual representations */
+
+.npc {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.npcShape {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  transition: transform 300ms ease;
+}
+
+.npc:hover .npcShape {
+  transform: scale(1.1);
+}
+
+/* Sam the dog */
+.npc.sam .npcShape {
+  background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%);
+  border: 3px solid #D97706;
+  animation: dogIdle 3000ms ease-in-out infinite;
+}
+
+@keyframes dogIdle {
+  0%, 100% {
+    border-radius: 50% 50% 50% 50%;
+  }
+  50% {
+    border-radius: 45% 55% 50% 50%;
+  }
+}
+
+/* Garfield the cat */
+.npc.garfield .npcShape {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  border: 3px solid #C2410C;
+}
+
+.shadow {
+  position: absolute;
+  bottom: -4px;
+  width: 80%;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  filter: blur(3px);
+}

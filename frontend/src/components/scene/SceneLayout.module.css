@@ -1,0 +1,160 @@
+/* SceneLayout.module.css - Based on DESIGN_SYSTEM.xml */
+
+.sceneLayout {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: var(--scene-background, #E0C3FC);
+}
+
+.sceneContainer {
+  width: 100%;
+  height: calc(100vh - 80px - 64px); /* subtract HUD and BottomNav */
+  position: relative;
+  top: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Isometric perspective container */
+.isometricView {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  transform-style: preserve-3d;
+  transform: scale(0.5);
+}
+
+/* Background layer */
+.background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  background: var(--scene-background);
+  transition: background 500ms ease-out;
+}
+
+/* Floor layer - isometric */
+.floor {
+  position: absolute;
+  width: 800px;
+  height: 600px;
+  background: rgba(255, 249, 233, 0.9);
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  transform: rotateX(60deg) rotateZ(45deg);
+  transform-origin: center center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+/* Back wall */
+.backWall {
+  position: absolute;
+  width: 800px;
+  height: 400px;
+  background: rgba(240, 230, 220, 0.95);
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  transform: rotateX(0deg) rotateZ(45deg) translateZ(200px);
+  z-index: 1;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.05);
+}
+
+/* Interactive objects layer */
+.objectsLayer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Individual object styling */
+.object {
+  position: absolute;
+  pointer-events: all;
+  cursor: pointer;
+  transition: transform 200ms ease-out;
+}
+
+.object:hover {
+  transform: scale(1.05);
+}
+
+.object.highlighted {
+  filter: drop-shadow(0 0 12px var(--color-primary, #F871AA));
+  animation: softPulse 1.5s ease-in-out infinite;
+}
+
+/* Character layer */
+.characterLayer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* NPCs layer */
+.npcsLayer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Time of day variants */
+.sceneLayout.morning .background {
+  background: linear-gradient(180deg, #FFECD2 0%, #FCB69F 100%);
+}
+
+.sceneLayout.day .background {
+  background: linear-gradient(180deg, #E0C3FC 0%, #8EC5FC 100%);
+}
+
+.sceneLayout.evening .background {
+  background: linear-gradient(180deg, #FFA17F 0%, #00223E 100%);
+}
+
+.sceneLayout.night .background {
+  background: linear-gradient(180deg, #2C3E50 0%, #000000 100%);
+}
+
+/* Animations from DESIGN_SYSTEM */
+@keyframes softPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Responsive - mobile first per DESIGN_SYSTEM */
+@media (max-width: 768px) {
+  .isometricView {
+    transform: scale(0.3);
+  }
+
+  .sceneContainer {
+    height: calc(100vh - 88px - 67px);
+    top: 88px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .isometricView {
+    transform: scale(0.4);
+  }
+}
+
+@media (min-width: 1025px) {
+  .isometricView {
+    transform: scale(0.6);
+  }
+}
