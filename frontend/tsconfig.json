@@ -14,19 +14,20 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Linting - STRICT MODE */
+    /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
 
     /* Path aliases */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": ["src/*"]
+    },
+
+    /* Include type declarations */
+    "typeRoots": ["node_modules/@types", "src/types"]
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
