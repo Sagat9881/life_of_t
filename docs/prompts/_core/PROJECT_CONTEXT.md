@@ -37,88 +37,86 @@
 
 ---
 
-## Статус разработки (01.03.2026)
+## Статус разработки (01.03.2026, 22:58 MSK)
 
 ### ✅ Готово
 
 #### Backend
-- Domain модели (Player, NPC, Pet, Action, Conflict, Event)
-- Application Use Cases (ExecuteAction, ResolveConflict, SelectChoice)
-- Infrastructure (REST API, H2 database)
-- GameSimulationService с временной системой
+- **Domain модели**: Player, NPC, Pet, Action, Conflict, Event
+- **Application Use Cases**: ExecuteAction, ResolveConflict, SelectChoice
+- **Infrastructure**: REST API, H2 database
+- **GameSimulationService** с временной системой
+- **17 зарегистрированных действий**:
+  - 7 базовых (work, visit_father, date_husband, play_cat, walk_dog, self_care, rest_at_home)
+  - 4 RoomPage (call_husband, watch_tv, play_with_pet, + rest_at_home)
+  - 3 OfficePage (work_on_project, make_coffee, talk_to_colleague)
+  - 4 ParkPage (rest_on_bench, feed_ducks, jogging, walk_dog_park)
 
 #### Frontend
 - **Shared компоненты**: Button, Card, StatBar, LoadingSpinner, ErrorMessage
-- **Layout**: AppLayout, BottomNav
+- **Layout**: AppLayout, BottomNav (с роутингом!)
 - **Game компоненты**:
   - PlayerPanel (панель игрока)
   - ActionCard, ActionList (действия)
   - NPCCard, PetCard, RelationshipList (отношения)
   - TacticCard, ConflictResolver (конфликты)
   - ChoiceButton, EventChoice (события)
-  - Character (персонаж с PixiJS анимацией)
-- **Pages (ВСЕ РОУТЫ РАБОТАЮТ!)**:
-  - HomePage (главная с действиями/конфликтами/событиями)
-  - RoomPage (комната Татьяны с изометрией)
-  - OfficePage (офис с объектами)
-  - ParkPage (парк с объектами)
-  - ActionsPage (список действий)
-  - RelationshipsPage (отношения)
-  - StatsPage (детальная статистика)
-  - PetsPage (управление питомцами)
-  - QuestsPage (квесты)
-  - ProfilePage (профиль)
-  - EndingPage (экран концовки)
-  - BackgroundTest (тест фонов)
-- **Routing**: React Router v6 с полной навигацией
-- **Store**: gameStore (Zustand) с поддержкой quests
+- **Pages (ВСЕ 11 РОУТОВ РАБОТАЮТ)**:
+  - HomePage (главная)
+  - RoomPage (комната с изометрией)
+  - OfficePage, ParkPage (с объектами)
+  - ActionsPage, RelationshipsPage, StatsPage
+  - PetsPage, QuestsPage, ProfilePage, EndingPage
+  - BackgroundTest
+- **Navigation**: BottomNav с 4 кнопками (Room, Actions, Relationships, Stats)
+- **Store**: gameStore (Zustand) с quests
 - **Services**: API client
-- **Types**: Полные TypeScript типы (Job, Quest, Pet.species)
+- **Types**: Полные TypeScript типы
 - **Styles**: CSS Variables, все компоненты стилизованы
 
 #### Infrastructure
 - Maven multi-module структура
-- Frontend интеграция через frontend-maven-plugin
-- Demo приложение с desktop launcher
-- ComponentTest.tsx для визуальной проверки
+- Frontend интеграция
+- Demo приложение
+- ComponentTest.tsx
 
 ### 🔄 Следующие шаги (приоритеты)
 
-1. **Bottom Navigation Integration**
-   - Добавить BottomNav на все основные страницы
-   - Переключение между: Room, Actions, Relationships, Stats
-
-2. **Backend Actions Registration**
-   - Зарегистрировать действия из RoomPage (CALL_HUSBAND, REST_AT_HOME, и т.д.)
-   - Добавить действия из OfficePage и ParkPage
-
-3. **Game Loop & State Management**
-   - Автоматическое продвижение времени
+1. **Game Loop & Time Display** (30 мин)
+   - Отображение текущего времени в UI
    - Кнопка "End Day" для завершения дня
+   - Автоматическое продвижение времени
 
-4. **Content Filling**
-   - Добавить реальные действия, конфликты, события
+2. **Content Filling**
+   - Добавить реальные конфликты
+   - Добавить реальные события
    - Квесты и достижения
 
+3. **Polish**
+   - Анимации персонажа
+   - Сохранение/загрузка игры
+   - Telegram WebApp deployment
+
 ### 📋 Запланировано
-- Сохранение/загрузка игры
 - Система достижений
-- Telegram WebApp deployment
-- Анимации персонажа (полный набор эмоций)
+- Музыка и звуковые эффекты
+- Разные концовки игры
 
 ---
 
 ## Важные файлы
 
 - `docs/prompts/PROJECT_CONTEXT.md` — этот файл
+- `docs/TODO.md` — список задач
 - `docs/prompts/FRONTEND_SYSTEM_PROMPT.md` — промпт для фронтенда
 - `frontend/src/ComponentTest.tsx` — демо всех компонентов
-- `frontend/src/store/gameStore.ts` — глобальное состояние игры
-- `frontend/src/App.tsx` — роутер с всеми страницами
-- `application/src/main/java/.../GameSimulationService.java` — симуляция игры
+- `frontend/src/store/gameStore.ts` — глобальное состояние
+- `frontend/src/App.tsx` — роутер
+- `backend/.../GameSimulationService.java` — симуляция
+- `backend/.../DomainConfig.java` — регистрация действий
 
 ---
 
-**Дата обновления**: 01 марта 2026  
+**Дата обновления**: 01 марта 2026, 22:58 MSK  
 **Версия**: 0.1.0-SNAPSHOT (MVP)  
 **Автор**: Александр Захаров
