@@ -1,23 +1,25 @@
-/* Character.module.css - Container for PixiJS canvas */
+/* Character.module.css - Larger scale for detail */
 
 .characterContainer {
   position: absolute;
-  width: 128px;
-  height: 192px;
+  width: 200px;
+  height: 300px;
   pointer-events: none;
-  transform: scale(0.8);
-  transform-origin: center bottom;
+  /* No extra scaling - character drawn at proper size */
 }
 
 .characterContainer canvas {
   display: block;
   width: 100%;
   height: 100%;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* Responsive - slightly smaller on very small screens */
+@media (max-width: 480px) {
   .characterContainer {
-    transform: scale(0.7);
+    transform: scale(0.9);
+    transform-origin: center bottom;
   }
 }

@@ -1,7 +1,8 @@
 /**
- * Character - PixiJS-based Tatyana sprite
- * Renders character on Canvas using PixiJS Graphics API
- * Based on reference image: burgundy hair, mint top, beige cardigan
+ * Character - Layered PixiJS Tatyana sprite
+ * Scale: 1/8 screen height (~250px tall character)
+ * Rendering: 3 layers (background → mid → foreground)
+ * Parts: HEAD → BODY → ARMS → HIPS → LEGS → FEET
  */
 
 import React, { useEffect, useRef } from 'react';
@@ -25,14 +26,13 @@ export const Character: React.FC<CharacterProps> = ({
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    // Initialize PixiJS Application
     const app = new PIXI.Application();
     appRef.current = app;
 
     (async () => {
       await app.init({
-        width: 128,
-        height: 192,
+        width: 200,
+        height: 300,
         backgroundAlpha: 0,
         antialias: true,
         resolution: window.devicePixelRatio || 1,
@@ -40,21 +40,33 @@ export const Character: React.FC<CharacterProps> = ({
 
       canvasRef.current?.appendChild(app.canvas);
 
-      // Create character container
+      // Main character container (centered)
       const character = new PIXI.Container();
-      character.x = 64;
-      character.y = 160;
+      character.x = 100; // center X
+      character.y = 270; // bottom anchor
       app.stage.addChild(character);
 
-      // Draw character using Graphics
-      drawTatyana(character, emotion);
+      // === LAYER 1: BACKGROUND (Base shapes) ===
+      const layer1 = new PIXI.Container();
+      character.addChild(layer1);
 
-      // Idle animation
+      // Draw HEAD - Layer 1 only (base shapes)
+      drawHeadLayer1(layer1);
+
+      // === LAYER 2: MID (Details) - TODO ===
+      const layer2 = new PIXI.Container();
+      character.addChild(layer2);
+
+      // === LAYER 3: FOREGROUND (Fine details) - TODO ===
+      const layer3 = new PIXI.Container();
+      character.addChild(layer3);
+
+      // Idle breathing animation
       if (state === 'idle') {
         let time = 0;
         app.ticker.add(() => {
-          time += 0.03;
-          character.y = 160 + Math.sin(time) * 2; // Breathing
+          time += 0.02;
+          character.y = 270 + Math.sin(time) * 3;
         });
       }
     })();
@@ -78,161 +90,80 @@ export const Character: React.FC<CharacterProps> = ({
 };
 
 /**
- * Draw Tatyana character using PixiJS Graphics
- * Matches reference image style
+ * HEAD - Layer 1: Base shapes (skin, hair mass)
+ * Scale: Head ~50px tall (1/5 of total character height)
  */
-function drawTatyana(container: PIXI.Container, emotion: string) {
-  const graphics = new PIXI.Graphics();
+function drawHeadLayer1(container: PIXI.Container) {
+  const g = new PIXI.Graphics();
 
-  // Colors from reference
-  const skinColor = 0xF5D5B8;
-  const hairColor = 0x8B1A1A;
-  const eyeColor = 0x6B8E23;
-  const mintTopColor = 0xB5EAD7;
-  const cardiganColor = 0xF5E6D3;
-  const jeansColor = 0xE8E8E8;
-  const slipperColor = 0xA8A8A8;
+  // Colors
+  const skinBase = 0xF5D5B8;
+  const skinShadow = 0xF0CCAA;
+  const hairBase = 0x8B1A1A;
+  const hairDark = 0x6B1515;
 
-  // Shadow
-  graphics.ellipse(0, 60, 20, 6);
-  graphics.fill({ color: 0x000000, alpha: 0.2 });
+  // === NECK ===
+  g.beginPath();
+  g.rect(-8, -15, 16, 18);
+  g.fill({ color: skinBase });
+  // Neck shadow
+  g.beginPath();
+  g.rect(-7, -15, 14, 3);
+  g.fill({ color: skinShadow, alpha: 0.3 });
 
-  // === LEGS & FEET ===
-  // Left leg
-  graphics.rect(-8, 35, 8, 20);
-  graphics.fill({ color: jeansColor });
-  graphics.rect(-8, 35, 8, 20);
-  graphics.stroke({ color: 0xD0D0D0, width: 1 });
-
-  // Right leg
-  graphics.rect(2, 35, 8, 20);
-  graphics.fill({ color: jeansColor });
-  graphics.rect(2, 35, 8, 20);
-  graphics.stroke({ color: 0xD0D0D0, width: 1 });
-
-  // Left slipper
-  graphics.roundRect(-9, 54, 10, 6, 3);
-  graphics.fill({ color: slipperColor });
-
-  // Right slipper
-  graphics.roundRect(1, 54, 10, 6, 3);
-  graphics.fill({ color: slipperColor });
-
-  // === BODY ===
-  // Cardigan (beige)
-  graphics.roundRect(-14, 10, 28, 28, 4);
-  graphics.fill({ color: cardiganColor });
-  graphics.roundRect(-14, 10, 28, 28, 4);
-  graphics.stroke({ color: 0xE5D3BF, width: 1 });
-
-  // Mint top (visible through open cardigan)
-  graphics.roundRect(-8, 12, 16, 22, 3);
-  graphics.fill({ color: mintTopColor });
-
-  // Arms
-  // Left arm
-  graphics.roundRect(-18, 14, 6, 20, 3);
-  graphics.fill({ color: cardiganColor });
-
-  // Right arm
-  graphics.roundRect(12, 14, 6, 20, 3);
-  graphics.fill({ color: cardiganColor });
-
-  // Hands
-  graphics.circle(-15, 34, 3);
-  graphics.fill({ color: skinColor });
-  graphics.circle(15, 34, 3);
-  graphics.fill({ color: skinColor });
-
-  // Gold necklace
-  graphics.moveTo(-6, 11);
-  graphics.lineTo(6, 11);
-  graphics.stroke({ color: 0xFFD700, width: 2 });
+  // === FACE BASE (oval) ===
+  g.beginPath();
+  g.ellipse(0, -45, 22, 28); // larger head
+  g.fill({ color: skinBase });
   
-  // Heart pendant
-  graphics.circle(0, 14, 2.5);
-  graphics.fill({ color: 0xFFD700 });
+  // Face highlight (top-left)
+  g.beginPath();
+  g.ellipse(-5, -55, 12, 15);
+  g.fill({ color: 0xFFFFFF, alpha: 0.15 });
 
-  // === HEAD ===
-  // Neck
-  graphics.rect(-4, 6, 8, 6);
-  graphics.fill({ color: skinColor });
+  // Face shadow (bottom-right)
+  g.beginPath();
+  g.ellipse(3, -35, 15, 18);
+  g.fill({ color: skinShadow, alpha: 0.2 });
 
-  // Face (oval)
-  graphics.ellipse(0, 0, 10, 12);
-  graphics.fill({ color: skinColor });
-  graphics.ellipse(0, 0, 10, 12);
-  graphics.stroke({ color: 0xF0CCAA, width: 1 });
+  // === HAIR MASS (back layer) ===
+  // Back hair (large mass)
+  g.beginPath();
+  g.ellipse(0, -58, 28, 30); // behind head
+  g.fill({ color: hairDark });
 
-  // Hair back (burgundy)
-  graphics.ellipse(0, -8, 12, 10);
-  graphics.fill({ color: hairColor });
+  // Hair shadow under
+  g.beginPath();
+  g.ellipse(0, -50, 26, 8);
+  g.fill({ color: 0x000000, alpha: 0.2 });
 
-  // Hair left side
-  graphics.roundRect(-12, -6, 6, 14, 4);
-  graphics.fill({ color: hairColor });
+  // Left hair volume
+  g.beginPath();
+  g.roundRect(-28, -55, 14, 40, 8);
+  g.fill({ color: hairBase });
+  g.beginPath();
+  g.roundRect(-28, -55, 14, 40, 8);
+  g.stroke({ color: hairDark, width: 1 });
 
-  // Hair right side
-  graphics.roundRect(6, -6, 6, 14, 4);
-  graphics.fill({ color: hairColor });
+  // Right hair volume
+  g.beginPath();
+  g.roundRect(14, -55, 14, 40, 8);
+  g.fill({ color: hairBase });
+  g.beginPath();
+  g.roundRect(14, -55, 14, 40, 8);
+  g.stroke({ color: hairDark, width: 1 });
 
-  // Hair front bangs
-  graphics.moveTo(-8, -10);
-  graphics.bezierCurveTo(-6, -12, 6, -12, 8, -10);
-  graphics.lineTo(8, -6);
-  graphics.lineTo(-8, -6);
-  graphics.closePath();
-  graphics.fill({ color: hairColor });
+  // Front hair (bangs placeholder)
+  g.beginPath();
+  g.moveTo(-20, -65);
+  g.bezierCurveTo(-15, -72, 15, -72, 20, -65);
+  g.lineTo(20, -58);
+  g.bezierCurveTo(15, -60, -15, -60, -20, -58);
+  g.closePath();
+  g.fill({ color: hairBase });
 
-  // === FACE DETAILS ===
-  // Eyes (olive green)
-  // Left eye white
-  graphics.ellipse(-4, -2, 2.5, 3);
-  graphics.fill({ color: 0xFFFFFF });
-  // Left pupil
-  graphics.circle(-4, -1.5, 1.5);
-  graphics.fill({ color: eyeColor });
-  // Left highlight
-  graphics.circle(-4.5, -2, 0.5);
-  graphics.fill({ color: 0xFFFFFF });
+  container.addChild(g);
 
-  // Right eye white
-  graphics.ellipse(4, -2, 2.5, 3);
-  graphics.fill({ color: 0xFFFFFF });
-  // Right pupil
-  graphics.circle(4, -1.5, 1.5);
-  graphics.fill({ color: eyeColor });
-  // Right highlight
-  graphics.circle(3.5, -2, 0.5);
-  graphics.fill({ color: 0xFFFFFF });
-
-  // Eyebrows
-  graphics.moveTo(-6, -5);
-  graphics.bezierCurveTo(-5, -6, -3, -6, -2, -5);
-  graphics.stroke({ color: 0x6B1515, width: 1.5 });
-
-  graphics.moveTo(2, -5);
-  graphics.bezierCurveTo(3, -6, 5, -6, 6, -5);
-  graphics.stroke({ color: 0x6B1515, width: 1.5 });
-
-  // Nose (subtle)
-  graphics.circle(0, 2, 0.8);
-  graphics.fill({ color: 0xF0CCAA });
-
-  // Smile
-  if (emotion === 'happy') {
-    graphics.arc(0, 4, 4, 0.3, Math.PI - 0.3);
-    graphics.stroke({ color: 0xD4A494, width: 2 });
-  } else {
-    graphics.arc(0, 4, 3, 0.5, Math.PI - 0.5);
-    graphics.stroke({ color: 0xD4A494, width: 1.5 });
-  }
-
-  // Blush
-  graphics.ellipse(-6, 2, 2, 1.5);
-  graphics.fill({ color: 0xFFB6C1, alpha: 0.4 });
-  graphics.ellipse(6, 2, 2, 1.5);
-  graphics.fill({ color: 0xFFB6C1, alpha: 0.4 });
-
-  container.addChild(graphics);
+  // TODO Layer 2: Hair strands, face contour
+  // TODO Layer 3: Eyes, eyebrows, nose, mouth, blush
 }
