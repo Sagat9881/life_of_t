@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  STATS PAGE - STATS & PROGRESSION
+  Экран "Статы" — основные характеристики, навыки и достижения Тани.
+
+  Родительские файлы:
+    - ../SCREENS_SPECIFICATION.xml
+    - ../shared/HUD.xml
+    - ../shared/BottomNavigation.xml
+    - ../../design/DESIGN_SYSTEM.xml
+
+  Путь для сохранения: docs/prompts/screens/shared/StatsPage.xml
+  Версия: 1.0
+  Дата: 2026-03-01
+-->
+
+<screen name="StatsPage" type="menu" route="/stats">
+
+  <meta>
+    <title>Статы</title>
+    <description>
+      Экран с обзором состояния Тани: базовые параметры, навыки, прогресс и достижения.
+      Нужен для понимания последствий действий и планирования следующих шагов.
+    </description>
+    <entry-points>
+      <from>BottomNavigation.stats</from>
+      <from>HUD.tooltips</from>
+      <from>Achievements notifications</from>
+    </entry-points>
+  </meta>
+
+  <!-- ОБЩИЙ ЛЕЙАУТ -->
+  <layout>
+    <container
+      width="100%"
+      height="100vh"
+      padding-top="80px"    <!-- HUD -->
+      padding-bottom="64px" <!-- BottomNavigation -->
+      background="linear-gradient(180deg, #EEF2FF 0%, #F9FAFB 100%)"
+    >
+      <content
+        max-width="960px"
+        margin="0 auto"
+        padding="16px"
+        gap="16px"
+      />
+    </container>
+  </layout>
+
+  <!-- ХЕДЕР -->
+  <header>
+    <title-row
+      display="flex"
+      align="center"
+      justify="space-between"
+      margin-bottom="8px"
+    >
+      <left>
+        <title font-size="1.25rem" weight="700">Статы и прогресс</title>
+        <subtitle font-size="0.85rem" color="#6B7280">
+          Здесь можно спокойно посмотреть, как у Тани дела по всем фронтам
+        </subtitle>
+      </left>
+
+      <right>
+        <view-toggle>
+          <option id="overview" default="true">Обзор</option>
+          <option id="skills">Навыки</option>
+          <option id="achievements">Достижения</option>
+        </view-toggle>
+      </right>
+    </title-row>
+  </header>
+
+  <!-- СЕКЦИЯ 1: ОСНОВНЫЕ СТАТЫ -->
+  <section id="main-stats">
+    <title font-size="1rem" weight="600" margin-bottom="8px">Основные параметры</title>
+
+    <grid
+      type="responsive"
+      columns-mobile="1"
+      columns-tablet="2"
+      columns-desktop="3"
+      gap="10px"
+    >
+      <!-- ШАБЛОН КАРТОЧКИ СТАТА -->
+      <stat-card-spec>
+        <card
+          border-radius="16px"
+          padding="10px 12px"
+          background="rgba(255,255,255,0.95)"
+          shadow="0 6px 18px rgba(15,23,42,0.06)"
+          display="flex"
+          direction="column"
+          gap="4px"
+          min-height="80px"
+        >
+          <header-row
+            display="flex"
+            align="center"
+            justify="space-between"
+          >
+            <left display="flex" align="center" gap="6px">
+              <icon size="18px" />
+              <label font-size="0.9rem" weight="600" />
+            </left>
+            <value font-size="0.9rem" weight="600" color="#111827" />
+          </header-row>
+
+          <bar
+            height="6px"
+            border-radius="999px"
+            background="rgba(229,231,235,1)"
+            margin-top="2px"
+          >
+            <fill gradient="true" />
+          </bar>
+
+          <hint font-size="0.75rem" color="#6B7280" margin-top="2px" />
+        </card>
+      </stat-card-spec>
+
+      <!-- КОНКРЕТНЫЕ СТАТЫ -->
+      <stat id="energy">
+        <icon>⚡</icon>
+        <label>Энергия</label>
+        <hint>Нужна для большинства действий. Восстанавливается сном и отдыхом.</hint>
+        <bar-colors>
+          <normal>#FACC15</normal>
+          <low>#F97316</low>
+          <critical>#EF4444</critical>
+        </bar-colors>
+      </stat>
+
+      <stat id="happiness">
+        <icon>😊</icon>
+        <label>Счастье</label>
+        <hint>Влияет на настроение, отношения и некоторые события.</hint>
+        <bar-colors>
+          <normal>#F97316</normal>
+          <high>#EC4899</high>
+        </bar-colors>
+      </stat>
+
+      <stat id="health">
+        <icon>❤️</icon>
+        <label>Здоровье</label>
+        <hint>Если здоровье долго низкое, возможны негативные эффекты.</hint>
+        <bar-colors>
+          <normal>#EF4444</normal>
+          <warning>#F97316</warning>
+        </bar-colors>
+      </stat>
+
+      <stat id="stress">
+        <icon>😵‍💫</icon>
+        <label>Стресс</label>
+        <hint>Чем выше стресс, тем сложнее получать удовольствие от жизни.</hint>
+        <bar-direction>reverse</bar-direction>
+        <bar-colors>
+          <low>#22C55E</low>
+          <medium>#F97316</medium>
+          <high>#DC2626</high>
+        </bar-colors>
+      </stat>
+
+      <stat id="money">
+        <icon>💰</icon>
+        <label>Деньги</label>
+        <hint>Баланс для трат на кафе, подарки, уют и т.д.</hint>
+        <value-format>{amount} ₽</value-format>
+      </stat>
+
+      <stat id="relationship-overall">
+        <icon>🤍</icon>
+        <label>Отношения</label>
+        <hint>Сводный показатель по семье, друзьям и питомцам.</hint>
+        <bar-colors>
+          <low>#9CA3AF</low>
+          <medium>#F97316</medium>
+          <high>#EC4899</high>
+        </bar-colors>
+      </stat>
+    </grid>
+  </section>
+
+  <!-- СЕКЦИЯ 2: НАВЫКИ -->
+  <section id="skills">
+    <title font-size="1rem" weight="600" margin="12px 0 8px 0">Навыки</title>
+    <subtitle font-size="0.8rem" color="#6B7280" margin-bottom="8px">
+      Навыки растут от действий и влияют на доступ к новым возможностям.
+    </subtitle>
+
+    <skills-list
+      type="stacked"
+      gap="6px"
+    >
+      <!-- ШАБЛОН НАВЫКА -->
+      <skill-item-spec>
+        <row
+          display="flex"
+          align="center"
+          justify="space-between"
+          border-radius="12px"
+          padding="8px 10px"
+          background="rgba(255,255,255,0.9)"
+        >
+          <left display="flex" align="center" gap="8px">
+            <icon size="20px" />
+            <labels display="flex" direction="column" gap="2px">
+              <name font-size="0.9rem" weight="600" />
+              <meta-row font-size="0.75rem" color="#6B7280">
+                <!-- Пример: "Уровень 3 • 45 / 100 XP" -->
+              </meta-row>
+            </labels>
+          </left>
+
+          <right display="flex" direction="column" align="flex-end" gap="2px">
+            <xp-bar
+              width="96px"
+              height="6px"
+              border-radius="999px"
+              background="rgba(229,231,235,1)"
+            >
+              <fill color="#6366F1" />
+            </xp-bar>
+            <tag size="small" tone="muted">
+              <!-- Пример: "Работа", "Соц", "Забота о себе" -->
+            </tag>
+          </right>
+        </row>
+      </skill-item-spec>
+
+      <!-- КОНКРЕТНЫЕ НАВЫКИ -->
+      <skill id="work">
+        <icon>💻</icon>
+        <name>Работа</name>
+        <category>Карьера</category>
+        <description>Влияет на доход и сложность задач.</description>
+      </skill>
+
+      <skill id="communication">
+        <icon>💬</icon>
+        <name>Коммуникация</name>
+        <category>Социальные</category>
+        <description>Помогает в разговорах с мужем, отцом и друзьями.</description>
+      </skill>
+
+      <skill id="self-care">
+        <icon>🧘</icon>
+        <name>Забота о себе</name>
+        <category>Саморазвитие</category>
+        <description>Снижает стресс и помогает лучше восстанавливаться.</description>
+      </skill>
+
+      <skill id="pets-care">
+        <icon>🐾</icon>
+        <name>Забота о питомцах</name>
+        <category>Дом</category>
+        <description>Укрепляет связь с Сэмом и Гарфилдом.</description>
+      </skill>
+
+      <skill id="fitness">
+        <icon>🏃‍♀️</icon>
+        <name>Фитнес</name>
+        <category>Здоровье</category>
+        <description>Повышает максимум энергии и здоровье.</description>
+      </skill>
+    </skills-list>
+  </section>
+
+  <!-- СЕКЦИЯ 3: ДОСТИЖЕНИЯ -->
+  <section id="achievements">
+    <title font-size="1rem" weight="600" margin="12px 0 8px 0">Достижения</title>
+    <subtitle font-size="0.8rem" color="#6B7280" margin-bottom="8px">
+      Маленькие и большие победы Тани. Некоторые открывают особые сцены и концовки.
+    </subtitle>
+
+    <achievements-list
+      type="grid"
+      columns-mobile="2"
+      columns-tablet="3"
+      columns-desktop="4"
+      gap="8px"
+    >
+      <!-- ШАБЛОН ДОСТИЖЕНИЯ -->
+      <achievement-card-spec>
+        <card
+          border-radius="14px"
+          padding="8px"
+          background="rgba(255,255,255,0.95)"
+          shadow="0 4px 12px rgba(15,23,42,0.05)"
+          min-height="90px"
+          display="flex"
+          direction="column"
+          align="flex-start"
+          gap="4px"
+        >
+          <icon-row
+            display="flex"
+            align="center"
+            justify="space-between"
+          >
+            <emoji size="22px" />
+            <status-badge size="small">
+              <!-- "Открыто" / "Скрыто" -->
+            </status-badge>
+          </icon-row>
+
+          <name font-size="0.78rem" weight="600" color="#111827" />
+          <description font-size="0.7rem" color="#6B7280" max-lines="2" />
+
+          <meta font-size="0.65rem" color="#9CA3AF">
+            <!-- Пример: "Открыто: День 7" -->
+          </meta>
+        </card>
+
+        <states>
+          <state name="locked">
+            <opacity>0.5</opacity>
+            <blur>1px</blur>
+          </state>
+          <state name="unlocked">
+            <opacity>1.0</opacity>
+          </state>
+        </states>
+      </achievement-card-spec>
+
+      <!-- ПРИМЕРЫ ДОСТИЖЕНИЙ -->
+      <achievement id="first-day">
+        <emoji>🌅</emoji>
+        <name>Первый день</name>
+        <description>Успешно завершён первый игровой день.</description>
+      </achievement>
+
+      <achievement id="deep-worker">
+        <emoji>🎯</emoji>
+        <name>Фокус на максимум</name>
+        <description>10 раз использована глубокая работа.</description>
+      </achievement>
+
+      <achievement id="dog-whisperer">
+        <emoji>🐕</emoji>
+        <name>Друг собак</name>
+        <description>Отношения с Сэмом достигли максимума.</description>
+      </achievement>
+
+      <achievement id="coffee-addict">
+        <emoji>☕</emoji>
+        <name>Кофеман</name>
+        <description>Выпито 100 чашек кофе.</description>
+      </achievement>
+    </achievements-list>
+  </section>
+
+  <!-- ПЕРЕКЛЮЧЕНИЕ ВИДОВ (OVERVIEW / SKILLS / ACHIEVEMENTS) -->
+  <view-behavior>
+    <view id="overview">
+      <show>main-stats, skills (свернутый вид), achievements (первые 4)</show>
+    </view>
+    <view id="skills">
+      <show>main-stats, skills (полный список)</show>
+      <collapse>achievements</collapse>
+    </view>
+    <view id="achievements">
+      <show>main-stats (компакт), achievements (полный список)</show>
+      <collapse>skills</collapse>
+    </view>
+  </view-behavior>
+
+  <!-- ИНТЕРАКЦИИ -->
+  <interactions>
+    <on-stat-card-tap>
+      <behavior>Показать небольшое пояснение, какие действия влияют на этот стат</behavior>
+      <haptic>light</haptic>
+    </on-stat-card-tap>
+
+    <on-skill-tap>
+      <behavior>Показать какие действия прокачивают навык сильнее всего</behavior>
+      <haptic>light</haptic>
+    </on-skill-tap>
+
+    <on-achievement-tap>
+      <behavior>Показать подробнее условие открытия (если уже открыто)</behavior>
+      <haptic>selectionChanged</haptic>
+    </on-achievement-tap>
+  </interactions>
+
+  <!-- DATA BINDING -->
+  <data-binding>
+    <source name="stats">
+      <field>energy</field>
+      <field>happiness</field>
+      <field>health</field>
+      <field>stress</field>
+      <field>money</field>
+      <field>relationshipOverall</field>
+    </source>
+
+    <source name="skillsState">
+      <field>id</field>
+      <field>level</field>
+      <field>currentXp</field>
+      <field>requiredXp</field>
+      <field>category</field>
+    </source>
+
+    <source name="achievementsState">
+      <field>id</field>
+      <field>name</field>
+      <field>description</field>
+      <field>emoji</field>
+      <field>unlocked</field>
+      <field>unlockDay</field>
+    </source>
+  </data-binding>
+
+  <!-- СОСТОЯНИЯ ЭКРАНА -->
+  <states>
+    <loading>
+      <skeleton-sections>
+        <main-stats count="3" />
+        <skills count="4" />
+        <achievements count="6" />
+      </skeleton-sections>
+    </loading>
+
+    <error>
+      <icon>⚠️</icon>
+      <title>Не удалось загрузить статы</title>
+      <subtitle>Проверь соединение и попробуй ещё раз.</subtitle>
+      <retry-button>Повторить</retry-button>
+    </error>
+  </states>
+
+  <!-- ТРЕБОВАНИЯ К РЕАЛИЗАЦИИ -->
+  <implementation-requirements>
+    <requirement priority="critical">Экран только для просмотра и понимания, изменения происходят через действия, а не прямое редактирование.</requirement>
+    <requirement priority="critical">Все данные берутся из единого store, без локальных "теневых" копий.</requirement>
+    <requirement priority="high">Все значения отображаются в дружелюбной форме (иконки + текст), без перегруза цифрами.</requirement>
+    <requirement priority="high">Экран должен оставаться понятным даже при большом количестве достижений и навыков.</requirement>
+    <requirement priority="medium">Поддержка тёмной темы через CSS-переменные.</requirement>
+  </implementation-requirements>
+
+</screen>

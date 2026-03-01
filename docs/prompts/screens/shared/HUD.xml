@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  HUD - UNIVERSAL HEADS-UP DISPLAY
+  Универсальный HUD для всех локаций игры Life of Tatyana
+
+  Родительский файл: ../SCREENS_SPECIFICATION.xml
+  Связанные промты:
+    - ../../design/DESIGN_SYSTEM.xml
+    - ../../_core/PROJECT_CONTEXT.md
+    - ../../_core/visual-generation-workflow.xml
+
+  Путь для сохранения: docs/prompts/screens/shared/HUD.xml
+  Версия: 1.0
+  Дата: 2026-03-01
+-->
+
+<hud-specification name="HUD" version="1.0">
+
+  <meta>
+    <description>
+      Универсальная верхняя панель HUD, отображающая ключевые игровые статы:
+      энергию, счастье, здоровье, время, дату, деньги и контекст локации.
+    </description>
+    <scope>
+      <applies-to>Все экраны-локации (RoomPage, OfficePage, ParkPage, FatherHouse, Cafe и др.)</applies-to>
+      <applies-to>Основные меню (ActionsPage, RelationshipsPage, StatsPage)</applies-to>
+    </scope>
+    <layout-position>top</layout-position>
+    <height>80px (включая safe-area)</height>
+    <sticky>true</sticky>
+    <mobile-first>true</mobile-first>
+  </meta>
+
+  <!-- БАЗОВАЯ СТРУКТУРА HUD -->
+  <layout>
+    <container
+      display="flex"
+      direction="row"
+      justify="space-between"
+      align="center"
+      padding-x="16px"
+      height="80px"
+      width="100%"
+      position="fixed"
+      top="0"
+      z-index="200"
+    >
+      <background>
+        <color>rgba(255, 255, 255, 0.9)</color>
+        <blur>8px</blur>
+        <border-bottom>1px solid rgba(0,0,0,0.08)</border-bottom>
+        <shadow>0 4px 12px rgba(0,0,0,0.06)</shadow>
+        <supports-dark-mode>true</supports-dark-mode>
+      </background>
+
+      <safe-area respect="true">
+        <padding-top>env(safe-area-inset-top)</padding-top>
+      </safe-area>
+
+      <sections>
+        <section id="left" width="auto" align="flex-start" />
+        <section id="center" width="auto" align="center" />
+        <section id="right" width="auto" align="flex-end" />
+      </sections>
+    </container>
+  </layout>
+
+  <!-- ЛЕВАЯ ЧАСТЬ: ОСНОВНЫЕ СТАТЫ -->
+  <left-section id="primary-stats">
+    <layout
+      display="flex"
+      direction="row"
+      gap="12px"
+      align="center"
+    />
+
+    <!-- ЭНЕРГИЯ -->
+    <stat name="energy" icon="battery" color="#FCD34D" max="100">
+      <label>Энергия</label>
+      <display type="icon+value">
+        <icon library="lucide-react" name="battery-charging" size="20px" />
+        <value font-size="0.95rem" weight="600" />
+      </display>
+      <bar enabled="true" width="72px" height="6px" radius="999px">
+        <background>rgba(0,0,0,0.05)</background>
+        <fill color="#FCD34D" gradient="true" />
+      </bar>
+      <animation on-change="pulse" duration="300ms" />
+      <thresholds>
+        <warning value="30" behavior="color-shift" color="#F97316" />
+        <critical value="10" behavior="shake+color" color="#EF4444" />
+      </thresholds>
+      <tooltip>Энергия: нужна для выполнения действий</tooltip>
+    </stat>
+
+    <!-- СЧАСТЬЕ -->
+    <stat name="happiness" icon="smile" color="#F093FB" max="100">
+      <label>Счастье</label>
+      <display type="icon+value">
+        <emoji>😊</emoji>
+        <value font-size="0.95rem" weight="600" />
+      </display>
+      <bar enabled="true" width="72px" height="6px" radius="999px">
+        <background>rgba(0,0,0,0.05)</background>
+        <fill color="#F093FB" gradient="true" />
+      </bar>
+      <thresholds>
+        <warning value="40" behavior="soft-pulse" color="#F97316" />
+        <critical value="20" behavior="shake" color="#EF4444" />
+      </thresholds>
+      <tooltip>Счастье: влияет на отношения и события</tooltip>
+    </stat>
+
+    <!-- ЗДОРОВЬЕ -->
+    <stat name="health" icon="heart" color="#EF4444" max="100">
+      <label>Здоровье</label>
+      <display type="icon+value">
+        <icon library="lucide-react" name="heart-pulse" size="20px" />
+        <value font-size="0.95rem" weight="600" />
+      </display>
+      <bar enabled="true" width="72px" height="6px" radius="999px">
+        <background>rgba(0,0,0,0.05)</background>
+        <fill color="#EF4444" gradient="true" />
+      </bar>
+      <thresholds>
+        <warning value="50" behavior="color-shift" color="#F97316" />
+        <critical value="30" behavior="strong-pulse" color="#B91C1C" />
+      </thresholds>
+      <tooltip>Здоровье: если упадёт слишком низко, возможны негативные события</tooltip>
+    </stat>
+  </left-section>
+
+  <!-- ЦЕНТР: ВРЕМЯ, ДАТА, ДЕНЬ НЕДЕЛИ -->
+  <center-section id="time-date">
+    <layout
+      display="flex"
+      direction="column"
+      align="center"
+      justify="center"
+      gap="2px"
+    />
+
+    <time-row>
+      <icon library="lucide-react" name="clock-3" size="18px" />
+      <time format="HH:mm" font-size="1.1rem" weight="600" />
+    </time-row>
+
+    <date-row>
+      <date format="dd MMM" font-size="0.8rem" color="#6B7280" />
+      <separator>•</separator>
+      <weekday format="EEE" font-size="0.8rem" color="#9CA3AF" />
+      <separator>•</separator>
+      <ingame-day format="Day {N}" font-size="0.8rem" color="#9CA3AF" />
+    </date-row>
+
+    <tooltip>Время и день влияют на доступные действия и события</tooltip>
+  </center-section>
+
+  <!-- ПРАВАЯ ЧАСТЬ: ДЕНЬГИ, ЛОКАЦИЯ, СПЕЦ.ИНДИКАТОРЫ -->
+  <right-section id="meta-stats">
+    <layout
+      display="flex"
+      direction="row"
+      gap="12px"
+      align="center"
+    />
+
+    <!-- ДЕНЬГИ -->
+    <money>
+      <label>Деньги</label>
+      <display type="icon+value">
+        <emoji>💰</emoji>
+        <value font-size="1.0rem" weight="700" />
+      </display>
+      <animation on-change="coin-flip" duration="500ms" />
+      <tooltip>Баланс: используется для покупок, подарков, кафе и т.д.</tooltip>
+    </money>
+
+    <!-- ТЕКУЩАЯ ЛОКАЦИЯ -->
+    <location-indicator>
+      <icon library="lucide-react" name="map-pin" size="18px" />
+      <name font-size="0.85rem" weight="500">
+        <!-- Примеры значений: "Дом", "Офис", "Парк", "Кафе", "Дом отца" -->
+      </name>
+      <badge type="context" visible="when-needed">
+        <!-- Например: "Работа", "Отдых", "Семья", "Романтика" -->
+      </badge>
+      <tooltip>Текущая локация и её контекст</tooltip>
+    </location-indicator>
+
+    <!-- ДОП.ИНДИКАТОРЫ (ИВЕНТЫ, БУФФЫ, СТАТУСЫ) -->
+    <status-indicators max-visible="3">
+      <indicator type="buff" icon="sparkles" color="#A855F7">
+        <tooltip>Активны положительные эффекты (кофе, утренняя пробежка и т.д.)</tooltip>
+      </indicator>
+      <indicator type="debuff" icon="alert-triangle" color="#F97316">
+        <tooltip>Негативные эффекты (стресс, недосып)</tooltip>
+      </indicator>
+      <indicator type="event" icon="star" color="#FBBF24">
+        <tooltip>Активное сюжетное событие или квест</tooltip>
+      </indicator>
+      <more-indicator when=">3" icon="more-horizontal" />
+    </status-indicators>
+  </right-section>
+
+  <!-- АДАПТИВНОСТЬ (MOBILE / DESKTOP) -->
+  <responsive-behavior>
+    <breakpoint name="mobile" max-width="768px" default="true">
+      <rules>
+        <rule>Скрыть текстовые лейблы статов, оставить только иконки + числовые значения</rule>
+        <rule>Сократить ширину баров статов до 56px</rule>
+        <rule>Спрятать текст названия локации, оставить только иконку</rule>
+        <rule>Скрыть подписи к дате, оставить только время и короткую дату</rule>
+        <rule>Увеличить высоту HUD до 88px, чтобы учесть safe-area и тапы</rule>
+      </rules>
+    </breakpoint>
+
+    <breakpoint name="tablet" min-width="769px" max-width="1024px">
+      <rules>
+        <rule>Показывать все элементы, но с компактными отступами</rule>
+        <rule>Центрировать блок времени</rule>
+      </rules>
+    </breakpoint>
+
+    <breakpoint name="desktop" min-width="1025px">
+      <rules>
+        <rule>Использовать полную ширину, больше отступы</rule>
+        <rule>Показывать развёрнутые подписи (например, "Дом — основная локация")</rule>
+      </rules>
+    </breakpoint>
+  </responsive-behavior>
+
+  <!-- ИНТЕРАКТИВНОСТЬ И HAPTIC FEEDBACK -->
+  <interactions>
+    <tap-area min-size="44px" />
+
+    <stat-interactions>
+      <on-tap stat="energy">
+        <behavior>Показать tooltip с описанием и источниками восстановления энергии</behavior>
+        <haptic>light</haptic>
+      </on-tap>
+      <on-tap stat="happiness">
+        <behavior>Показать подсказку: какие действия поднимают счастье</behavior>
+        <haptic>light</haptic>
+      </on-tap>
+      <on-tap stat="health">
+        <behavior>Показать подсказку: какие риски при низком здоровье</behavior>
+        <haptic>medium</haptic>
+      </on-tap>
+      <on-tap element="money">
+        <behavior>Показать краткий лог изменений денег (последние транзакции)</behavior>
+        <haptic>light</haptic>
+      </on-tap>
+    </stat-interactions>
+
+    <long-press>
+      <on element="time">
+        <behavior>Показать подробный календарь/день по слотам</behavior>
+        <haptic>medium</haptic>
+      </on>
+      <on element="location-indicator">
+        <behavior>Открыть мини-меню быстрых переходов по локациям</behavior>
+        <haptic>medium</haptic>
+      </on>
+    </long-press>
+  </interactions>
+
+  <!-- СОСТОЯНИЯ (LOADING / ERROR / DISABLED) -->
+  <states>
+    <state name="loading">
+      <behavior>Показывать skeleton вместо чисел</behavior>
+      <skeleton>
+        <shape>rounded</shape>
+        <shimmer>true</shimmer>
+        <duration>1200ms</duration>
+      </skeleton>
+    </state>
+
+    <state name="error">
+      <behavior>Показать иконку ошибки рядом со временем</behavior>
+      <icon library="lucide-react" name="alert-circle" color="#EF4444" />
+      <tooltip>Ошибка синхронизации времени или статов</tooltip>
+    </state>
+
+    <state name="dimmed">
+      <behavior>При открытии модального окна слегка затемнять HUD</behavior>
+      <opacity>0.6</opacity>
+      <interaction>disabled</interaction>
+    </state>
+  </states>
+
+  <!-- ИНТЕГРАЦИЯ С ИГРОВЫМ СОСТОЯНИЕМ -->
+  <data-binding>
+    <source name="gameState">
+      <field>stats.energy → HUD.energy.value</field>
+      <field>stats.happiness → HUD.happiness.value</field>
+      <field>stats.health → HUD.health.value</field>
+      <field>time.current → HUD.time</field>
+      <field>time.date → HUD.date</field>
+      <field>time.weekday → HUD.weekday</field>
+      <field>time.dayNumber → HUD.ingame-day</field>
+      <field>currency.balance → HUD.money.value</field>
+      <field>location.current → HUD.location.name</field>
+      <field>effects.buffs → HUD.status-indicators.buff</field>
+      <field>effects.debuffs → HUD.status-indicators.debuff</field>
+      <field>events.active → HUD.status-indicators.event</field>
+    </source>
+  </data-binding>
+
+  <!-- ТРЕБОВАНИЯ К РЕАЛИЗАЦИИ -->
+  <implementation-requirements>
+    <requirement priority="critical">HUD должен быть единым компонентом, переиспользуемым на всех страницах</requirement>
+    <requirement priority="critical">Все кликабельные элементы HUD имеют размер не менее 44x44px</requirement>
+    <requirement priority="high">При изменении значения стата применяется анимация (pulse/coin-flip)</requirement>
+    <requirement priority="high">Время и дата синхронизированы с игровым временем, а не реальным</requirement>
+    <requirement priority="high">Поддержка тёмной/светлой темы за счёт CSS переменных</requirement>
+    <requirement priority="medium">HUD не должен перекрывать важный контент локаций</requirement>
+    <requirement priority="medium">Все тексты подготовлены к локализации (i18n)</requirement>
+  </implementation-requirements>
+
+  <!-- ЧЕКЛИСТ ДЛЯ FRONTEND-РЕАЛИЗАЦИИ -->
+  <frontend-checklist>
+    <item>Компонент HUD реализован как отдельный React-компонент с строгими пропами</item>
+    <item>Используются CSS Modules и дизайн-система из DESIGN_SYSTEM.xml</item>
+    <item>Вся логика обновления статов вынесена в Zustand/Store, HUD только подписывается</item>
+    <item>Написаны unit-тесты на отображение и пороговые состояния</item>
+    <item>Проверен рендер на мобильных и десктопных размерах</item>
+  </frontend-checklist>
+
+</hud-specification>

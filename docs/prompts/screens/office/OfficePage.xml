@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OFFICE PAGE - DETAILED SPECIFICATION
+  Детальная спецификация экрана офиса (рабочая локация)
+  
+  Родительский файл: ../SCREENS_SPECIFICATION.xml
+  Связанные промты:
+    - ../../_core/location-generation-specs.xml
+    - ../../animation/characters/tatyana.xml
+    - ../../design/DESIGN_SYSTEM.xml
+  
+  Путь для сохранения: docs/prompts/screens/office/OfficePage.xml
+  Версия: 1.0
+  Дата: 2026-03-01
+-->
+
+<screen name="OfficePage" type="location" location="office">
+
+  <meta>
+    <route>/office</route>
+    <description>Экран офиса - локация работы Татьяны на Tilda</description>
+    <availability>
+      <time>09:00-18:00 (рабочие часы)</time>
+      <conditions>Доступен только в будние дни</conditions>
+    </availability>
+    <accessibility>Все объекты доступны для взаимодействия через тап</accessibility>
+  </meta>
+
+  <!-- АТМОСФЕРА И НАСТРОЕНИЕ -->
+  <atmosphere>
+    <mood>Профессиональная, продуктивная, современная</mood>
+    <lighting>Яркий холодный свет офисных ламп + естественный свет из окна</lighting>
+    <color-scheme>
+      <dominant>#F5F7FA (светло-серый)</dominant>
+      <accent>#4A90E2 (синий - бизнес)</accent>
+      <accent>#7B68EE (фиолетовый - креатив)</accent>
+      <neutral>#E8EEF2 (холодный серый)</neutral>
+    </color-scheme>
+    <sounds optional="true">
+      <ambient>Тихий гул кондиционера, клики клавиатуры</ambient>
+      <interactions>Звук уведомлений, кофемашины</interactions>
+    </sounds>
+  </atmosphere>
+
+  <!-- СТРУКТУРА СЛОЁВ -->
+  <layout-layers>
+    <layer name="background" z-index="0">
+      <type>Office gradient background</type>
+      <color>linear-gradient(180deg, #E3F2FD 0%, #BBDEFB 100%)</color>
+      <time-of-day-variant enabled="true">
+        <morning>linear-gradient(180deg, #FFF9E9 0%, #E3F2FD 100%)</morning>
+        <day>linear-gradient(180deg, #E3F2FD 0%, #BBDEFB 100%)</day>
+        <evening>linear-gradient(180deg, #FFE0B2 0%, #FFCCBC 100%)</evening>
+      </time-of-day-variant>
+    </layer>
+
+    <layer name="office-back-wall" z-index="1">
+      <type>Isometric office back wall</type>
+      <content>Большое панорамное окно с видом на город, минималистичная отделка</content>
+      <elements>
+        <element>Панорамное окно (80% стены)</element>
+        <element>Белые стены</element>
+        <element>Часы на стене</element>
+        <element>Доска с заметками (post-it notes)</element>
+      </elements>
+    </layer>
+
+    <layer name="office-floor" z-index="2">
+      <type>Isometric floor with office furniture</type>
+      <perspective>2:1 isometric (45°)</perspective>
+      <content>Светлый ламинат, ковровая дорожка, тени от мебели</content>
+    </layer>
+
+    <layer name="interactive-objects" z-index="3">
+      <type>Clickable office objects with animations</type>
+      <render-order>Back to front by Y position</render-order>
+    </layer>
+
+    <layer name="character" z-index="4">
+      <type>Tatyana sprite in work outfit</type>
+      <position>At desk or moving between stations</position>
+      <shadow enabled="true" opacity="0.3" />
+    </layer>
+
+    <layer name="colleagues" z-index="5">
+      <type>Background office workers (non-interactive NPCs)</type>
+      <behavior>Subtle animations - typing, walking, chatting</behavior>
+      <blur>slight (depth of field effect)</blur>
+    </layer>
+
+    <layer name="hud" z-index="10">
+      <type>UI overlay - stats, time, money</type>
+      <sticky>true</sticky>
+      <safe-area>true</safe-area>
+    </layer>
+
+    <layer name="action-menu" z-index="100">
+      <type>Popup menu for object interactions</type>
+      <visibility>Dynamic on tap</visibility>
+    </layer>
+
+    <layer name="modals" z-index="600">
+      <type>Modal dialogs and confirmations</type>
+    </layer>
+  </layout-layers>
+
+  <!-- HUD (использует общий HUD из shared) -->
+  <hud ref="../shared/HUD.xml" />
+
+  <!-- ИЗОМЕТРИЧЕСКИЙ ОФИС -->
+  <isometric-office perspective="2:1" angle="45deg" viewport="1920x1080">
+    
+    <!-- ПЕРСОНАЖ ТАТЬЯНА -->
+    <character name="tatyana" ref="../../animation/characters/tatyana.xml">
+      <position x="center" y="center" z-index="4" />
+      <outfit>Business casual (рабочая одежда)</outfit>
+      <sprite size="64x64" />
+      <animations>
+        <idle-office default="true" fps="6" loop="true" description="Сидит за столом" />
+        <typing fps="10" loop="true" description="Печатает на клавиатуре" />
+        <walk fps="10" loop="true" directions="4" />
+        <coffee-break fps="8" loop="false" description="Пьёт кофе" />
+        <phone-call fps="6" loop="true" description="Разговаривает по телефону" />
+      </animations>
+      <shadow enabled="true" opacity="0.3" offset="0, 8px" blur="4px" />
+      <movement speed="2" type="click-to-move" pathfinding="true" />
+    </character>
+
+    <!-- ИНТЕРАКТИВНЫЕ ОБЪЕКТЫ -->
+    <interactive-objects>
+      
+      <!-- РАБОЧИЙ СТОЛ -->
+      <object id="desk" type="work-station" category="work">
+        <position x="960" y="400" z-index="3" />
+        <sprite size="192x128" />
+        <description>Большой L-образный стол с двумя мониторами</description>
+        <states>
+          <state name="idle" description="Мониторы включены, показывают Tilda" />
+          <state name="working" active-when="tatyana-working" glow="true" />
+          <state name="break" description="Экран заблокирован" />
+        </states>
+        <highlight type="glow" color="var(--color-accent)" opacity="0.5" pulse="1.5s" />
+        
+        <actions>
+          <action id="work-tilda" label="💼 Работать в Tilda" icon="monitor">
+            <requirements>
+              <energy min="20" />
+              <time between="09:00-18:00" />
+              <skill name="work" min="0" />
+            </requirements>
+            <effects>
+              <energy cost="20" />
+              <time advance="2h" />
+              <money reward="200" bonus-reason="Офисная работа платит больше" />
+              <skill name="work" xp="+15" />
+              <stress change="+5" reason="Офисная среда напрягает" />
+            </effects>
+            <animation character="typing" object="working" duration="2h" />
+            <haptic intensity="medium" />
+          </action>
+
+          <action id="focus-work" label="🎯 Глубокая работа (4ч)" icon="zap">
+            <requirements>
+              <energy min="40" />
+              <time between="09:00-15:00" message="Нужно время для фокуса" />
+              <coffee-buff active="true" />
+            </requirements>
+            <effects>
+              <energy cost="40" />
+              <time advance="4h" />
+              <money reward="450" />
+              <skill name="work" xp="+35" />
+              <stress change="+15" />
+              <achievement unlock="deep-worker" />
+            </effects>
+            <animation character="typing" object="working" duration="4h" intensity="high" />
+            <haptic intensity="heavy" />
+          </action>
+
+          <action id="check-emails" label="📧 Проверить почту" icon="mail">
+            <requirements>
+              <energy min="5" />
+            </requirements>
+            <effects>
+              <energy cost="5" />
+              <time advance="15m" />
+              <stress change="+2" />
+            </effects>
+            <animation duration="15m" />
+          </action>
+        </actions>
+      </object>
+
+      <!-- КОФЕМАШИНА -->
+      <object id="coffee-machine" type="refresh" category="break">
+        <position x="1400" y="300" z-index="3" />
+        <sprite size="96x96" />
+        <description>Современная кофемашина с капучинатором</description>
+        <states>
+          <state name="ready" default="true" />
+          <state name="brewing" animation="steam" sound="brewing" duration="30s" />
+          <state name="empty" warning="true" />
+        </states>
+        <ambient-animation type="steam-puff" fps="4" interval="5s" />
+        
+        <actions>
+          <action id="make-coffee" label="☕ Приготовить кофе" icon="coffee">
+            <requirements>
+              <energy min="5" />
+              <time cost="10m" />
+            </requirements>
+            <effects>
+              <energy cost="5" restore="+30" net="+25" />
+              <time advance="10m" />
+              <happiness change="+8" />
+              <buff name="coffee-boost" duration="2h" effects="energy +10%, focus +20%" />
+            </effects>
+            <animation character="coffee-break" object="brewing" duration="10m" />
+            <haptic intensity="light" />
+          </action>
+
+          <action id="social-coffee" label="☕ Кофе-брейк с коллегами" icon="users">
+            <requirements>
+              <energy min="10" />
+              <time between="10:00-12:00, 14:00-16:00" message="Время для перерыва" />
+            </requirements>
+            <effects>
+              <energy cost="10" restore="+20" />
+              <time advance="30m" />
+              <happiness change="+15" />
+              <stress change="-10" />
+              <relationship target="colleagues" change="+5" />
+            </effects>
+            <animation character="coffee-break" duration="30m" />
+            <dialog type="casual-chat" participants="colleagues" />
+          </action>
+        </actions>
+      </object>
+
+      <!-- ТЕЛЕФОН (ОФИСНЫЙ) -->
+      <object id="office-phone" type="communication" category="social">
+        <position x="900" y="380" z-index="3" />
+        <sprite size="48x48" />
+        <description>Стационарный офисный телефон</description>
+        <states>
+          <state name="idle" />
+          <state name="ringing" animation="vibrate" sound="ring" />
+          <state name="active" />
+        </states>
+        
+        <actions>
+          <action id="call-client" label="📞 Позвонить клиенту" icon="phone">
+            <requirements>
+              <energy min="10" />
+              <time between="09:00-18:00" />
+            </requirements>
+            <effects>
+              <energy cost="10" />
+              <time advance="20m" />
+              <money reward="50" chance="80%" />
+              <skill name="communication" xp="+5" />
+              <stress change="+8" />
+            </effects>
+            <dialog type="business-call" />
+          </action>
+
+          <action id="call-husband" label="💕 Позвонить мужу" icon="heart">
+            <requirements>
+              <energy min="5" />
+              <time between="12:00-13:00, 16:00-17:00" message="Обеденный перерыв или конец дня" />
+            </requirements>
+            <effects>
+              <energy cost="5" />
+              <time advance="15m" />
+              <happiness change="+12" />
+              <stress change="-5" />
+              <relationship target="husband" change="+8" />
+            </effects>
+            <dialog type="romantic-call" character="husband" />
+          </action>
+        </actions>
+      </object>
+
+      <!-- ДИВАН ДЛЯ ОТДЫХА -->
+      <object id="lounge-sofa" type="rest" category="break">
+        <position x="300" y="500" z-index="3" />
+        <sprite size="128x96" />
+        <description>Мягкий диван в зоне отдыха офиса</description>
+        <states>
+          <state name="available" />
+          <state name="occupied" active-when="tatyana-resting" />
+        </states>
+        
+        <actions>
+          <action id="power-nap" label="😴 Быстрый сон (20м)" icon="moon">
+            <requirements>
+              <energy max="40" message="Нужна усталость для сна" />
+              <time between="13:00-14:00" message="Только в обед" />
+            </requirements>
+            <effects>
+              <energy restore="+35" />
+              <time advance="20m" />
+              <happiness change="+10" />
+              <buff name="refreshed" duration="2h" effects="energy regen +5%" />
+            </effects>
+            <animation character="sleep" object="occupied" duration="20m" />
+          </action>
+
+          <action id="relax" label="🧘 Отдохнуть" icon="wind">
+            <requirements>
+              <energy min="10" />
+            </requirements>
+            <effects>
+              <energy restore="+15" />
+              <time advance="10m" />
+              <stress change="-8" />
+              <happiness change="+5" />
+            </effects>
+            <animation character="idle" duration="10m" />
+          </action>
+        </actions>
+      </object>
+
+      <!-- ПРИНТЕР/КОПИР -->
+      <object id="printer" type="equipment" category="work">
+        <position x="1200" y="250" z-index="3" />
+        <sprite size="96x96" />
+        <description>Многофункциональное устройство (МФУ)</description>
+        <states>
+          <state name="idle" />
+          <state name="printing" animation="paper-feed" sound="printer" />
+          <state name="error" color="red" />
+        </states>
+        
+        <actions>
+          <action id="print-documents" label="🖨️ Распечатать документы" icon="printer">
+            <requirements>
+              <energy min="5" />
+            </requirements>
+            <effects>
+              <energy cost="5" />
+              <time advance="5m" />
+              <progress task="work" value="+10%" />
+            </effects>
+            <animation object="printing" duration="5m" />
+            <random-event chance="10%" type="printer-jam" effect="stress +5, time +5m" />
+          </action>
+        </actions>
+      </object>
+
+      <!-- ОКНО С ВИДОМ -->
+      <object id="window-view" type="scenery" category="rest">
+        <position x="960" y="100" z-index="1" />
+        <sprite size="512x256" />
+        <description>Панорамное окно с видом на город</description>
+        <states>
+          <state name="morning" description="Утренний свет, восход" />
+          <state name="day" description="Ясное небо, городская активность" />
+          <state name="evening" description="Закат, розовое небо" />
+        </states>
+        <parallax enabled="true" depth="0.2" />
+        
+        <actions>
+          <action id="look-outside" label="🏙️ Посмотреть на город" icon="eye">
+            <requirements>
+              <energy min="5" />
+            </requirements>
+            <effects>
+              <energy cost="5" />
+              <time advance="5m" />
+              <happiness change="+8" />
+              <stress change="-10" />
+              <inspiration change="+5" />
+            </effects>
+            <animation character="idle" duration="5m" camera-focus="window" />
+            <narration>Вид на город успокаивает... Откуда-то приходит вдохновение.</narration>
+          </action>
+        </actions>
+      </object>
+
+    </interactive-objects>
+
+    <!-- ФОНОВЫЕ NPC (неинтерактивные) -->
+    <background-npcs>
+      <npc id="colleague-1" type="background">
+        <position dynamic="true" area="left-desks" />
+        <sprite size="48x48" />
+        <behavior type="work-routine">
+          <animation loop="typing" weight="70%" />
+          <animation loop="walk" weight="20%" />
+          <animation loop="phone" weight="10%" />
+        </behavior>
+        <blur amount="2px" reason="Depth of field" />
+      </npc>
+
+      <npc id="colleague-2" type="background">
+        <position dynamic="true" area="right-desks" />
+        <sprite size="48x48" />
+        <behavior type="work-routine">
+          <animation loop="typing" weight="60%" />
+          <animation loop="coffee-break" weight="30%" />
+          <animation loop="meeting" weight="10%" />
+        </behavior>
+        <blur amount="2px" />
+      </npc>
+
+      <npc id="manager" type="background">
+        <position dynamic="true" area="back-office" />
+        <sprite size="48x48" />
+        <behavior type="walking">
+          <path>Ходит между столами, иногда останавливается</path>
+        </behavior>
+        <blur amount="2px" />
+      </npc>
+    </background-npcs>
+
+  </isometric-office>
+
+  <!-- ОСВЕЩЕНИЕ И АТМОСФЕРА -->
+  <atmosphere-effects>
+    <time-of-day-lighting>
+      <morning time="09:00-11:59">
+        <natural-light color="#FFF9E9" intensity="0.7" direction="from-window" />
+        <office-lights color="#F0F4F8" intensity="1.0" />
+        <mood>Свежесть, начало дня, оптимизм</mood>
+      </morning>
+
+      <day time="12:00-15:59">
+        <natural-light color="#FFFFFF" intensity="1.0" direction="from-window" />
+        <office-lights color="#F0F4F8" intensity="0.8" />
+        <mood>Продуктивность, энергия</mood>
+      </day>
+
+      <evening time="16:00-18:00">
+        <natural-light color="#FFE0B2" intensity="0.5" direction="from-window" />
+        <office-lights color="#F0F4F8" intensity="1.0" />
+        <mood>Усталость, желание домой</mood>
+      </evening>
+    </time-of-day-lighting>
+
+    <ambient-effects>
+      <particles type="dust-motes" visible="when-sunlight" speed="slow" density="low" />
+      <shadows dynamic="true" based-on="time-of-day" />
+    </ambient-effects>
+  </atmosphere-effects>
+
+  <!-- ОСОБЕННОСТИ ЛОКАЦИИ -->
+  <location-features>
+    <feature name="stress-accumulation">
+      <description>Нахождение в офисе медленно повышает стресс</description>
+      <effect stat="stress" change="+1" per="30m" max="50" />
+      <mitigation action="coffee-break, look-outside, relax" />
+    </feature>
+
+    <feature name="productivity-bonus">
+      <description>Работа в офисе эффективнее домашней</description>
+      <effect stat="money" multiplier="x1.5" />
+      <effect stat="work-xp" multiplier="x1.3" />
+    </feature>
+
+    <feature name="social-opportunities">
+      <description>Можно общаться с коллегами</description>
+      <random-events>
+        <event type="colleague-chat" chance="15%" per="hour" effect="happiness +5, stress -3" />
+        <event type="team-lunch" chance="5%" per="day" effect="happiness +15, relationships +10" />
+      </random-events>
+    </feature>
+
+    <feature name="time-pressure">
+      <description>После 18:00 офис закрывается</description>
+      <warning time="17:45" message="Скоро конец рабочего дня! Завершай дела." />
+      <force-exit time="18:00" />
+    </feature>
+  </location-features>
+
+  <!-- ТРЕБОВАНИЯ К РЕАЛИЗАЦИИ -->
+  <implementation-requirements>
+    <requirement priority="critical">Офис доступен только 09:00-18:00, вне этого времени кнопка перехода неактивна</requirement>
+    <requirement priority="critical">Все интерактивные объекты видны одновременно без прокрутки</requirement>
+    <requirement priority="high">Плавные анимации 200-300ms для всех переходов</requirement>
+    <requirement priority="high">Haptic feedback на каждый тап</requirement>
+    <requirement priority="high">Фоновые NPC не мешают геймплею, blur 2px</requirement>
+    <requirement priority="medium">Освещение меняется плавно при смене времени суток (1000ms transition)</requirement>
+    <requirement priority="medium">Стресс индикатор мигает при превышении 70%</requirement>
+    <requirement priority="low">Звуки офиса (опционально): клавиатура, кофемашина, принтер</requirement>
+  </implementation-requirements>
+
+  <!-- ИНТЕГРАЦИЯ С ИГРОВОЙ МЕХАНИКОЙ -->
+  <game-mechanics-integration>
+    <work-progression>
+      <milestone level="1" unlock="basic-work" description="Базовые задачи в Tilda" />
+      <milestone level="5" unlock="focus-work" description="Глубокая работа доступна" />
+      <milestone level="10" unlock="team-lead" description="Можно руководить проектами" />
+    </work-progression>
+
+    <relationship-system>
+      <relationship target="colleagues" max="100">
+        <unlock-at level="30" feature="team-lunch" />
+        <unlock-at level="60" feature="after-work-drinks" />
+        <unlock-at level="90" feature="work-friends" />
+      </relationship>
+    </relationship-system>
+
+    <achievements>
+      <achievement id="first-day" trigger="complete-first-workday" />
+      <achievement id="workaholic" trigger="work-30-days-straight" />
+      <achievement id="deep-worker" trigger="focus-work-10-times" />
+      <achievement id="coffee-addict" trigger="drink-coffee-100-times" />
+      <achievement id="social-butterfly" trigger="colleagues-relationship-max" />
+    </achievements>
+  </game-mechanics-integration>
+
+</screen>

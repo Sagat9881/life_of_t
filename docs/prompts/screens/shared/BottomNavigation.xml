@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  BOTTOM NAVIGATION - MAIN APP NAVBAR
+  Нижняя навигация для Telegram WebApp версии Life of Tatyana
+
+  Родительский файл: ../SCREENS_SPECIFICATION.xml
+  Связанные промты:
+    - ./HUD.xml
+    - ../../design/DESIGN_SYSTEM.xml
+    - ../../_core/PROJECT_CONTEXT.md
+
+  Путь для сохранения: docs/prompts/screens/shared/BottomNavigation.xml
+  Версия: 1.0
+  Дата: 2026-03-01
+-->
+
+<bottom-navigation-specification name="BottomNavigation" version="1.0">
+
+  <meta>
+    <description>
+      Основная нижняя панель навигации между ключевыми экранными разделами:
+      Дом, Действия, Отношения, Статистика. Оптимизирована под Telegram WebApp.
+    </description>
+    <platform>Telegram WebApp (mobile-first)</platform>
+    <position>bottom</position>
+    <sticky>true</sticky>
+    <visible-on>
+      <screen>RoomPage</screen>
+      <screen>OfficePage</screen>
+      <screen>ParkPage</screen>
+      <screen>FatherHousePage</screen>
+      <screen>CafePage</screen>
+      <screen>ActionsPage</screen>
+      <screen>RelationshipsPage</screen>
+      <screen>StatsPage</screen>
+    </visible-on>
+    <hidden-on>
+      <screen>LoadingScreen</screen>
+      <screen>EndingScreen</screen>
+      <screen>Modal-only overlays</screen>
+    </hidden-on>
+  </meta>
+
+  <!-- БАЗОВАЯ РАЗМЕТКА -->
+  <layout>
+    <container
+      position="fixed"
+      bottom="0"
+      left="0"
+      width="100%"
+      height="64px"
+      z-index="200"
+      display="flex"
+      justify="space-around"
+      align="center"
+      padding-x="8px"
+    >
+      <background>
+        <color>rgba(255, 255, 255, 0.95)</color>
+        <blur>12px</blur>
+        <border-top>1px solid rgba(0,0,0,0.08)</border-top>
+        <shadow>0 -4px 12px rgba(0,0,0,0.06)</shadow>
+      </background>
+
+      <safe-area respect="true">
+        <padding-bottom>env(safe-area-inset-bottom)</padding-bottom>
+      </safe-area>
+    </container>
+  </layout>
+
+  <!-- ЭЛЕМЕНТЫ НАВИГАЦИИ -->
+  <items max-count="5">
+    <!-- 1. ДОМ -->
+    <item id="home" route="/room" type="location" default="true">
+      <icon library="lucide-react" name="home" />
+      <label>Дом</label>
+      <priority>primary</priority>
+      <tooltip>Основная локация комнаты Татьяны</tooltip>
+    </item>
+
+    <!-- 2. ДЕЙСТВИЯ -->
+    <item id="actions" route="/actions" type="menu">
+      <icon library="lucide-react" name="list-checks" />
+      <label>Действия</label>
+      <priority>high</priority>
+      <badge type="counter" source="availableActions.count" />
+      <tooltip>Все доступные действия (работа, отдых, социальные)</tooltip>
+    </item>
+
+    <!-- 3. ОТНОШЕНИЯ -->
+    <item id="relationships" route="/relationships" type="menu">
+      <icon library="lucide-react" name="heart-handshake" />
+      <label>Отношения</label>
+      <priority>medium</priority>
+      <badge type="dot" visible-when="new-relationship-events" color="#F97316" />
+      <tooltip>Муж, отец, друзья, Сэм, Гарфилд</tooltip>
+    </item>
+
+    <!-- 4. СТАТЫ -->
+    <item id="stats" route="/stats" type="menu">
+      <icon library="lucide-react" name="bar-chart-3" />
+      <label>Статы</label>
+      <priority>medium</priority>
+      <tooltip>Характеристики, навыки, достижения</tooltip>
+    </item>
+
+    <!-- (опционально) 5. ЕЩЁ -->
+    <item id="more" route="/more" type="menu" optional="true">
+      <icon library="lucide-react" name="more-horizontal" />
+      <label>Ещё</label>
+      <priority>low</priority>
+      <tooltip>Дополнительные экраны (настройки, помощь)</tooltip>
+    </item>
+  </items>
+
+  <!-- СОСТОЯНИЯ ЭЛЕМЕНТОВ -->
+  <item-states>
+    <state name="default">
+      <icon-color>var(--color-text-muted)</icon-color>
+      <label-color>#6B7280</label-color>
+      <label-size>0.75rem</label-size>
+      <opacity>0.9</opacity>
+    </state>
+
+    <state name="active">
+      <icon-color>var(--color-primary)</icon-color>
+      <label-color>var(--color-primary)</label-color>
+      <label-weight>600</label-weight>
+      <underline enabled="true" height="3px" radius="999px" />
+      <background color="rgba(248, 113, 170, 0.08)" radius="999px" padding="6px 10px" />
+      <haptic>light</haptic>
+    </state>
+
+    <state name="disabled">
+      <icon-color>rgba(148, 163, 184, 0.6)</icon-color>
+      <label-color>rgba(148, 163, 184, 0.6)</label-color>
+      <opacity>0.6</opacity>
+      <interaction>none</interaction>
+    </state>
+
+    <state name="notification">
+      <badge type="dot" color="#EF4444" position="top-right" />
+      <animation>soft-pulse</animation>
+    </state>
+  </item-states>
+
+  <!-- АДАПТИВНОСТЬ -->
+  <responsive-behavior>
+    <breakpoint name="mobile" max-width="768px" default="true">
+      <rules>
+        <rule>Отображать только иконки + короткие подписи (макс. 6–7 символов)</rule>
+        <rule>Убедиться, что каждый элемент ≥ 56x56px для комфортного тапа</rule>
+        <rule>Центрировать иконки, подпись под иконкой</rule>
+      </rules>
+    </breakpoint>
+
+    <breakpoint name="tablet" min-width="769px" max-width="1024px">
+      <rules>
+        <rule>Увеличить отступы между элементами</rule>
+        <rule>Сделать подписи чуть крупнее (0.8rem)</rule>
+      </rules>
+    </breakpoint>
+
+    <breakpoint name="desktop" min-width="1025px">
+      <rules>
+        <rule>Разрешить перенос bottom-nav в левую боковую панель (опционально) — но по умолчанию оставить снизу</rule>
+        <rule>Увеличить ширину зоны клика, но визуально сохранить компактность</rule>
+      </rules>
+    </breakpoint>
+  </responsive-behavior>
+
+  <!-- АНИМАЦИИ И ВЗАИМОДЕЙСТВИЕ -->
+  <interactions>
+    <tap>
+      <haptic>Telegram.WebApp.HapticFeedback.impactOccurred('light')</haptic>
+      <visual>
+        <scale from="1.0" to="0.96" duration="120ms" easing="ease-out" />
+        <scale from="0.96" to="1.0" duration="180ms" easing="ease-in" />
+      </visual>
+    </tap>
+
+    <reselect-active>
+      <behavior>Если нажали на уже активный пункт — плавно проскроллить текущий экран в начало (если применимо)</behavior>
+      <haptic>selectionChanged</haptic>
+    </reselect-active>
+
+    <transition-between-screens>
+      <mobile type="slide" direction="horizontal" duration="300ms" />
+      <desktop type="fade" duration="250ms" />
+    </transition-between-screens>
+  </interactions>
+
+  <!-- СВЯЗЬ С РОУТЕРОМ -->
+  <routing-integration>
+    <on-tap item="home">
+      <action>navigate('/room')</action>
+    </on-tap>
+    <on-tap item="actions">
+      <action>navigate('/actions')</action>
+    </on-tap>
+    <on-tap item="relationships">
+      <action>navigate('/relationships')</action>
+    </on-tap>
+    <on-tap item="stats">
+      <action>navigate('/stats')</action>
+    </on-tap>
+    <on-tap item="more">
+      <action>open-modal('MoreMenu')</action>
+    </on-tap>
+
+    <active-state-sync>
+      <rule>Активный пункт определяется по текущему маршруту</rule>
+      <mapping>
+        <route pattern="/room">home</route>
+        <route pattern="/office">home</route>
+        <route pattern="/park">home</route>
+        <route pattern="/actions">actions</route>
+        <route pattern="/relationships">relationships</route>
+        <route pattern="/stats">stats</route>
+      </mapping>
+    </active-state-sync>
+  </routing-integration>
+
+  <!-- ИНДИКАТОРЫ СОСТОЯНИЙ -->
+  <badges>
+    <badge id="new-actions" target="actions" type="counter">
+      <source>gameState.actions.availableNew</source>
+      <behavior>Показывать число новых действий</behavior>
+    </badge>
+
+    <badge id="relationship-updates" target="relationships" type="dot">
+      <source>gameState.relationships.pendingEvents</source>
+      <visible-when>source &gt; 0</visible-when>
+    </badge>
+
+    <badge id="unread-stats" target="stats" type="small-label">
+      <label>NEW</label>
+      <visible-when>gameState.stats.newAchievements &gt; 0</visible-when>
+    </badge>
+  </badges>
+
+  <!-- ТЕМЫ И СТИЛИ -->
+  <theming>
+    <light-theme>
+      <background>rgba(255,255,255,0.95)</background>
+      <icon-color-default>#6B7280</icon-color-default>
+      <icon-color-active>var(--color-primary)</icon-color-active>
+      <label-color-default>#6B7280</label-color-default>
+      <label-color-active>var(--color-primary)</label-color-active>
+    </light-theme>
+
+    <dark-theme>
+      <background>rgba(15,23,42,0.95)</background>
+      <icon-color-default>#9CA3AF</icon-color-default>
+      <icon-color-active>#F9A8D4</icon-color-active>
+      <label-color-default>#9CA3AF</label-color-default>
+      <label-color-active>#F9A8D4</label-color-active>
+      <border-top>1px solid rgba(148,163,184,0.3)</border-top>
+    </dark-theme>
+  </theming>
+
+  <!-- ТРЕБОВАНИЯ К РЕАЛИЗАЦИИ -->
+  <implementation-requirements>
+    <requirement priority="critical">Нижняя навигация всегда видна на основных экранах и не перекрывает интерактивные элементы</requirement>
+    <requirement priority="critical">Каждый элемент навигации имеет зону тапа не менее 56x56px</requirement>
+    <requirement priority="high">Активный пункт всегда визуально выделен (цвет + underline + фон)</requirement>
+    <requirement priority="high">Навигация использует клиентский роутинг без полной перезагрузки приложения</requirement>
+    <requirement priority="high">Поддерживается Haptic Feedback на все тапы</requirement>
+    <requirement priority="medium">Все подписи готовы к локализации</requirement>
+    <requirement priority="medium">При повороте экрана (landscape) навбар сохраняет читаемость и доступность</requirement>
+  </implementation-requirements>
+
+  <!-- ЧЕКЛИСТ ДЛЯ FRONTEND -->
+  <frontend-checklist>
+    <item>Компонент BottomNavigation реализован как отдельный React-компонент</item>
+    <item>Используются иконки lucide-react, tree-shakeable импорт</item>
+    <item>Стили реализованы через CSS Modules и общую дизайн-систему</item>
+    <item>Добавлены unit-тесты на активный пункт по маршруту</item>
+    <item>Проверена работа Haptic Feedback в Telegram WebApp</item>
+  </frontend-checklist>
+
+</bottom-navigation-specification>

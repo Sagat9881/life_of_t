@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ACTION MENU - CONTEXTUAL BOTTOM SHEET
+  Контекстное меню действий для интерактивных объектов (кровать, компьютер, телефон, и т.д.)
+
+  Родительские файлы:
+    - ../SCREENS_SPECIFICATION.xml
+    - ../room/RoomPage.xml
+    - ../../design/DESIGN_SYSTEM.xml
+
+  Путь для сохранения: docs/prompts/screens/shared/ActionMenu.xml
+  Версия: 1.0
+  Дата: 2026-03-01
+-->
+
+<action-menu-specification name="ActionMenu" version="1.0">
+
+  <meta>
+    <description>
+      Контекстное меню действий, которое появляется при тапе по интерактивному объекту.
+      Оформлено как bottom-sheet, адаптировано под мобильный Telegram WebApp.
+    </description>
+    <invocation>
+      <trigger>tap на интерактивный объект</trigger>
+      <optional-trigger>long-press для расширенного списка действий</optional-trigger>
+    </invocation>
+    <position>bottom-overlay</position>
+    <dismiss-actions>tap-outside, swipe-down, back-button</dismiss-actions>
+  </meta>
+
+  <!-- БАЗОВЫЙ КОНТЕЙНЕР -->
+  <layout>
+    <backdrop
+      color="rgba(15,23,42,0.55)"
+      blur="8px"
+      z-index="500"
+      dismiss-on-tap="true"
+    />
+
+    <sheet
+      position="bottom"
+      width="100%"
+      max-width="480px"
+      margin-x="auto"
+      border-radius="24px 24px 0 0"
+      padding="16px 16px 24px 16px"
+      background="var(--color-surface, #FFFFFF)"
+      elevation="0 -8px 32px rgba(15,23,42,0.35)"
+      safe-area-bottom="env(safe-area-inset-bottom)"
+    >
+      <drag-handle
+        width="40px"
+        height="4px"
+        radius="999px"
+        color="rgba(148,163,184,0.6)"
+        margin-bottom="12px"
+      />
+
+      <header
+        display="flex"
+        align="center"
+        justify="space-between"
+        margin-bottom="12px"
+        gap="8px"
+      >
+        <object-info>
+          <icon size="24px" />
+          <title font-size="1rem" weight="600" />
+          <subtitle font-size="0.8rem" color="#6B7280" />
+        </object-info>
+
+        <context-tags>
+          <tag type="category" />
+          <tag type="time-of-day" optional="true" />
+        </context-tags>
+      </header>
+
+      <actions-list
+        type="scrollable"
+        max-height="50vh"
+        gap="8px"
+      />
+    </sheet>
+  </layout>
+
+  <!-- ЭЛЕМЕНТ ДЕЙСТВИЯ -->
+  <action-item-spec>
+    <container
+      height="56px"
+      border-radius="16px"
+      padding="12px 14px"
+      background="rgba(248,250,252,0.95)"
+      hover-background="rgba(241,245,249,1)"
+      disabled-background="rgba(15,23,42,0.06)"
+      display="flex"
+      align="center"
+      gap="10px"
+    >
+      <left-part
+        display="flex"
+        align="center"
+        gap="10px"
+        flex-grow="1"
+      >
+        <icon size="24px" />
+        <label-block>
+          <label font-size="0.95rem" weight="600" color="#0F172A" />
+          <description font-size="0.78rem" color="#6B7280" max-lines="2" />
+        </label-block>
+      </left-part>
+
+      <right-part
+        display="flex"
+        direction="column"
+        align="flex-end"
+        gap="2px"
+      >
+        <meta-row font-size="0.7rem" color="#9CA3AF">
+          <!-- Примеры: "Энергия: -20 • Время: +2ч" -->
+        </meta-row>
+        <badges-row display="flex" gap="4px">
+          <badge type="energy" />
+          <badge type="time" />
+          <badge type="reward" />
+          <badge type="relationship" />
+        </badges-row>
+      </right-part>
+    </container>
+
+    <states>
+      <state name="default">
+        <opacity>1.0</opacity>
+        <cursor>pointer</cursor>
+      </state>
+      <state name="pressed">
+        <transform>scale(0.97)</transform>
+        <background>rgba(226,232,240,1)</background>
+        <haptic>light</haptic>
+      </state>
+      <state name="disabled">
+        <opacity>0.45</opacity>
+        <cursor>not-allowed</cursor>
+        <show>reason-chip</show>
+      </state>
+    </states>
+  </action-item-spec>
+
+  <!-- ЧИПЫ/БЕЙДЖИ МЕТАИНФОРМАЦИИ -->
+  <badges-spec>
+    <badge type="energy">
+      <icon>⚡</icon>
+      <text format="Энергия: -{value}" />
+      <color negative="#F97316" positive="#22C55E" />
+    </badge>
+
+    <badge type="time">
+      <icon>🕒</icon>
+      <text format="+{value}" />
+      <color default="#3B82F6" />
+    </badge>
+
+    <badge type="reward">
+      <icon>💰</icon>
+      <text format="+{money}" />
+      <color default="#22C55E" />
+    </badge>
+
+    <badge type="relationship">
+      <icon>❤️</icon>
+      <text format="{target} +{value}" />
+      <color default="#EC4899" />
+    </badge>
+
+    <badge type="requirement-failed" special="true">
+      <icon>⚠️</icon>
+      <text>Условия не выполнены</text>
+      <color default="#F97316" />
+    </badge>
+  </badges-spec>
+
+  <!-- ЛОГИКА АКТИВНОСТИ/ДИЗАБЛА -->
+  <availability-logic>
+    <rule>
+      <condition>energy &lt; requiredEnergy</condition>
+      <result>action.disabled = true; reason = "Недостаточно энергии"</result>
+    </rule>
+    <rule>
+      <condition>currentTime not-in allowedTimeRange</condition>
+      <result>action.disabled = true; reason = "Недоступно в текущее время"</result>
+    </rule>
+    <rule>
+      <condition>relationship[target] &lt; minRelationship</condition>
+      <result>action.disabled = true; reason = "Нужны лучшие отношения"</result>
+    </rule>
+    <rule>
+      <condition>missingRequiredItem</condition>
+      <result>action.disabled = true; reason = "Нет нужного предмета"</result>
+    </rule>
+  </availability-logic>
+
+  <!-- АНИМАЦИИ ПОЯВЛЕНИЯ/ИСКЛЮЧЕНИЯ -->
+  <animations>
+    <on-open>
+      <backdrop opacity-from="0" opacity-to="1" duration="180ms" easing="ease-out" />
+      <sheet
+        translateY-from="100%"
+        translateY-to="0"
+        duration="260ms"
+        easing="cubic-bezier(0.25, 0.8, 0.25, 1)"
+      />
+      <haptic>Telegram.WebApp.HapticFeedback.impactOccurred('medium')</haptic>
+    </on-open>
+
+    <on-close>
+      <backdrop opacity-from="1" opacity-to="0" duration="160ms" easing="ease-in" />
+      <sheet
+        translateY-from="0"
+        translateY-to="100%"
+        duration="220ms"
+        easing="ease-in"
+      />
+    </on-close>
+  </animations>
+
+  <!-- ИНТЕРАКЦИЯ С ОБЪЕКТАМИ -->
+  <object-context>
+    <input>
+      <field>objectId</field>
+      <field>objectName</field>
+      <field>objectType</field>
+      <field>objectIcon</field>
+      <field>location</field>
+      <field>availableActions[]</field>
+    </input>
+
+    <mapping>
+      <objectName → header.title />
+      <objectType → header.subtitle />
+      <objectIcon → header.icon />
+      <availableActions → actions-list.items />
+    </mapping>
+
+    <!-- Пример: как выглядят actions, которые приходят в меню -->
+    <action-model>
+      <field id="id" />
+      <field id="label" />
+      <field id="description" />
+      <field id="icon" />
+      <field id="energyCost" />
+      <field id="energyGain" />
+      <field id="timeCost" />
+      <field id="moneyDelta" />
+      <field id="happinessDelta" />
+      <field id="relationshipDelta" />
+      <field id="requirements[]" />
+      <field id="isAvailable" />
+      <field id="unavailableReason" />
+    </action-model>
+  </object-context>
+
+  <!-- ПРИМЕРЫ ИСПОЛЬЗОВАНИЯ (ROOM PAGE) -->
+  <examples>
+    <example object="bed">
+      <objectName>Кровать</objectName>
+      <objectType>Отдых</objectType>
+      <actions>
+        <action id="sleep" label="😴 Спать 8 часов" description="Полностью восстановить энергию, но потратить ночь" />
+        <action id="nap" label="😌 Вздремнуть 1 час" description="Немного восстановить силы" />
+      </actions>
+    </example>
+
+    <example object="computer">
+      <objectName>Компьютер</objectName>
+      <objectType>Работа</objectType>
+      <actions>
+        <action id="work" label="💻 Работать" description="Заработать деньги и опыт" />
+        <action id="browse" label="🌐 Интернет" description="Немного развлечься и поднять настроение" />
+      </actions>
+    </example>
+  </examples>
+
+  <!-- СВЯЗЬ С ИГРОВОЙ ЛОГИКОЙ -->
+  <game-integration>
+    <on-action-click>
+      <steps>
+        <step>Проверить доступность (energy, time, requirements)</step>
+        <step>Если недоступно — показать toast с причиной и оставить меню открытым</step>
+        <step>Если доступно — закрыть меню, запустить анимацию действия на сцене</step>
+        <step>Применить эффекты к игровому состоянию (статы, время, деньги, отношения)</step>
+        <step>Показать небольшой toast/feedback о результате</step>
+      </steps>
+    </on-action-click>
+  </game-integration>
+
+  <!-- ТРЕБОВАНИЯ К РЕАЛИЗАЦИИ -->
+  <implementation-requirements>
+    <requirement priority="critical">ActionMenu открывается максимум за 1 тап по объекту</requirement>
+    <requirement priority="critical">Закрывается по тапу вне, свайпу вниз или кнопке "Назад"</requirement>
+    <requirement priority="high">Список действий вертикальный, скроллируемый, но первые 2–3 действия всегда видны без скролла</requirement>
+    <requirement priority="high">Каждое действие занимает не более двух строк описания</requirement>
+    <requirement priority="high">Всё управление реализовано через CSS transforms и opacity (без layout thrash)</requirement>
+    <requirement priority="medium">Поддержка светлой/тёмной темы через CSS-переменные дизайн-системы</requirement>
+    <requirement priority="medium">Haptic feedback на открытие меню и выбор действия</requirement>
+  </implementation-requirements>
+
+  <!-- ЧЕКЛИСТ FRONTEND -->
+  <frontend-checklist>
+    <item>Компонент ActionMenu реализован как портальный overlay (React Portal)</item>
+    <item>Логика открытия/закрытия централизована (store/контекст)</item>
+    <item>Добавлены unit-тесты на отрисовку действий, дизабл, причины недоступности</item>
+    <item>Проверено поведение при длинных текстах и маленьких экранах</item>
+    <item>Проверено, что ActionMenu не конфликтует с системным свайпом закрытия Telegram WebApp</item>
+  </frontend-checklist>
+
+</action-menu-specification>

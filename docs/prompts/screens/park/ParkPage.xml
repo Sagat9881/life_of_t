@@ -1,0 +1,758 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PARK PAGE - DETAILED SPECIFICATION
+  Детальная спецификация экрана парка (локация прогулок и отдыха)
+  
+  Родительский файл: ../SCREENS_SPECIFICATION.xml
+  Связанные промты:
+    - ../../_core/location-generation-specs.xml
+    - ../../animation/characters/tatyana.xml
+    - ../../animation/characters/sam.xml
+    - ../../design/DESIGN_SYSTEM.xml
+  
+  Путь для сохранения: docs/prompts/screens/park/ParkPage.xml
+  Версия: 1.0
+  Дата: 2026-03-01
+-->
+
+<screen name="ParkPage" type="location" location="park">
+
+  <meta>
+    <route>/park</route>
+    <description>Экран парка - локация прогулок с Сэмом, отдыха и социальных встреч</description>
+    <availability>
+      <time>06:00-22:00 (светлое время суток)</time>
+      <weather-dependent>true</weather-dependent>
+      <conditions>Недоступен при дожде/снежной буре</conditions>
+    </availability>
+    <accessibility>Все объекты доступны для взаимодействия через тап</accessibility>
+  </meta>
+
+  <!-- АТМОСФЕРА И НАСТРОЕНИЕ -->
+  <atmosphere>
+    <mood>Спокойная, свежая, природная, романтичная</mood>
+    <lighting>Естественное освещение - солнце, облака, тени деревьев</lighting>
+    <color-scheme>
+      <dominant>#A8E6CF (светло-зелёный)</dominant>
+      <accent>#81C784 (трава)</accent>
+      <accent>#64B5F6 (небо)</accent>
+      <accent>#FFD54F (солнце)</accent>
+      <neutral>#F5F5DC (песчаные дорожки)</neutral>
+    </color-scheme>
+    <sounds optional="true">
+      <ambient>Пение птиц, шелест листьев, шум ветра</ambient>
+      <interactions>Лай Сэма, плеск воды, шаги по гравию</interactions>
+    </sounds>
+  </atmosphere>
+
+  <!-- СТРУКТУРА СЛОЁВ -->
+  <layout-layers>
+    <layer name="sky-background" z-index="0">
+      <type>Animated sky with clouds</type>
+      <gradient>linear-gradient(180deg, #87CEEB 0%, #E0F7FA 100%)</gradient>
+      <weather-variants enabled="true">
+        <sunny>linear-gradient(180deg, #87CEEB 0%, #E0F7FA 100%)</sunny>
+        <cloudy>linear-gradient(180deg, #B0BEC5 0%, #CFD8DC 100%)</cloudy>
+        <evening>linear-gradient(180deg, #FF6F61 0%, #FFA07A 100%)</evening>
+      </weather-variants>
+      <clouds parallax="true" speed="slow" />
+    </layer>
+
+    <layer name="distant-trees" z-index="1">
+      <type>Background trees and city skyline</type>
+      <parallax enabled="true" depth="0.3" />
+      <blur amount="3px" reason="Depth of field" />
+    </layer>
+
+    <layer name="park-ground" z-index="2">
+      <type>Isometric park ground with paths</type>
+      <perspective>2:1 isometric (45°)</perspective>
+      <content>Трава, дорожки, клумбы, тени</content>
+    </layer>
+
+    <layer name="interactive-objects" z-index="3">
+      <type>Clickable park objects with animations</type>
+      <render-order>Back to front by Y position</render-order>
+    </layer>
+
+    <layer name="character" z-index="4">
+      <type>Tatyana sprite in casual outfit</type>
+      <position>Walking on paths or sitting on bench</position>
+      <shadow enabled="true" opacity="0.3" />
+    </layer>
+
+    <layer name="sam-dog" z-index="5">
+      <type>Sam sprite with playful animations</type>
+      <behavior>Follows Tatyana, explores, plays</behavior>
+      <leash visible="true" when="walking" />
+    </layer>
+
+    <layer name="npcs" z-index="5">
+      <type>Park visitors (joggers, families, couples)</type>
+      <behavior>Wander on paths, sit on benches</behavior>
+    </layer>
+
+    <layer name="weather-effects" z-index="8">
+      <type>Rain, snow, leaves falling</type>
+      <particles enabled="true" />
+    </layer>
+
+    <layer name="hud" z-index="10">
+      <type>UI overlay - stats, time, weather</type>
+      <sticky>true</sticky>
+      <safe-area>true</safe-area>
+    </layer>
+
+    <layer name="action-menu" z-index="100">
+      <type>Popup menu for object interactions</type>
+      <visibility>Dynamic on tap</visibility>
+    </layer>
+
+    <layer name="modals" z-index="600">
+      <type>Modal dialogs and confirmations</type>
+    </layer>
+  </layout-layers>
+
+  <!-- HUD (расширенный для парка) -->
+  <hud ref="../shared/HUD.xml">
+    <additional-widgets>
+      <weather-widget position="top-right">
+        <icon dynamic="true" values="sun, cloud, rain, snow" />
+        <temperature display="12°C" />
+        <tooltip>Погода влияет на доступность действий</tooltip>
+      </weather-widget>
+    </additional-widgets>
+  </hud>
+
+  <!-- ИЗОМЕТРИЧЕСКИЙ ПАРК -->
+  <isometric-park perspective="2:1" angle="45deg" viewport="1920x1080">
+    
+    <!-- ПЕРСОНАЖ ТАТЬЯНА -->
+    <character name="tatyana" ref="../../animation/characters/tatyana.xml">
+      <position x="center" y="center" z-index="4" />
+      <outfit>Casual outdoor (спортивная/удобная одежда)</outfit>
+      <sprite size="64x64" />
+      <animations>
+        <idle-park default="true" fps="6" loop="true" description="Стоит, смотрит вокруг" />
+        <walk fps="10" loop="true" directions="8" description="Гуляет по парку" />
+        <jog fps="12" loop="true" description="Бежит трусцой" />
+        <sit fps="4" loop="true" description="Сидит на скамейке" />
+        <play-with-sam fps="10" loop="false" description="Играет с Сэмом" />
+        <stretch fps="8" loop="false" description="Разминка" />
+      </animations>
+      <shadow enabled="true" opacity="0.3" offset="0, 8px" blur="4px" />
+      <movement speed="2" type="click-to-move" pathfinding="true" restricted-to="paths" />
+    </character>
+
+    <!-- СЭМ (СОБАКА) -->
+    <npc id="sam" ref="../../animation/characters/sam.xml">
+      <type>Цвергпинчер (компаньон)</type>
+      <position follow="tatyana" offset-x="30" offset-y="20" />
+      <sprite size="48x48" />
+      <animations>
+        <walk fps="12" loop="true" />
+        <run fps="14" loop="true" />
+        <sniff fps="6" loop="true" description="Нюхает траву" />
+        <play fps="12" loop="true" description="Играет с мячом" />
+        <bark fps="8" loop="false" />
+        <happy-tail fps="10" loop="true" description="Виляет хвостом" />
+      </animations>
+      <behavior type="companion">
+        <follow target="tatyana" distance="20-50px" />
+        <explore chance="20%" when="tatyana-idle" radius="100px" />
+        <return-when distance="150px" />
+      </behavior>
+      <leash visible="true" color="#8B4513" when="walking" />
+      <interaction tap="true" always-available="true">
+        <action id="pet-sam" label="🐕 Погладить Сэма">
+          <effects>
+            <happiness change="+12" />
+            <relationship target="sam" change="+5" />
+            <stress change="-8" />
+          </effects>
+          <animation dog="happy-tail" character="play-with-sam" duration="5s" />
+        </action>
+      </interaction>
+    </npc>
+
+    <!-- ИНТЕРАКТИВНЫЕ ОБЪЕКТЫ -->
+    <interactive-objects>
+      
+      <!-- СКАМЕЙКА -->
+      <object id="bench" type="rest" category="relax">
+        <position x="400" y="500" z-index="3" />
+        <sprite size="128x64" />
+        <description>Деревянная скамейка с видом на пруд</description>
+        <states>
+          <state name="empty" default="true" />
+          <state name="occupied" active-when="tatyana-sitting" />
+        </states>
+        <highlight type="glow" color="var(--color-secondary)" opacity="0.5" pulse="1.5s" />
+        
+        <actions>
+          <action id="sit-relax" label="🪑 Посидеть и отдохнуть" icon="armchair">
+            <requirements>
+              <energy min="10" />
+            </requirements>
+            <effects>
+              <energy restore="+20" />
+              <time advance="15m" />
+              <happiness change="+10" />
+              <stress change="-15" />
+            </effects>
+            <animation character="sit" object="occupied" duration="15m" />
+            <narration>Приятно посидеть и насладиться тишиной парка...</narration>
+            <haptic intensity="light" />
+          </action>
+
+          <action id="sit-read" label="📖 Почитать книгу" icon="book-open">
+            <requirements>
+              <energy min="15" />
+              <item name="book" in-inventory="true" />
+            </requirements>
+            <effects>
+              <energy cost="5" />
+              <time advance="30m" />
+              <happiness change="+15" />
+              <stress change="-20" />
+              <skill name="intellect" xp="+10" />
+            </effects>
+            <animation character="sit" prop="book" duration="30m" />
+          </action>
+
+          <action id="romantic-moment" label="💑 Романтичный момент с мужем" icon="heart">
+            <requirements>
+              <energy min="10" />
+              <relationship target="husband" min="50" />
+              <time between="18:00-21:00" message="Вечернее время" />
+              <trigger type="random-encounter" or="scheduled-date" />
+            </requirements>
+            <effects>
+              <energy cost="10" />
+              <time advance="1h" />
+              <happiness change="+25" />
+              <relationship target="husband" change="+15" />
+              <stress change="-20" />
+            </effects>
+            <animation character="sit" npc="husband" duration="1h" special="romantic" />
+            <dialog type="romantic-conversation" />
+            <haptic intensity="medium" />
+          </action>
+        </actions>
+      </object>
+
+      <!-- ПРУД -->
+      <object id="pond" type="scenery" category="nature">
+        <position x="960" y="700" z-index="2" />
+        <sprite size="256x128" />
+        <description>Небольшой пруд с утками и кувшинками</description>
+        <states>
+          <state name="calm" default="true" animation="water-ripples" />
+          <state name="rainy" animation="rain-splashes" />
+        </states>
+        <ambient-animation type="water-shimmer" fps="4" />
+        <npcs-present>
+          <npc type="ducks" count="3-5" behavior="swim, dive, quack" />
+        </npcs-present>
+        
+        <actions>
+          <action id="watch-pond" label="🦆 Наблюдать за утками" icon="eye">
+            <requirements>
+              <energy min="5" />
+            </requirements>
+            <effects>
+              <energy cost="5" />
+              <time advance="10m" />
+              <happiness change="+12" />
+              <stress change="-12" />
+              <calm change="+10" />
+            </effects>
+            <animation character="idle-park" camera-focus="pond" duration="10m" />
+            <narration>Утки плавают по пруду, создавая круги на воде. Умиротворение...</narration>
+          </action>
+
+          <action id="feed-ducks" label="🍞 Покормить уток" icon="bread-slice">
+            <requirements>
+              <energy min="10" />
+              <item name="bread" consumable="true" />
+            </requirements>
+            <effects>
+              <energy cost="10" />
+              <time advance="15m" />
+              <happiness change="+18" />
+              <relationship target="nature" change="+5" />
+            </effects>
+            <animation character="throw-bread" ducks="approach" duration="15m" />
+            <haptic intensity="light" />
+          </action>
+        </actions>
+      </object>
+
+      <!-- ДЕРЕВО -->
+      <object id="big-tree" type="nature" category="shade">
+        <position x="200" y="300" z-index="3" />
+        <sprite size="192x256" />
+        <description>Большой раскидистый дуб с качелью</description>
+        <states>
+          <state name="spring" leaves="light-green" flowers="true" />
+          <state name="summer" leaves="dark-green" shade="dense" />
+          <state name="autumn" leaves="orange-red" falling="true" />
+          <state name="winter" leaves="none" snow="true" />
+        </states>
+        <ambient-animation type="leaves-sway" fps="6" wind-responsive="true" />
+        <shadow dynamic="true" based-on="sun-position" />
+        
+        <actions>
+          <action id="rest-in-shade" label="🌳 Отдохнуть в тени" icon="cloud">
+            <requirements>
+              <energy min="15" />
+              <weather type="sunny" message="Нужна солнечная погода" />
+            </requirements>
+            <effects>
+              <energy restore="+25" />
+              <time advance="20m" />
+              <happiness change="+12" />
+              <stress change="-10" />
+            </effects>
+            <animation character="sit" position="under-tree" duration="20m" />
+          </action>
+
+          <action id="swing" label="🎠 Покачаться на качели" icon="smile">
+            <requirements>
+              <energy min="10" />
+            </requirements>
+            <effects>
+              <energy cost="10" />
+              <time advance="10m" />
+              <happiness change="+20" />
+              <inner-child change="+15" />
+              <stress change="-12" />
+            </effects>
+            <animation character="swing" duration="10m" />
+            <haptic intensity="medium" pattern="rhythmic" />
+          </action>
+        </actions>
+      </object>
+
+      <!-- БЕГОВАЯ ДОРОЖКА -->
+      <object id="jogging-path" type="exercise" category="sport">
+        <position x="path-loop" z-index="2" />
+        <sprite type="path-overlay" />
+        <description>Утоптанная беговая дорожка по периметру парка</description>
+        <distance>2.5 km</distance>
+        
+        <actions>
+          <action id="jog" label="🏃‍♀️ Пробежка (30 мин)" icon="activity">
+            <requirements>
+              <energy min="30" />
+              <outfit type="sport" or-changeable="true" />
+            </requirements>
+            <effects>
+              <energy cost="30" />
+              <time advance="30m" />
+              <health change="+15" />
+              <fitness change="+10" />
+              <stress change="-15" />
+              <calories-burned value="200" />
+            </effects>
+            <animation character="jog" sam="run" duration="30m" path="loop" />
+            <haptic intensity="light" interval="every-step" />
+          </action>
+
+          <action id="walk" label="🚶‍♀️ Прогулка с Сэмом" icon="footprints">
+            <requirements>
+              <energy min="15" />
+              <sam-present required="true" />
+            </requirements>
+            <effects>
+              <energy cost="15" />
+              <time advance="45m" />
+              <happiness change="+15" />
+              <relationship target="sam" change="+10" />
+              <stress change="-12" />
+              <steps value="3000" />
+            </effects>
+            <animation character="walk" sam="walk" duration="45m" path="casual-loop" />
+            <random-events>
+              <event type="meet-friend" chance="10%" />
+              <event type="find-treasure" chance="5%" reward="money +50" />
+              <event type="sam-finds-stick" chance="15%" effect="happiness +5" />
+            </random-events>
+          </action>
+
+          <action id="morning-run" label="🌅 Утренняя пробежка (1ч)" icon="sunrise">
+            <requirements>
+              <energy min="40" />
+              <time between="06:00-08:00" message="Только ранним утром" />
+            </requirements>
+            <effects>
+              <energy cost="40" restore="+20" net="-20" />
+              <time advance="1h" />
+              <health change="+25" />
+              <fitness change="+20" />
+              <buff name="morning-energy" duration="4h" effects="energy +15%" />
+              <achievement unlock="early-bird" />
+            </effects>
+            <animation character="jog" duration="1h" />
+          </action>
+        </actions>
+      </object>
+
+      <!-- КИОСК С МОРОЖЕНЫМ -->
+      <object id="ice-cream-stand" type="shop" category="food">
+        <position x="1400" y="400" z-index="3" />
+        <sprite size="96x128" />
+        <description>Яркий киоск с мороженым и напитками</description>
+        <states>
+          <state name="open" default="true" when="10:00-20:00" />
+          <state name="closed" when="20:00-10:00" sign="Закрыто" />
+        </states>
+        <vendor present="true" sprite="vendor-npc" />
+        
+        <actions>
+          <action id="buy-ice-cream" label="🍦 Купить мороженое" icon="ice-cream">
+            <requirements>
+              <energy min="5" />
+              <money min="50" />
+              <time between="10:00-20:00" />
+            </requirements>
+            <effects>
+              <energy cost="5" />
+              <money cost="50" />
+              <time advance="5m" />
+              <happiness change="+20" />
+              <health change="-5" reason="Сахар" />
+            </effects>
+            <animation character="eat-ice-cream" duration="5m" />
+            <dialog type="vendor-chat" />
+          </action>
+
+          <action id="buy-water" label="💧 Купить воду" icon="droplet">
+            <requirements>
+              <energy min="5" />
+              <money min="30" />
+            </requirements>
+            <effects>
+              <energy cost="5" restore="+10" />
+              <money cost="30" />
+              <time advance="2m" />
+              <health change="+5" />
+            </effects>
+            <animation character="drink" duration="2m" />
+          </action>
+        </actions>
+      </object>
+
+      <!-- ДЕТСКАЯ ПЛОЩАДКА -->
+      <object id="playground" type="scenery" category="social">
+        <position x="1200" y="600" z-index="3" />
+        <sprite size="192x128" />
+        <description>Детская площадка с качелями и горкой</description>
+        <npcs-present>
+          <npc type="children" count="3-5" behavior="play, run, laugh" />
+          <npc type="parents" count="2-3" behavior="watch, chat" />
+        </npcs-present>
+        <ambient-sounds>children-laughter, swing-creaking</ambient-sounds>
+        
+        <actions>
+          <action id="watch-children" label="👶 Наблюдать за детьми" icon="baby">
+            <requirements>
+              <energy min="5" />
+            </requirements>
+            <effects>
+              <energy cost="5" />
+              <time advance="10m" />
+              <happiness change="+10" />
+              <maternal-instinct change="+5" />
+            </effects>
+            <animation character="idle-park" duration="10m" />
+            <narration>Дети беззаботно играют... Когда-то и ты была такой.</narration>
+            <trigger-thought topic="family-planning" chance="30%" />
+          </action>
+
+          <action id="chat-with-parents" label="💬 Поболтать с родителями" icon="message-circle">
+            <requirements>
+              <energy min="10" />
+              <relationship target="strangers" min="20" />
+            </requirements>
+            <effects>
+              <energy cost="10" />
+              <time advance="20m" />
+              <happiness change="+12" />
+              <social-skill xp="+5" />
+            </effects>
+            <dialog type="casual-chat" topic="parenting" />
+          </action>
+        </actions>
+      </object>
+
+      <!-- ФОНТАН -->
+      <object id="fountain" type="scenery" category="landmark">
+        <position x="960" y="400" z-index="2" />
+        <sprite size="128x128" />
+        <description>Красивый фонтан в центре парка</description>
+        <states>
+          <state name="working" animation="water-spray" sound="water-splash" />
+          <state name="frozen" when="winter" animation="ice-glitter" />
+          <state name="off" when="maintenance" />
+        </states>
+        <ambient-animation type="water-spray" fps="8" />
+        <lighting night="true" color="#64B5F6" />
+        
+        <actions>
+          <action id="make-wish" label="💫 Загадать желание (бросить монетку)" icon="coins">
+            <requirements>
+              <energy min="5" />
+              <money min="10" />
+            </requirements>
+            <effects>
+              <money cost="10" />
+              <time advance="2m" />
+              <happiness change="+15" />
+              <hope change="+10" />
+              <luck-buff duration="24h" effect="random-events +10% positive" />
+            </effects>
+            <animation character="throw-coin" fountain="splash" duration="2m" />
+            <narration>Ты бросаешь монетку и загадываешь желание...</narration>
+            <haptic intensity="medium" />
+          </action>
+
+          <action id="photo-fountain" label="📸 Сфотографироваться" icon="camera">
+            <requirements>
+              <energy min="5" />
+              <phone in-inventory="true" />
+            </requirements>
+            <effects>
+              <energy cost="5" />
+              <time advance="5m" />
+              <happiness change="+12" />
+              <memory-created type="photo" location="fountain" />
+            </effects>
+            <animation character="selfie" duration="5m" />
+          </action>
+        </actions>
+      </object>
+
+    </interactive-objects>
+
+    <!-- СЛУЧАЙНЫЕ NPC (прохожие) -->
+    <random-npcs>
+      <npc id="jogger" type="passerby">
+        <spawn-chance>30%</spawn-chance>
+        <position dynamic="true" path="jogging-path" />
+        <sprite size="48x48" />
+        <behavior type="jogging" speed="3" />
+        <interaction chance="5%" type="greeting" effect="happiness +3" />
+      </npc>
+
+      <npc id="couple" type="passerby">
+        <spawn-chance>20%</spawn-chance>
+        <position dynamic="true" path="romantic-spots" />
+        <sprite size="96x48" count="2" />
+        <behavior type="romantic-walk" speed="1" />
+        <interaction chance="10%" type="small-talk" />
+      </npc>
+
+      <npc id="elderly" type="passerby">
+        <spawn-chance>15%</spawn-chance>
+        <position static="true" object="bench" />
+        <sprite size="48x48" />
+        <behavior type="sitting" animation="feed-birds" />
+        <interaction chance="30%" type="wisdom-talk" effect="inspiration +10" />
+      </npc>
+
+      <npc id="dog-walker" type="passerby">
+        <spawn-chance>25%</spawn-chance>
+        <position dynamic="true" />
+        <sprite size="48x48" />
+        <pet type="dog" size="32x32" />
+        <behavior type="walking-dog" />
+        <interaction chance="40%" when="sam-present" type="dogs-play" effect="sam-happiness +10" />
+      </npc>
+    </random-npcs>
+
+  </isometric-park>
+
+  <!-- ПОГОДА И ВРЕМЯ СУТОК -->
+  <atmosphere-effects>
+    <weather-system>
+      <weather type="sunny" chance="60%">
+        <lighting bright="true" warm="true" intensity="1.0" />
+        <shadows sharp="true" dynamic="true" />
+        <effects>
+          <particle type="sun-rays" visible="true" />
+          <heat-shimmer enabled="true" when="summer" />
+        </effects>
+        <mood>Радостная, энергичная</mood>
+      </weather>
+
+      <weather type="cloudy" chance="25%">
+        <lighting diffused="true" neutral="true" intensity="0.7" />
+        <shadows soft="true" />
+        <effects>
+          <clouds density="high" movement="slow" />
+        </effects>
+        <mood>Спокойная, задумчивая</mood>
+      </weather>
+
+      <weather type="rainy" chance="10%">
+        <lighting dark="true" cool="true" intensity="0.5" />
+        <shadows minimal="true" />
+        <effects>
+          <particle type="rain" density="medium" />
+          <puddles visible="true" reflective="true" />
+        </effects>
+        <mood>Меланхоличная</mood>
+        <restrictions>
+          <action id="jog" disabled="true" reason="Слишком скользко" />
+          <action id="sit-relax" disabled="true" reason="Скамейка мокрая" />
+        </restrictions>
+      </weather>
+
+      <weather type="snowy" chance="5%" season="winter">
+        <lighting bright="true" cool="true" intensity="0.9" />
+        <effects>
+          <particle type="snowfall" density="medium" />
+          <snow-cover ground="true" trees="true" />
+        </effects>
+        <mood>Волшебная, зимняя сказка</mood>
+      </weather>
+    </weather-system>
+
+    <time-of-day-lighting>
+      <morning time="06:00-09:59">
+        <sun-position angle="30deg" color="#FFE5B4" />
+        <ambient-light color="#FFF9E9" intensity="0.7" />
+        <mood>Свежесть, начало дня</mood>
+      </morning>
+
+      <day time="10:00-16:59">
+        <sun-position angle="90deg" color="#FFFACD" />
+        <ambient-light color="#FFFFFF" intensity="1.0" />
+        <mood>Активность, яркость</mood>
+      </day>
+
+      <evening time="17:00-19:59">
+        <sun-position angle="30deg" color="#FF7F50" />
+        <ambient-light color="#FFE4B5" intensity="0.6" />
+        <mood>Романтика, закат</mood>
+      </evening>
+
+      <night time="20:00-21:59">
+        <sun-position angle="0deg" />
+        <moon visible="true" phase="dynamic" />
+        <ambient-light color="#4A5568" intensity="0.3" />
+        <lamps enabled="true" color="#FFD700" />
+        <mood>Спокойствие, интимность</mood>
+      </night>
+    </time-of-day-lighting>
+
+    <seasonal-changes>
+      <spring months="03-05">
+        <trees state="blooming" flowers="true" />
+        <grass color="#90EE90" height="medium" />
+        <birds activity="high" sound="chirping" />
+      </spring>
+
+      <summer months="06-08">
+        <trees state="full-leaves" shade="dense" />
+        <grass color="#228B22" height="high" />
+        <heat-effect shimmer="true" />
+      </summer>
+
+      <autumn months="09-11">
+        <trees state="colorful-leaves" falling="true" />
+        <grass color="#DAA520" height="medium" />
+        <particle type="falling-leaves" density="medium" />
+      </autumn>
+
+      <winter months="12-02">
+        <trees state="bare" snow="true" />
+        <grass hidden="true" snow-cover="true" />
+        <ice visible="true" on="pond" />
+      </winter>
+    </seasonal-changes>
+  </atmosphere-effects>
+
+  <!-- ОСОБЕННОСТИ ЛОКАЦИИ -->
+  <location-features>
+    <feature name="stress-relief">
+      <description>Парк - лучшее место для снижения стресса</description>
+      <effect stat="stress" multiplier="x1.5" for="all-stress-reduction" />
+      <effect stat="happiness" bonus="+20%" while="in-park" />
+    </feature>
+
+    <feature name="relationship-boost">
+      <description>Прогулки с Сэмом укрепляют связь</description>
+      <effect relationship="sam" multiplier="x2.0" for="park-activities" />
+      <unlock-at relationship-level="80" feature="sam-tricks" />
+    </feature>
+
+    <feature name="social-encounters">
+      <description>Можно встретить друзей или новых людей</description>
+      <random-events>
+        <event type="meet-friend" chance="15%" effect="happiness +10" />
+        <event type="meet-stranger" chance="10%" unlock="new-friend-quest" />
+        <event type="romantic-encounter" chance="5%" when="husband-present" />
+      </random-events>
+    </feature>
+
+    <feature name="fitness-progress">
+      <description>Регулярные пробежки улучшают физическую форму</description>
+      <milestone action="jog" count="10" reward="fitness +50" />
+      <milestone action="jog" count="30" reward="achievement: marathon-ready" />
+    </feature>
+
+    <feature name="time-limit">
+      <description>Парк закрывается поздно вечером</description>
+      <warning time="21:30" message="Парк скоро закроется" />
+      <force-exit time="22:00" />
+    </feature>
+  </location-features>
+
+  <!-- ТРЕБОВАНИЯ К РЕАЛИЗАЦИИ -->
+  <implementation-requirements>
+    <requirement priority="critical">Парк доступен 06:00-22:00, вне этого времени кнопка перехода неактивна</requirement>
+    <requirement priority="critical">Погода влияет на доступность действий и визуал</requirement>
+    <requirement priority="critical">Сэм всегда присутствует в парке (компаньон)</requirement>
+    <requirement priority="high">Все интерактивные объекты видны одновременно</requirement>
+    <requirement priority="high">Плавная анимация облаков и листьев (parallax)</requirement>
+    <requirement priority="high">Haptic feedback на каждый тап</requirement>
+    <requirement priority="medium">Случайные NPC появляются динамически</requirement>
+    <requirement priority="medium">Освещение меняется плавно при смене времени суток</requirement>
+    <requirement priority="medium">Сезонные изменения применяются автоматически</requirement>
+    <requirement priority="low">Звуки природы (опционально): птицы, ветер, вода</requirement>
+  </implementation-requirements>
+
+  <!-- ИНТЕГРАЦИЯ С ИГРОВОЙ МЕХАНИКОЙ -->
+  <game-mechanics-integration>
+    <fitness-system>
+      <stat name="fitness" max="100" affects="health, energy-max, appearance" />
+      <milestone level="30" unlock="advanced-jogging" />
+      <milestone level="60" unlock="marathon-mode" />
+      <milestone level="90" unlock="athlete-ending" />
+    </fitness-system>
+
+    <relationship-system>
+      <relationship target="sam" max="100">
+        <unlock-at level="50" feature="sam-fetch" />
+        <unlock-at level="80" feature="sam-tricks" />
+        <unlock-at level="100" feature="sam-best-friend-ending" />
+      </relationship>
+      <relationship target="nature" max="100">
+        <unlock-at level="50" feature="bird-watching" />
+        <unlock-at level="100" feature="nature-lover-ending" />
+      </relationship>
+    </relationship-system>
+
+    <achievements>
+      <achievement id="first-walk" trigger="complete-first-park-visit" />
+      <achievement id="early-bird" trigger="morning-run-before-7am" />
+      <achievement id="park-regular" trigger="visit-park-30-days" />
+      <achievement id="fitness-guru" trigger="fitness-stat-max" />
+      <achievement id="nature-lover" trigger="all-park-activities-completed" />
+      <achievement id="dog-whisperer" trigger="sam-relationship-max" />
+    </achievements>
+  </game-mechanics-integration>
+
+</screen>

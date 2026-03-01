@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  EVENT DIALOG - STORY & CHOICE SYSTEM
+  Спецификация диалоговых/сюжетных окон с выбором (в стиле визуальной новеллы).
+
+  Родительские файлы:
+    - ../SCREENS_SPECIFICATION.xml
+    - ../../backend/SWAGGER.md (структура событий)
+    - ../../design/DESIGN_SYSTEM.xml
+    - ../../characters/*/visual-specs.xml
+
+  Путь для сохранения: docs/prompts/screens/shared/EventDialog.xml
+  Версия: 1.0
+  Дата: 2026-03-01
+-->
+
+<event-dialog-specification name="EventDialog" version="1.0">
+
+  <meta>
+    <description>
+      Универсальный диалоговый экран для сюжетных событий, разговоров и выборов.
+      Формат: портрет(ы) персонажей, текст, 2–4 варианта выбора, эффекты на статы и отношения.
+    </description>
+    <usage>
+      <case>Сюжетные события (день, крупные моменты)</case>
+      <case>Реакции на действия (конфликты, милые сцены)</case>
+      <case>Ключевые развилки для концовок</case>
+    </usage>
+    <display-mode>modal-overlay, блокирует фон до выбора</display-mode>
+  </meta>
+
+  <!-- БАЗОВЫЙ ЛЕЙАУТ ДИАЛОГА -->
+  <layout>
+    <backdrop
+      color="rgba(15,23,42,0.75)"
+      blur="12px"
+      dismiss-on-tap="false"
+      z-index="700"
+    />
+
+    <dialog
+      position="bottom"
+      width="100%"
+      max-width="960px"
+      margin-x="auto"
+      border-radius-mobile="24px 24px 0 0"
+      border-radius-desktop="24px"
+      background="rgba(15,23,42,0.96)"
+      padding="16px 16px 20px 16px"
+      shadow="0 -16px 60px rgba(0,0,0,0.6)"
+      safe-area-bottom="env(safe-area-inset-bottom)"
+    >
+      <top-row
+        display="flex"
+        align="flex-start"
+        gap="12px"
+        margin-bottom="10px"
+      >
+        <portrait-area>
+          <character-portrait
+            size="72px"
+            shape="rounded"
+            border="2px solid rgba(248,250,252,0.35)"
+            image-ref="characters/*/visual-specs.xml"
+          />
+        </portrait-area>
+
+        <text-area
+          display="flex"
+          direction="column"
+          gap="4px"
+        >
+          <speaker-name font-size="0.85rem" weight="600" color="#E5E7EB" />
+          <subtitle font-size="0.75rem" color="#9CA3AF" optional="true" />
+          <dialog-text
+            font-size="0.9rem"
+            line-height="1.4"
+            color="#F9FAFB"
+            max-lines-mobile="5"
+          />
+        </text-area>
+      </top-row>
+
+      <choices-list
+        type="column"
+        gap="6px"
+        margin-top="8px"
+      />
+    </dialog>
+  </layout>
+
+  <!-- ЭЛЕМЕНТ ВЫБОРА -->
+  <choice-spec>
+    <choice-button
+      height="48px"
+      border-radius="999px"
+      padding="10px 14px"
+      background="rgba(31,41,55,1)"
+      border="1px solid rgba(55,65,81,1)"
+      display="flex"
+      align="center"
+      justify="space-between"
+      gap="8px"
+    >
+      <left display="flex" align="center" gap="8px">
+        <label font-size="0.85rem" weight="500" color="#F9FAFB" />
+      </left>
+
+      <right display="flex" align="center" gap="6px">
+        <!-- Короткие иконки-намёки: статы/отношения -->
+        <effect-icon optional="true" />
+      </right>
+    </choice-button>
+
+    <states>
+      <state name="default">
+        <opacity>1.0</opacity>
+      </state>
+      <state name="hover">
+        <background>rgba(55,65,81,1)</background>
+      </state>
+      <state name="pressed">
+        <background>rgba(75,85,99,1)</background>
+        <transform>scale(0.98)</transform>
+        <haptic>light</haptic>
+      </state>
+      <state name="disabled">
+        <opacity>0.45</opacity>
+        <cursor>not-allowed</cursor>
+      </state>
+    </states>
+  </choice-spec>
+
+  <!-- ФОРМАТ СОБЫТИЯ -->
+  <event-model>
+    <field id="eventId" />
+    <field id="type">story/conflict/romantic/system</field>
+    <field id="speakerId" />
+    <field id="backgroundLocation">room/office/park/etc</field>
+    <field id="text" />
+    <field id="choices[]">
+      <field id="id" />
+      <field id="label" />
+      <field id="effects">
+        <stat id="energy" />
+        <stat id="happiness" />
+        <stat id="health" />
+        <stat id="stress" />
+        <relationship target="husband/father/sam/garfield/friend" />
+        <flag id="storyFlag" />
+      </field>
+      <field id="nextEventId" optional="true" />
+      <field id="isLocked" />
+      <field id="lockedReason" />
+    </field>
+  </event-model>
+
+  <!-- ПРИМЕРЫ СОБЫТИЙ -->
+
+  <examples>
+    <!-- РОМАНТИЧЕСКАЯ СЦЕНА С МУЖЕМ -->
+    <event id="evening_home_with_husband" type="romantic">
+      <speakerId>husband</speakerId>
+      <backgroundLocation>room</backgroundLocation>
+      <text>
+        Сегодня был сложный день, но муж неожиданно предлагает:
+        "Давай выключим телефоны и просто проведём вечер вместе?"
+      </text>
+
+      <choices>
+        <choice id="agree_evening">
+          <label>Да, давай устроим уютный вечер</label>
+          <effects>
+            <happiness>+20</happiness>
+            <energy>-10</energy>
+            <relationship target="husband">+15</relationship>
+          </effects>
+          <nextEventId>evening_candle_scene</nextEventId>
+        </choice>
+
+        <choice id="too_tired">
+          <label>Я слишком устала, может в другой раз?</label>
+          <effects>
+            <happiness>-5</happiness>
+            <relationship target="husband">-10</relationship>
+            <stress>-5</stress>
+          </effects>
+        </choice>
+      </choices>
+    </event>
+
+    <!-- ЗВОНОК ОТ ОТЦА -->
+    <event id="father_calls" type="family">
+      <speakerId>father</speakerId>
+      <backgroundLocation>room</backgroundLocation>
+      <text>
+        Папа звонит и спрашивает, как дела, но ты чувствуешь, что устала.
+      </text>
+      <choices>
+        <choice id="talk_now">
+          <label>Поговорить сейчас</label>
+          <effects>
+            <energy>-10</energy>
+            <relationship target="father">+10</relationship>
+          </effects>
+        </choice>
+
+        <choice id="call_back_later">
+          <label>Попросить перезвонить завтра</label>
+          <effects>
+            <relationship target="father">-2</relationship>
+          </effects>
+        </choice>
+      </choices>
+    </event>
+  </examples>
+
+  <!-- АНТАГОНИСТИЧЕСКИЕ / КРИТИЧЕСКИЕ СОБЫТИЯ -->
+  <critical-events>
+    <rule>
+      <when>health &lt;= 10</when>
+      <eventId>health_warning_event</eventId>
+    </rule>
+    <rule>
+      <when>relationship[husband] &lt; 20</when>
+      <eventId>husband_distance_event</eventId>
+    </rule>
+  </critical-events>
+
+  <!-- DATA BINDING -->
+  <data-binding>
+    <input>
+      <field>eventId</field>
+    </input>
+
+    <source name="eventState">
+      <field>currentEvent</field>
+      <field>choices</field>
+    </source>
+
+    <source name="charactersMeta">
+      <field>id</field>
+      <field>name</field>
+      <field>role</field>
+      <field>portraitRef</field>
+    </source>
+
+    <mapping>
+      <eventState.currentEvent.text → dialog-text />
+      <eventState.currentEvent.speakerId → speaker-name, portrait image-ref />
+      <eventState.choices → choices-list items />
+    </mapping>
+  </data-binding>
+
+  <!-- АНИМАЦИИ -->
+  <animations>
+    <on-open>
+      <backdrop opacity-from="0" opacity-to="1" duration="180ms" />
+      <dialog
+        translateY-from="20px"
+        translateY-to="0"
+        opacity-from="0"
+        opacity-to="1"
+        duration="220ms"
+        easing="cubic-bezier(0.25, 0.8, 0.25, 1)"
+      />
+      <haptic>Telegram.WebApp.HapticFeedback.impactOccurred('medium')</haptic>
+    </on-open>
+
+    <on-choice-select>
+      <choice
+        transform-from="1.0"
+        transform-to="0.97"
+        duration="120ms"
+      />
+    </on-choice-select>
+
+    <on-close>
+      <dialog
+        opacity-from="1"
+        opacity-to="0"
+        duration="180ms"
+      />
+    </on-close>
+  </animations>
+
+  <!-- ИНТЕРАКЦИИ -->
+  <interactions>
+    <on-choice-tap>
+      <behavior>
+        Проверить, не заблокирован ли выбор, применить эффекты к gameState,
+        загрузить nextEventId (если есть) или закрыть диалог.
+      </behavior>
+      <haptic>selectionChanged</haptic>
+    </on-choice-tap>
+
+    <on-locked-choice-tap>
+      <behavior>Показать tooltip с причиной блокировки</behavior>
+      <haptic>warning</haptic>
+    </on-locked-choice-tap>
+  </interactions>
+
+  <!-- ТРЕБОВАНИЯ К РЕАЛИЗАЦИИ -->
+  <implementation-requirements>
+    <requirement priority="critical">Пока открыт EventDialog, игрок не может взаимодействовать с локацией.</requirement>
+    <requirement priority="critical">Текст должен быть легко читаемым на мобильных (контраст, размер, отступы).</requirement>
+    <requirement priority="high">Диалоги должны корректно работать с локализацией (избегать жёсткой верстки по длине строк).</requirement>
+    <requirement priority="medium">Поддержка режима "без анимаций" при prefers-reduced-motion.</requirement>
+  </implementation-requirements>
+
+</event-dialog-specification>

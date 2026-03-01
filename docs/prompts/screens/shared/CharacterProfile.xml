@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  CHARACTER PROFILE - DETAIL VIEW
+  Экран/модалка подробного профиля персонажа:
+  портрет, краткая биография, статы отношений, важные факты.
+
+  Родительские файлы:
+    - ../SCREENS_SPECIFICATION.xml
+    - ./RelationshipsPage.xml
+    - ../../characters/*/visual-specs.xml
+    - ../../design/DESIGN_SYSTEM.xml
+
+  Путь для сохранения: docs/prompts/screens/shared/CharacterProfile.xml
+  Версия: 1.0
+  Дата: 2026-03-01
+-->
+
+<character-profile-specification name="CharacterProfile" version="1.0">
+
+  <meta>
+    <description>
+      Профиль персонажа открывается из экрана "Отношения" по тапу на карточку.
+      Показывает крупный портрет, базовую информацию, историю отношений и
+      подсказки, какие действия помогают улучшить связь.
+    </description>
+    <invocation>
+      <from>RelationshipsPage.card.tap</from>
+      <from>EventDialog (ссылка "О персонаже")</from>
+    </invocation>
+    <display-mode>modal-overlay-or-fullscreen-mobile</display-mode>
+  </meta>
+
+  <!-- БАЗОВЫЙ ЛЕЙАУТ -->
+  <layout>
+    <backdrop
+      color="rgba(15,23,42,0.65)"
+      blur="10px"
+      dismiss-on-tap="true"
+      z-index="550"
+    />
+
+    <panel
+      position="center"
+      max-width="420px"
+      width-mobile="100%"
+      height-mobile="100vh"
+      height-desktop="auto"
+      border-radius-mobile="0"
+      border-radius-desktop="24px"
+      background="rgba(255,255,255,0.98)"
+      padding="16px 16px 20px 16px"
+      shadow="0 20px 60px rgba(15,23,42,0.45)"
+      safe-area-top="env(safe-area-inset-top)"
+      safe-area-bottom="env(safe-area-inset-bottom)"
+    >
+      <header
+        display="flex"
+        align="center"
+        justify="space-between"
+        margin-bottom="8px"
+      >
+        <title font-size="1rem" weight="600">Профиль персонажа</title>
+        <close-button size="32px" shape="circle">
+          <icon>✕</icon>
+        </close-button>
+      </header>
+
+      <content
+        type="scrollable"
+        max-height="calc(100vh - 80px)"
+        padding-right="4px"
+      />
+    </panel>
+  </layout>
+
+  <!-- ВЕРХНИЙ БЛОК: ПОРТРЕТ + БАЗОВАЯ ИНФА -->
+  <hero-section>
+    <container
+      display="flex"
+      direction="column"
+      align="center"
+      gap="8px"
+      margin-bottom="12px"
+    >
+      <avatar
+        type="portrait"
+        size="96px"
+        shape="circle"
+        border="3px solid rgba(248,113,170,0.7)"
+        shadow="0 8px 24px rgba(15,23,42,0.25)"
+        image-ref="characters/*/visual-specs.xml"
+      />
+
+      <name font-size="1.25rem" weight="700" />
+      <role font-size="0.85rem" color="#6B7280" />
+
+      <tags-row display="flex" gap="6px" wrap="true">
+        <!-- Примеры: "Семья", "Партнёр", "Питомец", "Друзья" -->
+      </tags-row>
+    </container>
+  </hero-section>
+
+  <!-- СЕКЦИЯ: ТЕКУЩЕЕ СОСТОЯНИЕ ОТНОШЕНИЙ -->
+  <relationship-section>
+    <title font-size="0.9rem" weight="600" margin-bottom="4px">Состояние отношений</title>
+
+    <score-card
+      border-radius="14px"
+      padding="10px 12px"
+      background="rgba(248,250,252,0.95)"
+      display="flex"
+      direction="column"
+      gap="6px"
+      margin-bottom="8px"
+    >
+      <score-row display="flex" align="center" justify="space-between">
+        <label font-size="0.8rem" color="#6B7280">Уровень близости</label>
+        <value font-size="0.9rem" weight="600">
+          <!-- Пример: "72 / 100" -->
+        </value>
+      </score-row>
+
+      <progress-bar
+        height="8px"
+        border-radius="999px"
+        background="rgba(229,231,235,1)"
+      >
+        <fill
+          gradient="linear-gradient(90deg, #F97316 0%, #EC4899 50%, #6366F1 100%)"
+        />
+      </progress-bar>
+
+      <descriptor font-size="0.8rem" color="#4B5563">
+        <!-- Эмоциональное описание, например:
+             "Вы очень близки, много поддержки и тепла."
+        -->
+      </descriptor>
+
+      <subtle-meta font-size="0.7rem" color="#9CA3AF">
+        <!-- Пример: "Последнее важное событие: романтический вечер дома" -->
+      </subtle-meta>
+    </score-card>
+  </relationship-section>
+
+  <!-- СЕКЦИЯ: ХАРАКТЕР И КОРОТКАЯ БИО -->
+  <bio-section>
+    <title font-size="0.9rem" weight="600" margin-bottom="4px">О персонаже</title>
+
+    <bio-block
+      border-radius="12px"
+      padding="8px 10px"
+      background="rgba(255,255,255,0.95)"
+      border="1px solid rgba(226,232,240,1)"
+      margin-bottom="8px"
+    >
+      <short-bio font-size="0.8rem" color="#4B5563">
+        <!-- 2–3 строки про характер, привычки и роль в жизни Тани -->
+      </short-bio>
+    </bio-block>
+
+    <traits-list
+      display="flex"
+      wrap="true"
+      gap="6px"
+    >
+      <!-- Примеры чипов:
+           "Заботливый", "Упрямый", "Тёплый юмор", "Любит порядок"
+      -->
+      <trait-chip size="small" tone="muted" />
+    </traits-list>
+  </bio-section>
+
+  <!-- СЕКЦИЯ: ДИНАМИКА ОТНОШЕНИЙ -->
+  <history-section>
+    <title font-size="0.9rem" weight="600" margin="10px 0 4px 0">Как менялись отношения</title>
+
+    <history-card
+      border-radius="12px"
+      padding="8px 10px"
+      background="rgba(248,250,252,0.95)"
+    >
+      <timeline
+        type="compact-list"
+        max-items="3"
+      >
+        <!-- Каждый пункт: дата + краткое событие -->
+        <event>
+          <date font-size="0.7rem" color="#9CA3AF" />
+          <description font-size="0.78rem" color="#4B5563" />
+          <delta font-size="0.7rem" />
+        </event>
+      </timeline>
+
+      <link-more font-size="0.75rem" color="#3B82F6">
+        Смотреть больше событий
+      </link-more>
+    </history-card>
+  </history-section>
+
+  <!-- СЕКЦИЯ: ЧТО ПОМОГАЕТ УЛУЧШИТЬ ОТНОШЕНИЯ -->
+  <tips-section>
+    <title font-size="0.9rem" weight="600" margin="10px 0 4px 0">Как улучшить отношения</title>
+
+    <tips-list
+      type="chips"
+      gap="6px"
+    >
+      <!-- Примеры:
+           "Чаще созваниваться", "Проводить совместные вечера",
+           "Гулять вместе", "Уделять время без телефона"
+      -->
+      <tip-chip
+        size="small"
+        tone="positive"
+        icon="lightbulb"
+      />
+    </tips-list>
+
+    <recommended-actions
+      margin-top="6px"
+      border-radius="12px"
+      padding="8px 10px"
+      background="rgba(255,255,255,0.95)"
+      border="1px dashed rgba(209,213,219,1)"
+    >
+      <label font-size="0.8rem" weight="600" color="#4B5563">
+        Рекомендуемые действия
+      </label>
+      <actions
+        display="flex"
+        direction="column"
+        gap="4px"
+        margin-top="4px"
+      >
+        <!-- Строки вида: "📞 Позвонить вечером (Счастье +10, Отношения +8)" -->
+        <action-row font-size="0.78rem" color="#4B5563" />
+      </actions>
+    </recommended-actions>
+  </tips-section>
+
+  <!-- СПЕЦИАЛЬНЫЕ ПОЛЯ ДЛЯ КЛЮЧЕВЫХ ПЕРСОНАЖЕЙ -->
+  <special-cases>
+    <character id="husband">
+      <extra-section title="Про ваши отношения">
+        <text>
+          Краткое пояснение, почему муж — центральный персонаж истории,
+          как отношения с ним влияют на концовки.
+        </text>
+      </extra-section>
+      <marker type="critical-relationship" />
+    </character>
+
+    <character id="father">
+      <extra-section title="Про семью">
+        <text>
+          Отношения с отцом отражают семейную линию истории, важны для
+          эмоциональных сцен и поддержки.
+        </text>
+      </extra-section>
+    </character>
+
+    <character id="sam">
+      <extra-section title="Про Сэма">
+        <text>
+          Сэм — эмоциональный компаньон. Высокая связь с ним даёт отдельные
+          сцены и влияет на ощущение уюта.
+        </text>
+      </extra-section>
+    </character>
+
+    <character id="garfield">
+      <extra-section title="Про Гарфилда">
+        <text>
+          Гарфилд — ленивый, но преданный кот. Любит стабильность и вкусную еду.
+        </text>
+      </extra-section>
+    </character>
+  </special-cases>
+
+  <!-- DATA BINDING -->
+  <data-binding>
+    <input>
+      <field>characterId</field>
+    </input>
+
+    <source name="relationshipsState">
+      <field>characterId</field>
+      <field>score</field>
+      <field>lastEvents[]</field>
+      <field>recommendedActions[]</field>
+    </source>
+
+    <source name="characterMeta">
+      <field>name</field>
+      <field>role</field>
+      <field>type</field>
+      <field>tags[]</field>
+      <field>bio</field>
+      <field>traits[]</field>
+    </source>
+
+    <mapping>
+      <characterMeta.name → hero-section.name />
+      <characterMeta.role → hero-section.role />
+      <characterMeta.tags → hero-section.tags-row />
+      <characterMeta.bio → bio-section.short-bio />
+      <characterMeta.traits → bio-section.traits-list />
+      <relationshipsState.score → relationship-section.score-card.progress-bar & value />
+      <relationshipsState.lastEvents → history-section.timeline.events />
+      <relationshipsState.recommendedActions → tips-section.recommended-actions.actions />
+    </mapping>
+  </data-binding>
+
+  <!-- АНИМАЦИИ -->
+  <animations>
+    <on-open>
+      <backdrop opacity-from="0" opacity-to="1" duration="180ms" easing="ease-out" />
+      <panel
+        translateY-from="20px"
+        translateY-to="0"
+        opacity-from="0"
+        opacity-to="1"
+        duration="220ms"
+        easing="cubic-bezier(0.25, 0.8, 0.25, 1)"
+      />
+      <haptic>Telegram.WebApp.HapticFeedback.impactOccurred('light')</haptic>
+    </on-open>
+
+    <on-close>
+      <panel
+        translateY-from="0"
+        translateY-to="20px"
+        opacity-from="1"
+        opacity-to="0"
+        duration="180ms"
+        easing="ease-in"
+      />
+    </on-close>
+  </animations>
+
+  <!-- ИНТЕРАКЦИИ -->
+  <interactions>
+    <on-close-button-tap>
+      <behavior>Закрыть профиль</behavior>
+      <haptic>light</haptic>
+    </on-close-button-tap>
+
+    <on-backdrop-tap>
+      <behavior>Закрыть профиль</behavior>
+    </on-backdrop-tap>
+
+    <on-recommended-action-tap>
+      <behavior>Перейти на ActionsPage с предустановленным фильтром по персонажу</behavior>
+      <haptic>selectionChanged</haptic>
+    </on-recommended-action-tap>
+  </interactions>
+
+  <!-- ТРЕБОВАНИЯ К РЕАЛИЗАЦИИ -->
+  <implementation-requirements>
+    <requirement priority="critical">CharacterProfile не меняет статы напрямую, только показывает информацию и предлагает действия.</requirement>
+    <requirement priority="critical">Профиль должен открываться и закрываться без заметной задержки.</requirement>
+    <requirement priority="high">На мобильных профиль занимает весь экран; на desktop — центрированная модалка.</requirement>
+    <requirement priority="high">Портреты подгружаются из существующих ассетов/промтов персонажей.</requirement>
+    <requirement priority="medium">Текст и блоки адаптируются под длину биографии и истории, без горизонтального скролла.</requirement>
+  </implementation-requirements>
+
+</character-profile-specification>

@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ACTIONS PAGE - GLOBAL ACTIONS LIST
+  Экран "Действия" — централизованный список доступных действий по категориям:
+  работа, социальные, досуг, питомцы, саморазвитие.
+
+  Родительские файлы:
+    - ../SCREENS_SPECIFICATION.xml
+    - ../shared/HUD.xml
+    - ../shared/BottomNavigation.xml
+    - ../../design/DESIGN_SYSTEM.xml
+
+  Путь для сохранения: docs/prompts/screens/shared/ActionsPage.xml
+  Версия: 1.0
+  Дата: 2026-03-01
+-->
+
+<screen name="ActionsPage" type="menu" route="/actions">
+
+  <meta>
+    <title>Действия</title>
+    <description>Экран, где собраны все доступные действия, сгруппированные по категориям.</description>
+    <entry-points>
+      <from>BottomNavigation.actions</from>
+      <from>HUD.tooltips (клик по стату)</from>
+    </entry-points>
+  </meta>
+
+  <!-- ОБЩИЙ ЛЕЙАУТ -->
+  <layout>
+    <container
+      width="100%"
+      height="100vh"
+      padding-top="80px"  <!-- под HUD -->
+      padding-bottom="64px" <!-- под BottomNavigation -->
+      background="linear-gradient(180deg, #F9FAFB 0%, #EFF6FF 100%)"
+    >
+      <content
+        max-width="960px"
+        margin="0 auto"
+        padding="16px"
+        gap="16px"
+      />
+    </container>
+  </layout>
+
+  <!-- ХЕДЕР С ФИЛЬТРАМИ -->
+  <header>
+    <title-row
+      display="flex"
+      align="center"
+      justify="space-between"
+      margin-bottom="8px"
+    >
+      <title font-size="1.25rem" weight="700">Действия</title>
+      <subtitle font-size="0.85rem" color="#6B7280">
+        Выбирай, чем заняться сейчас
+      </subtitle>
+    </title-row>
+
+    <filters-row
+      display="flex"
+      gap="8px"
+      overflow-x="auto"
+      padding-bottom="4px"
+    >
+      <filter-chip id="all" default="true">
+        <label>Все</label>
+      </filter-chip>
+      <filter-chip id="work">
+        <emoji>💼</emoji>
+        <label>Работа</label>
+      </filter-chip>
+      <filter-chip id="social">
+        <emoji>💬</emoji>
+        <label>Соц</label>
+      </filter-chip>
+      <filter-chip id="leisure">
+        <emoji>🎮</emoji>
+        <label>Досуг</label>
+      </filter-chip>
+      <filter-chip id="pets">
+        <emoji>🐾</emoji>
+        <label>Питомцы</label>
+      </filter-chip>
+      <filter-chip id="self-care">
+        <emoji>💆</emoji>
+        <label>Себя</label>
+      </filter-chip>
+      <filter-chip id="home">
+        <emoji>🏠</emoji>
+        <label>Дом</label>
+      </filter-chip>
+    </filters-row>
+
+    <secondary-filters
+      display="flex"
+      justify="space-between"
+      align="center"
+      margin-top="8px"
+    >
+      <sort-dropdown>
+        <label>Сортировка</label>
+        <options>
+          <option id="recommended" default="true">Рекомендуемые</option>
+          <option id="by-energy">По энергии (от низкой)</option>
+          <option id="by-time">По времени (от коротких)</option>
+          <option id="by-reward">По награде (от большой)</option>
+        </options>
+      </sort-dropdown>
+
+      <toggle id="show-only-available">
+        <label>Только доступные</label>
+        <default>true</default>
+      </toggle>
+    </secondary-filters>
+  </header>
+
+  <!-- КАТЕГОРИИ ДЕЙСТВИЙ -->
+  <categories>
+    <!-- ШАБЛОН КАТЕГОРИИ -->
+    <category-spec>
+      <container
+        border-radius="16px"
+        padding="12px 12px 8px 12px"
+        background="rgba(255,255,255,0.9)"
+        shadow="0 6px 18px rgba(15,23,42,0.05)"
+      >
+        <header
+          display="flex"
+          align="center"
+          justify="space-between"
+          margin-bottom="8px"
+        >
+          <left>
+            <emoji>💼</emoji>
+            <title font-size="1rem" weight="600" />
+            <subtitle font-size="0.78rem" color="#6B7280" />
+          </left>
+          <right>
+            <chip size="small" tone="muted">
+              <text>{availableCount} доступно</text>
+            </chip>
+          </right>
+        </header>
+
+        <actions-list
+          type="column"
+          gap="6px"
+        />
+      </container>
+    </category-spec>
+
+    <!-- КОНКРЕТНЫЕ КАТЕГОРИИ -->
+    <category id="work">
+      <emoji>💼</emoji>
+      <title>Работа</title>
+      <subtitle>Заработать деньги и развить навыки</subtitle>
+    </category>
+
+    <category id="social">
+      <emoji>💬</emoji>
+      <title>Социальные</title>
+      <subtitle>Общение с мужем, отцом, друзьями</subtitle>
+    </category>
+
+    <category id="leisure">
+      <emoji>🎮</emoji>
+      <title>Досуг</title>
+      <subtitle>Отдых, развлечения, сериалы, игры</subtitle>
+    </category>
+
+    <category id="pets">
+      <emoji>🐾</emoji>
+      <title>Питомцы</title>
+      <subtitle>Сэм, Гарфилд и забота о них</subtitle>
+    </category>
+
+    <category id="self-care">
+      <emoji>💆</emoji>
+      <title>Забота о себе</title>
+      <subtitle>Сон, уход за собой, здоровье</subtitle>
+    </category>
+
+    <category id="home">
+      <emoji>🏠</emoji>
+      <title>Дом</title>
+      <subtitle>Быт, уборка, уют</subtitle>
+    </category>
+  </categories>
+
+  <!-- ЭЛЕМЕНТ СПИСКА ДЕЙСТВИЯ -->
+  <action-list-item-spec>
+    <container
+      border-radius="12px"
+      padding="10px 12px"
+      background="rgba(248,250,252,0.9)"
+      display="flex"
+      align="center"
+      justify="space-between"
+      gap="10px"
+      min-height="52px"
+    >
+      <left
+        display="flex"
+        align="center"
+        gap="10px"
+        flex-grow="1"
+      >
+        <icon size="24px" />
+        <labels>
+          <title font-size="0.95rem" weight="600" color="#0F172A" />
+          <meta-row font-size="0.75rem" color="#6B7280">
+            <!-- Примеры: "Энергия: -20 • Время: 2ч • Награда: +200💰" -->
+          </meta-row>
+        </labels>
+      </left>
+
+      <right
+        display="flex"
+        direction="column"
+        align="flex-end"
+        gap="2px"
+      >
+        <recommended-tag visible-when="isRecommended">
+          <chip tone="positive" size="small">Рекомендуем</chip>
+        </recommended-tag>
+        <location-tag>
+          <!-- Примеры: "Дом", "Офис", "Парк" -->
+          <chip tone="muted" size="small" icon="map-pin" />
+        </location-tag>
+      </right>
+    </container>
+
+    <states>
+      <state name="default">
+        <opacity>1.0</opacity>
+        <cursor>pointer</cursor>
+      </state>
+      <state name="hover">
+        <background>rgba(241,245,249,1)</background>
+      </state>
+      <state name="pressed">
+        <transform>scale(0.98)</transform>
+        <background>rgba(226,232,240,1)</background>
+      </state>
+      <state name="disabled">
+        <opacity>0.4</opacity>
+        <cursor>not-allowed</cursor>
+      </state>
+    </states>
+  </action-list-item-spec>
+
+  <!-- ПРИМЕРЫ ДЕЙСТВИЙ ПО КАТЕГОРИЯМ -->
+  <examples>
+    <category id="work">
+      <action id="work-from-home">
+        <title>Работать из дома</title>
+        <icon>💻</icon>
+        <location>Дом</location>
+        <energyCost>20</energyC
