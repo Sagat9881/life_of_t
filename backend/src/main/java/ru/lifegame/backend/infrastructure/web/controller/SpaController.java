@@ -1,26 +1,34 @@
 package ru.lifegame.backend.infrastructure.web.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * Controller for Single Page Application routing
- * Forwards all non-API routes to index.html for React Router
+ * SPA Controller для обработки фронтенд роутинга.
+ * Перенаправляет все не-API запросы на index.html для React Router.
  */
 @Controller
 public class SpaController {
 
-    /**
-     * Forward all routes (except API and static resources) to index.html
-     * This allows React Router to handle client-side routing
-     */
-    @GetMapping(value = {
-        "/",
-        "/room",
-        "/test/**",
-        "/{path:^(?!api|assets|static).*}/**"
+    @RequestMapping(value = {
+        "/{path:[^\\.]*}",
+        "/**/{path:[^\\.]*}"
     })
-    public String forward() {
+    public String forward(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        
+        // НЕ перенаправлять технические пути
+        if (path.startsWith("/api/") || 
+            path.startsWith("/error") ||
+            path.startsWith("/actuator/") ||
+            path.startsWith("/swagger-ui") ||
+            path.startsWith("/v3/api-docs")) {
+            // Пропускаем дальше по цепочке фильтров
+            return null;
+        }
+        
+        // Все остальное → index.html (React Router)
         return "forward:/index.html";
     }
 }
