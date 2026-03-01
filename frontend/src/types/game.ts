@@ -10,11 +10,18 @@ export interface Stats {
   selfEsteem: number;
 }
 
+export interface Job {
+  title: string;
+  company: string;
+  salary: number;
+}
+
 export interface Player {
   id: string;
   name: string;
   level: number;
   stats: Stats;
+  job?: Job;
   avatarUrl?: string;
 }
 
@@ -41,9 +48,18 @@ export interface Pet {
   id: string;
   name: string;
   type: 'cat' | 'dog';
+  species: 'Cat' | 'Dog'; // Backend uses this
   mood: number;
   hunger: number;
   avatarUrl?: string;
+}
+
+export interface Quest {
+  id: string;
+  title: string;
+  description: string;
+  completed: boolean;
+  progress?: number;
 }
 
 export interface Conflict {
@@ -105,4 +121,5 @@ export interface GameState {
   activeConflicts: Conflict[];
   currentConflict?: Conflict;
   currentEvent?: GameEvent;
+  quests?: Quest[];
 }

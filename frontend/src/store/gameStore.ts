@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { api } from '../services/api';
-import type { Player, NPC, Pet, GameAction, Conflict, GameEvent, GameTime } from '../types/game';
+import type { Player, NPC, Pet, GameAction, Conflict, GameEvent, GameTime, Quest } from '../types/game';
 
 interface GameStore {
   // State
@@ -9,6 +9,7 @@ interface GameStore {
   actions: GameAction[];
   npcs: NPC[];
   pets: Pet[];
+  quests: Quest[];
   currentConflict: Conflict | null;
   currentEvent: GameEvent | null;
   isLoading: boolean;
@@ -30,6 +31,7 @@ const initialState = {
   actions: [],
   npcs: [],
   pets: [],
+  quests: [],
   currentConflict: null,
   currentEvent: null,
   isLoading: false,
@@ -61,6 +63,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
           type: rel.npcCode?.toLowerCase() || 'friend'
         })),
         pets: state.pets || [],
+        quests: (state as any).quests || [],
         // Backend: activeConflicts[0] -> Frontend: currentConflict
         currentConflict: ((state as any).activeConflicts && (state as any).activeConflicts.length > 0)
           ? (state as any).activeConflicts[0]
@@ -93,6 +96,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
           type: rel.npcCode?.toLowerCase() || 'friend'
         })),
         pets: result.pets || [],
+        quests: (result as any).quests || [],
         currentConflict: ((result as any).activeConflicts && (result as any).activeConflicts.length > 0)
           ? (result as any).activeConflicts[0]
           : null,
