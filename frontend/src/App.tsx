@@ -25,21 +25,48 @@ function App() {
         return <RoomScreen gameState={{}} onObjectTap={handleObjectTap} />;
       case 'actions':
         return (
-          <div style={{ padding: '100px 20px' }}>
+          <div style={{ 
+            position: 'fixed',
+            top: '80px',
+            left: 0,
+            right: 0,
+            bottom: '64px',
+            padding: '20px',
+            overflow: 'auto',
+            background: '#F9FAFB'
+          }}>
             <h2>Действия</h2>
             <p>ActionsPage будет здесь</p>
           </div>
         );
       case 'relationships':
         return (
-          <div style={{ padding: '100px 20px' }}>
+          <div style={{ 
+            position: 'fixed',
+            top: '80px',
+            left: 0,
+            right: 0,
+            bottom: '64px',
+            padding: '20px',
+            overflow: 'auto',
+            background: '#F9FAFB'
+          }}>
             <h2>Отношения</h2>
             <p>RelationshipsPage будет здесь</p>
           </div>
         );
       case 'stats':
         return (
-          <div style={{ padding: '100px 20px' }}>
+          <div style={{ 
+            position: 'fixed',
+            top: '80px',
+            left: 0,
+            right: 0,
+            bottom: '64px',
+            padding: '20px',
+            overflow: 'auto',
+            background: '#F9FAFB'
+          }}>
             <h2>Статистика</h2>
             <p>StatsPage будет здесь</p>
           </div>

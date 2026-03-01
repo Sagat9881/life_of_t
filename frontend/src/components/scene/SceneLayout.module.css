@@ -1,160 +1,153 @@
-/* SceneLayout.module.css - Based on DESIGN_SYSTEM.xml */
-
-.sceneLayout {
-  width: 100%;
-  height: 100vh;
-  position: relative;
-  overflow: hidden;
-  background: var(--scene-background, #E0C3FC);
-}
+/* SceneLayout.module.css - Fullscreen isometric room */
 
 .sceneContainer {
-  width: 100%;
-  height: calc(100vh - 80px - 64px); /* subtract HUD and BottomNav */
-  position: relative;
+  position: fixed;
   top: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Isometric perspective container */
-.isometricView {
-  position: relative;
-  width: 1920px;
-  height: 1080px;
-  transform-style: preserve-3d;
-  transform: scale(0.5);
-}
-
-/* Background layer */
-.background {
-  position: absolute;
-  top: 0;
   left: 0;
+  right: 0;
+  bottom: 64px;
+  width: 100%;
+  height: calc(100vh - 144px);
+  overflow: hidden;
+  background: linear-gradient(135deg, #87CEEB 0%, #E0F6FF 50%, #FFE4B5 100%);
+}
+
+/* Isometric room layers */
+.sceneViewport {
+  position: relative;
   width: 100%;
   height: 100%;
-  z-index: 0;
-  background: var(--scene-background);
-  transition: background 500ms ease-out;
+  transform-style: preserve-3d;
+  perspective: 1000px;
 }
 
-/* Floor layer - isometric */
+/* Floor */
 .floor {
   position: absolute;
-  width: 800px;
-  height: 600px;
-  background: rgba(255, 249, 233, 0.9);
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  transform: rotateX(60deg) rotateZ(45deg);
-  transform-origin: center center;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  z-index: 2;
+  bottom: 20%;
+  left: 50%;
+  transform: translateX(-50%) rotateX(60deg);
+  width: 80%;
+  max-width: 600px;
+  height: 400px;
+  background: linear-gradient(135deg, #F5E6D3 0%, #E8D5C4 100%);
+  border: 2px solid #D4C5B5;
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.15),
+    inset 0 -2px 10px rgba(0, 0, 0, 0.05);
 }
 
 /* Back wall */
 .backWall {
   position: absolute;
-  width: 800px;
-  height: 400px;
-  background: rgba(240, 230, 220, 0.95);
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  transform: rotateX(0deg) rotateZ(45deg) translateZ(200px);
+  bottom: 40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  max-width: 600px;
+  height: 300px;
+  background: linear-gradient(180deg, #FFF9E9 0%, #F5EFE0 100%);
+  border: 2px solid #E8DCC8;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.08);
   z-index: 1;
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.05);
 }
 
-/* Interactive objects layer */
+/* Left wall */
+.leftWall {
+  position: absolute;
+  bottom: 40%;
+  left: 10%;
+  width: 200px;
+  height: 300px;
+  background: linear-gradient(90deg, #F0E6D8 0%, #E8DCC8 100%);
+  border-right: 2px solid #D4C5B5;
+  transform: skewY(-30deg);
+  transform-origin: bottom right;
+  z-index: 1;
+}
+
+/* Right wall */
+.rightWall {
+  position: absolute;
+  bottom: 40%;
+  right: 10%;
+  width: 200px;
+  height: 300px;
+  background: linear-gradient(270deg, #F0E6D8 0%, #E8DCC8 100%);
+  border-left: 2px solid #D4C5B5;
+  transform: skewY(30deg);
+  transform-origin: bottom left;
+  z-index: 1;
+}
+
+/* Objects layer */
 .objectsLayer {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  z-index: 3;
-  pointer-events: none;
+  z-index: 5;
 }
 
-/* Individual object styling */
-.object {
+/* Characters layer */
+.charactersLayer {
   position: absolute;
-  pointer-events: all;
-  cursor: pointer;
-  transition: transform 200ms ease-out;
-}
-
-.object:hover {
-  transform: scale(1.05);
-}
-
-.object.highlighted {
-  filter: drop-shadow(0 0 12px var(--color-primary, #F871AA));
-  animation: softPulse 1.5s ease-in-out infinite;
-}
-
-/* Character layer */
-.characterLayer {
-  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  z-index: 4;
-  pointer-events: none;
+  z-index: 10;
 }
 
 /* NPCs layer */
 .npcsLayer {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  z-index: 5;
-  pointer-events: none;
+  z-index: 8;
 }
 
 /* Time of day variants */
-.sceneLayout.morning .background {
-  background: linear-gradient(180deg, #FFECD2 0%, #FCB69F 100%);
+.sceneContainer.morning {
+  background: linear-gradient(135deg, #FFE8CC 0%, #FFF4E0 50%, #FFFAED 100%);
 }
 
-.sceneLayout.day .background {
-  background: linear-gradient(180deg, #E0C3FC 0%, #8EC5FC 100%);
+.sceneContainer.day {
+  background: linear-gradient(135deg, #87CEEB 0%, #B0E0F6 50%, #D4F1FF 100%);
 }
 
-.sceneLayout.evening .background {
-  background: linear-gradient(180deg, #FFA17F 0%, #00223E 100%);
+.sceneContainer.evening {
+  background: linear-gradient(135deg, #FF9966 0%, #FFB399 50%, #FFCCB3 100%);
 }
 
-.sceneLayout.night .background {
-  background: linear-gradient(180deg, #2C3E50 0%, #000000 100%);
+.sceneContainer.night {
+  background: linear-gradient(135deg, #1A1A2E 0%, #2D2D44 50%, #3F3F5A 100%);
 }
 
-/* Animations from DESIGN_SYSTEM */
-@keyframes softPulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
-
-/* Responsive - mobile first per DESIGN_SYSTEM */
+/* Responsive */
 @media (max-width: 768px) {
-  .isometricView {
-    transform: scale(0.3);
-  }
-
   .sceneContainer {
-    height: calc(100vh - 88px - 67px);
     top: 88px;
+    bottom: 67px;
+    height: calc(100vh - 155px);
   }
-}
 
-@media (min-width: 769px) and (max-width: 1024px) {
-  .isometricView {
-    transform: scale(0.4);
+  .floor {
+    width: 90%;
+    height: 350px;
   }
-}
 
-@media (min-width: 1025px) {
-  .isometricView {
-    transform: scale(0.6);
+  .backWall {
+    width: 90%;
+    height: 250px;
+  }
+
+  .leftWall,
+  .rightWall {
+    width: 150px;
+    height: 250px;
   }
 }
