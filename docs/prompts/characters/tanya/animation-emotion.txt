@@ -1,0 +1,62 @@
+<visual-generation-prompt>
+    <meta>
+        <name>Tatyana Emotion Joy Atlas</name>
+        <entity-type>character</entity-type>
+        <entity-id>tatyana</entity-id>
+        <aspect>animation-emotion-joy</aspect>
+        <version>1.0.0</version>
+        <last-updated>2026-03-01</last-updated>
+        <extends>
+            <prompt>../../_core/visual-generation-workflow.xml</prompt>
+            <prompt>../character-visual-specs.xml</prompt>
+            <prompt>./visual-specs.xml</prompt>
+            <prompt>./tatyana-animations.xml</prompt>
+        </extends>
+    </meta>
+
+    <context>
+        <usage>Яркая радость при достижениях, наградах, росте отношений</usage>
+        <atlas-id>emotion-joy</atlas-id>
+        <approval-pattern>atlas</approval-pattern>
+    </context>
+
+    <requirements>
+        <animation>
+            <name>emotion</name>
+            <variant>joy</variant>
+            <type>one-shot</type>
+            <frames>
+                <count>25</count>
+                <frame-size>
+                    <width>64</width>
+                    <height>64</height>
+                </frame-size>
+                <fps>10</fps>
+                <loop>false</loop>
+            </frames>
+            <description>Таня ярко радуется: поднимает руки, улыбается, корпус слегка подпрыгивает</description>
+        </animation>
+
+        <technical>
+            <atlas-format>horizontal-strip</atlas-format>
+            <background>прозрачный</background>
+            <file-format>WebP</file-format>
+        </technical>
+    </requirements>
+
+    <prompt-text>
+        <![CDATA[
+Создай one-shot спрайт-атлас emotion-joy:
+
+– 25 кадров 64x64, горизонтальный атлас, FPS 10.
+– Татьяна переходит из обычного состояния в яркую радость: широко улыбается, может слегка подпрыгнуть, поднять руки, сделать жест «ура».
+– Стартовый и финальный кадры должны быть совместимы с idle/standing позой Тани, чтобы переходы выглядели плавно.
+
+Сохраняй стиль и внешний вид Тани, не превращая эмоцию в карикатурную.
+        ]]>
+    </prompt-text>
+
+    <output>
+        <save-to>assets/characters/tatyana/animations/emotions/tatyana_emotion_joy_atlas.webp</save-to>
+    </output>
+</visual-generation-prompt>

@@ -1,0 +1,61 @@
+<visual-generation-prompt>
+    <meta>
+        <name>Tatyana Grooming Mirror Atlas</name>
+        <entity-type>character</entity-type>
+        <entity-id>tatyana</entity-id>
+        <aspect>animation-grooming-mirror</aspect>
+        <version>1.0.0</version>
+        <last-updated>2026-03-01</last-updated>
+        <extends>
+            <prompt>../../_core/visual-generation-workflow.xml</prompt>
+            <prompt>../character-visual-specs.xml</prompt>
+            <prompt>./visual-specs.xml</prompt>
+            <prompt>./tatyana-animations.xml</prompt>
+        </extends>
+    </meta>
+
+    <context>
+        <usage>Ритуал ухода за собой перед зеркалом (grooming state)</usage>
+        <atlas-id>grooming-mirror</atlas-id>
+        <approval-pattern>atlas</approval-pattern>
+    </context>
+
+    <requirements>
+        <animation>
+            <name>grooming</name>
+            <type>one-shot</type>
+            <frames>
+                <count>25</count>
+                <frame-size>
+                    <width>64</width>
+                    <height>64</height>
+                </frame-size>
+                <fps>8</fps>
+                <loop>false</loop>
+            </frames>
+            <description>Таня подходит к зеркалу, смотрит на себя, поправляет волосы, улыбается</description>
+        </animation>
+
+        <technical>
+            <atlas-format>horizontal-strip</atlas-format>
+            <background>прозрачный или с минимальным контуром зеркала/раковины</background>
+            <file-format>WebP</file-format>
+        </technical>
+    </requirements>
+
+    <prompt-text>
+        <![CDATA[
+Создай спрайт-атлас grooming-mirror:
+
+– 25 кадров 64x64, горизонтальный атлас, FPS 8, one-shot.
+– Последовательность: подойти к зеркалу → посмотреть на отражение → поправить волосы → коротко улыбнуться себе.
+– Следи за тем, чтобы позы были естественными и в рамках мягкого 2D-стиля, без гротеска.
+
+Тот же внешний вид Тани и аутфиты, что и в других анимациях, допускается использование "relax" аутфита.
+        ]]>
+    </prompt-text>
+
+    <output>
+        <save-to>assets/characters/tatyana/animations/grooming/tatyana_grooming_mirror_atlas.webp</save-to>
+    </output>
+</visual-generation-prompt>

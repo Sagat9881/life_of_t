@@ -1,0 +1,70 @@
+<visual-generation-prompt>
+    <meta>
+        <name>Tatyana Walk South Atlas</name>
+        <entity-type>character</entity-type>
+        <entity-id>tatyana</entity-id>
+        <aspect>animation-walk-south</aspect>
+        <version>1.0.0</version>
+        <last-updated>2026-03-01</last-updated>
+        <extends>
+            <prompt>../../_core/visual-generation-workflow.xml</prompt>
+            <prompt>../character-visual-specs.xml</prompt>
+            <prompt>./visual-specs.xml</prompt>
+            <prompt>./tatyana-animations.xml</prompt>
+        </extends>
+    </meta>
+
+    <context>
+        <usage>Ходьба Тани вперёд (в направлении "south" по спекам анимаций) в изометрических локациях</usage>
+        <atlas-id>walk-south</atlas-id>
+        <approval-pattern>atlas</approval-pattern>
+    </context>
+
+    <requirements>
+        <animation>
+            <name>walk</name>
+            <direction>south</direction>
+            <type>loop</type>
+            <frames>
+                <count>25</count>
+                <frame-size>
+                    <width>64</width>
+                    <height>64</height>
+                </frame-size>
+                <fps>10</fps>
+                <loop>true</loop>
+            </frames>
+            <description>Плавная анимация ходьбы, без рывков, с естественной физикой шага</description>
+        </animation>
+
+        <motion-guidelines>
+            <detail>Шаг средней длины, руки и ноги двигаются в противофазе</detail>
+            <detail>Корпус слегка перемещается вверх/вниз в ритме шагов</detail>
+            <detail>Силуэт читается на каждом кадре, без смазывания ключевых поз</detail>
+        </motion-guidelines>
+
+        <technical>
+            <atlas-format>horizontal-strip</atlas-format>
+            <background>прозрачный</background>
+            <file-format>WebP</file-format>
+        </technical>
+    </requirements>
+
+    <prompt-text>
+        <![CDATA[
+Создай спрайт-атлас walk-south для Тани:
+
+– 25 кадров 64x64, горизонтальная полоса, FPS 10, loop.
+– Персонаж идёт вперёд (к игроку) в изометрической перспективе, как в tatyana-animations.xml.
+– Аутфит тот же, что в базовых анимациях (home-work), движения естественные и плавные.
+– Руки и ноги двигаются в противофазе, корпус чуть покачивается вверх-вниз.
+– Все кадры должны смотреться как цельная петля, без заметного "шва" на переходе последнего кадра к первому.
+
+Строго соблюдай внешний вид Тани и стилистику, описанные в связанных спецификациях.
+        ]]>
+    </prompt-text>
+
+    <output>
+        <save-to>assets/characters/tatyana/animations/walk/tatyana_walk_south_atlas.webp</save-to>
+    </output>
+</visual-generation-prompt>

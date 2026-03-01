@@ -1,0 +1,62 @@
+<visual-generation-prompt>
+    <meta>
+        <name>Tatyana Interaction Pickup Atlas</name>
+        <entity-type>character</entity-type>
+        <entity-id>tatyana</entity-id>
+        <aspect>animation-interaction-pickup</aspect>
+        <version>1.0.0</version>
+        <last-updated>2026-03-01</last-updated>
+        <extends>
+            <prompt>../../_core/visual-generation-workflow.xml</prompt>
+            <prompt>../character-visual-specs.xml</prompt>
+            <prompt>./visual-specs.xml</prompt>
+            <prompt>./tatyana-animations.xml</prompt>
+        </extends>
+    </meta>
+
+    <context>
+        <usage>Поднятие объектов (книга, телефон, кружка, предметы комнаты/офиса)</usage>
+        <atlas-id>interaction-pickup</atlas-id>
+        <approval-pattern>atlas</approval-pattern>
+    </context>
+
+    <requirements>
+        <animation>
+            <name>interaction</name>
+            <variant>pick-up</variant>
+            <type>one-shot</type>
+            <frames>
+                <count>25</count>
+                <frame-size>
+                    <width>64</width>
+                    <height>64</height>
+                </frame-size>
+                <fps>8</fps>
+                <loop>false</loop>
+            </frames>
+            <description>Таня наклоняется/приседает и поднимает объект перед собой</description>
+        </animation>
+
+        <technical>
+            <atlas-format>horizontal-strip</atlas-format>
+            <background>прозрачный</background>
+            <file-format>WebP</file-format>
+        </technical>
+    </requirements>
+
+    <prompt-text>
+        <![CDATA[
+Создай спрайт-атлас interaction-pickup:
+
+– 25 кадров 64x64, горизонтальный атлас, FPS 8, анимация one-shot (не зацикливать).
+– Таня делает понятную и аккуратную анимацию «наклониться/присесть – взять объект – вернуться в исходную позу».
+– Следи, чтобы объект находился в зоне рук и легко добавлялся отдельным слоем (например, кружка, книга, телефон).
+
+Внешность, одежда и стилистика — как в других анимациях Тани.
+        ]]>
+    </prompt-text>
+
+    <output>
+        <save-to>assets/characters/tatyana/animations/interaction/tatyana_interaction_pickup_atlas.webp</save-to>
+    </output>
+</visual-generation-prompt>

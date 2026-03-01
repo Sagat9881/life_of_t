@@ -1,0 +1,70 @@
+<visual-generation-prompt>
+    <meta>
+        <name>Tatyana Work Computer Atlas</name>
+        <entity-type>character</entity-type>
+        <entity-id>tatyana</entity-id>
+        <aspect>animation-work-computer</aspect>
+        <version>1.0.0</version>
+        <last-updated>2026-03-01</last-updated>
+        <extends>
+            <prompt>../../_core/visual-generation-workflow.xml</prompt>
+            <prompt>../character-visual-specs.xml</prompt>
+            <prompt>./visual-specs.xml</prompt>
+            <prompt>./tatyana-animations.xml</prompt>
+        </extends>
+    </meta>
+
+    <context>
+        <usage>Работа за компьютером в комнате/офисе (working state)</usage>
+        <atlas-id>work-computer</atlas-id>
+        <approval-pattern>atlas</approval-pattern>
+    </context>
+
+    <requirements>
+        <animation>
+            <name>work</name>
+            <type>loop</type>
+            <frames>
+                <count>25</count>
+                <frame-size>
+                    <width>64</width>
+                    <height>64</height>
+                </frame-size>
+                <fps>6</fps>
+                <loop>true</loop>
+            </frames>
+            <description>Таня сидит за столом и работает за ноутбуком, набор повторяющихся действий</description>
+        </animation>
+
+        <keyframes>
+            <keyframe index="0"  action="hands-on-keyboard" />
+            <keyframe index="5"  action="typing" />
+            <keyframe index="10" action="pause-look-screen" />
+            <keyframe index="15" action="typing" />
+            <keyframe index="20" action="lean-back-think" />
+        </keyframes>
+
+        <technical>
+            <atlas-format>horizontal-strip</atlas-format>
+            <background>прозрачный, подразумевается, что стол/компьютер могут быть частью отдельного слоя</background>
+            <file-format>WebP</file-format>
+        </technical>
+    </requirements>
+
+    <prompt-text>
+        <![CDATA[
+Создай спрайт-атлас work-computer Тани:
+
+– 25 кадров 64x64, горизонтальный атлас, FPS 6, loop.
+– Татьяна сидит за столом с ноутбуком (из аксессуаров visual-specs: laptop), в аутфите home-work.
+– Анимация: печатает, делает паузы, смотрит на экран, слегка откидывается назад и думает.
+– Следи за читаемостью поз на маленьком размере и за плавностью переходов между ключевыми кадрами.
+
+Стиль и внешний вид персонажа должны соответствовать всем связанным спецификациям.
+        ]]>
+    </prompt-text>
+
+    <output>
+        <save-to>assets/characters/tatyana/animations/work/tatyana_work_computer_atlas.webp</save-to>
+    </output>
+</visual-generation-prompt>

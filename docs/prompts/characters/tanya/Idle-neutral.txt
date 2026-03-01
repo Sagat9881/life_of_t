@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<visual-generation-prompt>
+    <meta>
+        <name>Tatyana Idle Neutral Atlas</name>
+        <entity-type>character</entity-type>
+        <entity-id>tatyana</entity-id>
+        <aspect>animation-idle-neutral</aspect>
+        <version>1.0.0</version>
+        <last-updated>2026-03-01</last-updated>
+        <extends>
+            <prompt>../../_core/visual-generation-workflow.xml</prompt>
+            <prompt>../character-visual-specs.xml</prompt>
+            <prompt>./visual-specs.xml</prompt>
+            <prompt>./tatyana-animations.xml</prompt>
+        </extends>
+    </meta>
+
+    <context>
+        <usage>Базовая idle анимация Тани в нейтральном состоянии для всех изометрических локаций</usage>
+        <atlas-id>idle-neutral</atlas-id>
+        <approval-pattern>atlas</approval-pattern>
+    </context>
+
+    <requirements>
+        <animation>
+            <name>idle</name>
+            <variant>idle-neutral</variant>
+            <type>loop</type>
+            <expression>neutral</expression>
+            <frames>
+                <count>24</count>
+                <frame-size>
+                    <width>64</width>
+                    <height>64</height>
+                </frame-size>
+                <fps>6</fps>
+                <loop>true</loop>
+            </frames>
+            <description>Лёгкое покачивание тела и головы, едва заметное дыхание, естественная микродвижуха в спокойном состоянии</description>
+        </animation>
+
+        <style>
+            <overall>Современный мягкий 2D, без pixel art/8bit/16bit, вдохновение Gris / Spiritfarer / Celeste</overall>
+        </style>
+
+        <character-from-spec>
+            <source>./visual-specs.xml</source>
+            <outfit>home-work</outfit>
+            <notes>
+                <note>Внешность Тани и одежда из аутфита home-work должны быть узнаваемы на каждом кадре</note>
+            </notes>
+        </character-from-spec>
+
+        <motion-guidelines>
+            <detail>Движения очень мягкие и цикличные, без рывков</detail>
+            <detail>Небольшие колебания корпуса, головы и волос, лёгкое смещение веса тела</detail>
+            <detail>Эмоция остаётся нейтральной, без заметного счастья/усталости</detail>
+        </motion-guidelines>
+
+        <technical>
+            <atlas-format>horizontal-strip</atlas-format>
+            <background>прозрачный</background>
+            <file-format>WebP</file-format>
+            <max-size-kb>500</max-size-kb>
+        </technical>
+    </requirements>
+
+    <prompt-text>
+        <![CDATA[
+С опорой на:
+1) ../../_core/visual-generation-workflow.xml
+2) ../character-visual-specs.xml
+3) ./visual-specs.xml
+4) ./tatyana-animations.xml
+
+Создай спрайт-атлас idle-neutral Татьяны:
+
+– 24 кадра, размер каждого кадра 64x64, формат горизонтальной полосы (horizontal strip).
+– Изометрический вид, как в спецификации Tatyana Animations.
+– Татьяна в аутфите "home-work", с нейтрально-доброжелательным выражением лица.
+– Плавное слегка заметное покачивание тела и головы, лёгкое дыхание, минимальные движения волос и одежды.
+– Без резких жестов и выраженных эмоций, это спокойный базовый idle.
+
+Собери кадры в один горизонтальный атлас, пригодный для проигрывания с FPS 6 в бесконечном цикле.
+        ]]>
+    </prompt-text>
+
+    <output>
+        <save-to>assets/characters/tatyana/animations/idle/tatyana_idle_neutral_atlas.webp</save-to>
+    </output>
+</visual-generation-prompt>

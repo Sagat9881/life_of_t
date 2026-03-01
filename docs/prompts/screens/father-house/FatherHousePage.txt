@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screen name="FatherHousePage" type="activity" module="locations">
+  
+  <description>
+    Экран дома отца — семейная локация, где игрок может взаимодействовать 
+    с родителями, отдыхать, восстанавливать показатели и получать поддержку.
+    Отношения с родителями влияют на доступность помощи и сюжетные ветки.
+  </description>
+
+  <components>
+    
+    <!-- Заголовок локации -->
+    <header>
+      <title>🏠 Дом отца</title>
+      <subtitle dynamic="true">📍 {district_name} • {time_of_day}</subtitle>
+    </header>
+
+    <!-- Основной контент -->
+    <content_area layout="vertical" scroll="true">
+      
+      <!-- Атмосфера дома (меняется от времени суток) -->
+      <atmosphere_block>
+        <image source="father_house_{time_period}.jpg" />
+        <description dynamic="true">
+          {atmosphere_description}
+          <!-- Примеры:
+            - Утро: "Запах свежего кофе и звуки готовящегося завтрака"
+            - Вечер: "Тихий свет ламп, звуки телевизора из гостиной"
+            - Ночь: "В доме тихо, все спят"
+          -->
+        </description>
+      </atmosphere_block>
+
+      <!-- Информация о присутствии родителей -->
+      <npc_presence_block visible="{has_npcs_present}">
+        <title>👨‍👩‍👦 Сейчас дома:</title>
+        <npc_list>
+          <npc id="father" visible="{father_is_home}">
+            <icon>👨‍💼</icon>
+            <name>Отец</name>
+            <status dynamic="true">{father_activity}</status>
+            <!-- Читает газету, смотрит ТВ, работает в кабинете, спит -->
+            <relationship_indicator>
+              <label>Отношения:</label>
+              <value>{father_relationship}/100</value>
+              <visual_bar color="{relationship_color}" />
+            </relationship_indicator>
+          </npc>
+          
+          <npc id="mother" visible="{mother_is_home}">
+            <icon>👩</icon>
+            <name>Мать</name>
+            <status dynamic="true">{mother_activity}</status>
+            <relationship_indicator>
+              <label>Отношения:</label>
+              <value>{mother_relationship}/100</value>
+              <visual_bar color="{relationship_color}" />
+            </relationship_indicator>
+          </npc>
+        </npc_list>
+      </npc_presence_block>
+
+      <!-- Блок доступных действий -->
+      <actions_section>
+        <title>📋 Чем заняться:</title>
+        
+        <action_list layout="cards" columns="2">
+          
+          <!-- Диалоги с родителями -->
+          <action_group category="social">
+            
+            <action id="talk_to_father" 
+                    enabled="{father_is_home && father_is_available}"
+                    cooldown="{father_last_talk_time}">
+              <icon>💬</icon>
+              <label>Поговорить с отцом</label>
+              <description>Обсудить жизнь, получить совет или помощь</description>
+              <duration>30 минут</duration>
+              <effects>
+                <effect type="relationship" target="father" value="+5" />
+                <effect type="mood" value="+10" condition="{conversation_positive}" />
+                <effect type="story_progression" trigger="father_dialogue_tree" />
+              </effects>
+              <unavailable_reason visible="{!father_is_home}">
+                Отец на работе (вернётся в {father_return_time})
+              </unavailable_reason>
+            </action>
+
+            <action id="talk_to_mother" 
+                    enabled="{mother_is_home && mother_is_available}">
+              <icon>💬</icon>
+              <label>Поговорить с матерью</label>
+              <description>Душевный разговор, поддержка</description>
+              <duration>30 минут</duration>
+              <effects>
+                <effect type="relationship" target="mother" value="+5" />
+                <effect type="stress" value="-15" />
+                <effect type="mood" value="+15" />
+              </effects>
+            </action>
+          </action_group>
+
+          <!-- Отдых и восстановление -->
+          <action_group category="rest">
+            
+            <action id="sleep_in_room" enabled="true">
+              <icon>🛏️</icon>
+              <label>Отдохнуть в комнате</label>
+              <description>Поспать несколько часов</description>
+              <duration>2-8 часов (выбор игрока)</duration>
+              <effects>
+                <effect type="energy" value="+40" />
+                <effect type="health" value="+10" />
+                <effect type="time_skip" value="{selected_hours}" />
+              </effects>
+              <options>
+                <option label="Короткий сон (2 ч)" duration="2h" energy="+20" />
+                <option label="Полноценный сон (6 ч)" duration="6h" energy="+40" />
+                <option label="Проспать до утра" duration="until_morning" energy="+50" />
+              </options>
+            </action>
+
+            <action id="watch_tv" enabled="{time >= 18:00 || weekend}">
+              <icon>📺</icon>
+              <label>Посмотреть телевизор</label>
+              <description>Расслабиться перед экраном</description>
+              <duration>1 час</duration>
+              <effects>
+                <effect type="stress" value="-10" />
+                <effect type="mood" value="+5" />
+                <effect type="energy" value="-5" />
+              </effects>
+            </action>
+
+            <action id="read_book" enabled="true">
+              <icon>📚</icon>
+              <label>Почитать книгу</label>
+              <description>Провести время за чтением</description>
+              <duration>1 час</duration>
+              <effects>
+                <effect type="intelligence" value="+2" />
+                <effect type="stress" value="-15" />
+                <effect type="mood" value="+10" />
+              </effects>
+            </action>
+          </action_group>
+
+          <!-- Питание -->
+          <action_group category="food">
+            
+            <action id="family_dinner" 
+                    enabled="{dinner_time && parents_home}">
+              <icon>🍽️</icon>
+              <label>Поужинать с семьёй</label>
+              <description>Домашний ужин за общим столом</description>
+              <duration>45 минут</duration>
+              <effects>
+                <effect type="health" value="+15" />
+                <effect type="energy" value="+20" />
+                <effect type="mood" value="+15" />
+                <effect type="relationship" target="father" value="+3" />
+                <effect type="relationship" target="mother" value="+3" />
+              </effects>
+              <special_note>Семейное общение укрепляет связи</special_note>
+            </action>
+
+            <action id="cook_snack" enabled="true">
+              <icon>🍴</icon>
+              <label>Перекусить</label>
+              <description>Приготовить что-то простое</description>
+              <duration>15 минут</duration>
+              <effects>
+                <effect type="health" value="+5" />
+                <effect type="energy" value="+10" />
+              </effects>
+            </action>
+          </action_group>
+
+          <!-- Особые действия -->
+          <action_group category="special" visible="{has_special_actions}">
+            
+            <action id="ask_for_money" 
+                    enabled="{father_relationship >= 50}"
+                    cooldown="7 days">
+              <icon>💰</icon>
+              <label>Попросить денег</label>
+              <description>Обратиться к отцу за финансовой помощью</description>
+              <effects>
+                <effect type="money" value="+{help_amount}" probability="0.7" />
+                <effect type="relationship" target="father" value="-10" />
+              </effects>
+              <note>Успех зависит от отношений и частоты просьб</note>
+            </action>
+
+            <action id="help_with_chores" enabled="true">
+              <icon>🧹</icon>
+              <label>Помочь по дому</label>
+              <description>Убраться, помочь с делами</description>
+              <duration>2 часа</duration>
+              <effects>
+                <effect type="relationship" target="father" value="+8" />
+                <effect type="relationship" target="mother" value="+10" />
+                <effect type="energy" value="-15" />
+                <effect type="money" value="+500" note="Мать даст немного денег" />
+              </effects>
+            </action>
+          </action_group>
+
+        </action_list>
+      </actions_section>
+
+      <!-- Информационный блок -->
+      <info_panel style="compact">
+        <title>ℹ️ Информация:</title>
+        <info_list>
+          <info_item>
+            <icon>📅</icon>
+            <text>Последний визит: {days_since_last_visit} дн. назад</text>
+            <hint visible="{days_since_last_visit > 7}">
+              Родители скучают по вам
+            </hint>
+          </info_item>
+          
+          <info_item visible="{has_upcoming_event}">
+            <icon>🎉</icon>
+            <text>Скоро: {event_name} ({event_date})</text>
+          </info_item>
+          
+          <info_item visible="{has_mail}">
+            <icon>📬</icon>
+            <text>Для вас пришла почта</text>
+          </info_item>
+        </info_list>
+      </info_panel>
+
+    </content_area>
+
+    <!-- Кнопка выхода -->
+    <navigation_button position="bottom">
+      <button id="leave_house" action="navigate_back">
+        <icon>◀️</icon>
+        <label>На улицу</label>
+      </button>
+    </navigation_button>
+
+  </components>
+
+  <!-- Интеграция с системами -->
+  <integrations>
+    <component name="HUD" position="top" />
+    <component name="BottomNavigation" position="bottom" />
+    <dialog_system type="npc_dialogue" 
+                   characters="father,mother" 
+                   tree="family_dialogues" />
+    <event_system type="family_events" />
+  </integrations>
+
+  <!-- Динамические условия -->
+  <dynamic_logic>
+    
+    <!-- Доступность родителей по времени -->
+    <npc_schedule npc="father">
+      <available time="06:00-08:00" activity="breakfast" />
+      <available time="19:00-23:00" activity="evening_home" />
+      <available condition="weekend" time="09:00-22:00" />
+    </npc_schedule>
+
+    <npc_schedule npc="mother">
+      <available time="06:00-09:00" activity="morning_chores" />
+      <available time="17:00-23:00" activity="evening_home" />
+      <available condition="weekend" time="08:00-23:00" />
+    </npc_schedule>
+
+    <!-- Особые события -->
+    <special_events>
+      <event id="birthday" trigger="{is_parent_birthday}">
+        <action_unlock id="celebrate_birthday" />
+        <dialogue_branch branch="birthday_celebration" />
+      </event>
+      
+      <event id="holiday" trigger="{is_holiday}">
+        <atmosphere_override description="Праздничная атмосфера в доме" />
+        <action_modify id="family_dinner" effects_multiplier="1.5" />
+      </event>
+      
+      <event id="family_conflict" trigger="{story_flag_family_conflict}">
+        <atmosphere_override mood="tense" />
+        <dialogue_branch branch="resolve_conflict" />
+      </event>
+    </special_events>
+
+  </dynamic_logic>
+
+  <!-- Аналитика и метрики -->
+  <tracking>
+    <metric id="visits_count" type="counter" />
+    <metric id="time_spent_home" type="duration" />
+    <metric id="family_dinners_count" type="counter" />
+    <metric id="parent_relationship_trend" type="trend" />
+  </tracking>
+
+</screen>

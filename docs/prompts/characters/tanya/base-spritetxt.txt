@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<visual-generation-prompt>
+    <meta>
+        <name>Tatyana Base Sprite for Animation Atlases</name>
+        <entity-type>character</entity-type>
+        <entity-id>tatyana</entity-id>
+        <aspect>base-sprite</aspect>
+        <version>1.0.0</version>
+        <last-updated>2026-03-01</last-updated>
+
+        <!-- Явные ссылки на системные промты, которые должны быть загружены в один контекст -->
+        <extends>
+            <!-- Общий визуальный workflow (правила, формат атласов, no-pixel-art) -->
+            <prompt>../../_core/visual-generation-workflow.xml</prompt>
+            <!-- Глобальные визуальные спеки персонажей (палитра, общий стиль) -->
+            <prompt>../character-visual-specs.xml</prompt>
+            <!-- Индивидуальные визуальные спеки Тани (внешность, аутфиты, base-sprite требования) -->
+            <prompt>./visual-specs.xml</prompt>
+            <!-- Спецификация анимаций Тани (набор атласов, fps, размеры спрайтов) -->
+            <prompt>./tatyana-animations.xml</prompt>
+        </extends>
+    </meta>
+
+    <context>
+        <usage>Базовый изометрический спрайт Тани, используемый как эталон для всех анимационных атласов idle, walk, work, sleep, interaction, emotion, grooming</usage>
+        <screens>
+            <screen>RoomPage</screen>
+            <screen>OfficePage</screen>
+            <screen>ParkPage</screen>
+            <screen>FatherHousePage</screen>
+        </screens>
+        <approval-pattern>single-item</approval-pattern>
+    </context>
+
+    <requirements>
+        <!-- Стиль и запреты тянем из visual-generation-workflow + character-visual-specs -->
+        <style>
+            <overall>
+                <description>Мягкий современный 2D, реалистичные пропорции с лёгкой стилизацией, вдохновение Gris / Spiritfarer / Celeste</description>
+                <no-pixel-art>true</no-pixel-art>
+                <forbidden>
+                    <item>pixel art</item>
+                    <item>видимая сетка пикселей</item>
+                    <item>ретро 8-bit/16-bit стиль</item>
+                </forbidden>
+            </overall>
+        </style>
+
+        <sprite-target>
+            <!-- Требования к спрайту из tatyana-animations -->
+            <size>
+                <width>64</width>
+                <height>64</height>
+            </size>
+            <perspective>isometric 2:1 (21–45°)</perspective>
+            <usage>
+                <item>idle-neutral.webp</item>
+                <item>idle-happy.webp</item>
+                <item>idle-tired.webp</item>
+                <item>walk-*-*.webp</item>
+                <item>work-computer.webp</item>
+                <item>sleep.webp</item>
+                <item>interaction-*.webp</item>
+                <item>emotion-*.webp</item>
+                <item>grooming-mirror.webp</item>
+            </usage>
+        </sprite-target>
+
+        <character-from-spec>
+            <source>./visual-specs.xml</source>
+            <notes>
+                <note>Внешность (кожа, лицо, волосы, глаза, фигура) строго соответствует Tanya Visual Specifications</note>
+                <note>Использовать аутфит home-work как базовый наряд для всех внутренних анимаций (работа дома, idle, часть эмоций)</note>
+            </notes>
+        </character-from-spec>
+
+        <pose>
+            <description>Нейтральная стоячая поза, пригодная для цикла idle и старта ходьбы</description>
+            <details>
+                <detail>Татьяна стоит прямо, вес равномерно распределён или слегка смещён на одну ногу, без сильного наклона корпуса</detail>
+                <detail>Плечи расслаблены, спина ровная, естественная осанка</detail>
+                <detail>Руки опущены вдоль тела или слегка согнуты в локтях, кисти расслаблены</detail>
+                <detail>Ступни чуть развернуты, чтобы силуэт хорошо читался в изометрии</detail>
+                <detail>Выражение лица нейтрально-доброжелательное, без яркой эмоции (поддерживает idle-neutral)</detail>
+            </details>
+        </pose>
+
+        <view>
+            <type>isometric</type>
+            <camera-angle>около 30–40° сверху, как в tatyana-animations</camera-angle>
+            <orientation>
+                <detail>Корпус и голова ориентированы как для анимации walk-south (базовое «лицом к игроку» направление)</detail>
+                <detail>Следить, чтобы silhouette хорошо читался на 64x64 в атласах</detail>
+            </orientation>
+        </view>
+
+        <outfit>
+            <id>home-work</id>
+            <from-spec>./visual-specs.xml</from-spec>
+            <must-have>
+                <item>Уютный свитер или кардиган из палитры Тани (бежевый, розовый, мятный)</item>
+                <item>Удобные джинсы или мягкие брюки нейтрального цвета</item>
+                <item>Домашние тапочки или носки</item>
+                <item>Цепочка с маленьким кулоном-сердечком (может быть чуть стилизована, но должна читаться как светлый акцент на груди)</item>
+            </must-have>
+        </outfit>
+
+        <rendering>
+            <background>
+                <type>прозрачный</type>
+                <description>Фон полностью прозрачный; никакого доп. окружения, только персонаж</description>
+            </background>
+            <resolution>
+                <width>64</width>
+                <height>64</height>
+            </resolution>
+            <format>WebP или PNG, затем будет собран в горизонтальные спрайт-атласы согласно tatyana-animations</format>
+            <color-mode>RGB</color-mode>
+            <forbidden>
+                <item>Текст и логотипы</item>
+                <item>Слишком мелкие детали, не читающиеся в 64x64</item>
+            </forbidden>
+        </rendering>
+    </requirements>
+
+    <prompt-text>
+        <![CDATA[
+Ты — художник по 2D-анимациям для игры с изометрическим видом.
+
+Сначала мысленно применяй следующие документы (они загружаются вместе с этим описанием):
+1) Общий workflow генерации визуала: ../../_core/visual-generation-workflow.xml
+2) Character Visual Specifications (общий стиль и палитра): ../character-visual-specs.xml
+3) Tanya Visual Specifications (внешность и одежда Тани): ./visual-specs.xml
+4) Спецификация анимаций Тани (idle, walk, work, sleep, interaction, emotion, grooming): ./tatyana-animations.xml
+
+На их основе создай базовый изометрический спрайт Татьяны:
+
+Персонаж:
+– Женщина около 30 лет, рост ~165 см, стройная женственная фигура.
+– Тёплый бежевый тон кожи, бордовые волнистые волосы средней длины, зелёные миндалевидные глаза.
+– Лицо с мягкими чертами и нейтрально-доброжелательным выражением, без ярких эмоций.
+
+Поза:
+– Стоит прямо в естественной позе, пригодной для цикла idle и старта ходьбы.
+– Плечи расслаблены, руки опущены или слегка согнуты, кисти расслаблены.
+– Ступни и корпус ориентированы так, как это требуется для направления walk-south в tatyana-animations.
+
+Одежда:
+– Базовый аутфит «home-work»: уютный свитер/кардиган из указанной палитры, удобные брюки, домашняя обувь.
+– Цепочка с маленьким кулоном-сердечком заметна на груди, но без слишком тонких линий.
+
+Ракурс и размер:
+– Изометрическая перспектива (камера сверху под углом ~30–40°), как в остальных анимациях Тани.
+– Полный персонаж в пределах 64x64 пикселей, на прозрачном фоне, без окружения.
+
+Стиль:
+– Современный мягкий 2D, вдохновлённый Gris / Spiritfarer / Celeste.
+– Строго без pixel art и ретро 8-bit/16-bit эстетики; никаких видимых пиксельных лестниц.
+
+Результат должен быть пригоден как эталонный кадр для всех спрайт-атласов Тани, описанных в спецификации tatyana-animations.xml.
+        ]]>
+    </prompt-text>
+
+    <output>
+        <save-to>assets/characters/tatyana/base/tatyana_base_64x64_v1.webp</save-to>
+        <entity-mirror-path>assets/characters/tatyana/</entity-mirror-path>
+        <atlas-integration>
+            <note>Использовать как базовый кадр для атласов idle-neutral, walk-*, work-computer, sleep, interaction-*, emotion-*, grooming-mirror</note>
+        </atlas-integration>
+    </output>
+</visual-generation-prompt>

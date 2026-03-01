@@ -1,0 +1,62 @@
+<visual-generation-prompt>
+    <meta>
+        <name>Tatyana Sleep Atlas</name>
+        <entity-type>character</entity-type>
+        <entity-id>tatyana</entity-id>
+        <aspect>animation-sleep</aspect>
+        <version>1.0.0</version>
+        <last-updated>2026-03-01</last-updated>
+        <extends>
+            <prompt>../../_core/visual-generation-workflow.xml</prompt>
+            <prompt>../character-visual-specs.xml</prompt>
+            <prompt>./visual-specs.xml</prompt>
+            <prompt>./tatyana-animations.xml</prompt>
+        </extends>
+    </meta>
+
+    <context>
+        <usage>Сон Тани в кровати в комнате (sleeping state)</usage>
+        <atlas-id>sleep</atlas-id>
+        <approval-pattern>atlas</approval-pattern>
+    </context>
+
+    <requirements>
+        <animation>
+            <name>sleep</name>
+            <type>loop</type>
+            <frames>
+                <count>20</count>
+                <frame-size>
+                    <width>128</width>
+                    <height>64</height>
+                </frame-size>
+                <fps>4</fps>
+                <loop>true</loop>
+            </frames>
+            <description>Таня лежит в кровати, спокойное дыхание, лёгкое движение груди и одеяла</description>
+        </animation>
+
+        <technical>
+            <atlas-format>horizontal-strip</atlas-format>
+            <background>прозрачный, кровать и постельное бельё могут входить в тот же спрайт</background>
+            <file-format>WebP</file-format>
+        </technical>
+    </requirements>
+
+    <prompt-text>
+        <![CDATA[
+Создай спрайт-атлас sleep для Тани:
+
+– 20 кадров 128x64, горизонтальный атлас, FPS 4, loop.
+– Татьяна лежит в кровати (изометрический вид сверху под углом), глаза закрыты, выражение лица спокойное.
+– Одеяло чуть поднимается и опускается от дыхания, небольшие микродвижения тела, создающие ощущение жизни.
+– Аутфит может быть упрощён до "relax"/пижамы, как в visual-specs.
+
+Внешность и стилистика должны оставаться узнаваемыми.
+        ]]>
+    </prompt-text>
+
+    <output>
+        <save-to>assets/characters/tatyana/animations/sleep/tatyana_sleep_atlas.webp</save-to>
+    </output>
+</visual-generation-prompt>

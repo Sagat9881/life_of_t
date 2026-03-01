@@ -1,0 +1,71 @@
+<visual-generation-prompt>
+    <meta>
+        <name>Tatyana Idle Happy Atlas</name>
+        <entity-type>character</entity-type>
+        <entity-id>tatyana</entity-id>
+        <aspect>animation-idle-happy</aspect>
+        <version>1.0.0</version>
+        <last-updated>2026-03-01</last-updated>
+        <extends>
+            <prompt>../../_core/visual-generation-workflow.xml</prompt>
+            <prompt>../character-visual-specs.xml</prompt>
+            <prompt>./visual-specs.xml</prompt>
+            <prompt>./tatyana-animations.xml</prompt>
+        </extends>
+    </meta>
+
+    <context>
+        <usage>Idle анимация, когда показатель счастья высок (например, happiness &gt;= 70)</usage>
+        <atlas-id>idle-happy</atlas-id>
+        <approval-pattern>atlas</approval-pattern>
+    </context>
+
+    <requirements>
+        <animation>
+            <name>idle</name>
+            <variant>idle-happy</variant>
+            <type>loop</type>
+            <expression>happy</expression>
+            <frames>
+                <count>24</count>
+                <frame-size>
+                    <width>64</width>
+                    <height>64</height>
+                </frame-size>
+                <fps>6</fps>
+                <loop>true</loop>
+            </frames>
+            <description>Более живой, радостный idle: мягкая улыбка, лёгкое покачивание, чуть больше энергии в позе</description>
+        </animation>
+
+        <motion-guidelines>
+            <detail>Добавь лёгкое подпрыгивание или ускоренное покачивание корпуса, но очень деликатно</detail>
+            <detail>Улыбка на лице более заметна, взгляд чуть более открытый</detail>
+        </motion-guidelines>
+
+        <technical>
+            <atlas-format>horizontal-strip</atlas-format>
+            <background>прозрачный</background>
+            <file-format>WebP</file-format>
+            <max-size-kb>500</max-size-kb>
+        </technical>
+    </requirements>
+
+    <prompt-text>
+        <![CDATA[
+Создай вариант idle-happy Тани на основе idle-neutral, с опорой на те же системные файлы.
+
+– 24 кадра, 64x64, горизонтальный спрайт-атлас.
+– Та же базовая поза и ракурс, что в idle-neutral, но с более радостной энергетикой.
+– Улыбка шире, глаза чуть более раскрыты, положение корпуса немного более "подтянуто".
+– Покачивание и микродвижения чуть более оживлённые, но не превращаются в активный танец.
+– Подходит для состояния, когда счастье высокое.
+
+Кадры должны проигрываться с FPS 6 в бесконечном цикле.
+        ]]>
+    </prompt-text>
+
+    <output>
+        <save-to>assets/characters/tatyana/animations/idle/tatyana_idle_happy_atlas.webp</save-to>
+    </output>
+</visual-generation-prompt>
