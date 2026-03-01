@@ -1,8 +1,6 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { RoomPage } from './pages/RoomPage';
 import { BackgroundTest } from './pages/BackgroundTest';
-import { BottomNavigation } from './components/navigation/BottomNavigation';
 import './App.css';
 
 function App() {
@@ -14,12 +12,6 @@ function App() {
           <Route path="/room" element={<RoomPage />} />
           <Route path="/test/backgrounds" element={<BackgroundTest />} />
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        
-        {/* Show bottom nav only on main pages, not on test pages */}
-        <Routes>
-          <Route path="/test/*" element={null} />
-          <Route path="*" element={<BottomNavigation />} />
         </Routes>
       </div>
     </BrowserRouter>
