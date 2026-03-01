@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  GARFIELD CHARACTER ANIMATIONS - ELEGANT GINGER CAT
+  Детальная спецификация анимаций кота Гарфилда
+  
+  Родительский файл: ../ANIMATION_SYSTEM.xml
+  Используется: ../../screens/room/RoomPage.xml
+  
+  КРИТИЧНО: АБСОЛЮТНАЯ ПРОТИВОПОЛОЖНОСТЬ Гарфилду из комиксов/фильмов!
+  НЕ ТОЛСТЫЙ, НЕ ЛЕНИВЫЙ внешне - СТРОЙНЫЙ, ИЗЯЩНЫЙ, ГРАЦИОЗНЫЙ!
+-->
+
+<character name="garfield" type="npc-pet">
+
+  <meta>
+    <full-name>Гарфилд</full-name>
+    <breed>Домашний рыжий кот</breed>
+    <description>Стройный, изящный рыжий кот - ПОЛНАЯ ПРОТИВОПОЛОЖНОСТЬ Гарфилду из мультфильмов</description>
+    <personality>Спокойный, грациозный, независимый, любит комфорт, ленив по характеру (но НЕ внешне!)</personality>
+    <unlocked-when>relationship[sam] > 50</unlocked-when>
+  </meta>
+
+  <!-- ВИЗУАЛЬНЫЙ ДИЗАЙН -->
+  <visual-design style="pixel-art-isometric">
+    <sprite-size width="48" height="48" />
+    <perspective>Isometric 2:1 (45°)</perspective>
+    
+    <appearance type="domestic-ginger-cat">
+      <critical-distinction priority="MAXIMUM">
+        <rule>АБСОЛЮТНО НЕ ТОЛСТЫЙ как в комиксах/фильмах!</rule>
+        <rule>СТРОЙНЫЙ, ИЗЯЩНЫЙ, ГРАЦИОЗНЫЙ кот</rule>
+        <rule>ТОНКАЯ талия, ДЛИННЫЕ лапы, ГИБКОЕ тело</rule>
+      </critical-distinction>
+
+      <body-type>
+        <build>Стройный, атлетичный, элегантный</build>
+        <size>Среднего размера (почти как Сэм, но выше)</size>
+        <silhouette>Гибкий, грациозный силуэт</silhouette>
+        <legs>Длинные, тонкие, изящные</legs>
+        <tail>Длинный, пушистый, грациозно изогнутый</tail>
+      </body-type>
+
+      <coat type="short-medium">
+        <texture>Мягкая, гладкая, блестящая</texture>
+        <length>Короткая-средняя</length>
+        <grooming>Хорошо ухоженная</grooming>
+      </coat>
+
+      <color-pattern type="solid-ginger" priority="critical">
+        <primary color="#E07B39" name="ginger-orange">Основной рыжий (оранжево-рыжий)</primary>
+        <stripes color="#C66934" subtle="true">Лёгкие табби-полоски (опционально)</stripes>
+        <chest color="#F5D5A8" light="true">Светлая грудка</chest>
+        <paws color="#F5D5A8" light="true">Светлые лапки</paws>
+        <nose color="#FF8C94" pink="true" />
+        <eyes color="#6EAA3E" green="true" />
+      </color-pattern>
+
+      <head>
+        <shape>Изящная клиновидная форма</shape>
+        <ears size="средние" shape="треугольные" position="высоко посажены" />
+        <eyes size="большие" color="зелёные" expression="спокойно-высокомерное" />
+        <whiskers length="длинные" color="white" />
+      </head>
+
+      <palette>
+        <primary>#E07B39</primary> <!-- Рыжий -->
+        <stripes>#C66934</stripes> <!-- Тёмно-рыжий -->
+        <light>#F5D5A8</light> <!-- Светлый кремовый -->
+        <nose>#FF8C94</nose> <!-- Розовый -->
+        <eyes>#6EAA3E</eyes> <!-- Зелёный -->
+      </palette>
+    </appearance>
+
+    <characteristic-features priority="critical">
+      <feature>СТРОЙНОЕ тело (НЕ толстый!)</feature>
+      <feature>Изящные длинные лапы</feature>
+      <feature>Грациозные движения</feature>
+      <feature>Рыжий (оранжевый) окрас</feature>
+      <feature>Зелёные глаза</feature>
+      <feature>Длинный пушистый хвост</feature>
+    </characteristic-features>
+  </visual-design>
+
+  <!-- АНИМАЦИИ (ВСЕ HORIZONTAL STRIP ATLASES) -->
+  <animations atlas-format="horizontal-strip">
+    
+    <!-- IDLE (ПОКОЙ) -->
+    <animation name="idle" type="loop" priority="low">
+      <description>Спокойно сидит/стоит, лёгкое дыхание, хвост медленно покачивается</description>
+      
+      <variants>
+        <variant name="idle-sitting" default="true">
+          <atlas path="/sprites/characters/garfield/idle-sitting.webp" />
+          <frames count="20" />
+          <frame-size width="48" height="48" />
+          <fps>4</fps>
+          <loop>true</loop>
+          <description>Сидит в изящной позе, хвост обвивает лапы</description>
+        </variant>
+
+        <variant name="idle-standing">
+          <atlas path="/sprites/characters/garfield/idle-standing.webp" />
+          <frames count="20" />
+          <fps>4</fps>
+          <loop>true</loop>
+          <description>Стоит, грациозно покачивает хвостом</description>
+        </variant>
+
+        <variant name="idle-observing">
+          <atlas path="/sprites/characters/garfield/idle-observing.webp" />
+          <frames count="20" />
+          <fps>5</fps>
+          <loop>true</loop>
+          <description>Сидит, наблюдает, голова поворачивается</description>
+        </variant>
+      </variants>
+    </animation>
+
+    <!-- WALK (ХОДЬБА) -->
+    <animation name="walk" type="loop" priority="normal">
+      <description>Грациозная, плавная походка в 4 направлениях</description>
+      
+      <directions>
+        <direction name="north" angle="0°">
+          <atlas path="/sprites/characters/garfield/walk-north.webp" />
+          <frames count="20" />
+          <frame-size width="48" height="48" />
+          <fps>8</fps>
+          <loop>true</loop>
+          <gait>Плавная, грациозная, неспешная</gait>
+        </direction>
+
+        <direction name="east" angle="90°">
+          <atlas path="/sprites/characters/garfield/walk-east.webp" />
+          <frames count="20" />
+          <fps>8</fps>
+          <loop>true</loop>
+        </direction>
+
+        <direction name="south" angle="180°">
+          <atlas path="/sprites/characters/garfield/walk-south.webp" />
+          <frames count="20" />
+          <fps>8</fps>
+          <loop>true</loop>
+        </direction>
+
+        <direction name="west" angle="270°">
+          <atlas path="/sprites/characters/garfield/walk-west.webp" />
+          <frames count="20" />
+          <fps>8</fps>
+          <loop>true</loop>
+        </direction>
+      </directions>
+    </animation>
+
+    <!-- SLEEP (СОН) -->
+    <animation name="sleep" type="loop" priority="low">
+      <description>Спит в изящной позе, свернувшись калачиком</description>
+      
+      <variants>
+        <variant name="sleep-curled" default="true">
+          <atlas path="/sprites/characters/garfield/sleep-curled.webp" />
+          <frames count="20" />
+          <fps>3</fps>
+          <loop>true</loop>
+          <description>Свернулся калачиком, хвост обвивает тело</description>
+        </variant>
+
+        <variant name="sleep-stretched">
+          <atlas path="/sprites/characters/garfield/sleep-stretched.webp" />
+          <frames count="20" />
+          <fps>3</fps>
+          <loop>true</loop>
+          <description>Растянулся во всю длину</description>
+        </variant>
+      </variants>
+    </animation>
+
+    <!-- GROOMING (ВЫЛИЗЫВАНИЕ) -->
+    <animation name="groom" type="loop" priority="normal">
+      <description>Вылизывает шёрстку, умывается</description>
+      
+      <variants>
+        <variant name="groom-face">
+          <atlas path="/sprites/characters/garfield/groom-face.webp" />
+          <frames count="25" />
+          <fps>8</fps>
+          <loop>true</loop>
+          <description>Умывает мордочку лапкой</description>
+        </variant>
+
+        <variant name="groom-body">
+          <atlas path="/sprites/characters/garfield/groom-body.webp" />
+          <frames count="25" />
+          <fps>8</fps>
+          <loop>true</loop>
+          <description>Вылизывает тело</description>
+        </variant>
+
+        <variant name="groom-tail">
+          <atlas path="/sprites/characters/garfield/groom-tail.webp" />
+          <frames count="25" />
+          <fps>8</fps>
+          <loop>true</loop>
+          <description>Вылизывает хвост</description>
+        </variant>
+      </variants>
+    </animation>
+
+    <!-- STRETCH (ПОТЯГИВАЕТСЯ) -->
+    <animation name="stretch" type="one-shot" priority="normal">
+      <description>Потягивается после сна, грациозное движение</description>
+      
+      <atlas path="/sprites/characters/garfield/stretch.webp" />
+      <frames count="25" />
+      <fps>8</fps>
+      <loop>false</loop>
+      
+      <keyframes>
+        <keyframe at="0-8" action="arch-back" />
+        <keyframe at="9-15" action="extend-front-legs" />
+        <keyframe at="16-25" action="full-body-stretch" />
+      </keyframes>
+    </animation>
+
+    <!-- JUMP (ПРЫЖОК) -->
+    <animation name="jump" type="one-shot" priority="normal">
+      <description>Грациозный прыжок на возвышенность</description>
+      
+      <atlas path="/sprites/characters/garfield/jump.webp" />
+      <frames count="25" />
+      <fps>12</fps>
+      <loop>false</loop>
+      <description>Плавный прыжок вверх, мягкое приземление</description>
+    </animation>
+
+    <!-- SIT DOWN (ПРИСАЖИВАЕТСЯ) -->
+    <animation name="sit-down" type="one-shot-to-loop" priority="normal">
+      <description>Плавно присаживается, потом сидит неподвижно</description>
+      
+      <atlas path="/sprites/characters/garfield/sit-down.webp" />
+      <frames count="25" />
+      <fps>8</fps>
+      <loop>true</loop>
+      <loop-from-frame>15</loop-from-frame>
+    </animation>
+
+    <!-- LIE DOWN (ЛОЖИТСЯ) -->
+    <animation name="lie-down" type="one-shot-to-loop" priority="normal">
+      <description>Плавно ложится, складывает лапки под себя</description>
+      
+      <atlas path="/sprites/characters/garfield/lie-down.webp" />
+      <frames count="25" />
+      <fps>8</fps>
+      <loop>true</loop>
+      <loop-from-frame>18</loop-from-frame>
+    </animation>
+
+    <!-- MEOW (МЯУКАЕТ) -->
+    <animation name="meow" type="one-shot" priority="high">
+      <description>Мяукает, открывает рот</description>
+      
+      <atlas path="/sprites/characters/garfield/meow.webp" />
+      <frames count="20" />
+      <fps>8</fps>
+      <loop>false</loop>
+      <sound-effect>cat-meow-soft.mp3</sound-effect>
+    </animation>
+
+    <!-- PURR (МУРЛЫКАЕТ) -->
+    <animation name="purr" type="loop" priority="normal">
+      <description>Мурлыкает от удовольствия</description>
+      
+      <atlas path="/sprites/characters/garfield/purr.webp" />
+      <frames count="20" />
+      <fps>6</fps>
+      <loop>true</loop>
+      <trigger>Being petted, comfortable, happy</trigger>
+      <sound-effect>cat-purr.mp3</sound-effect>
+    </animation>
+
+    <!-- PLAY (ИГРА) -->
+    <animation name="play" type="loop" priority="normal">
+      <description>Играет с игрушкой, лапками бьёт по объекту</description>
+      
+      <atlas path="/sprites/characters/garfield/play.webp" />
+      <frames count="25" />
+      <fps>10</fps>
+      <loop>true</loop>
+      <trigger>Rare, only when energetic</trigger>
+    </animation>
+
+    <!-- EAT (ЕДА) -->
+    <animation name="eat" type="loop" priority="normal">
+      <description>Ест из миски, аккуратно и грациозно</description>
+      
+      <atlas path="/sprites/characters/garfield/eat.webp" />
+      <frames count="20" />
+      <fps>6</fps>
+      <loop>true</loop>
+    </animation>
+
+  </animations>
+
+  <!-- AI ПОВЕДЕНИЕ -->
+  <behavior-system>
+    <personality>
+      <trait name="lazy" value="high">Ленивый по характеру, но грациозный</trait>
+      <trait name="independent" value="high">Независимый</trait>
+      <trait name="elegant" value="maximum">Изящный в каждом движении</trait>
+      <trait name="comfort-loving" value="high">Любит комфорт</trait>
+    </personality>
+
+    <favorite-spots>
+      <spot location="bed" weight="50%" action="sleep-curled" />
+      <spot location="window-sill" weight="30%" action="idle-observing" />
+      <spot location="sunny-spot" weight="15%" action="sleep-stretched" />
+      <spot location="high-furniture" weight="5%" action="idle-sitting" />
+    </favorite-spots>
+
+    <movement>
+      <wander enabled="false" reason="Ленивый, предпочитает сидеть/лежать" />
+      <teleport-to-spot enabled="true" reason="Магически появляется в любимых местах" />
+      <graceful-walk speed="0.5" only-when-necessary="true" />
+    </movement>
+
+    <reactions>
+      <reaction trigger="tatyana-enters" action="open-one-eye" animation="idle-observing" interest="low" />
+      <reaction trigger="tatyana-pets" action="purr" animation="purr" happiness="+5" />
+      <reaction trigger="food-prepared" action="walk-slowly-to-bowl" animation="walk" speed="slow" />
+      <reaction trigger="sam-approaches" action="ignore" />
+      <reaction trigger="stranger" action="hide" />
+    </reactions>
+
+    <schedule>
+      <activity time="00:00-08:00" action="sleep" location="bed" />
+      <activity time="08:00-10:00" action="groom" animation="groom-face" />
+      <activity time="10:00-14:00" action="nap" location="sunny-spot" />
+      <activity time="14:00-16:00" action="observe" location="window" />
+      <activity time="16:00-20:00" action="nap" location="bed" />
+      <activity time="20:00-00:00" action="sleep" location="bed" />
+    </schedule>
+  </behavior-system>
+
+  <!-- ТРЕБОВАНИЯ К СПРАЙТАМ -->
+  <sprite-requirements>
+    <requirement priority="CRITICAL">АБСОЛЮТНО НЕ ТОЛСТЫЙ! СТРОЙНЫЙ, ИЗЯЩНЫЙ, ГРАЦИОЗНЫЙ!</requirement>
+    <requirement priority="critical">Рыжий (оранжевый) окрас #E07B39</requirement>
+    <requirement priority="critical">Зелёные глаза</requirement>
+    <requirement priority="critical">Длинные тонкие лапы</requirement>
+    <requirement priority="critical">Грациозные, плавные движения</requirement>
+    <requirement priority="high">Размер спрайта 48x48px</requirement>
+    <requirement priority="high">Изометрический угол 2:1 (45°)</requirement>
+    <requirement priority="medium">Тень под котом отдельным слоем</requirement>
+    <requirement priority="medium">Все атласы < 400KB после WebP сжатия</requirement>
+  </sprite-requirements>
+
+  <!-- ССЫЛКИ НА ASSETS -->
+  <assets-structure>
+    <base-path>/sprites/characters/garfield/</base-path>
+    
+    <files>
+      <file>idle-sitting.webp</file>
+      <file>idle-standing.webp</file>
+      <file>idle-observing.webp</file>
+      <file>walk-north.webp</file>
+      <file>walk-east.webp</file>
+      <file>walk-south.webp</file>
+      <file>walk-west.webp</file>
+      <file>sleep-curled.webp</file>
+      <file>sleep-stretched.webp</file>
+      <file>groom-face.webp</file>
+      <file>groom-body.webp</file>
+      <file>groom-tail.webp</file>
+      <file>stretch.webp</file>
+      <file>jump.webp</file>
+      <file>sit-down.webp</file>
+      <file>lie-down.webp</file>
+      <file>meow.webp</file>
+      <file>purr.webp</file>
+      <file>play.webp</file>
+      <file>eat.webp</file>
+    </files>
+  </assets-structure>
+
+</character>
