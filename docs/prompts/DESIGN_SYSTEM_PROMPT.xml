@@ -3,7 +3,7 @@
   DESIGN SYSTEM PROMPT
   Системный контекст для визуального дизайна игры Life of Tatyana
   Определяет строгие ограничения, технологии и визуальный стиль
-  
+
   Версия: 1.1
   Последнее обновление: 2026-03-01
 -->
@@ -90,7 +90,7 @@
       <neutral name="white-soft" hex="#FAFAFA" css-var="--color-white" usage="Текст на тёмном" />
       <neutral name="gray-mid" hex="#9CA3AF" css-var="--color-gray" usage="Вторичный текст" />
       <neutral name="black-soft" hex="#1F2937" css-var="--color-black" usage="Текст на светлом" />
-      
+
       <!-- Состояния -->
       <state name="success" hex="#10B981" css-var="--color-success" usage="Успешные действия" />
       <state name="warning" hex="#F59E0B" css-var="--color-warning" usage="Предупреждения" />
@@ -256,20 +256,20 @@
       <message tone="friendly" example="Пока здесь пусто, но скоро появится что-то интересное!" />
       <action-button visible="true" text="Начать" />
     </empty-state>
-    
+
     <error-page>
       <design style="branded" show-logo="true" />
       <message tone="helpful" example="Что-то пошло не так. Попробуем ещё раз?" />
       <action-button visible="true" text="Повторить" icon="refresh-cw" />
       <details expandable="true" for-developers="true" />
     </error-page>
-    
+
     <loading-skeleton>
       <enabled value="true" />
       <shimmer animation="true" color="rgba(240, 147, 251, 0.1)" />
       <shape match-content="true" />
     </loading-skeleton>
-    
+
     <inline-error>
       <icon name="alert-circle" color="var(--color-error)" />
       <message font-size="0.875rem" color="var(--color-error)" />
@@ -284,21 +284,21 @@
       <intensity values="light, medium, heavy, rigid, soft" />
       <usage>Все кнопки, свайпы, важные действия</usage>
     </haptic-feedback>
-    
+
     <safe-area respect="true" for="ios-notch">
       <padding-top dynamic="env(safe-area-inset-top)" />
       <padding-bottom dynamic="env(safe-area-inset-bottom)" />
     </safe-area>
-    
+
     <back-button>
       <behavior default="close-modal" />
       <custom-handler enabled="true" for="navigation" />
     </back-button>
-    
+
     <theme-params auto-apply="false" reason="Используем собственную цветовую палитру">
       <rule>Игнорировать Telegram theme colors для уникального стиля</rule>
     </theme-params>
-    
+
     <main-button>
       <usage>Основное действие на экране (например, 'Выполнить действие')</usage>
       <style background="var(--color-primary)" color="white" />
@@ -411,7 +411,7 @@
 
   <!-- ЧЕКЛИСТ ПЕРЕД КОММИТОМ -->
   <commit-checklist>
-    <check>✅ Компонент < 200 строк кода (разбить если больше)</check>
+    <check>✅ Компонент не больше 200 строк кода (разбить если больше)</check>
     <check>✅ CSS использует CSS Variables из палитры</check>
     <check>✅ Все анимации только на transform/opacity</check>
     <check>✅ Mobile breakpoint протестирован в DevTools</check>
