@@ -1,62 +1,41 @@
-import { type ButtonHTMLAttributes, type ReactNode } from 'react';
-import { useHaptic } from '@/hooks/useHaptic';
+import React from 'react';
 import styles from './Button.module.css';
+import { useHaptic } from '../../../hooks/useHaptic';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  children: ReactNode;
-  variant?: 'primary' | 'secondary' | 'accent' | 'outline';
+export interface ButtonProps {
+  children: React.ReactNode;
+  variant?: 'primary' | 'secondary' | 'danger';
   size?: 'small' | 'medium' | 'large';
-  fullWidth?: boolean;
-  isLoading?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
+  className?: string;
 }
 
-export const Button = ({
+export const Button: React.FC<ButtonProps> = ({
   children,
   variant = 'primary',
   size = 'medium',
-  fullWidth = false,
-  isLoading = false,
-  disabled,
+  disabled = false,
   onClick,
   className = '',
-  ...props
-}: ButtonProps) => {
-  const { impact } = useHaptic();
+}) => {
+  const haptic = useHaptic();
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!disabled && !isLoading) {
-      impact('light');
-      onClick?.(e);
+  const handleClick = () => {
+    if (!disabled && onClick) {
+      haptic.light();
+      onClick();
     }
   };
 
-  const classNames = [
-    styles.button,
-    styles[variant],
-    styles[size],
-    fullWidth ? styles.fullWidth : '',
-    isLoading ? styles.loading : '',
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
-
   return (
     <button
-      className={classNames}
-      disabled={disabled || isLoading}
+      className={`${styles.button} ${styles[variant]} ${styles[size]} ${className}`}
       onClick={handleClick}
-      {...props}
+      disabled={disabled}
+      type="button"
     >
-      {isLoading ? (
-        <span className={styles.spinner}>
-          <span className={styles.spinnerDot} />
-          <span className={styles.spinnerDot} />
-          <span className={styles.spinnerDot} />
-        </span>
-      ) : (
-        children
-      )}
+      {children}
     </button>
   );
 };

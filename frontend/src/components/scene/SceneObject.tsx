@@ -15,7 +15,6 @@ interface SceneObjectProps {
 
 export const SceneObject: React.FC<SceneObjectProps> = ({
   object,
-  state,
   onTap,
 }) => {
   const { id, position, sprite, category } = object;

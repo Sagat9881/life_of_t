@@ -2,7 +2,7 @@
  * App - Main application component with HUD, Navigation, and Scene
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { GameStateProvider } from './context/GameStateContext';
 import { HUD } from './components/ui/HUD';
 import { BottomNavigation, NavTab } from './components/ui/BottomNavigation';
