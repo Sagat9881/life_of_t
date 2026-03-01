@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ANIMATION SYSTEM PROMPT - ROOT
+  Корневой системный контекст для анимаций в игре Life of Tatyana
+  
+  Структура:
+  /animation/
+    - ANIMATION_SYSTEM.xml (этот файл - корневой)
+    - characters/ (анимации персонажей: Tatyana, Sam, Husband, Father, Garfield)
+    - objects/ (анимации объектов: bed, computer, phone, mirror)
+    - ui-effects/ (анимации UI: particles, notifications, transitions)
+  
+  Версия: 1.0
+  Последнее обновление: 2026-03-01
+-->
+
+<animation-system version="1.0" project="life-of-t">
+
+  <meta>
+    <description>Корневая спецификация системы анимаций</description>
+    <includes>
+      <include path="./characters/" description="Анимации всех персонажей игры" />
+      <include path="./objects/" description="Анимации интерактивных объектов" />
+      <include path="./ui-effects/" description="UI эффекты и переходы" />
+    </includes>
+  </meta>
+
+  <!-- ОБЩИЕ ПРИНЦИПЫ АНИМАЦИИ -->
+  <animation-principles reference="Punch Club">
+    <style>Pixel Art Frame-by-Frame Animation</style>
+    <inspiration primary="Punch Club" secondary="Stardew Valley, Undertale" />
+    <mood>Плавная, уютная, выразительная, современная</mood>
+    <performance-priority>60 FPS на мобильных устройствах</performance-priority>
+  </animation-principles>
+
+  <!-- ТЕХНИЧЕСКИЕ ОГРАНИЧЕНИЯ -->
+  <technical-constraints>
+    <frame-rate target="60fps" min="30fps" reason="Плавность на всех устройствах" />
+    <sprite-sheet-size max="2048x2048" reason="Поддержка старых GPU" />
+    <individual-sprite-size max="256x256" recommended="64x64 - 128x128" />
+    <max-animation-frames recommended="20-30" max="50" reason="Баланс плавности и размера файла" />
+    <format primary="WebP" fallback="PNG" reason="Оптимальное сжатие с прозрачностью" />
+    <compression quality="85-90%" reason="Баланс качества и размера" />
+  </technical-constraints>
+
+  <!-- АРХИТЕКТУРА СПРАЙТОВ -->
+  <sprite-architecture>
+    <atlas-format type="horizontal-strip" reason="Простота парсинга и рендеринга">
+      <description>Все кадры анимации в одну горизонтальную полоску</description>
+      <frame-separator width="0px" reason="Без разделителей для экономии места" />
+      <background transparency="true" alpha-channel="required" />
+    </atlas-format>
+
+    <naming-convention>
+      <pattern>{character}-{animation}-{state}.webp</pattern>
+      <examples>
+        <example>tatyana-idle-happy.webp</example>
+        <example>sam-walk-normal.webp</example>
+        <example>husband-work-focused.webp</example>
+      </examples>
+    </naming-convention>
+
+    <organization>
+      <structure>
+        /sprites/
+          /characters/
+            /tatyana/ - см. ./characters/tatyana.xml
+            /sam/ - см. ./characters/sam.xml
+            /husband/ - см. ./characters/husband.xml  
+          /objects/
+            /interactive/ - см. ./objects/interactive.xml
+          /ui/
+            /effects/ - см. ./ui-effects/particles.xml
+      </structure>
+    </organization>
+  </sprite-architecture>
+
+  <!-- ATLAS CONFIGURATION -->
+  <atlas-configuration>
+    <metadata-file path="/assets/atlas-config.json" format="JSON">
+      <description>Центральный файл конфигурации всех атласов</description>
+    </metadata-file>
+
+    <frame-data required="true">
+      <field name="frameWidth" type="number" required="true" />
+      <field name="frameHeight" type="number" required="true" />
+      <field name="frames" type="number" description="Количество кадров в атласе" />
+      <field name="fps" type="number" description="Кадров в секунду" />
+      <field name="loop" type="boolean" description="Зацикливать анимацию" />
+    </frame-data>
+  </atlas-configuration>
+
+  <!-- ПРОИЗВОДИТЕЛЬНОСТЬ -->
+  <performance-optimization>
+    <sprite-batching enabled="true">
+      <max-batch-size sprites="100" />
+    </sprite-batching>
+
+    <animation-pooling enabled="true">
+      <pool-size initial="20" max="50" />
+    </animation-pooling>
+
+    <culling enabled="true">
+      <viewport-culling>Не рендерить анимации вне viewport</viewport-culling>
+      <distance-culling>Упрощать анимации вдали</distance-culling>
+    </culling>
+
+    <frame-skip adaptive="true">
+      <threshold fps="30" action="reduce-quality" />
+      <threshold fps="20" action="skip-frames" />
+    </frame-skip>
+  </performance-optimization>
+
+  <!-- СИСТЕМА ТАЙМИНГА -->
+  <timing-system>
+    <frame-timing method="requestAnimationFrame" />
+    <interpolation enabled="false" reason="Pixel art требует чётких кадров" />
+    <synchronization>
+      <rule>Все анимации синхронизируются с game loop</rule>
+      <rule>Delta time для независимости от FPS</rule>
+    </synchronization>
+  </timing-system>
+
+  <!-- ПЕРЕХОДЫ МЕЖДУ АНИМАЦИЯМИ -->
+  <animation-transitions>
+    <blend-mode type="immediate" reason="Pixel art не требует блендинга" />
+
+    <state-machine enabled="true">
+      <description>Конечный автомат для управления переходами</description>
+      <rule>Приоритет: emotion > interaction > work > walk > idle</rule>
+    </state-machine>
+
+    <interruption policy="allow-with-priority">
+      <priority-order>
+        <level value="1" name="critical" examples="death, damage" />
+        <level value="2" name="high" examples="emotion, interaction" />
+        <level value="3" name="normal" examples="work, walk" />
+        <level value="4" name="low" examples="idle, ambient" />
+      </priority-order>
+    </interruption>
+  </animation-transitions>
+
+  <!-- ПРАВИЛА СОЗДАНИЯ СПРАЙТОВ -->
+  <sprite-creation-rules>
+    <pixel-art-guidelines>
+      <rule>Чёткие пиксельные границы, без anti-aliasing</rule>
+      <rule>Консистентная палитра цветов (из DESIGN_SYSTEM)</rule>
+      <rule>Изометрический угол 2:1 (45°)</rule>
+      <rule>Единый источник света (верхний левый угол)</rule>
+      <rule>Ограниченная палитра: 16-32 цвета на спрайт</rule>
+    </pixel-art-guidelines>
+
+    <frame-consistency>
+      <rule>Все кадры одной анимации ОДИНАКОВОГО размера</rule>
+      <rule>Персонаж в одной позиции по вертикали</rule>
+      <rule>Центр масс не прыгает между кадрами</rule>
+      <rule>Пиксельная сетка выровнена одинаково</rule>
+    </frame-consistency>
+
+    <animation-smoothness>
+      <rule>Минимум 6 кадров для плавной loop анимации</rule>
+      <rule>Ease-in/ease-out для начала/конца цикла</rule>
+      <rule>Промежуточные кадры для критических движений</rule>
+    </animation-smoothness>
+
+    <size-optimization>
+      <rule>Минимальный bounding box вокруг спрайта</rule>
+      <rule>Обрезка прозрачных областей</rule>
+      <rule>Компрессия WebP с quality 85-90%</rule>
+    </size-optimization>
+  </sprite-creation-rules>
+
+  <!-- ЗАПРЕТЫ -->
+  <forbidden>
+    <practice name="gif-animations" reason="Не контролируется timing, большой размер" />
+    <practice name="video-sprites" reason="Overhead, нет frame control" />
+    <practice name="different-frame-sizes" reason="Нарушает рендеринг" />
+    <practice name="anti-aliasing" reason="Размывает pixel art" />
+    <practice name="rotation-scaling" reason="Искажает pixel art" />
+    <practice name="> 2048px atlas" reason="Не поддерживается на старых GPU" />
+  </forbidden>
+
+  <!-- ЧЕКЛИСТ -->
+  <commit-checklist>
+    <check>✅ Все кадры одного размера</check>
+    <check>✅ Atlas < 500KB после компрессии</check>
+    <check>✅ FPS указан в atlas-config.json</check>
+    <check>✅ Анимация плавная при целевом FPS</check>
+    <check>✅ Прозрачность корректная</check>
+    <check>✅ Нет anti-aliasing</check>
+    <check>✅ Цвета из палитры</check>
+    <check>✅ Loop анимация зацикливается плавно</check>
+  </commit-checklist>
+
+</animation-system>
