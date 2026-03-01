@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<visual-generation-prompt>
+  <meta>
+    <name>Tatyana Idle Sad Atlas</name>
+    <entity-type>character</entity-type>
+    <entity-id>tatyana</entity-id>
+    <aspect>animation-idle-sad</aspect>
+    <version>1.0.0</version>
+    <last-updated>2026-03-01</last-updated>
+    <extends>../core/visual-generation-workflow.xml</extends>
+    <extends>../characters/tanya/visual-specs.xml</extends>
+    <extends>../characters/tanya/character-visual-specs.xml</extends>
+    <extends>../characters/tanya/tatyana-animations.xml</extends>
+  </meta>
+
+  <context>
+    <usage>Idle, используется когда уровень счастья низкий, но энергия не просела до состояния tired (например, happiness &lt; 30 и energy ≥ 30).</usage>
+    <atlas-id>idle-sad</atlas-id>
+    <approval-pattern>atlas</approval-pattern>
+  </context>
+
+  <requirements>
+    <animation>
+      <name>idle</name>
+      <variant>idle-sad</variant>
+      <type>loop</type>
+      <expression>sad</expression>
+
+      <frames>
+        <count>24</count>
+        <frame-size>
+          <width>64</width>
+          <height>64</height>
+        </frame-size>
+        <fps>6</fps>
+        <loop>true</loop>
+        <description>
+          Мягкая петля idle-анимации Татьяны в грустном состоянии: она стоит в базовой idle-позе, но с чуть опущенными плечами и головой, взгляд чаще направлен вниз, движения очень спокойные и немного замедленные.
+        </description>
+      </frames>
+
+      <style>
+        <overall>
+          <description>Мягкий 2D, без pixel art (никаких 8-bit/16-bit), визуально совместимый с Gris, Spiritfarer, Celeste и базовыми спрайтами Татьяны.</description>
+          <no-pixel-art>true</no-pixel-art>
+        </overall>
+        <character-from-spec>
+          <source>../characters/tanya/visual-specs.xml</source>
+          <outfit>home-work</outfit>
+        </character-from-spec>
+        <notes>
+          <note>Силуэт и базовая стойка максимально совместимы с idle-neutral, чтобы легко переключать атласы без “скачков” позы.</note>
+          <note>Изометрия, те же углы камеры, что и в base-sprite и idle-neutral.</note>
+        </notes>
+      </style>
+
+      <motion-guidelines>
+        <detail>Основное движение — едва заметное покачивание корпуса вперёд-назад и лёгкий “просед” плеч, подчёркивающий грусть.</detail>
+        <detail>Голова может чуть опускаться и подниматься в пределах 1–2 пикселей, с короткими паузами, чтобы избежать ощущения “кивающей игрушки”.</detail>
+        <detail>Руки остаются в примерно той же позиции, что в idle-neutral, возможны лёгкие микродвижения пальцев или кистей (например, пальцы чуть сжимаются и разжимаются).</detail>
+        <detail>Мимика: брови немного сведены, уголки губ опущены, глаза могут чуть прикрываться или смотреть вниз, но без сильной карикатурности.</detail>
+        <detail>Все движения плавные, без резких рывков; важна общая мягкость и ощущение “тихой грусти”, а не истерики.</detail>
+      </motion-guidelines>
+
+      <technical>
+        <atlas-format>horizontal-strip</atlas-format>
+        <background>transparent</background>
+        <file-format>WebP</file-format>
+        <max-size-kb>500</max-size-kb>
+      </technical>
+    </animation>
+  </requirements>
+
+  <prompt-text><![CDATA[
+1. Используй общий workflow из ../core/visual-generation-workflow.xml и визуальные спецификации Татьяны из ../characters/tanya/visual-specs.xml и ../characters/tanya/character-visual-specs.xml, а также правила анимаций из ../characters/tanya/tatyana-animations.xml.
+2. Создай looping idle-анимацию "idle-sad" для персонажа Татьяны в домашне-рабочем образе (home-work outfit), в изометрической проекции и стилистике, совпадающей с её base-sprite и idle-neutral атласом.
+3. Размер каждого кадра строго 64x64, все 24 кадра должны быть выстроены в одну горизонтальную полосу (horizontal strip) в порядке воспроизведения анимации.
+4. Поза и силуэт должны быть максимально близки к idle-neutral: та же стойка на ногах, тот же разворот корпуса и головы, те же пропорции. Отличия — в микродвижениях и передаче грусти.
+5. Передай грусть через чуть опущенные плечи, более закрытую осанку, небольшой наклон головы вперёд/вниз и мягкую, спокойную мимику с опущенными уголками губ и более тяжёлым взглядом.
+6. Основные движения: лёгкое покачивание корпуса и головы, очень небольшие микродвижения рук и пальцев, едва заметный вздох (например, понижением и последующим небольшим подъёмом плеч).
+7. Избегай резких, больших амплитуд и “мультяшных” перегибов. Должно ощущаться, что персонаж устал эмоционально или грустит, но ещё стоит и функционирует нормально.
+8. Стиль — мягкий 2D, вдохновлённый Gris/Spiritfarer/Celeste, без pixel art и без жёстких контуров. Никаких 8-bit/16-bit паттернов, лестниц по пикселям или грубой растеризации.
+9. Сохрани единый источник света, тени и материалы как в базовом спрайте Татьяны; цвета её home-work одежды не меняй.
+10. Сделай анимацию плавной при 6 FPS: соседние кадры должны иметь небольшие, но читаемые изменения позы, чтобы при воспроизведении возникало ощущение живой, но спокойной грусти.
+  ]]></prompt-text>
+
+  <output>
+    <save-to>assets/characters/tatyana/animations/idle/tatyana-idle-sad-atlas.webp</save-to>
+  </output>
+</visual-generation-prompt>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<visual-generation-prompt>
+  <meta>
+    <name>Tatyana Idle Sick Atlas</name>
+    <entity-type>character</entity-type>
+    <entity-id>tatyana</entity-id>
+    <aspect>animation-idle-sick</aspect>
+    <version>1.0.0</version>
+    <last-updated>2026-03-01</last-updated>
+    <extends>../core/visual-generation-workflow.xml</extends>
+    <extends>../characters/tanya/visual-specs.xml</extends>
+    <extends>../characters/tanya/character-visual-specs.xml</extends>
+    <extends>../characters/tanya/tatyana-animations.xml</extends>
+  </meta>
+
+  <context>
+    <usage>Idle, используется когда здоровье Татьяны низкое (например, health &lt; заданного порога, но она всё ещё на ногах).</usage>
+    <atlas-id>idle-sick</atlas-id>
+    <approval-pattern>atlas</approval-pattern>
+  </context>
+
+  <requirements>
+    <animation>
+      <name>idle</name>
+      <variant>idle-sick</variant>
+      <type>loop</type>
+      <expression>sick</expression>
+
+      <frames>
+        <count>20</count>
+        <frame-size>
+          <width>64</width>
+          <height>64</height>
+        </frame-size>
+        <fps>4</fps>
+        <loop>true</loop>
+        <description>
+          Петля idle-анимации больной Татьяны: она стоит неустойчиво, слегка покачивается, периодически прижимает руку ко лбу или груди, движения медленные и “тяжёлые”.
+        </description>
+      </frames>
+
+      <style>
+        <overall>
+          <description>Мягкий 2D стиль без pixel art, единый с остальными спрайтами Тани.</description>
+          <no-pixel-art>true</no-pixel-art>
+        </overall>
+        <character-from-spec>
+          <source>../characters/tanya/visual-specs.xml</source>
+          <outfit>home-work</outfit>
+        </character-from-spec>
+        <notes>
+          <note>Сохраняем общий силуэт из idle-neutral, но добавляем ощущение слабости и шаткости.</note>
+        </notes>
+      </style>
+
+      <motion-guidelines>
+        <detail>Корпус слегка раскачивается вперёд-назад или чуть в стороны, как у человека с температурой или головокружением.</detail>
+        <detail>Рука периодически поднимается к лбу/виску/горлу, как будто Татьяна проверяет температуру или чувствует слабость, затем опускается обратно.</detail>
+        <detail>Голова иногда чуть наклоняется в сторону или вперёд, глаза могут прищуриваться или частично закрываться.</detail>
+        <detail>Мимика: бледное, усталое выражение, губы слегка приоткрыты, брови немного сведены.</detail>
+        <detail>Движения очень плавные и растянутые по времени — важно, чтобы чувствовалось именно недомогание, а не карусель.</detail>
+      </motion-guidelines>
+
+      <technical>
+        <atlas-format>horizontal-strip</atlas-format>
+        <background>transparent</background>
+        <file-format>WebP</file-format>
+        <max-size-kb>500</max-size-kb>
+      </technical>
+    </animation>
+  </requirements>
+
+  <prompt-text><![CDATA[
+1. Базируйся на позе idle-neutral и base-sprite, сохраняя тот же угол камеры, положение ног и общие пропорции.
+2. Создай looping idle-анимацию "idle-sick" в 20 кадров 64x64, горизонтальный атлас, рассчитанный на воспроизведение при 4 FPS.
+3. Передай чувство недомогания через лёгкое раскачивание корпуса и менее устойчивую стойку, но без падений или драматических смещений.
+4. Добавь жест: рука периодически поднимается к лбу/горлу, задерживается там на несколько кадров, затем опускается.
+5. Мимика должна считываться как “плохо себя чувствую”: тяжёлый взгляд, слегка приоткрытый рот, немного сведённые брови.
+6. Стиль и освещение совпадают с остальными спрайтами Тани; одежда — тот же home-work outfit.
+7. Никакого pixel art или грубых пиксельных лестниц, только мягкие 2D-линии и аккуратный цвет.
+8. Начальный и финальный кадры должны стыковаться так, чтобы цикл казался непрерывным и медленным, без заметного скачка.
+  ]]></prompt-text>
+
+  <output>
+    <save-to>assets/characters/tatyana/animations/idle/tatyana-idle-sick-atlas.webp</save-to>
+  </output>
+</visual-generation-prompt>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<visual-generation-prompt>
+  <meta>
+    <name>Tatyana Idle Excited Atlas</name>
+    <entity-type>character</entity-type>
+    <entity-id>tatyana</entity-id>
+    <aspect>animation-idle-excited</aspect>
+    <version>1.0.0</version>
+    <last-updated>2026-03-01</last-updated>
+    <extends>../core/visual-generation-workflow.xml</extends>
+    <extends>../characters/tanya/visual-specs.xml</extends>
+    <extends>../characters/tanya/character-visual-specs.xml</extends>
+    <extends>../characters/tanya/tatyana-animations.xml</extends>
+  </meta>
+
+  <context>
+    <usage>Idle, используется при очень высоком уровне счастья/предвкушения (например, happiness &gt; 85, особые позитивные события).</usage>
+    <atlas-id>idle-excited</atlas-id>
+    <approval-pattern>atlas</approval-pattern>
+  </context>
+
+  <requirements>
+    <animation>
+      <name>idle</name>
+      <variant>idle-excited</variant>
+      <type>loop</type>
+      <expression>excited</expression>
+
+      <frames>
+        <count>24</count>
+        <frame-size>
+          <width>64</width>
+          <height>64</height>
+        </frame-size>
+        <fps>6</fps>
+        <loop>true</loop>
+        <description>
+          Петля idle-анимации воодушевлённой Татьяны: она стоит в живой, пружинящей позе, чуть подпрыгивает или “качает” вес с ноги на ногу, лицо светится ожиданием чего-то приятного.
+        </description>
+      </frames>
+
+      <style>
+        <overall>
+          <description>Мягкий 2D стиль без pixel art, визуально согласованный с idle-happy и emotion-joy.</description>
+          <no-pixel-art>true</no-pixel-art>
+        </overall>
+        <character-from-spec>
+          <source>../characters/tanya/visual-specs.xml</source>
+          <outfit>home-work</outfit>
+        </character-from-spec>
+        <notes>
+          <note>По интенсивности сильнее, чем idle-happy, но мягче и менее “сценично”, чем one-shot emotion-joy.</note>
+        </notes>
+      </style>
+
+      <motion-guidelines>
+        <detail>Корпус немного пружинит: лёгкий перенос веса с одной ноги на другую, едва заметные мини-подпрыгивания или покачивания вверх-вниз.</detail>
+        <detail>Руки могут быть слегка приподняты (но не как в большом жесте радости), периодически делая небольшой жест предвкушения, например, лёгкое сжимание кистей около груди.</detail>
+        <detail>Мимика: широкая улыбка, глаза чуть ярче раскрыты, брови приподняты — ощущение “о, сейчас будет что-то классное!”.</detail>
+        <detail>Движения плавные и цикличные, без излишней хаотичности; важно, чтобы это всё ещё читалось как idle, а не активный танец.</detail>
+        <detail>Силуэт остаётся узнаваемым и совместимым с idle-neutral и idle-happy, без экстремальных отклонений позы.</detail>
+      </motion-guidelines>
+
+      <technical>
+        <atlas-format>horizontal-strip</atlas-format>
+        <background>transparent</background>
+        <file-format>WebP</file-format>
+        <max-size-kb>500</max-size-kb>
+      </technical>
+    </animation>
+  </requirements>
+
+  <prompt-text><![CDATA[
+1. Используй idle-neutral и idle-happy как референсы по позе, силуэту и уровню “живости”.
+2. Создай looping idle-анимацию "idle-excited" в 24 кадра 64x64, горизонтальный атлас, 6 FPS.
+3. Сделай стойку более пружинящей: лёгкие вертикальные смещения корпуса, перенос веса с ноги на ногу, небольшие качания.
+4. Добавь позитивные микродвижения рук — лёгкое сжимание кистей, небольшие движения предплечий, но без широких взмахов, как в полноценных эмоциональных анимациях.
+5. Мимика должна считываться как сильное предвкушение/радость, но без клоунады: естественная, живая улыбка, светящийся взгляд.
+6. Стиль и освещение полностью совпадают с существующими спрайтами Тани; одежда — home-work, без добавления новых вещей.
+7. Никакого pixel art. Линии, заливки и тени должны оставаться мягкими и аккуратными.
+8. Убедись, что цикл начинается и заканчивается в почти одинаковой позе, чтобы при зацикливании не было резкого скачка энергии или позы.
+  ]]></prompt-text>
+
+  <output>
+    <save-to>assets/characters/tatyana/animations/idle/tatyana-idle-excited-atlas.webp</save-to>
+  </output>
+</visual-generation-prompt>

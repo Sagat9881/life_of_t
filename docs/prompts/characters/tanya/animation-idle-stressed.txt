@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<visual-generation-prompt>
+  <meta>
+    <name>Tatyana Idle Stressed Atlas</name>
+    <entity-type>character</entity-type>
+    <entity-id>tatyana</entity-id>
+    <aspect>animation-idle-stressed</aspect>
+    <version>1.0.0</version>
+    <last-updated>2026-03-01</last-updated>
+    <extends>../core/visual-generation-workflow.xml</extends>
+    <extends>../characters/tanya/visual-specs.xml</extends>
+    <extends>../characters/tanya/character-visual-specs.xml</extends>
+    <extends>../characters/tanya/tatyana-animations.xml</extends>
+  </meta>
+
+  <context>
+    <usage>Idle, состояние стресса/перегруза от работы или событий (например, высокий internal stress / overwork флаг).</usage>
+    <atlas-id>idle-stressed</atlas-id>
+    <approval-pattern>atlas</approval-pattern>
+  </context>
+
+  <requirements>
+    <animation>
+      <name>idle</name>
+      <variant>idle-stressed</variant>
+      <type>loop</type>
+      <expression>stressed</expression>
+
+      <frames>
+        <count>24</count>
+        <frame-size>
+          <width>64</width>
+          <height>64</height>
+        </frame-size>
+        <fps>6</fps>
+        <loop>true</loop>
+        <description>
+          Петля idle-анимации Татьяны в состоянии стресса: поза немного более сутулая, один из жестов — потирание переносицы, виска или лёгкое прикосновение пальцев к лбу, плюс небольшой, слышимый по позе вздох.
+        </description>
+      </frames>
+
+      <style>
+        <overall>
+          <description>Мягкий 2D, без pixel art, общий визуальный язык как у других спрайтов Тани.</description>
+          <no-pixel-art>true</no-pixel-art>
+        </overall>
+        <character-from-spec>
+          <source>../characters/tanya/visual-specs.xml</source>
+          <outfit>home-work</outfit>
+        </character-from-spec>
+        <notes>
+          <note>Используй те же изометрические настройки камеры, что в base-sprite и idle-neutral.</note>
+        </notes>
+      </style>
+
+      <motion-guidelines>
+        <detail>Осанка слегка проседает вперёд, словно Татьяна устала от мыслей и нагрузки, но ещё не настолько, чтобы перейти в полностью tired-состояние.</detail>
+        <detail>Циклический жест: рука (или пальцы) периодически поднимаются к переносице/виску, слегка трут её, затем возвращаются в исходное положение.</detail>
+        <detail>Голова может чуть наклоняться вперёд во время жеста и немного выпрямляться в конце цикла.</detail>
+        <detail>Мимика: брови сведены, рот чуть сжат, взгляд сосредоточенный и уставший, иногда опускается вниз.</detail>
+        <detail>Движения не должны быть слишком быстрыми — это не паника, а хроническая перегрузка и “закипающий” мозг.</detail>
+      </motion-guidelines>
+
+      <technical>
+        <atlas-format>horizontal-strip</atlas-format>
+        <background>transparent</background>
+        <file-format>WebP</file-format>
+        <max-size-kb>500</max-size-kb>
+      </technical>
+    </animation>
+  </requirements>
+
+  <prompt-text><![CDATA[
+1. Используй позу и силуэт из idle-neutral как базу, адаптируя их под более напряжённое, слегка сутулое состояние.
+2. Создай looping idle-анимацию "idle-stressed" в 24 кадра 64x64, собранную в горизонтальный атлас.
+3. Основной акцент — на жесте стресса: лёгкое потирание переносицы, виска или лба в середине цикла, с возвратом в исходную позу к концу цикла.
+4. Ощущение, что Татьяна “перегрета” задачами: взгляд немного усталый, сосредоточенный, брови сдвинуты, губы сжаты или слегка приоткрыты в выдохе.
+5. Сохрани тот же home-work outfit и общую цветовую палитру, что и в других idle-анимациях; никаких новых предметов и аксессуаров.
+6. Движения плавные, без рывков; цикл должен чувствоваться естественным при 6 FPS и без заметного “стыка” между последним и первым кадром.
+7. Стиль — мягкий 2D, без пиксельных паттернов, с аккуратной обработкой линий и материалов.
+  ]]></prompt-text>
+
+  <output>
+    <save-to>assets/characters/tatyana/animations/idle/tatyana-idle-stressed-atlas.webp</save-to>
+  </output>
+</visual-generation-prompt>

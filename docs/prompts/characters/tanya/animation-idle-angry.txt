@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<visual-generation-prompt>
+  <meta>
+    <name>Tatyana Idle Angry Atlas</name>
+    <entity-type>character</entity-type>
+    <entity-id>tatyana</entity-id>
+    <aspect>animation-idle-angry</aspect>
+    <version>1.0.0</version>
+    <last-updated>2026-03-01</last-updated>
+    <extends>../core/visual-generation-workflow.xml</extends>
+    <extends>../characters/tanya/visual-specs.xml</extends>
+    <extends>../characters/tanya/character-visual-specs.xml</extends>
+    <extends>../characters/tanya/tatyana-animations.xml</extends>
+  </meta>
+
+  <context>
+    <usage>Idle, используется когда у Татьяны повышенный уровень злости/раздражения (например, отдельный internal anger/stress флаг).</usage>
+    <atlas-id>idle-angry</atlas-id>
+    <approval-pattern>atlas</approval-pattern>
+  </context>
+
+  <requirements>
+    <animation>
+      <name>idle</name>
+      <variant>idle-angry</variant>
+      <type>loop</type>
+      <expression>angry</expression>
+
+      <frames>
+        <count>24</count>
+        <frame-size>
+          <width>64</width>
+          <height>64</height>
+        </frame-size>
+        <fps>6</fps>
+        <loop>true</loop>
+        <description>
+          Петля idle-анимации раздражённой Татьяны: она стоит примерно в той же базовой позе, но более собранная и напряжённая, с характерными микрожестами (скрещённые или чуть стиснутые руки, небольшое постукивание ногой, нахмуренные брови).
+        </description>
+      </frames>
+
+      <style>
+        <overall>
+          <description>Мягкий 2D стиль, без pixel art, совместимый с существующими атласами Тани.</description>
+          <no-pixel-art>true</no-pixel-art>
+        </overall>
+        <character-from-spec>
+          <source>../characters/tanya/visual-specs.xml</source>
+          <outfit>home-work</outfit>
+        </character-from-spec>
+        <notes>
+          <note>Сохраняем тот же изометрический угол и пропорции, что в base-sprite и idle-neutral.</note>
+        </notes>
+      </style>
+
+      <motion-guidelines>
+        <detail>Осанка чуть более жёсткая: плечи немного приподняты, корпус может быть чуть подан вперёд, создавая ощущение внутреннего напряжения.</detail>
+        <detail>Вариант микрожеста: одна нога еле заметно постукивает носком по полу в ритме, повторяющемся по циклу.</detail>
+        <detail>Руки — либо скрещены перед грудью, либо опущены, но с лёгким сжатием кулаков; пальцы могут дергаться/подрагивать в пределах одного-двух пикселей.</detail>
+        <detail>Мимика: нахмуренные брови, слегка сжатые губы, взгляд более острый и направленный вперёд (или чуть в сторону источника раздражения).</detail>
+        <detail>Движения плавные, но более “угловатые”, чем в happy/sad — важно передать раздражённость, не превращая это в комическую злость.</detail>
+      </motion-guidelines>
+
+      <technical>
+        <atlas-format>horizontal-strip</atlas-format>
+        <background>transparent</background>
+        <file-format>WebP</file-format>
+        <max-size-kb>500</max-size-kb>
+      </technical>
+    </animation>
+  </requirements>
+
+  <prompt-text><![CDATA[
+1. Бери исходную стойку и силуэт из idle-neutral и base-sprite Татьяны; не меняй рост, пропорции и точку опоры ног.
+2. Создай looping idle-анимацию "idle-angry" в 24 кадра 64x64, собранную в одну горизонтальную полосу в порядке анимации.
+3. Вырази раздражение через более жёсткую позу, нахмуренные брови и слегка сжатые губы; глаза могут быть чуть шире раскрыты и направлены вперёд.
+4. Добавь небольшой повторяющийся жест, вроде лёгкого постукивания носком одной ноги или лёгкого подрагивания стопы, который читается при 6 FPS.
+5. Вариант микродвижения рук: скрещённые руки периодически чуть смещаются (на 1–2 пикселя), словно Татьяна меняет опору или сильнее прижимает руки к телу.
+6. Избегай больших, театральных жестов (махание руками, широкие выпады); это именно idle-раздражение в ожидании, а не активная ссора.
+7. Сохрани общий свет, материалы и цвета из home-work образа. Никаких новых аксессуаров и смены одежды.
+8. Стиль — такой же мягкий 2D, как в других спрайтах Тани, без pixel art или “лесенок” по контурам.
+9. Убедись, что первый и последний кадр плавно стыкуются, чтобы петля не имела видимого “скачка”.
+  ]]></prompt-text>
+
+  <output>
+    <save-to>assets/characters/tatyana/animations/idle/tatyana-idle-angry-atlas.webp</save-to>
+  </output>
+</visual-generation-prompt>
