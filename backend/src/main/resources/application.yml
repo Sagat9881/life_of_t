@@ -1,11 +1,23 @@
 server:
   port: 8080
+  error:
+    whitelabel:
+      enabled: false
+    path: /error
 
 spring:
   application:
     name: lifegame-backend
   jackson:
     default-property-inclusion: non_null
+  web:
+    resources:
+      static-locations:
+        - classpath:/static/
+        - classpath:/public/
+      add-mappings: true
+  mvc:
+    throw-exception-if-no-handler-found: true
 
 session:
   persistence:
