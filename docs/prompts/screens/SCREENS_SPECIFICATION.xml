@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SCREENS SPECIFICATION - ROOT
+  Корневая спецификация всех экранов игры Life of Tatyana
+  
+  Структура:
+  /screens/
+    - SCREENS_SPECIFICATION.xml (этот файл - корневой)
+    - room/ (комната Татьяны - основной экран)
+    - office/ (офис - локация работы)
+    - park/ (парк - локация прогулок)
+    - shared/ (общие компоненты: навигация, модалки, toast)
+  
+  Версия: 1.0
+  Последнее обновление: 2026-03-01
+-->
+
+<screens-specification version="1.0" project="life-of-t">
+
+  <meta>
+    <description>Корневая спецификация всех экранов игры</description>
+    <includes>
+      <include path="./room/" description="Комната Татьяны - основной геймплей" />
+      <include path="./office/" description="Офис - локация работы" />
+      <include path="./park/" description="Парк - прогулки и отдых" />
+      <include path="./shared/" description="Общие UI компоненты" />
+    </includes>
+  </meta>
+
+  <!-- НАВИГАЦИОННАЯ СТРУКТУРА -->
+  <navigation-structure>
+    <primary-flow>
+      <screen name="RoomPage" route="/room" type="main" default="true" detail-path="./room/RoomPage.xml" />
+      <screen name="ActionsPage" route="/actions" type="menu" detail-path="./shared/ActionsPage.xml" />
+      <screen name="RelationshipsPage" route="/relationships" type="menu" detail-path="./shared/RelationshipsPage.xml" />
+      <screen name="StatsPage" route="/stats" type="menu" detail-path="./shared/StatsPage.xml" />
+    </primary-flow>
+
+    <locations>
+      <location name="room" route="/room" detail-path="./room/" />
+      <location name="office" route="/office" detail-path="./office/" />
+      <location name="park" route="/park" detail-path="./park/" />
+    </locations>
+
+    <navigation-type>
+      <mobile type="bottom-tab-bar" sticky="true" />
+      <desktop type="side-navigation" expandable="true" />
+    </navigation-type>
+
+    <transitions>
+      <duration value="300ms" />
+      <easing value="cubic-bezier(0.4, 0.0, 0.2, 1)" />
+      <type mobile="slide" desktop="fade" />
+    </transitions>
+  </navigation-structure>
+
+  <!-- ОБЩИЕ ПРИНЦИПЫ ЭКРАНОВ -->
+  <screen-principles>
+    <principle name="location-based" priority="critical">
+      <description>Каждая локация - отдельный экран с изометрией</description>
+      <structure>
+        <layer name="background" z-index="0" />
+        <layer name="scene" z-index="1" type="isometric" />
+        <layer name="hud" z-index="10" />
+        <layer name="modals" z-index="600" />
+      </structure>
+    </principle>
+
+    <principle name="consistent-hud" priority="high">
+      <description>Единый HUD на всех локациях</description>
+      <hud position="top" height="80px" sticky="true">
+        <stats values="energy, happiness, health" />
+        <time-widget format="HH:mm, dd MMM" />
+        <money display="иконка + сумма" />
+      </hud>
+    </principle>
+
+    <principle name="interactive-objects" priority="critical">
+      <description>Все объекты на экране подсвечиваются при тапе</description>
+      <highlight type="glow" color="var(--color-primary)" opacity="0.3-0.7" />
+      <haptic enabled="true" intensity="light" />
+      <action-menu position="above-object" animation="slideUp" />
+    </principle>
+
+    <principle name="responsive-layout" priority="high">
+      <description>Адаптивность под все разрешения</description>
+      <mobile width="100vw" height="100vh" />
+      <desktop width="1280px" height="720px" center="true" />
+    </principle>
+  </screen-principles>
+
+  <!-- ОБЩИЕ ТРЕБОВАНИЯ К ЭКРАНАМ -->
+  <common-requirements>
+    <requirement priority="critical">Все интерактивные объекты видны одновременно</requirement>
+    <requirement priority="critical">Персонаж Татьяна в центре, не перекрывается</requirement>
+    <requirement priority="high">Плавные анимации 200-300ms</requirement>
+    <requirement priority="high">Haptic feedback на всех тапах</requirement>
+    <requirement priority="medium">Время суток влияет на освещение</requirement>
+    <requirement priority="medium">Погода влияет на визуал локаций</requirement>
+  </common-requirements>
+
+  <!-- ЛОКАЦИИ (краткое описание, детали в поддиректориях) -->
+  <locations>
+    <location name="room" detail-path="./room/">
+      <description>Комната Татьяны - основной экран игры</description>
+      <objects count="7" types="bed, computer, phone, mirror, wardrobe, sam, garfield" />
+      <time-of-day affects="lighting, mood" />
+    </location>
+
+    <location name="office" detail-path="./office/">
+      <description>Офис - локация работы</description>
+      <objects count="5" types="desk, computer, coffee-machine, colleagues" />
+      <available-when>Рабочие часы 9:00-18:00</available-when>
+    </location>
+
+    <location name="park" detail-path="./park/">
+      <description>Парк - прогулки с Сэмом</description>
+      <objects count="4" types="bench, trees, pond, sam" />
+      <weather affects="visual, activities" />
+    </location>
+  </locations>
+
+  <!-- МЕНЮ ЭКРАНЫ (краткое описание, детали в ./shared/) -->
+  <menu-screens detail-path="./shared/">
+    <screen name="ActionsPage" route="/actions">
+      <description>Список доступных действий</description>
+      <categories values="work, social, leisure, pets" />
+    </screen>
+
+    <screen name="RelationshipsPage" route="/relationships">
+      <description>Отношения с персонажами</description>
+      <characters values="husband, father, sam, garfield, friend" />
+    </screen>
+
+    <screen name="StatsPage" route="/stats">
+      <description>Статистика и достижения</description>
+      <sections values="main-stats, skills, achievements" />
+    </screen>
+  </menu-screens>
+
+  <!-- ОБЩИЕ КОМПОНЕНТЫ (детали в ./shared/) -->
+  <shared-components detail-path="./shared/">
+    <component name="BottomNavigation" />
+    <component name="ModalWindow" />
+    <component name="ToastNotification" />
+    <component name="HUD" />
+    <component name="ActionMenu" />
+  </shared-components>
+
+</screens-specification>
