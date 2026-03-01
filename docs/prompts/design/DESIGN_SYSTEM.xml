@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  DESIGN SYSTEM PROMPT - ROOT
+  Корневой системный контекст для визуального дизайна игры Life of Tatyana
+  
+  Структура:
+  /design/
+    - DESIGN_SYSTEM.xml (этот файл - корневой)
+    - colors/ (детальная работа с цветовой палитрой)
+    - typography/ (типографика и шрифты)
+    - spacing/ (система отступов)
+    - components/ (UI компоненты)
+  
+  Версия: 1.1
+  Последнее обновление: 2026-03-01
+-->
+
+<design-system version="1.1" project="life-of-t">
+  
+  <meta>
+    <description>Корневая спецификация дизайн-системы проекта</description>
+    <includes>
+      <include path="./colors/" description="Цветовая палитра и темы" />
+      <include path="./typography/" description="Типографика" />
+      <include path="./spacing/" description="Система отступов" />
+      <include path="./components/" description="UI компоненты" />
+    </includes>
+  </meta>
+
+  <!-- ОБЩИЙ КОНТЕКСТ ПРОЕКТА -->
+  <project-context>
+    <name>Life of Tatyana</name>
+    <genre>Life Simulation Game / Visual Novel</genre>
+    <platform>Telegram Web App (Desktop + Mobile)</platform>
+    <target-audience age="25-35" gender="female" description="Подарок для жены, романтичный и уютный геймплей"/>
+    <inspiration primary="Punch Club" secondary="Stardaw Valley, The Sims" />
+    <core-emotion>Уют, тепло, забота, романтика, семья</core-emotion>
+  </project-context>
+
+  <!-- ТЕХНОЛОГИЧЕСКИЕ ОГРАНИЧЕНИЯ -->
+  <technical-constraints priority="performance">
+    <platform-limits>
+      <constraint type="bundle-size" max="5MB" reason="Telegram WebApp загрузка" />
+      <constraint type="image-size" max="500KB" per="asset" reason="Мобильный трафик" />
+      <constraint type="total-assets" max="50" reason="Быстрая загрузка" />
+      <constraint type="fps" target="60" min="30" reason="Плавность анимаций" />
+    </platform-limits>
+    
+    <technology-stack>
+      <frontend framework="React 18" language="TypeScript" />
+      <styling approach="CSS Modules" preprocessor="none" reason="Нативная производительность" />
+      <animations library="CSS Animations" hardware-accelerated="true" />
+      <assets format="WebP" fallback="PNG" reason="Оптимальное сжатие" />
+      <sprites format="sprite-atlas" type="horizontal-strip" reason="Efficient frame rendering" />
+      <icons library="lucide-react" tree-shakeable="true" reason="Минимальный bundle, modern SVG" />
+    </technology-stack>
+
+    <performance-requirements>
+      <requirement metric="first-paint" max="1000ms" />
+      <requirement metric="time-to-interactive" max="2000ms" />
+      <requirement metric="animation-frame-drop" max="5%" />
+      <requirement metric="memory-usage" max="150MB" />
+      <requirement metric="cls" max="0.1" reason="Cumulative Layout Shift" />
+    </performance-requirements>
+  </technical-constraints>
+
+  <!-- ВИЗУАЛЬНЫЙ СТИЛЬ -->
+  <visual-style reference="Punch Club">
+    <art-direction>
+      <style>Pixel Art / Retro 16-bit</style>
+      <perspective>Isometric 2:1 (45° angle)</perspective>
+      <resolution base="1920x1080" mobile="responsive" />
+      <pixel-density>High-definition pixel art (не классический low-res)</pixel-density>
+      <anti-aliasing enabled="false" reason="Чёткие пиксельные края" />
+      <mood>Тёплый, уютный, романтичный, современный</mood>
+    </art-direction>
+
+    <!-- Цвета - см. ./colors/ для деталей -->
+    <color-palette mood="warm-cozy" detail-path="./colors/PALETTE.xml" />
+
+    <!-- Типографика - см. ./typography/ для деталей -->
+    <typography detail-path="./typography/TYPOGRAPHY.xml" />
+
+    <!-- Отступы - см. ./spacing/ для деталей -->
+    <spacing-system detail-path="./spacing/SPACING.xml" />
+  </visual-style>
+
+  <!-- УПРАВЛЕНИЕ РЕСУРСАМИ -->
+  <asset-management>
+    <naming-convention pattern="kebab-case" example="tatyana-idle-sprite.webp" />
+    <organization structure="by-type">
+      <folder path="/sprites/" content="Спрайты персонажей и объектов" />
+      <folder path="/backgrounds/" content="Фоновые изображения локаций" />
+      <folder path="/ui/" content="UI иконки и элементы" />
+      <folder path="/audio/" content="Звуковые эффекты (если будут)" />
+    </organization>
+    <versioning enabled="false" reason="Нет необходимости на текущем этапе" />
+    <compression>
+      <tool name="squoosh" usage="manual" quality="80%" />
+      <rule>Всегда сжимать изображения перед коммитом</rule>
+      <rule>WebP для всех новых ассетов</rule>
+    </compression>
+  </asset-management>
+
+  <!-- ИКОНКИ -->
+  <icon-system>
+    <library name="lucide-react" version="latest">
+      <size-variants values="16, 24, 32, 48" default="24" />
+      <stroke-width default="2px" thin="1.5px" bold="2.5px" />
+      <usage>Все UI иконки (меню, действия, статы)</usage>
+    </library>
+    <emoji usage="decorative-only" reason="Кросс-платформенность, визуальная атмосфера">
+      <example>😊 для настроения, ❤️ для отношений, 💰 для денег</example>
+      <rule>Emoji только для визуального усиления, не для передачи критичной информации</rule>
+    </emoji>
+    <custom-icons format="SVG" stroke-width="2px">
+      <usage>Только если нет подходящей иконки в Lucide</usage>
+    </custom-icons>
+  </icon-system>
+
+  <!-- СЛОИ Z-INDEX -->
+  <z-index-layers>
+    <layer name="base" value="0" usage="Основной контент, фоны" />
+    <layer name="elevated" value="10" usage="Карточки, приподнятые элементы" />
+    <layer name="dropdown" value="100" usage="Выпадающие меню" />
+    <layer name="sticky" value="200" usage="Sticky headers" />
+    <layer name="modal-backdrop" value="500" usage="Затемнение под модалкой" />
+    <layer name="modal" value="600" usage="Модальные окна" />
+    <layer name="tooltip" value="1000" usage="Подсказки" />
+    <layer name="notification" value="2000" usage="Toast уведомления" />
+    <rule>Использовать только эти значения, не изобретать произвольные</rule>
+  </z-index-layers>
+
+  <!-- КОМПОНЕНТНАЯ СИСТЕМА -->
+  <component-design-rules>
+    <principle name="mobile-first" priority="high">
+      <description>Все компоненты сначала проектируются для мобильных экранов</description>
+      <breakpoints>
+        <breakpoint name="mobile" max="768px" default="true" />
+        <breakpoint name="tablet" min="769px" max="1024px" />
+        <breakpoint name="desktop" min="1025px" />
+      </breakpoints>
+    </principle>
+
+    <principle name="touch-friendly" priority="critical">
+      <min-touch-target size="44px" reason="Apple HIG + Android Material" />
+      <tap-feedback type="haptic" required="true" implementation="Telegram.WebApp.HapticFeedback" />
+      <tap-feedback type="visual" required="true" method="scale-transform" duration="200ms" />
+      <rule>Все кликабельные элементы >= 44x44px</rule>
+    </principle>
+
+    <principle name="performance-first" priority="critical">
+      <rule>Использовать CSS transforms вместо position для анимаций</rule>
+      <rule>Анимировать только transform и opacity (GPU-accelerated)</rule>
+      <rule>Избегать layout shifts (CLS = 0)</rule>
+      <rule>Lazy load для всех изображений вне viewport</rule>
+      <rule>Debounce/throttle для всех scroll/resize обработчиков</rule>
+      <rule>Использовать React.memo для тяжёлых компонентов</rule>
+      <rule>useMemo/useCallback для дорогих вычислений</rule>
+    </principle>
+
+    <principle name="smooth-animations" priority="high">
+      <timing-functions>
+        <function name="ease-in-out" value="cubic-bezier(0.4, 0.0, 0.2, 1)" usage="Стандартная плавная" />
+        <function name="ease-out" value="cubic-bezier(0.0, 0.0, 0.2, 1)" usage="Появление элементов" />
+        <function name="ease-in" value="cubic-bezier(0.4, 0.0, 1, 1)" usage="Исчезновение" />
+        <function name="spring" value="cubic-bezier(0.34, 1.56, 0.64, 1)" usage="Упругий эффект" />
+      </timing-functions>
+      <durations>
+        <duration name="instant" value="100ms" usage="Микро-интеракции" />
+        <duration name="fast" value="200ms" usage="Стандартная анимация" />
+        <duration name="normal" value="300ms" usage="Средняя анимация" />
+        <duration name="slow" value="500ms" usage="Плавные переходы" />
+      </durations>
+      <rule>Все анимации должны использовать will-change для оптимизации</rule>
+      <rule>requestAnimationFrame для сложных покадровых анимаций</rule>
+      <rule>Отключать анимации при prefers-reduced-motion</rule>
+    </principle>
+  </component-design-rules>
+
+  <!-- СОСТОЯНИЯ ИНТЕРАКТИВНЫХ ЭЛЕМЕНТОВ -->
+  <interaction-states>
+    <state name="default" description="Обычное состояние" />
+    <state name="hover" cursor="pointer" description="Наведение мыши">
+      <effect>Лёгкое увеличение scale(1.02)</effect>
+      <effect>Изменение тени</effect>
+    </state>
+    <state name="active" description="Момент клика">
+      <effect>Уменьшение scale(0.98)</effect>
+      <effect>Haptic feedback</effect>
+    </state>
+    <state name="focus" description="Фокус клавиатуры">
+      <outline width="3px" color="var(--color-primary)" offset="2px" />
+      <rule>Всегда показывать outline для доступности</rule>
+    </state>
+    <state name="disabled" description="Неактивное состояние">
+      <opacity value="0.5" />
+      <cursor value="not-allowed" />
+      <rule>НЕ показывать hover эффекты</rule>
+    </state>
+    <state name="loading" description="Загрузка">
+      <spinner visible="true" size="20px" />
+      <opacity value="0.7" />
+      <cursor value="wait" />
+    </state>
+    <state name="error" description="Ошибка валидации">
+      <border-color value="var(--color-error)" />
+      <shake-animation enabled="true" />
+    </state>
+  </interaction-states>
+
+  <!-- МИКРО-ВЗАИМОДЕЙСТВИЯ -->
+  <micro-interactions>
+    <hover delay="0ms" duration="200ms" easing="ease-out" />
+    <ripple enabled="true" on="click" color="rgba(240, 147, 251, 0.3)" duration="600ms" />
+    <particle-effects usage="rewards-only" reason="Не перегружать интерфейс">
+      <example>Конфетти при достижении цели</example>
+      <example>Сердечки при улучшении отношений</example>
+    </particle-effects>
+    <sound-effects enabled="false" reason="Может раздражать, фокус на визуале" />
+    <haptic-patterns>
+      <pattern name="light" usage="Обычный тап" />
+      <pattern name="medium" usage="Важное действие" />
+      <pattern name="heavy" usage="Критическое событие" />
+      <pattern name="success" usage="Успех" />
+      <pattern name="error" usage="Ошибка" />
+    </haptic-patterns>
+  </micro-interactions>
+
+  <!-- ДИЗАЙН СОСТОЯНИЙ ОШИБОК -->
+  <error-states>
+    <empty-state>
+      <illustration enabled="true" style="minimal-svg" />
+      <message tone="friendly" example="Пока здесь пусто, но скоро появится что-то интересное!" />
+      <action-button visible="true" text="Начать" />
+    </empty-state>
+    
+    <error-page>
+      <design style="branded" show-logo="true" />
+      <message tone="helpful" example="Что-то пошло не так. Попробуем ещё раз?" />
+      <action-button visible="true" text="Повторить" icon="refresh-cw" />
+      <details expandable="true" for-developers="true" />
+    </error-page>
+    
+    <loading-skeleton>
+      <enabled value="true" />
+      <shimmer animation="true" color="rgba(240, 147, 251, 0.1)" />
+      <shape match-content="true" />
+    </loading-skeleton>
+    
+    <inline-error>
+      <icon name="alert-circle" color="var(--color-error)" />
+      <message font-size="0.875rem" color="var(--color-error)" />
+      <shake-animation enabled="true" />
+    </inline-error>
+  </error-states>
+
+  <!-- TELEGRAM-СПЕЦИФИЧНЫЕ ПРАВИЛА -->
+  <telegram-integration platform="Telegram WebApp">
+    <haptic-feedback>
+      <method>window.Telegram.WebApp.HapticFeedback.impactOccurred('light')</method>
+      <intensity values="light, medium, heavy, rigid, soft" />
+      <usage>Все кнопки, свайпы, важные действия</usage>
+    </haptic-feedback>
+    
+    <safe-area respect="true" for="ios-notch">
+      <padding-top dynamic="env(safe-area-inset-top)" />
+      <padding-bottom dynamic="env(safe-area-inset-bottom)" />
+    </safe-area>
+    
+    <back-button>
+      <behavior default="close-modal" />
+      <custom-handler enabled="true" for="navigation" />
+    </back-button>
+    
+    <theme-params auto-apply="false" reason="Используем собственную цветовую палитру">
+      <rule>Игнорировать Telegram theme colors для уникального стиля</rule>
+    </theme-params>
+    
+    <main-button>
+      <usage>Основное действие на экране (например, 'Выполнить действие')</usage>
+      <style background="var(--color-primary)" color="white" />
+    </main-button>
+  </telegram-integration>
+
+  <!-- ДОСТУПНОСТЬ -->
+  <accessibility wcag-level="AA">
+    <contrast-ratio min="4.5" for="normal-text" target="7" for="large-text" />
+    <focus-indicators visible="true" thickness="3px" color="var(--color-primary)" offset="2px" />
+    <keyboard-navigation required="true">
+      <rule>Все интерактивные элементы доступны через Tab</rule>
+      <rule>Enter/Space для активации</rule>
+      <rule>Escape для закрытия модалок</rule>
+    </keyboard-navigation>
+    <screen-reader support="aria-labels">
+      <rule>Все иконки-кнопки имеют aria-label</rule>
+      <rule>Состояния загрузки озвучиваются</rule>
+      <rule>Ошибки валидации озвучиваются</rule>
+    </screen-reader>
+    <reduced-motion respect="true">
+      <media-query>@media (prefers-reduced-motion: reduce)</media-query>
+      <rule>Отключать все декоративные анимации</rule>
+      <rule>Оставлять только критичные transition для UX</rule>
+    </reduced-motion>
+  </accessibility>
+
+  <!-- СТИЛЬ ЭЛЕМЕНТОВ UI - см. ./components/ для деталей -->
+  <ui-elements style="modern-minimal" detail-path="./components/" />
+
+  <!-- ЗАПРЕТЫ И ОГРАНИЧЕНИЯ -->
+  <forbidden>
+    <practice name="inline-styles" reason="Нарушает компонентную архитектуру и переиспользование" />
+    <practice name="!important" reason="Создаёт проблемы с приоритетами, усложняет поддержку" />
+    <practice name="position-animations" reason="Вызывает layout reflow, критически тормозит" />
+    <practice name="nested-ternary" reason="Плохая читаемость кода" />
+    <practice name="magic-numbers" reason="Использовать CSS переменные для значений" />
+    <practice name="px-for-fonts" reason="Использовать rem для доступности и масштабирования" />
+    <practice name="deep-nesting" max-depth="3" reason="Усложняет понимание и поддержку" />
+    <library name="styled-components" reason="Bundle overhead 14kb, используем CSS Modules" />
+    <library name="framer-motion" reason="Bundle overhead 32kb, используем CSS Animations" />
+    <library name="lodash" reason="Используем нативные методы ES6+" />
+    <library name="moment.js" reason="Тяжёлая, используем date-fns или нативный Intl" />
+  </forbidden>
+
+  <!-- ЧЕКЛИСТ ПЕРЕД КОММИТОМ -->
+  <commit-checklist>
+    <check>✅ Компонент < 200 строк кода (разбить если больше)</check>
+    <check>✅ CSS использует CSS Variables из палитры</check>
+    <check>✅ Все анимации только на transform/opacity</check>
+    <check>✅ Mobile breakpoint протестирован в DevTools</check>
+    <check>✅ Touch targets >= 44px для всех кнопок</check>
+    <check>✅ Haptic feedback добавлен для действий</check>
+    <check>✅ Loading states реализованы (skeleton или spinner)</check>
+    <check>✅ Error states реализованы с retry логикой</check>
+    <check>✅ Нет console.log в production коде</check>
+    <check>✅ TypeScript типы корректны, нет any</check>
+    <check>✅ Accessibility: focus visible, aria-labels, keyboard nav</check>
+    <check>✅ Нет предупреждений ESLint/Prettier</check>
+  </commit-checklist>
+
+</design-system>
