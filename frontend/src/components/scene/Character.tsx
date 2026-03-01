@@ -1,5 +1,6 @@
 /**
  * Character - PixiJS v8 HEAD + TORSO (Layers 1-2)
+ * Pure PixiJS rendering, no CSS placeholders
  */
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -20,7 +21,6 @@ export const Character: React.FC<CharacterProps> = ({
   const canvasRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<PIXI.Application | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     console.log('[Character] Component mounted');
@@ -61,7 +61,7 @@ export const Character: React.FC<CharacterProps> = ({
         // Main character container
         const character = new PIXI.Container();
         character.x = 100;
-        character.y = 180; // raised higher in canvas
+        character.y = 180;
         app.stage.addChild(character);
         console.log('[Character] Container created');
 
@@ -153,7 +153,6 @@ export const Character: React.FC<CharacterProps> = ({
           console.log('[Character] Animation started');
         }
 
-        setLoaded(true);
         console.log('[Character] ✅ FULLY LOADED');
 
       } catch (err: any) {
@@ -179,23 +178,7 @@ export const Character: React.FC<CharacterProps> = ({
         zIndex: position.zIndex,
       }}
     >
-      {!loaded && !error && (
-        <div style={{
-          width: '200px',
-          height: '300px',
-          background: 'rgba(0, 255, 0, 0.2)',
-          border: '2px dashed lime',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'black',
-          fontSize: '12px',
-          fontWeight: 'bold',
-        }}>
-          🔄 LOADING...
-        </div>
-      )}
-
+      {/* Only show error, no loading placeholder */}
       {error && (
         <div style={{
           width: '200px',
@@ -217,6 +200,7 @@ export const Character: React.FC<CharacterProps> = ({
         </div>
       )}
 
+      {/* PixiJS canvas only */}
       <div ref={canvasRef} />
     </div>
   );
