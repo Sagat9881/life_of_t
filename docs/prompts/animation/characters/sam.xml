@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SAM CHARACTER ANIMATIONS - MINIATURE PINSCHER
+  Детальная спецификация анимаций собаки Сэма
+  
+  Родительский файл: ../ANIMATION_SYSTEM.xml
+  Используется: ../../screens/room/RoomPage.xml
+-->
+
+<character name="sam" type="npc-pet">
+
+  <meta>
+    <full-name>Сэм</full-name>
+    <breed>Цвергпинчер (Miniature Pinscher / Zwergpinscher)</breed>
+    <description>Энергичная маленькая собака, компаньон Татьяны</description>
+    <personality>Активный, игривый, преданный, бдительный</personality>
+    <reference>
+      <photos>User uploaded reference photos</photos>
+      <breed-characteristics>Маленький размер, стоячие уши, короткая шерсть, атлетическое телосложение</breed-characteristics>
+    </reference>
+  </meta>
+
+  <!-- ВИЗУАЛЬНЫЙ ДИЗАЙН -->
+  <visual-design style="pixel-art-isometric">
+    <sprite-size width="48" height="48" />
+    <scale>Меньше Татьяны (соотношение реального размера)</scale>
+    <perspective>Isometric 2:1 (45°)</perspective>
+    
+    <appearance breed="miniature-pinscher">
+      <size>Маленькая собака (25-30см в холке в реальности)</size>
+      <build>Компактное, мускулистое, атлетическое телосложение</build>
+      <coat>Короткая, гладкая, блестящая шерсть</coat>
+      <color-pattern type="black-and-tan" primary="#1A1A1A" secondary="#C67C4E">
+        <description>Классический окрас: чёрный корпус с рыже-коричневыми подпалинами</description>
+        <tan-markings>
+          <marking location="над глазами" />
+          <marking location="морда" />
+          <marking location="грудь" />
+          <marking location="лапы" />
+        </tan-markings>
+      </color-pattern>
+      <ears type="стоячие" shape="треугольные" position="высоко посажены" />
+      <tail type="короткий" position="высоко поднят" />
+      <legs>Прямые, тонкие, элегантные</legs>
+      
+      <palette>
+        <primary>#1A1A1A</primary> <!-- Чёрный -->
+        <tan>#C67C4E</tan> <!-- Рыже-коричневый -->
+        <nose>#000000</nose>
+        <eyes>#3B2414</eyes>
+      </palette>
+    </appearance>
+
+    <characteristic-features priority="critical">
+      <feature>Стоячие треугольные уши</feature>
+      <feature>Высоко поднятый хвост</feature>
+      <feature>Чёрно-подпалый окрас</feature>
+      <feature>Компактное мускулистое тело</feature>
+      <feature>Энергичная походка</feature>
+    </characteristic-features>
+  </visual-design>
+
+  <!-- АНИМАЦИИ (ВСЕ HORIZONTAL STRIP ATLASES) -->
+  <animations atlas-format="horizontal-strip">
+    
+    <!-- IDLE (ПОКОЙ) -->
+    <animation name="idle" type="loop" priority="low">
+      <description>Стоит на месте, настороже, лёгкое покачивание, дыхание, виляет хвостом</description>
+      
+      <variants>
+        <variant name="idle-alert" default="true">
+          <atlas path="/sprites/characters/sam/idle-alert.webp" />
+          <frames count="20" />
+          <frame-size width="48" height="48" />
+          <fps>6</fps>
+          <loop>true</loop>
+          <description>Настороженная стойка, уши подняты, хвост вверх</description>
+        </variant>
+
+        <variant name="idle-relaxed">
+          <atlas path="/sprites/characters/sam/idle-relaxed.webp" />
+          <frames count="20" />
+          <fps>5</fps>
+          <loop>true</loop>
+          <description>Расслабленная поза, спокойно сидит</description>
+        </variant>
+
+        <variant name="idle-panting">
+          <atlas path="/sprites/characters/sam/idle-panting.webp" />
+          <frames count="20" />
+          <fps>8</fps>
+          <loop>true</loop>
+          <description>Дышит с открытым ртом, высунут язык</description>
+          <trigger condition="after-walk, hot-weather" />
+        </variant>
+      </variants>
+    </animation>
+
+    <!-- WALK (ХОДЬБА) -->
+    <animation name="walk" type="loop" priority="normal">
+      <description>Энергичная рысца в 4 направлениях, характерная походка пинчера</description>
+      
+      <directions>
+        <direction name="north" angle="0°">
+          <atlas path="/sprites/characters/sam/walk-north.webp" />
+          <frames count="20" />
+          <frame-size width="48" height="48" />
+          <fps>12</fps>
+          <loop>true</loop>
+          <gait>Быстрая, пружинистая рысь</gait>
+        </direction>
+
+        <direction name="east" angle="90°">
+          <atlas path="/sprites/characters/sam/walk-east.webp" />
+          <frames count="20" />
+          <fps>12</fps>
+          <loop>true</loop>
+        </direction>
+
+        <direction name="south" angle="180°">
+          <atlas path="/sprites/characters/sam/walk-south.webp" />
+          <frames count="20" />
+          <fps>12</fps>
+          <loop>true</loop>
+        </direction>
+
+        <direction name="west" angle="270°">
+          <atlas path="/sprites/characters/sam/walk-west.webp" />
+          <frames count="20" />
+          <fps>12</fps>
+          <loop>true</loop>
+        </direction>
+      </directions>
+    </animation>
+
+    <!-- RUN (БЕГ) -->
+    <animation name="run" type="loop" priority="normal">
+      <description>Быстрый бег, ещё более энергичный</description>
+      
+      <atlas path="/sprites/characters/sam/run.webp" />
+      <frames count="20" />
+      <fps>15</fps>
+      <loop>true</loop>
+      <trigger>Excited, playing, chasing</trigger>
+    </animation>
+
+    <!-- SIT (СИДЕТЬ) -->
+    <animation name="sit" type="one-shot-to-loop" priority="normal">
+      <description>Переход из стойки в сидячую позу, потом зацикливается</description>
+      
+      <atlas path="/sprites/characters/sam/sit.webp" />
+      <frames count="25" />
+      <fps>8</fps>
+      <loop>true</loop>
+      <loop-from-frame>15</loop-from-frame>
+      
+      <keyframes>
+        <keyframe at="0-10" action="transition-to-sit" />
+        <keyframe at="11-25" action="sitting-idle" loop="true" />
+      </keyframes>
+    </animation>
+
+    <!-- LIE DOWN (ЛЕЖАТЬ) -->
+    <animation name="lie-down" type="loop" priority="low">
+      <description>Лежит, отдыхает, расслаблен</description>
+      
+      <atlas path="/sprites/characters/sam/lie-down.webp" />
+      <frames count="20" />
+      <fps>4</fps>
+      <loop>true</loop>
+      <description>Спокойно лежит, лёгкое дыхание</description>
+    </animation>
+
+    <!-- SLEEP (СОН) -->
+    <animation name="sleep" type="loop" priority="low">
+      <description>Спит, свернувшись калачиком</description>
+      
+      <atlas path="/sprites/characters/sam/sleep.webp" />
+      <frames count="20" />
+      <fps>3</fps>
+      <loop>true</loop>
+      <breathing subtle="true" />
+      <trigger condition="night-time, low-energy" />
+    </animation>
+
+    <!-- PLAY (ИГРА) -->
+    <animation name="play" type="loop" priority="normal">
+      <description>Игривое поведение: прыжки, повороты, игровая стойка</description>
+      
+      <variants>
+        <variant name="play-bow">
+          <atlas path="/sprites/characters/sam/play-bow.webp" />
+          <frames count="25" />
+          <fps>10</fps>
+          <loop>true</loop>
+          <description>Игровой поклон: передние лапы вытянуты, попа вверх, виляет хвостом</description>
+        </variant>
+
+        <variant name="play-jump">
+          <atlas path="/sprites/characters/sam/play-jump.webp" />
+          <frames count="20" />
+          <fps>12</fps>
+          <loop>true</loop>
+          <description>Энергичные прыжки на месте</description>
+        </variant>
+
+        <variant name="play-spin">
+          <atlas path="/sprites/characters/sam/play-spin.webp" />
+          <frames count="25" />
+          <fps>12</fps>
+          <loop>false</loop>
+          <description>Кружится на месте от радости</description>
+        </variant>
+      </variants>
+    </animation>
+
+    <!-- BARK (ЛАЙ) -->
+    <animation name="bark" type="one-shot" priority="high">
+      <description>Лает: короткие звонкие лайки</description>
+      
+      <atlas path="/sprites/characters/sam/bark.webp" />
+      <frames count="20" />
+      <fps>10</fps>
+      <loop>false</loop>
+      <trigger>Alert, stranger, doorbell, excited</trigger>
+      <sound-effect>bark-miniature-pinscher.mp3</sound-effect>
+    </animation>
+
+    <!-- SNIFF (НЮХАЕТ) -->
+    <animation name="sniff" type="loop" priority="normal">
+      <description>Обнюхивает землю, объекты</description>
+      
+      <atlas path="/sprites/characters/sam/sniff.webp" />
+      <frames count="20" />
+      <fps>8</fps>
+      <loop>true</loop>
+      <description>Нос близко к земле, хвост поднят</description>
+    </animation>
+
+    <!-- EAT/DRINK (ЕДА/ПИТЬЁ) -->
+    <animation name="eat" type="loop" priority="normal">
+      <description>Ест из миски</description>
+      
+      <atlas path="/sprites/characters/sam/eat.webp" />
+      <frames count="20" />
+      <fps>6</fps>
+      <loop>true</loop>
+    </animation>
+
+    <animation name="drink" type="loop" priority="normal">
+      <description>Пьёт воду из миски</description>
+      
+      <atlas path="/sprites/characters/sam/drink.webp" />
+      <frames count="20" />
+      <fps>6</fps>
+      <loop>true</loop>
+    </animation>
+
+    <!-- PET INTERACTION (РЕАКЦИЯ НА ЛАСКУ) -->
+    <animation name="being-petted" type="loop" priority="high">
+      <description>Радуется ласке: виляет хвостом, довольное выражение</description>
+      
+      <atlas path="/sprites/characters/sam/petted.webp" />
+      <frames count="25" />
+      <fps>8</fps>
+      <loop>true</loop>
+      <trigger>User pets Sam</trigger>
+      <particle-effect type="hearts" color="#F093FB" count="3" />
+    </animation>
+
+    <!-- SHAKE (ОТРЯХИВАЕТСЯ) -->
+    <animation name="shake" type="one-shot" priority="normal">
+      <description>Отряхивается после прогулки/купания</description>
+      
+      <atlas path="/sprites/characters/sam/shake.webp" />
+      <frames count="25" />
+      <fps>15</fps>
+      <loop>false</loop>
+      <particle-effect type="water-drops" if="wet" />
+    </animation>
+
+  </animations>
+
+  <!-- AI ПОВЕДЕНИЕ -->
+  <behavior-system>
+    <wander enabled="true">
+      <bounds>room</bounds>
+      <speed>1.5</speed>
+      <pause-duration min="2s" max="5s" />
+      <movement-pattern>Random walk с остановками</movement-pattern>
+    </wander>
+
+    <favorite-spots>
+      <spot location="near-bed" weight="30%" action="lie-down" />
+      <spot location="near-door" weight="20%" action="sit" />
+      <spot location="near-tatyana" weight="40%" action="follow" />
+      <spot location="window" weight="10%" action="look-outside" />
+    </favorite-spots>
+
+    <reactions>
+      <reaction trigger="tatyana-enters" action="run-to-greet" animation="play-jump" />
+      <reaction trigger="tatyana-pets" action="being-petted" happiness="+10" />
+      <reaction trigger="food-prepared" action="run-to-bowl" animation="eat" />
+      <reaction trigger="door-knock" action="bark" animation="bark" />
+      <reaction trigger="stranger" action="bark-alert" animation="bark" />
+    </reactions>
+
+    <schedule>
+      <activity time="07:00-09:00" action="active" energy="high" />
+      <activity time="09:00-12:00" action="nap" animation="sleep" />
+      <activity time="12:00-18:00" action="wander" />
+      <activity time="18:00-20:00" action="active" energy="high" />
+      <activity time="20:00-07:00" action="sleep" animation="sleep" />
+    </schedule>
+  </behavior-system>
+
+  <!-- ТРЕБОВАНИЯ К СПРАЙТАМ -->
+  <sprite-requirements>
+    <requirement priority="critical">Порода: ЦВЕРГПИНЧЕР - маленький, компактный, мускулистый</requirement>
+    <requirement priority="critical">Окрас: чёрно-подпалый (#1A1A1A + #C67C4E)</requirement>
+    <requirement priority="critical">Стоячие треугольные уши ВСЕГДА подняты</requirement>
+    <requirement priority="critical">Хвост высоко поднят вверх</requirement>
+    <requirement priority="high">Размер спрайта 48x48px (меньше Татьяны)</requirement>
+    <requirement priority="high">Энергичная походка, пружинистые движения</requirement>
+    <requirement priority="high">Изометрический угол 2:1 (45°)</requirement>
+    <requirement priority="medium">Тень под собакой отдельным слоем</requirement>
+    <requirement priority="medium">Все атласы < 400KB после WebP сжатия</requirement>
+  </sprite-requirements>
+
+  <!-- ССЫЛКИ НА ASSETS -->
+  <assets-structure>
+    <base-path>/sprites/characters/sam/</base-path>
+    
+    <files>
+      <file>idle-alert.webp</file>
+      <file>idle-relaxed.webp</file>
+      <file>idle-panting.webp</file>
+      <file>walk-north.webp</file>
+      <file>walk-east.webp</file>
+      <file>walk-south.webp</file>
+      <file>walk-west.webp</file>
+      <file>run.webp</file>
+      <file>sit.webp</file>
+      <file>lie-down.webp</file>
+      <file>sleep.webp</file>
+      <file>play-bow.webp</file>
+      <file>play-jump.webp</file>
+      <file>play-spin.webp</file>
+      <file>bark.webp</file>
+      <file>sniff.webp</file>
+      <file>eat.webp</file>
+      <file>drink.webp</file>
+      <file>petted.webp</file>
+      <file>shake.webp</file>
+    </files>
+  </assets-structure>
+
+</character>
