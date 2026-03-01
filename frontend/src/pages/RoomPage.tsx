@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
+import { Character } from '../components/scene/Character';
 import styles from './RoomPage.module.css';
 
 interface RoomObject {
@@ -94,13 +95,21 @@ export const RoomPage: React.FC = () => {
       <div className={styles.room}>
         <div className={styles.roomTitle}>✨ Комната Татьяны ✨</div>
         <div className={styles.roomScene}>
-          {/* Tatyana Character */}
-          <div className={styles.character}>
-            <div className={styles.characterSprite}>👩‍💼</div>
-            <div className={styles.characterName}>Татьяна</div>
-            <div className={styles.characterStatus}>
-              {stats.mood >= 70 ? '😊' : stats.mood >= 40 ? '😐' : '😔'}
-            </div>
+          {/* Tatyana Character - PixiJS Canvas */}
+          <div
+            style={{
+              position: 'absolute',
+              left: '45%',
+              top: '35%',
+              transform: 'translateX(-50%)',
+              zIndex: 5,
+            }}
+          >
+            <Character
+              position={{ x: 0, y: 0, zIndex: 5 }}
+              state="idle"
+              emotion={stats.mood >= 70 ? 'happy' : stats.mood >= 40 ? 'neutral' : 'tired'}
+            />
           </div>
 
           {/* Room Objects */}
