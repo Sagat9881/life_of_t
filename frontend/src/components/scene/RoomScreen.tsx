@@ -19,6 +19,7 @@ export const RoomScreen: React.FC<RoomScreenProps> = ({
   onObjectTap,
 }) => {
   const timeOfDay = gameState?.time?.timeOfDay || 'day';
+  const defaultCharacterPosition = { x: 500, y: 400, zIndex: 4 };
 
   return (
     <div className={`${styles.sceneContainer} ${styles[timeOfDay]}`}>
@@ -51,7 +52,7 @@ export const RoomScreen: React.FC<RoomScreenProps> = ({
         {/* Character layer */}
         <div className={styles.charactersLayer}>
           <Character
-            position={gameState?.character?.position || roomSceneModel.character.position}
+            position={gameState?.character?.position || defaultCharacterPosition}
             state={gameState?.character?.state || 'idle'}
             emotion={gameState?.character?.emotion || 'neutral'}
           />
