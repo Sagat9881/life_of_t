@@ -26,7 +26,7 @@ export const RoomPage: React.FC = () => {
 
   useEffect(() => {
     fetchGameState();
-  }, [fetchGameStore]);
+  }, [fetchGameState]);
 
   const handleObjectClick = async (obj: RoomObject) => {
     setSelectedObject(obj);
