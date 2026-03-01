@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  DESIGN SYSTEM PROMPT
+  Системный контекст для визуального дизайна игры Life of Tatyana
+  Определяет строгие ограничения, технологии и визуальный стиль
+-->
+
+<design-system version="1.0" project="life-of-t">
+  
+  <!-- ОБЩИЙ КОНТЕКСТ ПРОЕКТА -->
+  <project-context>
+    <name>Life of Tatyana</name>
+    <genre>Life Simulation Game / Visual Novel</genre>
+    <platform>Telegram Web App (Desktop + Mobile)</platform>
+    <target-audience age="25-35" gender="female" description="Подарок для жены, романтичный и уютный геймплей"/>
+    <inspiration primary="Punch Club" secondary="Stardew Valley, The Sims" />
+    <core-emotion>Уют, тепло, забота, романтика, семья</core-emotion>
+  </project-context>
+
+  <!-- ТЕХНОЛОГИЧЕСКИЕ ОГРАНИЧЕНИЯ -->
+  <technical-constraints priority="performance">
+    <platform-limits>
+      <constraint type="bundle-size" max="5MB" reason="Telegram WebApp загрузка" />
+      <constraint type="image-size" max="500KB" per="asset" reason="Мобильный трафик" />
+      <constraint type="total-assets" max="50" reason="Быстрая загрузка" />
+      <constraint type="fps" target="60" min="30" reason="Плавность анимаций" />
+    </platform-limits>
+    
+    <technology-stack>
+      <frontend framework="React 18" language="TypeScript" />
+      <styling approach="CSS Modules" preprocessor="none" reason="Нативная производительность" />
+      <animations library="CSS Animations" hardware-accelerated="true" />
+      <assets format="WebP" fallback="PNG" reason="Оптимальное сжатие" />
+      <sprites format="sprite-atlas" type="horizontal-strip" reason="Efficient frame rendering" />
+    </technology-stack>
+
+    <performance-requirements>
+      <requirement metric="first-paint" max="1000ms" />
+      <requirement metric="time-to-interactive" max="2000ms" />
+      <requirement metric="animation-frame-drop" max="5%" />
+      <requirement metric="memory-usage" max="150MB" />
+    </performance-requirements>
+  </technical-constraints>
+
+  <!-- ВИЗУАЛЬНЫЙ СТИЛЬ -->
+  <visual-style reference="Punch Club">
+    <art-direction>
+      <style>Pixel Art / Retro 16-bit</style>
+      <perspective>Isometric 2:1 (45° angle)</perspective>
+      <resolution base="1920x1080" mobile="responsive" />
+      <pixel-density>High-definition pixel art (не классический low-res)</pixel-density>
+      <anti-aliasing enabled="false" reason="Чёткие пиксельные края" />
+      <mood>Тёплый, уютный, романтичный, современный</mood>
+    </art-direction>
+
+    <color-palette mood="warm-cozy">
+      <!-- Основные цвета -->
+      <primary name="pink-warm" hex="#F093FB" usage="UI акценты, Татьяна" emotion="романтика" />
+      <primary name="lavender" hex="#C084FC" usage="Фоны, стены" emotion="спокойствие" />
+      <primary name="mint" hex="#6EE7B7" usage="Природа, свежесть" emotion="жизнь" />
+      
+      <!-- Дополнительные -->
+      <secondary name="wood-warm" hex="#A0826D" usage="Мебель, дерево" />
+      <secondary name="sky-soft" hex="#93C5FD" usage="Небо, окна" />
+      <secondary name="gold-accent" hex="#FCD34D" usage="Свет, награды" />
+      
+      <!-- Нейтральные -->
+      <neutral name="white-soft" hex="#FAFAFA" usage="Текст на тёмном" />
+      <neutral name="gray-mid" hex="#9CA3AF" usage="Вторичный текст" />
+      <neutral name="black-soft" hex="#1F2937" usage="Текст на светлом" />
+    </color-palette>
+
+    <typography>
+      <rule>НЕ использовать пиксельные шрифты для UI</rule>
+      <rule>Использовать современные sans-serif для читаемости</rule>
+      <primary-font family="system-ui" weight="400-700" />
+      <size-scale base="16px" ratio="1.25" mobile-base="14px" />
+    </typography>
+
+    <spacing-system unit="8px" scale="0.5x, 1x, 1.5x, 2x, 3x, 4x, 6x">
+      <rule>Все отступы кратны 8px для визуальной гармонии</rule>
+    </spacing-system>
+  </visual-style>
+
+  <!-- КОМПОНЕНТНАЯ СИСТЕМА -->
+  <component-design-rules>
+    <principle name="mobile-first" priority="high">
+      <description>Все компоненты сначала проектируются для мобильных экранов</description>
+      <breakpoints>
+        <breakpoint name="mobile" max="768px" />
+        <breakpoint name="tablet" min="769px" max="1024px" />
+        <breakpoint name="desktop" min="1025px" />
+      </breakpoints>
+    </principle>
+
+    <principle name="touch-friendly" priority="critical">
+      <min-touch-target size="44px" reason="Apple HIG + Android Material" />
+      <tap-feedback type="haptic" required="true" />
+      <tap-feedback type="visual" required="true" method="scale-transform" />
+    </principle>
+
+    <principle name="performance-first" priority="critical">
+      <rule>Использовать CSS transforms вместо position для анимаций</rule>
+      <rule>Анимировать только transform и opacity</rule>
+      <rule>Избегать layout shifts (CLS = 0)</rule>
+      <rule>Lazy load для всех изображений вне viewport</rule>
+      <rule>Debounce/throttle для всех scroll/resize обработчиков</rule>
+    </principle>
+
+    <principle name="smooth-animations" priority="high">
+      <timing-function default="cubic-bezier(0.4, 0.0, 0.2, 1)" />
+      <duration short="200ms" medium="300ms" long="500ms" />
+      <rule>Все анимации должны использовать will-change для оптимизации</rule>
+      <rule>requestAnimationFrame для сложных анимаций</rule>
+    </principle>
+  </component-design-rules>
+
+  <!-- СТИЛЬ ЭЛЕМЕНТОВ UI -->
+  <ui-elements style="modern-minimal">
+    <buttons>
+      <base border-radius="12px" padding="12px 24px" font-weight="600" />
+      <primary background="linear-gradient(135deg, #F093FB, #F5576C)" color="white" />
+      <secondary background="rgba(255,255,255,0.1)" border="2px solid rgba(255,255,255,0.3)" />
+      <hover transform="translateY(-2px) scale(1.02)" shadow="0 8px 20px rgba(240,147,251,0.4)" />
+      <active transform="translateY(0) scale(0.98)" />
+    </buttons>
+
+    <cards>
+      <base border-radius="20px" padding="20px" background="rgba(255,255,255,0.95)" />
+      <shadow default="0 8px 20px rgba(0,0,0,0.1)" hover="0 12px 30px rgba(0,0,0,0.15)" />
+      <border width="3px" color="currentColor" style="solid" />
+    </cards>
+
+    <inputs>
+      <base border-radius="12px" padding="10px 16px" border="2px solid #E5E7EB" />
+      <focus border-color="#F093FB" shadow="0 0 0 3px rgba(240,147,251,0.1)" />
+    </inputs>
+  </ui-elements>
+
+  <!-- ИГРОВЫЕ ЭКРАНЫ -->
+  <game-screens>
+    <screen name="RoomPage" type="main-gameplay">
+      <layout>Изометрическая комната с интерактивными объектами</layout>
+      <hud position="top" height="80px" content="Статы, время, деньги" />
+      <interactive-area position="center" type="isometric-room" />
+      <requirements>
+        <requirement>Видны ВСЕ интерактивные объекты одновременно</requirement>
+        <requirement>Персонаж Татьяна видна в центре</requirement>
+        <requirement>Плавные анимации при взаимодействии</requirement>
+      </requirements>
+    </screen>
+
+    <screen name="ActionsPage" type="menu">
+      <layout>Вертикальный список карточек действий</layout>
+      <card-design icon-size="48px" gradient-border="true" />
+    </screen>
+
+    <screen name="RelationshipsPage" type="menu">
+      <layout>Сетка карточек персонажей</layout>
+      <card-design avatar-size="80px" relationship-bar="true" />
+    </screen>
+  </game-screens>
+
+  <!-- ЗАПРЕТЫ И ОГРАНИЧЕНИЯ -->
+  <forbidden>
+    <practice name="inline-styles" reason="Нарушает компонентную архитектуру" />
+    <practice name="!important" reason="Создаёт проблемы с приоритетами" />
+    <practice name="position-animations" reason="Вызывает layout reflow, тормозит" />
+    <practice name="nested-ternary" reason="Плохая читаемость" />
+    <practice name="magic-numbers" reason="Использовать CSS переменные" />
+    <practice name="px-for-fonts" reason="Использовать rem для доступности" />
+    <library name="styled-components" reason="Bundle overhead, используем CSS Modules" />
+    <library name="framer-motion" reason="Bundle overhead, используем CSS" />
+  </forbidden>
+
+  <!-- ЧЕКЛИСТ ПЕРЕД КОММИТОМ -->
+  <commit-checklist>
+    <check>✅ Компонент < 200 строк кода</check>
+    <check>✅ CSS использует CSS Variables для цветов</check>
+    <check>✅ Все анимации на transform/opacity</check>
+    <check>✅ Mobile breakpoint протестирован</check>
+    <check>✅ Touch targets >= 44px</check>
+    <check>✅ Haptic feedback добавлен</check>
+    <check>✅ Loading states реализованы</check>
+    <check>✅ Error states реализованы</check>
+    <check>✅ Нет console.log в production коде</check>
+  </commit-checklist>
+
+</design-system>
