@@ -2,7 +2,7 @@ package ru.lifegame.backend.infrastructure.web.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 
 /**
  * SPA Controller для обработки фронтенд роутинга.
@@ -11,9 +11,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class SpaController {
 
-    @RequestMapping(value = {
-        "/{path:[^\\.]*}",
-        "/**/{path:[^\\.]*}"
+    /**
+     * Forward все маршруты (кроме API и статических ресурсов) на index.html
+     * Это позволяет React Router обрабатывать клиентский роутинг
+     */
+    @GetMapping(value = {
+        "/",
+        "/room/**",
+        "/test/**",
+        "/park/**",
+        "/game/**"
     })
     public String forward(HttpServletRequest request) {
         String path = request.getRequestURI();
@@ -23,8 +30,8 @@ public class SpaController {
             path.startsWith("/error") ||
             path.startsWith("/actuator/") ||
             path.startsWith("/swagger-ui") ||
-            path.startsWith("/v3/api-docs")) {
-            // Пропускаем дальше по цепочке фильтров
+            path.startsWith("/v3/api-docs") ||
+            path.contains(".")) {  // файлы с расширениями (js, css, png и т.д.)
             return null;
         }
         
