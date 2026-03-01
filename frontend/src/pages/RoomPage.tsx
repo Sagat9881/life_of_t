@@ -1,159 +1,92 @@
-import React, { useState, useEffect } from 'react';
-import { useGameStore } from '../store/gameStore';
-import { Character } from '../components/scene/Character';
-import styles from './RoomPage.module.css';
+import { useState } from 'react';
+import { Character } from '../components/game/Character';
+import { Button } from '../components/shared/Button';
+import { BottomNav } from '../components/layout/BottomNav/BottomNav';
+import './RoomPage.css';
 
-interface RoomObject {
+interface InteractiveObject {
   id: string;
   name: string;
-  actionCode: string;
   x: number;
   y: number;
+  action: string;
   icon: string;
 }
 
-const ROOM_OBJECTS: RoomObject[] = [
-  { id: 'bed', name: 'Кровать', actionCode: 'REST_AT_HOME', x: 15, y: 60, icon: '🛏️' },
-  { id: 'computer', name: 'Компьютер', actionCode: 'WORK_ON_PROJECT', x: 75, y: 65, icon: '💻' },
-  { id: 'phone', name: 'Телефон', actionCode: 'CALL_HUSBAND', x: 25, y: 85, icon: '📱' },
-  { id: 'mirror', name: 'Зеркало', actionCode: 'BEAUTY_ROUTINE', x: 80, y: 85, icon: '🪞' },
-  { id: 'dogs', name: 'Сэм', actionCode: 'WALK_DOG', x: 60, y: 90, icon: '🐕' },
+const ROOM_OBJECTS: InteractiveObject[] = [
+  { id: 'phone', name: 'Телефон', x: 15, y: 20, action: 'CALL_HUSBAND', icon: '📱' },
+  { id: 'bed', name: 'Кровать', x: 70, y: 25, action: 'REST_AT_HOME', icon: '🛌️' },
+  { id: 'tv', name: 'Телевизор', x: 85, y: 50, action: 'WATCH_TV', icon: '📺' },
+  { id: 'pet', name: 'Гарфилд', x: 30, y: 70, action: 'PLAY_WITH_PET', icon: '🐱' },
 ];
 
-export const RoomPage: React.FC = () => {
-  const { player, time, isLoading, error, fetchGameState, executeAction } = useGameStore();
-  const [selectedObject, setSelectedObject] = useState<RoomObject | null>(null);
+export function RoomPage() {
+  const [selectedObject, setSelectedObject] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchGameState();
-  }, [fetchGameState]);
-
-  const handleObjectClick = async (obj: RoomObject) => {
-    setSelectedObject(obj);
+  const handleObjectClick = (obj: InteractiveObject) => {
+    setSelectedObject(obj.id);
+    console.log('Action:', obj.action);
+    // TODO: executeAction(obj.action)
   };
-
-  const handleActionConfirm = async () => {
-    if (!selectedObject || !player) return;
-    
-    try {
-      await executeAction(selectedObject.actionCode);
-      setSelectedObject(null);
-    } catch (error: any) {
-      console.error('Action failed:', error);
-      alert(error.message || 'Действие не удалось');
-    }
-  };
-
-  if (isLoading && !player) {
-    return <div className={styles.loading}>Загрузка...</div>;
-  }
-
-  if (error) {
-    return <div className={styles.loading}>Ошибка: {error}</div>;
-  }
-
-  if (!player) {
-    return <div className={styles.loading}>Нет данных об игроке</div>;
-  }
-
-  const stats = player.stats;
-  const gameTime = time || { day: 1, hour: 7 };
 
   return (
-    <div className={styles.roomContainer}>
-      {/* HUD - Stats Bar */}
-      <div className={styles.hud}>
-        <div className={styles.hudLeft}>
-          <div className={styles.stat}>
-            <span className={styles.statIcon}>⚡</span>
-            <span className={styles.statValue}>{stats.energy}/100</span>
-          </div>
-          <div className={styles.stat}>
-            <span className={styles.statIcon}>❤️</span>
-            <span className={styles.statValue}>{stats.health}/100</span>
-          </div>
-          <div className={styles.stat}>
-            <span className={styles.statIcon}>😊</span>
-            <span className={styles.statValue}>{stats.mood}/100</span>
-          </div>
-        </div>
-        <div className={styles.hudCenter}>
-          <div className={styles.timeDisplay}>
-            <span className={styles.day}>День {gameTime.day}</span>
-            <span className={styles.hour}>{gameTime.hour}:00</span>
-          </div>
-        </div>
-        <div className={styles.hudRight}>
-          <div className={styles.money}>
-            <span className={styles.moneyIcon}>💰</span>
-            <span className={styles.moneyValue}>{stats.money} ₽</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Room with Objects */}
-      <div className={styles.room}>
-        <div className={styles.roomTitle}>✨ Комната Татьяны ✨</div>
-        <div className={styles.roomScene}>
-          {/* Tatyana Character - PixiJS Canvas (RAISED TO 25% TO AVOID BOTTOM NAV) */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '45%',
-              top: '25%',
-              transform: 'translateX(-50%)',
-              zIndex: 5,
-            }}
-          >
-            <Character
-              position={{ x: 0, y: 0, zIndex: 5 }}
-              state="idle"
-              emotion={stats.mood >= 70 ? 'happy' : stats.mood >= 40 ? 'neutral' : 'tired'}
-            />
+    <div className="room-page">
+      <div className="room-page__scene">
+        <div className="room-page__isometric">
+          {/* Character */}
+          <div className="room-page__character">
+            <Character emotion="neutral" scale={0.8} />
           </div>
 
-          {/* Room Objects */}
+          {/* Interactive Objects */}
           {ROOM_OBJECTS.map((obj) => (
             <button
               key={obj.id}
-              className={`${styles.roomObject} ${
-                selectedObject?.id === obj.id ? styles.selected : ''
+              className={`room-page__object ${
+                selectedObject === obj.id ? 'room-page__object--selected' : ''
               }`}
-              style={{ left: `${obj.x}%`, top: `${obj.y}%` }}
+              style={{
+                left: `${obj.x}%`,
+                top: `${obj.y}%`,
+              }}
               onClick={() => handleObjectClick(obj)}
+              title={obj.name}
             >
-              <div className={styles.objectIcon}>{obj.icon}</div>
-              <div className={styles.objectLabel}>{obj.name}</div>
+              <span className="room-page__object-icon">{obj.icon}</span>
+              <span className="room-page__object-label">{obj.name}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Action Dialog */}
+      {/* Action Confirmation */}
       {selectedObject && (
-        <div className={styles.actionDialog}>
-          <div className={styles.dialogContent}>
-            <h3>{selectedObject.name}</h3>
-            <p>Выполнить действие?</p>
-            <div className={styles.dialogButtons}>
-              <button
-                className={styles.confirmButton}
-                onClick={handleActionConfirm}
-                disabled={isLoading}
+        <div className="room-page__action-panel">
+          <div className="room-page__action-content">
+            <p className="room-page__action-text">
+              {ROOM_OBJECTS.find((o) => o.id === selectedObject)?.name}
+            </p>
+            <div className="room-page__action-buttons">
+              <Button
+                variant="primary"
+                onClick={() => {
+                  const obj = ROOM_OBJECTS.find((o) => o.id === selectedObject);
+                  console.log('Execute:', obj?.action);
+                  alert(`Выполнено: ${obj?.name}`);
+                  setSelectedObject(null);
+                }}
               >
-                {isLoading ? 'Выполняется...' : 'Да'}
-              </button>
-              <button
-                className={styles.cancelButton}
-                onClick={() => setSelectedObject(null)}
-                disabled={isLoading}
-              >
+                Выполнить
+              </Button>
+              <Button variant="outline" onClick={() => setSelectedObject(null)}>
                 Отмена
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
+
+      <BottomNav current="room" />
     </div>
   );
-};
+}

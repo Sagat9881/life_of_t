@@ -1,143 +1,70 @@
-import React, { useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
-import styles from './HomePage.module.css';
+import { StatBar } from '../components/shared/StatBar';
+import { BottomNav } from '../components/layout/BottomNav/BottomNav';
+import type { StatKey } from '../types/game';
+import './StatsPage.css';
 
-export const StatsPage: React.FC = () => {
-  const { player, time, isLoading, error, fetchGameState } = useGameStore();
+const STAT_LABELS: Record<StatKey, string> = {
+  energy: 'Энергия',
+  health: 'Здоровье',
+  stress: 'Стресс',
+  mood: 'Настроение',
+  money: 'Деньги',
+  selfEsteem: 'Самооценка',
+};
 
-  useEffect(() => {
-    fetchGameState();
-  }, [fetchGameState]);
-
-  if (isLoading && !player) {
-    return <div className={styles.loading}>Загрузка...</div>;
-  }
-
-  if (error) {
-    return <div className={styles.error}>Ошибка: {error}</div>;
-  }
+export function StatsPage() {
+  const { player } = useGameStore();
 
   if (!player) {
-    return <div className={styles.loading}>Нет данных об игроке</div>;
+    return (
+      <div className="stats-page">
+        <div className="stats-page__loading">Загрузка...</div>
+        <BottomNav current="stats" />
+      </div>
+    );
   }
 
   const stats = player.stats;
-  const gameTime = time || { day: 1, hour: 12 };
+  const statKeys = Object.keys(stats) as StatKey[];
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>📊 Статистика</h1>
-        <p className={styles.subtitle}>День {gameTime.day}, {gameTime.hour}:00</p>
+    <div className="stats-page">
+      <div className="stats-page__content">
+        <header className="stats-page__header">
+          <h1 className="stats-page__title">📊 Статистика</h1>
+          <p className="stats-page__subtitle">
+            Уровень {player.level} • {player.name}
+          </p>
+        </header>
+
+        <div className="stats-page__stats">
+          {statKeys.map((key) => (
+            <div key={key} className="stats-page__stat-item">
+              <div className="stats-page__stat-header">
+                <span className="stats-page__stat-label">{STAT_LABELS[key]}</span>
+                <span className="stats-page__stat-value">
+                  {key === 'money' ? `${stats[key]} ₽` : `${stats[key]}%`}
+                </span>
+              </div>
+              <StatBar statKey={key} value={stats[key]} />
+            </div>
+          ))}
+        </div>
+
+        {player.job && (
+          <div className="stats-page__job">
+            <h2 className="stats-page__section-title">💼 Работа</h2>
+            <div className="stats-page__job-card">
+              <p className="stats-page__job-title">{player.job.title}</p>
+              <p className="stats-page__job-company">{player.job.company}</p>
+              <p className="stats-page__job-salary">Зарплата: {player.job.salary} ₽</p>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className={styles.statsGrid}>
-        {/* Main Stats */}
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statIcon}>⚡</span>
-            <span className={styles.statLabel}>Энергия</span>
-          </div>
-          <div className={styles.statValue}>{stats.energy}/100</div>
-          <div className={styles.progressBar}>
-            <div
-              className={styles.progressFill}
-              style={{
-                width: `${stats.energy}%`,
-                backgroundColor: stats.energy > 50 ? '#4CAF50' : '#FFA726',
-              }}
-            />
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statIcon}>❤️</span>
-            <span className={styles.statLabel}>Здоровье</span>
-          </div>
-          <div className={styles.statValue}>{stats.health}/100</div>
-          <div className={styles.progressBar}>
-            <div
-              className={styles.progressFill}
-              style={{
-                width: `${stats.health}%`,
-                backgroundColor: stats.health > 50 ? '#4CAF50' : '#E74C3C',
-              }}
-            />
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statIcon}>😊</span>
-            <span className={styles.statLabel}>Настроение</span>
-          </div>
-          <div className={styles.statValue}>{stats.mood}/100</div>
-          <div className={styles.progressBar}>
-            <div
-              className={styles.progressFill}
-              style={{
-                width: `${stats.mood}%`,
-                backgroundColor: stats.mood > 50 ? '#FF6B9D' : '#FFA726',
-              }}
-            />
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statIcon}>😰</span>
-            <span className={styles.statLabel}>Стресс</span>
-          </div>
-          <div className={styles.statValue}>{stats.stress}/100</div>
-          <div className={styles.progressBar}>
-            <div
-              className={styles.progressFill}
-              style={{
-                width: `${stats.stress}%`,
-                backgroundColor: stats.stress < 50 ? '#4CAF50' : '#E74C3C',
-              }}
-            />
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statIcon}>💪</span>
-            <span className={styles.statLabel}>Самооценка</span>
-          </div>
-          <div className={styles.statValue}>{stats.selfEsteem}/100</div>
-          <div className={styles.progressBar}>
-            <div
-              className={styles.progressFill}
-              style={{
-                width: `${stats.selfEsteem}%`,
-                backgroundColor: stats.selfEsteem > 50 ? '#FF6B9D' : '#FFA726',
-              }}
-            />
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statIcon}>💰</span>
-            <span className={styles.statLabel}>Деньги</span>
-          </div>
-          <div className={styles.statValue}>{stats.money} ₽</div>
-        </div>
-      </div>
-
-      {/* Job Info */}
-      {player.job && (
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>💼 Работа</h2>
-          <div className={styles.jobInfo}>
-            <div className={styles.jobTitle}>{player.job.title}</div>
-            <div className={styles.jobCompany}>{player.job.company}</div>
-            <div className={styles.jobSalary}>Зарплата: {player.job.salary} ₽/день</div>
-          </div>
-        </div>
-      )}
+      <BottomNav current="stats" />
     </div>
   );
-};
+}

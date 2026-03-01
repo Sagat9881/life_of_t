@@ -1,50 +1,42 @@
-import { useEffect } from 'react';
-import { RelationshipList } from '../components/game/RelationshipList';
-import { Card } from '../components/shared/Card';
 import { useGameStore } from '../store/gameStore';
-import '../styles/pages/RelationshipsPage.css';
+import { RelationshipList } from '../components/game/RelationshipList';
+import { BottomNav } from '../components/layout/BottomNav/BottomNav';
+import './RelationshipsPage.css';
 
 export function RelationshipsPage() {
-  const {
-    npcs,
-    pets,
-    isLoading,
-    error,
-    fetchGameState,
-  } = useGameStore();
-
-  useEffect(() => {
-    fetchGameState();
-  }, [fetchGameState]);
+  const { npcs, pets } = useGameStore();
 
   const handleNPCClick = (npcId: string) => {
-    console.log('Open NPC dialog:', npcId);
-    // TODO: Реализовать диалог с NPC
+    console.log('NPC clicked:', npcId);
+    // TODO: открыть диалог с NPC
   };
 
   const handlePetClick = (petId: string) => {
-    console.log('Interact with pet:', petId);
-    // TODO: Реализовать взаимодействие с питомцем
+    console.log('Pet clicked:', petId);
+    // TODO: взаимодействие с питомцем
   };
 
   return (
     <div className="relationships-page">
-      <Card variant="elevated" padding="large">
-        <h1 className="relationships-page__title">Отношения</h1>
-        <p className="relationships-page__subtitle">
-          Управляйте отношениями с близкими людьми и питомцами
-        </p>
-        
-        <RelationshipList
-          npcs={npcs}
-          pets={pets}
-          isLoading={isLoading}
-          error={error}
-          onNPCClick={handleNPCClick}
-          onPetClick={handlePetClick}
-          onRetry={fetchGameState}
-        />
-      </Card>
+      <div className="relationships-page__content">
+        <header className="relationships-page__header">
+          <h1 className="relationships-page__title">❤️ Отношения</h1>
+          <p className="relationships-page__subtitle">
+            Ваши связи с близкими людьми и питомцами
+          </p>
+        </header>
+
+        <div className="relationships-page__list">
+          <RelationshipList
+            npcs={npcs}
+            pets={pets}
+            onNPCClick={handleNPCClick}
+            onPetClick={handlePetClick}
+          />
+        </div>
+      </div>
+
+      <BottomNav current="relationships" />
     </div>
   );
 }
