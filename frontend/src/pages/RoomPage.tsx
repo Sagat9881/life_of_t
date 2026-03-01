@@ -13,11 +13,11 @@ interface RoomObject {
 }
 
 const ROOM_OBJECTS: RoomObject[] = [
-  { id: 'bed', name: 'Кровать', actionCode: 'REST_AT_HOME', x: 15, y: 25, icon: '🛏️' },
-  { id: 'computer', name: 'Компьютер', actionCode: 'WORK_ON_PROJECT', x: 75, y: 30, icon: '💻' },
-  { id: 'phone', name: 'Телефон', actionCode: 'CALL_HUSBAND', x: 25, y: 65, icon: '📱' },
-  { id: 'mirror', name: 'Зеркало', actionCode: 'BEAUTY_ROUTINE', x: 80, y: 65, icon: '🪞' },
-  { id: 'dogs', name: 'Сэм', actionCode: 'WALK_DOG', x: 60, y: 75, icon: '🐕' },
+  { id: 'bed', name: 'Кровать', actionCode: 'REST_AT_HOME', x: 15, y: 55, icon: '🛏️' },
+  { id: 'computer', name: 'Компьютер', actionCode: 'WORK_ON_PROJECT', x: 75, y: 60, icon: '💻' },
+  { id: 'phone', name: 'Телефон', actionCode: 'CALL_HUSBAND', x: 25, y: 80, icon: '📱' },
+  { id: 'mirror', name: 'Зеркало', actionCode: 'BEAUTY_ROUTINE', x: 80, y: 80, icon: '🪞' },
+  { id: 'dogs', name: 'Сэм', actionCode: 'WALK_DOG', x: 60, y: 85, icon: '🐕' },
 ];
 
 export const RoomPage: React.FC = () => {
@@ -95,12 +95,12 @@ export const RoomPage: React.FC = () => {
       <div className={styles.room}>
         <div className={styles.roomTitle}>✨ Комната Татьяны ✨</div>
         <div className={styles.roomScene}>
-          {/* Tatyana Character - PixiJS Canvas */}
+          {/* Tatyana Character - PixiJS Canvas (LARGER, HIGHER) */}
           <div
             style={{
               position: 'absolute',
               left: '45%',
-              top: '35%',
+              top: '20%',
               transform: 'translateX(-50%)',
               zIndex: 5,
             }}
@@ -112,7 +112,7 @@ export const RoomPage: React.FC = () => {
             />
           </div>
 
-          {/* Room Objects */}
+          {/* Room Objects - moved lower to avoid overlap */}
           {ROOM_OBJECTS.map((obj) => (
             <button
               key={obj.id}
