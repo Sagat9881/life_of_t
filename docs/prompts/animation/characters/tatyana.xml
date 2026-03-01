@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TATYANA CHARACTER ANIMATIONS
+  Детальная спецификация анимаций главной героини
+  
+  Родительский файл: ../ANIMATION_SYSTEM.xml
+  Используется: ../../screens/room/RoomPage.xml
+-->
+
+<character name="tatyana" type="protagonist">
+
+  <meta>
+    <full-name>Татьяна</full-name>
+    <description>Главная героиня игры, прототип - жена девелопера</description>
+    <reference-photos>
+      <photo>User uploaded reference images</photo>
+    </reference-photos>
+  </meta>
+
+  <!-- ВИЗУАЛЬНЫЙ ДИЗАЙН -->
+  <visual-design style="pixel-art-isometric">
+    <sprite-size width="64" height="64" />
+    <perspective>Isometric 2:1 (45°)</perspective>
+    
+    <appearance>
+      <hair color="#8B1538" description="Красно-винные волосы (red-wine)" priority="critical" />
+      <hair-style>Длинные волосы, женственная причёска</hair-style>
+      <body-type>Стройная, современная</body-type>
+      <clothing>Повседневная одежда (джинсы, свитер / платье)</clothing>
+      <palette>
+        <primary>#8B1538</primary> <!-- Волосы -->
+        <skin>#FFD1BA</skin>
+        <clothes>#6B7280, #F3F4F6, #3B82F6</clothes>
+      </palette>
+    </appearance>
+
+    <emotion-expressions>
+      <expression name="neutral" default="true" />
+      <expression name="happy" emoji="😊" />
+      <expression name="sad" emoji="😔" />
+      <expression name="tired" emoji="😪" />
+      <expression name="love" emoji="🥰" />
+      <expression name="focused" emoji="🧐" />
+    </emotion-expressions>
+  </visual-design>
+
+  <!-- АНИМАЦИИ (ВСЕ HORIZONTAL STRIP ATLASES) -->
+  <animations atlas-format="horizontal-strip">
+    
+    <!-- IDLE (ПОКОЙ) -->
+    <animation name="idle" type="loop" priority="low">
+      <description>Стоит на месте, лёгкое покачивание, дыхание</description>
+      
+      <variants>
+        <variant name="idle-neutral" default="true">
+          <atlas path="/sprites/characters/tatyana/idle-neutral.webp" />
+          <frames count="24" />
+          <frame-size width="64" height="64" />
+          <fps>6</fps>
+          <loop>true</loop>
+          <expression>neutral</expression>
+        </variant>
+
+        <variant name="idle-happy">
+          <atlas path="/sprites/characters/tatyana/idle-happy.webp" />
+          <frames count="24" />
+          <fps>6</fps>
+          <loop>true</loop>
+          <expression>happy</expression>
+          <trigger condition="happiness > 70" />
+        </variant>
+
+        <variant name="idle-tired">
+          <atlas path="/sprites/characters/tatyana/idle-tired.webp" />
+          <frames count="20" />
+          <fps>4</fps>
+          <loop>true</loop>
+          <expression>tired</expression>
+          <trigger condition="energy < 30" />
+        </variant>
+      </variants>
+    </animation>
+
+    <!-- WALK (ХОДЬБА) -->
+    <animation name="walk" type="loop" priority="normal">
+      <description>Ходьба в 4 направлениях (изометрия)</description>
+      
+      <directions>
+        <direction name="north" angle="0°">
+          <atlas path="/sprites/characters/tatyana/walk-north.webp" />
+          <frames count="25" />
+          <frame-size width="64" height="64" />
+          <fps>10</fps>
+          <loop>true</loop>
+        </direction>
+
+        <direction name="east" angle="90°">
+          <atlas path="/sprites/characters/tatyana/walk-east.webp" />
+          <frames count="25" />
+          <fps>10</fps>
+          <loop>true</loop>
+        </direction>
+
+        <direction name="south" angle="180°">
+          <atlas path="/sprites/characters/tatyana/walk-south.webp" />
+          <frames count="25" />
+          <fps>10</fps>
+          <loop>true</loop>
+        </direction>
+
+        <direction name="west" angle="270°">
+          <atlas path="/sprites/characters/tatyana/walk-west.webp" />
+          <frames count="25" />
+          <fps>10</fps>
+          <loop>true</loop>
+        </direction>
+      </directions>
+    </animation>
+
+    <!-- WORK (РАБОТА ЗА КОМПЬЮТЕРОМ) -->
+    <animation name="work" type="loop" priority="normal">
+      <description>Сидит за компьютером, печатает</description>
+      
+      <atlas path="/sprites/characters/tatyana/work-computer.webp" />
+      <frames count="25" />
+      <frame-size width="64" height="64" />
+      <fps>6</fps>
+      <loop>true</loop>
+      <expression>focused</expression>
+      
+      <keyframes>
+        <keyframe at="0" action="hands-on-keyboard" />
+        <keyframe at="5" action="typing" />
+        <keyframe at="10" action="pause-look-screen" />
+        <keyframe at="15" action="typing" />
+        <keyframe at="20" action="lean-back-think" />
+      </keyframes>
+    </animation>
+
+    <!-- SLEEP (СОН) -->
+    <animation name="sleep" type="loop" priority="normal">
+      <description>Спит в кровати, спокойное дыхание</description>
+      
+      <atlas path="/sprites/characters/tatyana/sleep.webp" />
+      <frames count="20" />
+      <frame-size width="128" height="64" /> <!-- Шире, т.к. лежит -->
+      <fps>4</fps>
+      <loop>true</loop>
+      <expression>neutral</expression>
+      
+      <position>Lying in bed</position>
+      <breathing subtle="true" />
+    </animation>
+
+    <!-- INTERACTION (ВЗАИМОДЕЙСТВИЕ С ОБЪЕКТАМИ) -->
+    <animation name="interaction" type="one-shot" priority="high">
+      <description>Взаимодействует с объектом (тянется, берёт)</description>
+      
+      <variants>
+        <variant name="pick-up">
+          <atlas path="/sprites/characters/tatyana/interaction-pickup.webp" />
+          <frames count="25" />
+          <fps>8</fps>
+          <loop>false</loop>
+        </variant>
+
+        <variant name="use-object">
+          <atlas path="/sprites/characters/tatyana/interaction-use.webp" />
+          <frames count="25" />
+          <fps>8</fps>
+          <loop>false</loop>
+        </variant>
+      </variants>
+    </animation>
+
+    <!-- EMOTIONS (ЭМОЦИОНАЛЬНЫЕ РЕАКЦИИ) -->
+    <animation name="emotion" type="one-shot" priority="high">
+      <description>Эмоциональные реакции на события</description>
+      
+      <variants>
+        <variant name="joy">
+          <atlas path="/sprites/characters/tatyana/emotion-joy.webp" />
+          <frames count="25" />
+          <fps>10</fps>
+          <loop>false</loop>
+          <expression>happy</expression>
+          <trigger event="achievement, relationship-up, money-reward" />
+        </variant>
+
+        <variant name="love">
+          <atlas path="/sprites/characters/tatyana/emotion-love.webp" />
+          <frames count="25" />
+          <fps>8</fps>
+          <loop>false</loop>
+          <expression>love</expression>
+          <particle-effect type="hearts" />
+          <trigger event="call-husband, date, gift" />
+        </variant>
+
+        <variant name="sadness">
+          <atlas path="/sprites/characters/tatyana/emotion-sad.webp" />
+          <frames count="20" />
+          <fps>6</fps>
+          <loop>false</loop>
+          <expression>sad</expression>
+          <trigger event="relationship-down, failed-action" />
+        </variant>
+
+        <variant name="surprise">
+          <atlas path="/sprites/characters/tatyana/emotion-surprise.webp" />
+          <frames count="20" />
+          <fps>10</fps>
+          <loop>false</loop>
+          <trigger event="unexpected-event, notification" />
+        </variant>
+      </variants>
+    </animation>
+
+    <!-- GROOMING (УХОД ЗА СОБОЙ) -->
+    <animation name="grooming" type="one-shot" priority="normal">
+      <description>Приводит себя в порядок перед зеркалом</description>
+      
+      <atlas path="/sprites/characters/tatyana/grooming-mirror.webp" />
+      <frames count="25" />
+      <fps>8</fps>
+      <loop>false</loop>
+      
+      <keyframes>
+        <keyframe at="0" action="approach-mirror" />
+        <keyframe at="5" action="look-at-reflection" />
+        <keyframe at="10" action="fix-hair" />
+        <keyframe at="15" action="check-appearance" />
+        <keyframe at="20" action="satisfied-smile" />
+      </keyframes>
+    </animation>
+
+  </animations>
+
+  <!-- СОСТОЯНИЯ И ПЕРЕХОДЫ -->
+  <state-machine>
+    <states>
+      <state name="idle" default="true" priority="1" />
+      <state name="walking" priority="2" />
+      <state name="working" priority="3" />
+      <state name="sleeping" priority="3" />
+      <state name="interacting" priority="4" />
+      <state name="emotion" priority="5" />
+    </states>
+
+    <transitions>
+      <transition from="idle" to="walking" instant="true" />
+      <transition from="walking" to="idle" instant="true" />
+      <transition from="idle" to="working" blend="200ms" />
+      <transition from="any" to="emotion" interrupt="true" priority="high" />
+      <transition from="emotion" to="previous-state" delay="500ms" />
+    </transitions>
+  </state-machine>
+
+  <!-- ТРЕБОВАНИЯ К СПРАЙТАМ -->
+  <sprite-requirements>
+    <requirement priority="critical">ВОЛОСЫ ТОЛЬКО КРАСНО-ВИННЫЕ #8B1538</requirement>
+    <requirement priority="critical">Все кадры анимации 64x64px (кроме sleep: 128x64px)</requirement>
+    <requirement priority="critical">Изометрический угол 2:1 (45°)</requirement>
+    <requirement priority="high">Плавные переходы между кадрами</requirement>
+    <requirement priority="high">Чёткие пиксельные границы (без anti-aliasing)</requirement>
+    <requirement priority="high">Консистентная цветовая палитра во всех анимациях</requirement>
+    <requirement priority="medium">Тень под персонажем отдельным слоем</requirement>
+    <requirement priority="medium">Все атласы < 500KB после WebP сжатия</requirement>
+  </sprite-requirements>
+
+  <!-- ССЫЛКИ НА ASSETS -->
+  <assets-structure>
+    <base-path>/sprites/characters/tatyana/</base-path>
+    
+    <files>
+      <file>idle-neutral.webp</file>
+      <file>idle-happy.webp</file>
+      <file>idle-tired.webp</file>
+      <file>walk-north.webp</file>
+      <file>walk-east.webp</file>
+      <file>walk-south.webp</file>
+      <file>walk-west.webp</file>
+      <file>work-computer.webp</file>
+      <file>sleep.webp</file>
+      <file>interaction-pickup.webp</file>
+      <file>interaction-use.webp</file>
+      <file>emotion-joy.webp</file>
+      <file>emotion-love.webp</file>
+      <file>emotion-sad.webp</file>
+      <file>emotion-surprise.webp</file>
+      <file>grooming-mirror.webp</file>
+    </files>
+  </assets-structure>
+
+</character>
