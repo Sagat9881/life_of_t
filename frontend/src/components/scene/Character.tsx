@@ -42,7 +42,7 @@ export const Character: React.FC<CharacterProps> = ({
         app = new PIXI.Application();
         await app.init({
           width: 200,
-          height: 300,
+          height: 350, // увеличен для полного показа ног
           backgroundAlpha: 0,
           antialias: true,
           resolution: window.devicePixelRatio || 1,
@@ -63,7 +63,7 @@ export const Character: React.FC<CharacterProps> = ({
         // Main character container
         const character = new PIXI.Container();
         character.x = 100;
-        character.y = 220; // lowered to fit legs
+        character.y = 240; // опущен ниже для центрирования
         app.stage.addChild(character);
         console.log('[Character] Container created');
 
@@ -184,7 +184,7 @@ export const Character: React.FC<CharacterProps> = ({
           let time = 0;
           app.ticker.add(() => {
             time += 0.02;
-            character.y = 220 + Math.sin(time) * 3;
+            character.y = 240 + Math.sin(time) * 3;
           });
           console.log('[Character] Animation started');
         }
@@ -217,7 +217,7 @@ export const Character: React.FC<CharacterProps> = ({
       {error && (
         <div style={{
           width: '200px',
-          height: '300px',
+          height: '350px',
           background: 'rgba(255, 0, 0, 0.9)',
           border: '3px solid darkred',
           display: 'flex',
