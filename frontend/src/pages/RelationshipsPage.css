@@ -1,0 +1,37 @@
+.relationships-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.relationships-page__content {
+  flex: 1;
+  padding: 1rem;
+  padding-bottom: 5rem; /* Space for BottomNav */
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.relationships-page__header {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.relationships-page__title {
+  font-family: 'Comfortaa', sans-serif;
+  font-size: 1.75rem;
+  color: var(--color-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.relationships-page__subtitle {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.relationships-page__list {
+  margin-top: 1rem;
+}

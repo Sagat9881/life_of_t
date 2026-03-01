@@ -1,0 +1,110 @@
+.stats-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.stats-page__content {
+  flex: 1;
+  padding: 1rem;
+  padding-bottom: 5rem; /* Space for BottomNav */
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.stats-page__loading {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--color-text-secondary);
+  font-size: 1.1rem;
+}
+
+.stats-page__header {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.stats-page__title {
+  font-family: 'Comfortaa', sans-serif;
+  font-size: 1.75rem;
+  color: var(--color-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.stats-page__subtitle {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.stats-page__stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stats-page__stat-item {
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.stats-page__stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.stats-page__stat-label {
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+
+.stats-page__stat-value {
+  font-weight: 700;
+  color: var(--color-primary);
+  font-size: 1rem;
+}
+
+.stats-page__job {
+  margin-top: 2rem;
+}
+
+.stats-page__section-title {
+  font-family: 'Comfortaa', sans-serif;
+  font-size: 1.25rem;
+  color: var(--color-text);
+  margin: 0 0 1rem 0;
+}
+
+.stats-page__job-card {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-accent) 100%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stats-page__job-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 0.5rem 0;
+}
+
+.stats-page__job-company {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 0.75rem 0;
+}
+
+.stats-page__job-salary {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0;
+}
