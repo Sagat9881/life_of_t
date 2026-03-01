@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ROOM PAGE - DETAILED SPECIFICATION
+  Детальная спецификация экрана комнаты Татьяны
+  
+  Родительский файл: ../SCREENS_SPECIFICATION.xml
+  Связанные промты:
+    - ../../animation/characters/tatyana.xml
+    - ../../animation/characters/sam.xml
+    - ../../animation/objects/bedroom.xml
+-->
+
+<screen name="RoomPage" type="location" location="room">
+
+  <meta>
+    <route>/room</route>
+    <default>true</default>
+    <description>Основной игровой экран - комната Татьяны с изометрическим видом</description>
+    <accessibility>Все объекты доступны для взаимодействия через тап</accessibility>
+  </meta>
+
+  <!-- СТРУКТУРА СЛОЁВ -->
+  <layout-layers>
+    <layer name="background" z-index="0">
+      <type>Static gradient background</type>
+      <color>linear-gradient(180deg, #E0C3FC 0%, #8EC5FC 100%)</color>
+      <time-of-day-variant enabled="true">
+        <morning>linear-gradient(180deg, #FFECD2 0%, #FCB69F 100%)</morning>
+        <day>linear-gradient(180deg, #E0C3FC 0%, #8EC5FC 100%)</day>
+        <evening>linear-gradient(180deg, #FFA17F 0%, #00223E 100%)</evening>
+        <night>linear-gradient(180deg, #2C3E50 0%, #000000 100%)</night>
+      </time-of-day-variant>
+    </layer>
+
+    <layer name="room-back-wall" z-index="1">
+      <type>Isometric room back wall</type>
+      <content>Стена, окно, картины</content>
+      <lighting dynamic="true" affects="shadows, highlights" />
+    </layer>
+
+    <layer name="room-floor" z-index="2">
+      <type>Isometric floor with furniture</type>
+      <perspective>2:1 isometric (45°)</perspective>
+      <content>Пол, ковёр, тени от мебели</content>
+    </layer>
+
+    <layer name="interactive-objects" z-index="3">
+      <type>Clickable objects with animations</type>
+      <render-order>Back to front by Y position</render-order>
+    </layer>
+
+    <layer name="character" z-index="4">
+      <type>Tatyana sprite with animations</type>
+      <position>Center of room</position>
+      <shadow enabled="true" opacity="0.3" />
+    </layer>
+
+    <layer name="npcs" z-index="5">
+      <type>Sam, Garfield with AI behavior</type>
+      <wander enabled="true" bounds="room" />
+    </layer>
+
+    <layer name="hud" z-index="10">
+      <type>UI overlay - stats, time, money</type>
+      <sticky>true</sticky>
+      <safe-area>true</safe-area>
+    </layer>
+
+    <layer name="action-menu" z-index="100">
+      <type>Popup menu for object interactions</type>
+      <visibility>Dynamic on tap</visibility>
+    </layer>
+
+    <layer name="modals" z-index="600">
+      <type>Modal dialogs and confirmations</type>
+    </layer>
+  </layout-layers>
+
+  <!-- HUD (ВЕРХНЯЯ ПАНЕЛЬ) -->
+  <hud position="top" height="80px" sticky="true">
+    <background>
+      <blur>8px</blur>
+      <opacity>0.95</opacity>
+      <color>rgba(255, 255, 255, 0.9)</color>
+      <border-bottom>1px solid rgba(0,0,0,0.1)</border-bottom>
+    </background>
+
+    <safe-area respect="true">
+      <padding-top>env(safe-area-inset-top)</padding-top>
+    </safe-area>
+
+    <layout display="flex" justify="space-between" align="center" padding="0 16px">
+      <!-- Левая часть: Статы -->
+      <stats-group position="left" gap="12px">
+        <stat name="energy" icon="battery" color="#FCD34D" max="100">
+          <display type="icon + number" />
+          <animation on-change="pulse" duration="300ms" />
+          <tooltip>Энергия: необходима для действий</tooltip>
+        </stat>
+
+        <stat name="happiness" icon="smile" color="#F093FB" max="100">
+          <display type="icon + number" />
+          <emoji>😊</emoji>
+          <tooltip>Счастье: влияет на отношения</tooltip>
+        </stat>
+
+        <stat name="health" icon="heart" color="#EF4444" max="100">
+          <display type="icon + number" />
+          <warning-threshold>30</warning-threshold>
+          <tooltip>Здоровье</tooltip>
+        </stat>
+      </stats-group>
+
+      <!-- Центр: Время и дата -->
+      <time-widget position="center">
+        <time format="HH:mm" size="1.25rem" weight="600" />
+        <date format="dd MMM, EEE" size="0.875rem" color="#6B7280" />
+        <icon name="clock" size="20px" />
+      </time-widget>
+
+      <!-- Право: Деньги -->
+      <money position="right">
+        <icon emoji="💰" size="24px" />
+        <amount format="number" size="1.125rem" weight="700" />
+        <animation on-change="coin-flip" duration="500ms" />
+      </money>
+    </layout>
+  </hud>
+
+  <!-- ИЗОМЕТРИЧЕСКАЯ КОМНАТА -->
+  <isometric-room perspective="2:1" angle="45deg" viewport="1920x1080">
+    <!-- ПЕРСОНАЖ ТАТЬЯНА -->
+    <character name="tatyana" ref="../../animation/characters/tatyana.xml">
+      <position x="center" y="center" z-index="4" />
+      <sprite size="64x64" />
+      <animations>
+        <idle default="true" fps="6" loop="true" />
+        <walk fps="10" loop="true" directions="4" />
+        <work fps="6" loop="true" />
+        <sleep fps="4" loop="true" />
+        <interaction fps="8" loop="false" />
+      </animations>
+      <shadow enabled="true" opacity="0.3" offset="0, 8px" blur="4px" />
+      <movement speed="2" type="click-to-move" pathfinding="true" />
+    </character>
+
+    <!-- ИНТЕРАКТИВНЫЕ ОБЪЕКТЫ -->
+    <interactive-objects>
+      <!-- КРОВАТЬ -->
+      <object id="bed" type="furniture" category="rest">
+        <position x="200" y="150" z-index="3" />
+        <sprite size="128x128" atlas="../../animation/objects/bedroom.xml" />
+        <states>
+          <state name="neat" default="true" />
+          <state name="messy" transition-from="occupied" />
+          <state name="occupied" active-when="tatyana-sleeping" />
+        </states>
+        <highlight type="glow" color="var(--color-primary)" opacity="0.5" pulse="1.5s" />
+        <actions>
+          <action id="sleep" label="😴 Спать" icon="moon">
+            <requirements>
+              <time between="20:00-09:00" message="Можно спать только ночью" />
+              <energy min="0" />
+            </requirements>
+            <effects>
+              <energy restore="100" />
+              <time advance="8h" />
+              <happiness change="+10" />
+            </effects>
+            <animation character="sleep" object="occupied" duration="8h" />
+            <haptic intensity="light" />
+          </action>
+
+          <action id="make-bed" label="🛏️ Застелить кровать" icon="check">
+            <requirements>
+              <state current="messy" />
+            </requirements>
+            <effects>
+              <energy cost="5" />
+              <happiness change="+5" />
+              <state change-to="neat" />
+            </effects>
+            <animation duration="2s" />
+          </action>
+        </actions>
+      </object>
+
+      <!-- КОМПЬЮТЕР -->
+      <object id="computer" type="work-station" category="work">
+        <position x="800" y="200" z-index="3" />
+        <sprite size="128x128" />
+        <states>
+          <state name="off" />
+          <state name="idle" screen-glow="true" color="#93C5FD" />
+          <state name="working" active-when="tatyana-working" />
+        </states>
+        <ambient-animation type="screen-flicker" fps="3" />
+        <actions>
+          <action id="work" label="💻 Работать" icon="briefcase">
+            <requirements>
+              <energy min="20" />
+              <time between="09:00-22:00" />
+            </requirements>
+            <effects>
+              <energy cost="20" />
+              <time advance="2h" />
+              <money reward="100" />
+              <skill name="work" xp="+10" />
+            </effects>
+            <animation character="work" object="working" duration="2h" />
+          </action>
+
+          <action id="browse" label="🌐 Интернет" icon="globe">
+            <requirements>
+              <energy min="5" />
+            </requirements>
+            <effects>
+              <energy cost="5" />
+              <time advance="30m" />
+              <happiness change="+5" />
+            </effects>
+          </action>
+        </actions>
+      </object>
+
+      <!-- ТЕЛЕФОН -->
+      <object id="phone" type="communication" category="social">
+        <position x="700" y="180" z-index="3" />
+        <sprite size="64x64" />
+        <states>
+          <state name="idle" />
+          <state name="notification" animation="blink" />
+          <state name="active" />
+        </states>
+        <notification-badge visible="dynamic" />
+        <actions>
+          <action id="call-husband" label="📞 Позвонить мужу" icon="phone">
+            <effects>
+              <energy cost="5" />
+              <time advance="30m" />
+              <relationship target="husband" change="+5" />
+              <happiness change="+10" />
+            </effects>
+            <dialog type="phone-conversation" character="husband" />
+          </action>
+
+          <action id="call-father" label="📞 Позвонить папе" icon="phone">
+            <effects>
+              <energy cost="5" />
+              <time advance="30m" />
+              <relationship target="father" change="+5" />
+              <happiness change="+8" />
+            </effects>
+          </action>
+
+          <action id="social" label="📱 Соцсети" icon="users">
+            <effects>
+              <energy cost="5" />
+              <time advance="15m" />
+              <happiness change="+3" />
+            </effects>
+          </action>
+        </actions>
+      </object>
+
+      <!-- ЗЕРКАЛО -->
+      <object id="mirror" type="grooming" category="self-care">
+        <position x="900" y="300" z-index="3" />
+        <sprite size="96x96" />
+        <reflection enabled="true" />
+        <actions>
+          <action id="groom" label="🪞 Привести себя в порядок" icon="sparkles">
+            <requirements>
+              <energy min="10" />
+            </requirements>
+            <effects>
+              <energy cost="10" />
+              <time advance="15m" />
+              <happiness change="+10" />
+              <stat name="appearance" change="+20" duration="4h" />
+            </effects>
+            <animation character="interaction" duration="15m" />
+          </action>
+        </actions>
+      </object>
+
+      <!-- ШКАФ -->
+      <object id="wardrobe" type="storage" category="appearance">
+        <position x="300" y="400" z-index="3" />
+        <sprite size="128x128" />
+        <actions>
+          <action id="change-clothes" label="👗 Переодеться" icon="shirt">
+            <requirements>
+              <energy min="5" />
+            </requirements>
+            <effects>
+              <energy cost="5" />
+              <time advance="10m" />
+              <happiness change="+5" />
+            </effects>
+            <opens-modal type="wardrobe-selection" />
+          </action>
+        </actions>
+      </object>
+    </interactive-objects>
+
+    <!-- NPC ПЕРСОНАЖИ -->
+    <npcs>
+      <npc id="sam" ref="../../animation/characters/sam.xml">
+        <type>Цвергпинчер</type>
+        <position dynamic="true" initial-x="400" initial-y="300" />
+        <sprite size="48x48" />
+        <behavior type="wander" bounds="room" speed="1">
+          <favorite-spots>
+            <spot near="bed" />
+            <spot near="door" />
+          </favorite-spots>
+        </behavior>
+        <interaction tap="true">
+          <action id="pet" label="🐕 Погладить Сэма">
+            <effects>
+              <happiness change="+10" />
+              <relationship target="sam" change="+5" />
+            </effects>
+            <animation dog="play" duration="5s" />
+          </action>
+        </interaction>
+      </npc>
+
+      <npc id="garfield" ref="../../animation/characters/garfield.xml">
+        <type>Кот</type>
+        <visible condition="relationship[sam] > 50" />
+        <position dynamic="true" />
+        <behavior type="lazy">
+          <favorite-spots>
+            <spot at="bed" weight="50%" />
+            <spot at="window" weight="30%" />
+          </favorite-spots>
+        </behavior>
+      </npc>
+    </npcs>
+  </isometric-room>
+
+  <!-- ВЗАИМОДЕЙСТВИЯ -->
+  <interactions>
+    <tap-object>
+      <haptic intensity="light" />
+      <visual-feedback>
+        <scale from="1.0" to="1.05" duration="200ms" easing="ease-out" />
+        <highlight type="glow" />
+      </visual-feedback>
+      <show-action-menu position="above-object" offset="0, -20px" animation="slideUp" />
+    </tap-object>
+
+    <action-menu>
+      <background blur="12px" color="rgba(255,255,255,0.95)" />
+      <border-radius>20px</border-radius>
+      <padding>16px</padding>
+      <max-width>280px</max-width>
+      <shadow>0 8px 24px rgba(0,0,0,0.15)</shadow>
+      
+      <action-button height="48px" gap="8px">
+        <icon size="24px" />
+        <label size="1rem" weight="600" />
+        <meta-info display="energy, time, rewards" size="0.75rem" color="#6B7280" />
+        <disabled-state opacity="0.5" cursor="not-allowed" />
+      </action-button>
+    </action-menu>
+  </interactions>
+
+  <!-- ОСВЕЩЕНИЕ И АТМОСФЕРА -->
+  <atmosphere>
+    <time-of-day-effects>
+      <morning time="06:00-11:59">
+        <lighting bright="true" warm="true" />
+        <window-light color="#FFECD2" intensity="0.8" />
+      </morning>
+      
+      <day time="12:00-17:59">
+        <lighting bright="true" neutral="true" />
+        <window-light color="#E0C3FC" intensity="1.0" />
+      </day>
+      
+      <evening time="18:00-21:59">
+        <lighting warm="true" dimmed="true" />
+        <window-light color="#FFA17F" intensity="0.6" />
+        <ceiling-light enabled="true" color="#FCD34D" />
+      </evening>
+      
+      <night time="22:00-05:59">
+        <lighting dark="true" />
+        <window-light color="#2C3E50" intensity="0.2" />
+        <ceiling-light enabled="true" color="#FCD34D" intensity="0.8" />
+        <ambient-light color="#1F2937" />
+      </night>
+    </time-of-day-effects>
+  </atmosphere>
+
+  <!-- ТРЕБОВАНИЯ К РЕАЛИЗАЦИИ -->
+  <implementation-requirements>
+    <requirement priority="critical">Все интерактивные объекты видны одновременно без прокрутки</requirement>
+    <requirement priority="critical">Татьяна всегда в центре, не перекрывается объектами</requirement>
+    <requirement priority="high">Плавные анимации 200-300ms для всех переходов</requirement>
+    <requirement priority="high">Haptic feedback на каждый тап</requirement>
+    <requirement priority="high">Action menu закрывается при тапе вне его области</requirement>
+    <requirement priority="medium">Освещение меняется плавно при смене времени суток (1000ms transition)</requirement>
+    <requirement priority="medium">Сэм не должен застревать в объектах при wander</requirement>
+    <requirement priority="low">Ambient анимации объектов синхронизированы с game loop</requirement>
+  </implementation-requirements>
+
+</screen>
