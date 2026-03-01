@@ -26,7 +26,7 @@ export const RoomPage: React.FC = () => {
 
   useEffect(() => {
     fetchGameState();
-  }, [fetchGameState]);
+  }, [fetchGameStore]);
 
   const handleObjectClick = async (obj: RoomObject) => {
     setSelectedObject(obj);
@@ -95,12 +95,12 @@ export const RoomPage: React.FC = () => {
       <div className={styles.room}>
         <div className={styles.roomTitle}>✨ Комната Татьяны ✨</div>
         <div className={styles.roomScene}>
-          {/* Tatyana Character - PixiJS Canvas (RAISED HIGHER) */}
+          {/* Tatyana Character - PixiJS Canvas (RAISED TO 25% TO AVOID BOTTOM NAV) */}
           <div
             style={{
               position: 'absolute',
               left: '45%',
-              top: '35%',
+              top: '25%',
               transform: 'translateX(-50%)',
               zIndex: 5,
             }}
