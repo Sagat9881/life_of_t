@@ -95,12 +95,12 @@ export const RoomPage: React.FC = () => {
       <div className={styles.room}>
         <div className={styles.roomTitle}>✨ Комната Татьяны ✨</div>
         <div className={styles.roomScene}>
-          {/* Tatyana Character - PixiJS Canvas (HIGHER POSITION) */}
+          {/* Tatyana Character - PixiJS Canvas (RAISED HIGHER) */}
           <div
             style={{
               position: 'absolute',
               left: '45%',
-              top: '10%',
+              top: '35%',
               transform: 'translateX(-50%)',
               zIndex: 5,
             }}
@@ -112,7 +112,7 @@ export const RoomPage: React.FC = () => {
             />
           </div>
 
-          {/* Room Objects - moved lower to avoid overlap */}
+          {/* Room Objects */}
           {ROOM_OBJECTS.map((obj) => (
             <button
               key={obj.id}
