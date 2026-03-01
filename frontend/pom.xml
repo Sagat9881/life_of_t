@@ -17,6 +17,14 @@
     <name>Life of T - Frontend</name>
     <description>Frontend module with React + TypeScript Telegram Mini App</description>
 
+    <dependencies>
+        <!-- Assets Module: Visual Resources -->
+        <dependency>
+            <groupId>ru.lifegame</groupId>
+            <artifactId>assets</artifactId>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <!-- Cleanup deprecated files -->
@@ -111,6 +119,26 @@
                                     <filtering>false</filtering>
                                 </resource>
                             </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <!-- Unpack Assets JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.1</version>
+                <executions>
+                    <execution>
+                        <id>unpack-assets</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>assets</includeArtifactIds>
+                            <outputDirectory>${project.basedir}/public/assets</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
