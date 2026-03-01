@@ -15,6 +15,7 @@ import java.util.List;
 @Configuration
 public class DomainConfig {
 
+    // Existing actions
     @Bean
     public GoToWorkAction goToWorkAction() { return new GoToWorkAction(); }
 
@@ -35,6 +36,39 @@ public class DomainConfig {
 
     @Bean
     public RestAtHomeAction restAtHomeAction() { return new RestAtHomeAction(); }
+
+    // RoomPage actions
+    @Bean
+    public CallHusbandAction callHusbandAction() { return new CallHusbandAction(); }
+
+    @Bean
+    public WatchTVAction watchTVAction() { return new WatchTVAction(); }
+
+    @Bean
+    public PlayWithPetAction playWithPetAction() { return new PlayWithPetAction(); }
+
+    // OfficePage actions
+    @Bean
+    public WorkOnProjectAction workOnProjectAction() { return new WorkOnProjectAction(); }
+
+    @Bean
+    public MakeCoffeeAction makeCoffeeAction() { return new MakeCoffeeAction(); }
+
+    @Bean
+    public TalkToColleagueAction talkToColleagueAction() { return new TalkToColleagueAction(); }
+
+    // ParkPage actions
+    @Bean
+    public RestOnBenchAction restOnBenchAction() { return new RestOnBenchAction(); }
+
+    @Bean
+    public FeedDucksAction feedDucksAction() { return new FeedDucksAction(); }
+
+    @Bean
+    public JoggingAction joggingAction() { return new JoggingAction(); }
+
+    @Bean
+    public WalkDogParkAction walkDogParkAction() { return new WalkDogParkAction(); }
 
     @Bean
     public ActionProvider actionProvider(List<GameAction> actions) {
