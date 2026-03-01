@@ -1,46 +1,85 @@
 /**
- * Character - Tatyana character representation without sprite images
- * Based on tatyana.xml and character-visual-specs.xml
+ * Character - Detailed CSS-based Tatyana sprite
+ * Based on character-visual-specs.txt and FRONTEND_SYSTEM_PROMPT.md
  */
 
 import React from 'react';
 import styles from './Character.module.css';
-import { Position } from '../../types/SceneModel';
 
 interface CharacterProps {
-  position: Position;
-  state: 'idle' | 'walking' | 'working' | 'sleeping';
-  emotion: 'neutral' | 'happy' | 'sad' | 'tired' | 'love' | 'focused';
+  position: { x: number; y: number; zIndex: number };
+  state?: 'idle' | 'walk' | 'work' | 'sleep';
+  emotion?: 'neutral' | 'happy' | 'sad' | 'tired';
 }
 
 export const Character: React.FC<CharacterProps> = ({
   position,
-  state,
-  emotion,
+  state = 'idle',
+  emotion = 'neutral',
 }) => {
-  const style: React.CSSProperties = {
-    left: `${position.x}px`,
-    top: `${position.y}px`,
-  };
-
   return (
     <div
       className={`${styles.character} ${styles[state]} ${styles[emotion]}`}
-      style={style}
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        zIndex: position.zIndex,
+      }}
     >
       {/* Head */}
       <div className={styles.head}>
-        <div className={styles.hair} />
+        {/* Hair */}
+        <div className={styles.hair}>
+          <div className={styles.hairLeft} />
+          <div className={styles.hairRight} />
+          <div className={styles.hairBack} />
+        </div>
+
+        {/* Face */}
         <div className={styles.face}>
-          <div className={styles.eyes} />
-          <div className={styles.mouth} />
+          {/* Eyes */}
+          <div className={styles.eyes}>
+            <div className={styles.eye}>
+              <div className={styles.pupil} />
+            </div>
+            <div className={styles.eye}>
+              <div className={styles.pupil} />
+            </div>
+          </div>
+
+          {/* Smile */}
+          <div className={styles.smile} />
+
+          {/* Blush */}
+          <div className={styles.blush} />
         </div>
       </div>
 
       {/* Body */}
       <div className={styles.body}>
-        <div className={styles.torso} />
-        <div className={styles.arms} />
+        {/* Necklace */}
+        <div className={styles.necklace}>
+          <div className={styles.chain} />
+          <div className={styles.heart} />
+        </div>
+
+        {/* Sweater */}
+        <div className={styles.sweater}>
+          <div className={styles.leftArm} />
+          <div className={styles.rightArm} />
+        </div>
+
+        {/* Jeans */}
+        <div className={styles.jeans}>
+          <div className={styles.leftLeg} />
+          <div className={styles.rightLeg} />
+        </div>
+
+        {/* Slippers */}
+        <div className={styles.slippers}>
+          <div className={styles.leftSlipper} />
+          <div className={styles.rightSlipper} />
+        </div>
       </div>
 
       {/* Shadow */}
