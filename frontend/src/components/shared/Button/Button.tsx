@@ -4,11 +4,14 @@ import { useHaptic } from '../../../hooks/useHaptic';
 
 export interface ButtonProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'danger';
+  variant?: 'primary' | 'secondary' | 'danger' | 'accent' | 'outline';
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
+  isLoading?: boolean;
+  fullWidth?: boolean;
   onClick?: () => void;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -16,13 +19,16 @@ export const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
   size = 'medium',
   disabled = false,
+  isLoading = false,
+  fullWidth = false,
   onClick,
   className = '',
+  style,
 }) => {
   const haptic = useHaptic();
 
   const handleClick = () => {
-    if (!disabled && onClick) {
+    if (!disabled && !isLoading && onClick) {
       haptic.light();
       onClick();
     }
@@ -30,12 +36,13 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={`${styles.button} ${styles[variant]} ${styles[size]} ${className}`}
+      className={`${styles.button} ${styles[variant]} ${styles[size]} ${fullWidth ? styles.fullWidth : ''} ${className}`}
       onClick={handleClick}
-      disabled={disabled}
+      disabled={disabled || isLoading}
       type="button"
+      style={style}
     >
-      {children}
+      {isLoading ? 'Загрузка...' : children}
     </button>
   );
 };

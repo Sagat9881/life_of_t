@@ -5,24 +5,6 @@
 
 import { useCallback } from 'react';
 
-interface HapticFeedback {
-  impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;
-  notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
-  selectionChanged: () => void;
-}
-
-interface TelegramWebApp {
-  HapticFeedback?: HapticFeedback;
-}
-
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp?: TelegramWebApp;
-    };
-  }
-}
-
 export const useHaptic = () => {
   const haptic = window.Telegram?.WebApp?.HapticFeedback;
 
