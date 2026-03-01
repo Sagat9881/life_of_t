@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SCREENS SPECIFICATION
+  Спецификация всех экранов игры Life of Tatyana
+  Определяет структуру, layout, компоненты и UX каждого экрана
+  
+  Версия: 1.0
+  Последнее обновление: 2026-03-01
+-->
+
+<screens-specification version="1.0" project="life-of-t">
+
+  <!-- НАВИГАЦИОННАЯ СТРУКТУРА -->
+  <navigation-structure>
+    <primary-flow>
+      <screen name="RoomPage" type="main" default="true" />
+      <screen name="ActionsPage" type="menu" />
+      <screen name="RelationshipsPage" type="menu" />
+      <screen name="StatsPage" type="menu" />
+    </primary-flow>
+
+    <navigation-type>
+      <mobile type="bottom-tab-bar" sticky="true" />
+      <desktop type="side-navigation" expandable="true" />
+    </navigation-type>
+
+    <transitions>
+      <duration value="300ms" />
+      <easing value="cubic-bezier(0.4, 0.0, 0.2, 1)" />
+      <type mobile="slide" desktop="fade" />
+    </transitions>
+  </navigation-structure>
+
+  <!-- ЭКРАН 1: ROOM PAGE (ОСНОВНОЙ ГЕЙМПЛЕЙ) -->
+  <screen name="RoomPage" route="/room" type="main-gameplay">
+    <description>Основной игровой экран с изометрической комнатой Татьяны</description>
+    
+    <layout>
+      <structure>
+        <layer name="background" z-index="0" type="static-image" />
+        <layer name="room" z-index="1" type="isometric-scene" />
+        <layer name="hud" z-index="10" type="ui-overlay" />
+        <layer name="modals" z-index="600" type="dynamic" />
+      </structure>
+
+      <viewport>
+        <mobile width="100vw" height="100vh" />
+        <desktop width="1280px" height="720px" center="true" />
+      </viewport>
+    </layout>
+
+    <!-- HUD (ВЕРХНЯЯ ПАНЕЛЬ) -->
+    <hud position="top" height="80px" sticky="true" safe-area="true">
+      <background blur="8px" opacity="0.95" color="rgba(255,255,255,0.9)" />
+      <padding horizontal="16px" vertical="12px" />
+      
+      <elements>
+        <!-- Статы персонажа -->
+        <element name="character-stats" position="left">
+          <stats-bar>
+            <stat name="energy" icon="battery" color="#FCD34D" max="100" />
+            <stat name="happiness" icon="smile" color="#F093FB" max="100" />
+            <stat name="health" icon="heart" color="#EF4444" max="100" />
+          </stats-bar>
+        </element>
+
+        <!-- Время и дата -->
+        <element name="time-widget" position="center">
+          <display format="HH:mm" size="1.25rem" weight="600" />
+          <date format="dd MMM, EEE" size="0.875rem" color="gray" />
+          <icon name="clock" size="20px" />
+        </element>
+
+        <!-- Деньги -->
+        <element name="money" position="right">
+          <icon name="dollar-sign" emoji="💰" size="24px" />
+          <amount format="number" size="1.125rem" weight="700" />
+        </element>
+      </elements>
+    </hud>
+
+    <!-- ИЗОМЕТРИЧЕСКАЯ КОМНАТА -->
+    <isometric-room perspective="2:1" angle="45deg">
+      <camera type="fixed" zoom="1.0" />
+      
+      <!-- Персонаж Татьяна -->
+      <character name="tatyana" position="center">
+        <sprite size="64x64" />
+        <animations states="idle, walk, work, sleep, interaction" />
+        <shadow enabled="true" opacity="0.3" />
+        <name-label visible="false" />
+      </character>
+
+      <!-- Интерактивные объекты -->
+      <interactive-objects>
+        <object name="bed" type="furniture" position="back-left">
+          <sprite size="128x128" />
+          <states values="neat, messy, occupied" />
+          <highlight type="glow" color="var(--color-primary)" />
+          <actions>
+            <action id="sleep" label="😴 Спать" energy-cost="0" time-cost="8h" />
+            <action id="make-bed" label="🛏️ Застелить" energy-cost="5" />
+          </actions>
+        </object>
+
+        <object name="computer" type="work-station" position="back-right">
+          <sprite size="128x128" />
+          <states values="off, idle, working" />
+          <screen-glow enabled="true" color="#93C5FD" />
+          <actions>
+            <action id="work" label="💻 Работать" energy-cost="20" time-cost="2h" money-reward="100" />
+            <action id="browse" label="🌍 Интернет" energy-cost="5" time-cost="30m" />
+          </actions>
+        </object>
+
+        <object name="phone" type="communication" position="nightstand">
+          <sprite size="64x64" />
+          <states values="idle, notification, active" />
+          <notification-badge visible="dynamic" />
+          <actions>
+            <action id="call-husband" label="📞 Позвонить мужу" />
+            <action id="call-father" label="📞 Позвонить папе" />
+            <action id="social" label="📱 Соцсети" energy-cost="5" />
+          </actions>
+        </object>
+
+        <object name="mirror" type="grooming" position="right-wall">
+          <sprite size="96x96" />
+          <reflection enabled="true" />
+          <actions>
+            <action id="groom" label="🪩 Привести себя" energy-cost="10" happiness-reward="5" />
+          </actions>
+        </object>
+
+        <object name="wardrobe" type="storage" position="left-wall">
+          <sprite size="128x128" />
+          <actions>
+            <action id="change-clothes" label="👗 Переодеться" />
+          </actions>
+        </object>
+      </interactive-objects>
+
+      <!-- Животные -->
+      <npcs>
+        <npc name="sam" type="dog" position="dynamic">
+          <sprite size="48x48" />
+          <animations states="idle, walk, sit, play, bark" />
+          <behavior type="wander" bounds="room" />
+          <interaction tap="true" action="pet" />
+        </npc>
+
+        <npc name="garfield" type="cat" position="dynamic" visible="conditional">
+          <sprite size="48x48" />
+          <animations states="idle, walk, groom, sleep" />
+          <behavior type="lazy" favorite-spots="bed, window" />
+        </npc>
+      </npcs>
+    </isometric-room>
+
+    <!-- ВЗАИМОДЕЙСТВИЯ -->
+    <interactions>
+      <tap-object>
+        <effect haptic="light" />
+        <visual scale="1.05" duration="200ms" />
+        <show-action-menu position="above-object" animation="slideUp" />
+      </tap-object>
+
+      <action-menu>
+        <background blur="12px" color="rgba(255,255,255,0.95)" />
+        <border-radius value="20px" />
+        <padding value="16px" />
+        <max-width value="280px" />
+        <actions layout="vertical" gap="8px" />
+      </action-menu>
+
+      <action-button>
+        <height value="48px" />
+        <icon-size value="24px" />
+        <font-size value="1rem" />
+        <display-info show="energy-cost, time-cost, rewards" />
+      </action-button>
+    </interactions>
+
+    <!-- ТРЕБОВАНИЯ -->
+    <requirements>
+      <requirement priority="critical">Видны ВСЕ интерактивные объекты одновременно</requirement>
+      <requirement priority="critical">Персонаж Татьяна виден в центре, не перекрывается объектами</requirement>
+      <requirement priority="high">Плавные анимации при взаимодействии (200-300ms)</requirement>
+      <requirement priority="high">Объекты подсвечиваются при наведении/тапе</requirement>
+      <requirement priority="medium">Haptic feedback при тапе на объект</requirement>
+      <requirement priority="medium">Время суток влияет на освещение комнаты</requirement>
+    </requirements>
+  </screen>
+
+  <!-- ЭКРАН 2: ACTIONS PAGE (ДЕЙСТВИЯ) -->
+  <screen name="ActionsPage" route="/actions" type="menu">
+    <description>Меню доступных действий за пределами комнаты</description>
+
+    <layout>
+      <header height="60px" sticky="true">
+        <title text="Действия" size="1.5rem" weight="700" />
+        <subtitle text="Что сделать сегодня?" size="0.875rem" color="gray" />
+      </header>
+
+      <content>
+        <scroll-area type="vertical" padding="16px">
+          <actions-list layout="vertical" gap="12px" />
+        </scroll-area>
+      </content>
+    </layout>
+
+    <!-- КАРТОЧКИ ДЕЙСТВИЙ -->
+    <action-card design="gradient-border">
+      <structure>
+        <icon position="left" size="48px" />
+        <content position="center" flex="1">
+          <title size="1.125rem" weight="600" />
+          <description size="0.875rem" color="gray" lines="2" />
+          <meta-info display="energy, time, rewards" />
+        </content>
+        <arrow position="right" icon="chevron-right" size="20px" />
+      </structure>
+
+      <styling>
+        <border-radius value="16px" />
+        <padding value="16px" />
+        <background value="white" />
+        <border gradient="true" width="2px" />
+        <shadow default="0 4px 12px rgba(0,0,0,0.08)" />
+      </styling>
+
+      <states>
+        <hover transform="translateY(-2px)" shadow="0 8px 20px rgba(0,0,0,0.12)" />
+        <active transform="scale(0.98)" />
+        <disabled opacity="0.5" grayscale="true" />
+      </states>
+    </action-card>
+
+    <!-- КАТЕГОРИИ ДЕЙСТВИЙ -->
+    <action-categories>
+      <category name="work" icon="briefcase" color="#3B82F6">
+        <action id="office-work" title="Работа в офисе" time="8h" energy="-40" money="+500" />
+        <action id="freelance" title="Фриланс" time="4h" energy="-20" money="+200" />
+      </category>
+
+      <category name="social" icon="users" color="#F093FB">
+        <action id="meet-friends" title="Встретиться с подругами" time="3h" energy="-15" happiness="+20" />
+        <action id="date-husband" title="Свидание с мужем" time="4h" energy="-10" relationship-husband="+15" />
+        <action id="visit-father" title="Навестить папу" time="2h" energy="-10" relationship-father="+10" />
+      </category>
+
+      <category name="leisure" icon="sparkles" color="#6EE7B7">
+        <action id="shopping" title="Шопинг" time="2h" energy="-10" money="-100" happiness="+15" />
+        <action id="spa" title="Спа-салон" time="3h" energy="+20" money="-200" happiness="+25" />
+        <action id="walk-park" title="Прогулка в парке" time="1h" energy="-5" happiness="+10" />
+      </category>
+
+      <category name="pets" icon="heart" color="#FCD34D">
+        <action id="walk-sam" title="Гулять с Сэмом" time="1h" energy="-10" happiness="+15" relationship-sam="+10" />
+        <action id="vet" title="Ветеринар" time="2h" energy="-15" money="-150" />
+      </category>
+    </action-categories>
+
+    <requirements>
+      <requirement>Карточки показывают энергию, время, результат</requirement>
+      <requirement>Disabled state для недоступных действий (недостаточно энергии/денег)</requirement>
+      <requirement>Smooth scroll с momentum</requirement>
+      <requirement>Фильтрация по категориям (опционально)</requirement>
+    </requirements>
+  </screen>
+
+  <!-- ЭКРАН 3: RELATIONSHIPS PAGE (ОТНОШЕНИЯ) -->
+  <screen name="RelationshipsPage" route="/relationships" type="menu">
+    <description>Меню отношений с персонажами</description>
+
+    <layout>
+      <header height="60px" sticky="true">
+        <title text="Отношения" size="1.5rem" weight="700" />
+        <subtitle text="Близкие люди" size="0.875rem" color="gray" />
+      </header>
+
+      <content>
+        <scroll-area padding="16px">
+          <characters-grid 
+            columns-mobile="2" 
+            columns-tablet="3" 
+            columns-desktop="4" 
+            gap="16px" />
+        </scroll-area>
+      </content>
+    </layout>
+
+    <!-- КАРТОЧКИ ПЕРСОНАЖЕЙ -->
+    <character-card>
+      <structure>
+        <avatar size="80px" border="3px" border-color="dynamic" />
+        <name size="1rem" weight="600" align="center" />
+        <role size="0.75rem" color="gray" align="center" />
+        <relationship-bar height="8px" progress="0-100" />
+        <relationship-level text="dynamic" size="0.875rem" />
+      </structure>
+
+      <styling>
+        <border-radius value="20px" />
+        <padding value="16px" />
+        <background value="white" />
+        <shadow default="0 4px 12px rgba(0,0,0,0.08)" />
+      </styling>
+
+      <relationship-colors>
+        <level value="0-20" color="#EF4444" label="Напряжённые" />
+        <level value="21-40" color="#F59E0B" label="Нейтральные" />
+        <level value="41-60" color="#3B82F6" label="Дружеские" />
+        <level value="61-80" color="#6EE7B7" label="Тёплые" />
+        <level value="81-100" color="#F093FB" label="Любовь" />
+      </relationship-colors>
+    </character-card>
+
+    <!-- ПЕРСОНАЖИ -->
+    <characters>
+      <character id="husband" name="Муж" role="Любимый супруг" avatar="/sprites/husband/avatar.webp" />
+      <character id="father" name="Папа" role="Родной отец" avatar="/sprites/father/avatar.webp" />
+      <character id="sam" name="Сэм" role="Цвергпинчер" avatar="/sprites/sam/avatar.webp" />
+      <character id="garfield" name="Гарфилд" role="Кот" avatar="/sprites/garfield/avatar.webp" visible="conditional" />
+      <character id="friend-1" name="Подруга" role="Лучшая подруга" avatar="/sprites/friend/avatar.webp" />
+    </characters>
+
+    <requirements>
+      <requirement>Прогресс бар отношений с анимацией (300ms)</requirement>
+      <requirement>Аватары с рамкой цвета по уровню отношений</requirement>
+      <requirement>Тап на карточку открывает детальную информацию</requirement>
+    </requirements>
+  </screen>
+
+  <!-- ЭКРАН 4: STATS PAGE (СТАТИСТИКА) -->
+  <screen name="StatsPage" route="/stats" type="menu">
+    <description>Детальная статистика и достижения</description>
+
+    <layout>
+      <header height="60px" sticky="true">
+        <title text="Статистика" size="1.5rem" weight="700" />
+      </header>
+
+      <content>
+        <scroll-area padding="16px">
+          <sections gap="24px">
+            <section name="main-stats" />
+            <section name="skills" />
+            <section name="achievements" />
+            <section name="history" />
+          </sections>
+        </scroll-area>
+      </content>
+    </layout>
+
+    <!-- ОСНОВНЫЕ СТАТЫ -->
+    <main-stats>
+      <stat-card name="energy">
+        <icon name="battery" size="48px" color="#FCD34D" />
+        <value current="80" max="100" />
+        <progress-ring animate="true" />
+      </stat-card>
+
+      <stat-card name="happiness">
+        <icon emoji="😊" size="48px" />
+        <value current="75" max="100" />
+        <progress-ring animate="true" color="#F093FB" />
+      </stat-card>
+
+      <stat-card name="health">
+        <icon name="heart" size="48px" color="#EF4444" />
+        <value current="90" max="100" />
+        <progress-ring animate="true" />
+      </stat-card>
+    </main-stats>
+
+    <!-- НАВЫКИ -->
+    <skills>
+      <skill name="work" level="5" xp="450/500" icon="briefcase" />
+      <skill name="social" level="3" xp="120/300" icon="users" />
+      <skill name="fitness" level="2" xp="80/200" icon="activity" />
+      <skill name="cooking" level="4" xp="280/400" icon="chef" />
+    </skills>
+
+    <!-- ДОСТИЖЕНИЯ -->
+    <achievements layout="grid" columns="3">
+      <achievement id="first-week" unlocked="true" icon="🎉" />
+      <achievement id="workaholic" unlocked="true" icon="💼" />
+      <achievement id="social-butterfly" unlocked="false" icon="🦋" />
+    </achievements>
+  </screen>
+
+  <!-- ОБЩИЕ КОМПОНЕНТЫ -->
+  <shared-components>
+    <!-- НИЖНЯЯ НАВИГАЦИЯ -->
+    <bottom-navigation height="60px" safe-area="true">
+      <background blur="12px" color="rgba(255,255,255,0.95)" />
+      <border-top width="1px" color="rgba(0,0,0,0.1)" />
+      
+      <tabs>
+        <tab route="/room" icon="home" label="Комната" />
+        <tab route="/actions" icon="zap" label="Действия" />
+        <tab route="/relationships" icon="heart" label="Люди" />
+        <tab route="/stats" icon="bar-chart" label="Статы" />
+      </tabs>
+
+      <active-state>
+        <color value="var(--color-primary)" />
+        <indicator type="pill" height="3px" />
+      </active-state>
+    </bottom-navigation>
+
+    <!-- МОДАЛЬНОЕ ОКНО -->
+    <modal-window>
+      <backdrop blur="8px" color="rgba(0, 0, 0, 0.5)" />
+      <container max-width="500px" border-radius="24px" padding="32px" />
+      <close-button position="top-right" size="32px" />
+      <animation enter="slideUp" exit="fadeOut" duration="300ms" />
+    </modal-window>
+
+    <!-- УВЕДОМЛЕНИЯ (TOAST) -->
+    <toast-notification>
+      <position vertical="top" horizontal="center" offset="80px" />
+      <max-width value="400px" />
+      <duration value="3000ms" />
+      <animation enter="slideDown" exit="slideUp" />
+      <types>
+        <type name="success" icon="check-circle" color="#10B981" />
+        <type name="error" icon="x-circle" color="#EF4444" />
+        <type name="info" icon="info" color="#3B82F6" />
+      </types>
+    </toast-notification>
+  </shared-components>
+
+</screens-specification>
