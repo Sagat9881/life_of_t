@@ -1,42 +1,64 @@
+/**
+ * useHaptic - Telegram WebApp Haptic Feedback hook
+ * Based on BottomNavigation.xml haptic specifications
+ */
+
 import { useCallback } from 'react';
-import { useTelegram } from './useTelegram';
 
-type ImpactStyle = 'light' | 'medium' | 'heavy' | 'rigid' | 'soft';
-type NotificationType = 'error' | 'success' | 'warning';
-
-interface UseHapticResult {
-  impact: (style?: ImpactStyle) => void;
-  notification: (type: NotificationType) => void;
-  selection: () => void;
+interface TelegramWebApp {
+  HapticFeedback?: {
+    impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;
+    notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
+    selectionChanged: () => void;
+  };
 }
 
-/**
- * Хук для haptic feedback в Telegram
- */
-export const useHaptic = (): UseHapticResult => {
-  const { webApp } = useTelegram();
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp?: TelegramWebApp;
+    };
+  }
+}
 
-  const impact = useCallback(
-    (style: ImpactStyle = 'medium') => {
-      webApp?.HapticFeedback.impactOccurred(style);
-    },
-    [webApp]
-  );
+export const useHaptic = () => {
+  const haptic = window.Telegram?.WebApp?.HapticFeedback;
 
-  const notification = useCallback(
-    (type: NotificationType) => {
-      webApp?.HapticFeedback.notificationOccurred(type);
-    },
-    [webApp]
-  );
+  const light = useCallback(() => {
+    haptic?.impactOccurred('light');
+  }, [haptic]);
 
-  const selection = useCallback(() => {
-    webApp?.HapticFeedback.selectionChanged();
-  }, [webApp]);
+  const medium = useCallback(() => {
+    haptic?.impactOccurred('medium');
+  }, [haptic]);
+
+  const heavy = useCallback(() => {
+    haptic?.impactOccurred('heavy');
+  }, [haptic]);
+
+  const success = useCallback(() => {
+    haptic?.notificationOccurred('success');
+  }, [haptic]);
+
+  const error = useCallback(() => {
+    haptic?.notificationOccurred('error');
+  }, [haptic]);
+
+  const warning = useCallback(() => {
+    haptic?.notificationOccurred('warning');
+  }, [haptic]);
+
+  const selectionChanged = useCallback(() => {
+    haptic?.selectionChanged();
+  }, [haptic]);
 
   return {
-    impact,
-    notification,
-    selection,
+    light,
+    medium,
+    heavy,
+    success,
+    error,
+    warning,
+    selectionChanged,
   };
 };

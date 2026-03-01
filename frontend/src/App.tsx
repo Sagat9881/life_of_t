@@ -1,36 +1,67 @@
-import { useState } from 'react';
-import { AppLayout } from './components/layout/AppLayout';
-import { RoomPage } from './pages/RoomPage';
-import { RelationshipsPage } from './pages/RelationshipsPage';
-import { ProfilePage } from './pages/ProfilePage';
-import { ShutdownButton } from './components/demo/ShutdownButton';
-import type { NavItem } from './components/layout/BottomNav';
-import './styles/globals.css';
+/**
+ * App - Main application component with HUD, Navigation, and Scene
+ */
+
+import React, { useState } from 'react';
+import { GameStateProvider } from './context/GameStateContext';
+import { HUD } from './components/ui/HUD';
+import { BottomNavigation, NavTab } from './components/ui/BottomNavigation';
+import { RoomScreen } from './components/scene/RoomScreen';
+import './App.css';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<NavItem>('home');
+  const [activeTab, setActiveTab] = useState<NavTab>('home');
+  const [availableActions] = useState(3);
+  const [hasRelEvents] = useState(true);
 
-  const renderPage = () => {
-    switch (currentPage) {
+  const handleObjectTap = (objectId: string) => {
+    console.log('Object tapped:', objectId);
+    // TODO: Open ActionMenu modal
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
       case 'home':
-        return <RoomPage />;
+        return <RoomScreen gameState={{}} onObjectTap={handleObjectTap} />;
+      case 'actions':
+        return (
+          <div style={{ padding: '100px 20px' }}>
+            <h2>Действия</h2>
+            <p>ActionsPage будет здесь</p>
+          </div>
+        );
       case 'relationships':
-        return <RelationshipsPage />;
-      case 'profile':
-        return <ProfilePage />;
+        return (
+          <div style={{ padding: '100px 20px' }}>
+            <h2>Отношения</h2>
+            <p>RelationshipsPage будет здесь</p>
+          </div>
+        );
+      case 'stats':
+        return (
+          <div style={{ padding: '100px 20px' }}>
+            <h2>Статистика</h2>
+            <p>StatsPage будет здесь</p>
+          </div>
+        );
       default:
-        return <RoomPage />;
+        return null;
     }
   };
 
   return (
-    <>
-      <AppLayout currentNav={currentPage} onNavigate={setCurrentPage}>
-        {renderPage()}
-      </AppLayout>
-      {/* Кнопка выключения демо */}
-      <ShutdownButton />
-    </>
+    <GameStateProvider>
+      <div className="app">
+        <HUD />
+        {renderContent()}
+        <BottomNavigation
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          availableActionsCount={availableActions}
+          hasRelationshipEvents={hasRelEvents}
+        />
+      </div>
+    </GameStateProvider>
   );
 }
 

@@ -1,0 +1,107 @@
+/* App.css - Global styles per DESIGN_SYSTEM.xml */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+.app {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: #F9FAFB;
+}
+
+/* CSS Variables from DESIGN_SYSTEM.xml */
+:root {
+  /* Primary palette */
+  --color-primary: #F871AA;
+  --color-warm-beige: #F5E6D3;
+  --color-rose-pink: #FFB6C1;
+  --color-mint-green: #B5EAD7;
+  --color-soft-yellow: #FFF4B8;
+  --color-lavender: #E0BBE4;
+
+  /* Secondary palette */
+  --color-deep-brown: #6B4423;
+  --color-charcoal: #4A5859;
+  --color-cream-white: #FFF9E9;
+  --color-muted-gray: #A8B2B7;
+
+  /* Text colors */
+  --color-text-primary: #1F2937;
+  --color-text-secondary: #6B7280;
+  --color-text-muted: #9CA3AF;
+
+  /* Status colors */
+  --color-success: #10B981;
+  --color-warning: #F97316;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+
+  /* Z-index layers */
+  --z-base: 0;
+  --z-elevated: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal-backdrop: 500;
+  --z-modal: 600;
+  --z-tooltip: 1000;
+  --z-notification: 2000;
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text-primary: #F9FAFB;
+    --color-text-secondary: #9CA3AF;
+    --color-text-muted: #6B7280;
+  }
+
+  .app {
+    background: #111827;
+  }
+}
+
+/* Disable text selection for game UI */
+.app {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Smooth animations */
+* {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

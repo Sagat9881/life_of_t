@@ -1,0 +1,190 @@
+/* BottomNavigation.module.css - Based on BottomNavigation.xml and DESIGN_SYSTEM.xml */
+
+.bottomNav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  z-index: 200;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 8px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Safe area for iOS home indicator */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .bottomNav {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Nav item */
+.navItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 56px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: transform 120ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.navItem:active {
+  transform: scale(0.96);
+}
+
+/* Icon container with badge */
+.iconContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  color: #6B7280;
+  transition: color 200ms ease;
+}
+
+.navItem.active .icon {
+  color: #F871AA;
+}
+
+/* Label */
+.label {
+  font-size: 0.75rem;
+  color: #6B7280;
+  font-weight: 500;
+  transition: color 200ms ease;
+}
+
+.navItem.active .label {
+  color: #F871AA;
+  font-weight: 600;
+}
+
+/* Active indicator */
+.activeIndicator {
+  position: absolute;
+  bottom: -8px;
+  width: 32px;
+  height: 3px;
+  background: #F871AA;
+  border-radius: 999px;
+  animation: slideIn 180ms ease-in;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scaleX(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+/* Badge (counter) */
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #EF4444;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 999px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Dot indicator */
+.dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: #F97316;
+  border-radius: 50%;
+  border: 2px solid white;
+  animation: softPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes softPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+  .bottomNav {
+    height: 67px;
+  }
+
+  .navItem {
+    min-height: 56px;
+  }
+
+  .label {
+    font-size: 0.7rem;
+  }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .bottomNav {
+    background: rgba(15, 23, 42, 0.95);
+    border-top-color: rgba(148, 163, 184, 0.3);
+  }
+
+  .icon {
+    color: #9CA3AF;
+  }
+
+  .navItem.active .icon {
+    color: #F9A8D4;
+  }
+
+  .label {
+    color: #9CA3AF;
+  }
+
+  .navItem.active .label {
+    color: #F9A8D4;
+  }
+
+  .activeIndicator {
+    background: #F9A8D4;
+  }
+
+  .dot {
+    border-color: rgba(15, 23, 42, 1);
+  }
+}
