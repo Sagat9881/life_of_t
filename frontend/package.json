@@ -12,7 +12,10 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "pixi.js": "^8.5.2"
+    "pixi.js": "^8.5.2",
+    "lucide-react": "^0.460.0",
+    "framer-motion": "^11.11.17",
+    "zustand": "^5.0.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
