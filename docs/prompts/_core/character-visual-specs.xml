@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<character-visual-specifications>
+    <meta>
+        <name>Character Visual Specifications</name>
+        <version>1.0.0</version>
+        <purpose>Подробные визуальные спецификации всех персонажей игры Life of T</purpose>
+        <last-updated>2026-03-01</last-updated>
+    </meta>
+
+    <visual-style>
+        <overall>
+            <description>Мягкий современный 2D стиль, вдохновлённый инди-играми (Gris, Spiritfarer, Celeste)</description>
+            <characteristics>
+                <item>Реалистичные пропорции с лёгкой стилизацией</item>
+                <item>Выразительные лица и позы</item>
+                <item>Детализированная одежда и аксессуары</item>
+                <item>Тёплая уютная цветовая палитра</item>
+                <item>Мягкие тени и свет</item>
+            </characteristics>
+        </overall>
+
+        <color-palette>
+            <primary>
+                <color name="Warm Beige" hex="#F5E6D3" usage="Кожа, нейтральные фоны"/>
+                <color name="Rose Pink" hex="#FFB6C1" usage="Акценты, романтика, UI"/>
+                <color name="Mint Green" hex="#B5EAD7" usage="Свежесть, природа, позитив"/>
+                <color name="Soft Yellow" hex="#FFF4B8" usage="Тепло, свет, радость"/>
+                <color name="Lavender" hex="#E0BBE4" usage="Спокойствие, мечты"/>
+            </primary>
+
+            <secondary>
+                <color name="Deep Brown" hex="#6B4423" usage="Волосы, детали"/>
+                <color name="Charcoal" hex="#4A5859" usage="Одежда, контуры"/>
+                <color name="Cream White" hex="#FFF9E9" usage="Высветления, блики"/>
+                <color name="Muted Gray" hex="#A8B2B7" usage="Тени, фон"/>
+            </secondary>
+        </color-palette>
+    </visual-style>
+
+    <characters>
+        <character id="tanya">
+            <name>Татьяна (Таня)</name>
+            <role>Главная героиня, играбельный персонаж</role>
+            
+            <physical-description>
+                <age>~30 лет</age>
+                <height>165 см (средний рост)</height>
+                <build>Стройная, женственная фигура</build>
+                <skin-tone>#F5D5B8 (тёплый бежевый)</skin-tone>
+                
+                <hair>
+                    <color>#8B1A1A (burgundy/красно-винный)</color>
+                    <style>Средней длины, волнистые, часто распущенные или в небрежном пучке</style>
+                    <details>Естественный блеск, лёгкие волны, живые пряди</details>
+                </hair>
+
+                <eyes>
+                    <color>#6B8E23 (зелёный с оливковым оттенком)</color>
+                    <shape>Выразительные, миндалевидные</shape>
+                    <details>Длинные ресницы, чуть приподнятые внешние уголки</details>
+                </eyes>
+
+                <face>
+                    <shape>Овальное лицо с мягкими чертами</shape>
+                    <features>
+                        <feature>Аккуратный нос</feature>
+                        <feature>Полные губы натурального розового оттенка</feature>
+                        <feature>Высокие скулы</feature>
+                        <feature>Мягкая линия подбородка</feature>
+                    </features>
+                </face>
+            </physical-description>
+
+            <wardrobe>
+                <style>Casual-comfortable, домашний стиль с элементами женственности</style>
+                
+                <outfit id="home-work">
+                    <name>Домашняя работа</name>
+                    <pieces>
+                        <item>Уютный свитер или кардиган (бежевый, розовый, мятный)</item>
+                        <item>Удобные джинсы или мягкие брюки</item>
+                        <item>Домашние тапочки или носки</item>
+                    </pieces>
+                </outfit>
+
+                <outfit id="date">
+                    <name>Свидание</name>
+                    <pieces>
+                        <item>Женственное платье или блузка с юбкой</item>
+                        <item>Лёгкий макияж</item>
+                        <item>Аккуратная укладка волос</item>
+                    </pieces>
+                </outfit>
+
+                <outfit id="casual">
+                    <name>Повседневная</name>
+                    <pieces>
+                        <item>Футболка или рубашка</item>
+                        <item>Джинсы или леггинсы</item>
+                        <item>Кроссовки или балетки</item>
+                    </pieces>
+                </outfit>
+
+                <accessories>
+                    <item>Тонкая цепочка с кулоном (подарок мужа)</item>
+                    <item>Наушники (для работы под музыку)</item>
+                    <item>Чашка кофе/чая (часто в руках)</item>
+                    <item>Ноутбук или планшет (рабочий инструмент)</item>
+                </accessories>
+            </wardrobe>
+
+            <emotional-states>
+                <state name="neutral">
+                    <description>Спокойное, нейтральное выражение</description>
+                    <face>Расслабленные черты, лёгкая задумчивость</face>
+                </state>
+
+                <state name="happy">
+                    <description>Радость, счастье</description>
+                    <face>Широкая улыбка, блеск в глазах, приподнятые брови</face>
+                </state>
+
+                <state name="sad">
+                    <description>Грусть, расстройство</description>
+                    <face>Опущенные уголки губ, печальный взгляд, влажные глаза</face>
+                </state>
+
+                <state name="stressed">
+                    <description>Стресс, усталость</description>
+                    <face>Нахмуренные брови, напряжённая челюсть, тени под глазами</face>
+                </state>
+
+                <state name="angry">
+                    <description>Злость, раздражение</description>
+                    <face>Сжатые губы, сдвинутые брови, резкий взгляд</face>
+                </state>
+
+                <state name="surprised">
+                    <description>Удивление</description>
+                    <face>Широко открытые глаза, приоткрытый рот, приподнятые брови</face>
+                </state>
+
+                <state name="loving">
+                    <description>Любовь, нежность</description>
+                    <face>Мягкая улыбка, тёплый взгляд, расслабленные черты</face>
+                </state>
+
+                <state name="tired">
+                    <description>Усталость, изнеможение</description>
+                    <face>Полуприкрытые глаза, бледность, вялая поза</face>
+                </state>
+            </emotional-states>
+
+            <animations>
+                <animation name="idle">
+                    <frames>24</frames>
+                    <description>Спокойное стояние с лёгким дыханием</description>
+                    <timing>2fps (медленная, расслабленная)</timing>
+                </animation>
+
+                <animation name="walk">
+                    <frames>24</frames>
+                    <description>Естественная походка</description>
+                    <timing>12fps (средний темп)</timing>
+                </animation>
+
+                <animation name="sit_work">
+                    <frames>20</frames>
+                    <description>Сидение за компьютером, печать</description>
+                    <timing>8fps (рабочий ритм)</timing>
+                </animation>
+
+                <animation name="drink">
+                    <frames>22</frames>
+                    <description>Пьёт кофе/чай</description>
+                    <timing>10fps</timing>
+                </animation>
+
+                <animation name="pet_stroke">
+                    <frames>25</frames>
+                    <description>Гладит питомца</description>
+                    <timing>12fps (нежно)</timing>
+                </animation>
+
+                <animation name="phone_talk">
+                    <frames>23</frames>
+                    <description>Разговор по телефону</description>
+                    <timing>8fps</timing>
+                </animation>
+
+                <animation name="hug">
+                    <frames>20</frames>
+                    <description>Обнимает мужа</description>
+                    <timing>10fps (медленно, нежно)</timing>
+                </animation>
+
+                <animation name="stretch">
+                    <frames>24</frames>
+                    <description>Потягивается после работы</description>
+                    <timing>8fps</timing>
+                </animation>
+            </animations>
+
+            <personality-in-visual>
+                <trait>Выразительная мимика - эмоции читаются на лице</trait>
+                <trait>Естественные позы - не идеально ровная осанка, живая пластика</trait>
+                <trait>Часто задумчивое выражение - творческая натура</trait>
+                <trait>Теплота в глазах - доброта и эмпатия</trait>
+            </personality-in-visual>
+        </character>
+
+        <character id="husband_sam">
+            <name>Муж (Сэм/Александр)</name>
+            <role>NPC, любящий партнёр</role>
+            
+            <physical-description>
+                <age>~30-32 года</age>
+                <height>178 см (среднего роста, чуть выше Тани)</height>
+                <build>Спортивное телосложение, подтянутый</build>
+                <skin-tone>#F0D5A8 (светлый бежевый с тёплым подтоном)</skin-tone>
+
+                <reference-photos>
+                    <photo id="ref1" file="file:247">Стоит на улице, рюкзак, наушники</photo>
+                    <photo id="ref2" file="file:248">Селфи с другом в кафе</photo>
+                    <photo id="ref3" file="file:249">У воды, вид сбоку</photo>
+                    <photo id="ref4" file="file:250">Селфи крупным планом</photo>
+                    <photo id="ref5" file="file:251">Задумчивый взгляд</photo>
+                    <photo id="ref6" file="file:252">Портрет в синем пиджаке</photo>
+                </reference-photos>
+
+                <hair>
+                    <color>#3D2817 (тёмно-коричневый)</color>
+                    <style>Средней длины, слегка волнистые, зачёсаны назад или набок</style>
+                    <details>Естественная текстура, небольшой объём</details>
+                </hair>
+
+                <facial-hair>
+                    <type>Лёгкая щетина или короткая борода</type>
+                    <style>Ухоженная, подчёркивает линию челюсти</style>
+                </facial-hair>
+
+                <eyes>
+                    <color>#6B4423 (карие)</color>
+                    <shape>Выразительные, слегка прищуренные при улыбке</shape>
+                    <details>Тёплый взгляд, добрые глаза</details>
+                </eyes>
+
+                <face>
+                    <shape>Овальное с выраженной линией челюсти</shape>
+                    <features>
+                        <feature>Прямой нос средней величины</feature>
+                        <feature>Широкая искренняя улыбка</feature>
+                        <feature>Слегка выступающие скулы</feature>
+                        <feature>Аккуратные брови</feature>
+                    </features>
+                </face>
+            </physical-description>
+
+            <wardrobe>
+                <style>Casual smart, современный городской стиль</style>
+
+                <outfit id="home-casual">
+                    <name>Дома</name>
+                    <pieces>
+                        <item>Футболка или лонгслив</item>
+                        <item>Удобные джинсы или спортивные брюки</item>
+                        <item>Носки</item>
+                    </pieces>
+                </outfit>
+
+                <outfit id="work">
+                    <name>На работе</name>
+                    <pieces>
+                        <item>Рубашка (синяя, серая, белая)</item>
+                        <item>Джинсы или чиносы</item>
+                        <item>Пиджак (опционально)</item>
+                    </pieces>
+                </outfit>
+
+                <outfit id="outdoor">
+                    <name>На улице</name>
+                    <pieces>
+                        <item>Куртка или толстовка</item>
+                        <item>Рюкзак</item>
+                        <item>Кроссовки</item>
+                        <item>Наушники на шее</item>
+                    </pieces>
+                </outfit>
+
+                <accessories>
+                    <item>Рюкзак (городской, тёмно-синий или серый)</item>
+                    <item>Наушники (красные, как на фото)</item>
+                    <item>Часы (простые, современные)</item>
+                    <item>Смартфон</item>
+                </accessories>
+            </wardrobe>
+
+            <emotional-states>
+                <state name="neutral">
+                    <description>Спокойное выражение</description>
+                    <face>Расслабленные черты, лёгкая полуулыбка</face>
+                </state>
+
+                <state name="happy">
+                    <description>Радость, веселье</description>
+                    <face>Широкая улыбка, слегка прищуренные глаза, смеющийся вид</face>
+                </state>
+
+                <state name="loving">
+                    <description>Любовь, нежность к Тане</description>
+                    <face>Мягкая улыбка, тёплый взгляд, расслабленные черты</face>
+                </state>
+
+                <state name="concerned">
+                    <description>Беспокойство, забота</description>
+                    <face>Слегка нахмуренные брови, серьёзный взгляд</face>
+                </state>
+
+                <state name="tired">
+                    <description>Усталость после работы</description>
+                    <face>Полуприкрытые глаза, расслабленная поза</face>
+                </state>
+
+                <state name="playful">
+                    <description>Игривость, шутка</description>
+                    <face>Озорная улыбка, хитрый взгляд, приподнятая бровь</face>
+                </state>
+            </emotional-states>
+
+            <animations>
+                <animation name="idle">
+                    <frames>22</frames>
+                    <description>Спокойное стояние, руки в карманах или скрещены</description>
+                    <timing>2fps</timing>
+                </animation>
+
+                <animation name="walk">
+                    <frames>24</frames>
+                    <description>Уверенная походка</description>
+                    <timing>12fps</timing>
+                </animation>
+
+                <animation name="hug_tanya">
+                    <frames>20</frames>
+                    <description>Обнимает Таню</description>
+                    <timing>10fps (медленно, нежно)</timing>
+                </animation>
+
+                <animation name="typing">
+                    <frames>20</frames>
+                    <description>Работает за компьютером</description>
+                    <timing>8fps</timing>
+                </animation>
+
+                <animation name="phone">
+                    <frames>22</frames>
+                    <description>Смотрит в телефон, скроллит</description>
+                    <timing>8fps</timing>
+                </animation>
+
+                <animation name="wave">
+                    <frames>18</frames>
+                    <description>Машет рукой (привет/пока)</description>
+                    <timing>10fps</timing>
+                </animation>
+            </animations>
+
+            <personality-in-visual>
+                <trait>Открытая поза - доступный, не закрытый</trait>
+                <trait>Искренняя улыбка - добрый, позитивный</trait>
+                <trait>Спокойные движения - уравновешенный характер</trait>
+                <trait>Взгляд на Таню полон любви - преданный партнёр</trait>
+            </personality-in-visual>
+        </character>
+    </characters>
+
+</character-visual-specifications>

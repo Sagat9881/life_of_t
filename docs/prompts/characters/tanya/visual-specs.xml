@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<character-visual-specifications>
+    <meta>
+        <name>Tanya Visual Specifications</name>
+        <character-id>tanya</character-id>
+        <character-name>Татьяна (Таня)</character-name>
+        <role>Главная героиня, играбельный персонаж</role>
+        <version>1.0.0</version>
+        <last-updated>2026-03-01</last-updated>
+        <extends>../../_core/visual-generation-workflow.xml</extends>
+    </meta>
+
+    <context>
+        <game-role>Играбельный персонаж</game-role>
+        <personality>Творческая, эмоциональная web-дизайнер, работающая из дома</personality>
+        <importance>Главная героиня, через неё игрок проживает историю</importance>
+        <screen-time>100% (всегда на экране)</screen-time>
+    </context>
+
+    <visual-style>
+        <overall-style>Мягкий современный 2D, реалистичные пропорции с лёгкой стилизацией</overall-style>
+        <inspiration>Персонажи из Gris, Spiritfarer - выразительные, детальные, тёплые</inspiration>
+        <key-traits>
+            <trait>Выразительная мимика - эмоции читаются на лице</trait>
+            <trait>Естественные позы - живая пластика, не идеально ровная</trait>
+            <trait>Детализированная одежда с текстурами</trait>
+            <trait>Теплота в глазах - доброта и эмпатия</trait>
+        </key-traits>
+    </visual-style>
+
+    <physical-description>
+        <age>~30 лет</age>
+        <height>165 см</height>
+        <build>Стройная, женственная фигура</build>
+        <proportions>
+            <head>1 единица (эталон)</head>
+            <body>~7-7.5 голов высотой (натуральные пропорции)</body>
+            <legs>Длинные, пропорциональные</legs>
+        </proportions>
+
+        <skin>
+            <tone>#F5D5B8</tone>
+            <description>Тёплый бежевый, здоровый оттенок</description>
+            <details>Лёгкий румянец на щеках, натуральная текстура</details>
+        </skin>
+
+        <hair>
+            <color>#8B1A1A</color>
+            <color-name>Burgundy (красно-винный)</color-name>
+            <length>Средней длины, чуть ниже плеч</length>
+            <texture>Волнистые, естественные волны</texture>
+            <style-default>Распущенные или в небрежном пучке</style-default>
+            <details>
+                <detail>Естественный блеск</detail>
+                <detail>Лёгкие волны, не идеально уложенные</detail>
+                <detail>Живые пряди, падающие на лицо</detail>
+                <detail>Объём у корней</detail>
+            </details>
+        </hair>
+
+        <eyes>
+            <color>#6B8E23</color>
+            <color-name>Зелёный с оливковым оттенком</color-name>
+            <shape>Миндалевидные, выразительные</shape>
+            <size>Средние, пропорциональные лицу</size>
+            <details>
+                <detail>Длинные ресницы</detail>
+                <detail>Чуть приподнятые внешние уголки</detail>
+                <detail>Яркая радужка с тёплым оттенком</detail>
+                <detail>Блики света делают взгляд живым</detail>
+            </details>
+        </eyes>
+
+        <face>
+            <shape>Овальное с мягкими чертами</shape>
+            <nose>Аккуратный, прямой, средней величины</nose>
+            <lips>Полные, натурального розового оттенка (#FFB6C1)</lips>
+            <cheekbones>Высокие, но не выступающие</cheekbones>
+            <chin>Мягкая линия подбородка</chin>
+            <eyebrows>Натуральные, слегка изогнутые, чуть темнее волос</eyebrows>
+        </face>
+
+        <body>
+            <posture>Расслабленная, естественная</posture>
+            <shoulders>Средней ширины, женственные</shoulders>
+            <waist>Выраженная талия</waist>
+            <hips>Пропорциональные, женственные формы</hips>
+            <hands>Изящные, ухоженные</hands>
+            <feet>Пропорциональные, часто в домашней обуви</feet>
+        </body>
+    </physical-description>
+
+    <wardrobe>
+        <style-overall>Casual-comfortable, домашний стиль с элементами женственности</style-overall>
+        <palette>
+            <primary-colors>
+                <color>#FFB6C1 (розовый)</color>
+                <color>#F5E6D3 (бежевый)</color>
+                <color>#B5EAD7 (мятный)</color>
+            </primary-colors>
+            <neutral-colors>
+                <color>#FFFFFF (белый)</color>
+                <color>#A8B2B7 (серый)</color>
+                <color>#4A5859 (тёмно-серый)</color>
+            </neutral-colors>
+        </palette>
+
+        <outfits>
+            <outfit id="home-work">
+                <name>Домашняя работа</name>
+                <context>Когда Таня работает дома за компьютером</context>
+                <pieces>
+                    <piece type="top">Уютный свитер (бежевый, розовый, мятный) или кардиган</piece>
+                    <piece type="bottom">Удобные джинсы или мягкие брюки</piece>
+                    <piece type="footwear">Домашние тапочки или тёплые носки</piece>
+                </pieces>
+                <mood>Комфорт, продуктивность</mood>
+            </outfit>
+
+            <outfit id="date">
+                <name>Свидание</name>
+                <context>Романтический вечер с мужем</context>
+                <pieces>
+                    <piece type="dress">Женственное платье (розовое, лавандовое)</piece>
+                    <piece type="alt">Или красивая блузка с юбкой</piece>
+                    <piece type="accessories">Тонкая цепочка с кулоном</piece>
+                    <piece type="hair">Аккуратная укладка</piece>
+                    <piece type="makeup">Лёгкий макияж</piece>
+                </pieces>
+                <mood>Романтика, женственность</mood>
+            </outfit>
+
+            <outfit id="casual-outdoor">
+                <name>Повседневная (на улице)</name>
+                <context>Прогулка с питомцем, поход в магазин</context>
+                <pieces>
+                    <piece type="top">Футболка или лёгкая рубашка</piece>
+                    <piece type="bottom">Джинсы или леггинсы</piece>
+                    <piece type="footwear">Кроссовки или балетки</piece>
+                    <piece type="outerwear">Куртка (если прохладно)</piece>
+                </pieces>
+                <mood>Практичность, активность</mood>
+            </outfit>
+
+            <outfit id="relax">
+                <name>Отдых дома</name>
+                <context>Вечерний релакс, чтение, просмотр фильма</context>
+                <pieces>
+                    <piece type="set">Уютная пижама или домашний костюм</piece>
+                    <piece type="footwear">Мягкие тапочки</piece>
+                    <piece type="hair">Распущенные волосы или пучок</piece>
+                </pieces>
+                <mood>Расслабление, уют</mood>
+            </outfit>
+        </outfits>
+
+        <accessories>
+            <accessory id="necklace">
+                <name>Цепочка с кулоном</name>
+                <description>Тонкая золотистая цепочка с небольшим кулоном-сердечком</description>
+                <significance>Подарок от мужа, носит постоянно</significance>
+                <visibility>Всегда видна</visibility>
+            </accessory>
+
+            <accessory id="headphones">
+                <name>Наушники</name>
+                <description>Беспроводные наушники (белые или мятные)</description>
+                <usage>Когда работает под музыку</usage>
+                <visibility>На шее или в ушах</visibility>
+            </accessory>
+
+            <accessory id="coffee-mug">
+                <name>Чашка кофе/чая</name>
+                <description>Керамическая кружка с уютным дизайном</description>
+                <usage>Часто в руках во время работы</usage>
+                <colors>Розовая, мятная, бежевая</colors>
+            </accessory>
+
+            <accessory id="laptop">
+                <name>Ноутбук</name>
+                <description>Современный ноутбук (MacBook или аналог)</description>
+                <usage>Рабочий инструмент</usage>
+                <color>Серебристый или белый</color>
+            </accessory>
+        </accessories>
+    </wardrobe>
+
+    <generation-guidelines>
+        <base-sprite>
+            <requirements>
+                <requirement>Full-body изображение</requirement>
+                <requirement>Нейтральное выражение лица</requirement>
+                <requirement>Базовый наряд (home-work outfit)</requirement>
+                <requirement>Стоит прямо, руки по бокам или слегка согнуты</requirement>
+                <requirement>Разрешение: минимум 1000px по высоте</requirement>
+            </requirements>
+            <save-to>assets/characters/tanya/base/tanya_base.png</save-to>
+        </base-sprite>
+
+        <variations>
+            <variation type="outfits">
+                <description>Разные наряды на базе одной позы</description>
+                <count>4 (home-work, date, casual, relax)</count>
+                <save-to>assets/characters/tanya/variations/outfits/</save-to>
+            </variation>
+
+            <variation type="with-accessories">
+                <description>С разными аксессуарами</description>
+                <examples>
+                    <example>С наушниками</example>
+                    <example>С чашкой кофе</example>
+                    <example>С ноутбуком</example>
+                </examples>
+                <save-to>assets/characters/tanya/variations/accessories/</save-to>
+            </variation>
+        </variations>
+
+        <technical-specs>
+            <resolution>Минимум 1000x2000px для full-body</resolution>
+            <format>PNG с прозрачным фоном</format>
+            <color-mode>RGB</color-mode>
+            <dpi>300 (для масштабирования)</dpi>
+        </technical-specs>
+    </generation-guidelines>
+
+    <reference-links>
+        <link type="emotions">./emotional-states.xml</link>
+        <link type="animations">./animation-specs.xml</link>
+        <link type="workflow">../../_core/visual-generation-workflow.xml</link>
+    </reference-links>
+
+</character-visual-specifications>

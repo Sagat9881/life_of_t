@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<location-generation-specifications>
+    <meta>
+        <name>Location Generation Specifications</name>
+        <version>1.0.0</version>
+        <purpose>Спецификации генерации локаций для игры Life of T</purpose>
+        <last-updated>2026-03-01</last-updated>
+    </meta>
+
+    <generation-rules>
+        <rule id="three-layers-required">
+            <title>Обязательные три плана</title>
+            <description>Каждая локация состоит из трёх отдельных изображений-планов</description>
+            <implementation>
+                <step>Генерировать общий план (background)</step>
+                <step>Генерировать средний план (midground)</step>
+                <step>Генерировать ближний план (foreground)</step>
+                <step>Получить аппрув для всех трёх одновременно</step>
+                <step>Сохранить в assets/locations/{location_name}/</step>
+            </implementation>
+        </rule>
+
+        <rule id="consistent-lighting">
+            <title>Единое освещение</title>
+            <description>Все три плана должны иметь согласованное освещение</description>
+            <requirements>
+                <item>Одинаковое время суток</item>
+                <item>Одинаковое направление света</item>
+                <item>Согласованная температура света (тёплый/холодный)</item>
+                <item>Логичные тени на всех планах</item>
+            </requirements>
+        </rule>
+
+        <rule id="minimal-details-per-layer">
+            <title>Минимум деталей на локациях</title>
+            <description>Статичные фоны должны быть простыми, детали выносятся в отдельные атласы</description>
+            <rationale>Все интерактивные и анимированные элементы создаются как отдельные объекты с атласами</rationale>
+            <what-to-exclude>
+                <item>Анимированные элементы (часы, растения, огонь)</item>
+                <item>Интерактивные объекты (компьютер, мебель)</item>
+                <item>Динамические эффекты (дым, пар, свет)</item>
+            </what-to-exclude>
+            <what-to-include>
+                <item>Базовая архитектура (стены, пол, потолок)</item>
+                <item>Статичные элементы интерьера</item>
+                <item>Окна и двери (без анимации)</item>
+                <item>Общая атмосфера и освещение</item>
+            </what-to-include>
+        </rule>
+
+        <rule id="separate-atlases">
+            <title>Отдельные атласы для деталей</title>
+            <description>Каждая анимированная деталь локации генерируется как отдельный атлас</description>
+            <examples>
+                <example>
+                    <detail>Часы на стене</detail>
+                    <atlas>assets/locations/home/animations/wall_clock_atlas.png</atlas>
+                    <frames>24 (секундная стрелка)</frames>
+                </example>
+                <example>
+                    <detail>Растение в горшке (листья колышутся)</detail>
+                    <atlas>assets/locations/home/animations/plant_sway_atlas.png</atlas>
+                    <frames>20 (медленное покачивание)</frames>
+                </example>
+                <example>
+                    <detail>Свет из окна (меняется в зависимости от времени суток)</detail>
+                    <atlas>assets/locations/home/animations/window_light_atlas.png</atlas>
+                    <frames>25 (переход утро-день-вечер-ночь)</frames>
+                </example>
+            </examples>
+        </rule>
+
+        <rule id="scale-consistency">
+            <title>Согласованность масштаба</title>
+            <description>Объекты на всех планах должны соответствовать единому масштабу</description>
+            <reference>Персонаж (Таня) как эталон масштаба (165 см → ~400-450 пикселей высотой)</reference>
+        </rule>
+    </generation-rules>
+
+    <locations>
+        <location id="home">
+            <name>Дом (Главная локация)</name>
+            <description>Уютная квартира, где Таня живёт и работает</description>
+            
+            <atmosphere>
+                <mood>Тёплая, домашняя, уютная</mood>
+                <lighting>Мягкий естественный свет из окон + тёплый искусственный свет</lighting>
+                <colors>
+                    <dominant>#FFF9E9 (кремовый)</dominant>
+                    <accent>#FFB6C1 (розовый)</accent>
+                    <accent>#B5EAD7 (мятный)</accent>
+                    <neutral>#A8B2B7 (серый)</neutral>
+                </colors>
+            </atmosphere>
+
+            <layers>
+                <layer type="background">
+                    <description>Дальняя стена с окном</description>
+                    <elements>
+                        <element>Большое окно с видом на город</element>
+                        <element>Простые обои или покрашенная стена (тёплый бежевый)</element>
+                        <element>Плинтус</element>
+                    </elements>
+                    <notes>Минимальные детали, акцент на окне</notes>
+                </layer>
+
+                <layer type="midground">
+                    <description>Основное пространство комнаты</description>
+                    <elements>
+                        <element>Рабочий стол (простой, минималистичный)</element>
+                        <element>Стул</element>
+                        <element>Диван или кресло</element>
+                        <element>Низкий столик</element>
+                    </elements>
+                    <notes>Основная мебель, без мелких деталей</notes>
+                </layer>
+
+                <layer type="foreground">
+                    <description>Передний план с обрамлением</description>
+                    <elements>
+                        <element>Край дверного проёма (слева или справа)</element>
+                        <element>Часть полки с книгами (размыто)</element>
+                        <element>Край занавески</element>
+                    </elements>
+                    <notes>Создаёт глубину, рамка композиции</notes>
+                </layer>
+            </layers>
+
+            <animated-details>
+                <detail id="desk-computer">
+                    <name>Компьютер на столе</name>
+                    <atlas>assets/locations/home/animations/desk_computer_atlas.png</atlas>
+                    <frames>22</frames>
+                    <animation-type>Экран мерцает, иногда меняется изображение</animation-type>
+                </detail>
+
+                <detail id="wall-clock">
+                    <name>Часы на стене</name>
+                    <atlas>assets/locations/home/animations/wall_clock_atlas.png</atlas>
+                    <frames>24</frames>
+                    <animation-type>Секундная стрелка движется</animation-type>
+                </detail>
+
+                <detail id="plant">
+                    <name>Растение в горшке</name>
+                    <atlas>assets/locations/home/animations/plant_sway_atlas.png</atlas>
+                    <frames>20</frames>
+                    <animation-type>Листья медленно колышутся</animation-type>
+                </detail>
+
+                <detail id="window-light">
+                    <name>Свет из окна</name>
+                    <atlas>assets/locations/home/animations/window_light_cycle_atlas.png</atlas>
+                    <frames>25</frames>
+                    <animation-type>Цикл освещения по времени суток</animation-type>
+                    <states>
+                        <state>Утро (6:00-9:00): мягкий золотистый свет</state>
+                        <state>День (9:00-17:00): яркий белый свет</state>
+                        <state>Вечер (17:00-20:00): оранжево-розовый закатный свет</state>
+                        <state>Ночь (20:00-6:00): тёмно-синий лунный свет</state>
+                    </states>
+                </detail>
+
+                <detail id="pet-bowl">
+                    <name>Миски питомцев</name>
+                    <atlas>assets/locations/home/animations/pet_bowls_atlas.png</atlas>
+                    <frames>20</frames>
+                    <animation-type>Уровень еды/воды меняется</animation-type>
+                </detail>
+            </animated-details>
+
+            <time-of-day-variations>
+                <variation time="morning">
+                    <lighting>Мягкий рассеянный свет, золотистый оттенок</lighting>
+                    <mood>Спокойное пробуждение</mood>
+                </variation>
+
+                <variation time="day">
+                    <lighting>Яркий дневной свет, чёткие тени</lighting>
+                    <mood>Активность, работа</mood>
+                </variation>
+
+                <variation time="evening">
+                    <lighting>Тёплый искусственный свет + розовый закат из окна</lighting>
+                    <mood>Расслабление, уют</mood>
+                </variation>
+
+                <variation time="night">
+                    <lighting>Приглушённый лампочный свет, синие тени</lighting>
+                    <mood>Тихая интимность, отдых</mood>
+                </variation>
+            </time-of-day-variations>
+        </location>
+
+        <!-- Дополнительные локации будут добавлены по мере разработки -->
+        
+    </locations>
+
+    <generation-workflow>
+        <step id="1">
+            <action>Определить локацию и время суток</action>
+            <output>Концепт (текстовое описание)</output>
+        </step>
+
+        <step id="2">
+            <action>Сгенерировать background</action>
+            <output>Изображение дальнего плана</output>
+            <approval>Нет (ждём генерации всех трёх)</approval>
+        </step>
+
+        <step id="3">
+            <action>Сгенерировать midground</action>
+            <output>Изображение среднего плана</output>
+            <approval>Нет (ждём генерации всех трёх)</approval>
+        </step>
+
+        <step id="4">
+            <action>Сгенерировать foreground</action>
+            <output>Изображение переднего плана</output>
+            <approval>ДА - утверждение всех трёх планов одновременно</approval>
+        </step>
+
+        <step id="5">
+            <action>Сохранить три плана в директорию</action>
+            <path>assets/locations/{location_name}/</path>
+            <files>
+                <file>background.png</file>
+                <file>midground.png</file>
+                <file>foreground.png</file>
+            </files>
+        </step>
+
+        <step id="6">
+            <action>Сгенерировать атласы анимированных деталей</action>
+            <output>Отдельные sprite sheets для каждой детали</output>
+            <approval>ДА - для каждого атласа отдельно</approval>
+            <min-frames>20</min-frames>
+        </step>
+
+        <step id="7">
+            <action>Сохранить атласы</action>
+            <path>assets/locations/{location_name}/animations/</path>
+        </step>
+    </generation-workflow>
+
+</location-generation-specifications>

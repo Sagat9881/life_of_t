@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<visual-generation-workflow>
+    <meta>
+        <name>Visual Generation Workflow</name>
+        <version>1.0.0</version>
+        <purpose>Основной workflow генерации визуальных элементов игры Life of T</purpose>
+        <scope>Применяется ко всем типам визуальных ассетов</scope>
+        <last-updated>2026-03-01</last-updated>
+    </meta>
+
+    <core-principles>
+        <principle id="iterative-approval">
+            <title>Итеративное утверждение</title>
+            <description>Каждая генерация требует подтверждения перед сохранением</description>
+            <rules>
+                <rule priority="critical">Сгенерировал → показал → получил аппрув → сохранил</rule>
+                <rule priority="critical">Никогда не делай несколько генераций без промежуточного аппрува</rule>
+                <rule priority="high">Перед пушем в Git всегда задавай вопрос подтверждения</rule>
+                <rule priority="medium">Описывай что сгенерировано и что планируешь делать дальше</rule>
+            </rules>
+        </principle>
+
+        <principle id="entity-based-structure">
+            <title>Структура вокруг акторов</title>
+            <description>Каждая сущность (персонаж, локация, объект) имеет свою директорию</description>
+            <benefits>
+                <benefit>Выразительность: структура директорий отражает архитектуру системы</benefit>
+                <benefit>Изолированность: изменения в одной сущности не влияют на другие</benefit>
+                <benefit>Масштабируемость: легко добавлять новые сущности</benefit>
+                <benefit>Понятность: содержимое файла ясно из пути к нему</benefit>
+            </benefits>
+            <structure>
+                <pattern>docs/prompts/{entity-type}/{entity-name}/{aspect}.xml</pattern>
+                <examples>
+                    <example>docs/prompts/characters/tanya/visual-specs.xml</example>
+                    <example>docs/prompts/locations/home/generation-specs.xml</example>
+                    <example>docs/prompts/pets/garfield/animation-specs.xml</example>
+                </examples>
+            </structure>
+        </principle>
+
+        <principle id="assets-mirror-prompts">
+            <title>Зеркалирование структуры ассетов</title>
+            <description>Структура assets/ зеркалирует структуру prompts/</description>
+            <mapping>
+                <map>
+                    <prompt>docs/prompts/characters/tanya/</prompt>
+                    <assets>assets/characters/tanya/</assets>
+                </map>
+                <map>
+                    <prompt>docs/prompts/locations/home/</prompt>
+                    <assets>assets/locations/home/</assets>
+                </map>
+            </mapping>
+            <rationale>Легко найти промпт для конкретного ассета и наоборот</rationale>
+        </principle>
+
+        <principle id="animation-frames">
+            <title>Требования к анимациям</title>
+            <description>Все анимации должны быть плавными и детальными</description>
+            <requirements>
+                <requirement type="critical">Минимум кадров: 20</requirement>
+                <requirement type="recommended">Рекомендуемое количество: 20-25</requirement>
+                <requirement type="optional">Максимум кадров: 30 (для сложных анимаций)</requirement>
+                <requirement type="critical">Формат атласа: sprite sheet (сетка)</requirement>
+                <requirement type="critical">Тайминги: указываются для каждой анимации</requirement>
+            </requirements>
+        </principle>
+
+        <principle id="no-pixel-art">
+            <title>Не пиксельная графика</title>
+            <description>Визуал в стиле современной 2D иллюстрации, НЕ pixel art</description>
+            <forbidden>
+                <item>Пиксельная графика (pixel art)</item>
+                <item>Видимая сетка пикселей</item>
+                <item>Ретро 8-bit/16-bit стиль</item>
+            </forbidden>
+            <recommended>
+                <item>Векторная или растровая иллюстрация высокого разрешения</item>
+                <item>Мягкие линии и градиенты</item>
+                <item>Современный инди-стиль (Gris, Celeste, Spiritfarer)</item>
+                <item>Выразительные персонажи с деталями</item>
+            </recommended>
+        </principle>
+    </core-principles>
+
+    <global-workflow>
+        <stage id="1" name="planning">
+            <title>Планирование</title>
+            <actions>
+                <action>Определить тип сущности (персонаж/локация/объект)</action>
+                <action>Проверить наличие промпта в соответствующей директории</action>
+                <action>Если промпта нет - создать на основе шаблона</action>
+                <action>Изучить спецификации из промпта</action>
+            </actions>
+        </stage>
+
+        <stage id="2" name="generation">
+            <title>Генерация</title>
+            <actions>
+                <action>Сгенерировать визуальный элемент согласно спецификациям</action>
+                <action>Показать результат пользователю</action>
+                <action>Дождаться аппрува</action>
+            </actions>
+        </stage>
+
+        <stage id="3" name="saving">
+            <title>Сохранение</title>
+            <actions>
+                <action>Сохранить в директорию assets/{entity-type}/{entity-name}/</action>
+                <action>Использовать правильное именование файлов</action>
+                <action>Обновить README.md в директории сущности (если нужно)</action>
+            </actions>
+        </stage>
+
+        <stage id="4" name="iteration">
+            <title>Итерация</title>
+            <actions>
+                <action>Спросить: "Переходим к следующему элементу?"</action>
+                <action>Дождаться подтверждения</action>
+                <action>Вернуться к стадии 1 для следующего элемента</action>
+            </actions>
+        </stage>
+    </global-workflow>
+
+    <approval-patterns>
+        <pattern type="single-item">
+            <name>Одиночный артефакт</name>
+            <flow>Генерация → Показ → "Утверждаем?" → Да/Нет → Сохранение</flow>
+            <usage>Персонаж, одна эмоция, один объект</usage>
+        </pattern>
+
+        <pattern type="batch-same-entity">
+            <name>Пакет для одной сущности</name>
+            <flow>Генерация всех → Показ всех → "Утверждаем все N элементов?" → Да/Нет → Сохранение</flow>
+            <usage>Все эмоции персонажа, все вариации одежды, три плана локации</usage>
+            <example>Три плана локации: background, midground, foreground</example>
+        </pattern>
+
+        <pattern type="atlas">
+            <name>Атлас анимации</name>
+            <flow>Генерация → Показ превью + тайминг → "Утверждаем?" → Да/Нет → Сохранение</flow>
+            <usage>Любая анимация</usage>
+            <required-info>
+                <info>Количество кадров</info>
+                <info>FPS (timing)</info>
+                <info>Описание анимации</info>
+            </required-info>
+        </pattern>
+    </approval-patterns>
+
+    <naming-conventions>
+        <directories>
+            <rule>snake_case для имён сущностей</rule>
+            <examples>
+                <example>characters/tanya/</example>
+                <example>locations/home/</example>
+                <example>pets/sam_dog/</example>
+            </examples>
+        </directories>
+
+        <files>
+            <rule>kebab-case.xml для промптов</rule>
+            <rule>snake_case.png для ассетов</rule>
+            <examples>
+                <prompt>visual-specs.xml</prompt>
+                <prompt>animation-specs.xml</prompt>
+                <asset>tanya_neutral_base.png</asset>
+                <asset>tanya_walk_atlas.png</asset>
+            </examples>
+        </files>
+
+        <versioning>
+            <rule>Если несколько итераций: добавлять _v2, _v3</rule>
+            <examples>
+                <example>tanya_base_v1.png</example>
+                <example>tanya_base_v2.png</example>
+                <example>home_background_v3.png</example>
+            </examples>
+        </versioning>
+    </naming-conventions>
+
+    <cross-references>
+        <reference>
+            <from>Все промпты персонажей</from>
+            <to>_core/visual-generation-workflow.xml</to>
+            <reason>Наследуют общий workflow</reason>
+        </reference>
+
+        <reference>
+            <from>Все промпты локаций</from>
+            <to>_core/visual-generation-workflow.xml</to>
+            <reason>Используют паттерн трёх планов</reason>
+        </reference>
+
+        <reference>
+            <from>Все анимации</from>
+            <to>_core/visual-generation-workflow.xml</to>
+            <reason>Следуют правилу 20-25 кадров</reason>
+        </reference>
+    </cross-references>
+
+</visual-generation-workflow>

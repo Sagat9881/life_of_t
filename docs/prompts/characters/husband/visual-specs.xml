@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<character-visual-specifications>
+    <meta>
+        <name>Alexander (Husband) Visual Specifications</name>
+        <character-id>sam</character-id>
+        <character-name>Сэм (Александр) - Муж</character-name>
+        <role>NPC, любящий партнёр</role>
+        <version>1.0.0</version>
+        <last-updated>2026-03-01</last-updated>
+        <extends>../../_core/visual-generation-workflow.xml</extends>
+    </meta>
+
+    <context>
+        <game-role>NPC (Non-Playable Character)</game-role>
+        <personality>Любящий, поддерживающий, разработчик</personality>
+        <importance>Ключевой персонаж, романтический партнёр</importance>
+        <screen-time>Частые появления в сценах дома и на свиданиях</screen-time>
+        <real-person-based>true</real-person-based>
+    </context>
+
+    <reference-photos>
+        <photo id="ref1" source="file:247">
+            <description>Стоит на улице с рюкзаком и наушниками на шее</description>
+            <usage>Общий вид, телосложение, стиль одежды</usage>
+            <key-features>Рюкзак, наушники, casual стиль</key-features>
+        </photo>
+
+        <photo id="ref2" source="file:248">
+            <description>Селфи с другом в кафе</description>
+            <usage>Черты лица, улыбка, выражение</usage>
+            <key-features>Искренняя улыбка, тёплый взгляд</key-features>
+        </photo>
+
+        <photo id="ref3" source="file:249">
+            <description>У воды, вид сбоку</description>
+            <usage>Профиль, осанка, естественная поза</usage>
+            <key-features>Расслабленная поза, профиль лица</key-features>
+        </photo>
+
+        <photo id="ref4" source="file:250">
+            <description>Селфи крупным планом</description>
+            <usage>Детали лица, глаза, борода</usage>
+            <key-features>Борода, карие глаза, дружелюбный взгляд</key-features>
+        </photo>
+
+        <photo id="ref5" source="file:251">
+            <description>Задумчивый взгляд</description>
+            <usage>Серьёзное выражение, интеллектуальный вид</usage>
+            <key-features>Задумчивость, глубокий взгляд</key-features>
+        </photo>
+
+        <photo id="ref6" source="file:252">
+            <description>Портрет в синем пиджаке</description>
+            <usage>Более формальный стиль, деловой вид</usage>
+            <key-features>Синий пиджак, ухоженный вид</key-features>
+        </photo>
+    </reference-photos>
+
+    <physical-description>
+        <age>~30-32 года</age>
+        <height>178 см (чуть выше Тани)</height>
+        <build>Спортивное телосложение, подтянутый</build>
+
+        <skin>
+            <tone>#F0D5A8</tone>
+            <description>Светлый бежевый с тёплым подтоном</description>
+        </skin>
+
+        <hair>
+            <color>#3D2817</color>
+            <color-name>Тёмно-коричневый</color-name>
+            <length>Средней длины</length>
+            <texture>Слегка волнистые</texture>
+            <style-default>Зачёсаны назад или набок</style-default>
+            <details>
+                <detail>Естественная текстура</detail>
+                <detail>Небольшой объём</detail>
+                <detail>Ухоженные</detail>
+            </details>
+        </hair>
+
+        <facial-hair>
+            <type>Лёгкая щетина или короткая борода</type>
+            <style>Ухоженная, подчёркивает линию челюсти</style>
+            <color>#3D2817 (как волосы)</color>
+        </facial-hair>
+
+        <eyes>
+            <color>#6B4423</color>
+            <color-name>Карие</color-name>
+            <shape>Выразительные, слегка прищуренные при улыбке</shape>
+            <details>
+                <detail>Тёплый взгляд</detail>
+                <detail>Добрые глаза</detail>
+                <detail>Искренность в выражении</detail>
+            </details>
+        </eyes>
+
+        <face>
+            <shape>Овальное с выраженной линией челюсти</shape>
+            <nose>Прямой, средней величины</nose>
+            <lips>Средней полноты</lips>
+            <smile>Широкая, искренняя</smile>
+            <cheekbones>Слегка выступающие</cheekbones>
+            <eyebrows>Аккуратные, натуральные</eyebrows>
+        </face>
+
+        <body>
+            <posture>Уверенная, прямая осанка</posture>
+            <shoulders>Широкие, спортивные</shoulders>
+            <chest>Развитая грудная клетка</chest>
+            <waist>Подтянутая</waist>
+            <arms>Средней развитости, подтянутые</arms>
+            <hands>Ухоженные, среднего размера</hands>
+        </body>
+    </physical-description>
+
+    <wardrobe>
+        <style-overall>Casual smart, современный городской стиль</style-overall>
+
+        <outfits>
+            <outfit id="home-casual">
+                <name>Дома</name>
+                <context>Расслабленное времяпрепровождение дома</context>
+                <pieces>
+                    <piece type="top">Футболка или лонгслив (серый, синий, чёрный)</piece>
+                    <piece type="bottom">Удобные джинсы или спортивные брюки</piece>
+                    <piece type="footwear">Носки или домашние тапочки</piece>
+                </pieces>
+            </outfit>
+
+            <outfit id="work">
+                <name>На работе</name>
+                <context>Рабочий день в офисе</context>
+                <pieces>
+                    <piece type="shirt">Рубашка (синяя, серая, белая)</piece>
+                    <piece type="bottom">Джинсы или чиносы</piece>
+                    <piece type="jacket">Пиджак (опционально, синий как на фото ref6)</piece>
+                    <piece type="footwear">Кроссовки или туфли</piece>
+                </pieces>
+            </outfit>
+
+            <outfit id="outdoor">
+                <name>На улице</name>
+                <context>Прогулки, выход из дома</context>
+                <pieces>
+                    <piece type="top">Толстовка или лёгкая куртка</piece>
+                    <piece type="bottom">Джинсы</piece>
+                    <piece type="bag">Рюкзак (городской, тёмно-синий/серый)</piece>
+                    <piece type="accessories">Наушники на шее (красные)</piece>
+                    <piece type="footwear">Кроссовки</piece>
+                </pieces>
+            </outfit>
+
+            <outfit id="date">
+                <name>Свидание</name>
+                <context>Романтический вечер с Таней</context>
+                <pieces>
+                    <piece type="shirt">Красивая рубашка (голубая, белая)</piece>
+                    <piece type="bottom">Чистые джинсы или чиносы</piece>
+                    <piece type="shoes">Аккуратные туфли или чистые кроссовки</piece>
+                    <piece type="optional">Лёгкий пиджак</piece>
+                </pieces>
+            </outfit>
+        </outfits>
+
+        <accessories>
+            <accessory id="backpack">
+                <name>Рюкзак</name>
+                <description>Городской рюкзак современного дизайна</description>
+                <color>Тёмно-синий или серый</color>
+                <usage>Когда выходит из дома</usage>
+                <reference>photo ref1</reference>
+            </accessory>
+
+            <accessory id="headphones">
+                <name>Наушники</name>
+                <description>Накладные наушники</description>
+                <color>Красные (как на фото)</color>
+                <usage>На шее или в руках</usage>
+                <reference>photo ref1</reference>
+            </accessory>
+
+            <accessory id="watch">
+                <name>Часы</name>
+                <description>Простые современные часы</description>
+                <style>Минималистичные</style>
+                <usage>Постоянно на левой руке</usage>
+            </accessory>
+
+            <accessory id="smartphone">
+                <name>Смартфон</name>
+                <description>Современный смартфон</description>
+                <color>Тёмный корпус</color>
+                <usage>В руке или кармане</usage>
+            </accessory>
+        </accessories>
+    </wardrobe>
+
+    <generation-guidelines>
+        <base-sprite>
+            <requirements>
+                <requirement>Full-body изображение</requirement>
+                <requirement>Нейтральное дружелюбное выражение (лёгкая полуулыбка)</requirement>
+                <requirement>Базовый наряд (home-casual)</requirement>
+                <requirement>Естественная поза (не военная стойка)</requirement>
+                <requirement>Использовать референсные фото для точности черт лица</requirement>
+                <requirement>Разрешение: минимум 1000px по высоте</requirement>
+            </requirements>
+            <save-to>assets/characters/sam/base/sam_base.png</save-to>
+        </base-sprite>
+
+        <key-visual-markers>
+            <marker priority="critical">Карие глаза с тёплым взглядом</marker>
+            <marker priority="critical">Тёмно-коричневые волосы средней длины</marker>
+            <marker priority="critical">Ухоженная борода/щетина</marker>
+            <marker priority="high">Широкая искренняя улыбка</marker>
+            <marker priority="high">Спортивное телосложение</marker>
+            <marker priority="medium">Выраженная линия челюсти</marker>
+        </key-visual-markers>
+
+        <technical-specs>
+            <resolution>Минимум 1000x2000px для full-body</resolution>
+            <format>PNG с прозрачным фоном</format>
+            <color-mode>RGB</color-mode>
+            <dpi>300</dpi>
+        </technical-specs>
+    </generation-guidelines>
+
+    <reference-links>
+        <link type="emotions">./emotional-states.xml</link>
+        <link type="animations">./animation-specs.xml</link>
+        <link type="workflow">../../_core/visual-generation-workflow.xml</link>
+        <link type="partner">../tanya/visual-specs.xml</link>
+    </reference-links>
+
+</character-visual-specifications>
