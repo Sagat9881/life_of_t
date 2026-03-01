@@ -9,13 +9,10 @@ import { ActionList } from './components/game/ActionList';
 import { RelationshipList } from './components/game/RelationshipList';
 import { ConflictResolver } from './components/game/ConflictResolver';
 import { EventChoice } from './components/game/EventChoice';
-import { type NavItem } from './components/layout/BottomNav';
-import { AppLayout } from './components/layout/AppLayout';
 import type { Stats, Player, GameAction, NPC, Pet, Conflict, GameEvent } from './types/game';
 import { Power } from 'lucide-react';
 
 function ComponentTest() {
-  const [currentNav, setCurrentNav] = useState<NavItem>('home');
   const [isLoading, setIsLoading] = useState(false);
   const [showError, setShowError] = useState(false);
   const [isShuttingDown, setIsShuttingDown] = useState(false);
@@ -241,218 +238,195 @@ function ComponentTest() {
   };
 
   return (
-    <AppLayout currentNav={currentNav} onNavigate={setCurrentNav}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <h1 style={{ fontFamily: 'Comfortaa, sans-serif', color: '#FF6B9D' }}>
-          🎮 Component Test
-        </h1>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
+      <h1 style={{ fontFamily: 'Comfortaa, sans-serif', color: '#FF6B9D' }}>
+        🎮 Component Test
+      </h1>
 
-        {/* EventChoice Demo */}
-        <Card variant="elevated" padding="large">
-          <h2>EventChoice</h2>
-          <p style={{ marginBottom: '1rem', color: '#666' }}>
-            Компонент для выбора варианта действия в событиях
-          </p>
-          <EventChoice
-            event={mockEvent}
-            onSelectChoice={handleChoiceSelect}
-            onCancel={() => alert('Событие отменено')}
-          />
-        </Card>
+      {/* EventChoice Demo */}
+      <Card variant="elevated" padding="large">
+        <h2>EventChoice</h2>
+        <p style={{ marginBottom: '1rem', color: '#666' }}>
+          Компонент для выбора варианта действия в событиях
+        </p>
+        <EventChoice
+          event={mockEvent}
+          onSelectChoice={handleChoiceSelect}
+          onCancel={() => alert('Событие отменено')}
+        />
+      </Card>
 
-        {/* ConflictResolver Demo */}
-        <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
-          <h2>ConflictResolver</h2>
-          <p style={{ marginBottom: '1rem', color: '#666' }}>
-            Компонент для разрешения конфликтов с CSP-шкалой и выбором тактик
-          </p>
-          <ConflictResolver
-            conflict={mockConflict}
-            onSelectTactic={handleTacticSelect}
-            onCancel={() => alert('Конфликт отменён')}
-          />
-        </Card>
+      {/* ConflictResolver Demo */}
+      <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
+        <h2>ConflictResolver</h2>
+        <p style={{ marginBottom: '1rem', color: '#666' }}>
+          Компонент для разрешения конфликтов с CSP-шкалой и выбором тактик
+        </p>
+        <ConflictResolver
+          conflict={mockConflict}
+          onSelectTactic={handleTacticSelect}
+          onCancel={() => alert('Конфликт отменён')}
+        />
+      </Card>
 
-        {/* RelationshipList Demo */}
-        <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
-          <h2>RelationshipList</h2>
-          <p style={{ marginBottom: '1rem', color: '#666' }}>
-            Список персонажей и питомцев с показателями отношений
-          </p>
-          <RelationshipList 
-            npcs={mockNPCs}
-            pets={mockPets}
-            onNPCClick={handleNPCClick}
-            onPetClick={handlePetClick}
-          />
-        </Card>
+      {/* RelationshipList Demo */}
+      <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
+        <h2>RelationshipList</h2>
+        <p style={{ marginBottom: '1rem', color: '#666' }}>
+          Список персонажей и питомцев с показателями отношений
+        </p>
+        <RelationshipList 
+          npcs={mockNPCs}
+          pets={mockPets}
+          onNPCClick={handleNPCClick}
+          onPetClick={handlePetClick}
+        />
+      </Card>
 
-        {/* ActionList Demo */}
-        <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
-          <h2>ActionList</h2>
-          <p style={{ marginBottom: '1rem', color: '#666' }}>
-            Список действий с поиском и фильтрацией по категориям
-          </p>
-          <ActionList 
-            actions={mockActions}
-            onExecuteAction={handleActionExecute}
-          />
-        </Card>
+      {/* ActionList Demo */}
+      <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
+        <h2>ActionList</h2>
+        <p style={{ marginBottom: '1rem', color: '#666' }}>
+          Список действий с поиском и фильтрацией по категориям
+        </p>
+        <ActionList 
+          actions={mockActions}
+          onExecuteAction={handleActionExecute}
+        />
+      </Card>
 
-        {/* PlayerPanel Demo */}
-        <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
-          <h2>PlayerPanel</h2>
-          <p style={{ marginBottom: '1rem', color: '#666' }}>
-            Панель игрока с аватаром, именем, уровнем и статами
-          </p>
-          <PlayerPanel player={mockPlayer} />
-          
-          <div style={{ marginTop: '1.5rem' }}>
-            <h3 style={{ marginBottom: '0.5rem' }}>Компактная версия:</h3>
-            <PlayerPanel player={mockPlayer} compact />
-          </div>
-        </Card>
-
-        <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
-          <h2>Buttons</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <Button variant="primary" onClick={handleButtonClick}>
-              Primary Button
-            </Button>
-            <Button variant="secondary" onClick={handleButtonClick}>
-              Secondary Button
-            </Button>
-            <Button variant="accent" onClick={handleButtonClick}>
-              Accent Button
-            </Button>
-            <Button variant="outline" onClick={handleButtonClick}>
-              Outline Button
-            </Button>
-            <Button variant="primary" size="small">
-              Small
-            </Button>
-            <Button variant="primary" size="large">
-              Large
-            </Button>
-            <Button variant="primary" isLoading={isLoading}>
-              Loading Button
-            </Button>
-            <Button variant="primary" disabled>
-              Disabled Button
-            </Button>
-          </div>
-        </Card>
-
-        <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
-          <h2>StatBars</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <StatBar statKey="energy" value={mockStats.energy} showLabel />
-            <StatBar statKey="health" value={mockStats.health} showLabel />
-            <StatBar statKey="stress" value={mockStats.stress} showLabel />
-            <StatBar statKey="mood" value={mockStats.mood} showLabel />
-            <StatBar statKey="money" value={mockStats.money} showLabel />
-            <StatBar statKey="selfEsteem" value={mockStats.selfEsteem} showLabel />
-          </div>
-        </Card>
-
-        <div style={{ marginTop: '1rem', display: 'grid', gap: '1rem' }}>
-          <Card variant="default" padding="medium">
-            <h3>Default Card</h3>
-            <p>Это обычная карточка без тени.</p>
-          </Card>
-
-          <Card variant="elevated" padding="medium">
-            <h3>Elevated Card</h3>
-            <p>Карточка с тенью (hover для увеличения).</p>
-          </Card>
-
-          <Card 
-            variant="outlined" 
-            padding="medium"
-            onClick={() => alert('Карточка кликабельна!')}
-          >
-            <h3>Clickable Card</h3>
-            <p>Кликни на меня! Увидишь haptic feedback.</p>
-          </Card>
+      {/* PlayerPanel Demo */}
+      <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
+        <h2>PlayerPanel</h2>
+        <p style={{ marginBottom: '1rem', color: '#666' }}>
+          Панель игрока с аватаром, именем, уровнем и статами
+        </p>
+        <PlayerPanel player={mockPlayer} />
+        
+        <div style={{ marginTop: '1.5rem' }}>
+          <h3 style={{ marginBottom: '0.5rem' }}>Компактная версия:</h3>
+          <PlayerPanel player={mockPlayer} compact />
         </div>
+      </Card>
 
-        <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
-          <h2>Loading Spinners</h2>
-          <div style={{ display: 'flex', gap: '2rem', justifyContent: 'space-around' }}>
-            <LoadingSpinner size="small" />
-            <LoadingSpinner size="medium" text="Загрузка..." />
-            <LoadingSpinner size="large" />
-          </div>
-        </Card>
-
-        <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
-          <h2>Error Message</h2>
-          <Button 
-            variant="accent" 
-            onClick={() => setShowError(!showError)}
-            fullWidth
-          >
-            {showError ? 'Скрыть' : 'Показать'} ошибку
+      <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
+        <h2>Buttons</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <Button variant="primary" onClick={handleButtonClick}>
+            Primary Button
           </Button>
-          {showError && (
-            <ErrorMessage 
-              message="Не удалось загрузить данные. Проверьте подключение к интернету."
-              onRetry={() => {
-                setShowError(false);
-                alert('Повторная попытка...');
-              }}
-            />
-          )}
-        </Card>
-
-        <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
-          <h2>Bottom Navigation</h2>
-          <p>Текущая вкладка: <strong>{currentNav}</strong></p>
-          <p>Переключай вкладки внизу экрана и почувствуй haptic feedback!</p>
-        </Card>
-
-        <Card variant="outlined" padding="medium" style={{ marginTop: '1rem' }}>
-          <h3>💡 Информация</h3>
-          <ul style={{ paddingLeft: '1.5rem' }}>
-            <li>Haptic feedback работает только в Telegram Mini App</li>
-            <li>Все кнопки должны откликаться на клики</li>
-            <li>Проверь hover эффекты на десктопе</li>
-            <li>Цвета: 🌸 Розовый, 🌿 Мятный, ☀️ Жёлтый</li>
-            <li>PlayerPanel адаптируется под размер экрана</li>
-            <li>ActionList поддерживает поиск и фильтрацию</li>
-            <li>RelationshipList показывает NPCs и питомцев с прогресс-барами</li>
-            <li>ConflictResolver с динамической CSP-шкалой и тактиками</li>
-            <li>EventChoice с цветными кнопками и последствиями</li>
-          </ul>
-        </Card>
-
-        {/* Кнопка выключения в конце */}
-        <Card variant="elevated" padding="large" style={{ marginTop: '1rem', marginBottom: '2rem' }}>
-          <h2 style={{ color: '#e74c3c' }}>⚙️ Управление демо</h2>
-          <p style={{ marginBottom: '1rem' }}>Завершить работу демо-приложения:</p>
-          <Button 
-            variant="outline" 
-            onClick={handleShutdown}
-            disabled={isShuttingDown}
-            fullWidth
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              gap: '0.5rem',
-              color: '#e74c3c',
-              borderColor: '#e74c3c'
-            }}
-          >
-            <Power size={20} />
-            {isShuttingDown ? 'Выключение...' : 'Выключить приложение'}
+          <Button variant="secondary" onClick={handleButtonClick}>
+            Secondary Button
           </Button>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#666', textAlign: 'center' }}>
-            Также можно использовать Ctrl+C в консоли
-          </p>
+          <Button variant="accent" onClick={handleButtonClick}>
+            Accent Button
+          </Button>
+          <Button variant="outline" onClick={handleButtonClick}>
+            Outline Button
+          </Button>
+          <Button variant="primary" size="small">
+            Small
+          </Button>
+          <Button variant="primary" size="large">
+            Large
+          </Button>
+          <Button variant="primary" isLoading={isLoading}>
+            Loading Button
+          </Button>
+          <Button variant="primary" disabled>
+            Disabled Button
+          </Button>
+        </div>
+      </Card>
+
+      <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
+        <h2>StatBars</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <StatBar statKey="energy" value={mockStats.energy} showLabel />
+          <StatBar statKey="health" value={mockStats.health} showLabel />
+          <StatBar statKey="stress" value={mockStats.stress} showLabel />
+          <StatBar statKey="mood" value={mockStats.mood} showLabel />
+          <StatBar statKey="money" value={mockStats.money} showLabel />
+          <StatBar statKey="selfEsteem" value={mockStats.selfEsteem} showLabel />
+        </div>
+      </Card>
+
+      <div style={{ marginTop: '1rem', display: 'grid', gap: '1rem' }}>
+        <Card variant="default" padding="medium">
+          <h3>Default Card</h3>
+          <p>Это обычная карточка без тени.</p>
+        </Card>
+
+        <Card variant="elevated" padding="medium">
+          <h3>Elevated Card</h3>
+          <p>Карточка с тенью (hover для увеличения).</p>
+        </Card>
+
+        <Card 
+          variant="outlined" 
+          padding="medium"
+          onClick={() => alert('Карточка кликабельна!')}
+        >
+          <h3>Clickable Card</h3>
+          <p>Кликни на меня! Увидишь haptic feedback.</p>
         </Card>
       </div>
-    </AppLayout>
+
+      <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
+        <h2>Loading Spinners</h2>
+        <div style={{ display: 'flex', gap: '2rem', justifyContent: 'space-around' }}>
+          <LoadingSpinner size="small" />
+          <LoadingSpinner size="medium" text="Загрузка..." />
+          <LoadingSpinner size="large" />
+        </div>
+      </Card>
+
+      <Card variant="elevated" padding="large" style={{ marginTop: '1rem' }}>
+        <h2>Error Message</h2>
+        <Button 
+          variant="accent" 
+          onClick={() => setShowError(!showError)}
+          fullWidth
+        >
+          {showError ? 'Скрыть' : 'Показать'} ошибку
+        </Button>
+        {showError && (
+          <ErrorMessage 
+            message="Не удалось загрузить данные. Проверьте подключение к интернету."
+            onRetry={() => {
+              setShowError(false);
+              alert('Повторная попытка...');
+            }}
+          />
+        )}
+      </Card>
+
+      {/* Кнопка выключения в конце */}
+      <Card variant="elevated" padding="large" style={{ marginTop: '1rem', marginBottom: '2rem' }}>
+        <h2 style={{ color: '#e74c3c' }}>⚙️ Управление демо</h2>
+        <p style={{ marginBottom: '1rem' }}>Завершить работу демо-приложения:</p>
+        <Button 
+          variant="outline" 
+          onClick={handleShutdown}
+          disabled={isShuttingDown}
+          fullWidth
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            gap: '0.5rem',
+            color: '#e74c3c',
+            borderColor: '#e74c3c'
+          }}
+        >
+          <Power size={20} />
+          {isShuttingDown ? 'Выключение...' : 'Выключить приложение'}
+        </Button>
+        <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#666', textAlign: 'center' }}>
+          Также можно использовать Ctrl+C в консоли
+        </p>
+      </Card>
+    </div>
   );
 }
 

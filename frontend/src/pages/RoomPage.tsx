@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Character } from '../components/game/Character';
 import { Button } from '../components/shared/Button';
 import { BottomNav } from '../components/layout/BottomNav/BottomNav';
 import './RoomPage.css';
@@ -33,9 +32,9 @@ export function RoomPage() {
     <div className="room-page">
       <div className="room-page__scene">
         <div className="room-page__isometric">
-          {/* Character */}
+          {/* Character Placeholder */}
           <div className="room-page__character">
-            <Character emotion="neutral" scale={0.8} />
+            <div className="room-page__character-placeholder">👩</div>
           </div>
 
           {/* Interactive Objects */}
