@@ -1,0 +1,4 @@
+[submodule "lpc-spritesheets"]
+	path = lpc-spritesheets
+	url = https://github.com/sanderfrenken/Universal-LPC-Spritesheet-Character-Generator.git
+	branch = master
