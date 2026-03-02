@@ -1,24 +1,24 @@
 package ru.lifegame.lpc;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import ru.lifegame.lpc.model.LpcCharacterConfig;
 import ru.lifegame.lpc.model.LpcSpriteRequest;
+import ru.lifegame.lpc.selenium.SeleniumSpriteDownloader;
 import ru.lifegame.lpc.url.LpcUrlBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 
 /**
  * Main service for generating LPC character sprites.
  * <p>
  * This service provides:
  * - URL generation from character configs
- * - Sprite downloading via LPC Generator API
+ * - Sprite downloading via Selenium WebDriver
  * - File storage management
  * - Integration with prompt system
  */
@@ -26,20 +26,16 @@ import java.nio.file.StandardCopyOption;
 @Service
 public class LpcGeneratorService {
 
-    private final RestTemplate restTemplate;
+    @Autowired
+    private SeleniumSpriteDownloader seleniumDownloader;
+
     private final LpcUrlBuilder urlBuilder;
 
-    // Base URL for LPC Generator (can be configured)
+    // Base URL for LPC Generator
     private static final String LPC_GENERATOR_BASE_URL = 
         "https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/";
 
-    // API endpoint for sprite generation (if available)
-    // Note: LPC Generator is client-side, so we'll need to simulate API or use headless browser
-    private static final String LPC_API_ENDPOINT = 
-        "https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/api/generate";
-
     public LpcGeneratorService() {
-        this.restTemplate = new RestTemplate();
         this.urlBuilder = new LpcUrlBuilder();
     }
 
@@ -61,25 +57,36 @@ public class LpcGeneratorService {
      *
      * @param request Sprite generation request
      * @return Path to generated sprite file
-     * @throws IOException if file operations fail
+     * @throws Exception if generation or file operations fail
      */
-    public Path generateSprite(LpcSpriteRequest request) throws IOException {
+    public Path generateSprite(LpcSpriteRequest request) throws Exception {
         log.info("Generating sprite for: {}/{}", 
                  request.getCharacterId(), 
                  request.getAnimationName());
 
+        // Check if already exists and not overwrite mode
+        Path outputPath = buildOutputPath(request);
+        if (Files.exists(outputPath) && !request.isOverwrite()) {
+            log.info("Sprite already exists (skip): {}", outputPath);
+            return outputPath;
+        }
+
         // Generate URL
         String url = generateUrl(request.getConfig());
+        log.info("LPC URL: {}", url);
 
-        // Download sprite
+        // Download sprite via Selenium
         byte[] spriteData = downloadSprite(url);
 
+        if (spriteData == null || spriteData.length == 0) {
+            throw new IOException("Downloaded sprite is empty");
+        }
+
         // Save to file
-        Path outputPath = buildOutputPath(request);
         Files.createDirectories(outputPath.getParent());
         Files.write(outputPath, spriteData);
 
-        log.info("Sprite saved to: {}", outputPath);
+        log.info("✅ Sprite saved to: {} ({} bytes)", outputPath, spriteData.length);
         return outputPath;
     }
 
@@ -97,27 +104,27 @@ public class LpcGeneratorService {
     }
 
     /**
-     * Download sprite from LPC Generator
-     * <p>
-     * Note: Since LPC Generator is client-side JavaScript, we have two options:
-     * 1. Use Selenium/Playwright to render page and extract canvas
-     * 2. Implement server-side sprite composition using LPC assets
-     * <p>
-     * For now, this is a placeholder that will be implemented based on chosen approach.
+     * Download sprite from LPC Generator using Selenium.
      *
      * @param url LPC Generator URL
      * @return Sprite image bytes
+     * @throws Exception if download fails
      */
-    private byte[] downloadSprite(String url) {
-        log.warn("downloadSprite is not fully implemented yet. URL: {}", url);
-        
-        // TODO: Implement actual sprite download
-        // Option 1: Use Selenium WebDriver
-        // Option 2: Call external API service
-        // Option 3: Implement server-side LPC sprite composer
-        
-        // Placeholder: return empty PNG
-        return new byte[0];
+    private byte[] downloadSprite(String url) throws Exception {
+        log.info("Downloading sprite via Selenium...");
+
+        if (!seleniumDownloader.isReady()) {
+            throw new IllegalStateException("Selenium WebDriver is not initialized");
+        }
+
+        try {
+            byte[] spriteData = seleniumDownloader.downloadSprite(url);
+            log.info("✅ Sprite downloaded: {} bytes", spriteData.length);
+            return spriteData;
+        } catch (Exception e) {
+            log.error("❌ Sprite download failed: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**
@@ -127,11 +134,20 @@ public class LpcGeneratorService {
      * @return Path to output file
      */
     private Path buildOutputPath(LpcSpriteRequest request) {
-        // Pattern: assets/characters/{characterId}/animations/{animationName}.png
+        // Override output directory if specified
+        if (request.getOutputDirectory() != null && !request.getOutputDirectory().isEmpty()) {
+            return Paths.get(
+                request.getOutputDirectory(),
+                request.getAnimationName() + "." + request.getFormat()
+            );
+        }
+
+        // Default pattern: assets/characters/{characterId}/animations/{animationName}.png
         String filename = String.format(
-            "assets/characters/%s/animations/%s.png",
+            "assets/characters/%s/animations/%s.%s",
             request.getCharacterId(),
-            request.getAnimationName()
+            request.getAnimationName(),
+            request.getFormat()
         );
         return Paths.get(filename);
     }
@@ -144,5 +160,12 @@ public class LpcGeneratorService {
      */
     public String getViewUrl(LpcCharacterConfig config) {
         return generateUrl(config);
+    }
+
+    /**
+     * Check if Selenium is ready for sprite generation
+     */
+    public boolean isReady() {
+        return seleniumDownloader != null && seleniumDownloader.isReady();
     }
 }
