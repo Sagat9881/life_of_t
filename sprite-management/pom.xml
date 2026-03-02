@@ -18,7 +18,9 @@
 
     <modules>
         <module>compositor</module>
-        <module>prompt-scanner</module>
+        <!-- prompt-scanner disabled: contains empty stub classes (AnimationPrompt, ConfigExtractor, PromptScanner) -->
+        <!-- Uncomment when these classes are implemented -->
+        <!-- <module>prompt-scanner</module> -->
     </modules>
 
     <properties>
