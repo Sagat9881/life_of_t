@@ -17,6 +17,7 @@
         <module>backend</module>
         <module>assets</module>
         <module>lpc-generator</module>
+        <module>lpc-sprite-compositor</module>
         <module>frontend</module>
         <module>application</module>
         <module>demo</module>
@@ -61,6 +62,11 @@
             <dependency>
                 <groupId>ru.lifegame</groupId>
                 <artifactId>lpc-generator</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ru.lifegame</groupId>
+                <artifactId>lpc-sprite-compositor</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
