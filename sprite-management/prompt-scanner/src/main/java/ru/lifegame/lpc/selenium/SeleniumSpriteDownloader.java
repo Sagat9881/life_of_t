@@ -1,4 +1,4 @@
-package ru.lifegame.lpc.selenium;
+package ru.lifegame.sprite.scanner.selenium;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import jakarta.annotation.PostConstruct;

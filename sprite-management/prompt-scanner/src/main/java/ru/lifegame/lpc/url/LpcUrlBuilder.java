@@ -1,7 +1,7 @@
-package ru.lifegame.lpc.url;
+package ru.lifegame.sprite.scanner.url;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.lifegame.lpc.model.LpcCharacterConfig;
+import ru.lifegame.sprite.scanner.model.LpcCharacterConfig;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

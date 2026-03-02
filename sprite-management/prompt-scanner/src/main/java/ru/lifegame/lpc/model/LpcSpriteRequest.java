@@ -1,4 +1,4 @@
-package ru.lifegame.lpc.model;
+package ru.lifegame.sprite.scanner.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

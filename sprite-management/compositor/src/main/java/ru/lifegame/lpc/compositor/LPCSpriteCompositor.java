@@ -1,4 +1,4 @@
-package ru.lifegame.lpc.compositor;
+package ru.lifegame.sprite.compositor;
 
 import lombok.extern.slf4j.Slf4j;
 

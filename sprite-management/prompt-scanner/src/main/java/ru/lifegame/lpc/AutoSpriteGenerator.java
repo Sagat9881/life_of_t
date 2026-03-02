@@ -1,13 +1,13 @@
-package ru.lifegame.lpc;
+package ru.lifegame.sprite.scanner;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.lifegame.lpc.extractor.ConfigExtractor;
-import ru.lifegame.lpc.model.AnimationPrompt;
-import ru.lifegame.lpc.model.LpcCharacterConfig;
-import ru.lifegame.lpc.model.LpcSpriteRequest;
-import ru.lifegame.lpc.scanner.PromptScanner;
+import ru.lifegame.sprite.scanner.extractor.ConfigExtractor;
+import ru.lifegame.sprite.scanner.model.AnimationPrompt;
+import ru.lifegame.sprite.scanner.model.LpcCharacterConfig;
+import ru.lifegame.sprite.scanner.model.LpcSpriteRequest;
+import ru.lifegame.sprite.scanner.scanner.PromptScanner;
 
 import java.nio.file.Path;
 import java.util.List;

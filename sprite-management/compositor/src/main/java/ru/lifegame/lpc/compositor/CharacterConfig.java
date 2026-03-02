@@ -1,4 +1,4 @@
-package ru.lifegame.lpc.compositor;
+package ru.lifegame.sprite.compositor;
 
 import lombok.Builder;
 import lombok.Data;
