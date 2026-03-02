@@ -19,6 +19,7 @@
 
     <properties>
         <java.version>21</java.version>
+        <selenium.version>4.16.1</selenium.version>
     </properties>
 
     <dependencies>
@@ -46,6 +47,20 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.15.1</version>
+        </dependency>
+
+        <!-- Selenium WebDriver for sprite generation -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+
+        <!-- WebDriverManager for automatic driver management -->
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>5.6.3</version>
         </dependency>
 
         <!-- SLF4J for logging -->
