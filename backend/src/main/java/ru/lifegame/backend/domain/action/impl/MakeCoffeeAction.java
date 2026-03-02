@@ -1,19 +1,20 @@
 package ru.lifegame.backend.domain.action.impl;
 
 import ru.lifegame.backend.domain.action.*;
-import ru.lifegame.backend.domain.balance.GameBalance;
 import ru.lifegame.backend.domain.model.stats.StatChanges;
 
 import java.util.Map;
 
 public class MakeCoffeeAction implements GameAction {
 
+    private static final int TIME_COST = 1; // 15 minutes (rounded to 1 unit)
+
     @Override
     public ActionType type() { return StandardActionType.MAKE_COFFEE; }
 
     @Override
     public int calculateTimeCost(GameSessionReadModel session) {
-        return GameBalance.timeHours(0.25);
+        return TIME_COST;
     }
 
     @Override

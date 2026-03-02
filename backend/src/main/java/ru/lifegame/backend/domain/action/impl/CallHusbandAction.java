@@ -1,19 +1,20 @@
 package ru.lifegame.backend.domain.action.impl;
 
 import ru.lifegame.backend.domain.action.*;
-import ru.lifegame.backend.domain.balance.GameBalance;
 import ru.lifegame.backend.domain.model.stats.StatChanges;
 
 import java.util.Map;
 
 public class CallHusbandAction implements GameAction {
 
+    private static final int TIME_COST = 1; // 0.5 hours = 30 minutes
+
     @Override
     public ActionType type() { return StandardActionType.CALL_HUSBAND; }
 
     @Override
     public int calculateTimeCost(GameSessionReadModel session) {
-        return GameBalance.timeHours(0.5);
+        return TIME_COST;
     }
 
     @Override
