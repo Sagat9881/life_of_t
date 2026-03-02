@@ -30,10 +30,10 @@
             <artifactId>frontend</artifactId>
         </dependency>
 
-        <!-- LPC Generator module -->
+        <!-- LPC Sprite Compositor module -->
         <dependency>
             <groupId>ru.lifegame</groupId>
-            <artifactId>lpc-generator</artifactId>
+            <artifactId>lpc-sprite-compositor</artifactId>
         </dependency>
 
         <!-- Spring Boot Starter Web -->
