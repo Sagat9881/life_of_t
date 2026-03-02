@@ -2,21 +2,20 @@
 
 ## Overview
 
-`lpc-generator` is a standalone Maven module/library for generating LPC (Liberated Pixel Cup) character sprites programmatically.
+`lpc-generator` — standalone Maven-модуль/библиотека для автоматической генерации LPC (Liberated Pixel Cup) спрайтов персонажей.
 
 ### Features
 
-- ✅ **URL Generation**: Build LPC Generator URLs with hash parameters
-- ✅ **Character Configuration**: Type-safe API for character appearance
-- ✅ **Sprite Management**: Check existence, generate on-demand
-- 🚧 **API Integration**: Download sprites via API (coming soon)
-- 🚧 **Prompt Integration**: Auto-scan prompts and generate missing sprites
+- ✅ **URL Generation**: Генерация LPC URL с hash-параметрами
+- ✅ **Character Configuration**: Type-safe API для настройки внешности
+- ✅ **Prompt Scanner**: Автосканирование `docs/prompts/characters/`
+- ✅ **Config Extractor**: Парсинг visual specs → LPC config
+- ✅ **Auto-Generation**: Полный workflow scan → check → generate
+- 🚧 **API Integration**: Скачивание спрайтов через API (Phase 4 - TODO)
 
 ## Installation
 
 ### As Maven Dependency
-
-Add to your `pom.xml`:
 
 ```xml
 <dependency>
@@ -26,70 +25,68 @@ Add to your `pom.xml`:
 </dependency>
 ```
 
-### As Standalone Module
+## Quick Start
 
-```bash
-cd lpc-generator
-mvn clean install
-```
-
-## Usage
-
-### 1. Basic URL Generation
+### 1. Auto-Generate All Missing Sprites
 
 ```java
-import ru.lifegame.lpc.LpcGeneratorService;
-import ru.lifegame.lpc.model.LpcCharacterConfig;
+@SpringBootApplication
+public class Application {
 
-// Create service
-LpcGeneratorService lpcService = new LpcGeneratorService();
+    public static void main(String[] args) {
+        ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
 
-// Build character config
-LpcCharacterConfig tatyana = LpcCharacterConfig.builder()
-    .characterId("tatyana")
-    .sex("female")
-    .body("Body_Color_light")
-    .head("Human_Female_light")
-    .expression("Neutral_light")
-    .hair(List.of("Shoulder_burgundy"))
-    .build();
-
-// Add clothing
-tatyana.addClothing("tops", "Longsleeve_beige");
-tatyana.addClothing("bottoms", "Pants_gray_blue");
-tatyana.addClothing("shoes", "Slippers_white");
-
-// Add accessories
-tatyana.addAccessory("necklaces", "Heart_gold");
-
-// Generate URL
-String url = lpcService.generateUrl(tatyana);
-// Result: https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/#sex=female&body=Body_Color_light&head=Human_Female_light&expression=Neutral_light&hair=Shoulder_burgundy&torso=Longsleeve_beige&legs=Pants_gray_blue&feet=Slippers_white&necklace=Heart_gold
-```
-
-### 2. Check Sprite Existence
-
-```java
-import ru.lifegame.lpc.model.LpcSpriteRequest;
-
-LpcSpriteRequest request = LpcSpriteRequest.builder()
-    .characterId("tatyana")
-    .animationName("idle-neutral")
-    .config(tatyana)
-    .build();
-
-boolean exists = lpcService.spriteExists(request);
-if (!exists) {
-    System.out.println("Sprite not found, need to generate!");
+        // Авто-генерация при старте
+        AutoSpriteGenerator generator = context.getBean(AutoSpriteGenerator.class);
+        int generated = generator.generateMissingSprites();
+        
+        System.out.println("✅ Generated " + generated + " sprites!");
+    }
 }
 ```
 
-### 3. Generate Sprite (Future)
+### 2. Preview Missing Sprites (Dry Run)
 
 ```java
-// This will be implemented when API integration is ready
-Path spritePath = lpcService.generateSprite(request);
-System.out.println("Sprite saved to: " + spritePath);
+AutoSpriteGenerator generator = context.getBean(AutoSpriteGenerator.class);
+generator.preview();
+
+// Output:
+// === Dry Run Preview ===
+// ⚠️ Would generate 12 sprites:
+//   tatyana (8 sprites):
+//     - idle-neutral
+//     - walk-south
+//     - work-computer
+//     ...
+//   sam (4 sprites):
+//     - idle-neutral
+//     ...
+```
+
+### 3. Generate for Specific Character
+
+```java
+AutoSpriteGenerator generator = context.getBean(AutoSpriteGenerator.class);
+int count = generator.generateForCharacter("tatyana");
+System.out.println("Generated " + count + " sprites for Tatyana");
+```
+
+### 4. Manual URL Generation
+
+```java
+LpcGeneratorService service = context.getBean(LpcGeneratorService.class);
+
+LpcCharacterConfig config = LpcCharacterConfig.builder()
+    .sex("female")
+    .body("Body_Color_light")
+    .hair(List.of("Shoulder_burgundy"))
+    .build();
+
+config.addClothing("tops", "Longsleeve_beige");
+
+String url = service.generateUrl(config);
+// https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/#sex=female&body=Body_Color_light&hair=Shoulder_burgundy&torso=Longsleeve_beige
 ```
 
 ## Architecture
@@ -97,99 +94,130 @@ System.out.println("Sprite saved to: " + spritePath);
 ```
 lpc-generator/
 ├── src/main/java/ru/lifegame/lpc/
-│   ├── LpcGeneratorService.java      # Main API
+│   ├── LpcGeneratorService.java          # Главный API
+│   ├── AutoSpriteGenerator.java          # Orchestrator workflow
 │   ├── model/
-│   │   ├── LpcCharacterConfig.java   # Character appearance config
-│   │   └── LpcSpriteRequest.java     # Sprite generation request
+│   │   ├── LpcCharacterConfig.java       # Конфиг внешности
+│   │   ├── LpcSpriteRequest.java         # Запрос генерации
+│   │   └── AnimationPrompt.java          # Парсенный промпт
 │   ├── url/
-│   │   └── LpcUrlBuilder.java        # URL parameter builder
+│   │   └── LpcUrlBuilder.java            # URL с параметрами
+│   ├── scanner/
+│   │   └── PromptScanner.java            # Сканирование prompts
+│   ├── extractor/
+│   │   └── ConfigExtractor.java          # Парсинг visual specs
 │   └── api/
-│       └── LpcApiClient.java         # API integration (TODO)
+│       └── (TODO: Selenium/API client)
 └── pom.xml
 ```
 
-## LPC URL Parameter Format
+## How It Works
 
-### Example URL
-
-```
-https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/#sex=female&body=Body_Color_light&head=Human_Female_light&expression=Neutral_light&hair=Shoulder_burgundy
-```
-
-### Parameter Types
-
-| Parameter | Description | Example |
-|-----------|-------------|----------|
-| `sex` | Character sex | `male`, `female` |
-| `body` | Body type & skin | `Body_Color_light`, `Body_Color_dark` |
-| `head` | Head shape | `Human_Male_light`, `Human_Female_light` |
-| `expression` | Facial expression | `Neutral_light`, `Happy_light` |
-| `hair` | Hair layer(s) | `Shoulder_burgundy`, `Bangs_black` |
-| `torso` | Top clothing | `Longsleeve_beige`, `Turtleneck_white` |
-| `legs` | Bottom clothing | `Pants_gray_blue`, `Jeans_blue` |
-| `feet` | Footwear | `Slippers_white`, `Boots_brown` |
-| `necklace` | Necklace | `Heart_gold`, `Chain_silver` |
-| `bracers` | Arm accessories | `Bracers_gold` |
-
-## Integration with Prompts
-
-### Prompt Directory Structure
+### Workflow
 
 ```
-docs/prompts/
-└── characters/
-    └── tatyana/
-        ├── base-sprite.txt          # Base character appearance
-        └── animations/
-            ├── idle-neutral.txt     # Animation prompt
-            ├── walk-south.txt
-            └── work-computer.txt
+1. PromptScanner.scanPrompts()
+   ↳ Читает docs/prompts/characters/*/animations/*.txt
+   ↳ Создает AnimationPrompt для каждого файла
+   ↳ Проверяет наличие assets/characters/*/animations/*.png
+
+2. ConfigExtractor.extractFromPrompt()
+   ↳ Парсит character-visual-specs.txt
+   ↳ Извлекает: цвет волос, одежду, аксессуары
+   ↳ Маппит на LPC слои: #8B1538 → "Shoulder_burgundy"
+   ↳ Сохраняет assets/characters/{id}/config.json
+
+3. LpcGeneratorService.generateUrl()
+   ↳ Строит URL: .../#sex=female&hair=Shoulder_burgundy&...
+
+4. (TODO) LpcGeneratorService.generateSprite()
+   ↳ Скачивает PNG через Selenium/API
+   ↳ Сохраняет в assets/characters/{id}/animations/{name}.png
+
+5. AutoSpriteGenerator.generateMissingSprites()
+   ↳ Оркестрирует все шаги
+   ↳ Batch generation для всех персонажей
 ```
 
-### Assets Directory Structure (Mirror)
+### Directory Structure
 
+**Prompts** (источник правды):
+```
+docs/prompts/characters/
+└── tatyana/
+    ├── character-visual-specs.txt    # Внешность
+    └── animations/
+        ├── idle-neutral.txt
+        ├── walk-south.txt
+        └── work-computer.txt
+```
+
+**Assets** (генерируемые):
 ```
 assets/characters/
 └── tatyana/
+    ├── config.json                   # LPC config (auto-generated)
     └── animations/
-        ├── idle-neutral.png         # Generated sprite
+        ├── idle-neutral.png           # Sprite (auto-generated)
         ├── walk-south.png
         └── work-computer.png
 ```
 
-### Naming Convention
+**Naming**: `{animation}.txt` → `{animation}.png`
 
-**Prompts**: `{animation-name}.txt` → **Sprites**: `{animation-name}.png`
+## API Reference
 
-Examples:
-- `idle-neutral.txt` → `idle-neutral.png`
-- `walk-south.txt` → `walk-south.png`
-- `emotion-joy.txt` → `emotion-joy.png`
-
-## API Integration (TODO)
-
-### Option 1: Headless Browser (Selenium/Playwright)
+### AutoSpriteGenerator
 
 ```java
-// Use headless Chrome to render LPC Generator and extract canvas
-WebDriver driver = new ChromeDriver(options);
-driver.get(lpcUrl);
-// ... wait for render, extract canvas as PNG
+// Генерация всех недостающих
+int count = generator.generateMissingSprites();
+
+// Preview (без генерации)
+generator.preview();
+
+// Генерация для одного персонажа
+int count = generator.generateForCharacter("tatyana");
+
+// Генерация одной анимации
+generator.generateSingle("tatyana", "idle-neutral");
+
+// Получить отчет
+GenerationReport report = generator.getReport();
+System.out.println("Progress: " + report.completionPercentage() + "%");
 ```
 
-### Option 2: Server-Side Composer
+### PromptScanner
 
 ```java
-// Implement sprite composition using LPC asset library
-// Download individual layer PNGs and composite them
+// Сканировать все промпты
+Map<String, List<AnimationPrompt>> prompts = scanner.scanPrompts();
+
+// Найти недостающие спрайты
+List<AnimationPrompt> missing = scanner.findMissingSprites();
+
+// Статистика
+ScanStatistics stats = scanner.getStatistics();
+System.out.printf("%d/%d sprites exist (%.1f%%)%n",
+    stats.existingSprites(),
+    stats.totalPrompts(),
+    stats.completionPercentage());
 ```
 
-### Option 3: External API Service
+### ConfigExtractor
 
 ```java
-// Call external service that provides LPC sprite generation API
-RestTemplate client = new RestTemplate();
-byte[] sprite = client.postForObject(API_URL, request, byte[].class);
+// Извлечь из prompt
+LpcCharacterConfig config = extractor.extractFromPrompt("tatyana");
+
+// Сохранить в JSON
+extractor.saveConfig("tatyana", config);
+
+// Загрузить из JSON
+LpcCharacterConfig config = extractor.loadConfig("tatyana");
+
+// Load or extract (auto)
+LpcCharacterConfig config = extractor.loadOrExtract("tatyana");
 ```
 
 ## Configuration
@@ -198,36 +226,9 @@ byte[] sprite = client.postForObject(API_URL, request, byte[].class);
 
 ```properties
 # LPC Generator settings
+lpc.generator.prompts-dir=docs/prompts/characters
+lpc.generator.assets-dir=assets/characters
 lpc.generator.base-url=https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/
-lpc.generator.api-endpoint=https://api.example.com/lpc/generate
-lpc.generator.output-directory=assets/characters
-lpc.generator.default-format=png
-```
-
-## Testing
-
-### Run Tests
-
-```bash
-mvn test
-```
-
-### Example Test
-
-```java
-@Test
-void testUrlGeneration() {
-    LpcCharacterConfig config = LpcCharacterConfig.builder()
-        .sex("female")
-        .body("Body_Color_light")
-        .head("Human_Female_light")
-        .build();
-
-    String url = urlBuilder.build(config);
-    
-    assertThat(url).contains("sex=female");
-    assertThat(url).contains("body=Body_Color_light");
-}
 ```
 
 ## Roadmap
@@ -237,32 +238,59 @@ void testUrlGeneration() {
 - [x] LpcUrlBuilder
 - [x] LpcGeneratorService basic API
 
-### Phase 2: API Integration 🚧
-- [ ] Choose implementation approach (Selenium vs Server-side)
-- [ ] Implement sprite download
-- [ ] Add caching layer
-- [ ] Error handling & retries
+### Phase 2: Prompt Scanner ✅
+- [x] PromptScanner service
+- [x] AnimationPrompt model
+- [x] Directory scanning logic
+- [x] Statistics API
 
-### Phase 3: Prompt Integration 📋
-- [ ] Prompt scanner
-- [ ] Auto-generate missing sprites
-- [ ] Config extractor from prompts
-- [ ] Batch generation
+### Phase 3: Config Extractor ✅
+- [x] ConfigExtractor service
+- [x] Visual specs parsing
+- [x] Color mapping (#8B1538 → burgundy)
+- [x] config.json save/load
 
-### Phase 4: Optimization 📋
-- [ ] Sprite compression (WebP)
-- [ ] Parallel generation
-- [ ] CDN integration
-- [ ] Version management
+### Phase 4: Sprite Generator API 🚧
+- [ ] Choose implementation (Selenium recommended)
+- [ ] SeleniumSpriteGenerator
+- [ ] ChromeDriver setup
+- [ ] Canvas extraction
+- [ ] Error handling
+
+### Phase 5: Auto-Generation ✅
+- [x] AutoSpriteGenerator service
+- [x] Full workflow integration
+- [x] Logging & progress tracking
+- [x] Batch generation
+- [x] Preview/dry-run mode
+
+## Next Steps
+
+### Phase 4 Implementation Options
+
+**Option 1: Selenium WebDriver** (рекомендуемый)
+- Запускает headless Chrome
+- Открывает LPC Generator URL
+- Ждет рендера
+- Извлекает canvas как PNG
+
+**Option 2: Server-Side Composer**
+- Скачивает LPC asset слои
+- Композиция через Java ImageIO
+- Быстрее, но сложнее
+
+**Option 3: External API**
+- Создать Node.js микросервис
+- Использовать Puppeteer
+- Java вызывает REST API
 
 ## License
 
-This library generates URLs for and optionally downloads sprites from the Universal LPC Spritesheet Character Generator, which is licensed under CC-BY-SA 3.0 / GPL 3.0.
-
-**Attribution Required**: Any sprites generated must include proper attribution to LPC contributors.
+LPC sprites: **CC-BY-SA 3.0 / GPL 3.0**  
+**Attribution required** — see [CREDITS.md](https://github.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator/blob/master/CREDITS.md)
 
 ## Links
 
 - [LPC Generator](https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/)
 - [LPC GitHub](https://github.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator)
-- [LPC Credits](https://github.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator/blob/master/CREDITS.md)
+- [Integration Plan](INTEGRATION_PLAN.md)
