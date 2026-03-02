@@ -1,0 +1,51 @@
+{
+  "characters": [
+    {
+      "id": "tatyana-default",
+      "gender": "female",
+      "body": "light",
+      "hairStyle": "long",
+      "hair": "brown",
+      "clothes": [
+        "shirt-white",
+        "pants-jeans"
+      ],
+      "accessories": []
+    },
+    {
+      "id": "tatyana-work",
+      "gender": "female",
+      "body": "light",
+      "hairStyle": "ponytail",
+      "hair": "brown",
+      "clothes": [
+        "blouse-office",
+        "skirt-black"
+      ],
+      "accessories": ["glasses"]
+    },
+    {
+      "id": "tatyana-casual",
+      "gender": "female",
+      "body": "light",
+      "hairStyle": "long",
+      "hair": "brown",
+      "clothes": [
+        "hoodie-grey",
+        "pants-joggers"
+      ],
+      "accessories": []
+    },
+    {
+      "id": "tatyana-sleep",
+      "gender": "female",
+      "body": "light",
+      "hairStyle": "messy",
+      "hair": "brown",
+      "clothes": [
+        "pajamas-blue"
+      ],
+      "accessories": []
+    }
+  ]
+}
