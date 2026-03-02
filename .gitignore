@@ -3,6 +3,15 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Generated Sprites ###
+lpc-sprite-compositor/target/generated-sprites/
+*.png
+
+### Node ###
+node_modules/
+frontend/node_modules/
+dist/
+
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
@@ -37,4 +46,3 @@ build/
 
 ### Mac OS ###
 .DS_Store
-
