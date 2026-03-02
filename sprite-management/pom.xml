@@ -24,6 +24,7 @@
     <properties>
         <selenium.version>4.18.1</selenium.version>
         <webdrivermanager.version>5.7.0</webdrivermanager.version>
+        <jackson.version>2.16.1</jackson.version>
     </properties>
 
     <dependencyManagement>
@@ -40,6 +41,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
             </dependency>
 
             <!-- Selenium -->
