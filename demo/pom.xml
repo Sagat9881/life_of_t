@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>Life of T - Demo</name>
-    <description>Component showcase and documentation demo</description>
+    <description>Demo JAR with embedded frontend</description>
 
     <dependencies>
         <!-- Backend module -->
@@ -24,16 +24,16 @@
             <artifactId>backend</artifactId>
         </dependency>
 
-        <!-- Frontend module (static resources with ComponentTest) -->
+        <!-- Frontend module (static resources) -->
         <dependency>
             <groupId>ru.lifegame</groupId>
             <artifactId>frontend</artifactId>
         </dependency>
 
-        <!-- LPC Generator module -->
+        <!-- LPC Sprite Compositor module -->
         <dependency>
             <groupId>ru.lifegame</groupId>
-            <artifactId>lpc-generator</artifactId>
+            <artifactId>lpc-sprite-compositor</artifactId>
         </dependency>
 
         <!-- Spring Boot Starter Web -->
@@ -41,10 +41,38 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+
+        <!-- Spring Boot Starter Actuator (for health checks) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <!-- Unpack frontend static files from frontend JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.1</version>
+                <executions>
+                    <execution>
+                        <id>unpack-frontend</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>ru.lifegame</includeGroupIds>
+                            <includeArtifactIds>frontend</includeArtifactIds>
+                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                            <includes>static/**/*</includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- Spring Boot Maven Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -61,50 +89,8 @@
                     </execution>
                 </executions>
             </plugin>
-            
-            <!-- Launch4j Maven Plugin - Create Windows EXE -->
-            <plugin>
-                <groupId>com.akathist.maven.plugins.launch4j</groupId>
-                <artifactId>launch4j-maven-plugin</artifactId>
-                <version>2.5.1</version>
-                <executions>
-                    <execution>
-                        <id>create-exe</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>launch4j</goal>
-                        </goals>
-                        <configuration>
-                            <headerType>console</headerType>
-                            <outfile>target/life-of-t-demo.exe</outfile>
-                            <jar>target/life-of-t-demo.jar</jar>
-                            <errTitle>Life of T Demo</errTitle>
-                            <classPath>
-                                <mainClass>ru.lifegame.demo.DemoApplication</mainClass>
-                            </classPath>
-                            <jre>
-                                <minVersion>21.0.0</minVersion>
-                                <opts>
-                                    <opt>-Dserver.port=3000</opt>
-                                </opts>
-                            </jre>
-                            <versionInfo>
-                                <fileVersion>0.1.0.0</fileVersion>
-                                <txtFileVersion>0.1.0</txtFileVersion>
-                                <fileDescription>Life of T Component Demo</fileDescription>
-                                <copyright>2026</copyright>
-                                <productVersion>0.1.0.0</productVersion>
-                                <txtProductVersion>0.1.0</txtProductVersion>
-                                <productName>Life of T Demo</productName>
-                                <internalName>life-of-t-demo</internalName>
-                                <originalFilename>life-of-t-demo.exe</originalFilename>
-                            </versionInfo>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
-        
+
         <finalName>life-of-t-demo</finalName>
     </build>
 </project>
