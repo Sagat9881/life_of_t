@@ -16,6 +16,7 @@
     <modules>
         <module>backend</module>
         <module>assets</module>
+        <module>lpc-generator</module>
         <module>frontend</module>
         <module>application</module>
         <module>demo</module>
@@ -55,6 +56,11 @@
             <dependency>
                 <groupId>ru.lifegame</groupId>
                 <artifactId>assets</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ru.lifegame</groupId>
+                <artifactId>lpc-generator</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
