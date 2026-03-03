@@ -78,12 +78,39 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Generate game assets
-        run: mvn spring-boot:run -pl asset-generator -DskipTests
+      - name: Download application JAR
+        uses: actions/download-artifact@v4
+        with:
+          name: life-of-t-application
+
+      - name: Generate assets
+        run: java -jar life-of-t-application-*.jar --generate-assets --spring.main.web-application-type=none
 
       - name: Upload generated assets
         uses: actions/upload-artifact@v4
         with:
           name: generated-assets
-          path: asset-generator/output/
-          retention-days: 90
+          path: generated-assets/
+          retention-days: 30
+
+  analyze:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run analysis
+        run: mvn clean verify -pl backend,asset-generator -P ci
+
+      - name: Check code coverage
+        run: |
+          echo "Coverage reports generated in target/site/jacoco/"
+          echo "TODO: Add coverage threshold check"
