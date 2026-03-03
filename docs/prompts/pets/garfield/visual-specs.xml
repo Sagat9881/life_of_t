@@ -1,67 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  visual-specs.xml — Garfield (pet cat)
-  Life of T game asset specification
-
-  Generated against unified-asset-schema.xml v2.0
--->
-<asset id="garfield" category="pet">
-
-  <description>Garfield: an overweight, cynical orange tabby cat. Obsessed with
-  lasagne and naps. Unexpectedly expressive face. Moves slowly unless food
-  is involved.</description>
-
-  <layers>
-    <layer name="body"    type="base"    paletteRef="fur"     zIndex="0" optional="false"/>
-    <layer name="stripes" type="overlay" paletteRef="stripes" zIndex="1" optional="false"/>
-    <layer name="face"    type="overlay" paletteRef="face"    zIndex="2" optional="false"/>
-    <layer name="shadow"  type="shadow"                       zIndex="-1" optional="true"/>
-  </layers>
-
-  <animations>
-    <animation state="idle"  frameCount="3" fps="4"  loop="true">
-      <frames>0 1 2</frames>
-    </animation>
-    <animation state="sleep" frameCount="2" fps="2"  loop="true">
-      <frames>3 4</frames>
-    </animation>
-    <animation state="eat"   frameCount="4" fps="10" loop="false">
-      <frames>5 6 7 8</frames>
-    </animation>
-  </animations>
-
-  <palettes>
-    <palette name="fur">
-      <color>#E08030</color>
-      <color>#C86820</color>
-    </palette>
-    <palette name="stripes">
-      <color>#8B4010</color>
-    </palette>
-    <palette name="face">
-      <color>#FFDFC4</color>
-    </palette>
-  </palettes>
-
-  <variations>
-    <variation timeOfDay="morning" colorShift="#FFF4CC" opacity="0.08"/>
-    <variation timeOfDay="evening" colorShift="#FF8800" opacity="0.18"/>
-    <variation timeOfDay="night"   colorShift="#001133" opacity="0.38"/>
-  </variations>
-
-  <naming
-    prefix="garfield"
-    layerPattern="%s_layer_%02d.png"
-    atlasPattern="%s_atlas.webp"
-    configPattern="%s_atlas.json"
-  />
-
-  <constraints
-    widthPx="48"
-    heightPx="48"
-    maxFrames="16"
-    allowTransparency="true"
-    outputFormats="png,webp"
-  />
-
-</asset>
+<asset-spec version="1.0.0">
+    <meta>
+        <entity-type>pets</entity-type>
+        <entity-name>garfield</entity-name>
+        <version>1.0.0</version>
+    </meta>
+    <layers>
+        <layer id="base" type="base" z-order="0">Cat body — orange tabby, plump</layer>
+        <layer id="markings" type="overlay" z-order="1">Tabby stripe markings</layer>
+        <layer id="accessories" type="accessory" z-order="2">Collar with tag</layer>
+    </layers>
+    <color-palette>
+        <primary>
+            <color hex="#FF8C00" name="Orange"/>
+            <color hex="#FFD700" name="Gold"/>
+            <color hex="#F5E6D3" name="Warm Beige"/>
+        </primary>
+        <secondary>
+            <color hex="#8B4513" name="Saddle Brown"/>
+            <color hex="#2F4F4F" name="Dark Slate"/>
+        </secondary>
+    </color-palette>
+    <animations>
+        <animation name="idle" frames="20" fps="6" loop="true" frame-width="64" frame-height="64"/>
+        <animation name="walk" frames="24" fps="10" loop="true" frame-width="64" frame-height="64"/>
+        <animation name="sleep" frames="20" fps="4" loop="true" frame-width="64" frame-height="64"/>
+        <animation name="eat" frames="22" fps="8" loop="false" frame-width="64" frame-height="64"/>
+        <animation name="play" frames="24" fps="12" loop="true" frame-width="64" frame-height="64"/>
+    </animations>
+    <naming>
+        <output-dir>assets/pets/garfield</output-dir>
+    </naming>
+    <constraints>
+        <max-file-size-kb>500</max-file-size-kb>
+        <max-sprite-sheet-width>2048</max-sprite-sheet-width>
+        <max-sprite-sheet-height>2048</max-sprite-sheet-height>
+        <compression-quality>85</compression-quality>
+        <bit-depth>32</bit-depth>
+    </constraints>
+</asset-spec>
