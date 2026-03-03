@@ -67,14 +67,17 @@ public enum BaseConflictTactics implements ConflictTactic {
     private final String defaultReaction;
 
     BaseConflictTactics(String code, String label, String description, String defaultReaction) {
-        this.code = code; this.label = label; this.description = description; this.defaultReaction = defaultReaction;
+        this.code = code;
+        this.label = label;
+        this.description = description;
+        this.defaultReaction = defaultReaction;
     }
 
-    @Override public String code() { return code; }
-    @Override public String label() { return label; }
-    @Override public String description() { return description; }
-    @Override public boolean isBaseAvailable() { return true; }
+    @Override public String code()              { return code; }
+    @Override public String label()             { return label; }
+    @Override public String description()       { return description; }
+    @Override public boolean isBaseAvailable()  { return true; }
     @Override public Optional<String> requiredSkill() { return Optional.empty(); }
-    @Override public int requiredSkillLevel() { return 0; }
+    @Override public int requiredSkillLevel()   { return 0; }
     @Override public String defaultReactionText() { return defaultReaction; }
 }

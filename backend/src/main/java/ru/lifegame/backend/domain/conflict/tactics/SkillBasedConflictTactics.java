@@ -85,15 +85,19 @@ public enum SkillBasedConflictTactics implements ConflictTactic {
 
     SkillBasedConflictTactics(String code, String label, String description,
                                String skill, int skillLevel, String defaultReaction) {
-        this.code = code; this.label = label; this.description = description;
-        this.skill = skill; this.skillLevel = skillLevel; this.defaultReaction = defaultReaction;
+        this.code = code;
+        this.label = label;
+        this.description = description;
+        this.skill = skill;
+        this.skillLevel = skillLevel;
+        this.defaultReaction = defaultReaction;
     }
 
-    @Override public String code() { return code; }
-    @Override public String label() { return label; }
-    @Override public String description() { return description; }
-    @Override public boolean isBaseAvailable() { return false; }
+    @Override public String code()              { return code; }
+    @Override public String label()             { return label; }
+    @Override public String description()       { return description; }
+    @Override public boolean isBaseAvailable()  { return false; }
     @Override public Optional<String> requiredSkill() { return Optional.of(skill); }
-    @Override public int requiredSkillLevel() { return skillLevel; }
+    @Override public int requiredSkillLevel()   { return skillLevel; }
     @Override public String defaultReactionText() { return defaultReaction; }
 }
