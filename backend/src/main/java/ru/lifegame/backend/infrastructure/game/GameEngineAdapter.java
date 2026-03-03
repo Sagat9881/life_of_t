@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * Maintains a registry of all available actions.
  */
 public class GameEngineAdapter implements ActionProvider {
-    
+
     private final Map<String, GameAction> actions;
 
     public GameEngineAdapter(Collection<GameAction> actions) {

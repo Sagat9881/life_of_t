@@ -20,7 +20,7 @@ public class OpenApiConfig {
                         .title("Игра Life of T - REST API")
                         .version("1.0.0")
                         .description("""
-                            REST API для игры Life of T - симулятор жизни главной героини.
+                            REST API для игры Life of T - симулятор жизни главной героины.
                             
                             **Основные возможности:**
                             - Управление игровой сессией
@@ -29,10 +29,7 @@ public class OpenApiConfig {
                             - Выбор вариантов в событиях
                             - Отслеживание состояния персонажа, отношений и прогресса квестов
                             
-                            **Архитектура:**
-                            - Clean Architecture
-                            - Domain-Driven Design
-                            - Event Sourcing
+                            **Архитектура:** Clean Architecture, DDD, Event Sourcing
                             """)
                         .contact(new Contact()
                                 .name("Команда разработки Life of T")

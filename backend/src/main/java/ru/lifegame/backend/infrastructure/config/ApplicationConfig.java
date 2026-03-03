@@ -7,7 +7,7 @@ import ru.lifegame.backend.application.port.out.EventPublisher;
 import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.service.*;
 import ru.lifegame.backend.domain.action.ActionProvider;
-import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
+import ru.lifegame.backend.application.mapper.GameStateViewMapper;
 
 @Configuration
 public class ApplicationConfig {
@@ -45,6 +45,13 @@ public class ApplicationConfig {
     @Bean
     public ChooseEventOptionUseCase chooseEventOptionUseCase(SessionRepository repo,
                                                                GameStateViewMapper mapper) {
-        return new ChooseEventOptionService(repo,  mapper);
+        return new ChooseEventOptionService(repo, mapper);
+    }
+
+    @Bean
+    public EndDayUseCase endDayUseCase(SessionRepository repo,
+                                        EventPublisher publisher,
+                                        GameStateViewMapper mapper) {
+        return new EndDayService(repo, publisher, mapper);
     }
 }

@@ -7,7 +7,7 @@ import ru.lifegame.backend.domain.event.domain.DomainEvent;
 
 /**
  * Simple logging implementation of EventPublisher.
- * In production, this could be replaced with event bus, message queue, or event store integration.
+ * In production, this could be replaced with event bus or message queue integration.
  */
 public class LoggingEventPublisher implements EventPublisher {
 

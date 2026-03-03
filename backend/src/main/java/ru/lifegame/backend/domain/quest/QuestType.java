@@ -13,11 +13,6 @@ public enum QuestType {
         this.description = description;
     }
 
-    public String label() {
-        return label;
-    }
-
-    public String description() {
-        return description;
-    }
+    public String label()       { return label; }
+    public String description() { return description; }
 }
