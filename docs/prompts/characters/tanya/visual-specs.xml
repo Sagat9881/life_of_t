@@ -1,76 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  visual-specs.xml — Tanya (main character)
-  Life of T game asset specification
+<asset-spec version="1.0.0">
 
-  Generated against unified-asset-schema.xml v2.0
--->
-<asset id="tanya" category="character">
+    <meta>
+        <entity-type>characters</entity-type>
+        <entity-name>tanya</entity-name>
+        <version>1.0.0</version>
+    </meta>
 
-  <description>Tanya: the protagonist. A cheerful young woman with long auburn hair,
-  expressive eyes, and a colourful wardrobe. Works as a freelance illustrator,
-  loves cats, and tends to overthink social situations.</description>
+    <layers>
+        <layer id="base" type="base" z-order="0">Base body silhouette — young woman, medium height, slender</layer>
+        <layer id="outfit" type="outfit" z-order="1">Default casual outfit — summer dress or blouse + skirt</layer>
+        <layer id="overlay" type="overlay" z-order="2">Expression overlays and accessories</layer>
+    </layers>
 
-  <layers>
-    <layer name="body"   type="base"    paletteRef="skin"    zIndex="0" optional="false"/>
-    <layer name="hair"   type="overlay" paletteRef="hair"    zIndex="3" optional="false"/>
-    <layer name="outfit" type="overlay" paletteRef="clothes" zIndex="1" optional="false"/>
-    <layer name="eyes"   type="overlay" paletteRef="eye"     zIndex="2" optional="false"/>
-    <layer name="shadow" type="shadow"                       zIndex="-1" optional="true"/>
-  </layers>
+    <color-palette>
+        <primary>
+            <color hex="#F5E6D3" name="warm-beige"/>
+            <color hex="#FFB6C1" name="light-pink"/>
+            <color hex="#B5EAD7" name="mint-green"/>
+            <color hex="#FFF4B8" name="pastel-yellow"/>
+            <color hex="#E0BBE4" name="lavender"/>
+        </primary>
+        <secondary>
+            <color hex="#6B4423" name="dark-brown"/>
+            <color hex="#4A5859" name="dark-gray"/>
+            <color hex="#FFF9E9" name="cream"/>
+            <color hex="#A8B2B7" name="silver"/>
+        </secondary>
+    </color-palette>
 
-  <animations>
-    <animation state="idle" frameCount="4" fps="6" loop="true">
-      <frames>0 1 2 3</frames>
-    </animation>
-    <animation state="walk" frameCount="6" fps="10" loop="true">
-      <frames>4 5 6 7 8 9</frames>
-    </animation>
-    <animation state="draw" frameCount="4" fps="8" loop="true">
-      <frames>10 11 12 13</frames>
-    </animation>
-    <animation state="talk" frameCount="3" fps="6" loop="false">
-      <frames>14 15 16</frames>
-    </animation>
-  </animations>
+    <animations>
+        <animation name="idle" frames="24" fps="12" loop="true"
+                   frame-width="128" frame-height="128"/>
+        <animation name="walk" frames="16" fps="12" loop="true"
+                   frame-width="128" frame-height="128"/>
+        <animation name="sit_work" frames="12" fps="8" loop="true"
+                   frame-width="128" frame-height="128"/>
+    </animations>
 
-  <palettes>
-    <palette name="skin">
-      <color>#FFDFC4</color>
-      <color>#F0C080</color>
-    </palette>
-    <palette name="hair">
-      <color>#8B3A10</color>
-      <color>#A04520</color>
-    </palette>
-    <palette name="clothes">
-      <color>#FF6B9D</color>
-      <color>#FF8FAF</color>
-    </palette>
-    <palette name="eye">
-      <color>#4A7C9E</color>
-    </palette>
-  </palettes>
+    <naming>
+        <output-dir>assets/characters/tanya</output-dir>
+    </naming>
 
-  <variations>
-    <variation timeOfDay="morning" colorShift="#FFF4CC" opacity="0.10"/>
-    <variation timeOfDay="evening" colorShift="#FF8800" opacity="0.20"/>
-    <variation timeOfDay="night"   colorShift="#001133" opacity="0.40"/>
-  </variations>
+    <constraints>
+        <max-file-size-kb>500</max-file-size-kb>
+        <max-sprite-sheet-width>2048</max-sprite-sheet-width>
+        <max-sprite-sheet-height>2048</max-sprite-sheet-height>
+        <compression-quality>85</compression-quality>
+        <bit-depth>32</bit-depth>
+    </constraints>
 
-  <naming
-    prefix="tanya"
-    layerPattern="%s_layer_%02d.png"
-    atlasPattern="%s_atlas.webp"
-    configPattern="%s_atlas.json"
-  />
-
-  <constraints
-    widthPx="64"
-    heightPx="64"
-    maxFrames="32"
-    allowTransparency="true"
-    outputFormats="png,webp"
-  />
-
-</asset>
+</asset-spec>

@@ -1,79 +1,78 @@
 package ru.lifegame.assets.infrastructure.generator;
 
-import org.springframework.stereotype.Component;
-
-import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.nio.file.Path;
+import java.util.Random;
 
 /**
- * Generates simple procedural placeholder textures for use during
- * early prototyping.
+ * Simple procedural texture generator using cell grids with configurable symmetry.
+ * <p>
+ * This is the original ProceduralTextureGenerator v1.
  *
- * <p>Each texture is a solid-colour 64×64 PNG.  The colour is derived
- * deterministically from the supplied {@code seed} string via its hash
- * code, ensuring reproducible output.</p>
- *
- * @deprecated Use {@link LayeredAssetGenerator} for all new asset work.
- *             This class will be removed in a future release.
+ * @deprecated Use {@link LayeredAssetGenerator} instead. This class will be removed
+ * in a future release. The new generator supports XML-driven layered asset generation
+ * with animation atlas support.
  */
-@Deprecated(since = "1.0.0", forRemoval = true)
-@Component
+@Deprecated(since = "2.0", forRemoval = true)
 public class SimpleProceduralTextureGenerator {
 
-    private static final int DEFAULT_SIZE = 64;
+    public static final int CELL_SIZE = 2;
 
     /**
-     * Generate a procedural texture PNG and write it to {@code outputPath}.
+     * Generates a procedural texture image.
      *
-     * @param seed       a string used to deterministically pick the fill colour
-     * @param outputPath destination file path (extension should be {@code .png})
-     * @throws TextureGenerationException if the file cannot be written
+     * @param width           output image width
+     * @param height          output image height
+     * @param fillProbability probability of filling a cell (0.0 to 1.0)
+     * @param seed            random seed for deterministic output
+     * @return generated BufferedImage in ARGB format
      */
-    public void generate(String seed, Path outputPath) {
-        BufferedImage image = createImage(seed);
-        writeImage(image, outputPath);
-    }
+    public BufferedImage generate(int width, int height, double fillProbability, long seed) {
+        int cellCols = (width + CELL_SIZE - 1) / CELL_SIZE;
+        int cellRows = (height + CELL_SIZE - 1) / CELL_SIZE;
 
-    // -----------------------------------------------------------------------
-    // Internals
-    // -----------------------------------------------------------------------
+        boolean[][] cells = new boolean[cellCols][cellRows];
+        Random rng = new Random(seed);
 
-    private BufferedImage createImage(String seed) {
-        BufferedImage image = new BufferedImage(
-                DEFAULT_SIZE, DEFAULT_SIZE, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = image.createGraphics();
-        g.setColor(colorFromSeed(seed));
-        g.fillRect(0, 0, DEFAULT_SIZE, DEFAULT_SIZE);
-        g.dispose();
-        return image;
-    }
-
-    private Color colorFromSeed(String seed) {
-        int hash = seed.hashCode();
-        return new Color(
-                (hash >> 16) & 0xFF,
-                (hash >> 8)  & 0xFF,
-                 hash        & 0xFF
-        );
-    }
-
-    private void writeImage(BufferedImage image, Path outputPath) {
-        try {
-            ImageIO.write(image, "PNG", outputPath.toFile());
-        } catch (IOException e) {
-            throw new TextureGenerationException(
-                    "Failed to write texture to " + outputPath, e);
+        int halfCols = (cellCols + 1) / 2;
+        int halfRows = (cellRows + 1) / 2;
+        for (int col = 0; col < halfCols; col++) {
+            for (int row = 0; row < halfRows; row++) {
+                cells[col][row] = rng.nextDouble() < fillProbability;
+            }
         }
-    }
 
-    // -----------------------------------------------------------------------
-    // Exception
-    // -----------------------------------------------------------------------
+        // Apply quad symmetry
+        for (int row = 0; row < cellRows; row++) {
+            for (int col = 0; col < cellCols / 2; col++) {
+                cells[cellCols - 1 - col][row] = cells[col][row];
+            }
+        }
+        for (int col = 0; col < cellCols; col++) {
+            for (int row = 0; row < cellRows / 2; row++) {
+                cells[col][cellRows - 1 - row] = cells[col][row];
+            }
+        }
 
-    public static class TextureGenerationException extends RuntimeException {
-        public TextureGenerationException(String msg, Throwable cause) { super(msg, cause); }
+        int imgWidth = cellCols * CELL_SIZE;
+        int imgHeight = cellRows * CELL_SIZE;
+        BufferedImage image = new BufferedImage(imgWidth, imgHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = image.createGraphics();
+
+        Color fg = new Color(0x8B5E3C);
+        Color bg = new Color(0x5C3A1E);
+
+        for (int col = 0; col < cellCols; col++) {
+            for (int row = 0; row < cellRows; row++) {
+                g.setColor(cells[col][row] ? fg : bg);
+                g.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            }
+        }
+        g.dispose();
+
+        return image.getSubimage(0, 0,
+                Math.min(width, imgWidth),
+                Math.min(height, imgHeight));
     }
 }

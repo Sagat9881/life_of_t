@@ -1,140 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  unified-asset-schema.xml
-  Master schema definition for all visual-specs.xml files in Life of T.
+  UNIFIED ASSET SPECIFICATION SCHEMA
+  ==================================
+  Reference schema for all entity visual-specs.xml files.
+  Version: 1.0.0
 
-  PURPOSE
-  =======
-  This file documents the canonical XML structure that every
-  visual-specs.xml file in docs/prompts/**/ MUST follow.
-  It is used by XmlAssetSpecParser (asset-generator module) and by
-  any AI prompt that needs to produce or validate a spec file.
+  This file documents the unified XML structure used by the
+  LayeredAssetGenerator v2 to generate game assets.
 
-  HOW TO USE
-  ==========
-  1. Copy the <asset> template below into a new visual-specs.xml file.
-  2. Fill in the attributes and child elements as described.
-  3. Validate your file against the constraints in the <constraints> element.
+  Entity spec files live at:
+    docs/prompts/{entity-type}/{entity-name}/visual-specs.xml
+
+  Supported entity types: characters, locations, pets
 -->
-<schema version="2.0" module="asset-generator">
+<asset-spec version="1.0.0">
 
-  <!-- ===================================================================
-       TEMPLATE
-       Copy everything inside <template> into your visual-specs.xml.
-       =================================================================== -->
-  <template>
-    <asset id="UNIQUE_ASSET_ID" category="character|location|pet|object">
+    <!-- REQUIRED: Entity metadata -->
+    <meta>
+        <entity-type>characters|locations|pets</entity-type>
+        <entity-name>snake_case_name</entity-name>
+        <version>1.0.0</version>
+    </meta>
 
-      <!-- Human-readable description used in generation prompts -->
-      <description>Short, evocative description of the entity.</description>
-
-      <!-- =================================================================
-           LAYERS  (required for generation; can be empty for stubs)
-           Each layer maps to a separate PNG file in the output.
-           ================================================================= -->
-      <layers>
+    <!-- REQUIRED: Layer definitions (at least one layer) -->
+    <layers>
         <!--
-          name        : unique identifier within this asset
-          type        : base | overlay | shadow | glow | effect
-          paletteRef  : (optional) references a <palette name="..."> below
-          zIndex      : integer; 0 = furthest back
-          optional    : true | false
+          Each layer represents a visual plane in the asset.
+          Attributes:
+            id       - unique identifier (e.g. "background", "base", "outfit")
+            type     - layer type: background, midground, foreground, base, outfit, overlay, accessory
+            z-order  - rendering order (lower = behind, default = position in list)
         -->
-        <layer name="base"    type="base"    paletteRef="skin"      zIndex="0" optional="false"/>
-        <layer name="outfit"  type="overlay" paletteRef="clothes"   zIndex="1" optional="false"/>
-        <layer name="shadow"  type="shadow"                         zIndex="-1" optional="true"/>
-      </layers>
+        <layer id="background" type="background" z-order="0">Background environment</layer>
+        <layer id="midground" type="midground" z-order="1">Middle ground objects</layer>
+        <layer id="foreground" type="foreground" z-order="2">Foreground details and overlays</layer>
+    </layers>
 
-      <!-- =================================================================
-           ANIMATIONS
-           ================================================================= -->
-      <animations>
+    <!-- OPTIONAL: Color palette -->
+    <color-palette>
+        <primary>
+            <color hex="#F5E6D3" name="warm-beige"/>
+            <color hex="#FFB6C1" name="light-pink"/>
+            <color hex="#B5EAD7" name="mint-green"/>
+            <color hex="#FFF4B8" name="pastel-yellow"/>
+            <color hex="#E0BBE4" name="lavender"/>
+        </primary>
+        <secondary>
+            <color hex="#6B4423" name="dark-brown"/>
+            <color hex="#4A5859" name="dark-gray"/>
+            <color hex="#FFF9E9" name="cream"/>
+            <color hex="#A8B2B7" name="silver"/>
+        </secondary>
+    </color-palette>
+
+    <!-- OPTIONAL: Animation specifications -->
+    <animations>
         <!--
-          state      : unique animation state name (e.g. idle, walk, run)
-          frameCount : total frames in the sequence
-          fps        : playback speed
-          loop       : true | false
+          Each animation defines a sprite-sheet animation.
+          Attributes:
+            name         - animation identifier (e.g. "idle", "walk")
+            frames       - total frame count (1..50, NEVER exceed 50)
+            fps          - playback speed in frames per second
+            loop         - whether animation loops (true/false)
+            frame-width  - pixel width of each frame
+            frame-height - pixel height of each frame
         -->
-        <animation state="idle" frameCount="4" fps="8" loop="true">
-          <!-- Space-separated 0-based frame indices into the atlas strip -->
-          <frames>0 1 2 3</frames>
-        </animation>
-        <animation state="walk" frameCount="4" fps="12" loop="true">
-          <frames>4 5 6 7</frames>
-        </animation>
-      </animations>
+        <animation name="idle" frames="24" fps="12" loop="true"
+                   frame-width="128" frame-height="128"/>
+    </animations>
 
-      <!-- =================================================================
-           PALETTES
-           ================================================================= -->
-      <palettes>
-        <!--
-          name  : matches paletteRef values in <layers>
-          Each <color> is a hex string.  The first entry is the "primary" swatch.
-        -->
-        <palette name="skin">
-          <color>#FFDFC4</color>
-          <color>#F0C080</color>
-          <color>#C68642</color>
-        </palette>
-        <palette name="clothes">
-          <color>#3355AA</color>
-        </palette>
-      </palettes>
+    <!-- OPTIONAL: Time-of-day variations (primarily for locations) -->
+    <time-of-day-variations>
+        <variation time="morning">
+            <lighting>Soft golden light from the east</lighting>
+            <mood>Peaceful, awakening</mood>
+        </variation>
+        <variation time="day">
+            <lighting>Bright overhead light</lighting>
+            <mood>Active, vibrant</mood>
+        </variation>
+        <variation time="evening">
+            <lighting>Warm orange sunset tones</lighting>
+            <mood>Relaxing, winding down</mood>
+        </variation>
+        <variation time="night">
+            <lighting>Cool blue moonlight with warm indoor glow</lighting>
+            <mood>Quiet, intimate</mood>
+        </variation>
+    </time-of-day-variations>
 
-      <!-- =================================================================
-           VARIATIONS  (time-of-day colour shifts)
-           ================================================================= -->
-      <variations>
-        <!--
-          timeOfDay  : morning | day | evening | night
-          colorShift : hex tint colour
-          opacity    : 0.0 – 1.0
-        -->
-        <variation timeOfDay="morning" colorShift="#FFF4CC" opacity="0.1"/>
-        <variation timeOfDay="evening" colorShift="#FF8800" opacity="0.2"/>
-        <variation timeOfDay="night"   colorShift="#001133" opacity="0.4"/>
-      </variations>
+    <!-- OPTIONAL: Naming conventions -->
+    <naming>
+        <output-dir>assets/{entity-type}/{entity-name}</output-dir>
+    </naming>
 
-      <!-- =================================================================
-           NAMING  (output file patterns)
-           Printf-style: first %s = prefix, second %02d = index
-           ================================================================= -->
-      <naming
-        prefix="ENTITY_NAME"
-        layerPattern="%s_layer_%02d.png"
-        atlasPattern="%s_atlas.webp"
-        configPattern="%s_atlas.json"
-      />
+    <!-- OPTIONAL: Technical constraints -->
+    <constraints>
+        <max-file-size-kb>500</max-file-size-kb>
+        <max-sprite-sheet-width>2048</max-sprite-sheet-width>
+        <max-sprite-sheet-height>2048</max-sprite-sheet-height>
+        <compression-quality>85</compression-quality>
+        <bit-depth>32</bit-depth>
+    </constraints>
 
-      <!-- =================================================================
-           CONSTRAINTS
-           ================================================================= -->
-      <constraints
-        widthPx="64"
-        heightPx="64"
-        maxFrames="32"
-        allowTransparency="true"
-        outputFormats="png,webp"
-      />
-
-    </asset>
-  </template>
-
-  <!-- ===================================================================
-       FIELD REFERENCE
-       =================================================================== -->
-  <fieldReference>
-    <field name="asset/@id"          type="string"  required="true"  note="Unique across all assets"/>
-    <field name="asset/@category"     type="enum"    required="true"  values="character,location,pet,object"/>
-    <field name="layer/@name"         type="string"  required="true"  note="Unique within asset"/>
-    <field name="layer/@type"         type="enum"    required="true"  values="base,overlay,shadow,glow,effect"/>
-    <field name="layer/@zIndex"       type="int"     required="false" default="0"/>
-    <field name="layer/@optional"     type="boolean" required="false" default="false"/>
-    <field name="animation/@state"    type="string"  required="true"  note="Unique within asset"/>
-    <field name="animation/@fps"      type="int"     required="false" default="8"/>
-    <field name="animation/@loop"     type="boolean" required="false" default="true"/>
-    <field name="variation/@opacity"  type="double"  required="true"  note="Range 0.0–1.0"/>
-  </fieldReference>
-
-</schema>
+</asset-spec>

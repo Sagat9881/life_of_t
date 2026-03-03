@@ -14,19 +14,11 @@ import ru.lifegame.assets.infrastructure.writer.PngLayerWriter;
 import ru.lifegame.assets.infrastructure.writer.WebpAtlasWriter;
 
 /**
- * Spring {@link Configuration} that wires together all asset-generator beans.
- *
- * <p>Explicit {@code @Bean} declarations are used here (rather than relying
- * solely on {@code @Component} scanning) so that the wiring is visible in
- * one place and can be easily swapped in tests.</p>
+ * Spring configuration for the asset generator module.
+ * Wires up all infrastructure and use-case beans.
  */
 @Configuration
 public class AssetGeneratorConfiguration {
-
-    @Bean
-    public XmlAssetSpecParser xmlAssetSpecParser() {
-        return new XmlAssetSpecParser();
-    }
 
     @Bean
     public PngLayerWriter pngLayerWriter() {
@@ -44,15 +36,8 @@ public class AssetGeneratorConfiguration {
     }
 
     @Bean
-    public LayeredAssetGenerator layeredAssetGenerator(PngLayerWriter pngWriter,
-                                                        WebpAtlasWriter atlasWriter,
-                                                        AtlasConfigWriter configWriter) {
-        return new LayeredAssetGenerator(pngWriter, atlasWriter, configWriter);
-    }
-
-    @Bean
-    public AssetGenerationService assetGenerationService(LayeredAssetGenerator generator) {
-        return generator;
+    public XmlAssetSpecParser xmlAssetSpecParser() {
+        return new XmlAssetSpecParser();
     }
 
     @Bean
@@ -61,19 +46,28 @@ public class AssetGeneratorConfiguration {
     }
 
     @Bean
-    public GenerateLayeredAssetUseCase generateLayeredAssetUseCase(
-            XmlAssetSpecParser parser, AssetGenerationService service) {
-        return new GenerateLayeredAssetUseCase(parser, service);
+    public AssetGenerationService assetGenerationService(
+            PngLayerWriter pngLayerWriter,
+            WebpAtlasWriter webpAtlasWriter,
+            AtlasConfigWriter atlasConfigWriter) {
+        return new LayeredAssetGenerator(pngLayerWriter, webpAtlasWriter, atlasConfigWriter);
     }
 
     @Bean
-    public ScanMissingSpecsUseCase scanMissingSpecsUseCase(PromptDirectoryScanner scanner) {
+    public GenerateLayeredAssetUseCase generateLayeredAssetUseCase(
+            AssetGenerationService assetGenerationService) {
+        return new GenerateLayeredAssetUseCase(assetGenerationService);
+    }
+
+    @Bean
+    public ScanMissingSpecsUseCase scanMissingSpecsUseCase(
+            PromptDirectoryScanner scanner) {
         return new ScanMissingSpecsUseCase(scanner);
     }
 
     @Bean
-    public UnifyXmlSpecsUseCase unifyXmlSpecsUseCase(PromptDirectoryScanner scanner,
-                                                      XmlAssetSpecParser parser) {
-        return new UnifyXmlSpecsUseCase(scanner, parser);
+    public UnifyXmlSpecsUseCase unifyXmlSpecsUseCase(
+            XmlAssetSpecParser parser) {
+        return new UnifyXmlSpecsUseCase(parser);
     }
 }
