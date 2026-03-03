@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: life-of-t-bot
+
+server:
+  port: 8081
+
+bot:
+  token: ${BOT_TOKEN:your-bot-token-here}
+  username: ${BOT_USERNAME:LifeOfTBot}
+  webapp-url: ${WEBAPP_URL:https://your-domain.com}
