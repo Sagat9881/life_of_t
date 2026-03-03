@@ -7,29 +7,23 @@ import java.util.Map;
 
 public class WalkDogParkAction implements GameAction {
 
-    private static final int TIME_COST = 1; // 1 hour
+    private static final int TIME_COST = 1;
 
     @Override
     public ActionType type() { return StandardActionType.WALK_DOG_PARK; }
 
     @Override
-    public int calculateTimeCost(GameSessionReadModel session) {
-        return TIME_COST;
-    }
+    public int calculateTimeCost(GameSessionReadModel session) { return TIME_COST; }
 
     @Override
     public ActionResult calculate(GameSessionReadModel session) {
-        int timeCost = calculateTimeCost(session);
-        StatChanges changes = new StatChanges(
-                -10, 0, -10,
-                10, 0, 0
-        );
+        StatChanges changes = new StatChanges(-10, 0, -10, 10, 0, 0);
         return new ActionResult(
-                type(), timeCost,
-                "Татьяна погуляла с Сэмом. Собака счастлива!",
+                type(), TIME_COST,
+                "Татьяна погуляла с Сэмом в парке. Собака счастлива!",
                 changes,
                 Map.of(),
-                Map.of("sam", 20),
+                Map.of("SAM", 20),
                 false, false, false, false
         );
     }

@@ -7,25 +7,19 @@ import java.util.Map;
 
 public class TalkToColleagueAction implements GameAction {
 
-    private static final int TIME_COST = 1; // 0.5 hours = 30 minutes
+    private static final int TIME_COST = 1;
 
     @Override
     public ActionType type() { return StandardActionType.TALK_TO_COLLEAGUE; }
 
     @Override
-    public int calculateTimeCost(GameSessionReadModel session) {
-        return TIME_COST;
-    }
+    public int calculateTimeCost(GameSessionReadModel session) { return TIME_COST; }
 
     @Override
     public ActionResult calculate(GameSessionReadModel session) {
-        int timeCost = calculateTimeCost(session);
-        StatChanges changes = new StatChanges(
-                0, 0, -5,
-                10, 0, 0
-        );
+        StatChanges changes = new StatChanges(0, 0, -5, 10, 0, 0);
         return new ActionResult(
-                type(), timeCost,
+                type(), TIME_COST,
                 "Татьяна поболтала с коллегой. Приятное общение.",
                 changes,
                 Map.of(),

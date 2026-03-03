@@ -7,25 +7,19 @@ import java.util.Map;
 
 public class WorkOnProjectAction implements GameAction {
 
-    private static final int TIME_COST = 3; // 3 hours
+    private static final int TIME_COST = 3;
 
     @Override
     public ActionType type() { return StandardActionType.WORK_ON_PROJECT; }
 
     @Override
-    public int calculateTimeCost(GameSessionReadModel session) {
-        return TIME_COST;
-    }
+    public int calculateTimeCost(GameSessionReadModel session) { return TIME_COST; }
 
     @Override
     public ActionResult calculate(GameSessionReadModel session) {
-        int timeCost = calculateTimeCost(session);
-        StatChanges changes = new StatChanges(
-                -30, 0, 10,
-                0, 800, 0
-        );
+        StatChanges changes = new StatChanges(-30, 0, 10, 0, 800, 0);
         return new ActionResult(
-                type(), timeCost,
+                type(), TIME_COST,
                 "Татьяна поработала над проектом. +800₽ заработано.",
                 changes,
                 Map.of(),

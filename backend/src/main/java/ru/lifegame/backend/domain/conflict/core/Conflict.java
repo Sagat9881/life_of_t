@@ -72,8 +72,8 @@ public class Conflict {
     private String buildSituation(int round) {
         return switch (stage) {
             case ESCALATION -> type.label() + ": напряжение нарастает (раунд " + round + ")";
-            case CLIMAX -> type.label() + ": решающий момент!";
-            default -> type.label() + ": разговор";
+            case CLIMAX     -> type.label() + ": решающий момент!";
+            default         -> type.label() + ": разговор";
         };
     }
 
@@ -115,11 +115,10 @@ public class Conflict {
         return stage == ConflictStage.RESOLUTION && resolution != null;
     }
 
-    // --- Getters ---
-    public String id() { return id; }
-    public ConflictType type() { return type; }
-    public ConflictStage stage() { return stage; }
-    public ConflictStressPoints csp() { return csp; }
-    public List<ConflictRound> rounds() { return List.copyOf(rounds); }
-    public ConflictResolution resolution() { return resolution; }
+    public String id()                      { return id; }
+    public ConflictType type()              { return type; }
+    public ConflictStage stage()            { return stage; }
+    public ConflictStressPoints csp()       { return csp; }
+    public List<ConflictRound> rounds()     { return List.copyOf(rounds); }
+    public ConflictResolution resolution()  { return resolution; }
 }
