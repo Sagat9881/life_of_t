@@ -20,7 +20,7 @@ public enum Actions implements ActionType {
         this.description = description;
     }
 
-    @Override public String code() { return code; }
-    @Override public String label() { return label; }
+    @Override public String code()        { return code; }
+    @Override public String label()       { return label; }
     @Override public String description() { return description; }
 }

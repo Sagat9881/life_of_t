@@ -7,28 +7,22 @@ import java.util.Map;
 
 public class CallHusbandAction implements GameAction {
 
-    private static final int TIME_COST = 1; // 0.5 hours = 30 minutes
+    private static final int TIME_COST = 1;
 
     @Override
     public ActionType type() { return StandardActionType.CALL_HUSBAND; }
 
     @Override
-    public int calculateTimeCost(GameSessionReadModel session) {
-        return TIME_COST;
-    }
+    public int calculateTimeCost(GameSessionReadModel session) { return TIME_COST; }
 
     @Override
     public ActionResult calculate(GameSessionReadModel session) {
-        int timeCost = calculateTimeCost(session);
-        StatChanges changes = new StatChanges(
-                0, 0, 0,
-                10, 0, 0
-        );
+        StatChanges changes = new StatChanges(0, 0, 0, 10, 0, 0);
         return new ActionResult(
-                type(), timeCost,
+                type(), TIME_COST,
                 "Татьяна позвонила Александру. Приятный разговор поднял настроение.",
                 changes,
-                Map.of("husband", 5),
+                Map.of("HUSBAND", 5),
                 Map.of(),
                 false, false, true, false
         );

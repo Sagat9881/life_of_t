@@ -38,18 +38,7 @@ public enum StandardActionType implements ActionType {
         this.description = description;
     }
 
-    @Override
-    public String code() {
-        return code;
-    }
-
-    @Override
-    public String label() {
-        return label;
-    }
-
-    @Override
-    public String description() {
-        return description;
-    }
+    @Override public String code()        { return code; }
+    @Override public String label()       { return label; }
+    @Override public String description() { return description; }
 }
