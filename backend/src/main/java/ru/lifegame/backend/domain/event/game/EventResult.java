@@ -9,5 +9,4 @@ public record EventResult(
     StatChanges statChanges,
     Map<String, Integer> relationshipChanges,
     String questUpdate
-) {
-}
+) {}

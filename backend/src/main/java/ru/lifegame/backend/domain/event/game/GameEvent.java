@@ -16,14 +16,9 @@ public class GameEvent {
     private boolean resolved;
 
     public GameEvent(
-            String id,
-            GameEventType type,
-            String title,
-            String description,
-            List<EventOption> options,
-            Map<String, Object> context,
-            int priority,
-            int dayTriggered
+            String id, GameEventType type, String title, String description,
+            List<EventOption> options, Map<String, Object> context,
+            int priority, int dayTriggered
     ) {
         this.id = id;
         this.type = type;
@@ -42,9 +37,9 @@ public class GameEvent {
             .filter(o -> o.id().equals(optionId))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Option not found: " + optionId));
-        
+
         this.resolved = true;
-        
+
         return new EventResult(
             option.resultText(),
             option.statChanges(),
@@ -53,16 +48,16 @@ public class GameEvent {
         );
     }
 
-    public String id() { return id; }
-    public GameEventType type() { return type; }
-    public String title() { return title; }
-    public String description() { return description; }
+    public String id()              { return id; }
+    public GameEventType type()     { return type; }
+    public String title()           { return title; }
+    public String description()     { return description; }
     public List<EventOption> options() { return options; }
     public Map<String, Object> context() { return context; }
-    public int priority() { return priority; }
-    public int dayTriggered() { return dayTriggered; }
-    public boolean isTriggered() { return triggered; }
-    public boolean isResolved() { return resolved; }
-    
-    public void markTriggered() { this.triggered = true; }
+    public int priority()           { return priority; }
+    public int dayTriggered()       { return dayTriggered; }
+    public boolean isTriggered()    { return triggered; }
+    public boolean isResolved()     { return resolved; }
+
+    public void markTriggered()     { this.triggered = true; }
 }
