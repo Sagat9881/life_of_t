@@ -8,7 +8,7 @@ import ru.lifegame.backend.domain.action.ActionResult;
 import ru.lifegame.backend.domain.action.GameAction;
 import ru.lifegame.backend.domain.exception.SessionNotFoundException;
 import ru.lifegame.backend.domain.model.session.GameSession;
-import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
+import ru.lifegame.backend.application.mapper.GameStateViewMapper;
 
 import java.util.Collection;
 

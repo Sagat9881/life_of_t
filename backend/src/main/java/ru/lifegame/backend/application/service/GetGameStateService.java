@@ -6,7 +6,7 @@ import ru.lifegame.backend.application.query.GetStateQuery;
 import ru.lifegame.backend.application.view.GameStateView;
 import ru.lifegame.backend.domain.exception.SessionNotFoundException;
 import ru.lifegame.backend.domain.model.session.GameSession;
-import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
+import ru.lifegame.backend.application.mapper.GameStateViewMapper;
 
 public class GetGameStateService implements GetGameStateUseCase {
 
