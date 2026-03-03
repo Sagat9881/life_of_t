@@ -2,24 +2,17 @@ name: Asset Generator CI
 
 on:
   push:
-    branches: [ master, main, develop ]
     paths:
       - 'asset-generator/**'
       - 'docs/prompts/**'
-      - 'pom.xml'
       - '.github/workflows/asset-generator-ci.yml'
   pull_request:
-    branches: [ master, main ]
     paths:
       - 'asset-generator/**'
       - 'docs/prompts/**'
-      - 'pom.xml'
   workflow_dispatch:
 
 jobs:
-  # ---------------------------------------------------------------------------
-  # Job 1: Compile + unit-test the asset-generator module
-  # ---------------------------------------------------------------------------
   build-and-test:
     name: Build & Test (Java 21)
     runs-on: ubuntu-latest
@@ -35,15 +28,11 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build parent POM (install without tests)
-        run: mvn -B install -DskipTests --no-transfer-progress
+      - name: Compile asset-generator (mvn clean compile)
+        run: mvn -B clean compile -f asset-generator/pom.xml --no-transfer-progress
 
-      - name: Run asset-generator unit tests
-        run: |
-          mvn -B test \
-            --no-transfer-progress \
-            -pl asset-generator \
-            -Dsurefire.useModulePath=false
+      - name: Run asset-generator tests (mvn clean test)
+        run: mvn -B clean test -f asset-generator/pom.xml --no-transfer-progress -Dsurefire.useModulePath=false
 
       - name: Upload Surefire reports
         if: always()
@@ -53,75 +42,152 @@ jobs:
           path: asset-generator/target/surefire-reports/
           retention-days: 14
 
-  # ---------------------------------------------------------------------------
-  # Job 2: Validate that every entity directory has a visual-specs.xml
-  # ---------------------------------------------------------------------------
   validate-specs:
     name: Validate XML Specs
     runs-on: ubuntu-latest
-    needs: build-and-test
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install xmllint
+        run: sudo apt-get install -y libxml2-utils
+
       - name: Check all visual-specs.xml files are well-formed XML
         run: |
           EXIT=0
-          find docs/prompts -name 'visual-specs.xml' | while read f; do
+          for f in $(find docs/prompts -name 'visual-specs.xml'); do
             if ! xmllint --noout "$f" 2>/dev/null; then
               echo "::error file=$f::Not well-formed XML"
               EXIT=1
+            else
+              echo "OK: $f"
             fi
           done
-          # Check _core schema is also valid
-          if ! xmllint --noout docs/prompts/_core/unified-asset-schema.xml 2>/dev/null; then
-            echo "::error::unified-asset-schema.xml is not well-formed"
-            EXIT=1
+          if [ -f docs/prompts/_core/unified-asset-schema.xml ]; then
+            if ! xmllint --noout docs/prompts/_core/unified-asset-schema.xml 2>/dev/null; then
+              echo "::error::unified-asset-schema.xml is not well-formed"
+              EXIT=1
+            else
+              echo "OK: docs/prompts/_core/unified-asset-schema.xml"
+            fi
           fi
           exit $EXIT
 
       - name: Verify entity directories have visual-specs.xml
         run: |
-          EXIT=0
-          # Walk category directories (characters, locations, pets)
-          for category in docs/prompts/*/; do
-            dirname=$(basename "$category")
-            # Skip _core and any dot-directories
-            [[ "$dirname" == _* ]] && continue
-            [[ "$dirname" == .* ]] && continue
-            for entity in "$category"*/; do
-              [ -d "$entity" ] || continue
-              if [ ! -f "${entity}visual-specs.xml" ]; then
-                echo "::warning::Missing visual-specs.xml in $entity"
-              fi
-            done
+          EXPECTED_SPECS=(
+            "docs/prompts/characters/tanya/visual-specs.xml"
+            "docs/prompts/characters/husband/visual-specs.xml"
+            "docs/prompts/pets/garfield/visual-specs.xml"
+            "docs/prompts/locations/home/visual-specs.xml"
+            "docs/prompts/locations/office/visual-specs.xml"
+            "docs/prompts/locations/park/visual-specs.xml"
+            "docs/prompts/locations/father_house/visual-specs.xml"
+          )
+          ALL_OK=true
+          for spec in "${EXPECTED_SPECS[@]}"; do
+            if [ -f "$spec" ]; then
+              echo "OK: $spec"
+            else
+              echo "::error::MISSING: $spec"
+              ALL_OK=false
+            fi
           done
-          exit $EXIT
+          if [ "$ALL_OK" = false ]; then
+            exit 1
+          fi
+          echo "All entity XML specs present."
 
-  # ---------------------------------------------------------------------------
-  # Job 3: Code-quality gate (compiler warnings as errors)
-  # ---------------------------------------------------------------------------
   code-quality:
     name: Code Quality
     runs-on: ubuntu-latest
-    needs: build-and-test
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Compile with strict settings
+      - name: Verify no wildcard imports in main sources
         run: |
-          mvn -B compile \
-            --no-transfer-progress \
-            -pl asset-generator \
-            -Dmaven.compiler.showWarnings=true \
-            -Dmaven.compiler.failOnWarning=false
+          if grep -rn "import .*\*;" asset-generator/src/main/java/ 2>/dev/null; then
+            echo "::error::Wildcard imports found in main sources!"
+            exit 1
+          fi
+          echo "OK — no wildcard imports in main sources."
+
+      - name: Verify no wildcard imports in test sources
+        run: |
+          if grep -rn "import .*\*;" asset-generator/src/test/java/ 2>/dev/null; then
+            echo "::error::Wildcard imports found in test sources!"
+            exit 1
+          fi
+          echo "OK — no wildcard imports in test sources."
+
+      - name: Verify no --enable-preview in asset-generator pom.xml
+        run: |
+          if grep -q "enable-preview" asset-generator/pom.xml; then
+            echo "::error::--enable-preview found in asset-generator/pom.xml!"
+            exit 1
+          fi
+          echo "OK — no preview features."
+
+      - name: Verify no Lombok usage
+        run: |
+          if grep -rn "import lombok" asset-generator/src/ 2>/dev/null; then
+            echo "::error::Lombok imports found!"
+            exit 1
+          fi
+          if grep -q "lombok" asset-generator/pom.xml; then
+            echo "::error::Lombok dependency found in pom.xml!"
+            exit 1
+          fi
+          echo "OK — no Lombok."
+
+      - name: Verify RGBA 32-bit compliance
+        run: |
+          echo "Checking that all BufferedImage creation uses TYPE_INT_ARGB..."
+          VIOLATIONS=$(grep -rn "BufferedImage(" asset-generator/src/main/java/ | grep -v "TYPE_INT_ARGB" | grep -v "getType()" || true)
+          if [ -n "$VIOLATIONS" ]; then
+            echo "::warning::Possible non-ARGB BufferedImage creation:"
+            echo "$VIOLATIONS"
+          fi
+          echo "RGBA compliance check complete."
+
+      - name: Verify max 50 frames constraint
+        run: |
+          if grep -q "MAX_FRAMES = 50" asset-generator/src/main/java/ru/lifegame/assets/domain/model/asset/AnimationSpec.java; then
+            echo "OK — MAX_FRAMES = 50 enforced."
+          else
+            echo "::error::MAX_FRAMES = 50 not found in AnimationSpec!"
+            exit 1
+          fi
+
+      - name: Verify unified XML schema exists
+        run: |
+          if [ ! -f "docs/prompts/_core/unified-asset-schema.xml" ]; then
+            echo "::error::Unified XML schema not found!"
+            exit 1
+          fi
+          echo "OK — unified XML schema present."
+
+      - name: Verify Clean Architecture package structure
+        run: |
+          REQUIRED=(
+            "asset-generator/src/main/java/ru/lifegame/assets/domain/model/asset"
+            "asset-generator/src/main/java/ru/lifegame/assets/domain/service"
+            "asset-generator/src/main/java/ru/lifegame/assets/application/usecase"
+            "asset-generator/src/main/java/ru/lifegame/assets/infrastructure/generator"
+            "asset-generator/src/main/java/ru/lifegame/assets/infrastructure/parser"
+            "asset-generator/src/main/java/ru/lifegame/assets/infrastructure/writer"
+            "asset-generator/src/main/java/ru/lifegame/assets/infrastructure/scanner"
+            "asset-generator/src/main/java/ru/lifegame/assets/config"
+          )
+          for pkg in "${REQUIRED[@]}"; do
+            if [ -d "$pkg" ]; then
+              echo "OK: $pkg"
+            else
+              echo "::error::MISSING package: $pkg"
+              exit 1
+            fi
+          done
+          echo "Clean Architecture structure verified."
