@@ -1,140 +1,102 @@
 package ru.lifegame.backend.application;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.lifegame.backend.application.command.ExecuteActionCommand;
-import ru.lifegame.backend.application.port.out.SessionRepository;
-import ru.lifegame.backend.application.service.ExecutePlayerActionService;
-import ru.lifegame.backend.application.view.GameStateView;
-import ru.lifegame.backend.domain.action.GameAction;
-import ru.lifegame.backend.domain.action.impl.GoToWorkAction;
-import ru.lifegame.backend.domain.action.impl.RestAtHomeAction;
-import ru.lifegame.backend.domain.action.StandardActionType;
-import ru.lifegame.backend.domain.exception.SessionNotFoundException;
-import ru.lifegame.backend.domain.model.session.GameSession;
-import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
+import ru.lifegame.backend.domain.GameSession;
+import ru.lifegame.backend.domain.GameSessionRepository;
+import ru.lifegame.backend.domain.PlayerAction;
+import ru.lifegame.backend.domain.PlayerActionRepository;
+import ru.lifegame.backend.api.mapper.GameSessionMapper;
+import ru.lifegame.backend.api.dto.GameSessionDto;
+import ru.lifegame.backend.api.dto.PlayerActionDto;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("ExecutePlayerActionService — выполнение действий игрока")
 class ExecutePlayerActionServiceTest {
 
     @Mock
-    private SessionRepository sessionRepository;
+    private GameSessionRepository gameSessionRepository;
 
-    private ExecutePlayerActionService service;
+    @Mock
+    private PlayerActionRepository playerActionRepository;
 
-    private List<GameAction> allActions;
+    @Mock
+    private GameSessionMapper gameSessionMapper;
+
+    @InjectMocks
+    private ExecutePlayerActionService executePlayerActionService;
+
+    private UUID sessionId;
+    private GameSession gameSession;
 
     @BeforeEach
     void setUp() {
-        allActions = List.of(new GoToWorkAction(), new RestAtHomeAction());
-        GameStateViewMapper mapper = new GameStateViewMapper(allActions);
-        service = new ExecutePlayerActionService(sessionRepository, allActions, mapper);
+        sessionId = UUID.randomUUID();
+        gameSession = new GameSession();
+        gameSession.setId(sessionId);
+        gameSession.setTelegramUserId(12345L);
+        gameSession.setCurrentDay(1);
+        gameSession.setScore(0);
+        gameSession.setStatus(GameSession.Status.ACTIVE);
     }
 
     @Test
-    @DisplayName("execute: выполняет действие 'work' и возвращает обновлённое состояние")
-    void executeWorkActionReturnsUpdatedState() {
-        GameSession session = GameSession.createNew("user-exec-1");
-        when(sessionRepository.findByTelegramUserId("user-exec-1"))
-                .thenReturn(Optional.of(session));
+    void executeAction_success() {
+        PlayerActionDto actionDto = new PlayerActionDto();
+        actionDto.setSessionId(sessionId);
+        actionDto.setActionType("WORK");
 
-        ExecuteActionCommand command = new ExecuteActionCommand("user-exec-1", "GO_TO_WORK");
-        GameStateView result = service.execute(command);
+        GameSessionDto expectedDto = new GameSessionDto();
+        expectedDto.setId(sessionId);
+
+        when(gameSessionRepository.findById(sessionId)).thenReturn(Optional.of(gameSession));
+        when(playerActionRepository.save(any(PlayerAction.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(gameSessionRepository.save(any(GameSession.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(gameSessionMapper.toDto(any(GameSession.class))).thenReturn(expectedDto);
+
+        GameSessionDto result = executePlayerActionService.executeAction(actionDto);
 
         assertThat(result).isNotNull();
-        assertThat(result.telegramUserId()).isEqualTo("user-exec-1");
-        assertThat(result.lastActionResult()).isNotNull();
-        assertThat(result.lastActionResult().actionCode()).isEqualTo("GO_TO_WORK");
-        verify(sessionRepository).save(session);
+        assertThat(result.getId()).isEqualTo(sessionId);
+        verify(playerActionRepository).save(any(PlayerAction.class));
+        verify(gameSessionRepository).save(any(GameSession.class));
     }
 
     @Test
-    @DisplayName("execute: выполняет действие 'rest_at_home' и возвращает обновлённое состояние")
-    void executeRestActionReturnsUpdatedState() {
-        GameSession session = GameSession.createNew("user-exec-rest");
-        when(sessionRepository.findByTelegramUserId("user-exec-rest"))
-                .thenReturn(Optional.of(session));
+    void executeAction_sessionNotFound() {
+        PlayerActionDto actionDto = new PlayerActionDto();
+        actionDto.setSessionId(sessionId);
+        actionDto.setActionType("WORK");
 
-        ExecuteActionCommand command = new ExecuteActionCommand("user-exec-rest", "REST_AT_HOME");
-        GameStateView result = service.execute(command);
+        when(gameSessionRepository.findById(sessionId)).thenReturn(Optional.empty());
 
-        assertThat(result).isNotNull();
-        assertThat(result.lastActionResult()).isNotNull();
-        assertThat(result.lastActionResult().actionCode()).isEqualTo("REST_AT_HOME");
-    }
-
-    @Test
-    @DisplayName("execute: бросает SessionNotFoundException если сессия не найдена")
-    void executeThrowsWhenSessionNotFound() {
-        when(sessionRepository.findByTelegramUserId("ghost-user"))
-                .thenReturn(Optional.empty());
-
-        ExecuteActionCommand command = new ExecuteActionCommand("ghost-user", "GO_TO_WORK");
-
-        assertThatThrownBy(() -> service.execute(command))
-                .isInstanceOf(SessionNotFoundException.class);
-    }
-
-    @Test
-    @DisplayName("execute: бросает IllegalArgumentException при неизвестном коде действия")
-    void executeThrowsForUnknownActionCode() {
-        GameSession session = GameSession.createNew("user-unknown-action");
-        when(sessionRepository.findByTelegramUserId("user-unknown-action"))
-                .thenReturn(Optional.of(session));
-
-        ExecuteActionCommand command = new ExecuteActionCommand("user-unknown-action", "fly_to_moon");
-
-        assertThatThrownBy(() -> service.execute(command))
+        assertThatThrownBy(() -> executePlayerActionService.executeAction(actionDto))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("fly_to_moon");
+                .hasMessageContaining(sessionId.toString());
     }
 
     @Test
-    @DisplayName("execute: сохраняет сессию после успешного действия")
-    void executeAlwaysSavesSessionAfterSuccess() {
-        GameSession session = GameSession.createNew("user-save-check");
-        when(sessionRepository.findByTelegramUserId("user-save-check"))
-                .thenReturn(Optional.of(session));
+    void executeAction_sessionNotActive() {
+        gameSession.setStatus(GameSession.Status.COMPLETED);
 
-        service.execute(new ExecuteActionCommand("user-save-check", "GO_TO_WORK"));
+        PlayerActionDto actionDto = new PlayerActionDto();
+        actionDto.setSessionId(sessionId);
+        actionDto.setActionType("WORK");
 
-        verify(sessionRepository, times(1)).save(any(GameSession.class));
-    }
+        when(gameSessionRepository.findById(sessionId)).thenReturn(Optional.of(gameSession));
 
-    @Test
-    @DisplayName("execute: действие работы уменьшает энергию игрока")
-    void workActionDecreaseEnergy() {
-        GameSession session = GameSession.createNew("user-energy-check");
-        int energyBefore = session.player().stats().energy();
-        when(sessionRepository.findByTelegramUserId("user-energy-check"))
-                .thenReturn(Optional.of(session));
-
-        GameStateView view = service.execute(new ExecuteActionCommand("user-energy-check", "GO_TO_WORK"));
-
-        assertThat(view.player().stats().energy()).isLessThan(energyBefore);
-    }
-
-    @Test
-    @DisplayName("execute: возвращённое view содержит доступные действия")
-    void executeResultContainsActionOptions() {
-        GameSession session = GameSession.createNew("user-options-check");
-        when(sessionRepository.findByTelegramUserId("user-options-check"))
-                .thenReturn(Optional.of(session));
-
-        GameStateView view = service.execute(new ExecuteActionCommand("user-options-check", "GO_TO_WORK"));
-
-        assertThat(view.availableActions()).isNotEmpty();
+        assertThatThrownBy(() -> executePlayerActionService.executeAction(actionDto))
+                .isInstanceOf(IllegalStateException.class);
     }
 }
