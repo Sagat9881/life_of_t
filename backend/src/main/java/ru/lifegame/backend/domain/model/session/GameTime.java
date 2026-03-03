@@ -12,13 +12,15 @@ public record GameTime(int day, int hour) {
         if (day < 0) {
             throw new IllegalArgumentException("Day cannot be negative: " + day);
         }
-        if (hour < 0 || hour >= GameBalance.HOURS_PER_DAY) {
-            throw new IllegalArgumentException("Hour must be between 0 and " + (GameBalance.HOURS_PER_DAY - 1) + ", got: " + hour);
+        // Allow hour == 24 to represent end-of-day (isDayOver state)
+        // Normal range is [0, 24] inclusive; hour < 0 is invalid.
+        if (hour < 0 || hour > GameBalance.HOURS_PER_DAY) {
+            throw new IllegalArgumentException(
+                "Hour must be between 0 and " + GameBalance.HOURS_PER_DAY + ", got: " + hour);
         }
     }
 
     public boolean hasEnoughTime(int hours) {
-        // Рассчитываем оставшееся время в дне от текущего часа
         int remainingHours = GameBalance.HOURS_PER_DAY - hour;
         return hours <= remainingHours;
     }

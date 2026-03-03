@@ -50,14 +50,13 @@ public class Quest {
         return (int) (done * 100 / steps.size());
     }
 
-    public boolean isActive() { return status == QuestStatus.IN_PROGRESS; }
+    public boolean isActive()    { return status == QuestStatus.IN_PROGRESS; }
     public boolean isCompleted() { return status == QuestStatus.COMPLETED; }
 
-    // Accessor methods
-    public String id() { return id; }
-    public QuestType type() { return type; }
-    public String title() { return title; }
-    public String description() { return description; }
-    public QuestStatus status() { return status; }
-    public List<QuestStepState> steps() { return List.copyOf(steps); }
+    public String id()                     { return id; }
+    public QuestType type()                { return type; }
+    public String title()                  { return title; }
+    public String description()            { return description; }
+    public QuestStatus status()            { return status; }
+    public List<QuestStepState> steps()    { return List.copyOf(steps); }
 }

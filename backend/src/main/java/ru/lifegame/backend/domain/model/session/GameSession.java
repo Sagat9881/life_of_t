@@ -100,7 +100,7 @@ public class GameSession {
     }
 
     public Ending ending() {
-        return ending;
+        return ending != null ? ending : context.ending();
     }
 
     public GameSessionContext context() {
@@ -108,18 +108,21 @@ public class GameSession {
     }
 
     // === Actions ===
-    public ActionResult executeAction(GameAction actionType) {
+    public ActionResult executeAction(GameAction action) {
         ActionExecutor executor = new ActionExecutor();
-        ActionResult result = executor.execute(actionType, context, eventPublisher);
-        eventPublisher.publish(new ActionExecutedEvent(sessionId, actionType.type().code()));
-        return result;
+        // The executor already publishes ActionExecutedEvent internally — no double-publish here
+        return executor.execute(action, context, eventPublisher);
     }
 
     // === Day Management ===
     public void endDay() {
         DayEndProcessor processor = new DayEndProcessor();
+        // processEndOfDay already publishes DayEndedEvent — no extra publish here
         processor.processEndOfDay(context, eventPublisher);
-        eventPublisher.publish(new DayEndedEvent(sessionId, time().day()));
+        // Sync ending from context
+        if (context.ending() != null) {
+            this.ending = context.ending();
+        }
     }
 
     // === Conflict Management ===
@@ -177,7 +180,6 @@ public class GameSession {
         }
         if (result.relationshipChanges() != null && !result.relationshipChanges().isEmpty()) {
             result.relationshipChanges().forEach((npcName, delta) -> {
-                // Find NPC by name and apply changes
                 relationships().all().forEach((npc, rel) -> {
                     if (npc.name().equals(npcName)) {
                         relationships().applyChanges(npc,
@@ -193,19 +195,19 @@ public class GameSession {
     // === Game Over ===
     public void checkGameOver() {
         GameOverChecker checker = new GameOverChecker();
-        Optional<GameOverReason> gameOverEnding = checker.check(player(),relationships(),pets());
-        gameOverEnding.ifPresent(end -> {
-            this.ending = end.ending();
-            this.context.setGameOverReason(end);
+        Optional<GameOverReason> gameOverResult = checker.check(player(), relationships(), pets());
+        gameOverResult.ifPresent(reason -> {
+            this.ending = reason.ending();
+            this.context.setGameOverReason(reason);
             this.context.setEnding(this.ending);
             eventPublisher.publish(
-                    new GameOverEvent(sessionId, ending.type().name())
+                    new GameOverEvent(sessionId, reason.name())
             );
         });
     }
 
     public boolean isGameOver() {
-        return ending != null;
+        return ending() != null;
     }
 
     // === Event Sourcing ===
