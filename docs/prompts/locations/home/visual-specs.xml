@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  visual-specs.xml — Home location
+  Life of T game asset specification
+
+  Generated against unified-asset-schema.xml v2.0
+-->
+<asset id="location_home" category="location">
+
+  <description>Tanya's apartment: a cosy, cluttered two-room flat. Warm lighting,
+  illustrated prints on the walls, a large drawing desk, bookshelves overflowing
+  with sketchbooks. Garfield's bed in the corner. Lived-in and personal.</description>
+
+  <layers>
+    <layer name="floor"      type="base"    paletteRef="floor"   zIndex="0"  optional="false"/>
+    <layer name="walls"      type="base"    paletteRef="walls"   zIndex="1"  optional="false"/>
+    <layer name="furniture"  type="overlay" paletteRef="wood"    zIndex="2"  optional="false"/>
+    <layer name="decor"      type="overlay" paletteRef="accent"  zIndex="3"  optional="true"/>
+    <layer name="window"     type="overlay" paletteRef="window"  zIndex="4"  optional="false"/>
+    <layer name="lighting"   type="glow"                         zIndex="5"  optional="true"/>
+  </layers>
+
+  <animations>
+    <animation state="idle" frameCount="1" fps="1" loop="true">
+      <frames>0</frames>
+    </animation>
+    <animation state="day_cycle" frameCount="4" fps="1" loop="true">
+      <frames>0 1 2 3</frames>
+    </animation>
+  </animations>
+
+  <palettes>
+    <palette name="floor">
+      <color>#C8A878</color>
+      <color>#B89868</color>
+    </palette>
+    <palette name="walls">
+      <color>#F5ECD5</color>
+      <color>#EDE0C4</color>
+    </palette>
+    <palette name="wood">
+      <color>#8B5E3C</color>
+      <color>#7A4F2D</color>
+    </palette>
+    <palette name="accent">
+      <color>#FF6B9D</color>
+      <color>#6BC5FF</color>
+    </palette>
+    <palette name="window">
+      <color>#B8DEFF</color>
+    </palette>
+  </palettes>
+
+  <variations>
+    <variation timeOfDay="morning" colorShift="#FFF4CC" opacity="0.12"/>
+    <variation timeOfDay="evening" colorShift="#FF8800" opacity="0.25"/>
+    <variation timeOfDay="night"   colorShift="#001133" opacity="0.50"/>
+  </variations>
+
+  <naming
+    prefix="home"
+    layerPattern="%s_layer_%02d.png"
+    atlasPattern="%s_atlas.webp"
+    configPattern="%s_atlas.json"
+  />
+
+  <constraints
+    widthPx="320"
+    heightPx="180"
+    maxFrames="8"
+    allowTransparency="false"
+    outputFormats="png,webp"
+  />
+
+</asset>

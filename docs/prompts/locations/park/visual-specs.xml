@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  visual-specs.xml — Park location
+  Life of T game asset specification
+
+  Generated against unified-asset-schema.xml v2.0
+-->
+<asset id="location_park" category="location">
+
+  <description>A city park: trees, a fountain, benches, a winding path. Pigeons.
+  Seasonal variation implied by the time-of-day palette shifts. Background
+  NPCs are implied but not specified here.</description>
+
+  <layers>
+    <layer name="ground"    type="base"    paletteRef="grass"   zIndex="0"  optional="false"/>
+    <layer name="path"      type="overlay" paletteRef="path"    zIndex="1"  optional="false"/>
+    <layer name="trees"     type="overlay" paletteRef="foliage" zIndex="2"  optional="false"/>
+    <layer name="fountain"  type="overlay" paletteRef="stone"   zIndex="3"  optional="true"/>
+    <layer name="sky"       type="overlay" paletteRef="sky"     zIndex="-1" optional="false"/>
+  </layers>
+
+  <animations>
+    <animation state="idle" frameCount="1" fps="1" loop="true">
+      <frames>0</frames>
+    </animation>
+    <animation state="wind" frameCount="4" fps="4" loop="true">
+      <frames>0 1 2 3</frames>
+    </animation>
+  </animations>
+
+  <palettes>
+    <palette name="grass">
+      <color>#5A8A3C</color>
+      <color>#4A7A2C</color>
+    </palette>
+    <palette name="path">
+      <color>#C8B890</color>
+    </palette>
+    <palette name="foliage">
+      <color>#3A7A20</color>
+      <color>#5AAA40</color>
+    </palette>
+    <palette name="stone">
+      <color>#909090</color>
+    </palette>
+    <palette name="sky">
+      <color>#87CEEB</color>
+      <color>#4A90D9</color>
+    </palette>
+  </palettes>
+
+  <variations>
+    <variation timeOfDay="morning" colorShift="#FFF4CC" opacity="0.15"/>
+    <variation timeOfDay="evening" colorShift="#FF6600" opacity="0.30"/>
+    <variation timeOfDay="night"   colorShift="#001133" opacity="0.55"/>
+  </variations>
+
+  <naming
+    prefix="park"
+    layerPattern="%s_layer_%02d.png"
+    atlasPattern="%s_atlas.webp"
+    configPattern="%s_atlas.json"
+  />
+
+  <constraints
+    widthPx="320"
+    heightPx="180"
+    maxFrames="8"
+    allowTransparency="false"
+    outputFormats="png,webp"
+  />
+
+</asset>

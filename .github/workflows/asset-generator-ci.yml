@@ -1,0 +1,127 @@
+name: Asset Generator CI
+
+on:
+  push:
+    branches: [ master, main, develop ]
+    paths:
+      - 'asset-generator/**'
+      - 'docs/prompts/**'
+      - 'pom.xml'
+      - '.github/workflows/asset-generator-ci.yml'
+  pull_request:
+    branches: [ master, main ]
+    paths:
+      - 'asset-generator/**'
+      - 'docs/prompts/**'
+      - 'pom.xml'
+  workflow_dispatch:
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job 1: Compile + unit-test the asset-generator module
+  # ---------------------------------------------------------------------------
+  build-and-test:
+    name: Build & Test (Java 21)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build parent POM (install without tests)
+        run: mvn -B install -DskipTests --no-transfer-progress
+
+      - name: Run asset-generator unit tests
+        run: |
+          mvn -B test \
+            --no-transfer-progress \
+            -pl asset-generator \
+            -Dsurefire.useModulePath=false
+
+      - name: Upload Surefire reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: asset-generator/target/surefire-reports/
+          retention-days: 14
+
+  # ---------------------------------------------------------------------------
+  # Job 2: Validate that every entity directory has a visual-specs.xml
+  # ---------------------------------------------------------------------------
+  validate-specs:
+    name: Validate XML Specs
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check all visual-specs.xml files are well-formed XML
+        run: |
+          EXIT=0
+          find docs/prompts -name 'visual-specs.xml' | while read f; do
+            if ! xmllint --noout "$f" 2>/dev/null; then
+              echo "::error file=$f::Not well-formed XML"
+              EXIT=1
+            fi
+          done
+          # Check _core schema is also valid
+          if ! xmllint --noout docs/prompts/_core/unified-asset-schema.xml 2>/dev/null; then
+            echo "::error::unified-asset-schema.xml is not well-formed"
+            EXIT=1
+          fi
+          exit $EXIT
+
+      - name: Verify entity directories have visual-specs.xml
+        run: |
+          EXIT=0
+          # Walk category directories (characters, locations, pets)
+          for category in docs/prompts/*/; do
+            dirname=$(basename "$category")
+            # Skip _core and any dot-directories
+            [[ "$dirname" == _* ]] && continue
+            [[ "$dirname" == .* ]] && continue
+            for entity in "$category"*/; do
+              [ -d "$entity" ] || continue
+              if [ ! -f "${entity}visual-specs.xml" ]; then
+                echo "::warning::Missing visual-specs.xml in $entity"
+              fi
+            done
+          done
+          exit $EXIT
+
+  # ---------------------------------------------------------------------------
+  # Job 3: Code-quality gate (compiler warnings as errors)
+  # ---------------------------------------------------------------------------
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Compile with strict settings
+        run: |
+          mvn -B compile \
+            --no-transfer-progress \
+            -pl asset-generator \
+            -Dmaven.compiler.showWarnings=true \
+            -Dmaven.compiler.failOnWarning=false

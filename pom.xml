@@ -18,6 +18,7 @@
         <module>frontend</module>
         <module>application</module>
         <module>demo</module>
+        <module>asset-generator</module>
     </modules>
 
     <properties>

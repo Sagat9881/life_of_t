@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  visual-specs.xml — Office location
+  Life of T game asset specification
+
+  Generated against unified-asset-schema.xml v2.0
+-->
+<asset id="location_office" category="location">
+
+  <description>A generic open-plan office. Rows of desks, fluorescent lighting, a
+  coffee machine in the corner, motivational posters nobody reads. Slightly
+  soul-crushing but familiar.</description>
+
+  <layers>
+    <layer name="floor"     type="base"    paletteRef="floor"    zIndex="0" optional="false"/>
+    <layer name="walls"     type="base"    paletteRef="walls"    zIndex="1" optional="false"/>
+    <layer name="desks"     type="overlay" paletteRef="furniture" zIndex="2" optional="false"/>
+    <layer name="lighting"  type="glow"                          zIndex="3" optional="true"/>
+  </layers>
+
+  <animations>
+    <animation state="idle" frameCount="1" fps="1" loop="true">
+      <frames>0</frames>
+    </animation>
+  </animations>
+
+  <palettes>
+    <palette name="floor">
+      <color>#D0C8B8</color>
+    </palette>
+    <palette name="walls">
+      <color>#EEEEEE</color>
+    </palette>
+    <palette name="furniture">
+      <color>#888888</color>
+      <color>#AAAAAA</color>
+    </palette>
+  </palettes>
+
+  <variations>
+    <variation timeOfDay="morning" colorShift="#FFF4CC" opacity="0.05"/>
+    <variation timeOfDay="evening" colorShift="#FF8800" opacity="0.15"/>
+    <variation timeOfDay="night"   colorShift="#001133" opacity="0.45"/>
+  </variations>
+
+  <naming
+    prefix="office"
+    layerPattern="%s_layer_%02d.png"
+    atlasPattern="%s_atlas.webp"
+    configPattern="%s_atlas.json"
+  />
+
+  <constraints
+    widthPx="320"
+    heightPx="180"
+    maxFrames="4"
+    allowTransparency="false"
+    outputFormats="png,webp"
+  />
+
+</asset>

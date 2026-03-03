@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  visual-specs.xml — Father's house location
+  Life of T game asset specification
+
+  Generated against unified-asset-schema.xml v2.0
+-->
+<asset id="location_father_house" category="location">
+
+  <description>Tanya's father's house: a Soviet-era two-room apartment, somewhat dated
+  but kept tidy. Sturdy furniture, a large TV, family photos, the smell of
+  borscht. Warm but slightly formal. Used for family visit scenes.</description>
+
+  <layers>
+    <layer name="floor"     type="base"    paletteRef="floor"     zIndex="0" optional="false"/>
+    <layer name="walls"     type="base"    paletteRef="walls"     zIndex="1" optional="false"/>
+    <layer name="furniture" type="overlay" paletteRef="furniture" zIndex="2" optional="false"/>
+    <layer name="decor"     type="overlay" paletteRef="decor"     zIndex="3" optional="true"/>
+  </layers>
+
+  <animations>
+    <animation state="idle" frameCount="1" fps="1" loop="true">
+      <frames>0</frames>
+    </animation>
+  </animations>
+
+  <palettes>
+    <palette name="floor">
+      <color>#A07850</color>
+    </palette>
+    <palette name="walls">
+      <color>#D8CCAA</color>
+    </palette>
+    <palette name="furniture">
+      <color>#6B3F1F</color>
+      <color>#8B5E3C</color>
+    </palette>
+    <palette name="decor">
+      <color>#CC4444</color>
+      <color>#EECC88</color>
+    </palette>
+  </palettes>
+
+  <variations>
+    <variation timeOfDay="morning" colorShift="#FFF4CC" opacity="0.10"/>
+    <variation timeOfDay="evening" colorShift="#FF8800" opacity="0.22"/>
+    <variation timeOfDay="night"   colorShift="#001133" opacity="0.48"/>
+  </variations>
+
+  <naming
+    prefix="father_house"
+    layerPattern="%s_layer_%02d.png"
+    atlasPattern="%s_atlas.webp"
+    configPattern="%s_atlas.json"
+  />
+
+  <constraints
+    widthPx="320"
+    heightPx="180"
+    maxFrames="4"
+    allowTransparency="false"
+    outputFormats="png,webp"
+  />
+
+</asset>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  unified-asset-schema.xml
+  Master schema definition for all visual-specs.xml files in Life of T.
+
+  PURPOSE
+  =======
+  This file documents the canonical XML structure that every
+  visual-specs.xml file in docs/prompts/**/ MUST follow.
+  It is used by XmlAssetSpecParser (asset-generator module) and by
+  any AI prompt that needs to produce or validate a spec file.
+
+  HOW TO USE
+  ==========
+  1. Copy the <asset> template below into a new visual-specs.xml file.
+  2. Fill in the attributes and child elements as described.
+  3. Validate your file against the constraints in the <constraints> element.
+-->
+<schema version="2.0" module="asset-generator">
+
+  <!-- ===================================================================
+       TEMPLATE
+       Copy everything inside <template> into your visual-specs.xml.
+       =================================================================== -->
+  <template>
+    <asset id="UNIQUE_ASSET_ID" category="character|location|pet|object">
+
+      <!-- Human-readable description used in generation prompts -->
+      <description>Short, evocative description of the entity.</description>
+
+      <!-- =================================================================
+           LAYERS  (required for generation; can be empty for stubs)
+           Each layer maps to a separate PNG file in the output.
+           ================================================================= -->
+      <layers>
+        <!--
+          name        : unique identifier within this asset
+          type        : base | overlay | shadow | glow | effect
+          paletteRef  : (optional) references a <palette name="..."> below
+          zIndex      : integer; 0 = furthest back
+          optional    : true | false
+        -->
+        <layer name="base"    type="base"    paletteRef="skin"      zIndex="0" optional="false"/>
+        <layer name="outfit"  type="overlay" paletteRef="clothes"   zIndex="1" optional="false"/>
+        <layer name="shadow"  type="shadow"                         zIndex="-1" optional="true"/>
+      </layers>
+
+      <!-- =================================================================
+           ANIMATIONS
+           ================================================================= -->
+      <animations>
+        <!--
+          state      : unique animation state name (e.g. idle, walk, run)
+          frameCount : total frames in the sequence
+          fps        : playback speed
+          loop       : true | false
+        -->
+        <animation state="idle" frameCount="4" fps="8" loop="true">
+          <!-- Space-separated 0-based frame indices into the atlas strip -->
+          <frames>0 1 2 3</frames>
+        </animation>
+        <animation state="walk" frameCount="4" fps="12" loop="true">
+          <frames>4 5 6 7</frames>
+        </animation>
+      </animations>
+
+      <!-- =================================================================
+           PALETTES
+           ================================================================= -->
+      <palettes>
+        <!--
+          name  : matches paletteRef values in <layers>
+          Each <color> is a hex string.  The first entry is the "primary" swatch.
+        -->
+        <palette name="skin">
+          <color>#FFDFC4</color>
+          <color>#F0C080</color>
+          <color>#C68642</color>
+        </palette>
+        <palette name="clothes">
+          <color>#3355AA</color>
+        </palette>
+      </palettes>
+
+      <!-- =================================================================
+           VARIATIONS  (time-of-day colour shifts)
+           ================================================================= -->
+      <variations>
+        <!--
+          timeOfDay  : morning | day | evening | night
+          colorShift : hex tint colour
+          opacity    : 0.0 – 1.0
+        -->
+        <variation timeOfDay="morning" colorShift="#FFF4CC" opacity="0.1"/>
+        <variation timeOfDay="evening" colorShift="#FF8800" opacity="0.2"/>
+        <variation timeOfDay="night"   colorShift="#001133" opacity="0.4"/>
+      </variations>
+
+      <!-- =================================================================
+           NAMING  (output file patterns)
+           Printf-style: first %s = prefix, second %02d = index
+           ================================================================= -->
+      <naming
+        prefix="ENTITY_NAME"
+        layerPattern="%s_layer_%02d.png"
+        atlasPattern="%s_atlas.webp"
+        configPattern="%s_atlas.json"
+      />
+
+      <!-- =================================================================
+           CONSTRAINTS
+           ================================================================= -->
+      <constraints
+        widthPx="64"
+        heightPx="64"
+        maxFrames="32"
+        allowTransparency="true"
+        outputFormats="png,webp"
+      />
+
+    </asset>
+  </template>
+
+  <!-- ===================================================================
+       FIELD REFERENCE
+       =================================================================== -->
+  <fieldReference>
+    <field name="asset/@id"          type="string"  required="true"  note="Unique across all assets"/>
+    <field name="asset/@category"     type="enum"    required="true"  values="character,location,pet,object"/>
+    <field name="layer/@name"         type="string"  required="true"  note="Unique within asset"/>
+    <field name="layer/@type"         type="enum"    required="true"  values="base,overlay,shadow,glow,effect"/>
+    <field name="layer/@zIndex"       type="int"     required="false" default="0"/>
+    <field name="layer/@optional"     type="boolean" required="false" default="false"/>
+    <field name="animation/@state"    type="string"  required="true"  note="Unique within asset"/>
+    <field name="animation/@fps"      type="int"     required="false" default="8"/>
+    <field name="animation/@loop"     type="boolean" required="false" default="true"/>
+    <field name="variation/@opacity"  type="double"  required="true"  note="Range 0.0–1.0"/>
+  </fieldReference>
+
+</schema>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  visual-specs.xml — Husband character
+  Life of T game asset specification
+
+  Generated against unified-asset-schema.xml v2.0
+-->
+<asset id="husband" category="character">
+
+  <description>Tanya's husband: a laid-back gamer who works from home. Medium build, slightly
+  dishevelled dark hair, usually wearing a hoodie and sweatpants. Calm demeanour,
+  occasionally dramatic when gaming.</description>
+
+  <layers>
+    <layer name="body"    type="base"    paletteRef="skin"     zIndex="0" optional="false"/>
+    <layer name="hair"    type="overlay" paletteRef="hair"     zIndex="2" optional="false"/>
+    <layer name="outfit"  type="overlay" paletteRef="clothes"  zIndex="1" optional="false"/>
+    <layer name="shadow"  type="shadow"                        zIndex="-1" optional="true"/>
+  </layers>
+
+  <animations>
+    <animation state="idle" frameCount="4" fps="6" loop="true">
+      <frames>0 1 2 3</frames>
+    </animation>
+    <animation state="walk" frameCount="6" fps="10" loop="true">
+      <frames>4 5 6 7 8 9</frames>
+    </animation>
+    <animation state="gaming" frameCount="4" fps="12" loop="true">
+      <frames>10 11 12 13</frames>
+    </animation>
+  </animations>
+
+  <palettes>
+    <palette name="skin">
+      <color>#D4A574</color>
+      <color>#C8956C</color>
+    </palette>
+    <palette name="hair">
+      <color>#2C1810</color>
+      <color>#3D2314</color>
+    </palette>
+    <palette name="clothes">
+      <color>#4A4A6A</color>
+      <color>#6A6A8A</color>
+    </palette>
+  </palettes>
+
+  <variations>
+    <variation timeOfDay="morning" colorShift="#FFF4CC" opacity="0.08"/>
+    <variation timeOfDay="evening" colorShift="#FF8800" opacity="0.15"/>
+    <variation timeOfDay="night"   colorShift="#001133" opacity="0.35"/>
+  </variations>
+
+  <naming
+    prefix="husband"
+    layerPattern="%s_layer_%02d.png"
+    atlasPattern="%s_atlas.webp"
+    configPattern="%s_atlas.json"
+  />
+
+  <constraints
+    widthPx="64"
+    heightPx="64"
+    maxFrames="32"
+    allowTransparency="true"
+    outputFormats="png,webp"
+  />
+
+</asset>
