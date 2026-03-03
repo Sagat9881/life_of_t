@@ -1,8 +1,7 @@
 package ru.lifegame.assets.infrastructure.parser;
 
 /**
- * Thrown when an XML asset-spec file cannot be read or is structurally
- * invalid.
+ * Thrown when XML asset specification parsing fails.
  */
 public class XmlParseException extends RuntimeException {
 

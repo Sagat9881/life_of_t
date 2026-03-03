@@ -1,131 +1,95 @@
 package ru.lifegame.assets.infrastructure.writer;
 
-import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.lifegame.assets.domain.model.asset.AnimationSpec;
-import ru.lifegame.assets.domain.model.asset.AssetSpec;
 
 import javax.imageio.ImageIO;
-import javax.imageio.ImageWriter;
-import javax.imageio.stream.ImageOutputStream;
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Iterator;
 import java.util.List;
 
 /**
- * Assembles a WebP sprite atlas from the animation frames defined in an
- * {@link AssetSpec}.
- *
- * <p>The atlas is a <em>horizontal strip</em>: all frames are placed side-
- * by-side on a single row.  Each frame is a solid-colour rectangle whose
- * colour cycles through a predefined palette, producing a visually
- * distinguishable placeholder suitable for engine integration testing.</p>
- *
- * <h2>Fallback behaviour</h2>
- * <p>If the JVM does not provide a native WebP {@link ImageWriter} (which is
- * common in CI environments without a native codec), the writer falls back
- * to PNG.  A warning is printed to {@code System.err} in that case.</p>
+ * Creates horizontal-strip sprite atlas images from a list of animation frames.
+ * <p>
+ * Primary format is PNG (since Java does not natively support WebP encoding).
+ * The generated atlas follows the horizontal-strip convention:
+ * all frames placed side-by-side in a single row.
  */
-@Component
 public class WebpAtlasWriter {
 
-    private static final Color[] FRAME_COLORS = {
-            new Color(0xFF, 0xCC, 0x00),
-            new Color(0x00, 0xCC, 0xFF),
-            new Color(0x00, 0xFF, 0x66),
-            new Color(0xFF, 0x44, 0x44),
-    };
+    private static final Logger log = LoggerFactory.getLogger(WebpAtlasWriter.class);
 
     /**
-     * Write a WebP (or PNG fallback) atlas for {@code spec} into
-     * {@code outputDir}.
+     * Creates a horizontal-strip atlas from the given frames.
      *
-     * @param spec      asset specification
-     * @param outputDir target directory; created if absent
-     * @throws AtlasWriteException on any unrecoverable I/O error
+     * @param frames    list of individual frame images (must all be same dimensions)
+     * @param spec      animation specification with frame metadata
+     * @param outputDir directory to write the atlas into
+     * @return path to the generated atlas file
+     * @throws IOException if writing fails
+     * @throws IllegalArgumentException if frames are empty or inconsistent sizes
      */
-    public void write(AssetSpec spec, Path outputDir) {
-        try {
-            Files.createDirectories(outputDir);
-        } catch (IOException e) {
-            throw new AtlasWriteException("Cannot create output directory: " + outputDir, e);
+    public Path writeAtlas(List<BufferedImage> frames, AnimationSpec spec, Path outputDir)
+            throws IOException {
+        if (frames == null || frames.isEmpty()) {
+            throw new IllegalArgumentException("frames must not be empty");
         }
 
-        int totalFrames = totalFrameCount(spec.animations());
-        if (totalFrames == 0) return;          // nothing to write
+        int frameWidth = frames.get(0).getWidth();
+        int frameHeight = frames.get(0).getHeight();
 
-        int frameW = spec.constraints() != null ? spec.constraints().widthPx()  : 64;
-        int frameH = spec.constraints() != null ? spec.constraints().heightPx() : 64;
+        for (int i = 1; i < frames.size(); i++) {
+            BufferedImage frame = frames.get(i);
+            if (frame.getWidth() != frameWidth || frame.getHeight() != frameHeight) {
+                throw new IllegalArgumentException(
+                        "All frames must have identical dimensions. Frame 0: " + frameWidth + "x" + frameHeight
+                        + ", Frame " + i + ": " + frame.getWidth() + "x" + frame.getHeight());
+            }
+        }
 
-        BufferedImage atlas = buildAtlas(totalFrames, frameW, frameH);
-        Path dest = outputDir.resolve(atlasFileName(spec));
-        writeAtlas(atlas, dest);
-    }
+        int atlasWidth = frameWidth * frames.size();
+        int atlasHeight = frameHeight;
 
-    // -----------------------------------------------------------------------
-    // Internals
-    // -----------------------------------------------------------------------
+        BufferedImage atlas = new BufferedImage(atlasWidth, atlasHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = atlas.createGraphics();
 
-    private int totalFrameCount(List<AnimationSpec> animations) {
-        return animations.stream()
-                         .mapToInt(AnimationSpec::frameCount)
-                         .sum();
-    }
-
-    private BufferedImage buildAtlas(int frames, int frameW, int frameH) {
-        BufferedImage img = new BufferedImage(
-                frames * frameW, frameH, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = img.createGraphics();
-        for (int i = 0; i < frames; i++) {
-            g.setColor(FRAME_COLORS[i % FRAME_COLORS.length]);
-            g.fillRect(i * frameW, 0, frameW, frameH);
+        for (int i = 0; i < frames.size(); i++) {
+            g.drawImage(frames.get(i), i * frameWidth, 0, null);
         }
         g.dispose();
-        return img;
+
+        Files.createDirectories(outputDir);
+        String filename = spec.name() + "_atlas.png";
+        Path atlasPath = outputDir.resolve(filename);
+
+        ImageIO.write(atlas, "PNG", atlasPath.toFile());
+        log.info("Wrote atlas: {} ({}x{}, {} frames)", atlasPath, atlasWidth, atlasHeight, frames.size());
+
+        return atlasPath;
     }
 
-    private String atlasFileName(AssetSpec spec) {
-        if (spec.naming() != null && spec.naming().atlasPattern() != null) {
-            return String.format(spec.naming().atlasPattern(), spec.naming().prefix());
+    /**
+     * Creates the horizontal-strip atlas BufferedImage without writing to disk.
+     * Useful for testing.
+     */
+    public BufferedImage createAtlasImage(List<BufferedImage> frames) {
+        if (frames == null || frames.isEmpty()) {
+            throw new IllegalArgumentException("frames must not be empty");
         }
-        return spec.id() + "_atlas.webp";
-    }
+        int frameWidth = frames.get(0).getWidth();
+        int frameHeight = frames.get(0).getHeight();
+        int atlasWidth = frameWidth * frames.size();
 
-    private void writeAtlas(BufferedImage image, Path dest) {
-        // Try native WebP writer first
-        Iterator<ImageWriter> writers = ImageIO.getImageWritersByMIMEType("image/webp");
-        if (writers.hasNext()) {
-            ImageWriter writer = writers.next();
-            try (ImageOutputStream ios = ImageIO.createImageOutputStream(dest.toFile())) {
-                writer.setOutput(ios);
-                writer.write(image);
-            } catch (IOException e) {
-                throw new AtlasWriteException("WebP write failed: " + dest, e);
-            } finally {
-                writer.dispose();
-            }
-            return;
+        BufferedImage atlas = new BufferedImage(atlasWidth, frameHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = atlas.createGraphics();
+        for (int i = 0; i < frames.size(); i++) {
+            g.drawImage(frames.get(i), i * frameWidth, 0, null);
         }
-
-        // Fallback: PNG
-        System.err.println("[WebpAtlasWriter] No native WebP codec found — falling back to PNG.");
-        Path pngDest = dest.resolveSibling(
-                dest.getFileName().toString().replaceAll("\\.webp$", ".png"));
-        try {
-            ImageIO.write(image, "PNG", pngDest.toFile());
-        } catch (IOException e) {
-            throw new AtlasWriteException("PNG fallback write failed: " + pngDest, e);
-        }
-    }
-
-    // -----------------------------------------------------------------------
-    // Exception
-    // -----------------------------------------------------------------------
-
-    public static class AtlasWriteException extends RuntimeException {
-        public AtlasWriteException(String msg, Throwable cause) { super(msg, cause); }
+        g.dispose();
+        return atlas;
     }
 }

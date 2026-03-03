@@ -1,102 +1,103 @@
 package ru.lifegame.assets.infrastructure.scanner;
 
-import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.Set;
 
 /**
- * Scans a {@code docs/prompts/} directory tree and discovers entity
- * sub-directories that contain (or are missing) a {@code visual-specs.xml}
- * file.
- *
- * <h2>Directory convention</h2>
+ * Scans docs/prompts/ directory structure to discover entities and
+ * identify those missing unified XML specifications.
+ * <p>
+ * Expected structure:
  * <pre>
  * docs/prompts/
- *   _core/                 ← skipped (starts with '_')
  *   characters/
- *     tanya/
- *       visual-specs.xml   ← "has spec"
- *     husband/             ← "missing spec" (no XML file)
+ *     tanya/        ← entity directory
+ *     husband/      ← entity directory
  *   locations/
- *     home/
- *       visual-specs.xml
+ *     home/         ← entity directory
+ *   pets/
+ *     garfield/     ← entity directory
  * </pre>
- *
- * <p>Only <em>leaf</em> directories (i.e., directories that contain no
- * sub-directories) are considered entity directories.  Category directories
- * (e.g., {@code characters/}, {@code locations/}) are transparent.</p>
  */
-@Component
 public class PromptDirectoryScanner {
 
-    private static final String SPEC_FILENAME = "visual-specs.xml";
+    private static final Logger log = LoggerFactory.getLogger(PromptDirectoryScanner.class);
 
-    // -----------------------------------------------------------------------
-    // Public API
-    // -----------------------------------------------------------------------
+    /** Entity type directories to scan. */
+    private static final Set<String> ENTITY_TYPE_DIRS = Set.of(
+            "characters", "locations", "pets"
+    );
+
+    /** Name of the unified spec file to look for. */
+    private static final String UNIFIED_SPEC_FILENAME = "visual-specs.xml";
 
     /**
-     * Return all entity directories beneath {@code promptsRoot} that are
-     * missing a {@code visual-specs.xml} file.
+     * Discovers all entity directories under the prompts root.
      *
-     * @param promptsRoot root of the prompts directory tree
-     * @return unmodifiable list of directories without a spec file
+     * @param promptsRoot path to docs/prompts/
+     * @return list of entity directory paths (e.g. docs/prompts/characters/tanya)
+     */
+    public List<Path> discoverEntities(Path promptsRoot) {
+        List<Path> entities = new ArrayList<>();
+        for (String typeDir : ENTITY_TYPE_DIRS) {
+            Path typePath = promptsRoot.resolve(typeDir);
+            if (!Files.isDirectory(typePath)) {
+                continue;
+            }
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(typePath)) {
+                for (Path entry : stream) {
+                    if (Files.isDirectory(entry)) {
+                        entities.add(entry);
+                    }
+                }
+            } catch (IOException e) {
+                log.warn("Failed to scan directory: {}", typePath, e);
+            }
+        }
+        return entities;
+    }
+
+    /**
+     * Finds entity directories that are missing the unified XML spec file.
+     *
+     * @param promptsRoot path to docs/prompts/
+     * @return list of entity directories lacking visual-specs.xml
      */
     public List<Path> findMissingSpecs(Path promptsRoot) {
-        return leafDirectories(promptsRoot)
-                .filter(dir -> !hasSpecFile(dir))
-                .toList();
+        List<Path> allEntities = discoverEntities(promptsRoot);
+        List<Path> missing = new ArrayList<>();
+        for (Path entity : allEntities) {
+            Path specFile = entity.resolve(UNIFIED_SPEC_FILENAME);
+            if (!Files.exists(specFile)) {
+                missing.add(entity);
+                log.debug("Missing unified spec: {}", entity);
+            }
+        }
+        return missing;
     }
 
     /**
-     * Return the paths to all {@code visual-specs.xml} files found anywhere
-     * under {@code promptsRoot}.
-     *
-     * @param promptsRoot root of the prompts directory tree
-     * @return unmodifiable list of spec file paths
+     * Extracts the entity type from a full entity path.
+     * E.g. for "docs/prompts/characters/tanya" returns "characters".
      */
-    public List<Path> findAllSpecs(Path promptsRoot) {
-        try (Stream<Path> walk = Files.walk(promptsRoot)) {
-            return walk
-                    .filter(Files::isRegularFile)
-                    .filter(p -> SPEC_FILENAME.equals(p.getFileName().toString()))
-                    .toList();
-        } catch (IOException e) {
-            throw new UncheckedIOException("Cannot walk prompts root: " + promptsRoot, e);
-        }
+    public String extractEntityType(Path entityDir) {
+        Path parent = entityDir.getParent();
+        return parent != null ? parent.getFileName().toString() : "unknown";
     }
 
-    // -----------------------------------------------------------------------
-    // Internals
-    // -----------------------------------------------------------------------
-
-    /** Returns a stream of leaf directories (no child directories). */
-    private Stream<Path> leafDirectories(Path root) {
-        try {
-            return Files.walk(root)
-                    .filter(Files::isDirectory)
-                    .filter(dir -> !dir.equals(root))
-                    .filter(dir -> !dir.getFileName().toString().startsWith("_"))
-                    .filter(this::isLeafDirectory);
-        } catch (IOException e) {
-            throw new UncheckedIOException("Cannot walk prompts root: " + root, e);
-        }
-    }
-
-    private boolean isLeafDirectory(Path dir) {
-        try (Stream<Path> children = Files.list(dir)) {
-            return children.noneMatch(Files::isDirectory);
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
-    private boolean hasSpecFile(Path dir) {
-        return Files.exists(dir.resolve(SPEC_FILENAME));
+    /**
+     * Extracts the entity name from a full entity path.
+     * E.g. for "docs/prompts/characters/tanya" returns "tanya".
+     */
+    public String extractEntityName(Path entityDir) {
+        return entityDir.getFileName().toString();
     }
 }

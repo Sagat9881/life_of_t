@@ -1,262 +1,247 @@
 package ru.lifegame.assets.infrastructure.parser;
 
-import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import ru.lifegame.assets.domain.model.asset.*;
+import ru.lifegame.assets.domain.model.asset.AnimationSpec;
+import ru.lifegame.assets.domain.model.asset.AssetConstraints;
+import ru.lifegame.assets.domain.model.asset.AssetLayer;
+import ru.lifegame.assets.domain.model.asset.AssetSpec;
+import ru.lifegame.assets.domain.model.asset.ColorPalette;
+import ru.lifegame.assets.domain.model.asset.NamingSpec;
+import ru.lifegame.assets.domain.model.asset.TimeOfDayVariation;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Parses a {@code visual-specs.xml} file into an {@link AssetSpec} domain
- * object.
- *
- * <p>The parser is intentionally lenient: optional elements that are absent
- * from the XML result in empty collections or {@code null} field values,
- * never in a parse exception.  Only structurally invalid XML or a missing
- * mandatory {@code <asset>} root element will throw
- * {@link XmlParseException}.</p>
- *
- * <h2>Expected document structure</h2>
- * <pre>{@code
- * <asset id="..." category="...">
- *   <description>...</description>
- *
- *   <layers>
- *     <layer name="..." type="..." paletteRef="..." zIndex="0" optional="false"/>
- *   </layers>
- *
- *   <animations>
- *     <animation state="..." frameCount="4" fps="8" loop="true">
- *       <frames>0 1 2 3</frames>
- *     </animation>
- *   </animations>
- *
- *   <palettes>
- *     <palette name="...">
- *       <color>#RRGGBB</color>
- *     </palette>
- *   </palettes>
- *
- *   <variations>
- *     <variation timeOfDay="..." colorShift="#RRGGBB" opacity="0.2"/>
- *   </variations>
- *
- *   <naming prefix="..." layerPattern="..." atlasPattern="..." configPattern="..."/>
- *
- *   <constraints widthPx="64" heightPx="64" maxFrames="16"
- *                allowTransparency="true" outputFormats="png,webp"/>
- * </asset>
- * }</pre>
+ * Parses unified XML asset specifications into {@link AssetSpec} domain objects.
+ * <p>
+ * Expected XML structure follows docs/prompts/_core/unified-asset-schema.xml.
  */
-@Component
 public class XmlAssetSpecParser {
 
-    // -----------------------------------------------------------------------
-    // Public API
-    // -----------------------------------------------------------------------
+    private static final Logger log = LoggerFactory.getLogger(XmlAssetSpecParser.class);
 
     /**
-     * Parse the XML file at {@code specPath} into an {@link AssetSpec}.
+     * Parses an XML file at the given path into an {@link AssetSpec}.
      *
-     * @param specPath path to the {@code visual-specs.xml} file
-     * @return fully populated {@link AssetSpec}
-     * @throws XmlParseException if the file cannot be read or parsed
+     * @param xmlFile path to the unified XML spec
+     * @return parsed asset specification
+     * @throws XmlParseException if parsing fails
      */
-    public AssetSpec parse(Path specPath) {
-        Document doc = loadDocument(specPath);
-        Element root = doc.getDocumentElement();
-
-        if (!"asset".equals(root.getTagName())) {
-            throw new XmlParseException("Root element must be <asset>, found: <" + root.getTagName() + ">");
+    public AssetSpec parse(Path xmlFile) {
+        try (InputStream is = Files.newInputStream(xmlFile)) {
+            return parseFromStream(is);
+        } catch (XmlParseException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new XmlParseException("Failed to parse XML: " + xmlFile, e);
         }
-
-        String id          = mandatory(root, "id",       specPath);
-        String category    = mandatory(root, "category", specPath);
-        String description = textOf(firstChild(root, "description"));
-
-        List<AssetLayer>        layers     = parseLayers(root);
-        List<AnimationSpec>     animations = parseAnimations(root);
-        List<ColorPalette>      palettes   = parsePalettes(root);
-        List<TimeOfDayVariation> variations = parseVariations(root);
-        NamingSpec              naming     = parseNaming(root);
-        AssetConstraints        constraints = parseConstraints(root);
-
-        return new AssetSpec(id, category, description,
-                             layers, animations, palettes, variations,
-                             naming, constraints);
     }
 
-    // -----------------------------------------------------------------------
-    // Document loading
-    // -----------------------------------------------------------------------
-
-    private Document loadDocument(Path path) {
+    /**
+     * Parses an XML input stream into an {@link AssetSpec}.
+     * Visible for testing.
+     */
+    public AssetSpec parseFromStream(InputStream inputStream) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(false);
             factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             DocumentBuilder builder = factory.newDocumentBuilder();
-            return builder.parse(path.toFile());
+            Document doc = builder.parse(inputStream);
+            doc.getDocumentElement().normalize();
+
+            Element root = doc.getDocumentElement();
+            return parseRoot(root);
+        } catch (XmlParseException e) {
+            throw e;
         } catch (Exception e) {
-            throw new XmlParseException("Failed to load XML from " + path + ": " + e.getMessage(), e);
+            throw new XmlParseException("Failed to parse XML from stream", e);
         }
     }
 
-    // -----------------------------------------------------------------------
-    // Section parsers
-    // -----------------------------------------------------------------------
+    private AssetSpec parseRoot(Element root) {
+        Element meta = getFirstChild(root, "meta");
+        String entityType = getTextContent(meta, "entity-type");
+        String entityName = getTextContent(meta, "entity-name");
+        String version = getTextContentOrDefault(meta, "version", "1.0.0");
+
+        List<AssetLayer> layers = parseLayers(root);
+        ColorPalette palette = parseColorPalette(root);
+        List<AnimationSpec> animations = parseAnimations(root);
+        List<TimeOfDayVariation> variations = parseTimeOfDayVariations(root);
+        NamingSpec naming = parseNaming(root, entityType, entityName);
+        AssetConstraints constraints = parseConstraints(root);
+
+        return new AssetSpec(entityType, entityName, version,
+                layers, palette, animations, variations, naming, constraints);
+    }
 
     private List<AssetLayer> parseLayers(Element root) {
-        Element layersEl = firstChild(root, "layers");
-        if (layersEl == null) return List.of();
-
-        List<AssetLayer> result = new ArrayList<>();
-        NodeList nodes = layersEl.getElementsByTagName("layer");
-        for (int i = 0; i < nodes.getLength(); i++) {
-            Element el = (Element) nodes.item(i);
-            result.add(new AssetLayer(
-                    attr(el, "name"),
-                    attr(el, "type"),
-                    el.getAttribute("paletteRef"),          // optional
-                    intAttr(el, "zIndex", 0),
-                    boolAttr(el, "optional", false)
-            ));
+        List<AssetLayer> layers = new ArrayList<>();
+        Element layersEl = getFirstChildOrNull(root, "layers");
+        if (layersEl == null) {
+            throw new XmlParseException("Missing required <layers> element");
         }
-        return result;
+        NodeList layerNodes = layersEl.getElementsByTagName("layer");
+        for (int i = 0; i < layerNodes.getLength(); i++) {
+            Element el = (Element) layerNodes.item(i);
+            String id = el.getAttribute("id");
+            if (id.isBlank()) {
+                id = el.getAttribute("type");
+            }
+            String type = el.getAttribute("type");
+            String description = el.getTextContent().trim();
+            int zOrder = i;
+            String zOrderAttr = el.getAttribute("z-order");
+            if (!zOrderAttr.isBlank()) {
+                zOrder = Integer.parseInt(zOrderAttr);
+            }
+            layers.add(new AssetLayer(id, type, description, zOrder));
+        }
+        return layers;
+    }
+
+    private ColorPalette parseColorPalette(Element root) {
+        Element paletteEl = getFirstChildOrNull(root, "color-palette");
+        if (paletteEl == null) {
+            return ColorPalette.projectDefault();
+        }
+        List<String> primary = parseColorList(paletteEl, "primary");
+        List<String> secondary = parseColorList(paletteEl, "secondary");
+        return new ColorPalette(primary, secondary);
+    }
+
+    private List<String> parseColorList(Element parent, String tagName) {
+        List<String> colors = new ArrayList<>();
+        Element el = getFirstChildOrNull(parent, tagName);
+        if (el == null) return colors;
+        NodeList colorNodes = el.getElementsByTagName("color");
+        for (int i = 0; i < colorNodes.getLength(); i++) {
+            Element colorEl = (Element) colorNodes.item(i);
+            String hex = colorEl.getAttribute("hex");
+            if (!hex.isBlank()) {
+                colors.add(hex);
+            }
+        }
+        return colors;
     }
 
     private List<AnimationSpec> parseAnimations(Element root) {
-        Element animsEl = firstChild(root, "animations");
-        if (animsEl == null) return List.of();
-
-        List<AnimationSpec> result = new ArrayList<>();
-        NodeList nodes = animsEl.getElementsByTagName("animation");
-        for (int i = 0; i < nodes.getLength(); i++) {
-            Element el = (Element) nodes.item(i);
-            List<Integer> frames = parseFrames(firstChild(el, "frames"));
-            result.add(new AnimationSpec(
-                    attr(el, "state"),
-                    intAttr(el, "frameCount", frames.size()),
-                    intAttr(el, "fps", 8),
-                    boolAttr(el, "loop", true),
-                    frames
-            ));
+        List<AnimationSpec> animations = new ArrayList<>();
+        Element animsEl = getFirstChildOrNull(root, "animations");
+        if (animsEl == null) return animations;
+        NodeList animNodes = animsEl.getElementsByTagName("animation");
+        for (int i = 0; i < animNodes.getLength(); i++) {
+            Element el = (Element) animNodes.item(i);
+            String name = el.getAttribute("name");
+            int frames = intAttr(el, "frames", 24);
+            int fps = intAttr(el, "fps", 12);
+            boolean loop = boolAttr(el, "loop", true);
+            int frameWidth = intAttr(el, "frame-width", 128);
+            int frameHeight = intAttr(el, "frame-height", 128);
+            animations.add(new AnimationSpec(name, frames, fps, loop, frameWidth, frameHeight));
         }
-        return result;
+        return animations;
     }
 
-    private List<Integer> parseFrames(Element framesEl) {
-        if (framesEl == null) return List.of();
-        String text = framesEl.getTextContent().trim();
-        if (text.isEmpty()) return List.of();
-        List<Integer> result = new ArrayList<>();
-        for (String token : text.split("\\s+")) {
-            result.add(Integer.parseInt(token));
+    private List<TimeOfDayVariation> parseTimeOfDayVariations(Element root) {
+        List<TimeOfDayVariation> variations = new ArrayList<>();
+        Element todsEl = getFirstChildOrNull(root, "time-of-day-variations");
+        if (todsEl == null) return variations;
+        NodeList varNodes = todsEl.getElementsByTagName("variation");
+        for (int i = 0; i < varNodes.getLength(); i++) {
+            Element el = (Element) varNodes.item(i);
+            String time = el.getAttribute("time");
+            String lighting = getTextContentOrDefault(el, "lighting", "");
+            String mood = getTextContentOrDefault(el, "mood", "");
+            variations.add(new TimeOfDayVariation(time, lighting, mood));
         }
-        return result;
+        return variations;
     }
 
-    private List<ColorPalette> parsePalettes(Element root) {
-        Element palettesEl = firstChild(root, "palettes");
-        if (palettesEl == null) return List.of();
-
-        List<ColorPalette> result = new ArrayList<>();
-        NodeList nodes = palettesEl.getElementsByTagName("palette");
-        for (int i = 0; i < nodes.getLength(); i++) {
-            Element el     = (Element) nodes.item(i);
-            String  name   = attr(el, "name");
-            List<String> colors = new ArrayList<>();
-            NodeList colorNodes = el.getElementsByTagName("color");
-            for (int j = 0; j < colorNodes.getLength(); j++) {
-                colors.add(colorNodes.item(j).getTextContent().trim());
-            }
-            result.add(new ColorPalette(name, colors));
+    private NamingSpec parseNaming(Element root, String entityType, String entityName) {
+        Element namingEl = getFirstChildOrNull(root, "naming");
+        if (namingEl == null) {
+            return new NamingSpec(entityType, entityName, null);
         }
-        return result;
-    }
-
-    private List<TimeOfDayVariation> parseVariations(Element root) {
-        Element varsEl = firstChild(root, "variations");
-        if (varsEl == null) return List.of();
-
-        List<TimeOfDayVariation> result = new ArrayList<>();
-        NodeList nodes = varsEl.getElementsByTagName("variation");
-        for (int i = 0; i < nodes.getLength(); i++) {
-            Element el = (Element) nodes.item(i);
-            result.add(new TimeOfDayVariation(
-                    attr(el, "timeOfDay"),
-                    attr(el, "colorShift"),
-                    doubleAttr(el, "opacity", 0.0)
-            ));
-        }
-        return result;
-    }
-
-    private NamingSpec parseNaming(Element root) {
-        Element el = firstChild(root, "naming");
-        if (el == null) return null;
-        return new NamingSpec(
-                attr(el, "prefix"),
-                attr(el, "layerPattern"),
-                attr(el, "atlasPattern"),
-                attr(el, "configPattern")
-        );
+        String outputDir = getTextContentOrDefault(namingEl, "output-dir",
+                "assets/" + entityType + "/" + entityName);
+        return new NamingSpec(entityType, entityName, outputDir);
     }
 
     private AssetConstraints parseConstraints(Element root) {
-        Element el = firstChild(root, "constraints");
-        if (el == null) return null;
-        return new AssetConstraints(
-                intAttr(el, "widthPx",  64),
-                intAttr(el, "heightPx", 64),
-                intAttr(el, "maxFrames", 16),
-                boolAttr(el, "allowTransparency", true),
-                el.getAttribute("outputFormats")
-        );
+        Element constraintsEl = getFirstChildOrNull(root, "constraints");
+        if (constraintsEl == null) {
+            return AssetConstraints.defaults();
+        }
+        int maxFileSize = intChild(constraintsEl, "max-file-size-kb", 500);
+        int maxWidth = intChild(constraintsEl, "max-sprite-sheet-width", 2048);
+        int maxHeight = intChild(constraintsEl, "max-sprite-sheet-height", 2048);
+        int quality = intChild(constraintsEl, "compression-quality", 85);
+        int bitDepth = intChild(constraintsEl, "bit-depth", 32);
+        return new AssetConstraints(maxFileSize, maxWidth, maxHeight, quality, bitDepth);
     }
 
-    // -----------------------------------------------------------------------
-    // XML helpers
-    // -----------------------------------------------------------------------
+    // ---- XML helper methods ----
 
-    private Element firstChild(Element parent, String tagName) {
-        NodeList list = parent.getElementsByTagName(tagName);
-        return list.getLength() == 0 ? null : (Element) list.item(0);
+    private Element getFirstChild(Element parent, String tagName) {
+        Element el = getFirstChildOrNull(parent, tagName);
+        if (el == null) {
+            throw new XmlParseException("Missing required element: <" + tagName + ">");
+        }
+        return el;
     }
 
-    private String textOf(Element el) {
-        return el == null ? "" : el.getTextContent().trim();
+    private Element getFirstChildOrNull(Element parent, String tagName) {
+        NodeList nodes = parent.getElementsByTagName(tagName);
+        if (nodes.getLength() == 0) return null;
+        return (Element) nodes.item(0);
     }
 
-    private String attr(Element el, String name) {
-        return el.getAttribute(name);
+    private String getTextContent(Element parent, String tagName) {
+        Element el = getFirstChild(parent, tagName);
+        return el.getTextContent().trim();
     }
 
-    private String mandatory(Element root, String attr, Path path) {
-        String val = root.getAttribute(attr);
-        if (val == null || val.isBlank())
-            throw new XmlParseException("Missing mandatory attribute '" + attr + "' in " + path);
-        return val;
+    private String getTextContentOrDefault(Element parent, String tagName, String defaultValue) {
+        Element el = getFirstChildOrNull(parent, tagName);
+        if (el == null) return defaultValue;
+        String text = el.getTextContent().trim();
+        return text.isEmpty() ? defaultValue : text;
     }
 
-    private int intAttr(Element el, String name, int defaultValue) {
-        String val = el.getAttribute(name);
-        return (val == null || val.isBlank()) ? defaultValue : Integer.parseInt(val);
+    private int intAttr(Element el, String attr, int defaultValue) {
+        String val = el.getAttribute(attr);
+        if (val.isBlank()) return defaultValue;
+        try {
+            return Integer.parseInt(val);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
-    private double doubleAttr(Element el, String name, double defaultValue) {
-        String val = el.getAttribute(name);
-        return (val == null || val.isBlank()) ? defaultValue : Double.parseDouble(val);
+    private boolean boolAttr(Element el, String attr, boolean defaultValue) {
+        String val = el.getAttribute(attr);
+        if (val.isBlank()) return defaultValue;
+        return Boolean.parseBoolean(val);
     }
 
-    private boolean boolAttr(Element el, String name, boolean defaultValue) {
-        String val = el.getAttribute(name);
-        return (val == null || val.isBlank()) ? defaultValue : Boolean.parseBoolean(val);
+    private int intChild(Element parent, String tagName, int defaultValue) {
+        Element el = getFirstChildOrNull(parent, tagName);
+        if (el == null) return defaultValue;
+        try {
+            return Integer.parseInt(el.getTextContent().trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 }

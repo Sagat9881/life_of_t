@@ -1,44 +1,34 @@
 package ru.lifegame.assets.application.usecase;
 
-import org.springframework.stereotype.Service;
-import ru.lifegame.assets.infrastructure.scanner.PromptDirectoryScanner;
-import ru.lifegame.assets.infrastructure.parser.XmlAssetSpecParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.lifegame.assets.domain.model.asset.AssetSpec;
+import ru.lifegame.assets.infrastructure.parser.XmlAssetSpecParser;
 
 import java.nio.file.Path;
-import java.util.List;
 
 /**
- * Application-layer use case: collect and validate all {@code visual-specs.xml}
- * files found beneath a prompts root directory.
- *
- * <p>Returns a list of successfully parsed {@link AssetSpec} objects.  Any
- * file that cannot be parsed is logged and skipped; it does not abort the
- * entire scan.</p>
+ * Use case: parse any existing XML prompt file and convert it
+ * into the unified AssetSpec format.
  */
-@Service
 public class UnifyXmlSpecsUseCase {
 
-    private final PromptDirectoryScanner scanner;
-    private final XmlAssetSpecParser     parser;
+    private static final Logger log = LoggerFactory.getLogger(UnifyXmlSpecsUseCase.class);
 
-    public UnifyXmlSpecsUseCase(PromptDirectoryScanner scanner,
-                                XmlAssetSpecParser parser) {
-        this.scanner = scanner;
-        this.parser  = parser;
+    private final XmlAssetSpecParser parser;
+
+    public UnifyXmlSpecsUseCase(XmlAssetSpecParser parser) {
+        this.parser = parser;
     }
 
     /**
-     * Scan {@code promptsRoot} for {@code visual-specs.xml} files and parse
-     * each one.
+     * Parses the given XML file and returns a unified AssetSpec.
      *
-     * @param promptsRoot root of the prompts directory tree
-     * @return list of successfully parsed {@link AssetSpec} instances
+     * @param xmlFile path to the XML specification file
+     * @return parsed AssetSpec in unified format
      */
-    public List<AssetSpec> execute(Path promptsRoot) {
-        return scanner.findAllSpecs(promptsRoot)
-                      .stream()
-                      .map(parser::parse)
-                      .toList();
+    public AssetSpec execute(Path xmlFile) {
+        log.info("Unifying XML spec: {}", xmlFile);
+        return parser.parse(xmlFile);
     }
 }

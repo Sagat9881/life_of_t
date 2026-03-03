@@ -1,20 +1,19 @@
 package ru.lifegame.assets.application.usecase;
 
-import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.lifegame.assets.infrastructure.scanner.PromptDirectoryScanner;
 
 import java.nio.file.Path;
 import java.util.List;
 
 /**
- * Application-layer use case: scan a prompts root directory and report
- * every entity directory that is missing a {@code visual-specs.xml} file.
- *
- * <p>The result is a plain list of {@link Path} values pointing to entity
- * directories where spec authoring work is still required.</p>
+ * Use case: scan docs/prompts/ directory tree and identify entities that
+ * are missing unified XML specifications.
  */
-@Service
 public class ScanMissingSpecsUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(ScanMissingSpecsUseCase.class);
 
     private final PromptDirectoryScanner scanner;
 
@@ -23,13 +22,15 @@ public class ScanMissingSpecsUseCase {
     }
 
     /**
-     * Return entity directories under {@code promptsRoot} that lack a
-     * {@code visual-specs.xml} file.
+     * Scans the prompts root and returns entity directories missing a unified XML spec.
      *
-     * @param promptsRoot root of the prompts directory tree
-     * @return unmodifiable list of directories missing a spec file
+     * @param promptsRoot root of docs/prompts/
+     * @return list of entity directory paths that lack a visual-specs.xml
      */
     public List<Path> execute(Path promptsRoot) {
-        return scanner.findMissingSpecs(promptsRoot);
+        log.info("Scanning for missing specs in: {}", promptsRoot);
+        List<Path> missing = scanner.findMissingSpecs(promptsRoot);
+        log.info("Found {} entities with missing specs", missing.size());
+        return missing;
     }
 }
