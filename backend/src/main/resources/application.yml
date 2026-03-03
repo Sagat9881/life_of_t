@@ -1,31 +1,20 @@
 server:
   port: 8080
-  error:
-    whitelabel:
-      enabled: false
-    path: /error
 
 spring:
   application:
-    name: lifegame-backend
-  jackson:
-    default-property-inclusion: non_null
-  web:
-    resources:
-      static-locations:
-        - classpath:/static/
-        - classpath:/public/
-      add-mappings: true
-  mvc:
-    throw-exception-if-no-handler-found: true
+    name: life-of-t
 
-session:
-  persistence:
-    file: ${SESSION_PERSISTENCE_FILE:/app/data/sessions.json}
-    interval: ${SESSION_PERSISTENCE_INTERVAL:10}
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+  default-produces-media-type: application/json
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
+logging:
+  level:
+    ru.lifegame: DEBUG
+    org.springframework.web: INFO
