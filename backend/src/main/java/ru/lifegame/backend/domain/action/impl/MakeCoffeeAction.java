@@ -7,25 +7,19 @@ import java.util.Map;
 
 public class MakeCoffeeAction implements GameAction {
 
-    private static final int TIME_COST = 1; // 15 minutes (rounded to 1 unit)
+    private static final int TIME_COST = 1;
 
     @Override
     public ActionType type() { return StandardActionType.MAKE_COFFEE; }
 
     @Override
-    public int calculateTimeCost(GameSessionReadModel session) {
-        return TIME_COST;
-    }
+    public int calculateTimeCost(GameSessionReadModel session) { return TIME_COST; }
 
     @Override
     public ActionResult calculate(GameSessionReadModel session) {
-        int timeCost = calculateTimeCost(session);
-        StatChanges changes = new StatChanges(
-                10, 0, 0,
-                5, 0, 0
-        );
+        StatChanges changes = new StatChanges(10, 0, 0, 5, 0, 0);
         return new ActionResult(
-                type(), timeCost,
+                type(), TIME_COST,
                 "Татьяна сделала кофе. Бодрящий перерыв.",
                 changes,
                 Map.of(),

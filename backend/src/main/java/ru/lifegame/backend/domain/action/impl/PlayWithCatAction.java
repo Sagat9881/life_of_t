@@ -25,10 +25,10 @@ public class PlayWithCatAction implements GameAction {
         );
         return new ActionResult(
                 type(), timeCost,
-                "Татьяна поиграла с Гарфилдом. Кот доволен.",
+                "Татьяна поиграла с Барсиком. Кот доволен.",
                 changes,
                 Map.of(),
-                Map.of("GARFIELD", GameBalance.PLAY_CAT_PET_MOOD),
+                Map.of("BARSIK", GameBalance.PLAY_CAT_PET_MOOD),
                 false, false, false, false
         );
     }

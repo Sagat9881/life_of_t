@@ -7,25 +7,19 @@ import java.util.Map;
 
 public class JoggingAction implements GameAction {
 
-    private static final int TIME_COST = 1; // 1 hour
+    private static final int TIME_COST = 1;
 
     @Override
     public ActionType type() { return StandardActionType.JOGGING; }
 
     @Override
-    public int calculateTimeCost(GameSessionReadModel session) {
-        return TIME_COST;
-    }
+    public int calculateTimeCost(GameSessionReadModel session) { return TIME_COST; }
 
     @Override
     public ActionResult calculate(GameSessionReadModel session) {
-        int timeCost = calculateTimeCost(session);
-        StatChanges changes = new StatChanges(
-                -20, 15, -10,
-                0, 0, 10
-        );
+        StatChanges changes = new StatChanges(-20, 15, -10, 0, 0, 10);
         return new ActionResult(
-                type(), timeCost,
+                type(), TIME_COST,
                 "Татьяна совершила пробежку. Здоровый образ жизни!",
                 changes,
                 Map.of(),

@@ -7,25 +7,19 @@ import java.util.Map;
 
 public class RestOnBenchAction implements GameAction {
 
-    private static final int TIME_COST = 1; // 1 hour
+    private static final int TIME_COST = 1;
 
     @Override
     public ActionType type() { return StandardActionType.REST_ON_BENCH; }
 
     @Override
-    public int calculateTimeCost(GameSessionReadModel session) {
-        return TIME_COST;
-    }
+    public int calculateTimeCost(GameSessionReadModel session) { return TIME_COST; }
 
     @Override
     public ActionResult calculate(GameSessionReadModel session) {
-        int timeCost = calculateTimeCost(session);
-        StatChanges changes = new StatChanges(
-                15, 0, -15,
-                10, 0, 0
-        );
+        StatChanges changes = new StatChanges(15, 0, -15, 10, 0, 0);
         return new ActionResult(
-                type(), timeCost,
+                type(), TIME_COST,
                 "Татьяна отдохнула на скамейке. Свежий воздух освежает.",
                 changes,
                 Map.of(),

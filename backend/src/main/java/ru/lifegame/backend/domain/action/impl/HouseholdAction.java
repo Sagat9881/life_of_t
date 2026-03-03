@@ -12,6 +12,7 @@ import java.util.Map;
  * Costs energy and mood but maintains home environment and husband relationship.
  */
 public class HouseholdAction implements GameAction {
+
     @Override
     public ActionType type() {
         return StandardActionType.HOUSEHOLD;
@@ -25,16 +26,16 @@ public class HouseholdAction implements GameAction {
     @Override
     public ActionResult calculate(GameSessionReadModel state) {
         StatChanges stats = new StatChanges(
-                GameBalance.HOUSEHOLD_ENERGY,  // costs energy
-                0,  // no health change
-                0,  // no stress change
-                GameBalance.HOUSEHOLD_MOOD,    // slightly decreases mood
-                0,  // no money
-                0   // no self-esteem
+                GameBalance.HOUSEHOLD_ENERGY,
+                0,
+                0,
+                GameBalance.HOUSEHOLD_MOOD,
+                0,
+                0
         );
 
         Map<String, Integer> relationshipChanges = Map.of(
-                NpcCode.HUSBAND.name(), 5  // husband appreciates household help
+                NpcCode.HUSBAND.name(), 5
         );
 
         return new ActionResult(
@@ -43,11 +44,11 @@ public class HouseholdAction implements GameAction {
                 "Домашние дела сделаны. Муж ценит уют, но вы немного устали.",
                 stats,
                 relationshipChanges,
-                Map.of(),  // no pet changes
-                false,     // not rested
-                false,     // not worked
-                true,      // interacted with husband (indirectly)
-                false      // no father interaction
+                Map.of(),
+                false,
+                false,
+                true,
+                false
         );
     }
 }
