@@ -16,13 +16,9 @@ public class FatherCriticismTrigger implements ConflictTrigger {
     @Override
     public Optional<Conflict> check(PlayerCharacter player, Relationships relationships, GameTime time) {
         Relationship father = relationships.get(NpcCode.FATHER);
-        if (father == null || father.broken()) {
-            return Optional.empty();
-        }
-        
+        if (father == null || father.broken()) return Optional.empty();
         boolean triggered = player.job().satisfaction() < GameBalance.FATHER_CRITICISM_SATISFACTION
             || player.stats().selfEsteem() < GameBalance.FATHER_CRITICISM_SELF_ESTEEM;
-        
         if (triggered) {
             return Optional.of(new Conflict(UUID.randomUUID().toString(), FatherConflicts.CRITICISM_OF_CHOICES));
         }

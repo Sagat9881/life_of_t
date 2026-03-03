@@ -16,13 +16,9 @@ public class FatherConcernTrigger implements ConflictTrigger {
     @Override
     public Optional<Conflict> check(PlayerCharacter player, Relationships relationships, GameTime time) {
         Relationship father = relationships.get(NpcCode.FATHER);
-        if (father == null || father.broken()) {
-            return Optional.empty();
-        }
-        
+        if (father == null || father.broken()) return Optional.empty();
         boolean triggered = player.stats().money() < GameBalance.FATHER_CONCERN_MONEY
             || player.stats().health() < GameBalance.FATHER_CONCERN_HEALTH;
-        
         if (triggered) {
             return Optional.of(new Conflict(UUID.randomUUID().toString(), FatherConflicts.CONCERN_FOR_WELLBEING));
         }

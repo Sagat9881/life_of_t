@@ -15,7 +15,6 @@ public class GuiltTrigger implements ConflictTrigger {
     public Optional<Conflict> check(PlayerCharacter player, Relationships relationships, GameTime time) {
         boolean triggered = relationships.totalCloseness() < GameBalance.INTERNAL_GUILT_CLOSENESS_SUM
             && player.stats().selfEsteem() < GameBalance.INTERNAL_GUILT_SELF_ESTEEM;
-        
         if (triggered) {
             return Optional.of(new Conflict(UUID.randomUUID().toString(), InternalConflicts.GUILT));
         }

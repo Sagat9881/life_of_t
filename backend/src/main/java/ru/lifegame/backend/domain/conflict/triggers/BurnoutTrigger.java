@@ -15,7 +15,6 @@ public class BurnoutTrigger implements ConflictTrigger {
     public Optional<Conflict> check(PlayerCharacter player, Relationships relationships, GameTime time) {
         boolean triggered = player.job().burnoutRisk() > GameBalance.INTERNAL_BURNOUT_RISK
             || player.stats().stress() > GameBalance.INTERNAL_BURNOUT_STRESS;
-        
         if (triggered) {
             return Optional.of(new Conflict(UUID.randomUUID().toString(), InternalConflicts.BURNOUT));
         }

@@ -16,10 +16,7 @@ public class FatherNeglectedTrigger implements ConflictTrigger {
     @Override
     public Optional<Conflict> check(PlayerCharacter player, Relationships relationships, GameTime time) {
         Relationship father = relationships.get(NpcCode.FATHER);
-        if (father == null || father.broken()) {
-            return Optional.empty();
-        }
-        
+        if (father == null || father.broken()) return Optional.empty();
         if (father.closeness() < GameBalance.FATHER_CLOSENESS_NEGLECTED) {
             return Optional.of(new Conflict(UUID.randomUUID().toString(), FatherConflicts.FEELING_NEGLECTED));
         }

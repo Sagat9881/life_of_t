@@ -16,13 +16,9 @@ public class FinancialDisagreementTrigger implements ConflictTrigger {
     @Override
     public Optional<Conflict> check(PlayerCharacter player, Relationships relationships, GameTime time) {
         Relationship husband = relationships.get(NpcCode.HUSBAND);
-        if (husband == null || husband.broken()) {
-            return Optional.empty();
-        }
-        
+        if (husband == null || husband.broken()) return Optional.empty();
         int money = player.stats().money();
         boolean triggered = money < GameBalance.HUSBAND_MONEY_LOW || money > GameBalance.HUSBAND_MONEY_HIGH;
-        
         if (triggered) {
             return Optional.of(new Conflict(UUID.randomUUID().toString(), HusbandConflicts.FINANCIAL_DISAGREEMENT));
         }
