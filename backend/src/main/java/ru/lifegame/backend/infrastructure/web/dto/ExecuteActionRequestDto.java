@@ -6,8 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record ExecuteActionRequestDto(
     @Schema(description = "ID пользователя Telegram", example = "123456789", required = true)
     String telegramUserId,
-    
-    @Schema(description = "Код действия", example = "go_to_work", required = true)
+
+    @Schema(description = "Код действия", example = "GO_TO_WORK", required = true)
     String actionCode
-) {
-}
+) {}

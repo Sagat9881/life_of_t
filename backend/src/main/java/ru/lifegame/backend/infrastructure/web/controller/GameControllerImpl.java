@@ -3,18 +3,12 @@ package ru.lifegame.backend.infrastructure.web.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import ru.lifegame.backend.application.command.ChooseConflictTacticCommand;
-import ru.lifegame.backend.application.command.ChooseEventOptionCommand;
-import ru.lifegame.backend.application.command.ExecuteActionCommand;
-import ru.lifegame.backend.application.command.StartSessionCommand;
+import ru.lifegame.backend.application.command.*;
 import ru.lifegame.backend.application.port.in.*;
 import ru.lifegame.backend.application.query.GetStateQuery;
 import ru.lifegame.backend.application.view.GameStateView;
 import ru.lifegame.backend.domain.exception.SessionNotFoundException;
-import ru.lifegame.backend.infrastructure.web.dto.ChooseConflictTacticRequestDto;
-import ru.lifegame.backend.infrastructure.web.dto.ChooseEventOptionRequestDto;
-import ru.lifegame.backend.infrastructure.web.dto.ExecuteActionRequestDto;
-import ru.lifegame.backend.infrastructure.web.dto.StartSessionRequestDto;
+import ru.lifegame.backend.infrastructure.web.dto.*;
 
 @RestController
 public class GameControllerImpl implements GameController {
@@ -24,17 +18,20 @@ public class GameControllerImpl implements GameController {
     private final GetGameStateUseCase getGameState;
     private final ChooseConflictTacticUseCase chooseConflictTactic;
     private final ChooseEventOptionUseCase chooseEventOption;
+    private final EndDayUseCase endDay;
 
     public GameControllerImpl(StartOrLoadSessionUseCase startOrLoadSession,
                               ExecutePlayerActionUseCase executeAction,
                               GetGameStateUseCase getGameState,
                               ChooseConflictTacticUseCase chooseConflictTactic,
-                              ChooseEventOptionUseCase chooseEventOption) {
+                              ChooseEventOptionUseCase chooseEventOption,
+                              EndDayUseCase endDay) {
         this.startOrLoadSession = startOrLoadSession;
         this.executeAction = executeAction;
         this.getGameState = getGameState;
         this.chooseConflictTactic = chooseConflictTactic;
         this.chooseEventOption = chooseEventOption;
+        this.endDay = endDay;
     }
 
     @Override
@@ -83,6 +80,13 @@ public class GameControllerImpl implements GameController {
                 request.telegramUserId(), request.eventId(), request.optionCode()
         );
         GameStateView view = chooseEventOption.execute(command);
+        return ResponseEntity.ok(view);
+    }
+
+    @Override
+    public ResponseEntity<GameStateView> endDay(EndDayRequestDto request) {
+        EndDayCommand command = new EndDayCommand(request.telegramUserId());
+        GameStateView view = endDay.execute(command);
         return ResponseEntity.ok(view);
     }
 }
