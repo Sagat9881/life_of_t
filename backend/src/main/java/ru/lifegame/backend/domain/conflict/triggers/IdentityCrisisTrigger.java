@@ -15,7 +15,6 @@ public class IdentityCrisisTrigger implements ConflictTrigger {
     public Optional<Conflict> check(PlayerCharacter player, Relationships relationships, GameTime time) {
         boolean triggered = player.stats().selfEsteem() < GameBalance.INTERNAL_IDENTITY_SELF_ESTEEM
             && player.job().satisfaction() < GameBalance.INTERNAL_IDENTITY_SATISFACTION;
-        
         if (triggered) {
             return Optional.of(new Conflict(UUID.randomUUID().toString(), InternalConflicts.IDENTITY_CRISIS));
         }

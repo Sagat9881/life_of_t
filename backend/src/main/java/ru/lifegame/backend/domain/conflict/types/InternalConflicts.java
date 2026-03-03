@@ -7,12 +7,9 @@ import ru.lifegame.backend.domain.model.relationship.NpcCode;
 import java.util.Optional;
 
 public enum InternalConflicts implements ConflictType {
-    IDENTITY_CRISIS("IDENTITY_CRISIS", "Кризис самоопределения",
-            "Татьяна не уверена в своих жизненных выборах"),
-    BURNOUT("BURNOUT", "Выгорание",
-            "Татьяна на грани эмоционального выгорания"),
-    GUILT("GUILT", "Чувство вины",
-            "Татьяна чувствует вину перед близкими");
+    IDENTITY_CRISIS("IDENTITY_CRISIS", "Кризис самоопределения", "Татьяна не уверена в своих жизненных выборах"),
+    BURNOUT("BURNOUT", "Выгорание", "Татьяна на грани эмоционального выгорания"),
+    GUILT("GUILT", "Чувство вины", "Татьяна чувствует вину перед близкими");
 
     private final String code;
     private final String label;
@@ -22,9 +19,9 @@ public enum InternalConflicts implements ConflictType {
         this.code = code; this.label = label; this.description = description;
     }
 
-    @Override public String code() { return code; }
-    @Override public String label() { return label; }
-    @Override public String description() { return description; }
-    @Override public Optional<NpcCode> opponent() { return Optional.empty(); }
-    @Override public ConflictCategory category() { return ConflictCategory.INTERNAL; }
+    @Override public String code()                  { return code; }
+    @Override public String label()                 { return label; }
+    @Override public String description()           { return description; }
+    @Override public Optional<NpcCode> opponent()   { return Optional.empty(); }
+    @Override public ConflictCategory category()    { return ConflictCategory.INTERNAL; }
 }

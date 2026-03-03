@@ -7,14 +7,10 @@ import ru.lifegame.backend.domain.model.relationship.NpcCode;
 import java.util.Optional;
 
 public enum HusbandConflicts implements ConflictType {
-    HOUSEHOLD_DUTIES("HOUSEHOLD_DUTIES", "Домашние обязанности",
-            "Муж недоволен распределением домашних дел"),
-    LACK_OF_ATTENTION("LACK_OF_ATTENTION", "Нехватка внимания",
-            "Муж чувствует, что ему не уделяют времени"),
-    ROMANTIC_CRISIS("ROMANTIC_CRISIS", "Романтический кризис",
-            "Романтика в отношениях угасает"),
-    FINANCIAL_DISAGREEMENT("FINANCIAL_DISAGREEMENT", "Финансовые разногласия",
-            "Разные взгляды на расходы");
+    HOUSEHOLD_DUTIES("HOUSEHOLD_DUTIES", "Домашние обязанности", "Муж недоволен распределением домашних дел"),
+    LACK_OF_ATTENTION("LACK_OF_ATTENTION", "Нехватка внимания", "Муж чувствует, что ему не уделяют времени"),
+    ROMANTIC_CRISIS("ROMANTIC_CRISIS", "Романтический кризис", "Романтика в отношениях угасает"),
+    FINANCIAL_DISAGREEMENT("FINANCIAL_DISAGREEMENT", "Финансовые разногласия", "Разные взгляды на расходы");
 
     private final String code;
     private final String label;
@@ -24,9 +20,9 @@ public enum HusbandConflicts implements ConflictType {
         this.code = code; this.label = label; this.description = description;
     }
 
-    @Override public String code() { return code; }
-    @Override public String label() { return label; }
-    @Override public String description() { return description; }
-    @Override public Optional<NpcCode> opponent() { return Optional.of(NpcCode.HUSBAND); }
-    @Override public ConflictCategory category() { return ConflictCategory.FAMILY; }
+    @Override public String code()                  { return code; }
+    @Override public String label()                 { return label; }
+    @Override public String description()           { return description; }
+    @Override public Optional<NpcCode> opponent()   { return Optional.of(NpcCode.HUSBAND); }
+    @Override public ConflictCategory category()    { return ConflictCategory.FAMILY; }
 }
