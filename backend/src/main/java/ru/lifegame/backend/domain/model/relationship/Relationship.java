@@ -12,19 +12,19 @@ public record Relationship(
         boolean broken
 ) {
     public Relationship {
-        closeness = clamp(closeness);
-        trust = clamp(trust);
-        stability = clamp(stability);
-        romance = clamp(romance);
+        closeness  = clamp(closeness);
+        trust      = clamp(trust);
+        stability  = clamp(stability);
+        romance    = clamp(romance);
     }
 
     public Relationship applyChanges(RelationshipChanges c) {
         return new Relationship(
                 npcCode,
                 closeness + c.closeness(),
-                trust + c.trust(),
+                trust     + c.trust(),
                 stability + c.stability(),
-                romance + c.romance(),
+                romance   + c.romance(),
                 lastInteractionDay,
                 broken
         );
@@ -42,12 +42,12 @@ public record Relationship(
         if (gap < GameBalance.NO_INTERACTION_DAYS_SEVERE) {
             return new Relationship(npcCode,
                     closeness - GameBalance.DECAY_MILD_CLOSENESS,
-                    trust - GameBalance.DECAY_MILD_TRUST,
+                    trust     - GameBalance.DECAY_MILD_TRUST,
                     stability, romance, lastInteractionDay, broken);
         }
         return new Relationship(npcCode,
                 closeness - GameBalance.DECAY_SEVERE_CLOSENESS,
-                trust - GameBalance.DECAY_SEVERE_TRUST,
+                trust     - GameBalance.DECAY_SEVERE_TRUST,
                 stability, romance, lastInteractionDay, broken);
     }
 
