@@ -1,216 +1,216 @@
 package ru.lifegame.assets.infrastructure.parser;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import ru.lifegame.assets.domain.model.asset.*;
+import ru.lifegame.assets.domain.model.asset.AssetSpec;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/**
- * Unit tests for {@link XmlAssetSpecParser}.
- *
- * <p>Each test writes a minimal (or intentionally broken) XML file to a
- * {@link TempDir} and then calls {@code parse()} on it.  This avoids any
- * classpath-resource dependency and keeps the tests hermetically isolated.</p>
- */
+@DisplayName("XmlAssetSpecParser — парсинг XML спецификаций")
 class XmlAssetSpecParserTest {
 
-    @TempDir
-    Path tempDir;
+    private XmlAssetSpecParser parser;
 
-    private final XmlAssetSpecParser parser = new XmlAssetSpecParser();
-
-    // -----------------------------------------------------------------------
-    // Happy-path: fully populated spec
-    // -----------------------------------------------------------------------
+    @BeforeEach
+    void setUp() {
+        parser = new XmlAssetSpecParser();
+    }
 
     @Test
-    void parse_fullSpec_returnsPopulatedAssetSpec() throws IOException {
-        Path file = writeXml(tempDir, "full.xml", """
-                <?xml version="1.0" encoding="UTF-8"?>
-                <asset id="tanya_idle" category="character">
-                  <description>Tanya idle sprite</description>
-                  <layers>
-                    <layer name="base" type="base" paletteRef="skin" zIndex="0" optional="false"/>
-                    <layer name="eyes" type="overlay" paletteRef="eye_color" zIndex="1" optional="true"/>
-                  </layers>
-                  <animations>
-                    <animation state="idle" frameCount="4" fps="8" loop="true">
-                      <frames>0 1 2 3</frames>
-                    </animation>
-                  </animations>
-                  <palettes>
-                    <palette name="skin">
-                      <color>#FFDFC4</color>
-                      <color>#F0C080</color>
-                    </palette>
-                  </palettes>
-                  <variations>
-                    <variation timeOfDay="evening" colorShift="#FF8800" opacity="0.2"/>
-                  </variations>
-                  <naming prefix="tanya"
-                          layerPattern="%s_layer_%02d.png"
-                          atlasPattern="%s_atlas.webp"
-                          configPattern="%s_atlas.json"/>
-                  <constraints widthPx="64" heightPx="64" maxFrames="16"
-                               allowTransparency="true" outputFormats="png,webp"/>
-                </asset>
-                """);
+    @DisplayName("Парсинг location XML: 3 слоя, палитра, constraints")
+    void parseLocationXml() {
+        String xml = locationXml();
+        AssetSpec spec = parser.parseFromStream(toStream(xml));
 
-        AssetSpec spec = parser.parse(file);
+        assertThat(spec.entityType()).isEqualTo("locations");
+        assertThat(spec.entityName()).isEqualTo("home");
+        assertThat(spec.layers()).hasSize(3);
+        assertThat(spec.layers().get(0).type()).isEqualTo("background");
+        assertThat(spec.layers().get(1).type()).isEqualTo("midground");
+        assertThat(spec.layers().get(2).type()).isEqualTo("foreground");
+    }
 
-        assertThat(spec.id()).isEqualTo("tanya_idle");
-        assertThat(spec.category()).isEqualTo("character");
-        assertThat(spec.description()).isEqualTo("Tanya idle sprite");
+    @Test
+    @DisplayName("Парсинг character XML: слои + анимации")
+    void parseCharacterXml() {
+        String xml = characterXml();
+        AssetSpec spec = parser.parseFromStream(toStream(xml));
 
-        // Layers
+        assertThat(spec.entityType()).isEqualTo("characters");
+        assertThat(spec.entityName()).isEqualTo("tanya");
         assertThat(spec.layers()).hasSize(2);
-        assertThat(spec.layers().get(0).name()).isEqualTo("base");
-        assertThat(spec.layers().get(1).optional()).isTrue();
-
-        // Animations
-        assertThat(spec.animations()).hasSize(1);
-        assertThat(spec.animations().get(0).state()).isEqualTo("idle");
-        assertThat(spec.animations().get(0).frames()).containsExactly(0, 1, 2, 3);
-
-        // Palettes
-        assertThat(spec.palettes()).hasSize(1);
-        assertThat(spec.palettes().get(0).name()).isEqualTo("skin");
-        assertThat(spec.palettes().get(0).colors()).containsExactly("#FFDFC4", "#F0C080");
-
-        // Variations
-        assertThat(spec.variations()).hasSize(1);
-        assertThat(spec.variations().get(0).timeOfDay()).isEqualTo("evening");
-        assertThat(spec.variations().get(0).opacity()).isEqualTo(0.2);
-
-        // Naming
-        assertThat(spec.naming().prefix()).isEqualTo("tanya");
-
-        // Constraints
-        assertThat(spec.constraints().widthPx()).isEqualTo(64);
-        assertThat(spec.constraints().outputFormats()).isEqualTo("png,webp");
-    }
-
-    // -----------------------------------------------------------------------
-    // Minimal spec (only mandatory fields)
-    // -----------------------------------------------------------------------
-
-    @Test
-    void parse_minimalSpec_returnsSpecWithEmptyCollections() throws IOException {
-        Path file = writeXml(tempDir, "minimal.xml", """
-                <?xml version="1.0" encoding="UTF-8"?>
-                <asset id="hero" category="character">
-                </asset>
-                """);
-
-        AssetSpec spec = parser.parse(file);
-
-        assertThat(spec.id()).isEqualTo("hero");
-        assertThat(spec.layers()).isEmpty();
-        assertThat(spec.animations()).isEmpty();
-        assertThat(spec.palettes()).isEmpty();
-        assertThat(spec.variations()).isEmpty();
-        assertThat(spec.naming()).isNull();
-        assertThat(spec.constraints()).isNull();
-    }
-
-    // -----------------------------------------------------------------------
-    // Missing mandatory attribute
-    // -----------------------------------------------------------------------
-
-    @Test
-    void parse_missingId_throwsXmlParseException() throws IOException {
-        Path file = writeXml(tempDir, "no_id.xml", """
-                <?xml version="1.0" encoding="UTF-8"?>
-                <asset category="character">
-                </asset>
-                """);
-
-        assertThatThrownBy(() -> parser.parse(file))
-                .isInstanceOf(XmlParseException.class)
-                .hasMessageContaining("id");
+        assertThat(spec.animations()).hasSize(2);
+        assertThat(spec.animations().get(0).name()).isEqualTo("idle");
+        assertThat(spec.animations().get(0).frames()).isEqualTo(24);
+        assertThat(spec.animations().get(1).name()).isEqualTo("walk");
     }
 
     @Test
-    void parse_missingCategory_throwsXmlParseException() throws IOException {
-        Path file = writeXml(tempDir, "no_cat.xml", """
-                <?xml version="1.0" encoding="UTF-8"?>
-                <asset id="hero">
-                </asset>
-                """);
+    @DisplayName("Парсинг pet XML: слои + анимации")
+    void parsePetXml() {
+        String xml = petXml();
+        AssetSpec spec = parser.parseFromStream(toStream(xml));
 
-        assertThatThrownBy(() -> parser.parse(file))
-                .isInstanceOf(XmlParseException.class)
-                .hasMessageContaining("category");
+        assertThat(spec.entityType()).isEqualTo("pets");
+        assertThat(spec.entityName()).isEqualTo("garfield");
+        assertThat(spec.layers()).hasSize(2);
     }
-
-    // -----------------------------------------------------------------------
-    // Wrong root element
-    // -----------------------------------------------------------------------
 
     @Test
-    void parse_wrongRootElement_throwsXmlParseException() throws IOException {
-        Path file = writeXml(tempDir, "wrong_root.xml", """
-                <?xml version="1.0" encoding="UTF-8"?>
-                <spec id="x" category="y"></spec>
-                """);
+    @DisplayName("Палитра по умолчанию при отсутствии color-palette")
+    void defaultPaletteWhenMissing() {
+        String xml = minimalXml();
+        AssetSpec spec = parser.parseFromStream(toStream(xml));
 
-        assertThatThrownBy(() -> parser.parse(file))
-                .isInstanceOf(XmlParseException.class)
-                .hasMessageContaining("asset");
+        assertThat(spec.colorPalette().primary()).isNotEmpty();
+        assertThat(spec.colorPalette().primary()).contains("#F5E6D3");
     }
-
-    // -----------------------------------------------------------------------
-    // Layer defaults
-    // -----------------------------------------------------------------------
 
     @Test
-    void parse_layerDefaults_zIndexZeroAndNotOptional() throws IOException {
-        Path file = writeXml(tempDir, "layer_defaults.xml", """
-                <?xml version="1.0" encoding="UTF-8"?>
-                <asset id="hero" category="character">
-                  <layers>
-                    <layer name="base" type="base"/>
-                  </layers>
-                </asset>
-                """);
+    @DisplayName("Constraints по умолчанию при отсутствии")
+    void defaultConstraintsWhenMissing() {
+        String xml = minimalXml();
+        AssetSpec spec = parser.parseFromStream(toStream(xml));
 
-        AssetSpec spec = parser.parse(file);
-        assertThat(spec.layers().get(0).zIndex()).isEqualTo(0);
-        assertThat(spec.layers().get(0).optional()).isFalse();
+        assertThat(spec.constraints().maxFileSizeKb()).isEqualTo(500);
+        assertThat(spec.constraints().bitDepth()).isEqualTo(32);
     }
-
-    // -----------------------------------------------------------------------
-    // Animation with no <frames>
-    // -----------------------------------------------------------------------
 
     @Test
-    void parse_animationNoFrames_returnsEmptyFrameList() throws IOException {
-        Path file = writeXml(tempDir, "no_frames.xml", """
-                <?xml version="1.0" encoding="UTF-8"?>
-                <asset id="hero" category="character">
-                  <animations>
-                    <animation state="idle" frameCount="4" fps="8" loop="true"/>
-                  </animations>
-                </asset>
-                """);
+    @DisplayName("Time-of-day вариации парсятся корректно")
+    void parseTimeOfDayVariations() {
+        String xml = locationXml();
+        AssetSpec spec = parser.parseFromStream(toStream(xml));
 
-        AssetSpec spec = parser.parse(file);
-        assertThat(spec.animations().get(0).frames()).isEmpty();
+        assertThat(spec.timeOfDayVariations()).hasSize(2);
+        assertThat(spec.timeOfDayVariations().get(0).time()).isEqualTo("morning");
     }
 
-    // -----------------------------------------------------------------------
-    // Helper
-    // -----------------------------------------------------------------------
+    @Test
+    @DisplayName("Отсутствие <layers> выбрасывает XmlParseException")
+    void missingLayersThrows() {
+        String xml = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <asset-spec>
+                    <meta>
+                        <entity-type>locations</entity-type>
+                        <entity-name>test</entity-name>
+                    </meta>
+                </asset-spec>
+                """;
+        assertThatThrownBy(() -> parser.parseFromStream(toStream(xml)))
+                .isInstanceOf(XmlParseException.class);
+    }
 
-    private static Path writeXml(Path dir, String name, String content) throws IOException {
-        Path file = dir.resolve(name);
-        Files.writeString(file, content, StandardCharsets.UTF_8);
-        return file;
+    @Test
+    @DisplayName("Невалидный XML выбрасывает XmlParseException")
+    void invalidXmlThrows() {
+        String xml = "not xml at all";
+        assertThatThrownBy(() -> parser.parseFromStream(toStream(xml)))
+                .isInstanceOf(XmlParseException.class);
+    }
+
+    // --- XML fixtures ---
+
+    private String locationXml() {
+        return """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <asset-spec version="1.0.0">
+                    <meta>
+                        <entity-type>locations</entity-type>
+                        <entity-name>home</entity-name>
+                        <version>1.0.0</version>
+                    </meta>
+                    <layers>
+                        <layer id="background" type="background" z-order="0">Far wall with window</layer>
+                        <layer id="midground" type="midground" z-order="1">Main room space</layer>
+                        <layer id="foreground" type="foreground" z-order="2">Near elements</layer>
+                    </layers>
+                    <color-palette>
+                        <primary>
+                            <color hex="#FFF9E9"/>
+                            <color hex="#FFB6C1"/>
+                        </primary>
+                        <secondary>
+                            <color hex="#A8B2B7"/>
+                        </secondary>
+                    </color-palette>
+                    <time-of-day-variations>
+                        <variation time="morning">
+                            <lighting>Soft golden light</lighting>
+                            <mood>Calm awakening</mood>
+                        </variation>
+                        <variation time="evening">
+                            <lighting>Warm artificial light</lighting>
+                            <mood>Relaxation</mood>
+                        </variation>
+                    </time-of-day-variations>
+                </asset-spec>
+                """;
+    }
+
+    private String characterXml() {
+        return """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <asset-spec version="1.0.0">
+                    <meta>
+                        <entity-type>characters</entity-type>
+                        <entity-name>tanya</entity-name>
+                        <version>1.0.0</version>
+                    </meta>
+                    <layers>
+                        <layer id="base" type="base" z-order="0">Base body</layer>
+                        <layer id="outfit" type="outfit" z-order="1">Clothing</layer>
+                    </layers>
+                    <animations>
+                        <animation name="idle" frames="24" fps="2" loop="true" frame-width="128" frame-height="128"/>
+                        <animation name="walk" frames="24" fps="12" loop="true" frame-width="128" frame-height="128"/>
+                    </animations>
+                </asset-spec>
+                """;
+    }
+
+    private String petXml() {
+        return """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <asset-spec version="1.0.0">
+                    <meta>
+                        <entity-type>pets</entity-type>
+                        <entity-name>garfield</entity-name>
+                        <version>1.0.0</version>
+                    </meta>
+                    <layers>
+                        <layer id="base" type="base" z-order="0">Cat body</layer>
+                        <layer id="markings" type="overlay" z-order="1">Orange tabby markings</layer>
+                    </layers>
+                    <animations>
+                        <animation name="idle" frames="20" fps="6" loop="true" frame-width="64" frame-height="64"/>
+                    </animations>
+                </asset-spec>
+                """;
+    }
+
+    private String minimalXml() {
+        return """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <asset-spec version="1.0.0">
+                    <meta>
+                        <entity-type>characters</entity-type>
+                        <entity-name>minimal</entity-name>
+                    </meta>
+                    <layers>
+                        <layer id="base" type="base">Minimal layer</layer>
+                    </layers>
+                </asset-spec>
+                """;
+    }
+
+    private java.io.InputStream toStream(String xml) {
+        return new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
     }
 }

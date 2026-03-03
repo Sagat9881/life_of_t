@@ -1,100 +1,110 @@
 package ru.lifegame.assets.infrastructure.writer;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import ru.lifegame.assets.domain.model.asset.*;
+import ru.lifegame.assets.domain.model.asset.AnimationSpec;
 
-import java.nio.file.Files;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/**
- * Unit tests for {@link WebpAtlasWriter}.
- */
+@DisplayName("WebpAtlasWriter — генерация horizontal-strip атласов")
 class WebpAtlasWriterTest {
+
+    private WebpAtlasWriter writer;
 
     @TempDir
     Path tempDir;
 
-    private final WebpAtlasWriter writer = new WebpAtlasWriter();
-
-    // -----------------------------------------------------------------------
-    // write() — happy path
-    // -----------------------------------------------------------------------
+    @BeforeEach
+    void setUp() {
+        writer = new WebpAtlasWriter();
+    }
 
     @Test
-    void write_singleAnimation_producesAtlasFile() {
-        AssetSpec spec = specWithAnimations(
-                List.of(new AnimationSpec("idle", 4, 8, true, List.of(0, 1, 2, 3)))
+    @DisplayName("Атлас из 24 кадров 64x64 → размер 1536x64")
+    void atlasCorrectDimensions() {
+        List<BufferedImage> frames = createFrames(24, 64, 64);
+        BufferedImage atlas = writer.createAtlasImage(frames);
+
+        assertThat(atlas.getWidth()).isEqualTo(24 * 64);
+        assertThat(atlas.getHeight()).isEqualTo(64);
+    }
+
+    @Test
+    @DisplayName("Атлас формата ARGB")
+    void atlasIsArgb() {
+        List<BufferedImage> frames = createFrames(10, 32, 32);
+        BufferedImage atlas = writer.createAtlasImage(frames);
+
+        assertThat(atlas.getType()).isEqualTo(BufferedImage.TYPE_INT_ARGB);
+    }
+
+    @Test
+    @DisplayName("Кадры корректно размещены горизонтально")
+    void framesPlacedHorizontally() {
+        // Create frames with unique colors
+        List<BufferedImage> frames = new ArrayList<>();
+        int[] colors = {0xFFFF0000, 0xFF00FF00, 0xFF0000FF};
+        for (int c : colors) {
+            BufferedImage frame = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = frame.createGraphics();
+            g.setColor(new Color(c, true));
+            g.fillRect(0, 0, 16, 16);
+            g.dispose();
+            frames.add(frame);
+        }
+
+        BufferedImage atlas = writer.createAtlasImage(frames);
+        assertThat(atlas.getRGB(0, 0)).isEqualTo(0xFFFF0000);
+        assertThat(atlas.getRGB(16, 0)).isEqualTo(0xFF00FF00);
+        assertThat(atlas.getRGB(32, 0)).isEqualTo(0xFF0000FF);
+    }
+
+    @Test
+    @DisplayName("writeAtlas создаёт файл на диске")
+    void writeAtlasCreatesFile() throws Exception {
+        List<BufferedImage> frames = createFrames(5, 32, 32);
+        AnimationSpec spec = new AnimationSpec("test_anim", 5, 12, true, 32, 32);
+
+        Path result = writer.writeAtlas(frames, spec, tempDir);
+        assertThat(result.toFile()).exists();
+        assertThat(result.getFileName().toString()).isEqualTo("test_anim_atlas.png");
+    }
+
+    @Test
+    @DisplayName("Пустой список кадров выбрасывает исключение")
+    void emptyFramesThrows() {
+        assertThatThrownBy(() -> writer.createAtlasImage(List.of()))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("Кадры разного размера выбрасывают исключение")
+    void inconsistentFrameSizeThrows() {
+        List<BufferedImage> frames = List.of(
+                new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB),
+                new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB)
         );
-        writer.write(spec, tempDir);
+        AnimationSpec spec = new AnimationSpec("bad", 2, 12, true, 32, 32);
 
-        // Expect either .webp or .png fallback
-        long files = countAtlasFiles(tempDir);
-        assertThat(files).isGreaterThanOrEqualTo(1);
+        assertThatThrownBy(() -> writer.writeAtlas(frames, spec, tempDir))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
-    void write_multipleAnimations_atlasWidthMatchesTotalFrames() throws Exception {
-        AnimationSpec anim1 = new AnimationSpec("idle", 2, 8, true, List.of(0, 1));
-        AnimationSpec anim2 = new AnimationSpec("walk", 4, 12, true, List.of(2, 3, 4, 5));
-        AssetSpec spec = specWithAnimations(List.of(anim1, anim2));
-        writer.write(spec, tempDir);
-
-        long files = countAtlasFiles(tempDir);
-        assertThat(files).isGreaterThanOrEqualTo(1);
-    }
-
-    @Test
-    void write_noAnimations_producesNoFile() {
-        AssetSpec spec = specWithAnimations(List.of());
-        writer.write(spec, tempDir);
-
-        long files = countAtlasFiles(tempDir);
-        assertThat(files).isEqualTo(0);
-    }
-
-    // -----------------------------------------------------------------------
-    // Custom naming
-    // -----------------------------------------------------------------------
-
-    @Test
-    void write_withNamingSpec_usesPattern() {
-        NamingSpec naming = new NamingSpec(
-                "tanya", "%s_layer_%02d.png", "%s_atlas.webp", "%s_atlas.json");
-        AssetSpec spec = new AssetSpec(
-                "tanya_idle", "character", "desc",
-                List.of(), List.of(new AnimationSpec("idle", 2, 8, true, List.of(0, 1))),
-                List.of(), List.of(),
-                naming, new AssetConstraints(64, 64, 16, true, "png,webp"));
-
-        writer.write(spec, tempDir);
-
-        // atlas file should match naming pattern (webp or png fallback)
-        boolean found = tempDir.toFile().list() != null &&
-                java.util.Arrays.stream(tempDir.toFile().list())
-                        .anyMatch(f -> f.startsWith("tanya_atlas"));
-        assertThat(found).isTrue();
-    }
-
-    // -----------------------------------------------------------------------
-    // Helpers
-    // -----------------------------------------------------------------------
-
-    private AssetSpec specWithAnimations(List<AnimationSpec> anims) {
-        return new AssetSpec(
-                "test_asset", "character", "desc",
-                List.of(), anims, List.of(), List.of(),
-                null, new AssetConstraints(64, 64, 16, true, "png,webp"));
-    }
-
-    private long countAtlasFiles(Path dir) {
-        String[] files = dir.toFile().list();
-        if (files == null) return 0;
-        return java.util.Arrays.stream(files)
-                .filter(f -> f.endsWith(".webp") || f.endsWith(".png"))
-                .count();
+    private List<BufferedImage> createFrames(int count, int width, int height) {
+        List<BufferedImage> frames = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            frames.add(new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB));
+        }
+        return frames;
     }
 }

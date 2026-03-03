@@ -1,33 +1,34 @@
 package ru.lifegame.assets.infrastructure.generator;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import ru.lifegame.assets.domain.model.asset.*;
+import ru.lifegame.assets.domain.model.asset.AnimationSpec;
+import ru.lifegame.assets.domain.model.asset.AssetConstraints;
+import ru.lifegame.assets.domain.model.asset.AssetLayer;
+import ru.lifegame.assets.domain.model.asset.AssetSpec;
+import ru.lifegame.assets.domain.model.asset.ColorPalette;
+import ru.lifegame.assets.domain.model.asset.NamingSpec;
 import ru.lifegame.assets.infrastructure.writer.AtlasConfigWriter;
 import ru.lifegame.assets.infrastructure.writer.PngLayerWriter;
 import ru.lifegame.assets.infrastructure.writer.WebpAtlasWriter;
 
-import java.awt.*;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Unit tests for {@link LayeredAssetGenerator}.
- *
- * <p>Covers palette resolution, layer visibility filtering, time-of-day
- * tinting, hex parsing, colour blending, and the top-level
- * {@code generate()} orchestration (via a real temp directory).</p>
- */
+@DisplayName("LayeredAssetGenerator — генерация PNG по XML-спеке")
 class LayeredAssetGeneratorTest {
+
+    private LayeredAssetGenerator generator;
 
     @TempDir
     Path tempDir;
-
-    private LayeredAssetGenerator generator;
 
     @BeforeEach
     void setUp() {
@@ -38,201 +39,169 @@ class LayeredAssetGeneratorTest {
         );
     }
 
-    // -----------------------------------------------------------------------
-    // resolvePalettes
-    // -----------------------------------------------------------------------
-
     @Test
-    void resolvePalettes_returnsMappedColors() {
-        List<ColorPalette> palettes = List.of(
-                new ColorPalette("skin", List.of("#FFCCAA")),
-                new ColorPalette("hair", List.of("#331100"))
-        );
-        Map<String, Color> resolved = generator.resolvePalettes(palettes);
+    @DisplayName("Генерация локации: 3 слоя (background, midground, foreground)")
+    void generateLocationLayers() {
+        AssetSpec spec = locationSpec();
+        List<Path> files = generator.generateAsset(spec, tempDir);
 
-        assertThat(resolved).containsKey("skin");
-        assertThat(resolved).containsKey("hair");
-        assertThat(resolved.get("skin")).isEqualTo(new Color(0xFF, 0xCC, 0xAA));
-        assertThat(resolved.get("hair")).isEqualTo(new Color(0x33, 0x11, 0x00));
+        // 3 layers = 3 PNG files
+        long pngCount = files.stream()
+                .filter(p -> p.toString().endsWith(".png"))
+                .filter(p -> !p.toString().contains("atlas"))
+                .count();
+        assertThat(pngCount).isEqualTo(3);
     }
 
     @Test
-    void resolvePalettes_emptyPaletteColors_usesGrey() {
-        List<ColorPalette> palettes = List.of(
-                new ColorPalette("empty", List.of())
-        );
-        Map<String, Color> resolved = generator.resolvePalettes(palettes);
-        assertThat(resolved.get("empty")).isEqualTo(new Color(0x80, 0x80, 0x80));
+    @DisplayName("Сгенерированные PNG — формат RGBA 32-bit")
+    void generatedPngIsRgba32bit() throws Exception {
+        AssetSpec spec = locationSpec();
+        List<Path> files = generator.generateAsset(spec, tempDir);
+
+        Path firstPng = files.stream()
+                .filter(p -> p.toString().endsWith(".png"))
+                .filter(p -> !p.toString().contains("atlas"))
+                .findFirst().orElseThrow();
+
+        BufferedImage image = ImageIO.read(firstPng.toFile());
+        assertThat(image).isNotNull();
+        // After PNG round-trip, ImageIO may decode as TYPE_4BYTE_ABGR (6)
+        // instead of TYPE_INT_ARGB (2). Both are 32-bit with alpha.
+        assertThat(image.getColorModel().hasAlpha()).isTrue();
+        assertThat(image.getColorModel().getPixelSize()).isEqualTo(32);
     }
 
     @Test
-    void resolvePalettes_emptyInput_returnsEmptyMap() {
-        assertThat(generator.resolvePalettes(List.of())).isEmpty();
-    }
+    @DisplayName("Размеры слоёв соответствуют ожидаемым")
+    void layerDimensionsCorrect() throws Exception {
+        AssetSpec spec = locationSpec();
+        List<Path> files = generator.generateAsset(spec, tempDir);
 
-    // -----------------------------------------------------------------------
-    // resolveVisibleLayers
-    // -----------------------------------------------------------------------
-
-    @Test
-    void resolveVisibleLayers_includesNonOptionalLayersAlways() {
-        AssetSpec spec = minimalSpec(List.of(
-                new AssetLayer("base", "base", null, 0, false)
-        ));
-        Map<String, Color> palettes = Map.of();
-        List<AssetLayer> visible = generator.resolveVisibleLayers(spec, palettes);
-        assertThat(visible).hasSize(1);
+        for (Path file : files) {
+            if (file.toString().endsWith(".png") && !file.toString().contains("atlas")) {
+                BufferedImage image = ImageIO.read(file.toFile());
+                assertThat(image.getWidth()).isEqualTo(128);
+                assertThat(image.getHeight()).isEqualTo(128);
+            }
+        }
     }
 
     @Test
-    void resolveVisibleLayers_excludesOptionalLayerWithMissingPaletteRef() {
-        AssetSpec spec = minimalSpec(List.of(
-                new AssetLayer("overlay", "overlay", "missing_palette", 1, true)
-        ));
-        Map<String, Color> palettes = Map.of(); // palette not present
-        List<AssetLayer> visible = generator.resolveVisibleLayers(spec, palettes);
-        assertThat(visible).isEmpty();
+    @DisplayName("Генерация с анимацией создаёт atlas файлы")
+    void generateWithAnimationCreatesAtlas() {
+        AssetSpec spec = characterSpec();
+        List<Path> files = generator.generateAsset(spec, tempDir);
+
+        long atlasCount = files.stream()
+                .filter(p -> p.toString().contains("atlas"))
+                .filter(p -> p.toString().endsWith(".png"))
+                .count();
+        assertThat(atlasCount).isGreaterThanOrEqualTo(1);
     }
 
     @Test
-    void resolveVisibleLayers_includesOptionalLayerWhenPaletteExists() {
-        AssetSpec spec = minimalSpec(List.of(
-                new AssetLayer("overlay", "overlay", "skin", 1, true)
-        ));
-        Map<String, Color> palettes = Map.of("skin", Color.RED);
-        List<AssetLayer> visible = generator.resolveVisibleLayers(spec, palettes);
-        assertThat(visible).hasSize(1);
-    }
+    @DisplayName("Генерация с анимацией создаёт atlas-config.json")
+    void generateWithAnimationCreatesConfig() {
+        AssetSpec spec = characterSpec();
+        List<Path> files = generator.generateAsset(spec, tempDir);
 
-    // -----------------------------------------------------------------------
-    // applyTimeOfDayVariation
-    // -----------------------------------------------------------------------
-
-    @Test
-    void applyTimeOfDayVariation_noVariations_returnsSameSpec() {
-        AssetSpec spec = minimalSpec(List.of());
-        AssetSpec result = generator.applyTimeOfDayVariation(spec, Map.of());
-        assertThat(result).isSameAs(spec);
+        long configCount = files.stream()
+                .filter(p -> p.toString().endsWith(".json"))
+                .count();
+        assertThat(configCount).isGreaterThanOrEqualTo(1);
     }
 
     @Test
-    void applyTimeOfDayVariation_withVariation_tintsPalettes() {
-        List<ColorPalette> palettes = List.of(
-                new ColorPalette("skin", List.of("#FFFFFF"))
-        );
-        List<TimeOfDayVariation> variations = List.of(
-                new TimeOfDayVariation("evening", "#FF0000", 0.5)
-        );
-        AssetSpec spec = new AssetSpec(
-                "test", "character", "desc",
-                List.of(), List.of(), palettes, variations,
-                null, defaultConstraints());
+    @DisplayName("Слой background генерируется как прозрачный RGBA")
+    void backgroundLayerHasTransparency() throws Exception {
+        AssetSpec spec = locationSpec();
+        List<Path> files = generator.generateAsset(spec, tempDir);
 
-        Map<String, Color> resolved = generator.resolvePalettes(palettes);
-        AssetSpec tinted = generator.applyTimeOfDayVariation(spec, resolved);
+        Path bgFile = files.stream()
+                .filter(p -> p.getFileName().toString().equals("background.png"))
+                .findFirst().orElseThrow();
 
-        // palette should be modified; verify first colour is now a blend
-        String blended = tinted.palettes().get(0).colors().get(0);
-        assertThat(blended).isNotEqualTo("#FFFFFF");
-    }
-
-    // -----------------------------------------------------------------------
-    // parseHex + blendHex
-    // -----------------------------------------------------------------------
-
-    @Test
-    void parseHex_withHash_parsesCorrectly() {
-        Color c = generator.parseHex("#FF8800");
-        assertThat(c.getRed()).isEqualTo(0xFF);
-        assertThat(c.getGreen()).isEqualTo(0x88);
-        assertThat(c.getBlue()).isEqualTo(0x00);
+        BufferedImage image = ImageIO.read(bgFile.toFile());
+        // Check that at least one pixel has alpha < 255 (transparent area)
+        boolean hasTransparentPixel = false;
+        for (int y = 0; y < image.getHeight() && !hasTransparentPixel; y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                int alpha = (image.getRGB(x, y) >> 24) & 0xFF;
+                if (alpha < 255) {
+                    hasTransparentPixel = true;
+                    break;
+                }
+            }
+        }
+        assertThat(hasTransparentPixel).isTrue();
     }
 
     @Test
-    void parseHex_withoutHash_parsesCorrectly() {
-        Color c = generator.parseHex("00FF00");
-        assertThat(c.getGreen()).isEqualTo(0xFF);
+    @DisplayName("generateLayerImage возвращает ARGB BufferedImage")
+    void generateLayerImageReturnsArgb() {
+        AssetLayer layer = new AssetLayer("test", "background", "test layer", 0);
+        AssetSpec spec = locationSpec();
+        BufferedImage image = generator.generateLayerImage(layer, spec.colorPalette(), spec);
+
+        assertThat(image.getType()).isEqualTo(BufferedImage.TYPE_INT_ARGB);
     }
 
     @Test
-    void blendHex_zeroAlpha_returnsBase() {
-        String blended = generator.blendHex("#FF0000", Color.BLUE, 0f);
-        assertThat(blended).isEqualToIgnoringCase("#FF0000");
+    @DisplayName("generateAnimationFrames возвращает правильное количество кадров")
+    void generateAnimationFramesCorrectCount() {
+        AnimationSpec animSpec = new AnimationSpec("idle", 24, 12, true, 128, 128);
+        List<BufferedImage> frames = generator.generateAnimationFrames(
+                animSpec, ColorPalette.projectDefault());
+
+        assertThat(frames).hasSize(24);
     }
 
     @Test
-    void blendHex_fullAlpha_returnsTint() {
-        String blended = generator.blendHex("#FF0000", new Color(0, 255, 0), 1f);
-        assertThat(blended).isEqualToIgnoringCase("#00FF00");
+    @DisplayName("Кадры анимации одинакового размера")
+    void animationFramesSameSize() {
+        AnimationSpec animSpec = new AnimationSpec("walk", 20, 12, true, 64, 64);
+        List<BufferedImage> frames = generator.generateAnimationFrames(
+                animSpec, ColorPalette.projectDefault());
+
+        for (BufferedImage frame : frames) {
+            assertThat(frame.getWidth()).isEqualTo(64);
+            assertThat(frame.getHeight()).isEqualTo(64);
+        }
     }
 
-    @Test
-    void blendHex_halfAlpha_blendsMidpoint() {
-        String blended = generator.blendHex("#FF0000", new Color(0xFF, 0xFF, 0x00), 0.5f);
-        // Red: 255, Green: 127 or 128, Blue: 0
-        assertThat(blended).startsWith("#FF");
-    }
+    // --- Test fixtures ---
 
-    // -----------------------------------------------------------------------
-    // generate() integration
-    // -----------------------------------------------------------------------
-
-    @Test
-    void generate_createsOutputDirectory() {
-        AssetSpec spec = minimalSpec(List.of(
-                new AssetLayer("base", "base", null, 0, false)
-        ));
-        Path outDir = tempDir.resolve("output");
-        generator.generate(spec, outDir);
-        assertThat(outDir).isDirectory();
-    }
-
-    @Test
-    void generate_writesPngForEachLayer() {
-        AssetSpec spec = minimalSpec(List.of(
-                new AssetLayer("base", "base", null, 0, false),
-                new AssetLayer("eyes", "overlay", null, 1, false)
-        ));
-        generator.generate(spec, tempDir);
-        long pngCount = countFiles(tempDir, ".png");
-        assertThat(pngCount).isGreaterThanOrEqualTo(2);
-    }
-
-    @Test
-    void generate_writesAtlasConfig() {
-        AnimationSpec anim = new AnimationSpec("idle", 2, 8, true, List.of(0, 1));
-        AssetSpec spec = new AssetSpec(
-                "hero", "character", "desc",
-                List.of(new AssetLayer("base", "base", null, 0, false)),
-                List.of(anim),
-                List.of(), List.of(),
-                null, defaultConstraints());
-        generator.generate(spec, tempDir);
-        long jsonCount = countFiles(tempDir, ".json");
-        assertThat(jsonCount).isGreaterThanOrEqualTo(1);
-    }
-
-    // -----------------------------------------------------------------------
-    // Helpers
-    // -----------------------------------------------------------------------
-
-    private AssetSpec minimalSpec(List<AssetLayer> layers) {
+    private AssetSpec locationSpec() {
         return new AssetSpec(
-                "test_asset", "character", "A test asset",
-                layers, List.of(), List.of(), List.of(),
-                null, defaultConstraints());
+                "locations", "home", "1.0.0",
+                List.of(
+                        new AssetLayer("background", "background", "Far wall", 0),
+                        new AssetLayer("midground", "midground", "Main space", 1),
+                        new AssetLayer("foreground", "foreground", "Near elements", 2)
+                ),
+                ColorPalette.projectDefault(),
+                List.of(),
+                List.of(),
+                new NamingSpec("locations", "home", "assets/locations/home"),
+                AssetConstraints.defaults()
+        );
     }
 
-    private AssetConstraints defaultConstraints() {
-        return new AssetConstraints(64, 64, 16, true, "png,webp");
-    }
-
-    private long countFiles(Path dir, String ext) {
-        try {
-            return java.nio.file.Files.walk(dir)
-                    .filter(java.nio.file.Files::isRegularFile)
-                    .filter(p -> p.toString().endsWith(ext))
-                    .count();
-        } catch (Exception e) { return 0; }
+    private AssetSpec characterSpec() {
+        return new AssetSpec(
+                "characters", "tanya", "1.0.0",
+                List.of(
+                        new AssetLayer("base", "base", "Base body", 0),
+                        new AssetLayer("outfit", "outfit", "Clothing", 1)
+                ),
+                ColorPalette.projectDefault(),
+                List.of(
+                        new AnimationSpec("idle", 24, 12, true, 128, 128)
+                ),
+                List.of(),
+                new NamingSpec("characters", "tanya", "assets/characters/tanya"),
+                AssetConstraints.defaults()
+        );
     }
 }

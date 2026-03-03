@@ -1,108 +1,125 @@
 package ru.lifegame.assets.application.usecase;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import ru.lifegame.assets.domain.model.asset.AssetSpec;
 import ru.lifegame.assets.infrastructure.parser.XmlAssetSpecParser;
-import ru.lifegame.assets.infrastructure.scanner.PromptDirectoryScanner;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Unit tests for {@link UnifyXmlSpecsUseCase}.
- *
- * <p>Uses real {@link PromptDirectoryScanner} and {@link XmlAssetSpecParser}
- * implementations with an in-memory temp directory, so no mocking is needed.</p>
- */
+@DisplayName("UnifyXmlSpecsUseCase — приведение к unified format")
 class UnifyXmlSpecsTest {
+
+    private UnifyXmlSpecsUseCase useCase;
 
     @TempDir
     Path tempDir;
 
-    private final UnifyXmlSpecsUseCase useCase = new UnifyXmlSpecsUseCase(
-            new PromptDirectoryScanner(),
-            new XmlAssetSpecParser()
-    );
-
-    // -----------------------------------------------------------------------
-    // execute()
-    // -----------------------------------------------------------------------
-
-    @Test
-    void execute_twoSpecFiles_returnsTwoParsedSpecs() throws IOException {
-        createSpec("characters", "tanya",
-                "<asset id='tanya' category='character'/>");
-        createSpec("locations", "home",
-                "<asset id='home' category='location'/>");
-
-        List<AssetSpec> specs = useCase.execute(tempDir);
-
-        assertThat(specs).hasSize(2);
-        assertThat(specs).anyMatch(s -> s.id().equals("tanya"));
-        assertThat(specs).anyMatch(s -> s.id().equals("home"));
+    @BeforeEach
+    void setUp() {
+        useCase = new UnifyXmlSpecsUseCase(new XmlAssetSpecParser());
     }
 
     @Test
-    void execute_emptyRoot_returnsEmptyList() {
-        List<AssetSpec> specs = useCase.execute(tempDir);
-        assertThat(specs).isEmpty();
+    @DisplayName("Конвертация character XML в AssetSpec")
+    void convertCharacterXml() throws IOException {
+        Path xmlFile = tempDir.resolve("visual-specs.xml");
+        Files.writeString(xmlFile, characterXml(), StandardCharsets.UTF_8);
+
+        AssetSpec spec = useCase.execute(xmlFile);
+
+        assertThat(spec.entityType()).isEqualTo("characters");
+        assertThat(spec.entityName()).isEqualTo("tanya");
+        assertThat(spec.layers()).isNotEmpty();
+        assertThat(spec.colorPalette()).isNotNull();
+        assertThat(spec.constraints()).isNotNull();
     }
 
     @Test
-    void execute_singleSpec_returnsOneItem() throws IOException {
-        createSpec("pets", "garfield",
-                "<asset id='garfield' category='pet'/>");
+    @DisplayName("Конвертация location XML в AssetSpec")
+    void convertLocationXml() throws IOException {
+        Path xmlFile = tempDir.resolve("visual-specs.xml");
+        Files.writeString(xmlFile, locationXml(), StandardCharsets.UTF_8);
 
-        List<AssetSpec> specs = useCase.execute(tempDir);
+        AssetSpec spec = useCase.execute(xmlFile);
 
-        assertThat(specs).hasSize(1);
-        assertThat(specs.get(0).id()).isEqualTo("garfield");
-        assertThat(specs.get(0).category()).isEqualTo("pet");
+        assertThat(spec.entityType()).isEqualTo("locations");
+        assertThat(spec.entityName()).isEqualTo("home");
+        assertThat(spec.layers()).hasSize(3);
     }
 
     @Test
-    void execute_specWithLayers_parsesLayersCorrectly() throws IOException {
-        createSpec("characters", "hero", """
-                <asset id='hero' category='character'>
-                  <layers>
-                    <layer name='base' type='base' zIndex='0' optional='false'/>
-                    <layer name='hat'  type='overlay' zIndex='1' optional='true'/>
-                  </layers>
-                </asset>
-                """);
+    @DisplayName("Unified spec содержит все обязательные поля")
+    void unifiedSpecContainsAllFields() throws IOException {
+        Path xmlFile = tempDir.resolve("visual-specs.xml");
+        Files.writeString(xmlFile, characterXml(), StandardCharsets.UTF_8);
 
-        List<AssetSpec> specs = useCase.execute(tempDir);
+        AssetSpec spec = useCase.execute(xmlFile);
 
-        assertThat(specs).hasSize(1);
-        AssetSpec hero = specs.get(0);
-        assertThat(hero.layers()).hasSize(2);
-        assertThat(hero.layers().get(1).optional()).isTrue();
+        assertThat(spec.entityType()).isNotBlank();
+        assertThat(spec.entityName()).isNotBlank();
+        assertThat(spec.version()).isNotBlank();
+        assertThat(spec.layers()).isNotEmpty();
+        assertThat(spec.colorPalette()).isNotNull();
+        assertThat(spec.naming()).isNotNull();
+        assertThat(spec.constraints()).isNotNull();
     }
 
     @Test
-    void execute_multipleCategories_collectsAllSpecs() throws IOException {
-        createSpec("characters", "tanya",   "<asset id='tanya'   category='character'/>");
-        createSpec("characters", "husband", "<asset id='husband' category='character'/>");
-        createSpec("locations",  "home",    "<asset id='home'    category='location'/>");
-        createSpec("pets",       "garfield", "<asset id='garfield' category='pet'/>");
+    @DisplayName("Анимации из XML переносятся в AssetSpec")
+    void animationsPreserved() throws IOException {
+        Path xmlFile = tempDir.resolve("visual-specs.xml");
+        Files.writeString(xmlFile, characterXml(), StandardCharsets.UTF_8);
 
-        List<AssetSpec> specs = useCase.execute(tempDir);
+        AssetSpec spec = useCase.execute(xmlFile);
 
-        assertThat(specs).hasSize(4);
+        assertThat(spec.animations()).hasSize(1);
+        assertThat(spec.animations().get(0).name()).isEqualTo("idle");
+        assertThat(spec.animations().get(0).frames()).isEqualTo(24);
     }
 
-    // -----------------------------------------------------------------------
-    // Helpers
-    // -----------------------------------------------------------------------
+    private String characterXml() {
+        return """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <asset-spec version="1.0.0">
+                    <meta>
+                        <entity-type>characters</entity-type>
+                        <entity-name>tanya</entity-name>
+                        <version>1.0.0</version>
+                    </meta>
+                    <layers>
+                        <layer id="base" type="base" z-order="0">Base body</layer>
+                        <layer id="outfit" type="outfit" z-order="1">Clothing</layer>
+                    </layers>
+                    <animations>
+                        <animation name="idle" frames="24" fps="2" loop="true" frame-width="128" frame-height="128"/>
+                    </animations>
+                </asset-spec>
+                """;
+    }
 
-    private void createSpec(String category, String entity, String xml) throws IOException {
-        Path dir = Files.createDirectories(tempDir.resolve(category).resolve(entity));
-        Files.writeString(dir.resolve("visual-specs.xml"), xml, StandardCharsets.UTF_8);
+    private String locationXml() {
+        return """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <asset-spec version="1.0.0">
+                    <meta>
+                        <entity-type>locations</entity-type>
+                        <entity-name>home</entity-name>
+                        <version>1.0.0</version>
+                    </meta>
+                    <layers>
+                        <layer id="background" type="background" z-order="0">Wall</layer>
+                        <layer id="midground" type="midground" z-order="1">Furniture</layer>
+                        <layer id="foreground" type="foreground" z-order="2">Front frame</layer>
+                    </layers>
+                </asset-spec>
+                """;
     }
 }

@@ -1,5 +1,7 @@
 package ru.lifegame.assets.infrastructure.scanner;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -8,108 +10,110 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Unit tests for {@link PromptDirectoryScanner}.
- */
+@DisplayName("PromptDirectoryScanner — обнаружение entity и missing specs")
 class PromptDirectoryScannerTest {
+
+    private PromptDirectoryScanner scanner;
 
     @TempDir
     Path tempDir;
 
-    private final PromptDirectoryScanner scanner = new PromptDirectoryScanner();
-
-    // -----------------------------------------------------------------------
-    // findMissingSpecs
-    // -----------------------------------------------------------------------
-
-    @Test
-    void findMissingSpecs_allHaveSpecs_returnsEmpty() throws IOException {
-        Path chars = Files.createDirectories(tempDir.resolve("characters"));
-        Path tanya = Files.createDirectories(chars.resolve("tanya"));
-        Files.writeString(tanya.resolve("visual-specs.xml"), "<asset id='x' category='y'/>");
-
-        List<Path> missing = scanner.findMissingSpecs(tempDir);
-        assertThat(missing).isEmpty();
+    @BeforeEach
+    void setUp() {
+        scanner = new PromptDirectoryScanner();
     }
 
     @Test
-    void findMissingSpecs_oneEntityMissingSpec_returnsThatDirectory() throws IOException {
-        Path chars   = Files.createDirectories(tempDir.resolve("characters"));
-        Path tanya   = Files.createDirectories(chars.resolve("tanya"));
-        Path husband = Files.createDirectories(chars.resolve("husband"));
+    @DisplayName("Обнаруживает entity-директории под characters/ и locations/")
+    void discoverEntities() throws IOException {
+        Files.createDirectories(tempDir.resolve("characters/tanya"));
+        Files.createDirectories(tempDir.resolve("characters/husband"));
+        Files.createDirectories(tempDir.resolve("locations/home"));
 
-        // Only tanya has a spec
-        Files.writeString(tanya.resolve("visual-specs.xml"), "<asset id='x' category='y'/>");
-        // husband directory is empty (no spec)
-        Files.writeString(husband.resolve("dummy.txt"), "placeholder");
+        List<Path> entities = scanner.discoverEntities(tempDir);
+        assertThat(entities).hasSize(3);
+    }
+
+    @Test
+    @DisplayName("Игнорирует файлы (не директории) внутри entity-type")
+    void ignoresFiles() throws IOException {
+        Files.createDirectories(tempDir.resolve("characters/tanya"));
+        Files.createFile(tempDir.resolve("characters/some-file.txt"));
+
+        List<Path> entities = scanner.discoverEntities(tempDir);
+        assertThat(entities).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("Игнорирует неизвестные типовые директории")
+    void ignoresUnknownTypeDirs() throws IOException {
+        Files.createDirectories(tempDir.resolve("characters/tanya"));
+        Files.createDirectories(tempDir.resolve("unknown_type/something"));
+
+        List<Path> entities = scanner.discoverEntities(tempDir);
+        assertThat(entities).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("findMissingSpecs: entity без visual-specs.xml → missing")
+    void findMissingSpecs_noXml() throws IOException {
+        Files.createDirectories(tempDir.resolve("characters/tanya"));
+        Files.createDirectories(tempDir.resolve("characters/husband"));
+
+        List<Path> missing = scanner.findMissingSpecs(tempDir);
+        assertThat(missing).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("findMissingSpecs: entity с visual-specs.xml → не missing")
+    void findMissingSpecs_withXml() throws IOException {
+        Path tanyaDir = tempDir.resolve("characters/tanya");
+        Files.createDirectories(tanyaDir);
+        Files.createFile(tanyaDir.resolve("visual-specs.xml"));
+
+        Path husbandDir = tempDir.resolve("characters/husband");
+        Files.createDirectories(husbandDir);
 
         List<Path> missing = scanner.findMissingSpecs(tempDir);
         assertThat(missing).hasSize(1);
-        assertThat(missing.get(0)).isEqualTo(husband);
+        assertThat(missing.get(0).getFileName().toString()).isEqualTo("husband");
     }
 
     @Test
-    void findMissingSpecs_coreDirectorySkipped() throws IOException {
-        // _core directories are skipped (start with '_')
-        Path core = Files.createDirectories(tempDir.resolve("_core"));
-        Files.writeString(core.resolve("schema.xml"), "...");
+    @DisplayName("extractEntityType возвращает тип из пути")
+    void extractEntityType() throws IOException {
+        Path entityDir = tempDir.resolve("characters/tanya");
+        Files.createDirectories(entityDir);
 
-        List<Path> missing = scanner.findMissingSpecs(tempDir);
-        assertThat(missing).isEmpty();
-    }
-
-    // -----------------------------------------------------------------------
-    // findAllSpecs
-    // -----------------------------------------------------------------------
-
-    @Test
-    void findAllSpecs_multipleSpecs_returnsAllPaths() throws IOException {
-        Path tanya = Files.createDirectories(
-                tempDir.resolve("characters").resolve("tanya"));
-        Path home = Files.createDirectories(
-                tempDir.resolve("locations").resolve("home"));
-
-        Path spec1 = tanya.resolve("visual-specs.xml");
-        Path spec2 = home.resolve("visual-specs.xml");
-        Files.writeString(spec1, "<asset id='x' category='y'/>");
-        Files.writeString(spec2, "<asset id='y' category='z'/>");
-
-        List<Path> specs = scanner.findAllSpecs(tempDir);
-        assertThat(specs).hasSize(2);
-        assertThat(specs).contains(spec1, spec2);
+        String type = scanner.extractEntityType(entityDir);
+        assertThat(type).isEqualTo("characters");
     }
 
     @Test
-    void findAllSpecs_emptyRoot_returnsEmpty() throws IOException {
-        List<Path> specs = scanner.findAllSpecs(tempDir);
-        assertThat(specs).isEmpty();
+    @DisplayName("extractEntityName возвращает имя из пути")
+    void extractEntityName() throws IOException {
+        Path entityDir = tempDir.resolve("locations/home");
+        Files.createDirectories(entityDir);
+
+        String name = scanner.extractEntityName(entityDir);
+        assertThat(name).isEqualTo("home");
     }
 
     @Test
-    void findAllSpecs_ignoresNonSpecXmlFiles() throws IOException {
-        Path tanya = Files.createDirectories(
-                tempDir.resolve("characters").resolve("tanya"));
-        Files.writeString(tanya.resolve("other.xml"), "...");
-
-        List<Path> specs = scanner.findAllSpecs(tempDir);
-        assertThat(specs).isEmpty();
+    @DisplayName("Пустой prompts root → пустой результат")
+    void emptyRoot() {
+        List<Path> entities = scanner.discoverEntities(tempDir);
+        assertThat(entities).isEmpty();
     }
 
-    // -----------------------------------------------------------------------
-    // Edge cases
-    // -----------------------------------------------------------------------
-
     @Test
-    void findMissingSpecs_categoryDirectoryNotCountedAsEntity() throws IOException {
-        // 'characters' is a category dir (has sub-directories), not a leaf
-        Path chars = Files.createDirectories(tempDir.resolve("characters"));
-        Path tanya = Files.createDirectories(chars.resolve("tanya"));
-        Files.writeString(tanya.resolve("visual-specs.xml"), "<asset id='x' category='y'/>");
+    @DisplayName("discoverEntities находит pets/")
+    void discoverPets() throws IOException {
+        Files.createDirectories(tempDir.resolve("pets/garfield"));
 
-        List<Path> missing = scanner.findMissingSpecs(tempDir);
-        // 'characters' should NOT be in the missing list
-        assertThat(missing).doesNotContain(chars);
+        List<Path> entities = scanner.discoverEntities(tempDir);
+        assertThat(entities).hasSize(1);
     }
 }
