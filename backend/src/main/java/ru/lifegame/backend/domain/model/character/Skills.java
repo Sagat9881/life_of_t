@@ -23,22 +23,19 @@ public record Skills(Map<String, Integer> values) {
         return new Skills(copy);
     }
 
-    /**
-     * Convert skills to a map for serialization/display.
-     */
     public Map<String, Integer> toMap() {
         return values;
     }
 
     public static Skills initial() {
         return new Skills(Map.of(
-                "cooking", 30,
-                "dog_care", 40,
-                "efficiency", 20,
-                "empathy", 25,
-                "humor", 15,
-                "rhetoric", 10,
-                "charisma", 20,
+                "cooking",       30,
+                "dog_care",      40,
+                "efficiency",    20,
+                "empathy",       25,
+                "humor",         15,
+                "rhetoric",      10,
+                "charisma",      20,
                 "assertiveness", 15,
                 "communication", 30
         ));

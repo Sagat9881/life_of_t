@@ -88,8 +88,8 @@ public class PlayerCharacter {
         workedToday = false;
     }
 
-    public void markRested() { this.restedToday = true; }
-    public void markWorked() { this.workedToday = true; }
+    public void markRested()         { this.restedToday = true; }
+    public void markWorked()         { this.workedToday = true; }
     public void resetHouseholdDays() { this.daysSinceHousehold = 0; }
 
     public boolean isBurnedOut() {
@@ -112,16 +112,16 @@ public class PlayerCharacter {
     public void setLocation(Location location) { this.location = location; }
 
     // --- Getters ---
-    public PlayerId id() { return id; }
-    public String name() { return name; }
-    public Stats stats() { return stats; }
-    public JobInfo job() { return job; }
-    public Location location() { return location; }
-    public Map<String, Boolean> tags() { return Collections.unmodifiableMap(tags); }
-    public Skills skills() { return skills; }
-    public List<String> inventory() { return Collections.unmodifiableList(inventory); }
-    public int consecutiveWorkDays() { return consecutiveWorkDays; }
-    public int daysSinceHousehold() { return daysSinceHousehold; }
+    public PlayerId id()                           { return id; }
+    public String name()                           { return name; }
+    public Stats stats()                           { return stats; }
+    public JobInfo job()                           { return job; }
+    public Location location()                     { return location; }
+    public Map<String, Boolean> tags()             { return Collections.unmodifiableMap(tags); }
+    public Skills skills()                         { return skills; }
+    public List<String> inventory()                { return Collections.unmodifiableList(inventory); }
+    public int consecutiveWorkDays()               { return consecutiveWorkDays; }
+    public int daysSinceHousehold()                { return daysSinceHousehold; }
 
     public static PlayerCharacter initial() {
         return new PlayerCharacter(

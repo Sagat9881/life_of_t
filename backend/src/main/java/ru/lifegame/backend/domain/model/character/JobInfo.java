@@ -9,7 +9,7 @@ public record JobInfo(
 ) {
     public JobInfo {
         satisfaction = clamp(satisfaction);
-        burnoutRisk = Math.max(0, Math.min(burnoutRisk, GameBalance.BURNOUT_THRESHOLD));
+        burnoutRisk  = Math.max(0, Math.min(burnoutRisk, GameBalance.BURNOUT_THRESHOLD));
     }
 
     public JobInfo changeSatisfaction(int delta) {
