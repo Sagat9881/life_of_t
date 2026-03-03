@@ -1,0 +1,181 @@
+.hud {
+  height: var(--hud-height);
+  flex-shrink: 0;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--bg-secondary);
+  box-shadow: var(--shadow-sm);
+  transition: background var(--transition-slow);
+  z-index: 100;
+}
+
+/* Time-of-day themes */
+.morning {
+  background: linear-gradient(135deg, #FFF8F0 0%, #FFE8CC 100%);
+}
+
+.day {
+  background: linear-gradient(135deg, #FFF8F0 0%, #F0F8FF 100%);
+}
+
+.evening {
+  background: linear-gradient(135deg, #FFF0E6 0%, #FFE0D0 100%);
+}
+
+.night {
+  background: linear-gradient(135deg, #2C1810 0%, #3D2B1F 100%);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.night .statIcon,
+.night .day,
+.night .hour {
+  filter: brightness(2);
+}
+
+.night .bar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.night .moneyCurrency,
+.night .moneyAmount {
+  color: var(--stat-money);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 100%;
+  padding: 0 var(--space-4);
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-family: var(--font-pixel);
+  font-size: var(--text-pixel-xs);
+  color: var(--text-muted);
+}
+
+/* ─── Stats section ─── */
+.stats {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.statRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.statIcon {
+  font-size: 10px;
+  width: 14px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.bar {
+  flex: 1;
+  height: 5px;
+  background: rgba(44, 24, 16, 0.1);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-slow);
+  min-width: 2px;
+}
+
+.energy { background: var(--stat-energy); }
+.health { background: var(--stat-health); }
+.stress { background: var(--stat-stress); }
+.mood { background: var(--stat-mood); }
+
+/* ─── Money ─── */
+.money {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  flex-shrink: 0;
+  padding: 0 var(--space-2);
+}
+
+.moneyCurrency {
+  font-family: var(--font-pixel);
+  font-size: var(--text-pixel-xs);
+  color: var(--stat-money);
+  font-weight: bold;
+}
+
+.moneyAmount {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Time section ─── */
+.timeSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.timeDisplay {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--text-secondary);
+}
+
+.day {
+  font-family: var(--font-pixel);
+  font-size: var(--text-pixel-xs);
+  color: var(--text-secondary);
+}
+
+.hour {
+  font-family: var(--font-pixel);
+  font-size: var(--text-pixel-sm);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.endDayBtn {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 3px var(--space-2);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.endDayBtn:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.endDayBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.endDayText {
+  font-family: var(--font-pixel);
+  font-size: var(--text-pixel-xs);
+  white-space: nowrap;
+}

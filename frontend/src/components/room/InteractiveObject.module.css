@@ -1,0 +1,89 @@
+.object {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform var(--transition-fast), filter var(--transition-fast);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.object:hover .sprite {
+  filter: brightness(1.15) drop-shadow(0 4px 8px rgba(44, 24, 16, 0.25));
+  transform: scale(1.05);
+}
+
+.object:active .sprite {
+  transform: scale(0.95);
+}
+
+.sprite {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  transition: filter var(--transition-fast), transform var(--transition-fast);
+}
+
+.label {
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-family: var(--font-pixel);
+  color: var(--text-muted);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  pointer-events: none;
+  background: var(--bg-card);
+  padding: 1px 4px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.object:hover .label {
+  opacity: 1;
+}
+
+.active {
+  filter: drop-shadow(0 0 8px var(--color-primary));
+}
+
+.active .sprite {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+@keyframes click {
+  0% { transform: scale(1.05); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1.05); }
+}
+
+.clicking .sprite {
+  animation: click 300ms ease-in-out;
+}
+
+.object[data-available='false'] {
+  opacity: 0.6;
+  cursor: default;
+  pointer-events: none;
+}
+
+.object[data-available='false']:hover .sprite {
+  filter: none;
+  transform: none;
+}
+
+@media (hover: none) {
+  .label { display: none; }
+  .object:hover .sprite { filter: none; transform: scale(1.05); }
+}

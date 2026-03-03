@@ -1,0 +1,85 @@
+import { AlertTriangle } from 'lucide-react';
+import { Modal } from '@/components/shared/Modal';
+import type { Conflict } from '@/types/game';
+import styles from './ConflictDialog.module.css';
+
+interface ConflictDialogProps {
+  conflict: Conflict;
+  isLoading?: boolean;
+  onChooseTactic: (tacticId: string) => void;
+}
+
+function CspBar({ label, value, max, color }: { label: string; value: number; max: number; color: string }) {
+  const pct = Math.min(100, (value / max) * 100);
+  return (
+    <div className={styles.cspBar}>
+      <span className={styles.cspLabel}>{label}</span>
+      <div className={styles.cspTrack}>
+        <div className={styles.cspFill} style={{ width: `${pct}%`, background: color }} />
+      </div>
+      <span className={styles.cspValue}>{value}/{max}</span>
+    </div>
+  );
+}
+
+export function ConflictDialog({ conflict, isLoading = false, onChooseTactic }: ConflictDialogProps) {
+  const { description, round, maxRounds, playerCsp, opponentCsp, tactics } = conflict;
+  const maxCsp = 100;
+
+  return (
+    <Modal isOpen title="Конфликт!" closeable={false}>
+      <div className={styles.content}>
+        <div className={styles.conflictHeader}>
+          <AlertTriangle size={28} className={styles.warningIcon} />
+          <div className={styles.roundInfo}>
+            <span className={styles.roundLabel}>Раунд</span>
+            <span className={styles.roundValue}>{round} / {maxRounds}</span>
+          </div>
+        </div>
+
+        <p className={styles.description}>{description}</p>
+
+        {/* CSP Bars */}
+        <div className={styles.cspSection}>
+          <h4 className={styles.cspTitle}>Напряжённость</h4>
+          <CspBar label="Вы" value={playerCsp} max={maxCsp} color="var(--color-primary)" />
+          <CspBar label="Оппонент" value={opponentCsp} max={maxCsp} color="var(--color-danger)" />
+        </div>
+
+        {/* Tactics */}
+        <div className={styles.tactics}>
+          <h4 className={styles.tacticsTitle}>Выберите тактику:</h4>
+          <div className={styles.tacticsList}>
+            {tactics.map(tactic => (
+              <button
+                key={tactic.id}
+                className={styles.tacticBtn}
+                onClick={() => onChooseTactic(tactic.id)}
+                disabled={isLoading}
+              >
+                <div className={styles.tacticContent}>
+                  <span className={styles.tacticName}>{tactic.name}</span>
+                  <span className={styles.tacticDesc}>{tactic.description}</span>
+                </div>
+                {tactic.successChance !== undefined && (
+                  <span
+                    className={styles.successChance}
+                    style={{
+                      color: tactic.successChance >= 60
+                        ? 'var(--color-success)'
+                        : tactic.successChance >= 40
+                        ? 'var(--color-warning)'
+                        : 'var(--color-danger)'
+                    }}
+                  >
+                    {tactic.successChance}%
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+}
