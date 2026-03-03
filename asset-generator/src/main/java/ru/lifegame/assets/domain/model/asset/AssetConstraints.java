@@ -1,25 +1,29 @@
 package ru.lifegame.assets.domain.model.asset;
 
 /**
- * Physical size and frame constraints for a generated asset.
+ * Technical constraints for asset generation.
  *
- * @param widthPx        Canvas width in pixels.
- * @param heightPx       Canvas height in pixels.
- * @param maxFrames      Upper bound on atlas frame count.
- * @param allowTransparency Whether the output supports an alpha channel.
- * @param outputFormats  Comma-separated list of accepted output formats
- *                       (e.g., "png,webp").
+ * @param maxFileSizeKb         maximum file size in KB per asset (default 500)
+ * @param maxSpriteSheetWidth   max sprite sheet width in pixels (default 2048)
+ * @param maxSpriteSheetHeight  max sprite sheet height in pixels (default 2048)
+ * @param compressionQuality    compression quality 0..100 (default 85)
+ * @param bitDepth              bit depth (default 32 for RGBA)
  */
 public record AssetConstraints(
-        int widthPx,
-        int heightPx,
-        int maxFrames,
-        boolean allowTransparency,
-        String outputFormats
+        int maxFileSizeKb,
+        int maxSpriteSheetWidth,
+        int maxSpriteSheetHeight,
+        int compressionQuality,
+        int bitDepth
 ) {
     public AssetConstraints {
-        if (widthPx <= 0)  throw new IllegalArgumentException("widthPx must be positive");
-        if (heightPx <= 0) throw new IllegalArgumentException("heightPx must be positive");
-        if (maxFrames <= 0) throw new IllegalArgumentException("maxFrames must be positive");
+        if (maxFileSizeKb <= 0) throw new IllegalArgumentException("maxFileSizeKb must be positive");
+        if (compressionQuality < 0 || compressionQuality > 100) {
+            throw new IllegalArgumentException("compressionQuality must be 0..100");
+        }
+    }
+
+    public static AssetConstraints defaults() {
+        return new AssetConstraints(500, 2048, 2048, 85, 32);
     }
 }

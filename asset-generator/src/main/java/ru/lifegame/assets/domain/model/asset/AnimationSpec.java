@@ -1,30 +1,40 @@
 package ru.lifegame.assets.domain.model.asset;
 
-import java.util.List;
-
 /**
- * Describes an animation sequence for a sprite asset.
+ * Specification for a single animation within an asset.
  *
- * <p>Each animation belongs to a named state (e.g., "idle", "walk") and
- * contains an ordered list of frame indices referencing the atlas strip.</p>
- *
- * @param state      Animation state name (e.g., "idle", "run").
- * @param frameCount Total number of frames in the sequence.
- * @param fps        Playback speed in frames per second.
- * @param loop       Whether the animation loops after the last frame.
- * @param frames     Ordered list of frame indices in the atlas.
+ * @param name       animation identifier (e.g. "idle", "walk", "sit_work")
+ * @param frames     total number of frames (must be 1..50)
+ * @param fps        frames per second for playback
+ * @param loop       whether the animation loops
+ * @param frameWidth width of each frame in pixels
+ * @param frameHeight height of each frame in pixels
  */
 public record AnimationSpec(
-        String state,
-        int frameCount,
+        String name,
+        int frames,
         int fps,
         boolean loop,
-        List<Integer> frames
+        int frameWidth,
+        int frameHeight
 ) {
+    /** Maximum allowed frames per animation. */
+    public static final int MAX_FRAMES = 50;
+
     public AnimationSpec {
-        if (state == null || state.isBlank()) throw new IllegalArgumentException("Animation state must not be blank");
-        if (frameCount <= 0) throw new IllegalArgumentException("frameCount must be positive");
-        if (fps <= 0) throw new IllegalArgumentException("fps must be positive");
-        frames = List.copyOf(frames);
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Animation name must not be blank");
+        }
+        if (frames < 1 || frames > MAX_FRAMES) {
+            throw new IllegalArgumentException(
+                    "frames must be between 1 and " + MAX_FRAMES + ", got " + frames);
+        }
+        if (fps < 1) {
+            throw new IllegalArgumentException("fps must be positive, got " + fps);
+        }
+        if (frameWidth < 1 || frameHeight < 1) {
+            throw new IllegalArgumentException(
+                    "frameWidth and frameHeight must be positive");
+        }
     }
 }

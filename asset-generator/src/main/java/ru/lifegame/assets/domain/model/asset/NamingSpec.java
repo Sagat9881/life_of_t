@@ -1,25 +1,26 @@
 package ru.lifegame.assets.domain.model.asset;
 
 /**
- * Naming conventions applied when writing output files.
+ * Naming conventions for generated assets.
  *
- * @param prefix       Short token prepended to every output filename
- *                     (e.g., "tanya").
- * @param layerPattern Printf-style pattern for layer filenames
- *                     (e.g., "%s_layer_%02d.png").
- * @param atlasPattern Printf-style pattern for atlas filenames
- *                     (e.g., "%s_atlas.webp").
- * @param configPattern Printf-style pattern for JSON config filenames
- *                      (e.g., "%s_atlas.json").
+ * @param entityType entity type: "characters", "locations", "pets"
+ * @param entityName entity name in snake_case: "tanya", "home", "garfield"
+ * @param outputDir  target output directory relative to assets root
  */
 public record NamingSpec(
-        String prefix,
-        String layerPattern,
-        String atlasPattern,
-        String configPattern
+        String entityType,
+        String entityName,
+        String outputDir
 ) {
     public NamingSpec {
-        if (prefix == null || prefix.isBlank())
-            throw new IllegalArgumentException("prefix must not be blank");
+        if (entityType == null || entityType.isBlank()) {
+            throw new IllegalArgumentException("entityType must not be blank");
+        }
+        if (entityName == null || entityName.isBlank()) {
+            throw new IllegalArgumentException("entityName must not be blank");
+        }
+        if (outputDir == null || outputDir.isBlank()) {
+            outputDir = "assets/" + entityType + "/" + entityName;
+        }
     }
 }

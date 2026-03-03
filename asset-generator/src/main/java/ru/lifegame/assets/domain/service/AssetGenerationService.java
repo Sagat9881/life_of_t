@@ -3,24 +3,19 @@ package ru.lifegame.assets.domain.service;
 import ru.lifegame.assets.domain.model.asset.AssetSpec;
 
 import java.nio.file.Path;
+import java.util.List;
 
 /**
- * Domain-level contract for generating a layered game asset.
- *
- * <p>Implementations are responsible for producing all output artefacts
- * (PNG layers, WebP atlas, JSON config) in the given output directory.</p>
- *
- * @see ru.lifegame.assets.infrastructure.generator.LayeredAssetGenerator
+ * Domain service interface for generating layered assets from specifications.
  */
 public interface AssetGenerationService {
 
     /**
-     * Generate all artefacts for the supplied {@code spec} inside
-     * {@code outputDir}.
+     * Generates all layers (static PNGs and animation atlases) for the given spec.
      *
-     * @param spec      the asset specification to generate
-     * @param outputDir target directory; created if absent
-     * @throws AssetGenerationException on any unrecoverable error
+     * @param spec       the asset specification parsed from XML
+     * @param outputRoot root directory where generated files will be written
+     * @return list of paths to all generated files
      */
-    void generate(AssetSpec spec, Path outputDir);
+    List<Path> generateAsset(AssetSpec spec, Path outputRoot);
 }
