@@ -1,0 +1,309 @@
+.scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+  cursor: default;
+}
+
+/* ─── Time-of-day backgrounds ─── */
+.morning {
+  background: linear-gradient(180deg, #FFE4B5 0%, #FFF8E7 40%, #8FD090 100%);
+}
+.day {
+  background: linear-gradient(180deg, #87CEEB 0%, #E0F4FF 40%, #7EC87E 100%);
+}
+.evening {
+  background: linear-gradient(180deg, #FF7E5F 0%, #FEB47B 40%, #6B8E23 100%);
+}
+.night {
+  background: linear-gradient(180deg, #0D1B2A 0%, #1B2A3A 40%, #2D4A2D 100%);
+}
+
+/* ─── Room floor ─── */
+.floor {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 35%;
+  background: #D4A574;
+  border-top: 3px solid #B8875A;
+}
+
+.floorPattern {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 47px,
+    rgba(0,0,0,0.06) 47px,
+    rgba(0,0,0,0.06) 50px
+  ),
+  repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 47px,
+    rgba(0,0,0,0.06) 47px,
+    rgba(0,0,0,0.06) 50px
+  );
+}
+
+/* ─── Room walls ─── */
+.walls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 65%;
+  background: #F5E6D3;
+}
+
+.wallPattern {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 23px,
+    rgba(200, 150, 100, 0.08) 23px,
+    rgba(200, 150, 100, 0.08) 25px
+  );
+}
+
+/* ─── Shadow line at floor/wall meeting ─── */
+.shadowLine {
+  position: absolute;
+  bottom: 34.5%;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.12), transparent);
+  pointer-events: none;
+}
+
+/* ─── Window ─── */
+.window {
+  position: absolute;
+  top: 8%;
+  right: 12%;
+  width: 80px;
+  height: 90px;
+  border: 3px solid #8B6914;
+  border-radius: 4px;
+  background: #87CEEB;
+  overflow: hidden;
+}
+
+.windowFrame {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 2px;
+  padding: 2px;
+}
+
+.windowPane {
+  background: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(135,206,235,0.8) 100%);
+  border-radius: 1px;
+}
+
+.windowSill {
+  position: absolute;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  height: 8px;
+  background: #A0752A;
+  border-radius: 2px;
+}
+
+/* Morning/day light shaft */
+.morning .window::after,
+.day .window::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10px;
+  width: 60px;
+  height: 200px;
+  background: linear-gradient(to bottom, rgba(255,255,200,0.3), transparent);
+  transform: skewX(-10deg);
+  pointer-events: none;
+}
+
+/* ─── Room objects (placed by JavaScript) ─── */
+.objectsLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.objectsLayer > * {
+  pointer-events: auto;
+}
+
+/* ─── Location badge ─── */
+.locationBadge {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  border-radius: var(--radius-full);
+  padding: 3px var(--space-2);
+  box-shadow: var(--shadow-sm);
+}
+
+.locationText {
+  font-family: var(--font-pixel);
+  font-size: var(--text-pixel-xs);
+  color: var(--text-primary);
+}
+
+/* ─── Clock overlay ─── */
+.clockOverlay {
+  position: absolute;
+  bottom: 36%;
+  right: var(--space-3);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  border-radius: var(--radius-md);
+  padding: var(--space-1) var(--space-2);
+  box-shadow: var(--shadow-sm);
+}
+
+.clockText {
+  font-family: var(--font-pixel);
+  font-size: var(--text-pixel-xs);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Character ─── */
+.character {
+  position: absolute;
+  bottom: 34%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+  animation: breathe 3s ease-in-out infinite;
+}
+
+.characterSprite {
+  font-size: 3rem;
+  line-height: 1;
+  image-rendering: pixelated;
+}
+
+.characterName {
+  font-family: var(--font-pixel);
+  font-size: var(--text-pixel-xs);
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.85);
+  padding: 1px 4px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-3px); }
+}
+
+/* ─── Night overlay ─── */
+.nightOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(13, 27, 42, 0.4);
+  pointer-events: none;
+  transition: opacity 1s;
+}
+
+/* ─── Tooltip ─── */
+.tooltip {
+  position: absolute;
+  background: rgba(44, 24, 16, 0.9);
+  color: white;
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 300;
+  transform: translate(-50%, -100%);
+  margin-top: -8px;
+}
+
+/* ─── Selected ring on object ─── */
+.selectedRing {
+  position: absolute;
+  inset: -4px;
+  border: 2px solid var(--color-primary);
+  border-radius: 50%;
+  animation: ringPulse 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes ringPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.1); }
+}
+
+/* ─── Action result feedback ─── */
+.actionFeedback {
+  position: absolute;
+  left: 50%;
+  bottom: 45%;
+  transform: translateX(-50%);
+  background: rgba(44, 24, 16, 0.9);
+  color: white;
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: feedbackFloat 2s ease-out forwards;
+  z-index: 300;
+}
+
+@keyframes feedbackFloat {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  20%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+  80%  { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+}
+
+/* ─── Loading / disabled overlay ─── */
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.4);
+  z-index: 50;
+}
+
+/* ─── Shake animation for errors ─── */
+.shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(8px); }
+  75% { transform: translateX(-8px); }
+}

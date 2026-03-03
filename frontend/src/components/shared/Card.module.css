@@ -1,0 +1,28 @@
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.default {
+  background: var(--bg-card);
+}
+
+.elevated {
+  box-shadow: var(--shadow-md);
+}
+
+.bordered {
+  border: 1px solid var(--bg-secondary);
+}
+
+.header {
+  padding: var(--space-4) var(--space-4) 0;
+}
+
+.title {
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
+}
