@@ -1,91 +1,81 @@
-import { useState } from 'react';
-import { Button } from '../components/shared/Button';
-import { BottomNav } from '../components/layout/BottomNav/BottomNav';
-import './RoomPage.css';
-
-interface InteractiveObject {
-  id: string;
-  name: string;
-  x: number;
-  y: number;
-  action: string;
-  icon: string;
-}
-
-const ROOM_OBJECTS: InteractiveObject[] = [
-  { id: 'phone', name: 'Телефон', x: 15, y: 20, action: 'CALL_HUSBAND', icon: '📱' },
-  { id: 'bed', name: 'Кровать', x: 70, y: 25, action: 'REST_AT_HOME', icon: '🛌️' },
-  { id: 'tv', name: 'Телевизор', x: 85, y: 50, action: 'WATCH_TV', icon: '📺' },
-  { id: 'pet', name: 'Гарфилд', x: 30, y: 70, action: 'PLAY_WITH_PET', icon: '🐱' },
-];
+import { useEffect } from 'react';
+import { useGameStore } from '@/store/gameStore';
+import { RoomScene } from '@/components/room/RoomScene';
+import { EventDialog } from '@/components/events/EventDialog';
+import { ConflictDialog } from '@/components/events/ConflictDialog';
+import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
+import styles from './RoomPage.module.css';
 
 export function RoomPage() {
-  const [selectedObject, setSelectedObject] = useState<string | null>(null);
+  const {
+    gameState,
+    isLoading,
+    isActionLoading,
+    error,
+    startGame,
+    executeAction,
+    chooseEventOption,
+    chooseConflictTactic,
+  } = useGameStore();
 
-  const handleObjectClick = (obj: InteractiveObject) => {
-    setSelectedObject(obj.id);
-    console.log('Action:', obj.action);
-    // TODO: executeAction(obj.action)
-  };
+  // Start game on first load
+  useEffect(() => {
+    if (!gameState && !isLoading) {
+      startGame();
+    }
+  }, [gameState, isLoading, startGame]);
 
-  return (
-    <div className="room-page">
-      <div className="room-page__scene">
-        <div className="room-page__isometric">
-          {/* Character Placeholder */}
-          <div className="room-page__character">
-            <div className="room-page__character-placeholder">👩</div>
-          </div>
-
-          {/* Interactive Objects */}
-          {ROOM_OBJECTS.map((obj) => (
-            <button
-              key={obj.id}
-              className={`room-page__object ${
-                selectedObject === obj.id ? 'room-page__object--selected' : ''
-              }`}
-              style={{
-                left: `${obj.x}%`,
-                top: `${obj.y}%`,
-              }}
-              onClick={() => handleObjectClick(obj)}
-              title={obj.name}
-            >
-              <span className="room-page__object-icon">{obj.icon}</span>
-              <span className="room-page__object-label">{obj.name}</span>
-            </button>
-          ))}
+  if (isLoading) {
+    return (
+      <div className={styles.loadingScreen}>
+        <div className={styles.loadingContent}>
+          <div className={styles.loadingTitle}>Life of T</div>
+          <LoadingSpinner size="lg" text="Загрузка игры..." />
         </div>
       </div>
+    );
+  }
 
-      {/* Action Confirmation */}
-      {selectedObject && (
-        <div className="room-page__action-panel">
-          <div className="room-page__action-content">
-            <p className="room-page__action-text">
-              {ROOM_OBJECTS.find((o) => o.id === selectedObject)?.name}
-            </p>
-            <div className="room-page__action-buttons">
-              <Button
-                variant="primary"
-                onClick={() => {
-                  const obj = ROOM_OBJECTS.find((o) => o.id === selectedObject);
-                  console.log('Execute:', obj?.action);
-                  alert(`Выполнено: ${obj?.name}`);
-                  setSelectedObject(null);
-                }}
-              >
-                Выполнить
-              </Button>
-              <Button variant="outline" onClick={() => setSelectedObject(null)}>
-                Отмена
-              </Button>
-            </div>
-          </div>
+  if (error && !gameState) {
+    return (
+      <div className={styles.errorScreen}>
+        <div className={styles.errorContent}>
+          <p className={styles.errorText}>⚠️ {error}</p>
+          <button className={styles.retryBtn} onClick={startGame}>
+            Попробовать снова
+          </button>
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.page}>
+      {gameState ? (
+        <RoomScene onActionSelect={executeAction} />
+      ) : (
+        <div className={styles.emptyRoom} />
       )}
 
-      <BottomNav current="room" />
+      {/* Event dialog overlay */}
+      {gameState?.activeEvent && (
+        <EventDialog
+          event={gameState.activeEvent}
+          isLoading={isActionLoading}
+          onChoose={(optionId) =>
+            chooseEventOption(gameState.activeEvent!.id, optionId)
+          }
+        />
+      )}
+
+      {/* Conflict dialog overlay */}
+      {gameState?.activeConflict && (
+        <ConflictDialog
+          conflict={gameState.activeConflict}
+          isLoading={isActionLoading}
+          onChooseTactic={chooseConflictTactic}
+        />
+      )}
     </div>
   );
 }

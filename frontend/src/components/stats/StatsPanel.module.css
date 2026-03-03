@@ -1,0 +1,136 @@
+.panel {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Profile header */
+.profileHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  flex-shrink: 0;
+  border: 3px solid var(--color-primary-light);
+}
+
+.avatarEmoji {
+  display: block;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.playerName {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.location {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* Sections */
+.section {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+}
+
+.sectionTitle {
+  font-family: var(--font-pixel);
+  font-size: var(--text-pixel-sm);
+  color: var(--color-primary);
+  margin-bottom: var(--space-4);
+}
+
+.statsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Money */
+.moneyDisplay {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.moneyLabel {
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.moneyValue {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--stat-money);
+}
+
+/* Job */
+.jobStats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.jobStat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.jobStatLabel {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  width: 140px;
+  flex-shrink: 0;
+}
+
+.jobBar {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.jobBarFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-slow);
+  min-width: 2px;
+}
+
+.jobStatValue {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}

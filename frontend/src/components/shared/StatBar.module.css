@@ -1,0 +1,73 @@
+.statBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 3px;
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.value {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+  flex-shrink: 0;
+  margin-left: var(--space-2);
+}
+
+.track {
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-slow);
+  min-width: 2px;
+}
+
+/* Size variants */
+.sm .track {
+  height: 4px;
+}
+
+.sm .label {
+  font-size: var(--text-xs);
+}
+
+.sm .value {
+  font-size: var(--text-xs);
+}
+
+.md .track {
+  height: 6px;
+}

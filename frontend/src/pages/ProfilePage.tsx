@@ -1,109 +1,67 @@
-import { useEffect } from 'react';
-import { PlayerPanel } from '../components/game/PlayerPanel';
-import { Card } from '../components/shared/Card';
-import { StatBar } from '../components/shared/StatBar';
-import { useGameStore } from '../store/gameStore';
-import { Award, TrendingUp } from 'lucide-react';
-import '../styles/pages/ProfilePage.css';
+import { useNavigate } from 'react-router-dom';
+import { useGameStore } from '@/store/gameStore';
+import { Button } from '@/components/shared/Button';
+import { StatKeyBar } from '@/components/shared/StatBar';
+import styles from './ProfilePage.module.css';
 
 export function ProfilePage() {
-  const { player, fetchGameState } = useGameStore();
+  const { gameState, startGame } = useGameStore();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchGameState();
-  }, [fetchGameState]);
-
-  if (!player) {
-    return null;
+  if (!gameState) {
+    return (
+      <div className={styles.empty}>
+        <p>Начните игру, чтобы увидеть профиль</p>
+        <Button variant="primary" onClick={startGame}>Начать игру</Button>
+      </div>
+    );
   }
 
-  const { stats, level } = player;
+  const { player, time, relationships } = gameState;
 
   return (
-    <div className="profile-page">
-      <div className="profile-page__header">
-        <PlayerPanel player={player} />
+    <div className={styles.page}>
+      <div className={styles.hero}>
+        <div className={styles.avatarLarge}>👩</div>
+        <h1 className={styles.playerName}>{player.name}</h1>
+        <p className={styles.subtitle}>День {time.day} игры</p>
       </div>
 
-      <Card variant="elevated" padding="large" className="profile-page__stats-card">
-        <div className="profile-page__section-header">
-          <TrendingUp size={24} />
-          <h2 className="profile-page__section-title">Детальная статистика</h2>
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>Показатели</h2>
+        <div className={styles.statsList}>
+          <StatKeyBar statKey="energy" value={player.stats.energy} showLabel />
+          <StatKeyBar statKey="health" value={player.stats.health} showLabel />
+          <StatKeyBar statKey="mood" value={player.stats.mood} showLabel />
+          <StatKeyBar statKey="stress" value={player.stats.stress} showLabel />
+          <StatKeyBar statKey="selfEsteem" value={player.stats.selfEsteem} showLabel />
         </div>
+      </div>
 
-        <div className="profile-page__stats-grid">
-          <div className="profile-page__stat-item">
-            <StatBar
-              statKey="energy"
-              value={stats.energy}
-              showLabel
-              showValue
-              size="large"
-            />
-          </div>
-          <div className="profile-page__stat-item">
-            <StatBar
-              statKey="health"
-              value={stats.health}
-              showLabel
-              showValue
-              size="large"
-            />
-          </div>
-          <div className="profile-page__stat-item">
-            <StatBar
-              statKey="stress"
-              value={stats.stress}
-              showLabel
-              showValue
-              size="large"
-            />
-          </div>
-          <div className="profile-page__stat-item">
-            <StatBar
-              statKey="mood"
-              value={stats.mood}
-              showLabel
-              showValue
-              size="large"
-            />
-          </div>
-          <div className="profile-page__stat-item">
-            <StatBar
-              statKey="selfEsteem"
-              value={stats.selfEsteem}
-              showLabel
-              showValue
-              size="large"
-            />
-          </div>
-          <div className="profile-page__stat-item">
-            <StatBar
-              statKey="money"
-              value={stats.money}
-              showLabel
-              showValue
-              size="large"
-            />
-          </div>
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>Достижения</h2>
+        <div className={styles.tags}>
+          {time.day >= 7 && <span className={styles.tag}>🏆 Неделя пройдена</span>}
+          {player.stats.energy > 80 && <span className={styles.tag}>⚡ Энергичная</span>}
+          {player.stats.mood > 80 && <span className={styles.tag}>😊 Счастливая</span>}
+          {player.stats.money > 5000 && <span className={styles.tag}>💰 Богатая</span>}
+          {relationships.filter(r => r.closeness > 80).length > 0 && (
+            <span className={styles.tag}>💕 Любимая</span>
+          )}
+          {relationships.filter(r => !r.broken).length === relationships.length && relationships.length > 0 && (
+            <span className={styles.tag}>🤝 Миротворец</span>
+          )}
         </div>
-      </Card>
+        {time.day < 3 && player.stats.mood < 70 && (
+          <p className={styles.noAchievements}>Достижения появятся со временем</p>
+        )}
+      </div>
 
-      <Card variant="elevated" padding="large" className="profile-page__achievements-card">
-        <div className="profile-page__section-header">
-          <Award size={24} />
-          <h2 className="profile-page__section-title">Достижения</h2>
-        </div>
-
-        <div className="profile-page__achievement-info">
-          <p className="profile-page__level-badge">
-            Уровень {level}
-          </p>
-          <p className="profile-page__achievement-text">
-            Достижения будут доступны в следующем обновлении
-          </p>
-        </div>
-      </Card>
+      <div className={styles.actions}>
+        <Button variant="primary" fullWidth onClick={() => navigate('/room')}>
+          Вернуться в комнату
+        </Button>
+      </div>
     </div>
   );
 }

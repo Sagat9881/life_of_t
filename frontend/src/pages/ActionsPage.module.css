@@ -1,0 +1,23 @@
+.page {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-4) 0;
+}
+
+.title {
+  font-family: var(--font-pixel);
+  font-size: var(--text-pixel-sm);
+  color: var(--text-primary);
+}
+
+.timeLeft {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}

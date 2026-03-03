@@ -1,21 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
-import './styles/globals.css';
-
-// Telegram WebApp initialization
-if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
-  const tg = (window as any).Telegram.WebApp;
-  tg.ready();
-  tg.expand();
-  
-  // Установить цвет фона для Telegram
-  tg.setBackgroundColor('#FFFFFF');
-  tg.setHeaderColor('#FF6B9D');
-}
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </React.StrictMode>
 );

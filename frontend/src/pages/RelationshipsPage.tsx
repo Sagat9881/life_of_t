@@ -1,42 +1,56 @@
-import { useGameStore } from '../store/gameStore';
-import { RelationshipList } from '../components/game/RelationshipList';
-import { BottomNav } from '../components/layout/BottomNav/BottomNav';
-import './RelationshipsPage.css';
+import { useGameStore } from '@/store/gameStore';
+import { RelationshipCard } from '@/components/relationships/RelationshipCard';
+import { PetCard } from '@/components/relationships/PetCard';
+import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
+import styles from './RelationshipsPage.module.css';
 
 export function RelationshipsPage() {
-  const { npcs, pets } = useGameStore();
+  const { gameState, isLoading } = useGameStore();
 
-  const handleNPCClick = (npcId: string) => {
-    console.log('NPC clicked:', npcId);
-    // TODO: открыть диалог с NPC
-  };
+  const relationships = gameState?.relationships ?? [];
+  const pets = gameState?.pets ?? [];
 
-  const handlePetClick = (petId: string) => {
-    console.log('Pet clicked:', petId);
-    // TODO: взаимодействие с питомцем
-  };
+  if (isLoading && !gameState) {
+    return (
+      <div className={styles.loading}>
+        <LoadingSpinner size="lg" text="Загрузка..." />
+      </div>
+    );
+  }
 
   return (
-    <div className="relationships-page">
-      <div className="relationships-page__content">
-        <header className="relationships-page__header">
-          <h1 className="relationships-page__title">❤️ Отношения</h1>
-          <p className="relationships-page__subtitle">
-            Ваши связи с близкими людьми и питомцами
-          </p>
-        </header>
-
-        <div className="relationships-page__list">
-          <RelationshipList
-            npcs={npcs}
-            pets={pets}
-            onNPCClick={handleNPCClick}
-            onPetClick={handlePetClick}
-          />
-        </div>
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>❤️ Отношения</h1>
       </div>
 
-      <BottomNav current="relationships" />
+      {relationships.length > 0 && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Люди</h2>
+          <div className={styles.grid}>
+            {relationships.map(rel => (
+              <RelationshipCard key={rel.npcCode} relationship={rel} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {pets.length > 0 && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>🐾 Питомцы</h2>
+          <div className={styles.grid}>
+            {pets.map(pet => (
+              <PetCard key={pet.id} pet={pet} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {relationships.length === 0 && pets.length === 0 && (
+        <div className={styles.empty}>
+          <p>Отношения появятся после начала игры</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,33 +1,68 @@
-import React from 'react';
-import styles from './HomePage.module.css';
+import { useNavigate } from 'react-router-dom';
+import { useGameStore } from '@/store/gameStore';
+import { Button } from '@/components/shared/Button';
+import styles from './EndingPage.module.css';
 
-export const EndingPage: React.FC = () => {
+const ENDING_EMOJIS: Record<string, string> = {
+  good: '🌟',
+  bad: '💔',
+  neutral: '🌸',
+  great: '✨',
+  burnout: '😔',
+  love: '💕',
+};
+
+export function EndingPage() {
+  const { gameState, startGame } = useGameStore();
+  const navigate = useNavigate();
+  const ending = gameState?.ending;
+
+  const handleRestart = async () => {
+    await startGame();
+    navigate('/room');
+  };
+
+  if (!ending) {
+    return (
+      <div className={styles.noEnding}>
+        <p>Игра ещё не завершена</p>
+        <Button variant="primary" onClick={() => navigate('/room')}>
+          Вернуться в игру
+        </Button>
+      </div>
+    );
+  }
+
+  const emoji = ENDING_EMOJIS[ending.type] ?? '🌸';
+
   return (
-    <div className={styles.container}>
-      <div className={styles.endingContainer}>
-        <h1 className={styles.endingTitle}>🎭 Концовка</h1>
-        <div className={styles.endingContent}>
-          <p className={styles.endingText}>
-            История твоей жизни завершилась...
-          </p>
-          <div className={styles.endingStats}>
-            <h2>Итоги:</h2>
-            <ul>
-              <li>Прожито дней: 30</li>
-              <li>Достижений разблокировано: 5/20</li>
-              <li>Отношений развито: 3</li>
-            </ul>
-          </div>
-          <div className={styles.endingButtons}>
-            <button
-              className={styles.restartButton}
-              onClick={() => window.location.href = '/room'}
-            >
-              🔄 Начать заново
-            </button>
-          </div>
+    <div className={styles.page}>
+      <div className={styles.content}>
+        <div className={styles.emojiLarge}>{emoji}</div>
+        <div className={styles.dayCount}>
+          День {gameState?.time.day ?? 0}
         </div>
+        <h1 className={styles.title}>{ending.title}</h1>
+        <p className={styles.description}>{ending.description}</p>
+
+        <div className={styles.actions}>
+          <Button variant="primary" size="lg" fullWidth onClick={handleRestart}>
+            Начать заново
+          </Button>
+          <Button variant="ghost" fullWidth onClick={() => navigate('/stats')}>
+            Посмотреть итоги
+          </Button>
+        </div>
+      </div>
+
+      {/* Decorative particles */}
+      <div className={styles.particles} aria-hidden="true">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <span key={i} className={styles.particle} style={{ '--i': i } as React.CSSProperties}>
+            ✨
+          </span>
+        ))}
       </div>
     </div>
   );
-};
+}
