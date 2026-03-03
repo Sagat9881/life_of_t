@@ -1,58 +1,94 @@
-import { gameApi, ApiError } from '../api/client';
-import type { GameStateResponse } from '../types/api';
+import type {
+  GameState,
+  ExecuteActionRequest,
+  ConflictTacticRequest,
+  EventOptionRequest,
+} from '@/types/game';
 
-const getTelegramUserId = (): string => {
-  // В Telegram Mini App
-  if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
-    return window.Telegram.WebApp.initDataUnsafe.user.id.toString();
+const API_BASE = '/api';
+const TIMEOUT = 15000;
+
+class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public code?: string
+  ) {
+    super(message);
+    this.name = 'ApiError';
   }
-  // Fallback для demo
-  return 'demo-user';
-};
+}
 
-/**
- * API wrapper с автоматическим созданием сессии
- */
-export const api = {
-  /**
-   * Получить состояние игры (с автоматическим созданием сессии при 404)
-   */
-  async getGameState(): Promise<GameStateResponse> {
-    const telegramUserId = getTelegramUserId();
-    
-    try {
-      return await gameApi.getState(telegramUserId);
-    } catch (error) {
-      // Если сессия не найдена - создаём новую
-      if (error instanceof ApiError && error.status === 404) {
-        console.log('Session not found, creating new session...');
-        return await gameApi.startSession({ telegramUserId });
-      }
-      throw error;
+async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT);
+
+  try {
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new ApiError(
+        errorData.message || `HTTP ${response.status}`,
+        response.status,
+        errorData.code
+      );
     }
-  },
 
-  /**
-   * Выполнить действие
-   */
-  async executeAction(actionCode: string): Promise<GameStateResponse> {
-    const telegramUserId = getTelegramUserId();
-    return gameApi.executeAction({ telegramUserId, actionCode });
-  },
+    return await response.json();
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof ApiError) throw error;
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') throw new ApiError('Превышено время ожидания', 408);
+      throw new ApiError(error.message, 0);
+    }
+    throw new ApiError('Неизвестная ошибка', 0);
+  }
+}
 
-  /**
-   * Разрешить конфликт тактикой
-   */
-  async resolveTactic(conflictId: string, tacticCode: string): Promise<GameStateResponse> {
-    const telegramUserId = getTelegramUserId();
-    return gameApi.chooseConflictTactic({ telegramUserId, conflictId, tacticCode });
-  },
+export const api = {
+  startGame: (): Promise<{ sessionId: string }> =>
+    request<{ sessionId: string }>('/game/start', { method: 'POST' }),
 
-  /**
-   * Выбрать вариант в событии
-   */
-  async selectChoice(eventId: string, optionCode: string): Promise<GameStateResponse> {
-    const telegramUserId = getTelegramUserId();
-    return gameApi.chooseEventOption({ telegramUserId, eventId, optionCode });
-  },
+  getState: (sessionId: string): Promise<GameState> =>
+    request<GameState>(`/game/state?sessionId=${sessionId}`),
+
+  executeAction: (data: ExecuteActionRequest): Promise<GameState> =>
+    request<GameState>('/game/action', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  endDay: (sessionId: string): Promise<GameState> =>
+    request<GameState>('/game/end-day', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId }),
+    }),
+
+  chooseConflictTactic: (data: ConflictTacticRequest): Promise<GameState> =>
+    request<GameState>('/game/conflict/tactic', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  chooseEventOption: (data: EventOptionRequest): Promise<GameState> =>
+    request<GameState>('/game/event/option', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getAvailableActions: (sessionId: string): Promise<GameState['availableActions']> =>
+    request<GameState['availableActions']>(`/game/actions?sessionId=${sessionId}`),
 };
+
+export { ApiError };

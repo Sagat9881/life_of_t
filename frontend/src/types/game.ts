@@ -1,5 +1,24 @@
-// Базовые игровые типы
-export type StatKey = 'energy' | 'health' | 'stress' | 'mood' | 'money' | 'selfEsteem';
+// Game state types matching backend views
+
+export interface GameState {
+  sessionId: string;
+  player: Player;
+  relationships: Relationship[];
+  pets: Pet[];
+  time: GameTime;
+  availableActions: ActionOption[];
+  activeConflict?: Conflict;
+  activeEvent?: GameEvent;
+  ending?: Ending;
+  lastActionResult?: ActionResult;
+}
+
+export interface Player {
+  name: string;
+  stats: Stats;
+  job: JobInfo;
+  location: string;
+}
 
 export interface Stats {
   energy: number;
@@ -10,116 +29,110 @@ export interface Stats {
   selfEsteem: number;
 }
 
-export interface Job {
-  title: string;
-  company: string;
-  salary: number;
+export interface GameTime {
+  day: number;
+  hour: number;
 }
 
-export interface Player {
-  id: string;
+export interface Relationship {
+  npcCode: string;
   name: string;
-  level: number;
-  stats: Stats;
-  job?: Job;
-  avatarUrl?: string;
-}
-
-export interface GameAction {
-  code: string;
-  name: string;
-  description: string;
-  timeCost: number;
-  energyCost?: number;
-  effects?: Partial<Stats>;
-  available: boolean;
-  category?: string;
-}
-
-export interface NPC {
-  id: string;
-  name: string;
-  relationship: number;
-  avatarUrl?: string;
-  type: 'husband' | 'father' | 'friend';
+  closeness: number;
+  trust: number;
+  stability: number;
+  romance: number;
+  broken: boolean;
 }
 
 export interface Pet {
   id: string;
   name: string;
-  type: 'cat' | 'dog';
-  species: 'Cat' | 'Dog'; // Backend uses this
+  type: string;
+  satiety: number;
+  attention: number;
+  health: number;
   mood: number;
-  hunger: number;
-  avatarUrl?: string;
 }
 
-export interface Quest {
-  id: string;
-  title: string;
+export interface ActionOption {
+  type: string;
+  displayName: string;
   description: string;
-  completed: boolean;
-  progress?: number;
+  timeCost: number;
+  available: boolean;
+  unavailableReason?: string;
+  category?: string;
+  statEffects?: Partial<Stats>;
+}
+
+export interface ActionResult {
+  actionType: string;
+  message: string;
+  statChanges: Partial<Stats>;
+  timeAdvanced?: number;
 }
 
 export interface Conflict {
   id: string;
+  type: string;
+  category: string;
   description: string;
-  csp: number;
-  maxCSP: number;
-  tactics: ConflictTactic[];
+  stage: string;
+  round: number;
+  maxRounds: number;
+  playerCsp: number;
+  opponentCsp: number;
+  tactics: TacticOption[];
 }
 
-export interface ConflictTactic {
-  code: string;
+export interface TacticOption {
+  id: string;
   name: string;
   description: string;
-  successChance: number;
+  successChance?: number;
 }
 
 export interface GameEvent {
   id: string;
   title: string;
   description: string;
-  choices: EventChoice[];
+  options: EventOption[];
 }
 
-export interface EventChoice {
-  code: string;
+export interface EventOption {
+  id: string;
   text: string;
   consequences?: string;
 }
 
-// Дополнительные типы для API и store
-export type ActionCode = string;
-export type TacticCode = string;
-export type EventChoiceCode = string;
-
-export type TimeSlot = 'MORNING' | 'DAY' | 'EVENING' | 'NIGHT';
-
-export interface GameTime {
-  day: number;
-  hour: number;
-  timeSlot: TimeSlot;
+export interface JobInfo {
+  satisfaction: number;
+  burnoutRisk: number;
 }
 
-export interface Relationship {
-  npcId: string;
-  level: number;
-  trust: number;
-  romance?: number;
+export interface Ending {
+  type: string;
+  title: string;
+  description: string;
 }
 
-export interface GameState {
-  player: Player;
-  time: GameTime;
-  actions: GameAction[];
-  npcs: NPC[];
-  pets: Pet[];
-  relationships: Relationship[];
-  availableActions: GameAction[];
-  activeConflicts: Conflict[];
-  currentConflict?: Conflict;
-  currentEvent?: GameEvent;
-  quests?: Quest[];
+// API request/response types
+export interface StartGameRequest {
+  playerName?: string;
+}
+
+export interface ExecuteActionRequest {
+  sessionId: string;
+  actionType: string;
+}
+
+export interface ConflictTacticRequest {
+  sessionId: string;
+  tacticId: string;
+}
+
+export interface EventOptionRequest {
+  sessionId: string;
+  eventId: string;
+  optionId: string;
 }

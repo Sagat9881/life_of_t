@@ -1,0 +1,84 @@
+:root {
+  /* ─── Colors — warm, cozy palette ─── */
+  --color-primary: #E88D9E;
+  --color-primary-dark: #D4657A;
+  --color-primary-light: #F5B8C4;
+  --color-secondary: #8ECAE6;
+  --color-accent: #FFB347;
+  --color-success: #77DD77;
+  --color-danger: #FF6B6B;
+  --color-warning: #FFD93D;
+  --color-info: #74B9FF;
+
+  /* ─── Backgrounds ─── */
+  --bg-primary: #FFF8F0;
+  --bg-secondary: #FFF0E6;
+  --bg-card: #FFFFFF;
+  --bg-dark: #2C1810;
+  --bg-overlay: rgba(44, 24, 16, 0.5);
+
+  /* ─── Text ─── */
+  --text-primary: #2C1810;
+  --text-secondary: #6B4C3B;
+  --text-muted: #A08070;
+  --text-light: #FFF8F0;
+
+  /* ─── Stat Colors ─── */
+  --stat-energy: #77DD77;
+  --stat-health: #FF6B6B;
+  --stat-stress: #FFB347;
+  --stat-mood: #C3A6FF;
+  --stat-money: #FFD700;
+  --stat-self-esteem: #FF9F9F;
+
+  /* ─── Spacing (4px grid) ─── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ─── Border Radius ─── */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* ─── Fonts ─── */
+  --font-pixel: 'Press Start 2P', monospace;
+  --font-body: 'Inter', -apple-system, system-ui, sans-serif;
+
+  /* ─── Font sizes ─── */
+  --text-xs: 10px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-pixel-xs: 8px;
+  --text-pixel-sm: 10px;
+  --text-pixel-md: 12px;
+
+  /* ─── Shadows ─── */
+  --shadow-sm: 0 1px 3px rgba(44, 24, 16, 0.1);
+  --shadow-md: 0 4px 6px rgba(44, 24, 16, 0.15);
+  --shadow-lg: 0 10px 20px rgba(44, 24, 16, 0.2);
+  --shadow-inset: inset 0 2px 4px rgba(44, 24, 16, 0.1);
+
+  /* ─── Transitions ─── */
+  --transition-fast: 120ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 300ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ─── Layout ─── */
+  --hud-height: 64px;
+  --bottom-nav-height: 64px;
+  --content-max-width: 480px;
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
