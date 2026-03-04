@@ -17,6 +17,12 @@
     <name>Life of T — Asset Generator</name>
     <description>Layered asset generator with XML-driven specs for Life of T game</description>
 
+    <properties>
+        <asset.generation.skip>false</asset.generation.skip>
+        <asset.prompts.dir>${project.parent.basedir}/docs/prompts</asset.prompts.dir>
+        <asset.output.dir>${project.parent.basedir}/assets</asset.output.dir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -59,6 +65,31 @@
                 <configuration>
                     <useModulePath>false</useModulePath>
                 </configuration>
+            </plugin>
+            
+            <!-- Asset Generation Integration -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>generate-assets</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${asset.generation.skip}</skip>
+                            <mainClass>ru.lifegame.assets.AssetGeneratorApplication</mainClass>
+                            <arguments>
+                                <argument>--prompts-dir=${asset.prompts.dir}</argument>
+                                <argument>--output-dir=${asset.output.dir}</argument>
+                            </arguments>
+                            <classpathScope>compile</classpathScope>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
