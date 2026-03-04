@@ -43,25 +43,38 @@ jobs:
           cache: maven
 
       # ----------------------------------------------------------------
-      # 3. Build only demo + its dependencies (backend, asset-generator)
-      #    Skips frontend and application modules entirely.
+      # 3. Install parent POM into local repo
       # ----------------------------------------------------------------
-      - name: Build demo and dependencies (skip tests)
-        run: >-
-          mvn -B install -DskipTests --no-transfer-progress
-          -pl demo
-          -am
+      - name: Install parent POM
+        run: mvn -B -N install --no-transfer-progress
 
       # ----------------------------------------------------------------
-      # 4. Run unit + E2E tests for the demo module
+      # 4. Build backend module (dependency of demo)
+      # ----------------------------------------------------------------
+      - name: Build backend module
+        run: mvn -B install -DskipTests -f backend/pom.xml --no-transfer-progress
+
+      # ----------------------------------------------------------------
+      # 5. Build asset-generator module (dependency of demo)
+      # ----------------------------------------------------------------
+      - name: Build asset-generator module
+        run: mvn -B install -DskipTests -f asset-generator/pom.xml --no-transfer-progress
+
+      # ----------------------------------------------------------------
+      # 6. Build demo module (skip tests for compilation check)
+      # ----------------------------------------------------------------
+      - name: Build demo module (compile only)
+        run: mvn -B install -DskipTests -f demo/pom.xml --no-transfer-progress
+
+      # ----------------------------------------------------------------
+      # 7. Run unit + E2E tests for the demo module
       #    Testcontainers needs Docker; ubuntu-latest provides it.
-      #    DemoBrowserE2ETest is excluded in CI (requires real Chrome;
-      #    enable by adding CHROME_ENABLED env var or a dedicated job).
+      #    DemoBrowserE2ETest is excluded in CI (requires real Chrome).
       # ----------------------------------------------------------------
       - name: Run demo tests
         run: >-
           mvn -B test
-          -pl demo
+          -f demo/pom.xml
           --no-transfer-progress
           -Dspring.profiles.active=test
           -Ddemo.assets.output-dir=/tmp/life-of-t-assets
@@ -71,13 +84,13 @@ jobs:
           DOCKER_HOST: unix:///var/run/docker.sock
 
       # ----------------------------------------------------------------
-      # 5. Browser E2E (optional, only when Docker + Chrome available)
+      # 8. Browser E2E (optional, only when Docker + Chrome available)
       # ----------------------------------------------------------------
       - name: Run browser E2E tests (optional)
         if: ${{ env.BROWSER_E2E_ENABLED == 'true' }}
         run: >-
           mvn -B test
-          -pl demo
+          -f demo/pom.xml
           --no-transfer-progress
           -Dtest=DemoBrowserE2ETest
           -Dspring.profiles.active=test
@@ -87,17 +100,17 @@ jobs:
           TESTCONTAINERS_CHECKS_DISABLE: true
 
       # ----------------------------------------------------------------
-      # 6. Build the Spring Boot fat JAR
+      # 9. Package the Spring Boot fat JAR
       # ----------------------------------------------------------------
       - name: Package demo JAR
         run: >-
           mvn -B package
-          -pl demo
+          -f demo/pom.xml
           -DskipTests
           --no-transfer-progress
 
       # ----------------------------------------------------------------
-      # 7. Upload artifacts
+      # 10. Upload artifacts
       # ----------------------------------------------------------------
       - name: Upload demo JAR
         uses: actions/upload-artifact@v4
