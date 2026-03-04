@@ -202,8 +202,8 @@ public class DemoGameService {
                 "Найди себя",
                 "Позаботься о себе: отдохни и займись спортом",
                 List.of(
-                        new QuestStepState(new QuestObjective("Поспать не менее 7 часов", 1), 0),
-                        new QuestStepState(new QuestObjective("Сходить в спортзал", 1), 0)
+                        new QuestStepState(new QuestObjective("rest", "sleep", 1, "Поспать не менее 7 часов"), 0),
+                        new QuestStepState(new QuestObjective("rest", "gym", 1, "Сходить в спортзал"), 0)
                 )
         );
         selfCare.start();
@@ -216,8 +216,8 @@ public class DemoGameService {
                 "Семейный вечер",
                 "Укрепи отношения с мужем и папой",
                 List.of(
-                        new QuestStepState(new QuestObjective("Поговорить с мужем", 1), 0),
-                        new QuestStepState(new QuestObjective("Позвонить папе", 1), 0)
+                        new QuestStepState(new QuestObjective("social", "husband", 1, "Поговорить с мужем"), 0),
+                        new QuestStepState(new QuestObjective("social", "father", 1, "Позвонить папе"), 0)
                 )
         );
         family.start();
@@ -230,7 +230,7 @@ public class DemoGameService {
                 "Карьерный рост",
                 "Выполни рабочий проект и получи признание",
                 List.of(
-                        new QuestStepState(new QuestObjective("Завершить проект", 3), 0)
+                        new QuestStepState(new QuestObjective("work", "project", 3, "Завершить проект"), 0)
                 )
         );
         log.addQuest(career);
