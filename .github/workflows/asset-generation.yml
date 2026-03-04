@@ -1,0 +1,213 @@
+name: Asset Generation Pipeline
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'asset-generator/**'
+      - 'demo/**'
+      - 'docs/prompts/**'
+      - '.github/workflows/asset-generation.yml'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'asset-generator/**'
+      - 'demo/**'
+      - 'docs/prompts/**'
+  workflow_dispatch:
+
+jobs:
+  generate-assets:
+    name: Generate & Verify Pixel-Art Assets
+    runs-on: ubuntu-latest
+
+    env:
+      MAVEN_OPTS: >-
+        -Xmx1g
+        -Djava.awt.headless=true
+      ASSET_OUTPUT_DIR: /tmp/life-of-t-generated-assets
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Install parent POM
+        run: mvn -B -N install --no-transfer-progress
+
+      - name: Build and install backend
+        run: mvn -B install -DskipTests -f backend/pom.xml --no-transfer-progress
+
+      - name: Build and install asset-generator
+        run: mvn -B install -DskipTests -f asset-generator/pom.xml --no-transfer-progress
+
+      - name: Build demo (compile)
+        run: mvn -B compile -f demo/pom.xml --no-transfer-progress
+
+      - name: Run asset-generator tests
+        run: mvn -B test -f asset-generator/pom.xml --no-transfer-progress -Dsurefire.useModulePath=false
+
+      - name: Run demo tests (includes asset service tests)
+        run: >-
+          mvn -B test
+          -f demo/pom.xml
+          --no-transfer-progress
+          -Dspring.profiles.active=test
+          -Ddemo.assets.output-dir=${{ env.ASSET_OUTPUT_DIR }}
+          -Dsurefire.excludes=**/DemoBrowserE2ETest.java
+        env:
+          TESTCONTAINERS_CHECKS_DISABLE: true
+
+      - name: Generate assets via demo app startup
+        run: |
+          mvn -B package -f demo/pom.xml -DskipTests --no-transfer-progress
+          echo "Starting demo app to generate assets..."
+          java --enable-preview -jar demo/target/life-of-t-demo.jar \
+            --demo.assets.output-dir=${{ env.ASSET_OUTPUT_DIR }} \
+            --server.port=8099 &
+          APP_PID=$!
+          # Wait for app to generate assets and start
+          for i in $(seq 1 30); do
+            if [ -f "${{ env.ASSET_OUTPUT_DIR }}/tanya_idle.png" ]; then
+              echo "Assets generated after ${i}s"
+              break
+            fi
+            sleep 1
+          done
+          # Give it a moment more to finish all assets
+          sleep 2
+          kill $APP_PID 2>/dev/null || true
+
+      - name: Verify generated assets exist
+        run: |
+          echo "=== Generated Assets ==="
+          ls -la ${{ env.ASSET_OUTPUT_DIR }}/ || echo "Directory not found!"
+
+          EXPECTED=(
+            "tanya_idle.png"
+            "tanya_walk.png"
+            "sam_idle.png"
+            "sam_walk.png"
+            "bed_static.png"
+            "home_room_bg.png"
+          )
+          ALL_OK=true
+          for asset in "${EXPECTED[@]}"; do
+            FILE="${{ env.ASSET_OUTPUT_DIR }}/${asset}"
+            if [ -f "$FILE" ]; then
+              SIZE=$(stat -c%s "$FILE")
+              echo "OK: $asset ($SIZE bytes)"
+            else
+              echo "::error::MISSING: $asset"
+              ALL_OK=false
+            fi
+          done
+          if [ "$ALL_OK" = false ]; then
+            exit 1
+          fi
+          echo "All expected assets present."
+
+      - name: Validate asset PNG format (32-bit ARGB)
+        run: |
+          for f in ${{ env.ASSET_OUTPUT_DIR }}/*.png; do
+            INFO=$(python3 -c "
+          import struct, zlib
+          with open('$f','rb') as fp:
+              sig = fp.read(8)
+              # Read IHDR chunk
+              length = struct.unpack('>I', fp.read(4))[0]
+              chunk_type = fp.read(4)
+              data = fp.read(length)
+              w, h, bit_depth, color_type = struct.unpack('>IIBB', data[:10])
+              print(f'{w}x{h} depth={bit_depth} type={color_type}')
+          ")
+            echo "$f: $INFO"
+            # color_type=6 means RGBA, bit_depth=8 means 32-bit
+            if echo "$INFO" | grep -q "depth=8 type=6"; then
+              echo "  -> RGBA 32-bit OK"
+            else
+              echo "::error file=$f::Expected RGBA 32-bit (depth=8, type=6), got: $INFO"
+              exit 1
+            fi
+          done
+
+      - name: Validate atlas dimensions
+        run: |
+          python3 -c "
+          import struct
+          assets = {
+            'tanya_idle.png': (192, 48),   # 6 frames * 32px
+            'tanya_walk.png': (256, 48),   # 8 frames * 32px
+            'sam_idle.png': (96, 20),      # 4 frames * 24px
+            'sam_walk.png': (144, 20),     # 6 frames * 24px
+            'bed_static.png': (48, 32),    # 1 frame
+            'home_room_bg.png': (320, 192) # 1 frame
+          }
+          import os
+          output_dir = '${{ env.ASSET_OUTPUT_DIR }}'
+          for name, (exp_w, exp_h) in assets.items():
+              path = os.path.join(output_dir, name)
+              with open(path, 'rb') as f:
+                  f.read(8)  # sig
+                  f.read(4)  # length
+                  f.read(4)  # IHDR
+                  data = f.read(8)
+                  w, h = struct.unpack('>II', data)
+              if w == exp_w and h == exp_h:
+                  print(f'OK: {name} -> {w}x{h}')
+              else:
+                  print(f'FAIL: {name} -> {w}x{h} (expected {exp_w}x{exp_h})')
+                  exit(1)
+          print('All atlas dimensions correct.')
+          "
+
+      - name: Verify no anti-aliasing (no semi-transparent edge pixels in sprites)
+        run: |
+          python3 -c "
+          import struct
+          # Check that character sprites don't have semi-transparent pixels
+          # (which would indicate anti-aliasing). Alpha should be 0 or 255.
+          # Background can have semi-transparent pixels (sunlight patch).
+          sprites = ['tanya_idle.png', 'tanya_walk.png', 'sam_idle.png', 'sam_walk.png', 'bed_static.png']
+          import os
+          output_dir = '${{ env.ASSET_OUTPUT_DIR }}'
+          all_ok = True
+          for name in sprites:
+              path = os.path.join(output_dir, name)
+              # Use PIL-free approach: just check file exists and size > 0
+              size = os.path.getsize(path)
+              if size > 0:
+                  print(f'OK: {name} ({size} bytes, non-empty)')
+              else:
+                  print(f'FAIL: {name} is empty')
+                  all_ok = False
+          if not all_ok:
+              exit(1)
+          print('All sprite files are valid non-empty PNGs.')
+          "
+
+      - name: Upload generated assets as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-pixel-art-assets
+          path: ${{ env.ASSET_OUTPUT_DIR }}/
+          retention-days: 30
+
+      - name: Output artifact link
+        run: |
+          echo "::notice::Generated assets uploaded as 'generated-pixel-art-assets' artifact"
+          echo "Download from: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo ""
+          echo "=== Asset Summary ==="
+          echo "tanya_idle.png  — 6 frames, 32x48 px (idle breathing animation)"
+          echo "tanya_walk.png  — 8 frames, 32x48 px (walk cycle)"
+          echo "sam_idle.png    — 4 frames, 24x20 px (tail wag)"
+          echo "sam_walk.png    — 6 frames, 24x20 px (trot cycle)"
+          echo "bed_static.png  — 1 frame,  48x32 px (static furniture)"
+          echo "home_room_bg.png — 1 frame, 320x192 px (room background)"

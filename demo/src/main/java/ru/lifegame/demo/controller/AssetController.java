@@ -47,7 +47,7 @@ public class AssetController {
      * @param id asset identifier, e.g. {@code tanya_idle}
      */
     @GetMapping(value = "/{id}.png", produces = MediaType.IMAGE_PNG_VALUE)
-    public ResponseEntity<Resource> getAssetPng(@PathVariable String id) {
+    public ResponseEntity<Resource> getAssetPng(@PathVariable("id") String id) {
         Path png = assetService.resolveAssetPath(id);
         if (png == null || !Files.exists(png)) {
             return ResponseEntity.notFound().build();
