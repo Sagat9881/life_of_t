@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import ru.lifegame.assets.domain.model.asset.AnimationSpec;
 
 import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -66,7 +67,14 @@ public class WebpAtlasWriter {
         String filename = spec.name() + "_atlas.png";
         Path atlasPath = outputDir.resolve(filename);
 
-        ImageIO.write(atlas, "PNG", atlasPath.toFile());
+        // Use ImageOutputStream for proper stream handling and guaranteed flush
+        try (ImageOutputStream ios = ImageIO.createImageOutputStream(atlasPath.toFile())) {
+            if (!ImageIO.write(atlas, "PNG", ios)) {
+                throw new IOException("No appropriate PNG writer found");
+            }
+            ios.flush();
+        }
+
         log.info("Wrote atlas: {} ({}x{}, {} frames)", atlasPath, atlasWidth, atlasHeight, frames.size());
 
         return atlasPath;
