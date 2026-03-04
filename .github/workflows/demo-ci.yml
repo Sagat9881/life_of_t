@@ -45,20 +45,27 @@ jobs:
       - name: Build and install asset-generator
         run: mvn -B install -DskipTests -f asset-generator/pom.xml --no-transfer-progress
 
-      - name: Debug - validate demo POM
-        run: mvn -B validate -f demo/pom.xml --no-transfer-progress -e || true
-
-      - name: Debug - show effective compiler config
-        run: |
-          echo "=== Effective POM compiler section ==="
-          mvn -B help:effective-pom -f demo/pom.xml --no-transfer-progress 2>/dev/null | grep -A 25 'maven-compiler-plugin' | head -40 || true
-          echo "=== End compiler section ==="
-
-      - name: Debug - resolve demo dependencies
-        run: 'mvn -B dependency:resolve -f demo/pom.xml --no-transfer-progress -e || echo dependency-resolution-had-issues'
-
       - name: Compile demo
-        run: mvn -B compile -f demo/pom.xml -e
+        id: compile
+        run: |
+          mvn -B compile -f demo/pom.xml -e 2>&1 | tee /tmp/compile-output.txt
+          exit ${PIPESTATUS[0]}
+        continue-on-error: true
+
+      - name: Upload compile output on failure
+        if: steps.compile.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: compile-error-output
+          path: /tmp/compile-output.txt
+          retention-days: 3
+
+      - name: Fail if compile failed
+        if: steps.compile.outcome == 'failure'
+        run: |
+          echo "::error::Demo compilation failed. See compile-error-output artifact for details."
+          cat /tmp/compile-output.txt
+          exit 1
 
       - name: Install demo (skip tests)
         run: mvn -B install -DskipTests -f demo/pom.xml --no-transfer-progress
