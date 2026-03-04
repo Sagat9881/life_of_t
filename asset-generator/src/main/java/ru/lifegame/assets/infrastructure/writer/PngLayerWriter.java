@@ -31,14 +31,9 @@ public class PngLayerWriter {
         String filename = layer.id() + ".png";
         Path outputPath = outputDir.resolve(filename);
 
-        if (image.getType() != BufferedImage.TYPE_INT_ARGB) {
-            BufferedImage argbImage = new BufferedImage(
-                    image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
-            argbImage.getGraphics().drawImage(image, 0, 0, null);
-            image = argbImage;
-        }
+        BufferedImage argbImage = ensureARGB(image);
 
-        ImageIO.write(image, "PNG", outputPath.toFile());
+        ImageIO.write(argbImage, "PNG", outputPath.toFile());
         log.info("Wrote PNG layer: {}", outputPath);
         return outputPath;
     }
@@ -53,8 +48,28 @@ public class PngLayerWriter {
      */
     public Path writeToPath(BufferedImage image, Path outputPath) throws IOException {
         Files.createDirectories(outputPath.getParent());
-        ImageIO.write(image, "PNG", outputPath.toFile());
+        
+        BufferedImage argbImage = ensureARGB(image);
+        
+        ImageIO.write(argbImage, "PNG", outputPath.toFile());
         log.info("Wrote PNG: {}", outputPath);
         return outputPath;
+    }
+
+    /**
+     * Ensures the image is TYPE_INT_ARGB. If not, creates a new ARGB image
+     * and copies the original content.
+     *
+     * @param image source image
+     * @return ARGB image (either the original or a converted copy)
+     */
+    private BufferedImage ensureARGB(BufferedImage image) {
+        if (image.getType() == BufferedImage.TYPE_INT_ARGB) {
+            return image;
+        }
+        BufferedImage argbImage = new BufferedImage(
+                image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        argbImage.getGraphics().drawImage(image, 0, 0, null);
+        return argbImage;
     }
 }
