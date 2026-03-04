@@ -6,13 +6,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.lifegame.backend.LifegameBackendApplication;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(classes = LifegameBackendApplication.class)
 @AutoConfigureMockMvc
 class GameControllerIntegrationTest {
 
@@ -26,7 +27,7 @@ class GameControllerIntegrationTest {
                         .content("{\"telegramUserId\": \"test_user_1\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.telegramUserId").value("test_user_1"))
-                .andExpect(jsonPath("$.player.name").value("Татьяна"))
+                .andExpect(jsonPath("$.player.name").value("\u0422\u0430\u0442\u044c\u044f\u043d\u0430"))
                 .andExpect(jsonPath("$.player.stats.energy").value(100))
                 .andExpect(jsonPath("$.time.day").value(1))
                 .andExpect(jsonPath("$.time.hour").value(8));
@@ -42,13 +43,11 @@ class GameControllerIntegrationTest {
 
     @Test
     void executeAction_shouldUpdateTimeAndStats() throws Exception {
-        // 1. Создаём сессию
         mockMvc.perform(post("/api/v1/game/session/start")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"telegramUserId\": \"test_action_user\"}"))
                 .andExpect(status().isOk());
 
-        // 2. Выполняем действие
         mockMvc.perform(post("/api/v1/game/action")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"telegramUserId\": \"test_action_user\", \"actionCode\": \"PLAY_WITH_CAT\"}"))
@@ -65,14 +64,12 @@ class GameControllerIntegrationTest {
                         .content("{\"telegramUserId\": \"test_time_user\"}"))
                 .andExpect(status().isOk());
 
-        // Заполняем весь день действиями
         for (int i = 0; i < 10; i++) {
             mockMvc.perform(post("/api/v1/game/action")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("{\"telegramUserId\": \"test_time_user\", \"actionCode\": \"SELF_CARE\"}"));
         }
 
-        // Пробуем работать — не хватит времени
         mockMvc.perform(post("/api/v1/game/action")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"telegramUserId\": \"test_time_user\", \"actionCode\": \"GO_TO_WORK\"}"))
