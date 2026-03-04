@@ -45,7 +45,7 @@ jobs:
       - name: Build and install asset-generator
         run: mvn -B install -DskipTests -f asset-generator/pom.xml --no-transfer-progress
 
-      - name: Compile demo
+      - name: Compile demo (main sources)
         id: compile
         run: |
           mvn -B compile -f demo/pom.xml -e 2>&1 | tee /tmp/compile-output.txt
@@ -67,7 +67,51 @@ jobs:
           cat /tmp/compile-output.txt
           exit 1
 
-      - name: Install demo (skip tests)
+      - name: Compile demo (test sources)
+        id: test-compile
+        run: |
+          mvn -B test-compile -f demo/pom.xml -e 2>&1 | tee /tmp/test-compile-output.txt
+          exit ${PIPESTATUS[0]}
+        continue-on-error: true
+
+      - name: Upload test-compile output on failure
+        if: steps.test-compile.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-compile-error-output
+          path: /tmp/test-compile-output.txt
+          retention-days: 3
+
+      - name: Fail if test-compile failed
+        if: steps.test-compile.outcome == 'failure'
+        run: |
+          echo "::error::Demo test-compile failed."
+          cat /tmp/test-compile-output.txt
+          exit 1
+
+      - name: Package demo JAR (with repackage)
+        id: package-demo
+        run: |
+          mvn -B package -DskipTests -f demo/pom.xml -e 2>&1 | tee /tmp/package-output.txt
+          exit ${PIPESTATUS[0]}
+        continue-on-error: true
+
+      - name: Upload package output on failure
+        if: steps.package-demo.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-error-output
+          path: /tmp/package-output.txt
+          retention-days: 3
+
+      - name: Fail if package failed
+        if: steps.package-demo.outcome == 'failure'
+        run: |
+          echo "::error::Demo packaging/repackage failed."
+          cat /tmp/package-output.txt
+          exit 1
+
+      - name: Install demo to local repo
         run: mvn -B install -DskipTests -f demo/pom.xml --no-transfer-progress
 
       - name: Run demo tests
@@ -94,13 +138,6 @@ jobs:
         env:
           BROWSER_E2E_ENABLED: ${{ vars.BROWSER_E2E_ENABLED }}
           TESTCONTAINERS_CHECKS_DISABLE: true
-
-      - name: Package demo JAR
-        run: >-
-          mvn -B package
-          -f demo/pom.xml
-          -DskipTests
-          --no-transfer-progress
 
       - name: Upload demo JAR
         uses: actions/upload-artifact@v4
