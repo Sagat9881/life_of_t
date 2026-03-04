@@ -55,7 +55,7 @@ jobs:
           echo "=== End compiler section ==="
 
       - name: Debug - resolve demo dependencies
-        run: mvn -B dependency:resolve -f demo/pom.xml --no-transfer-progress -e || echo "WARN: dependency resolution had issues"
+        run: 'mvn -B dependency:resolve -f demo/pom.xml --no-transfer-progress -e || echo dependency-resolution-had-issues'
 
       - name: Compile demo
         run: mvn -B compile -f demo/pom.xml -e
