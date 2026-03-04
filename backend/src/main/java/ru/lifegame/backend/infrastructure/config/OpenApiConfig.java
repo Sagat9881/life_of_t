@@ -20,33 +20,24 @@ public class OpenApiConfig {
                         .title("Игра Life of T - REST API")
                         .version("1.0.0")
                         .description("""
-                            REST API для игры Life of T - симулятор жизни главной героини.
-                            
-                            **Основные возможности:**
-                            - Управление игровой сессией
-                            - Выполнение действий (работа, свидания, уход за питомцами)
-                            - Разрешение конфликтов
-                            - Выбор вариантов в событиях
-                            - Отслеживание состояния персонажа, отношений и прогресса квестов
-                            
-                            **Архитектура:**
-                            - Clean Architecture
-                            - Domain-Driven Design
-                            - Event Sourcing
-                            """)
-                        .contact(new Contact()
-                                .name("Команда разработки Life of T")
-                                .email("support@lifeoft.game"))
-                        .license(new License()
-                                .name("Проприетарная лицензия")
-                                .url("https://lifeoft.game/license")))
-                .servers(List.of(
+                                REST API для игры Life of T - симулятор жизни главной героини.
+                                
+                                **Основные возможности:**
+                                - Управление игровой сессией
+                                - Выполнение действий (работа, свидания, уход за питомцами)
+                                - Разрешение конфликтов
+                                - Выбор вариантов в событиях
+                                - Отслеживание состояния персонажа, отношений и прогресса квестов
+                                
+                                **Архитектура:**
+                                - Clean Architecture
+                                - Domain-Driven Design
+                                - Event Sourcing
+                                """)
+                ).servers(List.of(
                         new Server()
                                 .url("http://localhost:8080")
-                                .description("Локальный сервер разработки"),
-                        new Server()
-                                .url("https://api.lifeoft.game")
-                                .description("Продакшен сервер")
+                                .description("Локальный сервер разработки")
                 ));
     }
 }

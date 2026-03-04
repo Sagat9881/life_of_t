@@ -39,7 +39,7 @@ public class FileSessionPersistence implements SessionPersistence {
         writeToFile(sessions);
     }
 
-    @Scheduled(fixedRateString = "${session.persistence.interval:10}000")
+    @Scheduled(fixedRateString = "${session.persistence.interval:10}")
     public void periodicPersist() {
         Map<String, GameSession> snapshot = latestSnapshot.get();
         if (!snapshot.isEmpty()) {
