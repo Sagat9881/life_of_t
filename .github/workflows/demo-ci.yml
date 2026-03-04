@@ -43,10 +43,14 @@ jobs:
           cache: maven
 
       # ----------------------------------------------------------------
-      # 3. Build parent POM + all modules (no tests yet, fast check)
+      # 3. Build only demo + its dependencies (backend, asset-generator)
+      #    Skips frontend and application modules entirely.
       # ----------------------------------------------------------------
-      - name: Build parent and all modules (skip tests)
-        run: mvn -B install -DskipTests --no-transfer-progress
+      - name: Build demo and dependencies (skip tests)
+        run: >-
+          mvn -B install -DskipTests --no-transfer-progress
+          -pl demo
+          -am
 
       # ----------------------------------------------------------------
       # 4. Run unit + E2E tests for the demo module
