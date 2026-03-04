@@ -45,8 +45,20 @@ jobs:
       - name: Build and install asset-generator
         run: mvn -B install -DskipTests -f asset-generator/pom.xml --no-transfer-progress
 
+      - name: Debug - validate demo POM
+        run: mvn -B validate -f demo/pom.xml --no-transfer-progress -e || true
+
+      - name: Debug - show effective compiler config
+        run: |
+          echo "=== Effective POM compiler section ==="
+          mvn -B help:effective-pom -f demo/pom.xml --no-transfer-progress 2>/dev/null | grep -A 25 'maven-compiler-plugin' | head -40 || true
+          echo "=== End compiler section ==="
+
+      - name: Debug - resolve demo dependencies
+        run: mvn -B dependency:resolve -f demo/pom.xml --no-transfer-progress -e || echo "WARN: dependency resolution had issues"
+
       - name: Compile demo
-        run: mvn -B compile -f demo/pom.xml --no-transfer-progress -e
+        run: mvn -B compile -f demo/pom.xml -e
 
       - name: Install demo (skip tests)
         run: mvn -B install -DskipTests -f demo/pom.xml --no-transfer-progress
