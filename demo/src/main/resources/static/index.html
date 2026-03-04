@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life of T — Demo</title>
+<style>
+/* ===== Reset & base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; font-family: 'Courier New', Courier, monospace; }
+
+/* ===== Layout ===== */
+#app { display: grid; grid-template-columns: 1fr 300px; grid-template-rows: auto 1fr; height: 100vh; gap: 0; }
+#header { grid-column: 1/-1; background: #1a1a2e; border-bottom: 2px solid #4a3e6a; padding: 10px 20px; display: flex; align-items: center; gap: 16px; }
+#header h1 { font-size: 1.4rem; color: #c8a0ff; letter-spacing: 2px; text-transform: uppercase; }
+#header .subtitle { color: #7a6890; font-size: 0.75rem; }
+#game-time { margin-left: auto; color: #8be0b4; font-size: 0.85rem; }
+
+/* ===== Room canvas ===== */
+#room-container {
+    position: relative;
+    background: #1c2a3a;
+    overflow: hidden;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+/* Room background layer */
+#room-bg {
+    position: absolute; inset: 0;
+    background-image: url('/api/assets/home_room_bg.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+}
+
+/* Floor grid overlay (pixel art style) */
+#room-floor {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 40%;
+    background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 32px);
+}
+
+/* ===== Sprite base ===== */
+.sprite {
+    position: absolute;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background-repeat: no-repeat;
+    /* Each animation is a horizontal-strip atlas.
+       background-position is shifted by frameWidth each tick. */
+}
+
+/* ===== Bed (furniture – static) ===== */
+#bed {
+    bottom: 28%;
+    right: 8%;
+    width: 96px;   /* 2× scaled from 48px frame */
+    height: 64px;  /* 2× scaled from 32px frame */
+    background-image: url('/api/assets/bed_static.png');
+    background-size: 100% 100%; /* single frame */
+}
+
+/* ===== Sam the dog ===== */
+#sam {
+    bottom: 24%;
+    right: 18%;
+    width: 48px;   /* 2× */
+    height: 40px;  /* 2× */
+    background-image: url('/api/assets/sam_idle.png');
+    /* Atlas width = 4 frames × 24px = 96px, displayed at 2×: 192px logical width */
+    background-size: 192px 40px;
+    background-position: 0 0;
+}
+
+/* ===== Tanya (player character) ===== */
+#tanya {
+    bottom: 22%;
+    left: 30%;
+    width: 64px;   /* 2× of 32px */
+    height: 96px;  /* 2× of 48px */
+    background-image: url('/api/assets/tanya_idle.png');
+    /* Atlas width = 6 frames × 32px = 192px, displayed at 2×: 384px logical width */
+    background-size: 384px 96px;
+    background-position: 0 0;
+}
+
+/* Quest activity indicator above Tanya */
+#tanya-activity {
+    position: absolute;
+    bottom: calc(22% + 100px);
+    left: calc(30% + 8px);
+    font-size: 10px;
+    color: #ffe080;
+    white-space: nowrap;
+    pointer-events: none;
+    text-shadow: 1px 1px 0 #000;
+}
+
+/* ===== Side panel ===== */
+#side-panel {
+    background: #12121e;
+    border-left: 2px solid #2a2a4a;
+    padding: 12px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ===== Stats panel ===== */
+.panel-box {
+    background: #1a1a30;
+    border: 1px solid #3a3a5a;
+    border-radius: 2px;
+    padding: 10px;
+}
+.panel-box h2 {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #8070a0;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #2a2a4a;
+    padding-bottom: 4px;
+}
+
+/* stat bars */
+.stat-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.stat-label { font-size: 0.65rem; color: #a098b8; width: 70px; flex-shrink: 0; }
+.stat-bar-bg { flex: 1; height: 6px; background: #2a2a3a; border-radius: 0; }
+.stat-bar { height: 6px; border-radius: 0; transition: width 0.3s; }
+.stat-energy  .stat-bar { background: #80e880; }
+.stat-health  .stat-bar { background: #e84040; }
+.stat-stress  .stat-bar { background: #e8a040; }
+.stat-mood    .stat-bar { background: #40a8e8; }
+.stat-money   .stat-bar { background: #e8e040; }
+.stat-esteem  .stat-bar { background: #c840e8; }
+.stat-value { font-size: 0.6rem; color: #706890; width: 24px; text-align: right; }
+
+/* ===== Quest panel ===== */
+.quest-item { margin-bottom: 8px; }
+.quest-title { font-size: 0.7rem; color: #d0c0ff; margin-bottom: 3px; }
+.quest-type-badge {
+    display: inline-block;
+    font-size: 0.55rem;
+    padding: 1px 4px;
+    border-radius: 1px;
+    margin-bottom: 4px;
+}
+.quest-SELF_CARE_ARC    { background: #2a4a2a; color: #80e880; }
+.quest-FAMILY_HARMONY   { background: #4a2a2a; color: #e88080; }
+.quest-CAREER_GROWTH    { background: #2a3a4a; color: #80c0e8; }
+
+.quest-progress-bg { width: 100%; height: 4px; background: #2a2a3a; margin-bottom: 4px; }
+.quest-progress-fill { height: 4px; background: #8060c0; }
+.quest-step { font-size: 0.6rem; color: #706890; padding-left: 6px; margin-bottom: 1px; }
+.quest-step.done { color: #50e890; }
+.quest-step::before { content: '▸ '; }
+.quest-step.done::before { content: '✓ '; }
+
+/* ===== Relationship panel ===== */
+.rel-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.rel-label { font-size: 0.65rem; color: #a098b8; width: 60px; flex-shrink: 0; }
+.rel-hearts { font-size: 0.7rem; color: #e84060; }
+
+/* ===== Status bar ===== */
+#status-bar {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.6);
+    border: 1px solid #3a3a5a;
+    padding: 4px 12px;
+    font-size: 0.65rem;
+    color: #8080a0;
+    pointer-events: none;
+}
+
+/* ===== Loading overlay ===== */
+#loading {
+    position: fixed; inset: 0;
+    background: #0d0d14;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 100;
+    transition: opacity 0.4s;
+}
+#loading.hidden { opacity: 0; pointer-events: none; }
+#loading-text { color: #c8a0ff; font-size: 1rem; margin-bottom: 12px; }
+#loading-dots { color: #7a6890; font-size: 0.8rem; }
+
+/* ===== Pixel scanlines overlay ===== */
+#room-container::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.05) 0px,
+        rgba(0,0,0,0.05) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<div id="loading">
+    <div id="loading-text">LIFE OF T — DEMO</div>
+    <div id="loading-dots">загрузка ассетов...</div>
+</div>
+
+<div id="app">
+
+    <!-- Header -->
+    <header id="header">
+        <h1>Life of T</h1>
+        <span class="subtitle">Demo v0.1</span>
+        <span id="game-time">День 1 | 08:00</span>
+    </header>
+
+    <!-- Game room -->
+    <main id="room-container">
+        <div id="room-bg"></div>
+        <div id="room-floor"></div>
+
+        <!-- Furniture -->
+        <div id="bed" class="sprite" title="Кровать"></div>
+
+        <!-- Sam the dog -->
+        <div id="sam" class="sprite" title="Сэм"></div>
+
+        <!-- Tanya (player character) -->
+        <div id="tanya" class="sprite" title="Таня"></div>
+        <div id="tanya-activity">💬</div>
+
+        <div id="status-bar">Таня дома — начало нового дня</div>
+    </main>
+
+    <!-- Side panel -->
+    <aside id="side-panel">
+
+        <!-- Character stats -->
+        <div class="panel-box" id="stats-panel">
+            <h2>Таня — Статы</h2>
+            <div id="stats-rows">
+                <div class="stat-row stat-energy">
+                    <span class="stat-label">Энергия</span>
+                    <div class="stat-bar-bg"><div class="stat-bar" id="bar-energy" style="width:70%"></div></div>
+                    <span class="stat-value" id="val-energy">70</span>
+                </div>
+                <div class="stat-row stat-health">
+                    <span class="stat-label">Здоровье</span>
+                    <div class="stat-bar-bg"><div class="stat-bar" id="bar-health" style="width:80%"></div></div>
+                    <span class="stat-value" id="val-health">80</span>
+                </div>
+                <div class="stat-row stat-stress">
+                    <span class="stat-label">Стресс</span>
+                    <div class="stat-bar-bg"><div class="stat-bar" id="bar-stress" style="width:30%"></div></div>
+                    <span class="stat-value" id="val-stress">30</span>
+                </div>
+                <div class="stat-row stat-mood">
+                    <span class="stat-label">Настроение</span>
+                    <div class="stat-bar-bg"><div class="stat-bar" id="bar-mood" style="width:65%"></div></div>
+                    <span class="stat-value" id="val-mood">65</span>
+                </div>
+                <div class="stat-row stat-money">
+                    <span class="stat-label">Деньги</span>
+                    <div class="stat-bar-bg"><div class="stat-bar" id="bar-money" style="width:50%"></div></div>
+                    <span class="stat-value" id="val-money">50</span>
+                </div>
+                <div class="stat-row stat-esteem">
+                    <span class="stat-label">Самооценка</span>
+                    <div class="stat-bar-bg"><div class="stat-bar" id="bar-esteem" style="width:60%"></div></div>
+                    <span class="stat-value" id="val-esteem">60</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quest log -->
+        <div class="panel-box" id="quest-panel">
+            <h2>Активные квесты</h2>
+            <div id="quest-list">
+                <div class="quest-item">
+                    <span class="quest-type-badge quest-SELF_CARE_ARC">ЗАБОТА О СЕБЕ</span>
+                    <div class="quest-title">Найди себя</div>
+                    <div class="quest-progress-bg"><div class="quest-progress-fill" style="width:0%"></div></div>
+                    <div class="quest-step">Поспать не менее 7 часов</div>
+                    <div class="quest-step">Сходить в спортзал</div>
+                </div>
+                <div class="quest-item">
+                    <span class="quest-type-badge quest-FAMILY_HARMONY">СЕМЬЯ</span>
+                    <div class="quest-title">Семейный вечер</div>
+                    <div class="quest-progress-bg"><div class="quest-progress-fill" style="width:0%"></div></div>
+                    <div class="quest-step">Поговорить с мужем</div>
+                    <div class="quest-step">Позвонить папе</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Relationships -->
+        <div class="panel-box" id="rels-panel">
+            <h2>Отношения</h2>
+            <div id="rels-list">
+                <div class="rel-row">
+                    <span class="rel-label">Муж</span>
+                    <span class="rel-hearts" id="rel-husband">♥♥♥♥♥♥♥</span>
+                </div>
+                <div class="rel-row">
+                    <span class="rel-label">Папа</span>
+                    <span class="rel-hearts" id="rel-father">♥♥♥♥♥</span>
+                </div>
+            </div>
+        </div>
+
+    </aside>
+
+</div>
+
+<script>
+'use strict';
+
+// ============================================================
+// Sprite animator
+// Horizontal-strip atlas: all frames left-to-right in one PNG.
+// Animates by shifting CSS background-position-x.
+// ============================================================
+class SpriteAnimator {
+    /**
+     * @param {HTMLElement} el       - DOM element with background-image already set
+     * @param {number} frameWidth    - logical width of one frame in CSS px (already scaled)
+     * @param {number} frameCount    - total number of frames in the atlas
+     * @param {number} fps           - target frames per second
+     */
+    constructor(el, frameWidth, frameCount, fps) {
+        this.el         = el;
+        this.frameWidth = frameWidth;
+        this.frameCount = frameCount;
+        this.interval   = Math.round(1000 / fps);
+        this.current    = 0;
+        this.timer      = null;
+    }
+
+    start() {
+        if (this.timer !== null) return;
+        this.timer = setInterval(() => this._tick(), this.interval);
+    }
+
+    stop() {
+        if (this.timer !== null) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
+    }
+
+    _tick() {
+        // Shift background-position left by one frame width per tick
+        const offset = -(this.current * this.frameWidth);
+        this.el.style.backgroundPositionX = offset + 'px';
+        this.current = (this.current + 1) % this.frameCount;
+    }
+}
+
+// ============================================================
+// Asset metadata (mirror of DemoAssetService.SPECS, 2× scale)
+// ============================================================
+const ASSET_META = {
+    tanya_idle:    { fw: 64,  fh: 96,  frames: 6, fps: 8  },
+    tanya_walk:    { fw: 64,  fh: 96,  frames: 8, fps: 10 },
+    sam_idle:      { fw: 48,  fh: 40,  frames: 4, fps: 6  },
+    sam_walk:      { fw: 48,  fh: 40,  frames: 6, fps: 8  },
+    bed_static:    { fw: 96,  fh: 64,  frames: 1, fps: 1  },
+    home_room_bg:  { fw: 320, fh: 192, frames: 1, fps: 1  },
+};
+
+// ============================================================
+// Helpers
+// ============================================================
+function hearts(closeness) {
+    const full  = Math.round(closeness / 10);
+    const empty = 10 - full;
+    return '♥'.repeat(Math.max(0, full)) + '♡'.repeat(Math.max(0, empty));
+}
+
+function pct(value, max = 100) {
+    return Math.min(100, Math.max(0, Math.round((value / max) * 100)));
+}
+
+function updateBar(id, value, max = 100) {
+    const bar = document.getElementById('bar-' + id);
+    const val = document.getElementById('val-' + id);
+    if (bar) bar.style.width = pct(value, max) + '%';
+    if (val) val.textContent = value;
+}
+
+// ============================================================
+// API polling
+// ============================================================
+async function fetchStatus() {
+    try {
+        const res = await fetch('/api/demo/status');
+        if (!res.ok) return null;
+        return await res.json();
+    } catch (_) {
+        return null;
+    }
+}
+
+async function fetchQuests() {
+    try {
+        const res = await fetch('/api/demo/quest-log');
+        if (!res.ok) return [];
+        return await res.json();
+    } catch (_) {
+        return [];
+    }
+}
+
+// ============================================================
+// Render helpers
+// ============================================================
+function renderStats(stats) {
+    if (!stats) return;
+    updateBar('energy', stats.energy);
+    updateBar('health', stats.health);
+    updateBar('stress', stats.stress);
+    updateBar('mood',   stats.mood);
+    updateBar('money',  stats.money);
+    updateBar('esteem', stats.selfEsteem);
+}
+
+function renderRelationships(rels) {
+    if (!rels || !rels.byNpc) return;
+    const h = rels.byNpc['HUSBAND'];
+    const f = rels.byNpc['FATHER'];
+    if (h) document.getElementById('rel-husband').textContent = hearts(h.closeness);
+    if (f) document.getElementById('rel-father').textContent  = hearts(f.closeness);
+}
+
+function renderQuests(quests) {
+    if (!quests || quests.length === 0) return;
+    const list = document.getElementById('quest-list');
+    list.innerHTML = '';
+    quests.forEach(q => {
+        const div = document.createElement('div');
+        div.className = 'quest-item';
+        const badge = document.createElement('span');
+        badge.className = 'quest-type-badge quest-' + q.type;
+        badge.textContent = questTypeLabel(q.type);
+        div.appendChild(badge);
+        const title = document.createElement('div');
+        title.className = 'quest-title';
+        title.textContent = q.title;
+        div.appendChild(title);
+        const pbg = document.createElement('div');
+        pbg.className = 'quest-progress-bg';
+        const pfill = document.createElement('div');
+        pfill.className = 'quest-progress-fill';
+        pfill.style.width = (q.progressPercent || 0) + '%';
+        pbg.appendChild(pfill);
+        div.appendChild(pbg);
+        if (q.steps) {
+            q.steps.forEach(s => {
+                const step = document.createElement('div');
+                step.className = 'quest-step' + (s.completed ? ' done' : '');
+                step.textContent = s.description;
+                div.appendChild(step);
+            });
+        }
+        list.appendChild(div);
+    });
+}
+
+function questTypeLabel(type) {
+    switch (type) {
+        case 'SELF_CARE_ARC':    return 'ЗАБОТА О СЕБЕ';
+        case 'FAMILY_HARMONY':   return 'СЕМЬЯ';
+        case 'CAREER_GROWTH':    return 'КАРЬЕРА';
+        default:                 return type;
+    }
+}
+
+function renderGameTime(gt) {
+    if (!gt) return;
+    const h = String(gt.hour).padStart(2, '0');
+    document.getElementById('game-time').textContent =
+        'День ' + gt.day + ' | ' + h + ':00';
+}
+
+// ============================================================
+// Activity label above Tanya
+// ============================================================
+const ACTIVITIES = [
+    '☕ пьёт кофе', '📖 читает', '🎮 играет', '💭 думает', '🎵 слушает музыку'
+];
+let activityIdx = 0;
+function rotateActivity() {
+    const el = document.getElementById('tanya-activity');
+    if (el) el.textContent = ACTIVITIES[activityIdx++ % ACTIVITIES.length];
+}
+
+// ============================================================
+// Initialisation
+// ============================================================
+const animators = [];
+
+function initAnimators() {
+    // Tanya idle
+    const tanyaEl = document.getElementById('tanya');
+    const m = ASSET_META.tanya_idle;
+    animators.push(new SpriteAnimator(tanyaEl, m.fw, m.frames, m.fps));
+
+    // Sam idle
+    const samEl = document.getElementById('sam');
+    const sm = ASSET_META.sam_idle;
+    animators.push(new SpriteAnimator(samEl, sm.fw, sm.frames, sm.fps));
+}
+
+async function init() {
+    initAnimators();
+    animators.forEach(a => a.start());
+
+    // Initial data load
+    const status = await fetchStatus();
+    if (status) {
+        renderStats(status.character && status.character.stats);
+        renderRelationships(status.relationships);
+        renderGameTime(status.gameTime);
+    }
+
+    const quests = await fetchQuests();
+    renderQuests(quests);
+
+    // Hide loading screen
+    const loading = document.getElementById('loading');
+    loading.classList.add('hidden');
+    setTimeout(() => loading.remove(), 500);
+
+    // Poll every 5 seconds
+    setInterval(async () => {
+        const s = await fetchStatus();
+        if (s) {
+            renderStats(s.character && s.character.stats);
+            renderRelationships(s.relationships);
+            renderGameTime(s.gameTime);
+        }
+        const q = await fetchQuests();
+        renderQuests(q);
+    }, 5000);
+
+    // Rotate activity label every 4 seconds
+    rotateActivity();
+    setInterval(rotateActivity, 4000);
+}
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
