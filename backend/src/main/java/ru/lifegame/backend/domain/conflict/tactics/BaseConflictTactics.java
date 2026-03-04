@@ -59,6 +59,17 @@ public enum BaseConflictTactics implements ConflictTactic {
                     : null;
             return new TacticEffects(csp, StatChanges.none(), rel, true, defaultReactionText());
         }
+    },
+    LISTEN("LISTEN", "Выслушать", "Внимательно выслушать оппонента", "Спасибо, что выслушала...") {
+        @Override
+        public TacticEffects calculateEffects(PlayerCharacter player, Conflict conflict, Relationships relationships) {
+            CspChanges csp = new CspChanges(GameBalance.LISTEN_PLAYER_CSP, GameBalance.LISTEN_OPPONENT_CSP);
+            NpcCode npc = conflict.type().opponent().orElse(null);
+            RelationshipChanges rel = npc != null
+                    ? new RelationshipChanges(npc, GameBalance.LISTEN_CLOSENESS, GameBalance.LISTEN_TRUST, 0, 0)
+                    : null;
+            return new TacticEffects(csp, StatChanges.none(), rel, true, defaultReactionText());
+        }
     };
 
     private final String code;
