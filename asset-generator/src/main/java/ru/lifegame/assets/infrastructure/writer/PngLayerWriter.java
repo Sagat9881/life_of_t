@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import ru.lifegame.assets.domain.model.asset.AssetLayer;
 
 import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,7 +34,13 @@ public class PngLayerWriter {
 
         BufferedImage argbImage = ensureARGB(image);
 
-        ImageIO.write(argbImage, "PNG", outputPath.toFile());
+        try (ImageOutputStream ios = ImageIO.createImageOutputStream(outputPath.toFile())) {
+            if (!ImageIO.write(argbImage, "PNG", ios)) {
+                throw new IOException("No appropriate PNG writer found");
+            }
+            ios.flush();
+        }
+
         log.info("Wrote PNG layer: {}", outputPath);
         return outputPath;
     }
@@ -51,7 +58,13 @@ public class PngLayerWriter {
         
         BufferedImage argbImage = ensureARGB(image);
         
-        ImageIO.write(argbImage, "PNG", outputPath.toFile());
+        try (ImageOutputStream ios = ImageIO.createImageOutputStream(outputPath.toFile())) {
+            if (!ImageIO.write(argbImage, "PNG", ios)) {
+                throw new IOException("No appropriate PNG writer found");
+            }
+            ios.flush();
+        }
+
         log.info("Wrote PNG: {}", outputPath);
         return outputPath;
     }
