@@ -1,33 +1,25 @@
-# Demo Application Configuration
-
 spring:
   application:
     name: life-of-t-demo
+  web:
+    resources:
+      static-locations:
+        - classpath:/static/
+        - classpath:/public/
 
 server:
-  port: 3000
-  compression:
-    enabled: true
-    mime-types:
-      - application/javascript
-      - text/css
-      - text/html
+  port: 8080
+  servlet:
+    context-path: /
 
-# Spring MVC
-spring.mvc:
-  static-path-pattern: /**
+# Demo-specific configuration
+demo:
+  assets:
+    # Output directory for generated sprite atlas PNGs.
+    # Defaults to OS temp dir so tests and CI work without filesystem permissions.
+    output-dir: ${java.io.tmpdir}/life-of-t-assets
 
-spring.web.resources:
-  static-locations:
-    - classpath:/static/
-  cache:
-    cachecontrol:
-      no-cache: true  # No caching for demo
-
-# Logging
 logging:
   level:
-    ru.lifegame: INFO
-    org.springframework: WARN
-  pattern:
-    console: '%d{HH:mm:ss} - %msg%n'
+    ru.lifegame: DEBUG
+    org.springframework.web: INFO

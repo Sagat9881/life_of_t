@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Visual specification for Sam – Tanya's dog.
+
+  Naming conventions:
+    - Directory (outputDir):  snake_case  → pets/sam_dog
+    - Prompt files:           kebab-case  → visual-specs.xml
+    - Output PNG (idle):      snake_case  → sam_idle.png
+    - Output PNG (walk):      snake_case  → sam_walk.png
+
+  Atlas format: horizontal-strip.
+    sam_idle: 4 frames × 24px wide = 96px total, 20px tall
+    sam_walk: 6 frames × 24px wide = 144px total, 20px tall
+  No anti-aliasing. No GIF. Max 50 frames per animation.
+-->
+<asset id="sam_dog">
+
+    <naming>
+        <outputDir>pets/sam_dog</outputDir>
+    </naming>
+
+    <layers>
+        <layer id="body" type="BODY" zOrder="0">
+            <description>
+                Small dog, side view, pixel-art, 24×20 px per frame.
+                Body: elongated oval, colour #C8A04A (golden/tan).
+                Legs: 4 legs indicated as 2px wide blocks, colour #A0803A.
+                Tail: 4px stick at right, curves up at tip (staircase pixels).
+                No anti-aliasing. No gradients.
+            </description>
+        </layer>
+        <layer id="head" type="DETAIL" zOrder="1">
+            <description>
+                Head: 8×7px block, slightly rounder, same body colour.
+                Ears: 3×4px drooping flaps, colour #A0803A.
+                Eyes: single 2×2 black dot.
+                Nose: 2×1 px black block.
+                No anti-aliasing.
+            </description>
+        </layer>
+    </layers>
+
+    <animations>
+        <animation id="sam_idle" frames="4" frameRate="6">
+            <description>
+                Idle tail-wag cycle. Tail position: frame 0 up, frame 1 neutral,
+                frame 2 down, frame 3 neutral. Pixel offsets: ±2px on tail tip.
+                No body movement. No anti-aliasing.
+            </description>
+            <layerIds>
+                <layerId>body</layerId>
+                <layerId>head</layerId>
+            </layerIds>
+        </animation>
+
+        <animation id="sam_walk" frames="6" frameRate="8">
+            <description>
+                Walk cycle. Front pair of legs alternates with back pair.
+                Legs: 2px blocks shifting ±1px vertically per frame.
+                Tail wags during walk (±2px). Head bobs ±1px.
+                No anti-aliasing. Staircase pixels for any diagonal lines.
+            </description>
+            <layerIds>
+                <layerId>body</layerId>
+                <layerId>head</layerId>
+            </layerIds>
+        </animation>
+    </animations>
+
+    <canvasSize width="24" height="20"/>
+
+</asset>
