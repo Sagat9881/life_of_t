@@ -71,8 +71,15 @@ public class SimpleProceduralTextureGenerator {
         }
         g.dispose();
 
-        return image.getSubimage(0, 0,
-                Math.min(width, imgWidth),
-                Math.min(height, imgHeight));
+        // Create ARGB subimage copy instead of using getSubimage()
+        // to avoid shared raster and ensure TYPE_INT_ARGB
+        int targetWidth = Math.min(width, imgWidth);
+        int targetHeight = Math.min(height, imgHeight);
+        BufferedImage result = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D resultG = result.createGraphics();
+        resultG.drawImage(image, 0, 0, targetWidth, targetHeight, 0, 0, targetWidth, targetHeight, null);
+        resultG.dispose();
+        
+        return result;
     }
 }
