@@ -36,13 +36,20 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # Build only the modules demo depends on (backend, asset-generator)
-      # Using -pl with -am resolves the reactor graph correctly
-      - name: Build demo and dependencies (skip tests)
-        run: >-
-          mvn -B install -DskipTests
-          -pl demo -am
-          --no-transfer-progress
+      - name: Install parent POM
+        run: mvn -B -N install --no-transfer-progress
+
+      - name: Build and install backend
+        run: mvn -B install -DskipTests -f backend/pom.xml --no-transfer-progress
+
+      - name: Build and install asset-generator
+        run: mvn -B install -DskipTests -f asset-generator/pom.xml --no-transfer-progress
+
+      - name: Compile demo
+        run: mvn -B compile -f demo/pom.xml --no-transfer-progress -e
+
+      - name: Install demo (skip tests)
+        run: mvn -B install -DskipTests -f demo/pom.xml --no-transfer-progress
 
       - name: Run demo tests
         run: >-
