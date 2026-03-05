@@ -55,18 +55,10 @@ jobs:
           exit ${PIPESTATUS[0]}
         continue-on-error: true
 
-      - name: Upload compile output on failure
-        if: steps.compile.outcome == 'failure'
-        uses: actions/upload-artifact@v4
-        with:
-          name: compile-error-output
-          path: /tmp/compile-output.txt
-          retention-days: 3
-
       - name: Fail if compile failed
         if: steps.compile.outcome == 'failure'
         run: |
-          echo "::error::Demo compilation failed. See compile-error-output artifact for details."
+          echo "::error::Demo compilation failed."
           cat /tmp/compile-output.txt
           exit 1
 
@@ -76,14 +68,6 @@ jobs:
           mvn -B test-compile -f demo/pom.xml -e 2>&1 | tee /tmp/test-compile-output.txt
           exit ${PIPESTATUS[0]}
         continue-on-error: true
-
-      - name: Upload test-compile output on failure
-        if: steps.test-compile.outcome == 'failure'
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-compile-error-output
-          path: /tmp/test-compile-output.txt
-          retention-days: 3
 
       - name: Post test-compile errors to commit comment
         if: steps.test-compile.outcome == 'failure'
@@ -109,41 +93,65 @@ jobs:
           exit 1
 
       - name: Package demo JAR (with repackage)
-        id: package-demo
-        run: |
-          mvn -B package -DskipTests -f demo/pom.xml -e 2>&1 | tee /tmp/package-output.txt
-          exit ${PIPESTATUS[0]}
-        continue-on-error: true
-
-      - name: Upload package output on failure
-        if: steps.package-demo.outcome == 'failure'
-        uses: actions/upload-artifact@v4
-        with:
-          name: package-error-output
-          path: /tmp/package-output.txt
-          retention-days: 3
-
-      - name: Fail if package failed
-        if: steps.package-demo.outcome == 'failure'
-        run: |
-          echo "::error::Demo packaging/repackage failed."
-          cat /tmp/package-output.txt
-          exit 1
+        run: mvn -B package -DskipTests -f demo/pom.xml --no-transfer-progress
 
       - name: Install demo to local repo
         run: mvn -B install -DskipTests -f demo/pom.xml --no-transfer-progress
 
       - name: Run demo tests
-        run: >-
-          mvn -B test
-          -f demo/pom.xml
-          --no-transfer-progress
-          -Dspring.profiles.active=test
-          -Ddemo.assets.output-dir=/tmp/life-of-t-assets
-          -Dsurefire.excludes=**/DemoBrowserE2ETest.java
+        id: demo-tests
+        run: |
+          mvn -B test \
+            -f demo/pom.xml \
+            --no-transfer-progress \
+            -Dspring.profiles.active=test \
+            -Ddemo.assets.output-dir=/tmp/life-of-t-assets \
+            -Dsurefire.excludes=**/DemoBrowserE2ETest.java \
+            2>&1 | tee /tmp/test-output.txt
+          exit ${PIPESTATUS[0]}
+        continue-on-error: true
         env:
           TESTCONTAINERS_CHECKS_DISABLE: true
           DOCKER_HOST: unix:///var/run/docker.sock
+
+      - name: Post test failures to commit comment
+        if: steps.demo-tests.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const glob = require('glob');
+            let body = '## Demo test failures\n\n';
+            // Add Maven output summary
+            const mvnOut = fs.readFileSync('/tmp/test-output.txt', 'utf8');
+            const importantLines = mvnOut.split('\n').filter(l =>
+              l.includes('[ERROR]') || l.includes('Tests run:') || l.includes('FAILURE') ||
+              l.includes('Exception') || l.includes('<<< ERROR') || l.includes('<<< FAILURE')
+            ).slice(-50);
+            body += '### Maven output\n```\n' + importantLines.join('\n') + '\n```\n\n';
+            // Add surefire XML reports
+            const reportDir = 'demo/target/surefire-reports';
+            if (fs.existsSync(reportDir)) {
+              const xmlFiles = fs.readdirSync(reportDir).filter(f => f.endsWith('.txt'));
+              for (const f of xmlFiles.slice(0, 5)) {
+                const content = fs.readFileSync(reportDir + '/' + f, 'utf8');
+                if (content.includes('FAILURE') || content.includes('ERROR') || content.includes('Exception')) {
+                  body += '### ' + f + '\n```\n' + content.substring(0, 3000) + '\n```\n\n';
+                }
+              }
+            }
+            await github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: body.substring(0, 65535)
+            });
+
+      - name: Fail if tests failed
+        if: steps.demo-tests.outcome == 'failure'
+        run: |
+          echo "::error::Demo tests failed."
+          exit 1
 
       - name: Run browser E2E tests (optional)
         if: ${{ env.BROWSER_E2E_ENABLED == 'true' }}
