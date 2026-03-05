@@ -16,6 +16,7 @@ import ru.lifegame.backend.domain.conflict.core.ConflictCategory;
 import ru.lifegame.backend.domain.conflict.core.ConflictStage;
 import ru.lifegame.backend.domain.conflict.core.ConflictType;
 import ru.lifegame.backend.domain.conflict.tactics.BaseConflictTactics;
+import ru.lifegame.backend.domain.conflict.tactics.SkillBasedConflictTactics;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.stats.StatChanges;
 import ru.lifegame.backend.domain.model.relationship.NpcCode;
@@ -238,7 +239,7 @@ class GameNarrativeE2ETest {
         assertThat(conflict.stage()).isEqualTo(ConflictStage.ESCALATION);
 
         // De-escalate using LISTEN then COMPROMISE
-        conflict.applyTactic(BaseConflictTactics.LISTEN, tanya, rels);
+        conflict.applyTactic(SkillBasedConflictTactics.LISTEN_AND_UNDERSTAND, tanya, rels);
         conflict.applyTactic(BaseConflictTactics.COMPROMISE, tanya, rels);
 
         if (!conflict.isResolved()) {

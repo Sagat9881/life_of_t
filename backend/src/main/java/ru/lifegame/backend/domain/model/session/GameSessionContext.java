@@ -1,5 +1,6 @@
 package ru.lifegame.backend.domain.model.session;
 
+import lombok.Setter;
 import ru.lifegame.backend.domain.action.GameSessionReadModel;
 import ru.lifegame.backend.domain.conflict.core.Conflict;
 import ru.lifegame.backend.domain.ending.Ending;
@@ -24,7 +25,9 @@ public class GameSessionContext {
     private final List<Conflict> activeConflicts;
     private final QuestLog questLog;
     private final List<GameEvent> events;
+    @Setter
     private Ending ending;
+    @Setter
     private GameOverReason gameOverReason;
 
     public GameSessionContext(
@@ -66,14 +69,6 @@ public class GameSessionContext {
 
     public void startNewDay() {
         this.time = time.startNewDay();
-    }
-
-    public void setEnding(Ending ending) {
-        this.ending = ending;
-    }
-
-    public void setGameOverReason(GameOverReason reason) {
-        this.gameOverReason = reason;
     }
 
     public boolean isFinished() {

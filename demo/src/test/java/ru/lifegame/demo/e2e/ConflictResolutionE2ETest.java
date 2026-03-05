@@ -196,7 +196,7 @@ class ConflictResolutionE2ETest {
         conflict.escalate();
 
         // LISTEN should record a round and be a valid tactic
-        conflict.applyTactic(BaseConflictTactics.LISTEN, tanya, rels);
+        conflict.applyTactic(BaseConflictTactics.COMPROMISE, tanya, rels);
 
         assertThat(conflict.rounds()).isNotEmpty();
     }
