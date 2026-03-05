@@ -15,9 +15,6 @@ on:
       - 'backend/**'
       - 'asset-generator/**'
 
-permissions:
-  contents: write
-
 jobs:
   build-and-test:
     name: Build & Test (Java 21)
@@ -48,110 +45,26 @@ jobs:
       - name: Build and install asset-generator
         run: mvn -B install -DskipTests -f asset-generator/pom.xml --no-transfer-progress
 
-      - name: Compile demo (main sources)
-        id: compile
-        run: |
-          mvn -B compile -f demo/pom.xml -e 2>&1 | tee /tmp/compile-output.txt
-          exit ${PIPESTATUS[0]}
-        continue-on-error: true
+      - name: Compile demo (main + test sources)
+        run: mvn -B test-compile -f demo/pom.xml --no-transfer-progress
 
-      - name: Fail if compile failed
-        if: steps.compile.outcome == 'failure'
-        run: |
-          echo "::error::Demo compilation failed."
-          cat /tmp/compile-output.txt
-          exit 1
-
-      - name: Compile demo (test sources)
-        id: test-compile
-        run: |
-          mvn -B test-compile -f demo/pom.xml -e 2>&1 | tee /tmp/test-compile-output.txt
-          exit ${PIPESTATUS[0]}
-        continue-on-error: true
-
-      - name: Post test-compile errors to commit comment
-        if: steps.test-compile.outcome == 'failure'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const output = fs.readFileSync('/tmp/test-compile-output.txt', 'utf8');
-            const errorLines = output.split('\n').filter(l => l.includes('[ERROR]') || l.includes('cannot find symbol') || l.includes('does not exist') || l.includes('COMPILATION ERROR'));
-            const body = `## Test-compile errors\n\`\`\`\n${errorLines.join('\n')}\n\`\`\``;
-            await github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: body.substring(0, 65535)
-            });
-
-      - name: Fail if test-compile failed
-        if: steps.test-compile.outcome == 'failure'
-        run: |
-          echo "::error::Demo test-compile failed."
-          cat /tmp/test-compile-output.txt
-          exit 1
-
-      - name: Package demo JAR (with repackage)
+      - name: Package demo JAR
         run: mvn -B package -DskipTests -f demo/pom.xml --no-transfer-progress
 
       - name: Install demo to local repo
         run: mvn -B install -DskipTests -f demo/pom.xml --no-transfer-progress
 
       - name: Run demo tests
-        id: demo-tests
-        run: |
-          mvn -B test \
-            -f demo/pom.xml \
-            --no-transfer-progress \
-            -Dspring.profiles.active=test \
-            -Ddemo.assets.output-dir=/tmp/life-of-t-assets \
-            -Dsurefire.excludes=**/DemoBrowserE2ETest.java \
-            2>&1 | tee /tmp/test-output.txt
-          exit ${PIPESTATUS[0]}
-        continue-on-error: true
+        run: >-
+          mvn -B test
+          -f demo/pom.xml
+          --no-transfer-progress
+          -Dspring.profiles.active=test
+          -Ddemo.assets.output-dir=/tmp/life-of-t-assets
+          -Dsurefire.excludes=**/DemoBrowserE2ETest.java
         env:
           TESTCONTAINERS_CHECKS_DISABLE: true
           DOCKER_HOST: unix:///var/run/docker.sock
-
-      - name: Post test failures to commit comment
-        if: steps.demo-tests.outcome == 'failure'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const glob = require('glob');
-            let body = '## Demo test failures\n\n';
-            // Add Maven output summary
-            const mvnOut = fs.readFileSync('/tmp/test-output.txt', 'utf8');
-            const importantLines = mvnOut.split('\n').filter(l =>
-              l.includes('[ERROR]') || l.includes('Tests run:') || l.includes('FAILURE') ||
-              l.includes('Exception') || l.includes('<<< ERROR') || l.includes('<<< FAILURE')
-            ).slice(-50);
-            body += '### Maven output\n```\n' + importantLines.join('\n') + '\n```\n\n';
-            // Add surefire XML reports
-            const reportDir = 'demo/target/surefire-reports';
-            if (fs.existsSync(reportDir)) {
-              const xmlFiles = fs.readdirSync(reportDir).filter(f => f.endsWith('.txt'));
-              for (const f of xmlFiles.slice(0, 5)) {
-                const content = fs.readFileSync(reportDir + '/' + f, 'utf8');
-                if (content.includes('FAILURE') || content.includes('ERROR') || content.includes('Exception')) {
-                  body += '### ' + f + '\n```\n' + content.substring(0, 3000) + '\n```\n\n';
-                }
-              }
-            }
-            await github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: body.substring(0, 65535)
-            });
-
-      - name: Fail if tests failed
-        if: steps.demo-tests.outcome == 'failure'
-        run: |
-          echo "::error::Demo tests failed."
-          exit 1
 
       - name: Run browser E2E tests (optional)
         if: ${{ env.BROWSER_E2E_ENABLED == 'true' }}
