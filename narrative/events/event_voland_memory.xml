@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event id="event_voland_memory" type="TRIGGERED">
+    <meta>
+        <title-ru>Воспоминание о Воланде</title-ru>
+        <description-ru>Старая фотография или запах — и вдруг вспоминается молодой Воланд. Когда он ещё видел.</description-ru>
+        <probability>0.2</probability>
+        <cooldown-hours>96</cooldown-hours>
+    </meta>
+    <conditions>
+        <condition type="trigger" value="view_old_photo"/>
+    </conditions>
+    <effects>
+        <stat-change stat="happiness" value="+5"/>
+        <stat-change stat="anxiety" value="-5"/>
+        <dialogue speaker="narrator">
+            <line-ru>[ВОСПОМИНАНИЕ] Воланд молодой — прыгает, носится, видит всё. Таня и Александр — совсем молодые, смеются.</line-ru>
+        </dialogue>
+        <dialogue speaker="tanya">
+            <line-ru>Помню как он гонялся за своим хвостом. Целый час. Мы хохотали так что живот болел. (пауза, тише) Он всё ещё счастлив. Просто по-другому.</line-ru>
+        </dialogue>
+    </effects>
+</event>

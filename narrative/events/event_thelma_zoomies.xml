@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event id="event_thelma_zoomies" type="SEASONAL">
+    <meta>
+        <title-ru>Тельмины зуми</title-ru>
+        <description-ru>Тельма вдруг срывается с места и носится по участку как ненормальная. Только летом на даче.</description-ru>
+        <probability>0.6</probability>
+        <cooldown-hours>12</cooldown-hours>
+    </meta>
+    <conditions>
+        <condition type="location" value="dacha_garden"/>
+        <condition type="season" value="summer"/>
+        <condition type="time_of_day" value="evening"/>
+    </conditions>
+    <effects>
+        <stat-change stat="happiness" value="+15"/>
+        <dialogue speaker="narrator">
+            <line-ru>Что-то переключается внутри Тельмы. Она срывается с места — и летит. Через грядку, вокруг яблони, под забором, по всему огороду. Чёрно-белая молния.</line-ru>
+        </dialogue>
+        <dialogue speaker="tanya">
+            <line-ru>ТЕЛЬМА! СМОТРИ НА ТЕЛЬМУ! (хохочет) Саша! Она бежит! Она БЕЖИТ!</line-ru>
+        </dialogue>
+        <dialogue speaker="alexander">
+            <line-ru>Вижу. (улыбается) Летом она другая.</line-ru>
+        </dialogue>
+        <dialogue speaker="thelma">
+            <line-ru>МЯУ-У-У! (не останавливается)</line-ru>
+        </dialogue>
+    </effects>
+</event>

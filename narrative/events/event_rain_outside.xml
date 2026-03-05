@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event id="event_rain_outside" type="TRIGGERED">
+    <meta>
+        <title-ru>Дождь за окном</title-ru>
+        <description-ru>Дождь барабанит по стеклу. В квартире тепло. Кошки собираются у окна.</description-ru>
+        <probability>0.5</probability>
+        <cooldown-hours>72</cooldown-hours>
+    </meta>
+    <conditions>
+        <condition type="time_of_day" value="evening"/>
+        <condition type="weather" value="rain"/>
+    </conditions>
+    <effects>
+        <stat-change stat="happiness" value="+12"/>
+        <stat-change stat="anxiety" value="-8"/>
+        <dialogue speaker="narrator">
+            <line-ru>Дождь пришёл внезапно — сначала пара капель на стекло, потом настоящий. Гарфилд и Цирилла сидят на подоконнике, смотрят на улицу. В квартире тепло и пахнет кофе.</line-ru>
+        </dialogue>
+        <dialogue speaker="tanya">
+            <line-ru>Слышите? Дождь. (закутывается в плед) Вот это и называется «хорошо».</line-ru>
+        </dialogue>
+    </effects>
+</event>
