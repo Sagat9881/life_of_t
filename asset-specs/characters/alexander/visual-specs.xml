@@ -3,7 +3,7 @@
     <meta>
         <entity-type>characters</entity-type>
         <entity-name>alexander</entity-name>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
     </meta>
 
     <layers>
@@ -115,6 +115,18 @@
             <frame index="1" layer-offsets="head:0,-1; hair:0,-1; torso:0,-1"/>
             <frame index="2" layer-offsets=""/>
             <frame index="3" layer-offsets="head:0,-1; hair:0,-1; torso:0,-1"/>
+        </animation>
+
+        <animation name="walk" frames="8" fps="8" loop="true"
+                   frame-width="32" frame-height="48">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="legs:0,0; socks:1,0"/>
+            <frame index="2" layer-offsets="torso:0,-1; head:0,-1; hair:0,-1; legs:2,0; socks:2,0"/>
+            <frame index="3" layer-offsets="torso:0,-1; head:0,-1; hair:0,-1; legs:1,0; socks:1,0"/>
+            <frame index="4" layer-offsets=""/>
+            <frame index="5" layer-offsets="legs:0,0; socks:-1,0"/>
+            <frame index="6" layer-offsets="torso:0,-1; head:0,-1; hair:0,-1; legs:-2,0; socks:-2,0"/>
+            <frame index="7" layer-offsets="torso:0,-1; head:0,-1; hair:0,-1; legs:-1,0; socks:-1,0"/>
         </animation>
     </animations>
 

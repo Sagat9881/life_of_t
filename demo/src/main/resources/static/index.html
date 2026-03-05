@@ -60,7 +60,6 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     background-size: 100% 100%;
 }
 
-/* Sam: 24x20 sprite at 4× */
 #sam {
     bottom: 24%; right: 22%;
     width: 96px; height: 80px;
@@ -68,7 +67,6 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     background-size: 384px 80px;
     background-position: 0 0;
 }
-/* Tanya: 32x48 at 4× */
 #tanya {
     bottom: 22%; left: 35%;
     width: 128px; height: 192px;
@@ -76,7 +74,6 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     background-size: 768px 192px;
     background-position: 0 0;
 }
-/* Alexander: 32x48 at 4× */
 #alexander {
     bottom: 22%; right: 30%;
     width: 128px; height: 192px;
@@ -85,16 +82,14 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     background-position: 0 0;
 }
 
-#tanya-activity {
+.activity-icon {
     position: absolute;
-    bottom: calc(22% + 200px);
-    left: calc(35% + 16px);
-    font-size: 10px; color: #ffe080;
-    white-space: nowrap; pointer-events: none;
-    text-shadow: 1px 1px 0 #000;
+    font-size: 18px;
+    pointer-events: none;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    transition: opacity 0.3s;
 }
 
-/* Side panel */
 #side-panel {
     background: #12121e;
     border-left: 2px solid #2a2a4a;
@@ -125,7 +120,6 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 .stat-mood    .stat-bar { background: #40a8e8; }
 .stat-money   .stat-bar { background: #e8e040; }
 .stat-esteem  .stat-bar { background: #c840e8; }
-.stat-hunger  .stat-bar { background: #e88040; }
 .stat-value { font-size: 0.6rem; color: #706890; width: 24px; text-align: right; }
 
 .quest-item { margin-bottom: 8px; }
@@ -142,7 +136,7 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 .quest-step.done::before { content: '✓ '; }
 
 .rel-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-.rel-label { font-size: 0.65rem; color: #a098b8; width: 60px; flex-shrink: 0; }
+.rel-label { font-size: 0.65rem; color: #a098b8; width: 70px; flex-shrink: 0; }
 .rel-hearts { font-size: 0.7rem; color: #e84060; }
 
 #status-bar {
@@ -182,7 +176,7 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 <div id="app">
     <header id="header">
         <h1>Life of T</h1>
-        <span class="subtitle">Demo v0.4</span>
+        <span class="subtitle">Demo v0.5</span>
         <span id="game-time">День 1 | 08:00</span>
     </header>
 
@@ -194,13 +188,15 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 
         <div id="sam" class="sprite" title="Сэм (собака)"></div>
         <span id="label-sam" class="sprite-label">Сэм 🐾</span>
+        <span id="activity-sam" class="activity-icon">🧸</span>
 
         <div id="alexander" class="sprite" title="Александр (муж)"></div>
         <span id="label-alexander" class="sprite-label">Александр</span>
+        <span id="activity-alexander" class="activity-icon">📖</span>
 
         <div id="tanya" class="sprite" title="Таня"></div>
         <span id="label-tanya" class="sprite-label">Таня</span>
-        <div id="tanya-activity">💬</div>
+        <span id="activity-tanya" class="activity-icon">☕</span>
 
         <div id="status-bar">Таня и Александр дома — начало нового дня</div>
     </main>
@@ -215,23 +211,6 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
             <div class="stat-row stat-mood"><span class="stat-label">Настроение</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-t-mood" style="width:65%"></div></div><span class="stat-value" id="val-t-mood">65</span></div>
             <div class="stat-row stat-money"><span class="stat-label">Деньги</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-t-money" style="width:50%"></div></div><span class="stat-value" id="val-t-money">50</span></div>
             <div class="stat-row stat-esteem"><span class="stat-label">Самооценка</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-t-esteem" style="width:60%"></div></div><span class="stat-value" id="val-t-esteem">60</span></div>
-        </div>
-
-        <!-- Alexander stats -->
-        <div class="panel-box">
-            <h2>Александр — Статы</h2>
-            <div class="stat-row stat-energy"><span class="stat-label">Энергия</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-a-energy" style="width:85%"></div></div><span class="stat-value" id="val-a-energy">85</span></div>
-            <div class="stat-row stat-health"><span class="stat-label">Здоровье</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-a-health" style="width:90%"></div></div><span class="stat-value" id="val-a-health">90</span></div>
-            <div class="stat-row stat-stress"><span class="stat-label">Стресс</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-a-stress" style="width:20%"></div></div><span class="stat-value" id="val-a-stress">20</span></div>
-            <div class="stat-row stat-mood"><span class="stat-label">Настроение</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-a-mood" style="width:75%"></div></div><span class="stat-value" id="val-a-mood">75</span></div>
-        </div>
-
-        <!-- Sam stats -->
-        <div class="panel-box">
-            <h2>Сэм 🐾 — Статы</h2>
-            <div class="stat-row stat-energy"><span class="stat-label">Энергия</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-s-energy" style="width:90%"></div></div><span class="stat-value" id="val-s-energy">90</span></div>
-            <div class="stat-row stat-mood"><span class="stat-label">Настроение</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-s-mood" style="width:95%"></div></div><span class="stat-value" id="val-s-mood">95</span></div>
-            <div class="stat-row stat-hunger"><span class="stat-label">Голод</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-s-hunger" style="width:30%"></div></div><span class="stat-value" id="val-s-hunger">30</span></div>
         </div>
 
         <!-- Quests -->
@@ -269,16 +248,12 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 'use strict';
 
 // ============================================================
-// Sprite Animator — horizontal-strip atlas
+// Sprite Animator
 // ============================================================
 class SpriteAnimator {
     constructor(el, frameWidthCSS, frameCount, fps) {
-        this.el = el;
-        this.fw = frameWidthCSS;
-        this.fc = frameCount;
-        this.interval = Math.round(1000 / fps);
-        this.current = 0;
-        this.timer = null;
+        this.el = el; this.fw = frameWidthCSS; this.fc = frameCount;
+        this.interval = Math.round(1000 / fps); this.current = 0; this.timer = null;
     }
     start() {
         if (this.timer) return;
@@ -291,45 +266,17 @@ class SpriteAnimator {
 }
 
 // ============================================================
-// Character Walker — wander around the room
+// Character Walker
 // ============================================================
 class CharacterWalker {
-    /**
-     * @param {object} cfg
-     * @param {HTMLElement} cfg.el            - sprite element
-     * @param {HTMLElement} cfg.labelEl       - name label element
-     * @param {string}      cfg.idleAtlas     - idle atlas URL
-     * @param {string}      cfg.walkAtlas     - walk atlas URL
-     * @param {number}      cfg.idleFrames    - idle frame count
-     * @param {number}      cfg.idleFps       - idle fps
-     * @param {number}      cfg.walkFrames    - walk frame count
-     * @param {number}      cfg.walkFps       - walk fps
-     * @param {number}      cfg.spriteW       - CSS width of sprite
-     * @param {number}      cfg.spriteH       - CSS height of sprite
-     * @param {number}      cfg.minX          - leftmost position (% of container)
-     * @param {number}      cfg.maxX          - rightmost position (% of container)
-     * @param {number}      cfg.bottomPct     - CSS bottom %
-     * @param {number}      cfg.speed         - pixels per frame (60fps)
-     * @param {number}      cfg.idleMinSec    - min idle pause
-     * @param {number}      cfg.idleMaxSec    - max idle pause
-     */
     constructor(cfg) {
-        this.cfg = cfg;
-        this.el = cfg.el;
-        this.labelEl = cfg.labelEl;
-        this.state = 'idle'; // 'idle' | 'walking'
-        this.animator = null;
-        this.posX = parseFloat(this.el.style.left) || 0; // px from left
-        this.targetX = this.posX;
-        this.moveRAF = null;
-
-        // Initialize position from current CSS
+        this.cfg = cfg; this.el = cfg.el; this.labelEl = cfg.labelEl; this.activityEl = cfg.activityEl;
+        this.state = 'idle'; this.animator = null;
         const rect = this.el.getBoundingClientRect();
         const container = this.el.parentElement.getBoundingClientRect();
         this.posX = rect.left - container.left;
-
-        this._setIdleAnim();
-        this._scheduleNextWalk();
+        this.targetX = this.posX; this.moveRAF = null;
+        this._setIdleAnim(); this._scheduleNextWalk(); this._rotateActivity();
     }
 
     _setIdleAnim() {
@@ -338,8 +285,7 @@ class CharacterWalker {
         this.el.style.backgroundSize = `${c.spriteW * c.idleFrames}px ${c.spriteH}px`;
         if (this.animator) this.animator.stop();
         this.animator = new SpriteAnimator(this.el, c.spriteW, c.idleFrames, c.idleFps);
-        this.animator.start();
-        this.state = 'idle';
+        this.animator.start(); this.state = 'idle';
     }
 
     _setWalkAnim() {
@@ -348,8 +294,7 @@ class CharacterWalker {
         this.el.style.backgroundSize = `${c.spriteW * c.walkFrames}px ${c.spriteH}px`;
         if (this.animator) this.animator.stop();
         this.animator = new SpriteAnimator(this.el, c.spriteW, c.walkFrames, c.walkFps);
-        this.animator.start();
-        this.state = 'walking';
+        this.animator.start(); this.state = 'walking';
     }
 
     _scheduleNextWalk() {
@@ -358,25 +303,14 @@ class CharacterWalker {
     }
 
     _startWalk() {
-        const container = this.el.parentElement;
-        if (!container) return;
+        const container = this.el.parentElement; if (!container) return;
         const cw = container.clientWidth;
-        const minPx = cw * this.cfg.minX / 100;
-        const maxPx = cw * this.cfg.maxX / 100 - this.cfg.spriteW;
+        const minPx = cw * this.cfg.minX / 100, maxPx = cw * this.cfg.maxX / 100 - this.cfg.spriteW;
         this.targetX = minPx + Math.random() * (maxPx - minPx);
-
-        // Don't walk tiny distances
-        if (Math.abs(this.targetX - this.posX) < 20) {
-            this._scheduleNextWalk();
-            return;
-        }
-
-        // Flip sprite if walking left
+        if (Math.abs(this.targetX - this.posX) < 20) { this._scheduleNextWalk(); return; }
         const goingLeft = this.targetX < this.posX;
         this.el.style.transform = goingLeft ? 'scaleX(-1)' : 'scaleX(1)';
-
-        this._setWalkAnim();
-        this._move();
+        this._setWalkAnim(); this._move();
     }
 
     _move() {
@@ -384,29 +318,33 @@ class CharacterWalker {
         const step = () => {
             const dx = this.targetX - this.posX;
             if (Math.abs(dx) < speed) {
-                this.posX = this.targetX;
-                this._updatePosition();
+                this.posX = this.targetX; this._updatePosition();
                 this.el.style.transform = 'scaleX(1)';
-                this._setIdleAnim();
-                this._scheduleNextWalk();
-                return;
+                this._setIdleAnim(); this._scheduleNextWalk(); return;
             }
-            this.posX += dx > 0 ? speed : -speed;
-            this._updatePosition();
+            this.posX += dx > 0 ? speed : -speed; this._updatePosition();
             this.moveRAF = requestAnimationFrame(step);
         };
         this.moveRAF = requestAnimationFrame(step);
     }
 
     _updatePosition() {
-        this.el.style.left = this.posX + 'px';
-        this.el.style.right = 'auto';
-        // Update label position
+        this.el.style.left = this.posX + 'px'; this.el.style.right = 'auto';
         if (this.labelEl) {
             this.labelEl.style.left = (this.posX + this.cfg.spriteW / 2 - 30) + 'px';
-            this.labelEl.style.right = 'auto';
-            this.labelEl.style.bottom = `calc(${this.cfg.bottomPct}% - 14px)`;
+            this.labelEl.style.right = 'auto'; this.labelEl.style.bottom = `calc(${this.cfg.bottomPct}% - 14px)`;
         }
+        if (this.activityEl) {
+            this.activityEl.style.left = (this.posX + this.cfg.spriteW / 2 - 9) + 'px';
+            this.activityEl.style.right = 'auto'; this.activityEl.style.bottom = `calc(${this.cfg.bottomPct}% + ${this.cfg.spriteH}px + 4px)`;
+        }
+    }
+
+    _rotateActivity() {
+        if (!this.activityEl || !this.cfg.activities) return;
+        const act = this.cfg.activities[Math.floor(Math.random() * this.cfg.activities.length)];
+        this.activityEl.textContent = act;
+        setTimeout(() => this._rotateActivity(), (3 + Math.random() * 4) * 1000);
     }
 }
 
@@ -422,16 +360,6 @@ function setBar(id, v) {
 async function fetchJSON(url) { try { const r=await fetch(url); return r.ok?await r.json():null; } catch(_){return null;} }
 
 // ============================================================
-// Activity label
-// ============================================================
-const ACT = ['☕ пьёт кофе','📖 читает','🎮 играет','💭 думает','🎵 слушает музыку','🐾 гладит Сэма'];
-let ai = 0;
-function rotateActivity() {
-    const el = document.getElementById('tanya-activity');
-    if (el) el.textContent = ACT[ai++ % ACT.length];
-}
-
-// ============================================================
 // Init
 // ============================================================
 const walkers = [];
@@ -440,52 +368,41 @@ function initWalkers() {
     walkers.push(new CharacterWalker({
         el: document.getElementById('tanya'),
         labelEl: document.getElementById('label-tanya'),
+        activityEl: document.getElementById('activity-tanya'),
         idleAtlas: '/generated-assets/characters/tanya/animations/idle_atlas.png',
         walkAtlas: '/generated-assets/characters/tanya/animations/walk_atlas.png',
-        idleFrames: 6, idleFps: 8,
-        walkFrames: 8, walkFps: 10,
-        spriteW: 128, spriteH: 192,
-        minX: 5, maxX: 80,
-        bottomPct: 22,
-        speed: 1.8,
-        idleMinSec: 2, idleMaxSec: 6
+        idleFrames: 6, idleFps: 8, walkFrames: 8, walkFps: 10,
+        spriteW: 128, spriteH: 192, minX: 5, maxX: 80, bottomPct: 22, speed: 1.8,
+        idleMinSec: 2, idleMaxSec: 6,
+        activities: ['☕', '📖', '🎮', '💭', '🎵', '💅']
     }));
 
     walkers.push(new CharacterWalker({
         el: document.getElementById('alexander'),
         labelEl: document.getElementById('label-alexander'),
+        activityEl: document.getElementById('activity-alexander'),
         idleAtlas: '/generated-assets/characters/alexander/animations/idle_atlas.png',
         walkAtlas: '/generated-assets/characters/alexander/animations/walk_atlas.png',
-        idleFrames: 4, idleFps: 4,
-        walkFrames: 4, walkFps: 6,
-        spriteW: 128, spriteH: 192,
-        minX: 10, maxX: 85,
-        bottomPct: 22,
-        speed: 1.4,
-        idleMinSec: 3, idleMaxSec: 8
+        idleFrames: 4, idleFps: 4, walkFrames: 8, walkFps: 8,
+        spriteW: 128, spriteH: 192, minX: 10, maxX: 85, bottomPct: 22, speed: 1.4,
+        idleMinSec: 3, idleMaxSec: 8,
+        activities: ['📖', '💻', '☕', '📱', '🎵', '🤔']
     }));
 
     walkers.push(new CharacterWalker({
         el: document.getElementById('sam'),
         labelEl: document.getElementById('label-sam'),
+        activityEl: document.getElementById('activity-sam'),
         idleAtlas: '/generated-assets/characters/sam/animations/idle_atlas.png',
         walkAtlas: '/generated-assets/characters/sam/animations/walk_atlas.png',
-        idleFrames: 4, idleFps: 4,
-        walkFrames: 4, walkFps: 6,
-        spriteW: 96, spriteH: 80,
-        minX: 5, maxX: 90,
-        bottomPct: 24,
-        speed: 2.5,  // dog runs faster!
-        idleMinSec: 1, idleMaxSec: 4
+        idleFrames: 4, idleFps: 4, walkFrames: 4, walkFps: 6,
+        spriteW: 96, spriteH: 80, minX: 5, maxX: 90, bottomPct: 24, speed: 2.5,
+        idleMinSec: 1, idleMaxSec: 4,
+        activities: ['🧸', '🦴', '😴', '🐾', '👀']
     }));
 }
 
-// Simulated stat fluctuation for demo
-const demoStats = {
-    t: { energy: 70, health: 80, stress: 30, mood: 65, money: 50, esteem: 60 },
-    a: { energy: 85, health: 90, stress: 20, mood: 75 },
-    s: { energy: 90, mood: 95, hunger: 30 }
-};
+const demoStats = { t: { energy: 70, health: 80, stress: 30, mood: 65, money: 50, esteem: 60 } };
 
 function fluctuate(obj, key, min, max, delta) {
     obj[key] = Math.min(max, Math.max(min, obj[key] + (Math.random() - 0.5) * delta * 2));
@@ -493,29 +410,16 @@ function fluctuate(obj, key, min, max, delta) {
 }
 
 function updateDemoStats() {
-    // Tanya
     setBar('t-energy', fluctuate(demoStats.t, 'energy', 20, 100, 3));
     setBar('t-health', fluctuate(demoStats.t, 'health', 50, 100, 2));
     setBar('t-stress', fluctuate(demoStats.t, 'stress', 0, 80, 4));
     setBar('t-mood',   fluctuate(demoStats.t, 'mood', 30, 100, 3));
     setBar('t-money',  fluctuate(demoStats.t, 'money', 10, 100, 2));
     setBar('t-esteem', fluctuate(demoStats.t, 'esteem', 30, 100, 2));
-    // Alexander
-    setBar('a-energy', fluctuate(demoStats.a, 'energy', 30, 100, 2));
-    setBar('a-health', fluctuate(demoStats.a, 'health', 60, 100, 1));
-    setBar('a-stress', fluctuate(demoStats.a, 'stress', 0, 70, 3));
-    setBar('a-mood',   fluctuate(demoStats.a, 'mood', 40, 100, 3));
-    // Sam
-    setBar('s-energy', fluctuate(demoStats.s, 'energy', 40, 100, 4));
-    setBar('s-mood',   fluctuate(demoStats.s, 'mood', 50, 100, 3));
-    setBar('s-hunger', fluctuate(demoStats.s, 'hunger', 0, 80, 3));
 }
 
 async function init() {
-    // Start walkers (handles both idle and walk animations)
     initWalkers();
-
-    // Try to load real data from API
     const status = await fetchJSON('/api/demo/status');
     if (status) {
         if (status.character && status.character.stats) {
@@ -523,39 +427,21 @@ async function init() {
             Object.assign(demoStats.t, { energy: s.energy||70, health: s.health||80, stress: s.stress||30, mood: s.mood||65, money: s.money||50, esteem: s.selfEsteem||60 });
         }
         if (status.relationships && status.relationships.byNpc) {
-            const h = status.relationships.byNpc['HUSBAND'];
-            const f = status.relationships.byNpc['FATHER'];
+            const h = status.relationships.byNpc['HUSBAND'], f = status.relationships.byNpc['FATHER'];
             if (h) document.getElementById('rel-husband').textContent = hearts(h.closeness);
             if (f) document.getElementById('rel-father').textContent  = hearts(f.closeness);
         }
         if (status.gameTime) {
-            document.getElementById('game-time').textContent =
-                'День '+status.gameTime.day+' | '+String(status.gameTime.hour).padStart(2,'0')+':00';
+            document.getElementById('game-time').textContent = 'День '+status.gameTime.day+' | '+String(status.gameTime.hour).padStart(2,'0')+':00';
         }
     }
-
-    // Initial stat render
     updateDemoStats();
-
-    // Hide loading
-    const loading = document.getElementById('loading');
-    loading.classList.add('hidden');
+    const loading = document.getElementById('loading'); loading.classList.add('hidden');
     setTimeout(() => loading.remove(), 500);
-
-    // Stat fluctuation every 3 seconds
     setInterval(updateDemoStats, 3000);
-
-    // Rotate activity label
-    rotateActivity();
-    setInterval(rotateActivity, 4000);
-
-    // Poll API every 10 seconds (if backend running)
     setInterval(async () => {
         const s = await fetchJSON('/api/demo/status');
-        if (s && s.gameTime) {
-            document.getElementById('game-time').textContent =
-                'День '+s.gameTime.day+' | '+String(s.gameTime.hour).padStart(2,'0')+':00';
-        }
+        if (s && s.gameTime) document.getElementById('game-time').textContent = 'День '+s.gameTime.day+' | '+String(s.gameTime.hour).padStart(2,'0')+':00';
     }, 10000);
 }
 
