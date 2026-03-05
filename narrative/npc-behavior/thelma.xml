@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc-behavior entity-id="thelma">
+    <schedules>
+        <!-- WINTER MODE (default, indoors) -->
+        <schedule time="morning" season="winter">
+            <action type="move" target="home_room"/>
+            <action type="idle_animation" value="sleep_dead_center_bed"/>
+            <action type="dialogue-chance" probability="0.1">
+                <line-ru>Мяу... (едва слышно, не открывая глаза)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="day" season="winter">
+            <action type="move" target="home_room"/>
+            <action type="idle_animation" value="massive_nap"/>
+            <action type="dialogue-chance" probability="0.05">
+                <line-ru>... (не реагирует на внешние раздражители)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="evening" season="winter">
+            <action type="move" target="kitchen"/>
+            <action type="idle_animation" value="slow_eat"/>
+            <action type="move" target="home_room"/>
+            <action type="idle_animation" value="return_to_nap"/>
+        </schedule>
+        <schedule time="night" season="winter">
+            <action type="move" target="home_room"/>
+            <action type="idle_animation" value="sleep"/>
+        </schedule>
+
+        <!-- SUMMER MODE (dacha) -->
+        <schedule time="morning" season="summer">
+            <action type="move" target="dacha_garden"/>
+            <action type="idle_animation" value="morning_patrol"/>
+            <action type="dialogue-chance" probability="0.5">
+                <line-ru>МЯУ! (звонко, живо)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="day" season="summer">
+            <action type="move" target="dacha_garden"/>
+            <action type="idle_animation" value="hunt_bugs"/>
+            <action type="idle_animation" value="climb_fence"/>
+            <action type="dialogue-chance" probability="0.4">
+                <line-ru>Мяу-мяу! (носится, прыгает, играет)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="evening" season="summer">
+            <action type="idle_animation" value="zoomies_loop"/>
+            <action type="dialogue-chance" probability="0.7">
+                <line-ru>МЯУ-У-У! (зуми в полную силу)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="night" season="summer">
+            <action type="move" target="dacha_porch"/>
+            <action type="idle_animation" value="sleepy_sprawl"/>
+        </schedule>
+    </schedules>
+    <reactions>
+        <reaction trigger="player_nearby" radius="2" season="winter">
+            <action type="animation" value="barely_open_one_eye"/>
+            <action type="dialogue-chance" probability="0.1">
+                <line-ru>Мряу... (выражение абсолютной лени)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="player_nearby" radius="3" season="summer">
+            <action type="animation" value="spring_to_feet_sprint"/>
+            <action type="dialogue-chance" probability="0.6">
+                <line-ru>МЯУ! (несётся вокруг игрока)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="butterfly_or_bug" season="summer">
+            <action type="animation" value="stalk_and_pounce"/>
+        </reaction>
+        <reaction trigger="rain">
+            <action type="animation" value="sprint_inside"/>
+        </reaction>
+    </reactions>
+    <personality>
+        <trait name="friendliness" value="65"/>
+        <trait name="anxiety" value="20"/>
+        <trait name="energy" value="20"/>
+        <trait name="energy_summer" value="90"/>
+        <trait name="independence" value="70"/>
+        <trait name="seasonal_variation" value="100"/>
+    </personality>
+</npc-behavior>

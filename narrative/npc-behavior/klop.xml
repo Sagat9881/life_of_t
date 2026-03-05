@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc-behavior entity-id="klop">
+    <schedules>
+        <schedule time="morning">
+            <action type="move" target="kitchen"/>
+            <action type="idle_animation" value="belly_up_near_bowl"/>
+            <action type="dialogue-chance" probability="0.5">
+                <line-ru>Пурр-р-р... (лежит на спине, ждёт завтрака в таком виде)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="day">
+            <action type="move" target="living_room"/>
+            <action type="idle_animation" value="loaf_on_sofa"/>
+            <action type="idle_animation" value="social_check_all_pets"/>
+            <action type="dialogue-chance" probability="0.2">
+                <line-ru>Пурр... (обходит всех питомцев, нюхает, убеждается что всё в порядке)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="evening">
+            <action type="move" target="home_room"/>
+            <action type="idle_animation" value="belly_up_lap_claim"/>
+            <action type="dialogue-chance" probability="0.4">
+                <line-ru>Пурр-р-р-р... (укладывается на колени Тани)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="night">
+            <action type="move" target="home_room"/>
+            <action type="idle_animation" value="sleep_on_tanya_chest"/>
+        </schedule>
+    </schedules>
+    <reactions>
+        <reaction trigger="player_nearby" radius="4">
+            <action type="animation" value="slow_roll_to_back"/>
+            <action type="dialogue-chance" probability="0.6">
+                <line-ru>Пурр... (переворачивается, всем видом предлагает погладить живот)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="player_pet">
+            <action type="animation" value="intensify_purr"/>
+            <action type="dialogue-chance" probability="0.8">
+                <line-ru>ПУРР-Р-Р-Р-Р... (мурлычет настолько громко что вибрирует)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="new_pet_present">
+            <action type="animation" value="gentle_approach_sniff"/>
+            <action type="dialogue-chance" probability="0.7">
+                <line-ru>Пурр... (подходит медленно, нюхает, укладывается рядом — не давит)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="pet_nearby" pet-type="cat" pet-id="lada" relation="friendly">
+            <action type="animation" value="lie_beside_lada"/>
+        </reaction>
+        <reaction trigger="pet_nearby" pet-type="dog" relation="friendly">
+            <action type="animation" value="allow_nose_touch"/>
+            <action type="dialogue-chance" probability="0.5">
+                <line-ru>Пурр... (позволяет собаке ткнуться носом)</line-ru>
+            </action>
+        </reaction>
+    </reactions>
+    <personality>
+        <trait name="friendliness" value="100"/>
+        <trait name="anxiety" value="5"/>
+        <trait name="energy" value="30"/>
+        <trait name="independence" value="20"/>
+        <trait name="social_intelligence" value="95"/>
+        <trait name="aggression" value="0"/>
+    </personality>
+</npc-behavior>

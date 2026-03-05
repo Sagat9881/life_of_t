@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc-behavior entity-id="sam">
+    <schedules>
+        <schedule time="morning">
+            <action type="move" target="home_room"/>
+            <action type="idle_animation" value="wait_tanya_wake_up"/>
+            <action type="dialogue-chance" probability="0.7">
+                <line-ru>Тяв! Тяв! (немедленно активируется как только Таня шевелится)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="day">
+            <action type="move" target="tanya_location"/>
+            <action type="idle_animation" value="shadow_tanya"/>
+            <action type="dialogue-chance" probability="0.3">
+                <line-ru>Тяв? (вопросительно смотрит на Таню куда бы она ни пошла)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="evening">
+            <action type="move" target="living_room"/>
+            <action type="idle_animation" value="lap_dog_mode"/>
+            <action type="dialogue-chance" probability="0.4">
+                <line-ru>Тяф... (довольно, устроился рядом с Таней)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="night">
+            <action type="move" target="home_room"/>
+            <action type="idle_animation" value="sleep_at_tanya_feet"/>
+        </schedule>
+    </schedules>
+    <reactions>
+        <reaction trigger="tanya_nearby" radius="1">
+            <action type="animation" value="wag_helicopter_tail"/>
+            <action type="dialogue-chance" probability="0.8">
+                <line-ru>ТЯВ-ТЯВ-ТЯВ! (вертится, прыгает, радуется)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="alexander_nearby" radius="3">
+            <action type="animation" value="freeze_assess"/>
+            <action type="dialogue-chance" probability="0.5">
+                <line-ru>... (застывает, смотрит на Александра)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="alexander_nearby" radius="3" phase="trust_built">
+            <action type="animation" value="cautious_wag"/>
+            <action type="dialogue-chance" probability="0.5">
+                <line-ru>Тяв... (виляет, неуверенно, но уже не убегает)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="tanya_voice_command">
+            <action type="animation" value="immediate_obey"/>
+        </reaction>
+        <reaction trigger="alexander_voice_command">
+            <action type="animation" value="hesitate_then_obey" phase="trust_built"/>
+            <action type="animation" value="hide_behind_tanya" phase="scared"/>
+        </reaction>
+        <reaction trigger="tanya_anxious">
+            <action type="animation" value="press_body_against_leg"/>
+            <action type="dialogue-chance" probability="0.7">
+                <line-ru>Тяф... (тихо, прижимается к Тане)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="loud_noise">
+            <action type="animation" value="sprint_under_furniture"/>
+        </reaction>
+    </reactions>
+    <personality>
+        <trait name="friendliness" value="90"/>
+        <trait name="anxiety" value="75"/>
+        <trait name="energy" value="80"/>
+        <trait name="independence" value="10"/>
+        <trait name="loyalty_tanya" value="100"/>
+        <trait name="loyalty_alexander" value="30"/>
+        <trait name="bravery" value="20"/>
+    </personality>
+</npc-behavior>
