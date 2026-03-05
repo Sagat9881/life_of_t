@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>locations</entity-type>
+        <entity-name>dacha_yard</entity-name>
+        <version>1.0.0</version>
+        <description>Summer country house yard. Lush green, wooden fence, garden, large trees providing shade. Parents cottage visible in background. Tanya, Alexander and all pets spent summer 2025 here.</description>
+    </meta>
+    <layers>
+        <layer id="grass" type="background" z-order="0" width="320" height="240">
+            <pixel-data>
+                <rect x="0" y="140" w="320" h="100" color="#7BBF50"/>
+                <rect x="0" y="140" w="320" h="12"  color="#6AAF40"/>
+                <rect x="20"  y="148" w="8"  h="4"  color="#88D060"/>
+                <rect x="55"  y="152" w="6"  h="3"  color="#80C858"/>
+                <rect x="90"  y="150" w="10" h="4"  color="#88D060"/>
+                <rect x="130" y="148" w="8"  h="4"  color="#80C858"/>
+                <rect x="175" y="152" w="6"  h="3"  color="#88D060"/>
+                <rect x="210" y="150" w="8"  h="4"  color="#80C858"/>
+                <rect x="250" y="148" w="10" h="4"  color="#88D060"/>
+                <rect x="290" y="152" w="8"  h="3"  color="#80C858"/>
+                <hline x="0"  y="140" len="320" color="#5A9838"/>
+                <rect x="0" y="190" w="320" h="50"  color="#8ACA5C"/>
+                <pixel x="30"  y="195" color="#FFEE00"/>
+                <pixel x="75"  y="198" color="#FFEE00"/>
+                <pixel x="120" y="193" color="#FFFFFF"/>
+                <pixel x="165" y="196" color="#FFEE00"/>
+                <pixel x="200" y="194" color="#FF9090"/>
+                <pixel x="240" y="197" color="#FFEE00"/>
+                <pixel x="280" y="195" color="#FFFFFF"/>
+            </pixel-data>
+        </layer>
+        <layer id="fence" type="midground" z-order="1" width="320" height="240">
+            <pixel-data>
+                <rect x="0" y="136" w="320" h="6"  color="#B0905C"/>
+                <rect x="0" y="148" w="320" h="5"  color="#A88050"/>
+                <rect x="0"   y="120" w="10" h="34" color="#C0A060"/>
+                <rect x="20"  y="120" w="10" h="34" color="#C0A060"/>
+                <rect x="40"  y="120" w="10" h="34" color="#C0A060"/>
+                <rect x="60"  y="120" w="10" h="34" color="#C0A060"/>
+                <rect x="80"  y="120" w="10" h="34" color="#C0A060"/>
+                <rect x="100" y="120" w="10" h="34" color="#C0A060"/>
+                <rect x="120" y="120" w="10" h="34" color="#C0A060"/>
+                <rect x="140" y="120" w="10" h="34" color="#C0A060"/>
+                <rect x="160" y="120" w="10" h="34" color="#C0A060"/>
+                <rect x="180" y="120" w="10" h="34" color="#C0A060"/>
+                <rect x="200" y="120" w="10" h="34" color="#C0A060"/>
+                <rect x="220" y="120" w="10" h="34" color="#C0A060"/>
+                <rect x="240" y="120" w="10" h="34" color="#C0A060"/>
+                <rect x="260" y="120" w="10" h="34" color="#C0A060"/>
+                <rect x="280" y="120" w="10" h="34" color="#C0A060"/>
+                <rect x="300" y="120" w="10" h="34" color="#C0A060"/>
+                <rect x="0"   y="116" w="12" h="38" color="#A08048"/>
+                <rect x="60"  y="116" w="12" h="38" color="#A08048"/>
+                <rect x="120" y="116" w="12" h="38" color="#A08048"/>
+                <rect x="180" y="116" w="12" h="38" color="#A08048"/>
+                <rect x="240" y="116" w="12" h="38" color="#A08048"/>
+                <rect x="300" y="116" w="12" h="38" color="#A08048"/>
+            </pixel-data>
+        </layer>
+        <layer id="dacha_house" type="background" z-order="2" width="320" height="240">
+            <pixel-data>
+                <rect x="80" y="50" w="160" h="90" color="#E8D8C0"/>
+                <hline x="80"  y="60" len="160" color="#D8C8B0"/>
+                <hline x="80"  y="68" len="160" color="#D8C8B0"/>
+                <hline x="80"  y="76" len="160" color="#D8C8B0"/>
+                <hline x="80"  y="84" len="160" color="#D8C8B0"/>
+                <hline x="80"  y="92" len="160" color="#D8C8B0"/>
+                <hline x="80"  y="100" len="160" color="#D8C8B0"/>
+                <hline x="80"  y="108" len="160" color="#D8C8B0"/>
+                <hline x="80"  y="116" len="160" color="#D8C8B0"/>
+                <hline x="80"  y="124" len="160" color="#D8C8B0"/>
+                <rect x="70" y="32" w="180" h="22" color="#C06040"/>
+                <hline x="70" y="33" len="180" color="#A04020"/>
+                <hline x="70" y="37" len="180" color="#B05030"/>
+                <rect x="196" y="20" w="16" h="26" color="#A08068"/>
+                <rect x="194" y="18" w="20" h="4"  color="#907060"/>
+                <pixel x="202" y="14" color="#D0D0C0"/>
+                <pixel x="203" y="10" color="#C8C8B8"/>
+                <pixel x="204" y="6"  color="#C0C0B0"/>
+                <rect x="148" y="100" w="24" h="40" color="#80603A"/>
+                <rect x="150" y="102" w="20" h="36" color="#90703C"/>
+                <rect x="151" y="104" w="8"  h="14" color="#A08048"/>
+                <rect x="161" y="104" w="8"  h="14" color="#A08048"/>
+                <rect x="151" y="120" w="8"  h="14" color="#A08048"/>
+                <rect x="161" y="120" w="8"  h="14" color="#A08048"/>
+                <pixel x="168" y="121" color="#C0A060"/>
+                <rect x="92"  y="68" w="36" h="30" color="#B0D4E8"/>
+                <rect x="90"  y="66" w="40" h="2"  color="#C0A870"/>
+                <rect x="90"  y="96" w="40" h="2"  color="#C0A870"/>
+                <rect x="90"  y="66" w="2"  h="32" color="#C0A870"/>
+                <rect x="128" y="66" w="2"  h="32" color="#C0A870"/>
+                <rect x="108" y="66" w="2"  h="32" color="#C0A870"/>
+                <rect x="90"  y="80" w="40" h="2"  color="#C0A870"/>
+                <rect x="192" y="68" w="36" h="30" color="#B0D4E8"/>
+                <rect x="190" y="66" w="40" h="2"  color="#C0A870"/>
+                <rect x="190" y="96" w="40" h="2"  color="#C0A870"/>
+                <rect x="190" y="66" w="2"  h="32" color="#C0A870"/>
+                <rect x="228" y="66" w="2"  h="32" color="#C0A870"/>
+                <rect x="208" y="66" w="2"  h="32" color="#C0A870"/>
+                <rect x="190" y="80" w="40" h="2"  color="#C0A870"/>
+            </pixel-data>
+        </layer>
+        <layer id="garden" type="midground" z-order="3" width="320" height="240">
+            <pixel-data>
+                <rect x="4" y="156" w="60" h="6" color="#8A6040"/>
+                <rect x="4" y="155" w="60" h="3" color="#9A7040"/>
+                <rect x="5" y="158" w="58" h="4" color="#5A3820"/>
+                <rect x="10" y="148" w="4"  h="8"  color="#50A050"/>
+                <rect x="9"  y="144" w="6"  h="6"  color="#FF6080"/>
+                <rect x="18" y="150" w="3"  h="6"  color="#60B060"/>
+                <rect x="17" y="146" w="5"  h="6"  color="#FFB040"/>
+                <rect x="26" y="148" w="4"  h="8"  color="#50A050"/>
+                <rect x="25" y="144" w="6"  h="5"  color="#FF6080"/>
+                <rect x="34" y="150" w="3"  h="6"  color="#60B060"/>
+                <rect x="33" y="146" w="5"  h="6"  color="#FF88BB"/>
+                <rect x="42" y="148" w="4"  h="8"  color="#50A050"/>
+                <rect x="41" y="143" w="6"  h="7"  color="#FFEE40"/>
+                <rect x="50" y="150" w="3"  h="6"  color="#60B060"/>
+                <rect x="49" y="146" w="5"  h="6"  color="#FF6080"/>
+                <rect x="250" y="158" w="64" h="6" color="#8A6040"/>
+                <rect x="254" y="136" w="2"  h="22" color="#9A7050"/>
+                <rect x="253" y="134" w="8"  h="6"  color="#68B048"/>
+                <pixel x="257" y="132" color="#FF4040"/>
+                <rect x="266" y="136" w="2"  h="22" color="#9A7050"/>
+                <rect x="265" y="134" w="8"  h="6"  color="#68B048"/>
+                <rect x="278" y="136" w="2"  h="22" color="#9A7050"/>
+                <rect x="277" y="134" w="8"  h="6"  color="#68B048"/>
+                <pixel x="282" y="132" color="#FF4040"/>
+                <rect x="292" y="140" w="22" h="8"  color="#58A840"/>
+                <rect x="294" y="138" w="6"  h="5"  color="#88C068"/>
+                <rect x="304" y="140" w="6"  h="5"  color="#88C068"/>
+            </pixel-data>
+        </layer>
+        <layer id="bench" type="foreground" z-order="4" width="320" height="240">
+            <pixel-data>
+                <rect x="108" y="162" w="104" h="8"  color="#B89060"/>
+                <rect x="108" y="162" w="104" h="2"  color="#C8A070"/>
+                <hline x="109" y="165" len="102" color="#A88050"/>
+                <hline x="109" y="167" len="102" color="#B89060"/>
+                <hline x="108" y="166" len="104" color="#907040"/>
+                <rect x="108" y="148" w="104" h="6"  color="#B89060"/>
+                <rect x="108" y="148" w="104" h="2"  color="#C8A070"/>
+                <rect x="108" y="154" w="104" h="6"  color="#B89060"/>
+                <rect x="113" y="140" w="4"  h="22" color="#A08050"/>
+                <rect x="204" y="140" w="4"  h="22" color="#A08050"/>
+                <rect x="112" y="170" w="6"  h="14" color="#9A7848"/>
+                <rect x="120" y="170" w="6"  h="14" color="#9A7848"/>
+                <rect x="194" y="170" w="6"  h="14" color="#9A7848"/>
+                <rect x="202" y="170" w="6"  h="14" color="#9A7848"/>
+                <rect x="112" y="179" w="14" h="2"  color="#A08050"/>
+                <rect x="194" y="179" w="14" h="2"  color="#A08050"/>
+                <rect x="168" y="158" w="8"  h="8"  color="#E8D080"/>
+                <rect x="169" y="159" w="6"  h="6"  color="#F0D890"/>
+            </pixel-data>
+        </layer>
+        <layer id="trees" type="midground" z-order="5" width="320" height="240">
+            <pixel-data>
+                <rect x="4" y="68" w="18" h="76" color="#8A6A3A"/>
+                <rect x="6" y="70" w="12" h="72" color="#9A7848"/>
+                <rect x="2"  y="136" w="4"  h="8"  color="#7A5A30"/>
+                <rect x="20" y="136" w="4"  h="8"  color="#7A5A30"/>
+                <rect x="0"  y="20" w="50" h="54" color="#3A7830"/>
+                <rect x="4"  y="14" w="42" h="16" color="#408038"/>
+                <rect x="8"  y="10" w="34" h="12" color="#3A7828"/>
+                <rect x="0"  y="26" w="54" h="30" color="#508040"/>
+                <hline x="2"  y="20" len="46" color="#60A050"/>
+                <hline x="0"  y="28" len="52" color="#508038"/>
+                <rect x="294" y="80" w="18" h="64" color="#8A6A3A"/>
+                <rect x="296" y="82" w="12" h="60" color="#9A7848"/>
+                <rect x="292" y="138" w="4"  h="6"  color="#7A5A30"/>
+                <rect x="310" y="138" w="4"  h="6"  color="#7A5A30"/>
+                <rect x="274" y="28" w="52" h="58" color="#3A7830"/>
+                <rect x="278" y="22" w="44" h="16" color="#408038"/>
+                <rect x="282" y="18" w="36" h="12" color="#3A7828"/>
+                <hline x="276" y="28" len="48" color="#60A050"/>
+                <rect x="76" y="62" w="12" h="50" color="#8A6A3A"/>
+                <rect x="64" y="26" w="36" h="40" color="#3A7830"/>
+                <rect x="68" y="22" w="28" h="12" color="#408038"/>
+                <hline x="66" y="26" len="32" color="#60A050"/>
+                <rect x="8"  y="150" w="6"  h="4"  color="#A0C870"/>
+                <rect x="40" y="155" w="4"  h="3"  color="#A0C870"/>
+                <rect x="285" y="152" w="6"  h="4"  color="#A0C870"/>
+                <rect x="305" y="156" w="4"  h="3"  color="#A0C870"/>
+            </pixel-data>
+        </layer>
+        <layer id="parents_cottage" type="background" z-order="6" width="320" height="240">
+            <pixel-data>
+                <rect x="248" y="74" w="70" h="50" color="#E0CEB0"/>
+                <hline x="248" y="82"  len="70" color="#D0BEA0"/>
+                <hline x="248" y="90"  len="70" color="#D0BEA0"/>
+                <hline x="248" y="98"  len="70" color="#D0BEA0"/>
+                <hline x="248" y="106" len="70" color="#D0BEA0"/>
+                <hline x="248" y="114" len="70" color="#D0BEA0"/>
+                <rect x="244" y="58" w="78" h="18" color="#B05040"/>
+                <hline x="244" y="59" len="78" color="#903030"/>
+                <rect x="292" y="48" w="10" h="18" color="#907060"/>
+                <rect x="256" y="84" w="18" h="16" color="#B8D0E0"/>
+                <rect x="254" y="82" w="22" h="2"  color="#B0A080"/>
+                <rect x="254" y="98" w="22" h="2"  color="#B0A080"/>
+                <rect x="254" y="82" w="2"  h="18" color="#B0A080"/>
+                <rect x="274" y="82" w="2"  h="18" color="#B0A080"/>
+                <rect x="264" y="82" w="2"  h="18" color="#B0A080"/>
+                <rect x="254" y="90" w="22" h="2"  color="#B0A080"/>
+                <rect x="283" y="96" w="14" h="28" color="#7A5838"/>
+                <rect x="284" y="97" w="12" h="26" color="#8A6840"/>
+                <rect x="257" y="85" w="16" h="12" color="#FFE89040"/>
+                <rect x="250" y="140" w="18" h="6"  color="#C8B890"/>
+                <hline x="250" y="142" len="18" color="#D8C8A0"/>
+                <hline x="250" y="144" len="18" color="#B8A880"/>
+            </pixel-data>
+        </layer>
+        <layer id="sky" type="background" z-order="7" width="320" height="240">
+            <pixel-data>
+                <rect x="0" y="0"  w="320" h="50"  color="#5BB8F8"/>
+                <rect x="0" y="50" w="320" h="50"  color="#80C8FF"/>
+                <rect x="0" y="100" w="320" h="44" color="#A8D8FF"/>
+                <rect x="10"  y="12" w="50" h="14" color="#F8F8FF"/>
+                <rect x="6"   y="16" w="58" h="10" color="#FFFFFF"/>
+                <rect x="16"  y="8"  w="30" h="10" color="#F8F8FF"/>
+                <rect x="20"  y="6"  w="22" h="6"  color="#FFFFFF"/>
+                <rect x="140" y="8"  w="60" h="16" color="#F8F8FF"/>
+                <rect x="136" y="12" w="68" h="12" color="#FFFFFF"/>
+                <rect x="148" y="4"  w="36" h="10" color="#F8F8FF"/>
+                <rect x="152" y="2"  w="28" h="6"  color="#FFFFFF"/>
+                <rect x="252" y="18" w="40" h="10" color="#F8F8FF"/>
+                <rect x="248" y="22" w="48" h="8"  color="#FFFFFF"/>
+                <rect x="258" y="14" w="24" h="8"  color="#F8F8FF"/>
+                <rect x="0" y="118" w="320" h="24" color="#C8E8C0"/>
+                <rect x="40"  y="10" w="16" h="16" color="#FFEE80"/>
+                <rect x="42"  y="12" w="12" h="12" color="#FFF0A0"/>
+                <pixel x="47" y="7"  color="#FFE860"/>
+                <pixel x="47" y="29" color="#FFE860"/>
+                <pixel x="38" y="17" color="#FFE860"/>
+                <pixel x="59" y="17" color="#FFE860"/>
+            </pixel-data>
+            <conditions>
+                <condition id="time_morning"><override layer-ref="sky" tint="#D0E8F8" opacity="0.15"/></condition>
+                <condition id="time_day"><override layer-ref="sky" tint="#5BB8F8" opacity="0.0"/></condition>
+                <condition id="time_evening"><override layer-ref="sky" tint="#FF9040" opacity="0.30"/></condition>
+                <condition id="time_night"><override layer-ref="sky" tint="#101830" opacity="0.70"/></condition>
+            </conditions>
+        </layer>
+    </layers>
+    <naming><output-dir>locations/dacha_yard</output-dir></naming>
+</asset-spec>
