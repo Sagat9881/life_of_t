@@ -54,12 +54,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
                 <configuration>
                     <useModulePath>false</useModulePath>
                 </configuration>
             </plugin>
 
-            <!-- Run asset generation during generate-resources phase -->
+            <!-- Run asset generation AFTER compilation (process-classes) -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -67,7 +68,7 @@
                 <executions>
                     <execution>
                         <id>generate-assets</id>
-                        <phase>generate-resources</phase>
+                        <phase>process-classes</phase>
                         <goals>
                             <goal>java</goal>
                         </goals>
@@ -82,7 +83,7 @@
                 </executions>
             </plugin>
 
-            <!-- Copy generated assets to frontend/public/assets -->
+            <!-- Copy generated assets to frontend/public/assets/generated -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -90,7 +91,7 @@
                 <executions>
                     <execution>
                         <id>copy-generated-assets</id>
-                        <phase>process-resources</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
