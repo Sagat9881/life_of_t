@@ -25,10 +25,10 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     image-rendering: crisp-edges;
 }
 
-/* Room background layer */
+/* Room background — composite PNG from asset-generator */
 #room-bg {
     position: absolute; inset: 0;
-    background-image: url('/api/assets/home_room_bg.png');
+    background-image: url('/generated-assets/locations/home_room/home_room.png');
     background-size: 100% 100%;
     background-repeat: no-repeat;
     image-rendering: pixelated;
@@ -50,49 +50,53 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     background-repeat: no-repeat;
-    /* Each animation is a horizontal-strip atlas.
-       background-position is shifted by frameWidth each tick. */
 }
 
-/* ===== Bed (furniture – static) ===== */
+/* ===== Bed (from location layers) ===== */
 #bed {
     bottom: 28%;
     right: 8%;
-    width: 96px;   /* 2× scaled from 48px frame */
-    height: 64px;  /* 2× scaled from 32px frame */
-    background-image: url('/api/assets/bed_static.png');
-    background-size: 100% 100%; /* single frame */
+    width: 192px;  /* 3× of 64px */
+    height: 192px;
+    background-image: url('/generated-assets/locations/home_room/bed.png');
+    background-size: 100% 100%;
 }
 
-/* ===== Sam the dog ===== */
+/* ===== Desk ===== */
+#desk {
+    bottom: 22%;
+    left: 10%;
+    width: 192px;
+    height: 192px;
+    background-image: url('/generated-assets/locations/home_room/desk.png');
+    background-size: 100% 100%;
+}
+
+/* ===== Sam the dog (miniature pinscher) ===== */
 #sam {
     bottom: 24%;
-    right: 18%;
-    width: 48px;   /* 2× */
-    height: 40px;  /* 2× */
-    background-image: url('/api/assets/sam_idle.png');
-    /* Atlas width = 4 frames × 24px = 96px, displayed at 2×: 192px logical width */
-    background-size: 192px 40px;
-    background-position: 0 0;
+    right: 22%;
+    width: 96px;   /* 4× of 24px */
+    height: 80px;  /* 4× of 20px */
+    background-image: url('/generated-assets/characters/sam/sam.png');
+    background-size: 100% 100%;
 }
 
 /* ===== Tanya (player character) ===== */
 #tanya {
     bottom: 22%;
-    left: 30%;
-    width: 64px;   /* 2× of 32px */
-    height: 96px;  /* 2× of 48px */
-    background-image: url('/api/assets/tanya_idle.png');
-    /* Atlas width = 6 frames × 32px = 192px, displayed at 2×: 384px logical width */
-    background-size: 384px 96px;
-    background-position: 0 0;
+    left: 35%;
+    width: 128px;  /* 4× of 32px */
+    height: 192px; /* 4× of 48px */
+    background-image: url('/generated-assets/characters/tanya/tanya.png');
+    background-size: 100% 100%;
 }
 
 /* Quest activity indicator above Tanya */
 #tanya-activity {
     position: absolute;
-    bottom: calc(22% + 100px);
-    left: calc(30% + 8px);
+    bottom: calc(22% + 200px);
+    left: calc(35% + 16px);
     font-size: 10px;
     color: #ffe080;
     white-space: nowrap;
@@ -220,7 +224,7 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     <!-- Header -->
     <header id="header">
         <h1>Life of T</h1>
-        <span class="subtitle">Demo v0.1</span>
+        <span class="subtitle">Demo v0.2</span>
         <span id="game-time">День 1 | 08:00</span>
     </header>
 
@@ -231,6 +235,7 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 
         <!-- Furniture -->
         <div id="bed" class="sprite" title="Кровать"></div>
+        <div id="desk" class="sprite" title="Стол"></div>
 
         <!-- Sam the dog -->
         <div id="sam" class="sprite" title="Сэм"></div>
@@ -324,59 +329,6 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 
 <script>
 'use strict';
-
-// ============================================================
-// Sprite animator
-// Horizontal-strip atlas: all frames left-to-right in one PNG.
-// Animates by shifting CSS background-position-x.
-// ============================================================
-class SpriteAnimator {
-    /**
-     * @param {HTMLElement} el       - DOM element with background-image already set
-     * @param {number} frameWidth    - logical width of one frame in CSS px (already scaled)
-     * @param {number} frameCount    - total number of frames in the atlas
-     * @param {number} fps           - target frames per second
-     */
-    constructor(el, frameWidth, frameCount, fps) {
-        this.el         = el;
-        this.frameWidth = frameWidth;
-        this.frameCount = frameCount;
-        this.interval   = Math.round(1000 / fps);
-        this.current    = 0;
-        this.timer      = null;
-    }
-
-    start() {
-        if (this.timer !== null) return;
-        this.timer = setInterval(() => this._tick(), this.interval);
-    }
-
-    stop() {
-        if (this.timer !== null) {
-            clearInterval(this.timer);
-            this.timer = null;
-        }
-    }
-
-    _tick() {
-        // Shift background-position left by one frame width per tick
-        const offset = -(this.current * this.frameWidth);
-        this.el.style.backgroundPositionX = offset + 'px';
-        this.current = (this.current + 1) % this.frameCount;
-    }
-}
-
-// ============================================================
-// Asset metadata (mirror of DemoAssetService.SPECS, 2× scale)
-// ============================================================
-const ASSET_META = {
-    tanya_idle:    { fw: 64,  fh: 96,  frames: 6, fps: 8  },
-    tanya_walk:    { fw: 64,  fh: 96,  frames: 8, fps: 10 },
-    sam_idle:      { fw: 48,  fh: 40,  frames: 4, fps: 6  },
-    sam_walk:      { fw: 48,  fh: 40,  frames: 6, fps: 8  },
-    bed_static:    { fw: 96,  fh: 64,  frames: 1, fps: 1  },
-    home_room_bg:  { fw: 320, fh: 192, frames: 1, fps: 1  },
-};
 
 // ============================================================
 // Helpers
@@ -507,24 +459,7 @@ function rotateActivity() {
 // ============================================================
 // Initialisation
 // ============================================================
-const animators = [];
-
-function initAnimators() {
-    // Tanya idle
-    const tanyaEl = document.getElementById('tanya');
-    const m = ASSET_META.tanya_idle;
-    animators.push(new SpriteAnimator(tanyaEl, m.fw, m.frames, m.fps));
-
-    // Sam idle
-    const samEl = document.getElementById('sam');
-    const sm = ASSET_META.sam_idle;
-    animators.push(new SpriteAnimator(samEl, sm.fw, sm.frames, sm.fps));
-}
-
 async function init() {
-    initAnimators();
-    animators.forEach(a => a.start());
-
     // Initial data load
     const status = await fetchStatus();
     if (status) {
