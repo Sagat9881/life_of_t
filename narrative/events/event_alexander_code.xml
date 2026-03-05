@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event id="event_alexander_code" type="RANDOM">
+    <meta>
+        <title-ru>Александр кодит и забыл поесть</title-ru>
+        <description-ru>Александр кодит глубоко ночью и забыл поужинать. Таня его замечает.</description-ru>
+        <probability>0.45</probability>
+        <cooldown-hours>16</cooldown-hours>
+    </meta>
+    <conditions>
+        <condition type="time_of_day" value="night"/>
+        <condition type="location" value="alexander_room"/>
+    </conditions>
+    <effects>
+        <stat-change stat="happiness" value="+8"/>
+        <relationship-change target="alexander" value="+3"/>
+        <dialogue speaker="narrator">
+            <line-ru>Половина первого. В рабочей комнате Александра горит свет. Айджан спит у него на коленях. На столе — пустая кружка и никакой еды.</line-ru>
+        </dialogue>
+        <dialogue speaker="tanya">
+            <line-ru>Саш. Ты ел?</line-ru>
+        </dialogue>
+        <dialogue speaker="alexander">
+            <line-ru>(не поднимает взгляд) Сейчас доделаю и...</line-ru>
+        </dialogue>
+        <dialogue speaker="tanya">
+            <line-ru>Ел или нет?</line-ru>
+        </dialogue>
+        <dialogue speaker="alexander">
+            <line-ru>(пауза) Не помню.</line-ru>
+        </dialogue>
+        <dialogue speaker="tanya">
+            <line-ru>Иди есть. Я разогрею. Айджан, слезь с него — это я тоже тебе говорю.</line-ru>
+        </dialogue>
+    </effects>
+</event>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest id="quest_voland_visit" type="SIDE">
+    <meta>
+        <title>Visit Voland</title>
+        <title-ru>Навестить Воланда</title-ru>
+        <description>Visit Tanya's parents' cottage. Interact with the blind Voland — the dog who witnessed the very beginning of Tanya and Alexander's love story in 2015.</description>
+        <description-ru>Навести родителей Тани на их коттедже. Пообщайся с Воландом — слепым бульдогом, который был свидетелем самого начала истории Тани и Александра в 2015 году.</description-ru>
+        <chapter>4</chapter>
+        <prerequisites>quest_dacha_summer</prerequisites>
+    </meta>
+    <objectives>
+        <objective id="obj_walk_to_cottage" type="TRAVEL">
+            <description-ru>Пройди от дачи до коттеджа родителей</description-ru>
+            <target>parents_cottage</target>
+            <location>dacha_road</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_greet_voland" type="INTERACT">
+            <description-ru>Поздоровайся с Воландом — он учует тебя раньше чем ты войдёшь</description-ru>
+            <target>voland</target>
+            <location>parents_cottage</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_sit_with_voland" type="TIME">
+            <description-ru>Посиди с Воландом — просто рядом</description-ru>
+            <target>voland</target>
+            <location>parents_cottage</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_memory_2015" type="DIALOGUE">
+            <description-ru>Воспоминание о 2015 годе — первые свидания, молодой Воланд</description-ru>
+            <target>voland</target>
+            <location>parents_cottage</location>
+            <count>1</count>
+        </objective>
+    </objectives>
+    <steps>
+        <step order="1" objective-ref="obj_walk_to_cottage">
+            <dialogue speaker="tanya">
+                <line-ru>Саша, я к маме зайду. Воланда давно не видела.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Передай ему привет. И маме тоже.</line-ru>
+            </dialogue>
+        </step>
+        <step order="2" objective-ref="obj_greet_voland">
+            <dialogue speaker="narrator">
+                <line-ru>Воланд лежит в прихожей. Он слышит её шаги ещё с крыльца — голова поднимается, нос работает. Хвост начинает медленно двигаться.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Воланд. Воланд, это я. Таня. Помнишь меня?</line-ru>
+            </dialogue>
+            <dialogue speaker="voland">
+                <line-ru>...(встаёт медленно, осторожно идёт на запах — одна лапа, другая. Натыкается на тапочку, обходит. Находит её руку носом)</line-ru>
+            </dialogue>
+        </step>
+        <step order="3" objective-ref="obj_sit_with_voland">
+            <dialogue speaker="narrator">
+                <line-ru>Таня садится на пол. Воланд укладывается рядом — тяжело, по-старому. Одиннадцать лет. Он помнит её всю жизнь.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Ты помнишь как был маленьким? Мы тебя тогда гладили часами.</line-ru>
+            </dialogue>
+        </step>
+        <step order="4" objective-ref="obj_memory_2015">
+            <dialogue speaker="narrator">
+                <line-ru>[ВОСПОМИНАНИЕ — 2015] Семнадцатилетний Александр держит на руках щенка. Таня смеётся. Они оба смеются. Воланд пытается лизнуть их обоих сразу.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>(в настоящем, тихо) Ты видел нас в самом начале. Ты знаешь всё. (гладит его) Мы до сих пор вместе, Воланд. Ты знаешь?</line-ru>
+            </dialogue>
+            <dialogue speaker="voland">
+                <line-ru>...(вздыхает и кладёт морду ей на ноги)</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="happiness" value="+20"/>
+                <stat-change stat="anxiety" value="-15"/>
+                <relationship-change target="voland" value="+5"/>
+            </on-complete>
+        </step>
+    </steps>
+    <rewards>
+        <stat-change stat="happiness" value="+15"/>
+        <stat-change stat="anxiety" value="-10"/>
+        <unlock type="animation">voland_memory_2015</unlock>
+    </rewards>
+</quest>

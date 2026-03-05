@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest id="quest_save_lada" type="MAIN">
+    <meta>
+        <title>Save Lada</title>
+        <title-ru>Спасти Ладу</title-ru>
+        <description>Tanya discovers through a contact that Lada — given away to a good home — is being beaten. Drive to rescue her. Emotional climax of Chapter 3.</description>
+        <description-ru>Таня узнаёт от знакомой, что Лада — отданная в добрые руки — подвергается побоям. Езжай и забери её. Эмоциональная кульминация третьей главы.</description-ru>
+        <chapter>3</chapter>
+        <prerequisites>quest_morning_routine</prerequisites>
+    </meta>
+    <objectives>
+        <objective id="obj_receive_news" type="DIALOGUE">
+            <description-ru>Прочитай сообщение от знакомой о Ладе</description-ru>
+            <target>tanya_phone</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_tell_alexander" type="DIALOGUE">
+            <description-ru>Сообщи Александру — нужно ехать сейчас</description-ru>
+            <target>alexander</target>
+            <location>alexander_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_drive_there" type="TRAVEL">
+            <description-ru>Доедь до адреса где живёт Лада</description-ru>
+            <target>lada_address</target>
+            <location>city</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_confront" type="DIALOGUE">
+            <description-ru>Забери Ладу — спокойно или с конфликтом</description-ru>
+            <target>previous_owner_npc</target>
+            <location>city</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_bring_lada_home" type="TRAVEL">
+            <description-ru>Привези Ладу домой</description-ru>
+            <target>lada</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+    </objectives>
+    <steps>
+        <step order="1" objective-ref="obj_receive_news">
+            <dialogue speaker="narrator">
+                <line-ru>Телефон. Незнакомый номер. «Привет, я из приюта. Мне передали... про Ладу. Там не всё в порядке. Её обижают.»</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Что. Как её обижают. Объясни.</line-ru>
+            </dialogue>
+            <dialogue speaker="narrator">
+                <line-ru>Объяснение короткое и ужасное. Таня стоит посреди комнаты и чувствует как внутри что-то кристаллизуется — не тревога, не паника. Холодная ясность.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="anxiety" value="+20"/>
+                <stat-change stat="anger" value="+30"/>
+            </on-complete>
+        </step>
+        <step order="2" objective-ref="obj_tell_alexander">
+            <dialogue speaker="tanya">
+                <line-ru>Саша. Ладу бьют. Мы едем.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Когда?</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Сейчас.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Ключи уже беру.</line-ru>
+            </dialogue>
+        </step>
+        <step order="3" objective-ref="obj_drive_there">
+            <dialogue speaker="narrator">
+                <line-ru>В машине тихо. Александр ведёт. Таня смотрит в окно. Кулаки сжаты на коленях. Ладони мокрые — но сейчас это неважно.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Она маленькая. Она не понимает почему. Она думает, что так и должно быть.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Сейчас заберём. Не думай больше.</line-ru>
+            </dialogue>
+        </step>
+        <step order="4" objective-ref="obj_confront">
+            <dialogue speaker="previous_owner_npc">
+                <line-ru>Она просто царапается. Мы ничего не делаем...</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya" choice="calm">
+                <line-ru>Мне не нужны объяснения. Я забираю её обратно. Прямо сейчас. Пожалуйста, не мешайте.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya" choice="angry">
+                <line-ru>Заткнись. Отдай мне кошку. Сейчас же. Или я вызываю ветеринарную службу и пишу в три приюта.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="self_esteem" value="+10"/>
+                <stat-change stat="anger" value="-20"/>
+            </on-complete>
+        </step>
+        <step order="5" objective-ref="obj_bring_lada_home">
+            <dialogue speaker="narrator">
+                <line-ru>Лада сидит у Тани на коленях в машине. Дрожит. Маленькая. Лапы сжаты. Глаза закрыты.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Всё. Ты дома. Слышишь? Ты дома. Ты в безопасности. Никогда больше.</line-ru>
+            </dialogue>
+            <dialogue speaker="narrator">
+                <line-ru>Лада делает один маленький выдох и прижимается теснее.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="happiness" value="+20"/>
+                <stat-change stat="anxiety" value="-15"/>
+                <relationship-change target="lada" value="+15"/>
+            </on-complete>
+        </step>
+    </steps>
+    <rewards>
+        <stat-change stat="happiness" value="+25"/>
+        <stat-change stat="self_esteem" value="+15"/>
+        <relationship-change target="lada" value="+20"/>
+        <relationship-change target="alexander" value="+5"/>
+        <unlock type="character">lada</unlock>
+        <unlock type="quest">quest_klop_peacemaker</unlock>
+    </rewards>
+</quest>

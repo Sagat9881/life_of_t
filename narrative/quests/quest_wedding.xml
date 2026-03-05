@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest id="quest_wedding" type="MAIN">
+    <meta>
+        <title>The Wedding</title>
+        <title-ru>Свадьба</title-ru>
+        <description>The wedding scene. The good ending. Small ceremony, closest people, all the pets present. Tanya and Alexander finally make it official after everything.</description>
+        <description-ru>Свадебная сцена. Хорошая концовка. Маленькая церемония, только самые близкие, все питомцы рядом. Таня и Александр делают это официальным — после всего.</description-ru>
+        <chapter>5</chapter>
+        <prerequisites>quest_proposal</prerequisites>
+    </meta>
+    <objectives>
+        <objective id="obj_wedding_prep" type="INTERACT">
+            <description-ru>Подготовься к церемонии</description-ru>
+            <target>tanya</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_yulia_arrives" type="DIALOGUE">
+            <description-ru>Юлия Чикота приезжает как свидетель</description-ru>
+            <target>yulia_npc</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_ceremony" type="DIALOGUE">
+            <description-ru>Церемония. Слова которые ждали долго.</description-ru>
+            <target>alexander</target>
+            <location>wedding_location</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_kiss_scene" type="INTERACT">
+            <description-ru>Момент</description-ru>
+            <target>alexander</target>
+            <location>wedding_location</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_celebration" type="TIME">
+            <description-ru>Отметьте вместе — скромно, тепло, по-настоящему</description-ru>
+            <target>wedding_location</target>
+            <location>wedding_location</location>
+            <count>1</count>
+        </objective>
+    </objectives>
+    <steps>
+        <step order="1" objective-ref="obj_wedding_prep">
+            <dialogue speaker="tanya">
+                <line-ru>(смотрит в зеркало) Ну вот. Наконец-то. (смеётся) Я не могу поверить что это происходит.</line-ru>
+            </dialogue>
+            <dialogue speaker="narrator">
+                <line-ru>Где-то в квартире Сэм лает — почуял волнение. Клоп невозмутим.</line-ru>
+            </dialogue>
+        </step>
+        <step order="2" objective-ref="obj_yulia_arrives">
+            <dialogue speaker="yulia_npc">
+                <line-ru>ТАНЯ! (врывается, обнимает) Я приехала! Я не могу! Ты в белом! Ты такая красивая! Я плачу уже!</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Юля, мы ещё не на церемонии!</line-ru>
+            </dialogue>
+            <dialogue speaker="yulia_npc">
+                <line-ru>Мне всё равно! Ты моя лучшая подруга и ты выходишь замуж! (рыдает)</line-ru>
+            </dialogue>
+        </step>
+        <step order="3" objective-ref="obj_ceremony">
+            <dialogue speaker="narrator">
+                <line-ru>Маленькая церемония. Родители. Юля. Никаких лишних людей. Только те кто важен.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Мы знакомы с пятнадцати лет. Ты видела меня кассиром, грузчиком и человеком который многое делал неправильно. Ты всё равно верила. Я не понимаю до сих пор почему — но я благодарен каждый день. Я хочу быть достоин этого всю жизнь.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Я верила потому что знала. Просто знала. Некоторые вещи знаешь сразу — в пятнадцать лет, в лагере, летом. Ты мой человек. Всегда был.</line-ru>
+            </dialogue>
+        </step>
+        <step order="4" objective-ref="obj_kiss_scene">
+            <dialogue speaker="narrator">
+                <line-ru>Юля плачет громко. Сэм лает. Дюк пытается вскочить на Александра. Перси сидит спокойно как будто всегда знала что так и будет.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="happiness" value="+100"/>
+                <stat-change stat="anxiety" value="-50"/>
+                <relationship-change target="alexander" value="+30"/>
+            </on-complete>
+        </step>
+        <step order="5" objective-ref="obj_celebration">
+            <dialogue speaker="narrator">
+                <line-ru>Вечер. Все вместе. Хаотично, шумно, по-семейному. Гарфилд занял лучшее кресло. Тельма бегает вокруг стола. Клоп спит. Айджан сидит у Александра на коленях — именно у Александра, именно сейчас.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Саш. Смотри. Айджан у тебя на коленях.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>(улыбается, не шевелится чтобы не спугнуть) Вижу. Наверное она тоже рада.</line-ru>
+            </dialogue>
+        </step>
+    </steps>
+    <rewards>
+        <stat-change stat="happiness" value="+100"/>
+        <stat-change stat="self_esteem" value="+30"/>
+        <relationship-change target="alexander" value="+30"/>
+        <unlock type="animation">wedding_scene</unlock>
+        <unlock type="quest">quest_baby</unlock>
+        <unlock type="item">wedding_rings</unlock>
+    </rewards>
+</quest>

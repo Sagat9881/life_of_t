@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest id="quest_sam_trust" type="SIDE">
+    <meta>
+        <title>Sam's Trust</title>
+        <title-ru>Доверие Сэма</title-ru>
+        <description>Sam is deeply afraid of Alexander. A multi-step quest to slowly build trust: gentle voice, treats, patience — over several in-game days.</description>
+        <description-ru>Сэм очень боится Александра. Квест в несколько этапов — медленно строим доверие через мягкий голос, лакомства и терпение — на протяжении нескольких игровых дней.</description-ru>
+        <chapter>2</chapter>
+        <prerequisites>quest_morning_routine</prerequisites>
+    </meta>
+    <objectives>
+        <objective id="obj_observe_fear" type="INTERACT">
+            <description-ru>Заметь, как Сэм прячется когда Александр входит в комнату</description-ru>
+            <target>sam</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_ask_alexander" type="DIALOGUE">
+            <description-ru>Поговори с Александром — попроси его вести себя иначе с Сэмом</description-ru>
+            <target>alexander</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_alexander_low_voice" type="INTERACT">
+            <description-ru>Пусть Александр говорит с Сэмом тихим голосом, не глядя в глаза</description-ru>
+            <target>alexander</target>
+            <location>living_room</location>
+            <count>3</count>
+        </objective>
+        <objective id="obj_treat_from_alexander" type="INTERACT">
+            <description-ru>Пусть Александр даст Сэму лакомство из руки — без резких движений</description-ru>
+            <target>alexander</target>
+            <location>living_room</location>
+            <count>3</count>
+        </objective>
+        <objective id="obj_sam_sniffs_hand" type="INTERACT">
+            <description-ru>Дождись, пока Сэм сам обнюхает руку Александра</description-ru>
+            <target>sam</target>
+            <location>living_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_sam_wag" type="INTERACT">
+            <description-ru>Дождись первого виляния хвостом в сторону Александра</description-ru>
+            <target>sam</target>
+            <location>living_room</location>
+            <count>1</count>
+        </objective>
+    </objectives>
+    <steps>
+        <step order="1" objective-ref="obj_observe_fear">
+            <dialogue speaker="narrator">
+                <line-ru>Александр входит в комнату. Сэм немедленно исчезает за диваном. Оттуда слышно тихое поскуливание.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Сэм... (тихо) Всё хорошо, Саша просто зашёл. Он не обидит.</line-ru>
+            </dialogue>
+        </step>
+        <step order="2" objective-ref="obj_ask_alexander">
+            <dialogue speaker="tanya">
+                <line-ru>Саш, я тебя прошу — когда входишь, не смотри на него сразу. Не нагибайся к нему сверху. Просто... игнорируй поначалу. Дай ему привыкнуть.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Я его что, пугаю? Я ничего не делаю...</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Ты большой. Ты двигаешься уверенно. Для маленькой собаки это пугает само по себе. Доверяй мне, я разбираюсь.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Ладно. Буду стараться.</line-ru>
+            </dialogue>
+        </step>
+        <step order="3" objective-ref="obj_alexander_low_voice">
+            <dialogue speaker="alexander">
+                <line-ru>(тихо, не глядя на Сэма) Привет, малой. Я никуда не тороплюсь. Просто сижу тут.</line-ru>
+            </dialogue>
+            <dialogue speaker="narrator">
+                <line-ru>Сэм выглядывает из-за дивана. Один глаз, одно ухо.</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="sam" value="+2"/>
+                <relationship-change target="alexander" value="+2"/>
+            </on-complete>
+        </step>
+        <step order="4" objective-ref="obj_treat_from_alexander">
+            <dialogue speaker="alexander">
+                <line-ru>Держи. Это тебе. Не обязательно подходить, я просто положу.</line-ru>
+            </dialogue>
+            <dialogue speaker="narrator">
+                <line-ru>Александр кладёт лакомство на пол и отворачивается. Пауза. Шаг. Ещё шаг. Быстрый захват. Бегство.</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="sam" value="+3"/>
+            </on-complete>
+        </step>
+        <step order="5" objective-ref="obj_sam_sniffs_hand">
+            <dialogue speaker="narrator">
+                <line-ru>Александр сидит на полу, рука вытянута. Ждёт. Сэм стоит в двух метрах, весь дрожит — но нос тянется к запаху. Шаг. Шаг. Влажный нос касается пальца.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>(шёпотом) Саша. Не двигайся. Пожалуйста.</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="sam" value="+5"/>
+                <stat-change stat="happiness" value="+15"/>
+            </on-complete>
+        </step>
+        <step order="6" objective-ref="obj_sam_wag">
+            <dialogue speaker="narrator">
+                <line-ru>Это происходит на пятый день. Александр входит. Сэм вздрагивает по привычке — но потом... хвост. Медленно, неуверенно, но хвост начинает вилять.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>(тихо, но очень довольно) Таня. Он машет хвостом. Смотри. Смотри на него.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Я вижу. (смаргивает) Вижу.</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="sam" value="+10"/>
+                <relationship-change target="alexander" value="+5"/>
+                <stat-change stat="happiness" value="+25"/>
+            </on-complete>
+        </step>
+    </steps>
+    <rewards>
+        <stat-change stat="happiness" value="+20"/>
+        <relationship-change target="sam" value="+15"/>
+        <relationship-change target="alexander" value="+5"/>
+        <unlock type="animation">sam_alexander_wag</unlock>
+    </rewards>
+</quest>

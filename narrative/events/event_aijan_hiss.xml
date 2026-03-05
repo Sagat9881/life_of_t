@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event id="event_aijan_hiss" type="TRIGGERED">
+    <meta>
+        <title-ru>Айджан шипит</title-ru>
+        <description-ru>Айджан натолкнулась на другую кошку — мир рушится, она это докажет.</description-ru>
+        <probability>0.8</probability>
+        <cooldown-hours>2</cooldown-hours>
+    </meta>
+    <conditions>
+        <condition type="location" value="alexander_room"/>
+        <condition type="trigger" value="cat_enters_room"/>
+    </conditions>
+    <effects>
+        <stat-change stat="anxiety" value="+3"/>
+        <dialogue speaker="aijan">
+            <line-ru>ШШШШ!!!! (шерсть дыбом, хвост трубой, максимальная драматичность)</line-ru>
+        </dialogue>
+        <dialogue speaker="narrator">
+            <line-ru>Другая кошка замирает. Айджан делает один шаг вперёд — просто чтобы обозначить позицию. Самая сильная. Всегда.</line-ru>
+        </dialogue>
+        <dialogue speaker="tanya">
+            <line-ru>Айджан! Никто не претендует на твою территорию! Успокойся!</line-ru>
+        </dialogue>
+        <dialogue speaker="aijan">
+            <line-ru>Ш... (недовольно, но успокаивается)</line-ru>
+        </dialogue>
+    </effects>
+</event>

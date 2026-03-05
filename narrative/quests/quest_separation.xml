@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest id="quest_separation" type="MAIN">
+    <meta>
+        <title>A Year Apart</title>
+        <title-ru>Год порознь</title-ru>
+        <description>A flashback and narrative quest covering the separation year (~2021). Tanya and Alexander apart. Multiple endings based on choices — forgiveness, understanding, or bitterness.</description>
+        <description-ru>Флешбэк-квест о годе разлуки (~2021). Таня и Александр порознь. Несколько концовок в зависимости от выбора — прощение, понимание или горечь.</description-ru>
+        <chapter>3</chapter>
+        <prerequisites>quest_alexander_dinner</prerequisites>
+    </meta>
+    <objectives>
+        <objective id="obj_memory_trigger" type="INTERACT">
+            <description-ru>Найди старую фотографию — она запускает воспоминание</description-ru>
+            <target>old_photo</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_flashback_alone" type="DIALOGUE">
+            <description-ru>Флешбэк: Таня одна с Гарфилдом. Ночь. Сообщений нет.</description-ru>
+            <target>garfield</target>
+            <location>st_petersburg_apt</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_flashback_work" type="INTERACT">
+            <description-ru>Флешбэк: Таня берёт новые проекты, чтобы не думать</description-ru>
+            <target>tanya_laptop</target>
+            <location>st_petersburg_apt</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_flashback_reconnect" type="DIALOGUE">
+            <description-ru>Флешбэк: первый звонок после молчания</description-ru>
+            <target>alexander</target>
+            <location>st_petersburg_apt</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_decide_forgive" type="DIALOGUE">
+            <description-ru>Решение: простить и попробовать снова — или держать расстояние</description-ru>
+            <target>alexander</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+    </objectives>
+    <steps>
+        <step order="1" objective-ref="obj_memory_trigger">
+            <dialogue speaker="narrator">
+                <line-ru>На дне ящика стола — фотография. Два подростка в летнем лагере, 2013 год. Солнечно. Смешно. Она помнит тот день. Смотрит на снимок долго.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Мы были такими... простыми. Без всего этого.</line-ru>
+            </dialogue>
+        </step>
+        <step order="2" objective-ref="obj_flashback_alone">
+            <dialogue speaker="narrator">
+                <line-ru>[ФЛЕШБЭК — 2021] Питерская квартира. Зима. Гарфилд лежит рядом, греет.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Гарфилд, что я делаю не так? (тихо) Почему это так больно?</line-ru>
+            </dialogue>
+            <dialogue speaker="garfield">
+                <line-ru>Пурр... (кладёт лапу на её руку)</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="anxiety" value="+15"/>
+                <stat-change stat="happiness" value="-10"/>
+            </on-complete>
+        </step>
+        <step order="3" objective-ref="obj_flashback_work">
+            <dialogue speaker="narrator">
+                <line-ru>Новый проект. Ещё один. Ещё. Работа не даёт думать. Это помогает.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Если я занята — значит, всё в порядке. Значит, я в порядке.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="self_esteem" value="+5"/>
+                <stat-change stat="anxiety" value="-5"/>
+            </on-complete>
+        </step>
+        <step order="4" objective-ref="obj_flashback_reconnect">
+            <dialogue speaker="narrator">
+                <line-ru>Звонок. Его номер. Палец над кнопкой.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Привет. Я понимаю если не хочешь говорить. Но я... мне надо было это сказать. Я был неправ. Во многом. Мне жаль.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>(долгая пауза) Я слушаю.</line-ru>
+            </dialogue>
+        </step>
+        <step order="5" objective-ref="obj_decide_forgive">
+            <dialogue speaker="narrator">
+                <line-ru>[НАСТОЯЩЕЕ] Таня смотрит на фотографию, потом в сторону закрытой двери в рабочую комнату Александра.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya" choice="forgive">
+                <line-ru>Он старается. Я вижу это каждый день. Иногда прошлое — это просто прошлое.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya" choice="wary">
+                <line-ru>Я помню. Я прощаю — но помню. И это тоже важно. Любовь не значит забыть.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="self_esteem" value="+20" condition="choice:wary"/>
+                <stat-change stat="happiness" value="+15" condition="choice:forgive"/>
+                <relationship-change target="alexander" value="+10" condition="choice:forgive"/>
+                <relationship-change target="alexander" value="+5" condition="choice:wary"/>
+            </on-complete>
+        </step>
+    </steps>
+    <rewards>
+        <stat-change stat="self_esteem" value="+20"/>
+        <relationship-change target="alexander" value="+10"/>
+        <unlock type="quest">quest_proposal</unlock>
+        <unlock type="animation">old_photo_memory</unlock>
+    </rewards>
+</quest>
