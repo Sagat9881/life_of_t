@@ -10,7 +10,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.lifegame.backend.domain.model.character.Stats;
 import ru.lifegame.backend.domain.quest.Quest;
 import ru.lifegame.backend.domain.quest.QuestLog;
 import ru.lifegame.backend.domain.quest.QuestObjective;
