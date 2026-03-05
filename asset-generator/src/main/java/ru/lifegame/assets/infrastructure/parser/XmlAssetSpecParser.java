@@ -5,13 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import ru.lifegame.assets.domain.model.asset.AnimationSpec;
-import ru.lifegame.assets.domain.model.asset.AssetConstraints;
-import ru.lifegame.assets.domain.model.asset.AssetLayer;
-import ru.lifegame.assets.domain.model.asset.AssetSpec;
-import ru.lifegame.assets.domain.model.asset.ColorPalette;
-import ru.lifegame.assets.domain.model.asset.NamingSpec;
-import ru.lifegame.assets.domain.model.asset.TimeOfDayVariation;
+import ru.lifegame.assets.domain.model.asset.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -19,24 +13,14 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-/**
- * Parses unified XML asset specifications into {@link AssetSpec} domain objects.
- * <p>
- * Expected XML structure follows docs/prompts/_core/unified-asset-schema.xml.
- */
 public class XmlAssetSpecParser {
 
     private static final Logger log = LoggerFactory.getLogger(XmlAssetSpecParser.class);
 
-    /**
-     * Parses an XML file at the given path into an {@link AssetSpec}.
-     *
-     * @param xmlFile path to the unified XML spec
-     * @return parsed asset specification
-     * @throws XmlParseException if parsing fails
-     */
     public AssetSpec parse(Path xmlFile) {
         try (InputStream is = Files.newInputStream(xmlFile)) {
             return parseFromStream(is);
@@ -47,10 +31,6 @@ public class XmlAssetSpecParser {
         }
     }
 
-    /**
-     * Parses an XML input stream into an {@link AssetSpec}.
-     * Visible for testing.
-     */
     public AssetSpec parseFromStream(InputStream inputStream) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -58,9 +38,7 @@ public class XmlAssetSpecParser {
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(inputStream);
             doc.getDocumentElement().normalize();
-
-            Element root = doc.getDocumentElement();
-            return parseRoot(root);
+            return parseRoot(doc.getDocumentElement());
         } catch (XmlParseException e) {
             throw e;
         } catch (Exception e) {
@@ -95,44 +73,54 @@ public class XmlAssetSpecParser {
         for (int i = 0; i < layerNodes.getLength(); i++) {
             Element el = (Element) layerNodes.item(i);
             String id = el.getAttribute("id");
-            if (id.isBlank()) {
-                id = el.getAttribute("type");
-            }
+            if (id.isBlank()) id = el.getAttribute("type");
             String type = el.getAttribute("type");
-            String description = el.getTextContent().trim();
-            int zOrder = i;
-            String zOrderAttr = el.getAttribute("z-order");
-            if (!zOrderAttr.isBlank()) {
-                zOrder = Integer.parseInt(zOrderAttr);
-            }
-            layers.add(new AssetLayer(id, type, description, zOrder));
+            int zOrder = intAttr(el, "z-order", i);
+            int width = intAttr(el, "width", 0);
+            int height = intAttr(el, "height", 0);
+            String description = "";
+
+            // Parse pixel-data if present
+            PixelData pixelData = parsePixelData(el);
+
+            layers.add(new AssetLayer(id, type, description, zOrder, width, height, pixelData));
         }
         return layers;
     }
 
-    private ColorPalette parseColorPalette(Element root) {
-        Element paletteEl = getFirstChildOrNull(root, "color-palette");
-        if (paletteEl == null) {
-            return ColorPalette.projectDefault();
-        }
-        List<String> primary = parseColorList(paletteEl, "primary");
-        List<String> secondary = parseColorList(paletteEl, "secondary");
-        return new ColorPalette(primary, secondary);
-    }
+    private PixelData parsePixelData(Element layerEl) {
+        Element pdEl = getFirstChildOrNull(layerEl, "pixel-data");
+        if (pdEl == null) return PixelData.EMPTY;
 
-    private List<String> parseColorList(Element parent, String tagName) {
-        List<String> colors = new ArrayList<>();
-        Element el = getFirstChildOrNull(parent, tagName);
-        if (el == null) return colors;
-        NodeList colorNodes = el.getElementsByTagName("color");
-        for (int i = 0; i < colorNodes.getLength(); i++) {
-            Element colorEl = (Element) colorNodes.item(i);
-            String hex = colorEl.getAttribute("hex");
-            if (!hex.isBlank()) {
-                colors.add(hex);
+        List<PixelRect> rects = new ArrayList<>();
+        List<PixelLine> lines = new ArrayList<>();
+        List<PixelDot> dots = new ArrayList<>();
+
+        NodeList children = pdEl.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            if (!(children.item(i) instanceof Element child)) continue;
+            switch (child.getTagName()) {
+                case "rect" -> rects.add(new PixelRect(
+                        intAttr(child, "x", 0), intAttr(child, "y", 0),
+                        intAttr(child, "w", 1), intAttr(child, "h", 1),
+                        child.getAttribute("color")));
+                case "pixel" -> dots.add(new PixelDot(
+                        intAttr(child, "x", 0), intAttr(child, "y", 0),
+                        child.getAttribute("color")));
+                case "hline" -> lines.add(new PixelLine(
+                        intAttr(child, "x", 0), intAttr(child, "y", 0),
+                        intAttr(child, "len", 1),
+                        PixelLine.Direction.HORIZONTAL,
+                        child.getAttribute("color")));
+                case "vline" -> lines.add(new PixelLine(
+                        intAttr(child, "x", 0), intAttr(child, "y", 0),
+                        intAttr(child, "len", 1),
+                        PixelLine.Direction.VERTICAL,
+                        child.getAttribute("color")));
+                default -> log.warn("Unknown pixel-data element: {}", child.getTagName());
             }
         }
-        return colors;
+        return new PixelData(rects, lines, dots);
     }
 
     private List<AnimationSpec> parseAnimations(Element root) {
@@ -148,9 +136,67 @@ public class XmlAssetSpecParser {
             boolean loop = boolAttr(el, "loop", true);
             int frameWidth = intAttr(el, "frame-width", 128);
             int frameHeight = intAttr(el, "frame-height", 128);
-            animations.add(new AnimationSpec(name, frames, fps, loop, frameWidth, frameHeight));
+
+            List<FrameOffset> frameOffsets = parseFrameOffsets(el);
+            animations.add(new AnimationSpec(name, frames, fps, loop,
+                    frameWidth, frameHeight, frameOffsets));
         }
         return animations;
+    }
+
+    private List<FrameOffset> parseFrameOffsets(Element animEl) {
+        List<FrameOffset> offsets = new ArrayList<>();
+        NodeList frameNodes = animEl.getElementsByTagName("frame");
+        for (int i = 0; i < frameNodes.getLength(); i++) {
+            Element el = (Element) frameNodes.item(i);
+            int index = intAttr(el, "index", i);
+            String offsetsStr = el.getAttribute("layer-offsets");
+            Map<String, int[]> layerOffsets = parseLayerOffsets(offsetsStr);
+            offsets.add(new FrameOffset(index, layerOffsets));
+        }
+        return offsets;
+    }
+
+    private Map<String, int[]> parseLayerOffsets(String s) {
+        Map<String, int[]> map = new HashMap<>();
+        if (s == null || s.isBlank()) return map;
+        String[] entries = s.split(";");
+        for (String entry : entries) {
+            entry = entry.trim();
+            if (entry.isEmpty()) continue;
+            String[] parts = entry.split(":");
+            if (parts.length != 2) continue;
+            String layerId = parts[0].trim();
+            String[] coords = parts[1].trim().split(",");
+            if (coords.length == 2) {
+                try {
+                    int dx = Integer.parseInt(coords[0].trim());
+                    int dy = Integer.parseInt(coords[1].trim());
+                    map.put(layerId, new int[]{dx, dy});
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+        return map;
+    }
+
+    private ColorPalette parseColorPalette(Element root) {
+        Element paletteEl = getFirstChildOrNull(root, "color-palette");
+        if (paletteEl == null) return ColorPalette.projectDefault();
+        List<String> primary = parseColorList(paletteEl, "primary");
+        List<String> secondary = parseColorList(paletteEl, "secondary");
+        return new ColorPalette(primary, secondary);
+    }
+
+    private List<String> parseColorList(Element parent, String tagName) {
+        List<String> colors = new ArrayList<>();
+        Element el = getFirstChildOrNull(parent, tagName);
+        if (el == null) return colors;
+        NodeList colorNodes = el.getElementsByTagName("color");
+        for (int i = 0; i < colorNodes.getLength(); i++) {
+            String hex = ((Element) colorNodes.item(i)).getAttribute("hex");
+            if (!hex.isBlank()) colors.add(hex);
+        }
+        return colors;
     }
 
     private List<TimeOfDayVariation> parseTimeOfDayVariations(Element root) {
@@ -170,78 +216,61 @@ public class XmlAssetSpecParser {
 
     private NamingSpec parseNaming(Element root, String entityType, String entityName) {
         Element namingEl = getFirstChildOrNull(root, "naming");
-        if (namingEl == null) {
-            return new NamingSpec(entityType, entityName, null);
-        }
+        if (namingEl == null) return new NamingSpec(entityType, entityName, null);
         String outputDir = getTextContentOrDefault(namingEl, "output-dir",
                 "assets/" + entityType + "/" + entityName);
         return new NamingSpec(entityType, entityName, outputDir);
     }
 
     private AssetConstraints parseConstraints(Element root) {
-        Element constraintsEl = getFirstChildOrNull(root, "constraints");
-        if (constraintsEl == null) {
-            return AssetConstraints.defaults();
-        }
-        int maxFileSize = intChild(constraintsEl, "max-file-size-kb", 500);
-        int maxWidth = intChild(constraintsEl, "max-sprite-sheet-width", 2048);
-        int maxHeight = intChild(constraintsEl, "max-sprite-sheet-height", 2048);
-        int quality = intChild(constraintsEl, "compression-quality", 85);
-        int bitDepth = intChild(constraintsEl, "bit-depth", 32);
-        return new AssetConstraints(maxFileSize, maxWidth, maxHeight, quality, bitDepth);
+        Element el = getFirstChildOrNull(root, "constraints");
+        if (el == null) return AssetConstraints.defaults();
+        return new AssetConstraints(
+                intChild(el, "max-file-size-kb", 500),
+                intChild(el, "max-sprite-sheet-width", 2048),
+                intChild(el, "max-sprite-sheet-height", 2048),
+                intChild(el, "compression-quality", 85),
+                intChild(el, "bit-depth", 32));
     }
 
-    // ---- XML helper methods ----
+    // ---- XML helpers ----
 
-    private Element getFirstChild(Element parent, String tagName) {
-        Element el = getFirstChildOrNull(parent, tagName);
-        if (el == null) {
-            throw new XmlParseException("Missing required element: <" + tagName + ">");
-        }
+    private Element getFirstChild(Element parent, String tag) {
+        Element el = getFirstChildOrNull(parent, tag);
+        if (el == null) throw new XmlParseException("Missing required element: <" + tag + ">");
         return el;
     }
 
-    private Element getFirstChildOrNull(Element parent, String tagName) {
-        NodeList nodes = parent.getElementsByTagName(tagName);
-        if (nodes.getLength() == 0) return null;
-        return (Element) nodes.item(0);
+    private Element getFirstChildOrNull(Element parent, String tag) {
+        NodeList nodes = parent.getElementsByTagName(tag);
+        return nodes.getLength() > 0 ? (Element) nodes.item(0) : null;
     }
 
-    private String getTextContent(Element parent, String tagName) {
-        Element el = getFirstChild(parent, tagName);
-        return el.getTextContent().trim();
+    private String getTextContent(Element parent, String tag) {
+        return getFirstChild(parent, tag).getTextContent().trim();
     }
 
-    private String getTextContentOrDefault(Element parent, String tagName, String defaultValue) {
-        Element el = getFirstChildOrNull(parent, tagName);
-        if (el == null) return defaultValue;
+    private String getTextContentOrDefault(Element parent, String tag, String def) {
+        Element el = getFirstChildOrNull(parent, tag);
+        if (el == null) return def;
         String text = el.getTextContent().trim();
-        return text.isEmpty() ? defaultValue : text;
+        return text.isEmpty() ? def : text;
     }
 
-    private int intAttr(Element el, String attr, int defaultValue) {
+    private int intAttr(Element el, String attr, int def) {
         String val = el.getAttribute(attr);
-        if (val.isBlank()) return defaultValue;
-        try {
-            return Integer.parseInt(val);
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
+        if (val.isBlank()) return def;
+        try { return Integer.parseInt(val); } catch (NumberFormatException e) { return def; }
     }
 
-    private boolean boolAttr(Element el, String attr, boolean defaultValue) {
+    private boolean boolAttr(Element el, String attr, boolean def) {
         String val = el.getAttribute(attr);
-        if (val.isBlank()) return defaultValue;
-        return Boolean.parseBoolean(val);
+        return val.isBlank() ? def : Boolean.parseBoolean(val);
     }
 
-    private int intChild(Element parent, String tagName, int defaultValue) {
-        Element el = getFirstChildOrNull(parent, tagName);
-        if (el == null) return defaultValue;
-        try {
-            return Integer.parseInt(el.getTextContent().trim());
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
+    private int intChild(Element parent, String tag, int def) {
+        Element el = getFirstChildOrNull(parent, tag);
+        if (el == null) return def;
+        try { return Integer.parseInt(el.getTextContent().trim()); } catch (NumberFormatException e) { return def; }
     }
 }

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>locations</entity-type>
+        <entity-name>home_room</entity-name>
+        <version>1.0.0</version>
+    </meta>
+
+    <layers>
+        <!-- Floor (z=0) -->
+        <layer id="floor" type="background" z-order="0" width="320" height="240">
+            <pixel-data>
+                <rect x="0" y="160" w="320" h="80" color="#C8A882"/>
+                <!-- Floorboard lines -->
+                <hline x="0" y="180" len="320" color="#B89872"/>
+                <hline x="0" y="200" len="320" color="#B89872"/>
+                <hline x="0" y="220" len="320" color="#B89872"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Wall (z=1) -->
+        <layer id="wall" type="background" z-order="1" width="320" height="240">
+            <pixel-data>
+                <rect x="0" y="0" w="320" h="160" color="#FFF4E6"/>
+                <!-- Baseboard -->
+                <rect x="0" y="155" w="320" h="5" color="#D4B896"/>
+                <!-- Wallpaper stripe -->
+                <hline x="0" y="80" len="320" color="#FFE8D0"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Window (z=2) -->
+        <layer id="window" type="midground" z-order="2" width="320" height="240">
+            <pixel-data>
+                <rect x="200" y="20" w="80" h="100" color="#B0D8F0"/>
+                <!-- Frame -->
+                <rect x="198" y="18" w="84" h="2" color="#D4B896"/>
+                <rect x="198" y="120" w="84" h="2" color="#D4B896"/>
+                <rect x="198" y="18" w="2" h="104" color="#D4B896"/>
+                <rect x="280" y="18" w="2" h="104" color="#D4B896"/>
+                <!-- Cross -->
+                <rect x="238" y="18" w="2" h="104" color="#D4B896"/>
+                <rect x="198" y="68" w="84" h="2" color="#D4B896"/>
+                <!-- Curtains -->
+                <rect x="190" y="15" w="10" h="110" color="#FFB6C1"/>
+                <rect x="280" y="15" w="10" h="110" color="#FFB6C1"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Bed (z=3) -->
+        <layer id="bed" type="foreground" z-order="3" width="320" height="240">
+            <pixel-data>
+                <!-- Frame -->
+                <rect x="20" y="120" w="120" h="60" color="#A08060"/>
+                <!-- Mattress -->
+                <rect x="22" y="122" w="116" h="40" color="#F5E6D3"/>
+                <!-- Pillow -->
+                <rect x="24" y="124" w="30" h="18" color="#FFFFFF"/>
+                <rect x="24" y="124" w="30" h="1" color="#E8E8E8"/>
+                <!-- Blanket -->
+                <rect x="22" y="142" w="116" h="18" color="#B5EAD7"/>
+                <rect x="22" y="142" w="116" h="2" color="#A0D8C4"/>
+                <!-- Legs -->
+                <rect x="22" y="178" w="4" h="6" color="#8A6A4A"/>
+                <rect x="134" y="178" w="4" h="6" color="#8A6A4A"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Desk (z=4) -->
+        <layer id="desk" type="foreground" z-order="4" width="320" height="240">
+            <pixel-data>
+                <rect x="160" y="130" w="80" h="40" color="#B89878"/>
+                <rect x="160" y="130" w="80" h="2" color="#A08868"/>
+                <!-- Legs -->
+                <rect x="162" y="170" w="3" h="14" color="#A08060"/>
+                <rect x="235" y="170" w="3" h="14" color="#A08060"/>
+                <!-- Laptop -->
+                <rect x="170" y="124" w="30" h="6" color="#505050"/>
+                <rect x="170" y="118" w="30" h="6" color="#4488BB"/>
+                <rect x="172" y="119" w="26" h="4" color="#66AADD"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Bookshelf (z=5) -->
+        <layer id="bookshelf" type="foreground" z-order="5" width="320" height="240">
+            <pixel-data>
+                <rect x="40" y="30" w="60" h="80" color="#C8A070"/>
+                <!-- Shelves -->
+                <hline x="40" y="50" len="60" color="#A08060"/>
+                <hline x="40" y="70" len="60" color="#A08060"/>
+                <hline x="40" y="90" len="60" color="#A08060"/>
+                <!-- Books -->
+                <rect x="42" y="32" w="5" h="16" color="#E06060"/>
+                <rect x="48" y="34" w="4" h="14" color="#4080C0"/>
+                <rect x="53" y="32" w="5" h="16" color="#50A050"/>
+                <rect x="59" y="35" w="4" h="13" color="#E0C040"/>
+                <rect x="42" y="52" w="6" h="16" color="#8060A0"/>
+                <rect x="49" y="54" w="5" h="14" color="#E09040"/>
+                <rect x="55" y="52" w="5" h="16" color="#4488BB"/>
+                <rect x="42" y="72" w="4" h="16" color="#D06080"/>
+                <rect x="47" y="74" w="5" h="14" color="#60A080"/>
+                <rect x="53" y="72" w="6" h="16" color="#A08040"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <naming>
+        <output-dir>locations/home_room</output-dir>
+    </naming>
+</asset-spec>
