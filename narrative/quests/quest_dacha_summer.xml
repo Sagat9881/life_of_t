@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest id="quest_dacha_summer" type="MAIN">
+    <meta>
+        <title>Summer at the Dacha</title>
+        <title-ru>Лето на даче</title-ru>
+        <description>The family moves to the dacha for the summer. Thelma comes alive. New location unlocked — dacha garden, yard, road. Tanya rediscovers space and lightness.</description>
+        <description-ru>Семья переезжает на дачу на лето. Тельма оживает. Разблокируется новая локация — дачный огород, двор, дорога. Таня заново открывает для себя простор и лёгкость.</description-ru>
+        <chapter>4</chapter>
+        <prerequisites>quest_separation</prerequisites>
+    </meta>
+    <objectives>
+        <objective id="obj_pack_bags" type="INTERACT">
+            <description-ru>Собери вещи и переноски для питомцев</description-ru>
+            <target>travel_bags</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_load_car" type="TRAVEL">
+            <description-ru>Загрузи всех питомцев и вещи в машину</description-ru>
+            <target>car</target>
+            <location>home_entrance</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_arrive_dacha" type="TRAVEL">
+            <description-ru>Доедь до дачи</description-ru>
+            <target>dacha</target>
+            <location>dacha</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_release_thelma" type="INTERACT">
+            <description-ru>Выпусти Тельму на улицу — она ещё никогда не видела траву</description-ru>
+            <target>thelma</target>
+            <location>dacha_garden</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_explore_dacha" type="TRAVEL">
+            <description-ru>Исследуй дачную территорию со всеми питомцами</description-ru>
+            <target>dacha_garden</target>
+            <location>dacha_garden</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_evening_porch" type="TIME">
+            <description-ru>Проведи вечер на крыльце с Александром</description-ru>
+            <target>dacha_porch</target>
+            <location>dacha</location>
+            <count>1</count>
+        </objective>
+    </objectives>
+    <steps>
+        <step order="1" objective-ref="obj_pack_bags">
+            <dialogue speaker="tanya">
+                <line-ru>Шесть кошек, три собаки... нам нужна логистика. Саша, ты точно уверен что всё влезет?</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Влезет. Я уже складываю математически.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Математически... восемь переносок, пятнадцать пакетов корма, Дюк который никуда не помещается...</line-ru>
+            </dialogue>
+        </step>
+        <step order="2" objective-ref="obj_load_car">
+            <dialogue speaker="narrator">
+                <line-ru>Загрузка длится полтора часа. Дюк вылезает из машины три раза. Гарфилд смотрит на переноску как будто его предали.</line-ru>
+            </dialogue>
+            <dialogue speaker="garfield">
+                <line-ru>Мрр... (демонстративно садится рядом с переноской, не заходя внутрь)</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Гарфилд. Зайди. Пожалуйста. Там дача, там трава и котики. Ну Гарфилд!</line-ru>
+            </dialogue>
+        </step>
+        <step order="3" objective-ref="obj_arrive_dacha">
+            <dialogue speaker="narrator">
+                <line-ru>Запах сосен и земли. Тишина настоящая — не городская пауза между машинами, а настоящая. Таня выходит из машины и просто дышит.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Саш... слышишь? Тишина.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Слышу. (улыбается) Давай распаковываться.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="happiness" value="+15"/>
+                <stat-change stat="anxiety" value="-10"/>
+                <unlock type="location">dacha</unlock>
+                <unlock type="location">dacha_garden</unlock>
+            </on-complete>
+        </step>
+        <step order="4" objective-ref="obj_release_thelma">
+            <dialogue speaker="narrator">
+                <line-ru>Тельма осторожно выходит из переноски. Нос в воздухе. Лапа в траве — и сразу назад. Снова вперёд. Понюхала цветок. Нашла жука. Побежала.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Тельма... ты что, бежишь?! Ты БЕЖИШЬ! Саша, смотри! Тельма БЕЖИТ!</line-ru>
+            </dialogue>
+            <dialogue speaker="thelma">
+                <line-ru>МЯУ! (носится по огороду как маленький чёрно-белый торнадо)</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="happiness" value="+20"/>
+                <relationship-change target="thelma" value="+5"/>
+                <unlock type="animation">thelma_zoomies_dacha</unlock>
+            </on-complete>
+        </step>
+        <step order="5" objective-ref="obj_explore_dacha">
+            <dialogue speaker="narrator">
+                <line-ru>Перси обходит периметр двора деловитым шагом — проверяет. Сэм бежит за Таней. Дюк обнаруживает дырку в заборе и моментально пытается в неё залезть.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Дюк! Нет! Там лес! Дюк, стой! Ты вернёшься через три дня весь в репьях!</line-ru>
+            </dialogue>
+        </step>
+        <step order="6" objective-ref="obj_evening_porch">
+            <dialogue speaker="narrator">
+                <line-ru>Вечер. Закат за соснами. На крыльце — два кресла, кружки с чаем. Клоп лежит поперёк ступенек. Перси — рядом с ногой Александра.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Хорошо. Просто хорошо.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Да. (берёт её за руку)</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="happiness" value="+25"/>
+                <stat-change stat="anxiety" value="-20"/>
+                <relationship-change target="alexander" value="+5"/>
+            </on-complete>
+        </step>
+    </steps>
+    <rewards>
+        <stat-change stat="happiness" value="+30"/>
+        <stat-change stat="anxiety" value="-20"/>
+        <unlock type="location">dacha</unlock>
+        <unlock type="location">dacha_garden</unlock>
+        <unlock type="location">dacha_road</unlock>
+        <unlock type="animation">thelma_summer_mode</unlock>
+    </rewards>
+</quest>

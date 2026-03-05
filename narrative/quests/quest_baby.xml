@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest id="quest_baby" type="HIDDEN">
+    <meta>
+        <title>New Life</title>
+        <title-ru>Новая жизнь</title-ru>
+        <description>The true ending. Post-wedding. A quiet morning, a small test, a big moment. The final scene of the game.</description>
+        <description-ru>Истинная концовка. После свадьбы. Тихое утро, маленький тест, большой момент. Финальная сцена игры.</description-ru>
+        <chapter>5</chapter>
+        <prerequisites>quest_wedding</prerequisites>
+    </meta>
+    <objectives>
+        <objective id="obj_morning_quiet" type="TIME">
+            <description-ru>Тихое утро — что-то чувствуется по-другому</description-ru>
+            <target>tanya</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_the_test" type="INTERACT">
+            <description-ru>Аптека. Маленькая коробочка.</description-ru>
+            <target>pharmacy</target>
+            <location>city</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_wait" type="TIME">
+            <description-ru>Подожди. Две полоски или одна.</description-ru>
+            <target>bathroom_sink</target>
+            <location>bathroom</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_tell_alexander" type="DIALOGUE">
+            <description-ru>Скажи Александру</description-ru>
+            <target>alexander</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+    </objectives>
+    <steps>
+        <step order="1" objective-ref="obj_morning_quiet">
+            <dialogue speaker="narrator">
+                <line-ru>Утро как утро. Гарфилд ждёт еды. Сэм вертится. Клоп спит. Но что-то... что-то не так. Вернее — что-то по-другому.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>(тихо) Подожди. Дата...</line-ru>
+            </dialogue>
+        </step>
+        <step order="2" objective-ref="obj_the_test">
+            <dialogue speaker="narrator">
+                <line-ru>Аптека. Таня стоит перед полкой дольше чем нужно. Берёт. Платит. Идёт домой быстрым шагом.</line-ru>
+            </dialogue>
+        </step>
+        <step order="3" objective-ref="obj_wait">
+            <dialogue speaker="narrator">
+                <line-ru>Ванная. Дверь закрыта. Тиканье часов. Гарфилд скребётся снаружи — учуял что что-то происходит.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>(шёпотом) Считаю... раз... два... три...</line-ru>
+            </dialogue>
+            <dialogue speaker="narrator">
+                <line-ru>Две полоски.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>О боже.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="happiness" value="+50"/>
+                <stat-change stat="anxiety" value="+20"/>
+            </on-complete>
+        </step>
+        <step order="4" objective-ref="obj_tell_alexander">
+            <dialogue speaker="tanya">
+                <line-ru>Саша. Саш. Мне надо тебе кое-что показать.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Что? Что случилось? Ты белая как...</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>(протягивает тест)</line-ru>
+            </dialogue>
+            <dialogue speaker="narrator">
+                <line-ru>Александр смотрит. Долго. Потом поднимает глаза на неё.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>(тихо) Правда?</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Правда.</line-ru>
+            </dialogue>
+            <dialogue speaker="narrator">
+                <line-ru>Он обнимает её. Тесно. Никуда не уходит. Гарфилд запрыгивает на диван рядом с ними. Сэм тявкает. Клоп не просыпается. Перси кладёт голову на лапы и закрывает глаза — как будто знала.</line-ru>
+            </dialogue>
+            <dialogue speaker="narrator">
+                <line-ru>Семья стала чуть больше.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="happiness" value="+100"/>
+                <stat-change stat="anxiety" value="-30"/>
+                <relationship-change target="alexander" value="+20"/>
+                <unlock type="animation">true_ending_scene</unlock>
+            </on-complete>
+        </step>
+    </steps>
+    <rewards>
+        <stat-change stat="happiness" value="+100"/>
+        <unlock type="animation">true_ending_scene</unlock>
+        <unlock type="item">baby_announcement</unlock>
+    </rewards>
+</quest>

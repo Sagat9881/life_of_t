@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest id="quest_find_persi" type="MAIN">
+    <meta>
+        <title>Night Highway Find</title>
+        <title-ru>Ночная находка</title-ru>
+        <description>August night. Alexander is walking Persi's location — she emerges from the forest onto the highway. Walk 3km back to the dacha together. Trust-building through shared silence.</description>
+        <description-ru>Августовская ночь. Александр идёт по дороге. Перси выходит из леса на трассу — большая, чёрная, грязная. Пройти вместе 3 км обратно до дачи. Доверие — через тишину.</description-ru>
+        <chapter>4</chapter>
+        <prerequisites>quest_dacha_summer</prerequisites>
+    </meta>
+    <objectives>
+        <objective id="obj_walk_night" type="TRAVEL">
+            <description-ru>Александр идёт по ночной трассе — Таня дома</description-ru>
+            <target>night_highway</target>
+            <location>dacha_road</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_persi_appears" type="INTERACT">
+            <description-ru>Что-то большое выходит из леса</description-ru>
+            <target>night_highway</target>
+            <location>dacha_road</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_persi_greeting" type="INTERACT">
+            <description-ru>Она сразу идёт к тебе — не убегает</description-ru>
+            <target>persi</target>
+            <location>dacha_road</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_walk_home" type="TRAVEL">
+            <description-ru>Иди с ней рядом — 3 км до дачи</description-ru>
+            <target>dacha</target>
+            <location>dacha_road</location>
+            <count>3</count>
+        </objective>
+        <objective id="obj_tanya_meets_persi" type="DIALOGUE">
+            <description-ru>Александр приводит Перси к Тане</description-ru>
+            <target>tanya</target>
+            <location>dacha</location>
+            <count>1</count>
+        </objective>
+    </objectives>
+    <steps>
+        <step order="1" objective-ref="obj_walk_night">
+            <dialogue speaker="narrator">
+                <line-ru>22:00. Август. Трасса пустая — только лес по обе стороны и дальний свет редких машин. Александр идёт медленно. Тепло и тихо.</line-ru>
+            </dialogue>
+        </step>
+        <step order="2" objective-ref="obj_persi_appears">
+            <dialogue speaker="narrator">
+                <line-ru>Шорох. Ветки. Из темноты между соснами — большой тёмный силуэт. Александр замирает.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Эй... тихо... Кто тут?</line-ru>
+            </dialogue>
+        </step>
+        <step order="3" objective-ref="obj_persi_greeting">
+            <dialogue speaker="narrator">
+                <line-ru>Она выходит на асфальт. Чёрная немецкая овчарка — грязная, с репьями в шерсти, но не забитая. Смотрит прямо на него. И идёт к нему.</line-ru>
+            </dialogue>
+            <dialogue speaker="persi">
+                <line-ru>...(кладёт голову ему на руку)</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>(тихо) Эй. Привет. Откуда ты? Ты чья? (пауза) Ладно. Пойдём к нам.</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="persi" value="+10"/>
+            </on-complete>
+        </step>
+        <step order="4" objective-ref="obj_walk_home">
+            <dialogue speaker="narrator">
+                <line-ru>Три километра. Она идёт рядом — ровно в шаге. Не убегает вперёд, не отстаёт. Просто идёт рядом, как будто всегда так было.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Ты умная. Это видно. Ты знала что ли, что я хороший человек?</line-ru>
+            </dialogue>
+            <dialogue speaker="persi">
+                <line-ru>...(смотрит вперёд, хвост медленно машет)</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="persi" value="+5"/>
+            </on-complete>
+        </step>
+        <step order="5" objective-ref="obj_tanya_meets_persi">
+            <dialogue speaker="tanya">
+                <line-ru>Саша! Ты где... что... это кто?!</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Она вышла из леса. Сама. Просто подошла. Я не мог её оставить на трассе.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>(смотрит на Перси долго, потом садится на корточки) Привет. Как тебя зовут? Персефона, да? Ты похожа на Персефону.</line-ru>
+            </dialogue>
+            <dialogue speaker="persi">
+                <line-ru>...(тихий выдох, хвост — медленное, спокойное движение)</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="happiness" value="+30"/>
+                <relationship-change target="persi" value="+15"/>
+                <relationship-change target="alexander" value="+5"/>
+            </on-complete>
+        </step>
+    </steps>
+    <rewards>
+        <stat-change stat="happiness" value="+25"/>
+        <unlock type="character">persi</unlock>
+        <unlock type="animation">persi_walks_beside</unlock>
+    </rewards>
+</quest>

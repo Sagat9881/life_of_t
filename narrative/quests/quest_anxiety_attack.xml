@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest id="quest_anxiety_attack" type="SIDE">
+    <meta>
+        <title>Anxiety Attack</title>
+        <title-ru>Приступ тревоги</title-ru>
+        <description>Tanya experiences a sudden anxiety attack. Mini-game: complete breathing exercises. Optional: call the psychologist. Based on real anxiety management techniques.</description>
+        <description-ru>У Тани начинается приступ тревоги. Мини-игра: выполни дыхательные упражнения. Опционально: позвони психологу. Основано на реальных техниках управления тревогой.</description-ru>
+        <chapter>3</chapter>
+        <prerequisites>quest_morning_routine</prerequisites>
+    </meta>
+    <objectives>
+        <objective id="obj_panic_starts" type="TIME">
+            <description-ru>Таня чувствует нарастающую тревогу</description-ru>
+            <target>tanya</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_breathing_1" type="INTERACT">
+            <description-ru>Вдох на 4 счёта — удерживай кнопку</description-ru>
+            <target>breath_minigame</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_breathing_2" type="INTERACT">
+            <description-ru>Задержи дыхание на 4 счёта</description-ru>
+            <target>breath_minigame</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_breathing_3" type="INTERACT">
+            <description-ru>Выдох на 6 счётов</description-ru>
+            <target>breath_minigame</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_grounding" type="INTERACT">
+            <description-ru>Назови 5 вещей которые видишь — приём заземления</description-ru>
+            <target>grounding_minigame</target>
+            <location>home_room</location>
+            <count>5</count>
+        </objective>
+        <objective id="obj_call_help" type="DIALOGUE">
+            <description-ru>Реши: позвонить психологу или справиться самой</description-ru>
+            <target>tanya_phone</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+    </objectives>
+    <steps>
+        <step order="1" objective-ref="obj_panic_starts">
+            <dialogue speaker="narrator">
+                <line-ru>Это начинается ниоткуда — или не ниоткуда. Сердце ускоряется. Ладони горят. Мысли рвут в разные стороны. Ничего конкретного нет, но ощущение угрозы — везде.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Нет. Нет-нет-нет. Не сейчас. Просто... дышать. Надо дышать.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="anxiety" value="+30"/>
+            </on-complete>
+        </step>
+        <step order="2" objective-ref="obj_breathing_1">
+            <dialogue speaker="tanya">
+                <line-ru>Раз... два... три... четыре... Вдыхаю.</line-ru>
+            </dialogue>
+        </step>
+        <step order="3" objective-ref="obj_breathing_2">
+            <dialogue speaker="tanya">
+                <line-ru>Держу... держу... ещё... четыре.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="anxiety" value="-5"/>
+            </on-complete>
+        </step>
+        <step order="4" objective-ref="obj_breathing_3">
+            <dialogue speaker="tanya">
+                <line-ru>Выдыхаю... медленно... один... два... три... четыре... пять... шесть.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="anxiety" value="-10"/>
+            </on-complete>
+        </step>
+        <step order="5" objective-ref="obj_grounding">
+            <dialogue speaker="narrator">
+                <line-ru>Пять вещей которые видишь. Это упражнение заземления. Таня оглядывается.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Ноутбук. Шторы... розовые. Книжный шкаф. Клоп на диване. Кружка с кофе.</line-ru>
+            </dialogue>
+            <dialogue speaker="narrator">
+                <line-ru>Клоп открывает один глаз, смотрит на неё — и мурлыкает.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="anxiety" value="-15"/>
+            </on-complete>
+        </step>
+        <step order="6" objective-ref="obj_call_help">
+            <dialogue speaker="tanya" choice="call_psychologist">
+                <line-ru>Анна Сергеевна? Извините что снова... У меня был приступ. Я справилась, но хочу поговорить.</line-ru>
+            </dialogue>
+            <dialogue speaker="psychologist_npc" choice="call_psychologist">
+                <line-ru>Ты справилась — это главное. Ты помнишь как. Это важно. Расскажи что было до него.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya" choice="alone">
+                <line-ru>Я справилась сама. Я справилась. (пауза) Кажется, я становлюсь сильнее.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="anxiety" value="-20"/>
+                <stat-change stat="self_esteem" value="+15"/>
+            </on-complete>
+        </step>
+    </steps>
+    <rewards>
+        <stat-change stat="anxiety" value="-20"/>
+        <stat-change stat="self_esteem" value="+15"/>
+        <unlock type="animation">breathing_technique</unlock>
+    </rewards>
+</quest>

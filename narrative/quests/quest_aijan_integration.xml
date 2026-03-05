@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest id="quest_aijan_integration" type="MAIN">
+    <meta>
+        <title>New Family Member</title>
+        <title-ru>Новый член семьи</title-ru>
+        <description>Aijan arrives back with Alexander after the separation year. Help her adjust to the apartment full of other cats — especially Garfield, who terrifies her.</description>
+        <description-ru>Айджан возвращается вместе с Александром после года разлуки. Помоги ей обустроиться в квартире полной других кошек — особенно с Гарфилдом, который её пугает до истошного крика.</description-ru>
+        <chapter>3</chapter>
+        <prerequisites>quest_separation</prerequisites>
+    </meta>
+    <objectives>
+        <objective id="obj_aijan_arrival" type="INTERACT">
+            <description-ru>Встреть Айджан у двери — она нервничает в новом пространстве</description-ru>
+            <target>aijan</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_setup_room" type="INTERACT">
+            <description-ru>Оборудуй комнату Александра для Айджан — миска, лоток, лежанка</description-ru>
+            <target>alexander_room</target>
+            <location>alexander_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_first_encounter_garfield" type="INTERACT">
+            <description-ru>Контролируй первую встречу Айджан и Гарфилда</description-ru>
+            <target>garfield</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_aijan_safe_space" type="TIME">
+            <description-ru>Дай Айджан три дня освоиться в своей комнате</description-ru>
+            <target>alexander_room</target>
+            <location>alexander_room</location>
+            <count>3</count>
+        </objective>
+        <objective id="obj_aijan_first_outing" type="INTERACT">
+            <description-ru>Выпусти Айджан исследовать квартиру — под наблюдением</description-ru>
+            <target>aijan</target>
+            <location>living_room</location>
+            <count>1</count>
+        </objective>
+    </objectives>
+    <steps>
+        <step order="1" objective-ref="obj_aijan_arrival">
+            <dialogue speaker="aijan">
+                <line-ru>МРР! (немедленно тянется к Тане, игнорируя все незнакомые запахи)</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Привет, Айджан. Я тебя знаю заочно. Ты любишь людей? Значит, мы подружимся.</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Она всегда так. С людьми — ангел. С кошками — другой вопрос.</line-ru>
+            </dialogue>
+        </step>
+        <step order="2" objective-ref="obj_setup_room">
+            <dialogue speaker="tanya">
+                <line-ru>Вот твой уголок. Твоя миска, твой лоток, твоя лежанка. Это твоя территория. Выходить когда будешь готова.</line-ru>
+            </dialogue>
+            <dialogue speaker="aijan">
+                <line-ru>Мурр... (обходит комнату по периметру, нюхая каждый угол)</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="aijan" value="+3"/>
+            </on-complete>
+        </step>
+        <step order="3" objective-ref="obj_first_encounter_garfield">
+            <dialogue speaker="narrator">
+                <line-ru>Гарфилд появляется в дверном проёме. Просто стоит. Смотрит.</line-ru>
+            </dialogue>
+            <dialogue speaker="aijan">
+                <line-ru>АААААААА!!!! (истошный вопль, прыжок на верхнюю полку шкафа)</line-ru>
+            </dialogue>
+            <dialogue speaker="garfield">
+                <line-ru>(разворачивается и уходит с видом человека, которого всё это не касается)</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Хорошо. Значит, нам нужен план. Это будет долго.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="anxiety" value="+5"/>
+            </on-complete>
+        </step>
+        <step order="4" objective-ref="obj_aijan_safe_space">
+            <dialogue speaker="narrator">
+                <line-ru>Три дня Айджан живёт в комнате Александра — царица своего небольшого королевства. Изредка шипит в щель под дверью.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Терпение, Айджан. Терпение.</line-ru>
+            </dialogue>
+        </step>
+        <step order="5" objective-ref="obj_aijan_first_outing">
+            <dialogue speaker="narrator">
+                <line-ru>Таня открывает дверь. Айджан высовывает голову, нюхает воздух. Гарфилда нигде не видно. Два шага. Потом ещё. Она обходит живую комнату, хвост трубой, уши назад — но идёт.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Молодец, Айджан. Видишь? Это тоже твой дом.</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="aijan" value="+5"/>
+                <stat-change stat="happiness" value="+15"/>
+            </on-complete>
+        </step>
+    </steps>
+    <rewards>
+        <stat-change stat="happiness" value="+15"/>
+        <relationship-change target="aijan" value="+10"/>
+        <relationship-change target="alexander" value="+5"/>
+        <unlock type="character">aijan</unlock>
+        <unlock type="animation">aijan_room_owner</unlock>
+    </rewards>
+</quest>
