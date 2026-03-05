@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>characters</entity-type>
+        <entity-name>alexander</entity-name>
+        <version>1.0.0</version>
+    </meta>
+
+    <layers>
+        <!-- Socks/shoes (z=0) -->
+        <layer id="socks" type="base" z-order="0" width="32" height="48">
+            <pixel-data>
+                <rect x="9" y="46" w="5" h="2" color="#3A3A3A"/>
+                <pixel x="9" y="47" color="#2A2A2A"/>
+                <rect x="18" y="46" w="5" h="2" color="#3A3A3A"/>
+                <pixel x="22" y="47" color="#2A2A2A"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Legs / dark chinos (z=1) -->
+        <layer id="legs" type="base" z-order="1" width="32" height="48">
+            <pixel-data>
+                <rect x="10" y="32" w="4" h="14" color="#4A5060"/>
+                <rect x="10" y="32" w="1" h="14" color="#3A4050"/>
+                <rect x="18" y="32" w="4" h="14" color="#4A5060"/>
+                <rect x="21" y="32" w="1" h="14" color="#3A4050"/>
+                <hline x="10" y="32" len="12" color="#3A4050"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Torso: navy henley shirt (z=2) -->
+        <layer id="torso" type="base" z-order="2" width="32" height="48">
+            <pixel-data>
+                <!-- Henley body -->
+                <rect x="9" y="18" w="14" h="14" color="#2C3E50"/>
+                <rect x="9" y="18" w="1" h="14" color="#1A2C3E"/>
+                <rect x="22" y="18" w="1" h="14" color="#1A2C3E"/>
+                <!-- Shoulders (broader than Tanya) -->
+                <rect x="5" y="18" w="5" h="3" color="#2C3E50"/>
+                <rect x="22" y="18" w="5" h="3" color="#2C3E50"/>
+                <!-- Henley button placket -->
+                <pixel x="15" y="19" color="#D8D0C0"/>
+                <pixel x="15" y="21" color="#D8D0C0"/>
+                <pixel x="15" y="23" color="#D8D0C0"/>
+                <!-- Sleeves -->
+                <rect x="5" y="21" w="4" h="6" color="#2C3E50"/>
+                <rect x="23" y="21" w="4" h="6" color="#2C3E50"/>
+                <!-- Arms (skin) -->
+                <rect x="5" y="27" w="4" h="5" color="#F0D5A8"/>
+                <hline x="5" y="31" len="4" color="#D8B888"/>
+                <rect x="23" y="27" w="4" h="5" color="#F0D5A8"/>
+                <hline x="23" y="31" len="4" color="#D8B888"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Head (z=3) -->
+        <layer id="head" type="base" z-order="3" width="32" height="48">
+            <pixel-data>
+                <!-- Face (slightly wider jaw than Tanya) -->
+                <rect x="11" y="6" w="10" h="10" color="#F0D5A8"/>
+                <rect x="11" y="11" w="1" h="3" color="#D8B888"/>
+                <!-- Jaw definition -->
+                <pixel x="11" y="15" color="#D8B888"/>
+                <pixel x="20" y="15" color="#D8B888"/>
+                <!-- Eyes (brown #6B4423) -->
+                <pixel x="13" y="10" color="#6B4423"/>
+                <pixel x="13" y="11" color="#6B4423"/>
+                <pixel x="12" y="10" color="#202020"/>
+                <pixel x="18" y="10" color="#6B4423"/>
+                <pixel x="18" y="11" color="#6B4423"/>
+                <pixel x="19" y="10" color="#202020"/>
+                <!-- Eyebrows (thicker, dark brown) -->
+                <hline x="12" y="9" len="3" color="#3D2817"/>
+                <hline x="17" y="9" len="3" color="#3D2817"/>
+                <!-- Stubble on jaw -->
+                <hline x="12" y="14" len="8" color="#C8B898"/>
+                <hline x="13" y="15" len="6" color="#C8B898"/>
+                <!-- Mouth -->
+                <hline x="14" y="13" len="3" color="#C08070"/>
+                <!-- Nose -->
+                <pixel x="15" y="11" color="#E0C098"/>
+                <pixel x="16" y="12" color="#D8B888"/>
+                <!-- Neck (thicker) -->
+                <rect x="13" y="16" w="6" h="2" color="#F0D5A8"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Hair: dark chestnut, short messy (z=4) -->
+        <layer id="hair" type="overlay" z-order="4" width="32" height="48">
+            <pixel-data>
+                <!-- Top volume -->
+                <rect x="10" y="3" w="12" h="4" color="#3D2817"/>
+                <rect x="13" y="3" w="6" h="1" color="#4D3827"/>
+                <rect x="12" y="4" w="8" h="1" color="#4D3827"/>
+                <!-- Left side -->
+                <rect x="10" y="5" w="2" h="5" color="#3D2817"/>
+                <pixel x="10" y="9" color="#4D3827"/>
+                <!-- Right side -->
+                <rect x="20" y="5" w="2" h="5" color="#3D2817"/>
+                <pixel x="21" y="9" color="#4D3827"/>
+                <!-- Messy fringe -->
+                <pixel x="11" y="6" color="#3D2817"/>
+                <pixel x="12" y="5" color="#3D2817"/>
+                <pixel x="13" y="6" color="#4D3827"/>
+                <pixel x="19" y="6" color="#3D2817"/>
+                <pixel x="20" y="5" color="#3D2817"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <animation name="idle" frames="4" fps="4" loop="true"
+                   frame-width="32" frame-height="48">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="head:0,-1; hair:0,-1; torso:0,-1"/>
+            <frame index="2" layer-offsets=""/>
+            <frame index="3" layer-offsets="head:0,-1; hair:0,-1; torso:0,-1"/>
+        </animation>
+    </animations>
+
+    <naming>
+        <output-dir>characters/alexander</output-dir>
+    </naming>
+</asset-spec>
