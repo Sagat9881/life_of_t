@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event id="event_night_anxiety" type="TRIGGERED">
+    <meta>
+        <title-ru>Ночная тревога</title-ru>
+        <description-ru>Таня просыпается ночью с ощущением тревоги. Мысли начинают бежать по кругу.</description-ru>
+        <probability>0.4</probability>
+        <cooldown-hours>48</cooldown-hours>
+    </meta>
+    <conditions>
+        <condition type="time_of_day" value="night"/>
+        <condition type="stat_min" stat="anxiety" value="60"/>
+    </conditions>
+    <effects>
+        <stat-change stat="anxiety" value="+15"/>
+        <stat-change stat="energy" value="-10"/>
+        <dialogue speaker="narrator">
+            <line-ru>03:47. Темно. Александр спит. Всё тихо — но тревога уже здесь, сидит на груди невидимым весом. Мысли сразу начинают: а вдруг? а если? а зачем?</line-ru>
+        </dialogue>
+        <dialogue speaker="tanya">
+            <line-ru>Нет. Стоп. Это просто мысли. Не факты. (лежит, дышит) Просто мысли.</line-ru>
+        </dialogue>
+    </effects>
+</event>

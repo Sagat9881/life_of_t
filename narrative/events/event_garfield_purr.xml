@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event id="event_garfield_purr" type="RANDOM">
+    <meta>
+        <title-ru>Гарфилд мурлычет на коленях</title-ru>
+        <description-ru>Гарфилд запрыгивает к Тане на колени и начинает мурлыкать. Тревога снижается.</description-ru>
+        <probability>0.4</probability>
+        <cooldown-hours>8</cooldown-hours>
+    </meta>
+    <conditions>
+        <condition type="time_of_day" value="evening"/>
+        <condition type="location" value="home_room"/>
+        <condition type="stat_min" stat="anxiety" value="0"/>
+    </conditions>
+    <effects>
+        <stat-change stat="anxiety" value="-10"/>
+        <stat-change stat="happiness" value="+8"/>
+        <dialogue speaker="narrator">
+            <line-ru>Гарфилд тихо запрыгивает на колени, поворачивается три раза и укладывается. Начинает мурлыкать — глубоко, ровно. Как маленький мотор счастья.</line-ru>
+        </dialogue>
+        <dialogue speaker="tanya">
+            <line-ru>Гарфилд... (выдыхает) Вот и ты. Хорошо.</line-ru>
+        </dialogue>
+    </effects>
+</event>
