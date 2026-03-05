@@ -5,12 +5,12 @@ import ru.lifegame.backend.domain.balance.GameBalance;
 import ru.lifegame.backend.domain.model.character.JobInfo;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.character.Skills;
+import ru.lifegame.backend.domain.model.stats.StatChanges;
 import ru.lifegame.backend.domain.model.stats.Stats;
 import ru.lifegame.backend.domain.model.common.Location;
 import ru.lifegame.backend.domain.model.common.PlayerId;
 import ru.lifegame.backend.domain.model.relationship.NpcCode;
 import ru.lifegame.backend.domain.model.relationship.Relationship;
-import ru.lifegame.backend.domain.model.relationship.RelationshipChanges;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.model.session.GameTime;
 import ru.lifegame.backend.domain.quest.Quest;
@@ -158,7 +158,7 @@ public class DemoGameService {
             }
         }
 
-        // Apply stat changes
+        // Apply stat changes via domain model
         applyStatChanges(statChanges);
 
         // Apply relationship changes
@@ -179,26 +179,20 @@ public class DemoGameService {
 
     private void applyStatChanges(Map<String, Integer> changes) {
         PlayerCharacter pc = character.get();
-        Stats s = pc.stats();
-        int energy = s.energy(), health = s.health(), stress = s.stress();
-        int mood = s.mood(), money = s.money(), selfEsteem = s.selfEsteem();
+        int energy = 0, health = 0, stress = 0, mood = 0, money = 0, selfEsteem = 0;
 
         for (var e : changes.entrySet()) {
             switch (e.getKey()) {
-                case "energy"     -> energy     = clamp(energy + e.getValue());
-                case "health"     -> health     = clamp(health + e.getValue());
-                case "stress"     -> stress     = clamp(stress + e.getValue());
-                case "mood"       -> mood       = clamp(mood + e.getValue());
-                case "money"      -> money      = Math.max(-9999, money + e.getValue());
-                case "selfEsteem" -> selfEsteem = clamp(selfEsteem + e.getValue());
+                case "energy"     -> energy     = e.getValue();
+                case "health"     -> health     = e.getValue();
+                case "stress"     -> stress     = e.getValue();
+                case "mood"       -> mood       = e.getValue();
+                case "money"      -> money      = e.getValue();
+                case "selfEsteem" -> selfEsteem = e.getValue();
             }
         }
 
-        character.set(new PlayerCharacter(
-                pc.id(), pc.name(),
-                new Stats(energy, health, stress, mood, money, selfEsteem),
-                pc.job(), pc.location(), pc.statusEffects(), pc.skills(), pc.completedActions()
-        ));
+        pc.applyStatChanges(new StatChanges(energy, health, stress, mood, money, selfEsteem));
     }
 
     private void applyRelationshipChanges(String target, Map<String, Integer> changes) {
@@ -211,20 +205,14 @@ public class DemoGameService {
         }
 
         // Determine which NPC to modify
-        NpcCode npc = null;
-        if ("alexander".equals(target)) npc = NpcCode.HUSBAND;
-        // father changes are prefixed with father_
         boolean hasFatherChanges = changes.keySet().stream().anyMatch(k -> k.startsWith("father_"));
-        if (hasFatherChanges) npc = NpcCode.FATHER;
-        if ("alexander".equals(target) && !hasFatherChanges) npc = NpcCode.HUSBAND;
 
-        if (npc != null && map.containsKey(npc)) {
-            Relationship old = map.get(npc);
+        if (hasFatherChanges && map.containsKey(NpcCode.FATHER)) {
+            Relationship old = map.get(NpcCode.FATHER);
             int closeness = old.closeness();
             int trust = old.trust();
             int stability = old.stability();
             int romance = old.romance();
-
             for (var e : changes.entrySet()) {
                 String k = e.getKey().replace("father_", "");
                 switch (k) {
@@ -234,7 +222,24 @@ public class DemoGameService {
                     case "romance"   -> romance   = clamp(romance + e.getValue());
                 }
             }
-            map.put(npc, new Relationship(npc, closeness, trust, stability, romance, old.lastInteractionDay(), old.broken()));
+            map.put(NpcCode.FATHER, new Relationship(NpcCode.FATHER, closeness, trust, stability, romance, old.lastInteractionDay(), old.broken()));
+        }
+
+        if ("alexander".equals(target) && !hasFatherChanges && map.containsKey(NpcCode.HUSBAND)) {
+            Relationship old = map.get(NpcCode.HUSBAND);
+            int closeness = old.closeness();
+            int trust = old.trust();
+            int stability = old.stability();
+            int romance = old.romance();
+            for (var e : changes.entrySet()) {
+                switch (e.getKey()) {
+                    case "closeness" -> closeness = clamp(closeness + e.getValue());
+                    case "trust"     -> trust     = clamp(trust + e.getValue());
+                    case "stability" -> stability = clamp(stability + e.getValue());
+                    case "romance"   -> romance   = clamp(romance + e.getValue());
+                }
+            }
+            map.put(NpcCode.HUSBAND, new Relationship(NpcCode.HUSBAND, closeness, trust, stability, romance, old.lastInteractionDay(), old.broken()));
         }
 
         relationships.set(new Relationships(map));
@@ -249,13 +254,16 @@ public class DemoGameService {
         }
     }
 
-    private void advanceQuestStep(String category, String targetCode) {
+    private void advanceQuestStep(String type, String target) {
         QuestLog log = questLog.get();
         for (Quest q : log.activeQuests()) {
-            for (QuestStepState step : q.steps()) {
+            List<QuestStepState> steps = q.steps();
+            for (int i = 0; i < steps.size(); i++) {
+                QuestStepState step = steps.get(i);
                 QuestObjective obj = step.objective();
-                if (obj.category().equals(category) && obj.targetCode().equals(targetCode) && !step.isCompleted()) {
-                    step.increment();
+                if (obj.type().equals(type) && obj.target().equals(target) && !step.isCompleted()) {
+                    q.updateStep(i, step.increment());
+                    q.checkCompletion();
                     return;
                 }
             }
