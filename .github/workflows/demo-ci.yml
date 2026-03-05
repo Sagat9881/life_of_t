@@ -82,6 +82,22 @@ jobs:
           path: /tmp/test-compile-output.txt
           retention-days: 3
 
+      - name: Post test-compile errors to commit comment
+        if: steps.test-compile.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const output = fs.readFileSync('/tmp/test-compile-output.txt', 'utf8');
+            const errorLines = output.split('\n').filter(l => l.includes('[ERROR]') || l.includes('cannot find symbol') || l.includes('does not exist') || l.includes('COMPILATION ERROR'));
+            const body = `## Test-compile errors\n\`\`\`\n${errorLines.join('\n')}\n\`\`\``;
+            await github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: body.substring(0, 65535)
+            });
+
       - name: Fail if test-compile failed
         if: steps.test-compile.outcome == 'failure'
         run: |
