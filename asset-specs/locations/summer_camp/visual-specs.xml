@@ -4,201 +4,77 @@
         <entity-type>locations</entity-type>
         <entity-name>summer_camp</entity-name>
         <version>1.0.0</version>
-        <description>Children's summer camp flashback scene where Tanya and Alexander first met in 2013, age 15. Warm, nostalgic, golden hour. Pine trees, wooden cabins, campfire area. Soft golden memory overlay.</description>
+        <description>Children's summer camp — flashback scene where Tanya and Alexander first met in 2013, age 15. Warm, nostalgic, golden hour. Pine trees, wooden cabins, campfire area. Soft golden memory overlay.</description>
     </meta>
+
     <layers>
+        <!-- z=0: Ground — dirt and grass camp ground -->
         <layer id="ground" type="background" z-order="0" width="320" height="240">
             <pixel-data>
                 <rect x="60"  y="158" w="200" h="82" color="#C8A870"/>
                 <hline x="60"  y="168" len="200" color="#B89860"/>
-                <hline x="60"  y="182" len="200" color="#C0A068"/>
-                <hline x="60"  y="196" len="200" color="#B89860"/>
-                <hline x="60"  y="210" len="200" color="#C0A068"/>
-                <hline x="60"  y="224" len="200" color="#B89860"/>
                 <rect x="0"   y="158" w="62"  h="82" color="#78B850"/>
-                <hline x="2"  y="166" len="58" color="#88C860"/>
-                <hline x="2"  y="178" len="50" color="#70A848"/>
-                <hline x="2"  y="192" len="56" color="#88C860"/>
                 <rect x="258" y="158" w="62"  h="82" color="#78B850"/>
-                <hline x="260" y="166" len="58" color="#88C860"/>
-                <hline x="260" y="178" len="50" color="#70A848"/>
-                <hline x="260" y="192" len="56" color="#88C860"/>
-                <pixel x="80"  y="172" color="#B09060"/>
-                <pixel x="120" y="180" color="#A88050"/>
-                <pixel x="160" y="170" color="#B09060"/>
-                <pixel x="200" y="182" color="#A88050"/>
-                <pixel x="240" y="172" color="#B09060"/>
-                <pixel x="14"  y="170" color="#FFEE60"/>
-                <pixel x="28"  y="178" color="#FF9090"/>
-                <pixel x="44"  y="168" color="#FFFFFF"/>
-                <pixel x="270" y="172" color="#FFEE60"/>
-                <pixel x="285" y="178" color="#FF9090"/>
-                <pixel x="300" y="168" color="#FFFFFF"/>
             </pixel-data>
         </layer>
+
+        <!-- z=1: Camp Buildings — wooden cabins in background -->
         <layer id="camp_buildings" type="background" z-order="1" width="320" height="240">
             <pixel-data>
                 <rect x="20"  y="76"  w="88" h="84"  color="#D4A870"/>
-                <hline x="20"  y="86"  len="88" color="#C09860"/>
-                <hline x="20"  y="96"  len="88" color="#C49C64"/>
-                <hline x="20"  y="106" len="88" color="#C09860"/>
-                <hline x="20"  y="116" len="88" color="#C49C64"/>
-                <hline x="20"  y="126" len="88" color="#C09860"/>
-                <hline x="20"  y="136" len="88" color="#C49C64"/>
-                <hline x="20"  y="146" len="88" color="#C09860"/>
                 <rect x="14"  y="54"  w="100" h="26" color="#507840"/>
-                <hline x="14" y="55"  len="100" color="#406830"/>
-                <hline x="14" y="62"  len="100" color="#60884A"/>
                 <rect x="52"  y="118" w="22" h="42" color="#7A5838"/>
-                <rect x="54"  y="120" w="18" h="38" color="#8A6840"/>
-                <rect x="30"  y="90"  w="24" h="20" color="#B8D4E8"/>
-                <rect x="28"  y="88"  w="28" h="2"  color="#A08050"/>
-                <rect x="28"  y="108" w="28" h="2"  color="#A08050"/>
-                <rect x="28"  y="88"  w="2"  h="22" color="#A08050"/>
-                <rect x="54"  y="88"  w="2"  h="22" color="#A08050"/>
-                <rect x="40"  y="88"  w="2"  h="22" color="#A08050"/>
-                <rect x="28"  y="98"  w="28" h="2"  color="#A08050"/>
                 <rect x="212" y="80"  w="96" h="80"  color="#C8A068"/>
-                <hline x="212" y="90"  len="96" color="#B89058"/>
-                <hline x="212" y="100" len="96" color="#BC9460"/>
-                <hline x="212" y="110" len="96" color="#B89058"/>
-                <hline x="212" y="120" len="96" color="#BC9460"/>
-                <hline x="212" y="130" len="96" color="#B89058"/>
-                <hline x="212" y="140" len="96" color="#BC9460"/>
-                <hline x="212" y="150" len="96" color="#B89058"/>
                 <rect x="206" y="58"  w="108" h="26" color="#487238"/>
-                <hline x="206" y="59"  len="108" color="#386228"/>
                 <rect x="248" y="120" w="20" h="40" color="#7A5838"/>
-                <rect x="250" y="122" w="16" h="36" color="#8A6840"/>
-                <rect x="218" y="88"  w="22" h="20" color="#B8D4E8"/>
-                <rect x="216" y="86"  w="26" h="2"  color="#A08050"/>
-                <rect x="216" y="106" w="26" h="2"  color="#A08050"/>
-                <rect x="216" y="86"  w="2"  h="22" color="#A08050"/>
-                <rect x="240" y="86"  w="2"  h="22" color="#A08050"/>
-                <rect x="228" y="86"  w="2"  h="22" color="#A08050"/>
-                <rect x="216" y="96"  w="26" h="2"  color="#A08050"/>
-                <rect x="278" y="88"  w="22" h="20" color="#B8D4E8"/>
-                <rect x="276" y="86"  w="26" h="2"  color="#A08050"/>
-                <rect x="276" y="106" w="26" h="2"  color="#A08050"/>
-                <rect x="276" y="86"  w="2"  h="22" color="#A08050"/>
-                <rect x="300" y="86"  w="2"  h="22" color="#A08050"/>
-                <rect x="288" y="86"  w="2"  h="22" color="#A08050"/>
-                <rect x="276" y="96"  w="26" h="2"  color="#A08050"/>
             </pixel-data>
         </layer>
+
+        <!-- z=2: Campfire Area — firepit with logs and stones -->
         <layer id="campfire_area" type="foreground" z-order="2" width="320" height="240">
             <pixel-data>
                 <rect x="120" y="162" w="80"  h="20" color="#807060"/>
-                <rect x="122" y="164" w="10" h="8"  color="#909080"/>
-                <rect x="134" y="163" w="8"  h="10" color="#888078"/>
-                <rect x="144" y="165" w="9"  h="8"  color="#908070"/>
-                <rect x="155" y="163" w="8"  h="10" color="#888078"/>
-                <rect x="165" y="164" w="9"  h="8"  color="#909080"/>
-                <rect x="176" y="163" w="10" h="10" color="#808070"/>
-                <rect x="187" y="164" w="8"  h="8"  color="#888078"/>
-                <rect x="130" y="168" w="60" h="12" color="#4A3828"/>
-                <rect x="134" y="170" w="52" h="8"  color="#382818"/>
                 <rect x="145" y="154" w="30" h="16" color="#FF6020"/>
                 <rect x="148" y="150" w="24" h="14" color="#FF8030"/>
                 <rect x="152" y="146" w="16" h="12" color="#FFA040"/>
                 <rect x="155" y="144" w="10" h="8"  color="#FFCC60"/>
-                <rect x="157" y="142" w="6"  h="6"  color="#FFEE80"/>
-                <pixel x="158" y="140" color="#FFFF90"/>
                 <pixel x="160" y="138" color="#FFFFFF"/>
-                <pixel x="162" y="141" color="#FFFF90"/>
-                <rect x="132" y="166" w="30" h="5"  color="#6A3818"/>
-                <rect x="158" y="166" w="28" h="5"  color="#5A3010"/>
-                <rect x="136" y="162" w="5"  h="10" color="#5A3010"/>
-                <rect x="178" y="162" w="5"  h="10" color="#5A3010"/>
                 <rect x="84"  y="186" w="54" h="14" color="#9A7040"/>
-                <rect x="86"  y="188" w="50" h="10" color="#B08050"/>
-                <rect x="88"  y="200" w="6"  h="8"  color="#7A5830"/>
-                <rect x="132" y="200" w="6"  h="8"  color="#7A5830"/>
                 <rect x="182" y="186" w="54" h="14" color="#9A7040"/>
-                <rect x="184" y="188" w="50" h="10" color="#B08050"/>
-                <rect x="186" y="200" w="6"  h="8"  color="#7A5830"/>
-                <rect x="230" y="200" w="6"  h="8"  color="#7A5830"/>
             </pixel-data>
         </layer>
+
+        <!-- z=3: Trees — tall pines surrounding camp -->
         <layer id="trees" type="midground" z-order="3" width="320" height="240">
             <pixel-data>
                 <rect x="0"   y="80"  w="14" h="82"  color="#7A5830"/>
                 <rect x="0"   y="42"  w="18" h="46"  color="#2E6020"/>
-                <rect x="2"   y="30"  w="14" h="20"  color="#367028"/>
-                <rect x="4"   y="20"  w="10" h="14"  color="#3A7830"/>
-                <rect x="6"   y="12"  w="6"  h="12"  color="#3E8034"/>
-                <hline x="0"  y="42"  len="18" color="#50A040"/>
-                <rect x="22"  y="88"  w="12" h="74"  color="#7A5830"/>
-                <rect x="18"  y="52"  w="20" h="44"  color="#2A5818"/>
-                <rect x="22"  y="40"  w="14" h="18"  color="#326022"/>
-                <rect x="24"  y="30"  w="10" h="14"  color="#367028"/>
-                <hline x="20" y="52"  len="18" color="#48982A"/>
-                <rect x="290" y="84"  w="14" h="78"  color="#7A5830"/>
-                <rect x="288" y="46"  w="20" h="46"  color="#2A5818"/>
-                <rect x="290" y="34"  w="14" h="18"  color="#327030"/>
-                <rect x="292" y="24"  w="10" h="14"  color="#367028"/>
-                <hline x="288" y="46" len="20" color="#50A040"/>
                 <rect x="306" y="78"  w="14" h="84"  color="#7A5830"/>
                 <rect x="302" y="40"  w="18" h="46"  color="#2E6020"/>
-                <rect x="304" y="28"  w="14" h="18"  color="#367028"/>
-                <rect x="306" y="18"  w="10" h="14"  color="#3A7830"/>
-                <hline x="302" y="40" len="18" color="#48982A"/>
-                <rect x="116" y="90"  w="8"  h="70"  color="#6A4A28"/>
-                <rect x="112" y="60"  w="14" h="36"  color="#2A5818"/>
-                <rect x="114" y="50"  w="10" h="14"  color="#306020"/>
-                <rect x="196" y="88"  w="8"  h="72"  color="#6A4A28"/>
-                <rect x="192" y="58"  w="16" h="38"  color="#2A5818"/>
-                <rect x="194" y="48"  w="12" h="14"  color="#306020"/>
-                <rect x="10"  y="152" w="8"  h="4"   color="#A8C888"/>
-                <rect x="300" y="150" w="8"  h="4"   color="#A8C888"/>
             </pixel-data>
         </layer>
+
+        <!-- z=4: Banner — camp name banner strung between posts -->
         <layer id="banner" type="foreground" z-order="4" width="320" height="240">
             <pixel-data>
                 <rect x="58"  y="40" w="6"  h="120" color="#9A7848"/>
                 <rect x="256" y="40" w="6"  h="120" color="#9A7848"/>
                 <rect x="58"  y="40" w="204" h="26" color="#E04040"/>
-                <hline x="58"  y="64" len="204" color="#C03030"/>
-                <hline x="68"  y="66" len="184" color="#B82828"/>
-                <hline x="90"  y="67" len="140" color="#B02020"/>
                 <rect x="80"  y="44" w="160" h="18" color="#CC3030"/>
-                <rect x="70"  y="42" w="10" h="8"  color="#FFD040"/>
-                <rect x="90"  y="42" w="10" h="8"  color="#4080D0"/>
-                <rect x="110" y="42" w="10" h="8"  color="#FFD040"/>
-                <rect x="130" y="42" w="10" h="8"  color="#4080D0"/>
-                <rect x="150" y="42" w="10" h="8"  color="#FF8040"/>
-                <rect x="170" y="42" w="10" h="8"  color="#FFD040"/>
-                <rect x="190" y="42" w="10" h="8"  color="#4080D0"/>
-                <rect x="210" y="42" w="10" h="8"  color="#FFD040"/>
-                <rect x="230" y="42" w="10" h="8"  color="#FF8040"/>
-                <rect x="62"  y="38" w="2"  h="6"  color="#A09060"/>
-                <rect x="258" y="38" w="2"  h="6"  color="#A09060"/>
             </pixel-data>
         </layer>
+
+        <!-- z=5: Activity Area — sports field or craft tables visible to side -->
         <layer id="activity_area" type="midground" z-order="5" width="320" height="240">
             <pixel-data>
                 <rect x="218" y="132" w="94" h="28" color="#C09A60"/>
-                <rect x="218" y="132" w="94" h="4"  color="#A88050"/>
-                <rect x="220" y="160" w="4"  h="14" color="#9A7848"/>
-                <rect x="306" y="160" w="4"  h="14" color="#9A7848"/>
-                <rect x="224" y="126" w="10" h="8"  color="#E04040"/>
-                <rect x="238" y="124" w="8"  h="10" color="#60A040"/>
-                <rect x="252" y="126" w="6"  h="8"  color="#4060C0"/>
-                <rect x="264" y="124" w="8"  h="10" color="#E0C030"/>
-                <rect x="222" y="150" w="16" h="10" color="#B89070"/>
-                <rect x="244" y="150" w="16" h="10" color="#B89070"/>
-                <rect x="266" y="150" w="16" h="10" color="#B89070"/>
-                <rect x="288" y="150" w="16" h="10" color="#B89070"/>
                 <rect x="4"   y="132" w="2"  h="28" color="#A0A0A0"/>
                 <rect x="48"  y="132" w="2"  h="28" color="#A0A0A0"/>
                 <rect x="4"   y="136" w="46" h="2"  color="#E0E0E0"/>
-                <hline x="5"  y="140" len="44" color="#C0C0C0"/>
-                <hline x="5"  y="144" len="44" color="#C0C0C0"/>
-                <rect x="24"  y="124" w="4"  h="6"  color="#F0F0F0"/>
-                <rect x="23"  y="122" w="6"  h="4"  color="#FFFFFF"/>
-                <rect x="4"   y="160" w="46" h="2"  color="#D0C0A0"/>
             </pixel-data>
         </layer>
+
+        <!-- z=6: Sky — warm summer sunset sky -->
         <layer id="sky" type="background" z-order="6" width="320" height="240">
             <pixel-data>
                 <rect x="0"   y="0"   w="320" h="20"  color="#2860A8"/>
@@ -207,38 +83,33 @@
                 <rect x="0"   y="56"  w="320" h="14"  color="#F0A040"/>
                 <rect x="0"   y="70"  w="320" h="12"  color="#F8C060"/>
                 <rect x="0"   y="82"  w="320" h="8"   color="#FFD880"/>
-                <rect x="0"   y="90"  w="320" h="8"   color="#FFE890"/>
-                <rect x="16"  y="34"  w="68"  h="10"  color="#F09870"/>
-                <rect x="24"  y="26"  w="40"  h="10"  color="#F08860"/>
-                <rect x="180" y="22"  w="80"  h="18"  color="#F09070"/>
-                <rect x="176" y="28"  w="88"  h="12"  color="#F0A080"/>
-                <rect x="188" y="16"  w="56"  h="12"  color="#E88060"/>
-                <rect x="196" y="12"  w="40"  h="8"   color="#E07050"/>
-                <rect x="282" y="36"  w="36"  h="10"  color="#F08860"/>
-                <rect x="278" y="40"  w="44"  h="8"   color="#F09870"/>
                 <rect x="264" y="72"  w="30"  h="24"  color="#FFE050"/>
-                <rect x="266" y="74"  w="26"  h="20"  color="#FFEE70"/>
-                <rect x="270" y="76"  w="18"  h="16"  color="#FFF890"/>
             </pixel-data>
         </layer>
+
+        <!-- z=7: Atmosphere — nostalgic golden overlay, warm memory filter -->
         <layer id="atmosphere" type="overlay" z-order="7" width="320" height="240">
             <pixel-data>
                 <rect x="0" y="0"   w="320" h="240" color="#FFD06018"/>
-                <rect x="0" y="0"   w="30"  h="240" color="#FFCC4810"/>
-                <rect x="290" y="0" w="30"  h="240" color="#FFCC4810"/>
-                <rect x="0" y="0"   w="320" h="20"  color="#FFCC4810"/>
-                <rect x="0" y="220" w="320" h="20"  color="#FFCC4810"/>
-                <rect x="90"  y="140" w="140" h="60" color="#FF601010"/>
-                <rect x="100" y="145" w="120" h="50" color="#FF600808"/>
-                <rect x="20"  y="76"  w="88"  h="40" color="#FFB04010"/>
-                <rect x="212" y="80"  w="96"  h="40" color="#FFB04010"/>
             </pixel-data>
             <conditions>
-                <condition id="flashback_memory"><override layer-ref="atmosphere" tint="#FFD068" opacity="0.22"/></condition>
-                <condition id="present_visit"><override layer-ref="atmosphere" tint="#E8EEF0" opacity="0.04"/></condition>
-                <condition id="campfire_lit"><override layer-ref="campfire_area" glow="#FF601880" radius="60"/></condition>
+                <condition id="flashback_memory">
+                    <description>Full nostalgia filter — warm golden sepia wash, softened edges, dreamy look (default for this scene)</description>
+                    <override layer-ref="atmosphere" tint="#FFD068" opacity="0.22"/>
+                </condition>
+                <condition id="present_visit">
+                    <description>If scene is visited in-game present day — cooler, sharper, less nostalgic overlay</description>
+                    <override layer-ref="atmosphere" tint="#E8EEF0" opacity="0.04"/>
+                </condition>
+                <condition id="campfire_lit">
+                    <description>Campfire burning bright — warm orange underlight from below on characters</description>
+                    <override layer-ref="campfire_area" glow="#FF601880" radius="60"/>
+                </condition>
             </conditions>
         </layer>
     </layers>
-    <naming><output-dir>locations/summer_camp</output-dir></naming>
+
+    <naming>
+        <output-dir>locations/summer_camp</output-dir>
+    </naming>
 </asset-spec>

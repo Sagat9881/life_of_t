@@ -42,59 +42,29 @@
     </objectives>
     <steps>
         <step order="1" objective-ref="obj_aijan_arrival">
-            <dialogue speaker="aijan">
-                <line-ru>МРР! (немедленно тянется к Тане, игнорируя все незнакомые запахи)</line-ru>
-            </dialogue>
-            <dialogue speaker="tanya">
-                <line-ru>Привет, Айджан. Я тебя знаю заочно. Ты любишь людей? Значит, мы подружимся.</line-ru>
-            </dialogue>
-            <dialogue speaker="alexander">
-                <line-ru>Она всегда так. С людьми — ангел. С кошками — другой вопрос.</line-ru>
-            </dialogue>
+            <dialogue speaker="aijan"><line-ru>МРР! (немедленно тянется к Тане, игнорируя все незнакомые запахи)</line-ru></dialogue>
+            <dialogue speaker="tanya"><line-ru>Привет, Айджан. Я тебя знаю заочно. Ты любишь людей? Значит, мы подружимся.</line-ru></dialogue>
+            <dialogue speaker="alexander"><line-ru>Она всегда так. С людьми — ангел. С кошками — другой вопрос.</line-ru></dialogue>
         </step>
         <step order="2" objective-ref="obj_setup_room">
-            <dialogue speaker="tanya">
-                <line-ru>Вот твой уголок. Твоя миска, твой лоток, твоя лежанка. Это твоя территория. Выходить когда будешь готова.</line-ru>
-            </dialogue>
-            <dialogue speaker="aijan">
-                <line-ru>Мурр... (обходит комнату по периметру, нюхая каждый угол)</line-ru>
-            </dialogue>
-            <on-complete>
-                <relationship-change target="aijan" value="+3"/>
-            </on-complete>
+            <dialogue speaker="tanya"><line-ru>Вот твой уголок. Твоя миска, твой лоток, твоя лежанка. Это твоя территория. Выходить когда будешь готова.</line-ru></dialogue>
+            <dialogue speaker="aijan"><line-ru>Мурр... (обходит комнату по периметру, нюхая каждый угол)</line-ru></dialogue>
+            <on-complete><relationship-change target="aijan" value="+3"/></on-complete>
         </step>
         <step order="3" objective-ref="obj_first_encounter_garfield">
-            <dialogue speaker="narrator">
-                <line-ru>Гарфилд появляется в дверном проёме. Просто стоит. Смотрит.</line-ru>
-            </dialogue>
-            <dialogue speaker="aijan">
-                <line-ru>АААААААА!!!! (истошный вопль, прыжок на верхнюю полку шкафа)</line-ru>
-            </dialogue>
-            <dialogue speaker="garfield">
-                <line-ru>(разворачивается и уходит с видом человека, которого всё это не касается)</line-ru>
-            </dialogue>
-            <dialogue speaker="tanya">
-                <line-ru>Хорошо. Значит, нам нужен план. Это будет долго.</line-ru>
-            </dialogue>
-            <on-complete>
-                <stat-change stat="anxiety" value="+5"/>
-            </on-complete>
+            <dialogue speaker="narrator"><line-ru>Гарфилд появляется в дверном проёме. Просто стоит. Смотрит.</line-ru></dialogue>
+            <dialogue speaker="aijan"><line-ru>АААААААА!!!! (истошный вопль, прыжок на верхнюю полку шкафа)</line-ru></dialogue>
+            <dialogue speaker="garfield"><line-ru>(разворачивается и уходит с видом человека, которого всё это не касается)</line-ru></dialogue>
+            <dialogue speaker="tanya"><line-ru>Хорошо. Значит, нам нужен план. Это будет долго.</line-ru></dialogue>
+            <on-complete><stat-change stat="anxiety" value="+5"/></on-complete>
         </step>
         <step order="4" objective-ref="obj_aijan_safe_space">
-            <dialogue speaker="narrator">
-                <line-ru>Три дня Айджан живёт в комнате Александра — царица своего небольшого королевства. Изредка шипит в щель под дверью.</line-ru>
-            </dialogue>
-            <dialogue speaker="tanya">
-                <line-ru>Терпение, Айджан. Терпение.</line-ru>
-            </dialogue>
+            <dialogue speaker="narrator"><line-ru>Три дня Айджан живёт в комнате Александра — царица своего небольшого королевства. Изредка шипит в щель под дверью.</line-ru></dialogue>
+            <dialogue speaker="tanya"><line-ru>Терпение, Айджан. Терпение.</line-ru></dialogue>
         </step>
         <step order="5" objective-ref="obj_aijan_first_outing">
-            <dialogue speaker="narrator">
-                <line-ru>Таня открывает дверь. Айджан высовывает голову, нюхает воздух. Гарфилда нигде не видно. Два шага. Потом ещё. Она обходит живую комнату, хвост трубой, уши назад — но идёт.</line-ru>
-            </dialogue>
-            <dialogue speaker="tanya">
-                <line-ru>Молодец, Айджан. Видишь? Это тоже твой дом.</line-ru>
-            </dialogue>
+            <dialogue speaker="narrator"><line-ru>Таня открывает дверь. Айджан высовывает голову, нюхает воздух. Гарфилда нигде не видно. Два шага. Потом ещё. Она обходит живую комнату, хвост трубой, уши назад — но идёт.</line-ru></dialogue>
+            <dialogue speaker="tanya"><line-ru>Молодец, Айджан. Видишь? Это тоже твой дом.</line-ru></dialogue>
             <on-complete>
                 <relationship-change target="aijan" value="+5"/>
                 <stat-change stat="happiness" value="+15"/>

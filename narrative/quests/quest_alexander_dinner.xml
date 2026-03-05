@@ -9,85 +9,34 @@
         <prerequisites>quest_morning_routine</prerequisites>
     </meta>
     <objectives>
-        <objective id="obj_buy_groceries" type="TRAVEL">
-            <description-ru>Купи продукты для ужина</description-ru>
-            <target>grocery_store</target>
-            <location>city</location>
-            <count>1</count>
-        </objective>
-        <objective id="obj_cook_dinner" type="INTERACT">
-            <description-ru>Приготовь ужин на кухне</description-ru>
-            <target>kitchen_stove</target>
-            <location>kitchen</location>
-            <count>1</count>
-        </objective>
-        <objective id="obj_set_table" type="INTERACT">
-            <description-ru>Накрой стол для двоих</description-ru>
-            <target>dining_table</target>
-            <location>kitchen</location>
-            <count>1</count>
-        </objective>
-        <objective id="obj_dinner_dialogue" type="DIALOGUE">
-            <description-ru>Поговори с Александром за ужином</description-ru>
-            <target>alexander</target>
-            <location>kitchen</location>
-            <count>1</count>
-        </objective>
+        <objective id="obj_buy_groceries" type="TRAVEL"><description-ru>Купи продукты для ужина</description-ru><target>grocery_store</target><location>city</location><count>1</count></objective>
+        <objective id="obj_cook_dinner" type="INTERACT"><description-ru>Приготовь ужин на кухне</description-ru><target>kitchen_stove</target><location>kitchen</location><count>1</count></objective>
+        <objective id="obj_set_table" type="INTERACT"><description-ru>Накрой стол для двоих</description-ru><target>dining_table</target><location>kitchen</location><count>1</count></objective>
+        <objective id="obj_dinner_dialogue" type="DIALOGUE"><description-ru>Поговори с Александром за ужином</description-ru><target>alexander</target><location>kitchen</location><count>1</count></objective>
     </objectives>
     <steps>
         <step order="1" objective-ref="obj_buy_groceries">
-            <dialogue speaker="tanya">
-                <line-ru>Саша любит пасту. И чтобы был хлеб. И сыр. Он всегда забывает поесть когда кодит.</line-ru>
-            </dialogue>
-            <on-complete>
-                <stat-change stat="happiness" value="+3"/>
-            </on-complete>
+            <dialogue speaker="tanya"><line-ru>Саша любит пасту. И чтобы был хлеб. И сыр. Он всегда забывает поесть когда кодит.</line-ru></dialogue>
+            <on-complete><stat-change stat="happiness" value="+3"/></on-complete>
         </step>
         <step order="2" objective-ref="obj_cook_dinner">
-            <dialogue speaker="narrator">
-                <line-ru>Кухня пахнет чесноком и оливковым маслом. Сэм вертится под ногами. Где-то за стеной Александр что-то печатает.</line-ru>
-            </dialogue>
-            <dialogue speaker="tanya">
-                <line-ru>Сэм, выйди из-под ног. Я тебя люблю, но ты мне мешаешь. Выйди. Вот именно. Спасибо.</line-ru>
-            </dialogue>
+            <dialogue speaker="narrator"><line-ru>Кухня пахнет чесноком и оливковым маслом. Сэм вертится под ногами. Где-то за стеной Александр что-то печатает.</line-ru></dialogue>
+            <dialogue speaker="tanya"><line-ru>Сэм, выйди из-под ног. Я тебя люблю, но ты мне мешаешь. Выйди. Вот именно. Спасибо.</line-ru></dialogue>
         </step>
         <step order="3" objective-ref="obj_set_table">
-            <dialogue speaker="tanya">
-                <line-ru>Ужин готов! Александр, выходи из своей пещеры! Саша! Я знаю, что ты меня слышишь!</line-ru>
-            </dialogue>
-            <dialogue speaker="alexander">
-                <line-ru>Иду-иду! Дай только коммит закрою...</line-ru>
-            </dialogue>
-            <dialogue speaker="tanya">
-                <line-ru>Пять минут, я засекаю.</line-ru>
-            </dialogue>
+            <dialogue speaker="tanya"><line-ru>Ужин готов! Александр, выходи из своей пещеры! Саша! Я знаю, что ты меня слышишь!</line-ru></dialogue>
+            <dialogue speaker="alexander"><line-ru>Иду-иду! Дай только коммит закрою...</line-ru></dialogue>
+            <dialogue speaker="tanya"><line-ru>Пять минут, я засекаю.</line-ru></dialogue>
         </step>
         <step order="4" objective-ref="obj_dinner_dialogue">
-            <dialogue speaker="alexander">
-                <line-ru>Вкусно. Ты лучшая. Слушай, у меня сегодня прод лёг на два часа, я чуть с ума не сошёл.</line-ru>
-            </dialogue>
-            <!-- CHOICE BRANCH -->
-            <dialogue speaker="tanya" choice="argue">
-                <line-ru>Саш, ты вообще думаешь о чём-то кроме работы? Мы вот сидим ужинаем, а ты сразу про прод...</line-ru>
-            </dialogue>
-            <dialogue speaker="alexander" choice="argue">
-                <line-ru>Я просто рассказываю про свой день. Что не так? Я неправильно разговариваю?</line-ru>
-            </dialogue>
-            <dialogue speaker="tanya" choice="argue">
-                <line-ru>Нет, просто... не важно. Извини. Устала просто.</line-ru>
-            </dialogue>
-            <dialogue speaker="tanya" choice="support">
-                <line-ru>Ужас. И как вы подняли? Ты разобрался сам?</line-ru>
-            </dialogue>
-            <dialogue speaker="alexander" choice="support">
-                <line-ru>Ну да, через час понял в чём дело. Там баг был ещё с прошлого спринта. Знаешь, я горжусь, что нашёл.</line-ru>
-            </dialogue>
-            <dialogue speaker="tanya" choice="support">
-                <line-ru>Конечно нашёл. Ты умный. Налить ещё?</line-ru>
-            </dialogue>
-            <dialogue speaker="alexander" choice="support">
-                <line-ru>Налей. (смотрит на неё тепло) Спасибо что готовишь. Я знаю, у тебя тоже был тяжёлый день.</line-ru>
-            </dialogue>
+            <dialogue speaker="alexander"><line-ru>Вкусно. Ты лучшая. Слушай, у меня сегодня прод лёг на два часа, я чуть с ума не сошёл.</line-ru></dialogue>
+            <dialogue speaker="tanya" choice="argue"><line-ru>Саш, ты вообще думаешь о чём-то кроме работы? Мы вот сидим ужинаем, а ты сразу про прод...</line-ru></dialogue>
+            <dialogue speaker="alexander" choice="argue"><line-ru>Я просто рассказываю про свой день. Что не так? Я неправильно разговариваю?</line-ru></dialogue>
+            <dialogue speaker="tanya" choice="argue"><line-ru>Нет, просто... не важно. Извини. Устала просто.</line-ru></dialogue>
+            <dialogue speaker="tanya" choice="support"><line-ru>Ужас. И как вы подняли? Ты разобрался сам?</line-ru></dialogue>
+            <dialogue speaker="alexander" choice="support"><line-ru>Ну да, через час понял в чём дело. Там баг был ещё с прошлого спринта. Знаешь, я горжусь, что нашёл.</line-ru></dialogue>
+            <dialogue speaker="tanya" choice="support"><line-ru>Конечно нашёл. Ты умный. Налить ещё?</line-ru></dialogue>
+            <dialogue speaker="alexander" choice="support"><line-ru>Налей. (смотрит на неё тепло) Спасибо что готовишь. Я знаю, у тебя тоже был тяжёлый день.</line-ru></dialogue>
             <on-complete>
                 <stat-change stat="happiness" value="+10" condition="choice:support"/>
                 <stat-change stat="happiness" value="-5" condition="choice:argue"/>
