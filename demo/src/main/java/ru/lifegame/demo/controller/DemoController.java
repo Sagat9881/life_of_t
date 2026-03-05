@@ -3,10 +3,9 @@ package ru.lifegame.demo.controller;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ru.lifegame.demo.dto.DemoDtos.ActionRequestDto;
+import ru.lifegame.demo.dto.DemoDtos.ActionResultDto;
 import ru.lifegame.demo.dto.DemoDtos.CharacterDto;
 import ru.lifegame.demo.dto.DemoDtos.GameStateDto;
 import ru.lifegame.demo.dto.DemoDtos.QuestSummaryDto;
@@ -23,6 +22,7 @@ import java.util.Map;
  *   <li>{@code GET  /api/demo/status}     – full game-state snapshot</li>
  *   <li>{@code GET  /api/demo/quest-log}  – active quests</li>
  *   <li>{@code GET  /api/demo/characters} – character info</li>
+ *   <li>{@code POST /api/demo/action}     – execute interactive action</li>
  *   <li>{@code POST /api/demo/shutdown}   – graceful shutdown</li>
  * </ul>
  */
@@ -39,42 +39,37 @@ public class DemoController {
         this.applicationContext = applicationContext;
     }
 
-    /**
-     * Returns a full JSON snapshot of the current demo game state.
-     */
     @GetMapping("/status")
     public ResponseEntity<GameStateDto> status() {
         return ResponseEntity.ok(gameService.buildGameStateDto());
     }
 
-    /**
-     * Returns only the active quests from the current quest log.
-     */
     @GetMapping("/quest-log")
     public ResponseEntity<List<QuestSummaryDto>> questLog() {
         return ResponseEntity.ok(gameService.buildActiveQuestDtos());
     }
 
-    /**
-     * Returns character information for all demo characters.
-     */
     @GetMapping("/characters")
     public ResponseEntity<Map<String, CharacterDto>> characters() {
         CharacterDto tanya = gameService.buildCharacterDto();
         return ResponseEntity.ok(Map.of("tanya", tanya));
     }
 
-    /**
-     * Returns relationship state.
-     */
     @GetMapping("/relationships")
     public ResponseEntity<RelationshipsDto> relationships() {
         return ResponseEntity.ok(gameService.buildRelationshipsDto());
     }
 
     /**
-     * Initiates a graceful JVM shutdown so automated tests can terminate the process.
+     * Executes an interactive action on a target NPC/self.
+     * E.g. {"target": "alexander", "actionCode": "talk"}
      */
+    @PostMapping("/action")
+    public ResponseEntity<ActionResultDto> executeAction(@RequestBody ActionRequestDto request) {
+        ActionResultDto result = gameService.executeAction(request.target(), request.actionCode());
+        return ResponseEntity.ok(result);
+    }
+
     @PostMapping("/shutdown")
     public ResponseEntity<Map<String, String>> shutdown() {
         Thread shutdownThread = new Thread(() -> {
