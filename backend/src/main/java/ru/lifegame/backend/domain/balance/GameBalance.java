@@ -88,8 +88,9 @@ public final class GameBalance {
     public static final int INTERNAL_GUILT_SELF_ESTEEM = 40;
 
     // --- Tactic CSP deltas ---
-    public static final int SURRENDER_PLAYER_CSP = 10;
-    public static final int SURRENDER_OPPONENT_CSP = -20;
+    // SURRENDER: player gives in - player CSP drains, opponent CSP recovers
+    public static final int SURRENDER_PLAYER_CSP = -20;
+    public static final int SURRENDER_OPPONENT_CSP = 10;
     public static final int SURRENDER_SELF_ESTEEM = -5;
     public static final int SURRENDER_CLOSENESS = 5;
     public static final int SURRENDER_TRUST = -5;
