@@ -5,6 +5,7 @@ on:
     branches: [ master ]
     paths:
       - 'asset-generator/**'
+      - 'backend/**'
       - 'demo/**'
       - 'docs/prompts/**'
       - '.github/workflows/asset-generation.yml'
@@ -12,6 +13,7 @@ on:
     branches: [ master ]
     paths:
       - 'asset-generator/**'
+      - 'backend/**'
       - 'demo/**'
       - 'docs/prompts/**'
   workflow_dispatch:
@@ -205,9 +207,9 @@ jobs:
           echo "Download from: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           echo ""
           echo "=== Asset Summary ==="
-          echo "tanya_idle.png  — 6 frames, 32x48 px (idle breathing animation)"
-          echo "tanya_walk.png  — 8 frames, 32x48 px (walk cycle)"
-          echo "sam_idle.png    — 4 frames, 24x20 px (tail wag)"
-          echo "sam_walk.png    — 6 frames, 24x20 px (trot cycle)"
-          echo "bed_static.png  — 1 frame,  48x32 px (static furniture)"
-          echo "home_room_bg.png — 1 frame, 320x192 px (room background)"
+          echo "tanya_idle.png  - 6 frames, 32x48 px (idle breathing animation)"
+          echo "tanya_walk.png  - 8 frames, 32x48 px (walk cycle)"
+          echo "sam_idle.png    - 4 frames, 24x20 px (tail wag)"
+          echo "sam_walk.png    - 6 frames, 24x20 px (trot cycle)"
+          echo "bed_static.png  - 1 frame,  48x32 px (static furniture)"
+          echo "home_room_bg.png - 1 frame, 320x192 px (room background)"
