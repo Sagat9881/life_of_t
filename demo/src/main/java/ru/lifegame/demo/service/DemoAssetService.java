@@ -17,12 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Discovers pre-generated pixel-art assets produced by the asset-generator module
- * during {@code mvn compile}.
- *
- * <p>No runtime rendering — assets are already built as PNG + atlas files
- * in the output directory. This service simply indexes them and provides
- * metadata for the demo UI.</p>
+ * Discovers pre-generated pixel-art assets produced by the asset-generator module.
+ * Assets are already built as PNG + atlas files in the output directory.
  */
 @Service
 public class DemoAssetService {
@@ -34,18 +30,17 @@ public class DemoAssetService {
     private final List<AssetInfoDto> assetInfos = new ArrayList<>();
 
     public DemoAssetService(
-            @Value("${demo.assets.output-dir:${java.io.tmpdir}/life-of-t-assets}") String outputDirStr) {
-        this.outputDir = Path.of(outputDirStr);
+            @Value("${demo.assets.output-dir:${user.dir}/asset-generator/target/generated-assets}") String outputDirStr) {
+        this.outputDir = Path.of(outputDirStr).toAbsolutePath().normalize();
     }
 
     /**
      * Scans the output directory for generated assets and indexes them.
-     * Idempotent — safe to call multiple times.
      */
     public void generateAll() {
         if (!Files.exists(outputDir)) {
             log.warn("Asset output directory does not exist: {}. "
-                    + "Run 'mvn compile' on asset-generator first.", outputDir);
+                    + "Run 'mvn clean package' from project root first.", outputDir);
             return;
         }
 
@@ -59,16 +54,18 @@ public class DemoAssetService {
                 if (Files.isDirectory(entry)) {
                     String subPrefix = prefix.isEmpty()
                             ? entry.getFileName().toString()
-                            : prefix + "/" + entry.getFileName().toString();
+                            : prefix + "/" + entry.getFileName();
                     scanDirectory(entry, subPrefix);
-                } else if (entry.toString().endsWith(".png") && !entry.toString().contains("atlas")) {
-                    String id = prefix + "/" + entry.getFileName().toString()
-                            .replace(".png", "");
+                } else if (entry.toString().endsWith(".png")) {
+                    String relativePath = prefix.isEmpty()
+                            ? entry.getFileName().toString()
+                            : prefix + "/" + entry.getFileName();
+                    String id = relativePath.replace(".png", "");
                     assetPaths.put(id, entry);
                     assetInfos.add(new AssetInfoDto(
                             id,
-                            "/generated-assets/" + prefix + "/" + entry.getFileName(),
-                            0, 0, 1, 1  // static asset defaults
+                            "/generated-assets/" + relativePath,
+                            0, 0, 1, 1
                     ));
                 }
             }
@@ -77,20 +74,14 @@ public class DemoAssetService {
         }
     }
 
-    /** Returns metadata DTOs for all discovered assets. */
     public List<AssetInfoDto> listAssetInfos() {
         return List.copyOf(assetInfos);
     }
 
-    /**
-     * Resolves the filesystem path for a given asset id,
-     * or {@code null} if not found.
-     */
     public Path resolveAssetPath(String id) {
         return assetPaths.get(id);
     }
 
-    /** Absolute path to the generated assets directory. */
     public Path getOutputDir() {
         return outputDir;
     }

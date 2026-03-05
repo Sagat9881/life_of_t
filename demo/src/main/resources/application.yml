@@ -16,8 +16,9 @@ server:
 demo:
   assets:
     # Output directory for generated sprite atlas PNGs.
-    # Defaults to OS temp dir so tests and CI work without filesystem permissions.
-    output-dir: ${java.io.tmpdir}/life-of-t-assets
+    # Points to asset-generator build output by default.
+    # Override with -Ddemo.assets.output-dir=/path/to/assets
+    output-dir: ${user.dir}/asset-generator/target/generated-assets
 
 logging:
   level:
