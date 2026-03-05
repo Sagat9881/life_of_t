@@ -15,9 +15,6 @@ public final class DemoDtos {
     // Top-level status
     // -----------------------------------------------------------------------
 
-    /**
-     * Full game-state snapshot returned by {@code GET /api/demo/status}.
-     */
     public record GameStateDto(
             CharacterDto character,
             RelationshipsDto relationships,
@@ -106,5 +103,23 @@ public final class DemoDtos {
             int frameHeight,
             int frameCount,
             int frameRate
+    ) {}
+
+    // -----------------------------------------------------------------------
+    // Actions (interactive dialogues)
+    // -----------------------------------------------------------------------
+
+    public record ActionRequestDto(
+            String target,
+            String actionCode
+    ) {}
+
+    public record ActionResultDto(
+            boolean success,
+            String message,
+            String narrativeText,
+            Map<String, Integer> statChanges,
+            Map<String, Integer> relationshipChanges,
+            GameStateDto updatedState
     ) {}
 }

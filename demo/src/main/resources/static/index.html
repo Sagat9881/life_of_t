@@ -47,6 +47,10 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     transition: none;
 }
 
+.sprite.clickable { cursor: pointer; }
+.sprite.clickable:hover { filter: brightness(1.3) drop-shadow(0 0 6px rgba(200,160,255,0.5)); }
+.sprite.clickable:active { filter: brightness(1.5); transform: scale(0.97); }
+
 #bed {
     bottom: 28%; right: 8%;
     width: 192px; height: 192px;
@@ -112,8 +116,8 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 }
 .stat-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
 .stat-label { font-size: 0.65rem; color: #a098b8; width: 70px; flex-shrink: 0; }
-.stat-bar-bg { flex: 1; height: 6px; background: #2a2a3a; }
-.stat-bar { height: 6px; transition: width 0.3s; }
+.stat-bar-bg { flex: 1; height: 6px; background: #2a2a3a; position: relative; }
+.stat-bar { height: 6px; transition: width 0.5s ease; }
 .stat-energy  .stat-bar { background: #80e880; }
 .stat-health  .stat-bar { background: #e84040; }
 .stat-stress  .stat-bar { background: #e8a040; }
@@ -129,7 +133,7 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 .quest-FAMILY_HARMONY { background: #4a2a2a; color: #e88080; }
 .quest-CAREER_GROWTH  { background: #2a3a4a; color: #80c0e8; }
 .quest-progress-bg { width: 100%; height: 4px; background: #2a2a3a; margin-bottom: 4px; }
-.quest-progress-fill { height: 4px; background: #8060c0; }
+.quest-progress-fill { height: 4px; background: #8060c0; transition: width 0.5s ease; }
 .quest-step { font-size: 0.6rem; color: #706890; padding-left: 6px; margin-bottom: 1px; }
 .quest-step.done { color: #50e890; }
 .quest-step::before { content: '▸ '; }
@@ -137,12 +141,13 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 
 .rel-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
 .rel-label { font-size: 0.65rem; color: #a098b8; width: 70px; flex-shrink: 0; }
-.rel-hearts { font-size: 0.7rem; color: #e84060; }
+.rel-hearts { font-size: 0.7rem; color: #e84060; transition: all 0.3s; }
 
 #status-bar {
     position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
     background: rgba(0,0,0,0.6); border: 1px solid #3a3a5a;
     padding: 4px 12px; font-size: 0.65rem; color: #8080a0; pointer-events: none;
+    transition: all 0.3s;
 }
 #loading {
     position: fixed; inset: 0; background: #0d0d14;
@@ -156,7 +161,7 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 #room-container::after {
     content: ''; position: absolute; inset: 0;
     background: repeating-linear-gradient(0deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 2px);
-    pointer-events: none;
+    pointer-events: none; z-index: 5;
 }
 
 .sprite-label {
@@ -164,6 +169,103 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     text-align: center; pointer-events: none;
     text-shadow: 1px 1px 0 #000; white-space: nowrap;
 }
+
+/* ======================== Interaction Modal ======================== */
+.interaction-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 50; display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.25s;
+    pointer-events: none;
+}
+.interaction-overlay.visible { opacity: 1; pointer-events: all; }
+
+.interaction-modal {
+    background: #1a1a30; border: 2px solid #6040a0;
+    border-radius: 4px; padding: 0; width: 360px; max-width: 90vw;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    transform: translateY(20px); transition: transform 0.25s;
+}
+.interaction-overlay.visible .interaction-modal { transform: translateY(0); }
+
+.modal-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; border-bottom: 1px solid #3a3a5a;
+    background: #22224a;
+}
+.modal-avatar { font-size: 28px; }
+.modal-name { font-size: 0.9rem; color: #c8a0ff; font-weight: bold; }
+.modal-close {
+    margin-left: auto; background: none; border: none;
+    color: #706890; font-size: 1.2rem; cursor: pointer;
+    padding: 4px 8px;
+}
+.modal-close:hover { color: #c8a0ff; }
+
+.modal-body { padding: 16px; }
+.modal-desc { font-size: 0.75rem; color: #a098b8; margin-bottom: 12px; line-height: 1.4; }
+
+.action-btn {
+    display: block; width: 100%; padding: 10px 14px;
+    margin-bottom: 6px; background: #2a2a50; border: 1px solid #4a3e6a;
+    border-radius: 3px; color: #d0c0ff; font-size: 0.8rem;
+    font-family: inherit; cursor: pointer; text-align: left;
+    transition: all 0.15s;
+}
+.action-btn:hover { background: #3a3a6a; border-color: #8060c0; transform: translateX(4px); }
+.action-btn:active { background: #4a4a7a; }
+.action-btn .action-cost {
+    float: right; font-size: 0.65rem; color: #706890;
+}
+.action-btn:disabled {
+    opacity: 0.4; cursor: not-allowed;
+    transform: none !important; background: #1a1a30 !important;
+}
+
+.modal-narrative {
+    padding: 16px; font-size: 0.75rem; color: #c8c0d8;
+    line-height: 1.5; min-height: 60px;
+    border-top: 1px solid #3a3a5a;
+    background: #161630;
+}
+.modal-narrative .stat-change {
+    display: inline-block; font-size: 0.65rem; padding: 1px 5px;
+    border-radius: 2px; margin: 2px 2px;
+}
+.modal-narrative .stat-pos { background: #1a4a1a; color: #80e880; }
+.modal-narrative .stat-neg { background: #4a1a1a; color: #e88080; }
+
+/* Floating stat change indicators */
+.stat-floater {
+    position: absolute; pointer-events: none;
+    font-size: 14px; font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    animation: floatUp 1.5s ease-out forwards;
+    z-index: 40;
+}
+.stat-floater.positive { color: #80e880; }
+.stat-floater.negative { color: #e88080; }
+@keyframes floatUp {
+    0%   { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-40px); }
+}
+
+/* Heart particle burst */
+.heart-particle {
+    position: absolute; pointer-events: none; font-size: 16px; z-index: 40;
+    animation: heartBurst 1.2s ease-out forwards;
+}
+@keyframes heartBurst {
+    0%   { opacity: 1; transform: translate(0,0) scale(0.5); }
+    50%  { opacity: 1; transform: translate(var(--dx), var(--dy)) scale(1.2); }
+    100% { opacity: 0; transform: translate(var(--dx), calc(var(--dy) - 20px)) scale(0.3); }
+}
+
+/* Quest completion flash */
+@keyframes questFlash {
+    0%   { background: #3a6a3a; }
+    100% { background: #1a1a30; }
+}
+.quest-complete-flash { animation: questFlash 1s ease; }
 </style>
 </head>
 <body>
@@ -176,7 +278,7 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 <div id="app">
     <header id="header">
         <h1>Life of T</h1>
-        <span class="subtitle">Demo v0.5</span>
+        <span class="subtitle">Demo v0.6</span>
         <span id="game-time">День 1 | 08:00</span>
     </header>
 
@@ -186,23 +288,22 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
         <div id="bed" class="sprite" title="Кровать"></div>
         <div id="desk" class="sprite" title="Стол"></div>
 
-        <div id="sam" class="sprite" title="Сэм (собака)"></div>
+        <div id="sam" class="sprite clickable" title="Сэм (собака)"></div>
         <span id="label-sam" class="sprite-label">Сэм 🐾</span>
         <span id="activity-sam" class="activity-icon">🧸</span>
 
-        <div id="alexander" class="sprite" title="Александр (муж)"></div>
+        <div id="alexander" class="sprite clickable" title="Александр (муж)"></div>
         <span id="label-alexander" class="sprite-label">Александр</span>
         <span id="activity-alexander" class="activity-icon">📖</span>
 
-        <div id="tanya" class="sprite" title="Таня"></div>
+        <div id="tanya" class="sprite clickable" title="Таня"></div>
         <span id="label-tanya" class="sprite-label">Таня</span>
         <span id="activity-tanya" class="activity-icon">☕</span>
 
-        <div id="status-bar">Таня и Александр дома — начало нового дня</div>
+        <div id="status-bar">Кликни на персонажа для взаимодействия</div>
     </main>
 
     <aside id="side-panel">
-        <!-- Tanya stats -->
         <div class="panel-box">
             <h2>Таня — Статы</h2>
             <div class="stat-row stat-energy"><span class="stat-label">Энергия</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-t-energy" style="width:70%"></div></div><span class="stat-value" id="val-t-energy">70</span></div>
@@ -213,28 +314,11 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
             <div class="stat-row stat-esteem"><span class="stat-label">Самооценка</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-t-esteem" style="width:60%"></div></div><span class="stat-value" id="val-t-esteem">60</span></div>
         </div>
 
-        <!-- Quests -->
         <div class="panel-box">
             <h2>Активные квесты</h2>
-            <div id="quest-list">
-                <div class="quest-item">
-                    <span class="quest-type-badge quest-SELF_CARE_ARC">ЗАБОТА О СЕБЕ</span>
-                    <div class="quest-title">Найди себя</div>
-                    <div class="quest-progress-bg"><div class="quest-progress-fill" style="width:0%"></div></div>
-                    <div class="quest-step">Поспать не менее 7 часов</div>
-                    <div class="quest-step">Сходить в спортзал</div>
-                </div>
-                <div class="quest-item">
-                    <span class="quest-type-badge quest-FAMILY_HARMONY">СЕМЬЯ</span>
-                    <div class="quest-title">Семейный вечер</div>
-                    <div class="quest-progress-bg"><div class="quest-progress-fill" style="width:0%"></div></div>
-                    <div class="quest-step">Поговорить с Александром</div>
-                    <div class="quest-step">Позвонить папе</div>
-                </div>
-            </div>
+            <div id="quest-list"></div>
         </div>
 
-        <!-- Relationships -->
         <div class="panel-box">
             <h2>Отношения</h2>
             <div class="rel-row"><span class="rel-label">Александр</span><span class="rel-hearts" id="rel-husband">♥♥♥♥♥♥♥</span></div>
@@ -244,8 +328,57 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     </aside>
 </div>
 
+<!-- Interaction overlay -->
+<div id="interaction-overlay" class="interaction-overlay">
+    <div class="interaction-modal" id="interaction-modal">
+        <div class="modal-header">
+            <span class="modal-avatar" id="modal-avatar"></span>
+            <span class="modal-name" id="modal-name"></span>
+            <button class="modal-close" id="modal-close">✕</button>
+        </div>
+        <div class="modal-body" id="modal-body"></div>
+        <div class="modal-narrative" id="modal-narrative" style="display:none"></div>
+    </div>
+</div>
+
 <script>
 'use strict';
+
+// ============================================================
+// NPC Action Definitions
+// ============================================================
+const NPC_ACTIONS = {
+    alexander: {
+        name: 'Александр',
+        avatar: '👨',
+        desc: 'Твой муж. Можно поговорить, обнять или устроить свидание.',
+        actions: [
+            { code: 'talk',  label: '💬 Поговорить',     cost: '1 ч',  costH: 1 },
+            { code: 'hug',   label: '🤗 Обнять',          cost: '1 ч',  costH: 1 },
+            { code: 'date',  label: '🕯️ Свидание',       cost: '3 ч',  costH: 3 },
+        ]
+    },
+    sam: {
+        name: 'Сэм',
+        avatar: '🐕',
+        desc: 'Твой цвергпинчер. Верный друг с неуёмной энергией.',
+        actions: [
+            { code: 'pet',   label: '🐾 Погладить',      cost: '1 ч',  costH: 1 },
+            { code: 'feed',  label: '🦴 Покормить',      cost: '1 ч',  costH: 1 },
+            { code: 'walk',  label: '🚶 Погулять',       cost: '2 ч',  costH: 2 },
+        ]
+    },
+    tanya: {
+        name: 'Таня',
+        avatar: '👩',
+        desc: 'Это ты. Позаботься о себе.',
+        actions: [
+            { code: 'rest',       label: '😴 Отдохнуть',          cost: '3 ч',  costH: 3 },
+            { code: 'selfcare',   label: '💅 Уход за собой',      cost: '2 ч',  costH: 2 },
+            { code: 'callfather', label: '📞 Позвонить папе',     cost: '1 ч',  costH: 1 },
+        ]
+    }
+};
 
 // ============================================================
 // Sprite Animator
@@ -278,7 +411,6 @@ class CharacterWalker {
         this.targetX = this.posX; this.moveRAF = null;
         this._setIdleAnim(); this._scheduleNextWalk(); this._rotateActivity();
     }
-
     _setIdleAnim() {
         const c = this.cfg;
         this.el.style.backgroundImage = `url('${c.idleAtlas}')`;
@@ -287,7 +419,6 @@ class CharacterWalker {
         this.animator = new SpriteAnimator(this.el, c.spriteW, c.idleFrames, c.idleFps);
         this.animator.start(); this.state = 'idle';
     }
-
     _setWalkAnim() {
         const c = this.cfg;
         this.el.style.backgroundImage = `url('${c.walkAtlas}')`;
@@ -296,12 +427,10 @@ class CharacterWalker {
         this.animator = new SpriteAnimator(this.el, c.spriteW, c.walkFrames, c.walkFps);
         this.animator.start(); this.state = 'walking';
     }
-
     _scheduleNextWalk() {
         const delay = (this.cfg.idleMinSec + Math.random() * (this.cfg.idleMaxSec - this.cfg.idleMinSec)) * 1000;
         setTimeout(() => this._startWalk(), delay);
     }
-
     _startWalk() {
         const container = this.el.parentElement; if (!container) return;
         const cw = container.clientWidth;
@@ -312,7 +441,6 @@ class CharacterWalker {
         this.el.style.transform = goingLeft ? 'scaleX(-1)' : 'scaleX(1)';
         this._setWalkAnim(); this._move();
     }
-
     _move() {
         const speed = this.cfg.speed || 1.5;
         const step = () => {
@@ -327,7 +455,6 @@ class CharacterWalker {
         };
         this.moveRAF = requestAnimationFrame(step);
     }
-
     _updatePosition() {
         this.el.style.left = this.posX + 'px'; this.el.style.right = 'auto';
         if (this.labelEl) {
@@ -339,7 +466,6 @@ class CharacterWalker {
             this.activityEl.style.right = 'auto'; this.activityEl.style.bottom = `calc(${this.cfg.bottomPct}% + ${this.cfg.spriteH}px + 4px)`;
         }
     }
-
     _rotateActivity() {
         if (!this.activityEl || !this.cfg.activities) return;
         const act = this.cfg.activities[Math.floor(Math.random() * this.cfg.activities.length)];
@@ -349,20 +475,243 @@ class CharacterWalker {
 }
 
 // ============================================================
-// Helpers
+// Interaction Modal
 // ============================================================
-function hearts(c) { const f=Math.round(c/10); return '♥'.repeat(Math.max(0,f))+'♡'.repeat(Math.max(0,10-f)); }
+class InteractionModal {
+    constructor() {
+        this.overlay = document.getElementById('interaction-overlay');
+        this.modal = document.getElementById('interaction-modal');
+        this.avatarEl = document.getElementById('modal-avatar');
+        this.nameEl = document.getElementById('modal-name');
+        this.bodyEl = document.getElementById('modal-body');
+        this.narrativeEl = document.getElementById('modal-narrative');
+        this.closeBtn = document.getElementById('modal-close');
+        this.currentTarget = null;
+        this.busy = false;
+
+        this.closeBtn.addEventListener('click', () => this.hide());
+        this.overlay.addEventListener('click', (e) => {
+            if (e.target === this.overlay) this.hide();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') this.hide();
+        });
+    }
+
+    show(targetId) {
+        const cfg = NPC_ACTIONS[targetId];
+        if (!cfg) return;
+        this.currentTarget = targetId;
+        this.avatarEl.textContent = cfg.avatar;
+        this.nameEl.textContent = cfg.name;
+        this.narrativeEl.style.display = 'none';
+        this.narrativeEl.innerHTML = '';
+
+        const gt = currentGameTime;
+        const remainH = 24 - gt.hour;
+
+        let html = `<div class="modal-desc">${cfg.desc}</div>`;
+        for (const a of cfg.actions) {
+            const disabled = a.costH > remainH ? 'disabled' : '';
+            html += `<button class="action-btn" data-action="${a.code}" ${disabled}>`;
+            html += `${a.label}<span class="action-cost">⏱ ${a.cost}</span></button>`;
+        }
+        this.bodyEl.innerHTML = html;
+
+        this.bodyEl.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', () => this.doAction(btn.dataset.action));
+        });
+
+        this.overlay.classList.add('visible');
+    }
+
+    hide() {
+        this.overlay.classList.remove('visible');
+        this.currentTarget = null;
+    }
+
+    async doAction(actionCode) {
+        if (this.busy) return;
+        this.busy = true;
+
+        this.bodyEl.querySelectorAll('.action-btn').forEach(b => b.disabled = true);
+
+        try {
+            const resp = await fetch('/api/demo/action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ target: this.currentTarget, actionCode })
+            });
+            const result = await resp.json();
+
+            if (result.success) {
+                // Show narrative
+                let nHtml = `<p>${result.narrativeText}</p><div style="margin-top:8px">`;
+                if (result.statChanges) {
+                    for (const [k, v] of Object.entries(result.statChanges)) {
+                        const cls = v >= 0 ? 'stat-pos' : 'stat-neg';
+                        const label = STAT_LABELS[k] || k;
+                        nHtml += `<span class="stat-change ${cls}">${label} ${v>=0?'+':''}${v}</span>`;
+                    }
+                }
+                if (result.relationshipChanges) {
+                    for (const [k, v] of Object.entries(result.relationshipChanges)) {
+                        const cls = v >= 0 ? 'stat-pos' : 'stat-neg';
+                        const label = REL_LABELS[k] || k;
+                        nHtml += `<span class="stat-change ${cls}">${label} ${v>=0?'+':''}${v}</span>`;
+                    }
+                }
+                nHtml += '</div>';
+                this.narrativeEl.innerHTML = nHtml;
+                this.narrativeEl.style.display = 'block';
+
+                // Spawn floaters over the sprite
+                spawnStatFloaters(this.currentTarget, result.statChanges);
+
+                // Heart particles on relationship boost
+                if (result.relationshipChanges) {
+                    const hasPositive = Object.values(result.relationshipChanges).some(v => v > 0);
+                    if (hasPositive) spawnHeartParticles(this.currentTarget);
+                }
+
+                // Update full game state from server
+                if (result.updatedState) {
+                    syncFromServerState(result.updatedState);
+                }
+            } else {
+                this.narrativeEl.innerHTML = `<p style="color:#e88080">${result.message}</p>`;
+                this.narrativeEl.style.display = 'block';
+            }
+        } catch (err) {
+            this.narrativeEl.innerHTML = '<p style="color:#e88080">Ошибка соединения</p>';
+            this.narrativeEl.style.display = 'block';
+        }
+
+        this.busy = false;
+        // Re-enable buttons after 1s so player can do another action
+        setTimeout(() => {
+            if (this.currentTarget) {
+                this.show(this.currentTarget);
+            }
+        }, 1500);
+    }
+}
+
+// ============================================================
+// Visual feedback helpers
+// ============================================================
+const STAT_LABELS = { energy:'⚡', health:'❤️', stress:'😰', mood:'😊', money:'💰', selfEsteem:'⭐' };
+const REL_LABELS = { closeness:'💕 близость', trust:'🤝 доверие', romance:'💘 романтика', stability:'🏠 стабильность', father_closeness:'💕 папа', father_trust:'🤝 папа' };
+
+function spawnStatFloaters(targetId, changes) {
+    if (!changes) return;
+    const el = document.getElementById(targetId);
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const container = document.getElementById('room-container').getBoundingClientRect();
+    let i = 0;
+    for (const [k, v] of Object.entries(changes)) {
+        const floater = document.createElement('div');
+        floater.className = 'stat-floater ' + (v >= 0 ? 'positive' : 'negative');
+        floater.textContent = (STAT_LABELS[k]||'') + (v>=0?'+':'') + v;
+        floater.style.left = (rect.left - container.left + rect.width/2 - 20 + (i-1)*30) + 'px';
+        floater.style.top = (rect.top - container.top - 10) + 'px';
+        document.getElementById('room-container').appendChild(floater);
+        setTimeout(() => floater.remove(), 1600);
+        i++;
+    }
+}
+
+function spawnHeartParticles(targetId) {
+    const el = document.getElementById(targetId);
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const container = document.getElementById('room-container').getBoundingClientRect();
+    const cx = rect.left - container.left + rect.width/2;
+    const cy = rect.top - container.top + rect.height/3;
+    for (let i = 0; i < 6; i++) {
+        const heart = document.createElement('div');
+        heart.className = 'heart-particle';
+        heart.textContent = '♥';
+        const dx = (Math.random() - 0.5) * 80;
+        const dy = -(20 + Math.random() * 40);
+        heart.style.cssText = `left:${cx}px;top:${cy}px;--dx:${dx}px;--dy:${dy}px;animation-delay:${i*0.08}s`;
+        document.getElementById('room-container').appendChild(heart);
+        setTimeout(() => heart.remove(), 1400);
+    }
+}
+
+// ============================================================
+// State sync
+// ============================================================
+let currentGameTime = { day: 1, hour: 8 };
+
+function hearts(c) {
+    const f = Math.round(c / 10);
+    return '♥'.repeat(Math.max(0,f)) + '♡'.repeat(Math.max(0,10-f));
+}
+
 function setBar(id, v) {
     const b = document.getElementById('bar-'+id), n = document.getElementById('val-'+id);
     const p = Math.min(100, Math.max(0, Math.round(v)));
-    if(b) b.style.width = p+'%'; if(n) n.textContent = v;
+    if (b) b.style.width = p+'%';
+    if (n) n.textContent = v;
 }
-async function fetchJSON(url) { try { const r=await fetch(url); return r.ok?await r.json():null; } catch(_){return null;} }
+
+function syncFromServerState(state) {
+    if (state.character && state.character.stats) {
+        const s = state.character.stats;
+        setBar('t-energy', s.energy);
+        setBar('t-health', s.health);
+        setBar('t-stress', s.stress);
+        setBar('t-mood', s.mood);
+        setBar('t-money', s.money);
+        setBar('t-esteem', s.selfEsteem);
+    }
+    if (state.relationships && state.relationships.byNpc) {
+        const h = state.relationships.byNpc['HUSBAND'];
+        const f = state.relationships.byNpc['FATHER'];
+        if (h) document.getElementById('rel-husband').textContent = hearts(h.closeness);
+        if (f) document.getElementById('rel-father').textContent = hearts(f.closeness);
+    }
+    if (state.gameTime) {
+        currentGameTime = state.gameTime;
+        document.getElementById('game-time').textContent =
+            'День ' + state.gameTime.day + ' | ' + String(state.gameTime.hour).padStart(2,'0') + ':00';
+    }
+    if (state.activeQuests) {
+        renderQuests(state.activeQuests);
+    }
+}
+
+function renderQuests(quests) {
+    const container = document.getElementById('quest-list');
+    container.innerHTML = '';
+    for (const q of quests) {
+        const div = document.createElement('div');
+        div.className = 'quest-item';
+        const typeLabel = { SELF_CARE_ARC: 'ЗАБОТА О СЕБЕ', FAMILY_HARMONY: 'СЕМЬЯ', CAREER_GROWTH: 'КАРЬЕРА' };
+        let html = `<span class="quest-type-badge quest-${q.type}">${typeLabel[q.type]||q.type}</span>`;
+        html += `<div class="quest-title">${q.title}</div>`;
+        html += `<div class="quest-progress-bg"><div class="quest-progress-fill" style="width:${q.progressPercent}%"></div></div>`;
+        for (const s of q.steps) {
+            html += `<div class="quest-step ${s.completed?'done':''}">${s.description} (${s.current}/${s.required})</div>`;
+        }
+        div.innerHTML = html;
+        if (q.status === 'COMPLETED') div.classList.add('quest-complete-flash');
+        container.appendChild(div);
+    }
+}
+
+async function fetchJSON(url) {
+    try { const r = await fetch(url); return r.ok ? await r.json() : null; } catch(_) { return null; }
+}
 
 // ============================================================
 // Init
 // ============================================================
 const walkers = [];
+let modal;
 
 function initWalkers() {
     walkers.push(new CharacterWalker({
@@ -376,7 +725,6 @@ function initWalkers() {
         idleMinSec: 2, idleMaxSec: 6,
         activities: ['☕', '📖', '🎮', '💭', '🎵', '💅']
     }));
-
     walkers.push(new CharacterWalker({
         el: document.getElementById('alexander'),
         labelEl: document.getElementById('label-alexander'),
@@ -388,7 +736,6 @@ function initWalkers() {
         idleMinSec: 3, idleMaxSec: 8,
         activities: ['📖', '💻', '☕', '📱', '🎵', '🤔']
     }));
-
     walkers.push(new CharacterWalker({
         el: document.getElementById('sam'),
         labelEl: document.getElementById('label-sam'),
@@ -402,46 +749,31 @@ function initWalkers() {
     }));
 }
 
-const demoStats = { t: { energy: 70, health: 80, stress: 30, mood: 65, money: 50, esteem: 60 } };
-
-function fluctuate(obj, key, min, max, delta) {
-    obj[key] = Math.min(max, Math.max(min, obj[key] + (Math.random() - 0.5) * delta * 2));
-    return Math.round(obj[key]);
-}
-
-function updateDemoStats() {
-    setBar('t-energy', fluctuate(demoStats.t, 'energy', 20, 100, 3));
-    setBar('t-health', fluctuate(demoStats.t, 'health', 50, 100, 2));
-    setBar('t-stress', fluctuate(demoStats.t, 'stress', 0, 80, 4));
-    setBar('t-mood',   fluctuate(demoStats.t, 'mood', 30, 100, 3));
-    setBar('t-money',  fluctuate(demoStats.t, 'money', 10, 100, 2));
-    setBar('t-esteem', fluctuate(demoStats.t, 'esteem', 30, 100, 2));
+function initClickHandlers() {
+    ['alexander', 'sam', 'tanya'].forEach(id => {
+        document.getElementById(id).addEventListener('click', (e) => {
+            e.stopPropagation();
+            modal.show(id);
+        });
+    });
 }
 
 async function init() {
+    modal = new InteractionModal();
     initWalkers();
+    initClickHandlers();
+
     const status = await fetchJSON('/api/demo/status');
-    if (status) {
-        if (status.character && status.character.stats) {
-            const s = status.character.stats;
-            Object.assign(demoStats.t, { energy: s.energy||70, health: s.health||80, stress: s.stress||30, mood: s.mood||65, money: s.money||50, esteem: s.selfEsteem||60 });
-        }
-        if (status.relationships && status.relationships.byNpc) {
-            const h = status.relationships.byNpc['HUSBAND'], f = status.relationships.byNpc['FATHER'];
-            if (h) document.getElementById('rel-husband').textContent = hearts(h.closeness);
-            if (f) document.getElementById('rel-father').textContent  = hearts(f.closeness);
-        }
-        if (status.gameTime) {
-            document.getElementById('game-time').textContent = 'День '+status.gameTime.day+' | '+String(status.gameTime.hour).padStart(2,'0')+':00';
-        }
-    }
-    updateDemoStats();
-    const loading = document.getElementById('loading'); loading.classList.add('hidden');
+    if (status) syncFromServerState(status);
+
+    const loading = document.getElementById('loading');
+    loading.classList.add('hidden');
     setTimeout(() => loading.remove(), 500);
-    setInterval(updateDemoStats, 3000);
+
+    // Periodic refresh
     setInterval(async () => {
         const s = await fetchJSON('/api/demo/status');
-        if (s && s.gameTime) document.getElementById('game-time').textContent = 'День '+s.gameTime.day+' | '+String(s.gameTime.hour).padStart(2,'0')+':00';
+        if (s) syncFromServerState(s);
     }, 10000);
 }
 
