@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>characters</entity-type>
+        <entity-name>duke</entity-name>
+        <version>1.0.0</version>
+    </meta>
+    <!-- Duke (Pyzdyuk): East European Shepherd puppy, ~6 months old.
+         Canvas: 26x20 (medium, puppy proportions — big head, chunky paws, gangly legs).
+         Color: #222222 black saddle, #999999 grey sides, #BBBBBB lighter face.
+         Attached to Persi; exuberant puppy energy. Found March 2026. -->
+    <layers>
+        <!-- z=0: paws — oversized puppy paws (puppies have big feet!) -->
+        <layer id="paws" type="base" z-order="0" width="26" height="20">
+            <pixel-data>
+                <!-- front left paw: chunky 3px, grey -->
+                <rect x="3" y="16" w="3" h="3" color="#999999"/>
+                <hline x="3" y="18" len="3" color="#777777"/>
+                <!-- front right paw -->
+                <rect x="9" y="16" w="3" h="3" color="#999999"/>
+                <hline x="9" y="18" len="3" color="#777777"/>
+                <!-- rear left paw: even bigger rear paws -->
+                <rect x="16" y="16" w="4" h="3" color="#888888"/>
+                <hline x="16" y="18" len="4" color="#666666"/>
+                <!-- rear right paw -->
+                <rect x="22" y="16" w="4" h="3" color="#888888"/>
+                <hline x="22" y="18" len="4" color="#666666"/>
+                <!-- paw pads: pink-grey -->
+                <pixel x="5" y="18" color="#CCAAAA"/>
+                <pixel x="11" y="18" color="#CCAAAA"/>
+                <pixel x="18" y="18" color="#BBAAAA"/>
+                <pixel x="24" y="18" color="#BBAAAA"/>
+            </pixel-data>
+        </layer>
+        <!-- z=1: legs — gangly puppy legs, slightly uncoordinated proportions -->
+        <layer id="legs" type="base" z-order="1" width="26" height="20">
+            <pixel-data>
+                <!-- front legs: grey, slightly thin (growing into paws) -->
+                <rect x="3" y="10" w="3" h="6" color="#999999"/>
+                <rect x="9" y="10" w="3" h="6" color="#999999"/>
+                <!-- rear legs: darker, stronger hindquarters -->
+                <rect x="16" y="10" w="3" h="6" color="#888888"/>
+                <rect x="22" y="10" w="3" h="6" color="#888888"/>
+                <!-- black saddle bleeds down upper legs -->
+                <hline x="3" y="10" len="3" color="#222222"/>
+                <hline x="9" y="10" len="3" color="#222222"/>
+                <hline x="16" y="10" len="3" color="#222222"/>
+                <hline x="22" y="10" len="3" color="#222222"/>
+            </pixel-data>
+        </layer>
+        <!-- z=2: body — puppy proportions: compact but soft, black saddle on top -->
+        <layer id="body" type="base" z-order="2" width="26" height="20">
+            <pixel-data>
+                <!-- main body -->
+                <rect x="3" y="6" w="18" h="7" color="#999999"/>
+                <!-- black saddle across back -->
+                <rect x="4" y="6" w="16" h="3" color="#222222"/>
+                <!-- saddle highlight (young coat, slight sheen) -->
+                <hline x="5" y="6" len="14" color="#333333"/>
+                <!-- grey flanks -->
+                <hline x="4" y="11" len="16" color="#888888"/>
+                <!-- belly puppy-soft, slightly lighter -->
+                <hline x="5" y="12" len="14" color="#AAAAAA"/>
+            </pixel-data>
+        </layer>
+        <!-- z=3: chest_markings — grey chest, slight lighter patch under chin -->
+        <layer id="chest_markings" type="overlay" z-order="3" width="26" height="20">
+            <pixel-data>
+                <!-- chest lighter grey patch -->
+                <rect x="4" y="9" w="6" h="4" color="#AAAAAA"/>
+                <!-- chest highlight -->
+                <hline x="5" y="9" len="4" color="#BBBBBB"/>
+                <!-- throat lighter area -->
+                <hline x="5" y="8" len="3" color="#CCCCCC"/>
+            </pixel-data>
+        </layer>
+        <!-- z=4: tail — puppy tail: short, wags constantly, held high -->
+        <layer id="tail" type="base" z-order="4" width="26" height="20">
+            <pixel-data>
+                <!-- short stubby puppy tail held up -->
+                <pixel x="21" y="9" color="#888888"/>
+                <pixel x="22" y="8" color="#888888"/>
+                <pixel x="23" y="7" color="#999999"/>
+                <pixel x="24" y="6" color="#999999"/>
+                <!-- fluffy tip: lighter -->
+                <pixel x="24" y="5" color="#AAAAAA"/>
+                <pixel x="25" y="6" color="#BBBBBB"/>
+                <!-- dark saddle at tail base -->
+                <pixel x="21" y="10" color="#222222"/>
+                <pixel x="22" y="9" color="#333333"/>
+            </pixel-data>
+        </layer>
+        <!-- z=5: head — big puppy head, large cranium relative to muzzle -->
+        <layer id="head" type="base" z-order="5" width="26" height="20">
+            <pixel-data>
+                <!-- large round puppy skull -->
+                <rect x="1" y="1" w="11" h="9" color="#BBBBBB"/>
+                <!-- black cap on top -->
+                <rect x="2" y="1" w="9" h="4" color="#222222"/>
+                <!-- muzzle: shorter than adult, grey -->
+                <rect x="0" y="5" w="5" h="4" color="#AAAAAA"/>
+                <!-- wrinkle on forehead (puppy folds) -->
+                <hline x="3" y="3" len="5" color="#444444"/>
+                <!-- cheeks puffy (puppy fat) -->
+                <pixel x="1" y="6" color="#CCCCCC"/>
+                <pixel x="1" y="7" color="#CCCCCC"/>
+                <pixel x="11" y="6" color="#AAAAAA"/>
+                <pixel x="11" y="7" color="#AAAAAA"/>
+            </pixel-data>
+        </layer>
+        <!-- z=6: ears — large floppy/semi-upright puppy ears (still developing) -->
+        <layer id="ears" type="base" z-order="6" width="26" height="20">
+            <pixel-data>
+                <!-- left ear: flops forward slightly -->
+                <rect x="1" y="0" w="3" h="3" color="#888888"/>
+                <pixel x="1" y="2" color="#AAAAAA"/>
+                <pixel x="2" y="2" color="#AAAAAA"/>
+                <!-- ear inner: pink -->
+                <pixel x="2" y="1" color="#DDAAAA"/>
+                <!-- right ear: half-upright (shepherd ears coming in) -->
+                <rect x="8" y="0" w="3" h="3" color="#888888"/>
+                <pixel x="9" y="0" color="#AAAAAA"/>
+                <!-- ear inner -->
+                <pixel x="9" y="1" color="#DDAAAA"/>
+            </pixel-data>
+        </layer>
+        <!-- z=7: face_details — bright curious brown eyes, wide nose, puppy expression -->
+        <layer id="face_details" type="overlay" z-order="7" width="26" height="20">
+            <pixel-data>
+                <!-- left eye: bright brown (puppy wide and curious) -->
+                <pixel x="3" y="4" color="#884422"/>
+                <pixel x="4" y="3" color="#AA6633"/>
+                <pixel x="5" y="3" color="#AA6633"/>
+                <pixel x="4" y="4" color="#AA6633"/>
+                <pixel x="5" y="4" color="#111111"/>
+                <!-- right eye: same -->
+                <pixel x="7" y="4" color="#884422"/>
+                <pixel x="8" y="3" color="#AA6633"/>
+                <pixel x="9" y="3" color="#AA6633"/>
+                <pixel x="8" y="4" color="#AA6633"/>
+                <pixel x="9" y="4" color="#111111"/>
+                <!-- big shine dots (puppies have bright eyes) -->
+                <pixel x="4" y="3" color="#FFFFFF"/>
+                <pixel x="8" y="3" color="#FFFFFF"/>
+                <!-- nose: wide dark puppy nose -->
+                <rect x="1" y="6" w="3" h="2" color="#333333"/>
+                <hline x="1" y="6" len="3" color="#555555"/>
+                <!-- puppy mouth: slightly open, happy -->
+                <hline x="1" y="8" len="4" color="#884422"/>
+                <pixel x="2" y="9" color="#CC7744"/>
+                <!-- tongue hint: tiny pink pixel -->
+                <pixel x="3" y="9" color="#FF8888"/>
+                <!-- eyebrow spots (developing shepherd expression) -->
+                <pixel x="4" y="2" color="#888888"/>
+                <pixel x="8" y="2" color="#888888"/>
+            </pixel-data>
+        </layer>
+    </layers>
+    <animations>
+        <!-- idle_morning: energetic waking — immediately wants to play -->
+        <animation name="idle_morning" frames="4" fps="5" loop="true" frame-width="26" frame-height="20">
+            <condition type="time_of_day" value="morning"/>
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="head:0,-1; ears:0,-1; face_details:0,-1; tail:0,-2"/>
+            <frame index="2" layer-offsets="head:1,-1; ears:1,-1; face_details:1,-1; tail:1,-1"/>
+            <frame index="3" layer-offsets="tail:0,-2"/>
+        </animation>
+        <!-- idle_day: maximum energy, looking everywhere at once -->
+        <animation name="idle_day" frames="4" fps="6" loop="true" frame-width="26" frame-height="20">
+            <condition type="time_of_day" value="day"/>
+            <frame index="0" layer-offsets="tail:0,-2"/>
+            <frame index="1" layer-offsets="head:-2,0; ears:-2,0; face_details:-2,0; tail:0,-2"/>
+            <frame index="2" layer-offsets="head:0,-1; ears:0,-1; face_details:0,-1; tail:1,-3"/>
+            <frame index="3" layer-offsets="head:2,0; ears:2,0; face_details:2,0; tail:0,-2"/>
+        </animation>
+        <!-- idle_evening: tiring out, slowing down, tail still wagging -->
+        <animation name="idle_evening" frames="4" fps="3" loop="true" frame-width="26" frame-height="20">
+            <condition type="time_of_day" value="evening"/>
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="tail:0,-1"/>
+            <frame index="2" layer-offsets="head:0,1; face_details:0,1"/>
+            <frame index="3" layer-offsets="tail:1,0"/>
+        </animation>
+        <!-- idle_night: crashed out completely (puppies sleep hard) -->
+        <animation name="idle_night" frames="4" fps="2" loop="true" frame-width="26" frame-height="20">
+            <condition type="time_of_day" value="night"/>
+            <frame index="0" layer-offsets="head:1,3; ears:1,3; face_details:1,3; legs:0,2; paws:0,2; tail:3,3"/>
+            <frame index="1" layer-offsets="head:1,3; ears:1,3; face_details:1,3; legs:0,2; paws:0,2; tail:3,3"/>
+            <frame index="2" layer-offsets="head:1,3; ears:1,3; face_details:1,3; body:0,1; chest_markings:0,1; legs:0,2; paws:0,2; tail:3,3"/>
+            <frame index="3" layer-offsets="head:1,3; ears:1,3; face_details:1,3; legs:0,2; paws:0,2; tail:3,3"/>
+        </animation>
+        <!-- walk: clumsy enthusiastic puppy trot, gangly -->
+        <animation name="walk" frames="6" fps="8" loop="true" frame-width="26" frame-height="20">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="paws:-2,-2; legs:-1,0; tail:0,-1"/>
+            <frame index="2" layer-offsets="body:-1,0; chest_markings:-1,0; tail:0,-2"/>
+            <frame index="3" layer-offsets="paws:2,-2; legs:1,0; tail:1,-1"/>
+            <frame index="4" layer-offsets="body:1,0; chest_markings:1,0; tail:0,-1"/>
+            <frame index="5" layer-offsets=""/>
+        </animation>
+        <!-- bounce: unique — excited puppy jumping up and down, can't contain joy -->
+        <animation name="bounce" frames="6" fps="8" loop="false" frame-width="26" frame-height="20">
+            <condition type="trigger" value="excitement"/>
+            <!-- frame 0: crouch to spring -->
+            <frame index="0" layer-offsets="body:0,2; chest_markings:0,2; head:0,2; face_details:0,2; ears:0,2; tail:0,-1"/>
+            <!-- frame 1: leap up, all layers rise -->
+            <frame index="1" layer-offsets="body:0,-3; chest_markings:0,-3; head:0,-4; face_details:0,-4; ears:0,-4; legs:0,-2; paws:0,-2; tail:0,-4"/>
+            <!-- frame 2: peak height, tongue out -->
+            <frame index="2" layer-offsets="body:0,-4; chest_markings:0,-4; head:0,-5; face_details:0,-6; ears:0,-5; legs:0,-3; paws:0,-3; tail:0,-5"/>
+            <!-- frame 3: descend -->
+            <frame index="3" layer-offsets="body:0,-2; chest_markings:0,-2; head:0,-3; face_details:0,-3; ears:0,-3; legs:0,-1; tail:0,-3"/>
+            <!-- frame 4: land with thud, paws splaying -->
+            <frame index="4" layer-offsets="paws:1,1; legs:1,1"/>
+            <!-- frame 5: recover, tail still wagging -->
+            <frame index="5" layer-offsets="tail:0,-2"/>
+        </animation>
+    </animations>
+    <naming>
+        <output-dir>characters/duke</output-dir>
+    </naming>
+</asset-spec>
