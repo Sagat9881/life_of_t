@@ -3,7 +3,7 @@
     <meta>
         <entity-type>characters</entity-type>
         <entity-name>sam</entity-name>
-        <version>2.0.0</version>
+        <version>2.1.0</version>
     </meta>
 
     <layers>
@@ -32,10 +32,10 @@
         <!-- Legs (z=1) -->
         <layer id="legs" type="base" z-order="1" width="24" height="20">
             <pixel-data>
-                <!-- Front legs (thin) -->
+                <!-- Front legs -->
                 <rect x="5" y="13" w="2" h="4" color="#1A1A1A"/>
                 <rect x="9" y="13" w="2" h="4" color="#1A1A1A"/>
-                <!-- Back legs (slightly thicker at top) -->
+                <!-- Back legs -->
                 <rect x="15" y="12" w="2" h="5" color="#1A1A1A"/>
                 <rect x="19" y="12" w="2" h="5" color="#1A1A1A"/>
                 <pixel x="14" y="12" color="#1A1A1A"/>
@@ -46,15 +46,15 @@
         <!-- Body (z=2): compact black torso with tan chest -->
         <layer id="body" type="base" z-order="2" width="24" height="20">
             <pixel-data>
-                <!-- Main body — black -->
+                <!-- Main body -->
                 <rect x="5" y="8" w="16" h="5" color="#1A1A1A"/>
                 <rect x="6" y="7" w="14" h="1" color="#1A1A1A"/>
-                <!-- Belly underside —slightly lighter -->
+                <!-- Belly -->
                 <hline x="7" y="12" len="10" color="#2A2A2A"/>
                 <!-- Tan chest patch -->
                 <rect x="5" y="10" w="3" h="3" color="#C07840"/>
                 <pixel x="6" y="9" color="#C07840"/>
-                <!-- Tail (short, upright) -->
+                <!-- Tail -->
                 <rect x="20" y="5" w="1" h="3" color="#1A1A1A"/>
                 <pixel x="21" y="5" color="#1A1A1A"/>
             </pixel-data>
@@ -63,28 +63,26 @@
         <!-- Head (z=3): black with tan muzzle -->
         <layer id="head" type="base" z-order="3" width="24" height="20">
             <pixel-data>
-                <!-- Head base — black -->
+                <!-- Head base -->
                 <rect x="1" y="4" w="6" h="5" color="#1A1A1A"/>
                 <rect x="2" y="3" w="4" h="1" color="#1A1A1A"/>
-                <!-- Tan markings on muzzle -->
+                <!-- Tan muzzle -->
                 <rect x="1" y="7" w="3" h="2" color="#C07840"/>
                 <pixel x="1" y="6" color="#C07840"/>
                 <!-- Tan eyebrow dots -->
                 <pixel x="3" y="4" color="#C07840"/>
                 <pixel x="5" y="4" color="#C07840"/>
-                <!-- Eyes — dark brown, alert -->
-                <pixel x="3" y="5" color="#402010"/>
-                <pixel x="5" y="5" color="#402010"/>
-                <!-- Eye shine -->
+                <!-- Eyes -->
                 <pixel x="3" y="5" color="#603820"/>
+                <pixel x="5" y="5" color="#402010"/>
                 <!-- Nose -->
                 <pixel x="1" y="7" color="#101010"/>
-                <!-- Ears — pointed, erect -->
+                <!-- Ears -->
                 <rect x="2" y="1" w="2" h="2" color="#1A1A1A"/>
                 <pixel x="2" y="0" color="#1A1A1A"/>
                 <rect x="5" y="1" w="2" h="2" color="#1A1A1A"/>
                 <pixel x="6" y="0" color="#1A1A1A"/>
-                <!-- Inner ear — tan -->
+                <!-- Inner ear tan -->
                 <pixel x="3" y="2" color="#C07840"/>
                 <pixel x="5" y="2" color="#C07840"/>
             </pixel-data>
@@ -98,6 +96,14 @@
             <frame index="1" layer-offsets="head:0,-1"/>
             <frame index="2" layer-offsets=""/>
             <frame index="3" layer-offsets="head:0,-1"/>
+        </animation>
+
+        <animation name="walk" frames="4" fps="6" loop="true"
+                   frame-width="24" frame-height="20">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="legs:1,0; paws:1,0; body:0,-1; head:0,-1"/>
+            <frame index="2" layer-offsets=""/>
+            <frame index="3" layer-offsets="legs:-1,0; paws:-1,0; body:0,-1; head:0,-1"/>
         </animation>
     </animations>
 
