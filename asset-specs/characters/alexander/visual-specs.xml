@@ -3,7 +3,7 @@
     <meta>
         <entity-type>characters</entity-type>
         <entity-name>alexander</entity-name>
-        <version>1.1.0</version>
+        <version>1.2.0</version>
     </meta>
 
     <layers>
@@ -106,9 +106,27 @@
                 <pixel x="20" y="5" color="#3D2817"/>
             </pixel-data>
         </layer>
+
+        <!-- Apron overlay (z=5, только при готовке) -->
+        <layer id="apron" type="overlay" z-order="5" width="32" height="48"
+               condition="animation:cook-together">
+            <pixel-data>
+                <!-- Простой фартук -->
+                <rect x="10" y="22" w="12" h="10" color="#F0F0E8"/>
+                <rect x="10" y="22" w="12" h="1" color="#E0E0D8"/>
+                <!-- Завязки -->
+                <pixel x="9" y="22" color="#F0F0E8"/>
+                <pixel x="22" y="22" color="#F0F0E8"/>
+                <!-- Карман -->
+                <rect x="13" y="27" w="6" h="3" color="#E8E8E0"/>
+                <hline x="13" y="27" len="6" color="#D8D8D0"/>
+            </pixel-data>
+        </layer>
     </layers>
 
     <animations>
+        <!-- === БАЗОВЫЕ === -->
+
         <animation name="idle" frames="4" fps="4" loop="true"
                    frame-width="32" frame-height="48">
             <frame index="0" layer-offsets=""/>
@@ -127,6 +145,125 @@
             <frame index="5" layer-offsets="legs:0,0; socks:-1,0"/>
             <frame index="6" layer-offsets="torso:0,-1; head:0,-1; hair:0,-1; legs:-2,0; socks:-2,0"/>
             <frame index="7" layer-offsets="torso:0,-1; head:0,-1; hair:0,-1; legs:-1,0; socks:-1,0"/>
+        </animation>
+
+        <!-- === РАБОТА (Александр на удалёнке) === -->
+
+        <animation name="sit-work" frames="8" fps="3" loop="true"
+                   frame-width="32" frame-height="48"
+                   interact-with="furniture/computer" location="alexander_room">
+            <description>
+                Александр сидит за компьютером в своей комнате.
+                Сидячая поза: ноги согнуты, торс наклонён вперёд.
+                Покачивание головы + «дыхание» торса.
+                Более спокойный ритм чем у Тани (3 FPS вместо 4).
+            </description>
+            <frame index="0" layer-offsets="legs:0,-6; socks:3,-6; torso:0,-1; head:0,-1; hair:0,-1"/>
+            <frame index="1" layer-offsets="legs:0,-6; socks:3,-6; torso:0,-1; head:0,-1; hair:0,-1"/>
+            <frame index="2" layer-offsets="legs:0,-6; socks:3,-6; torso:0,-2; head:1,-2; hair:1,-2"/>
+            <frame index="3" layer-offsets="legs:0,-6; socks:3,-6; torso:0,-2; head:1,-2; hair:1,-2"/>
+            <frame index="4" layer-offsets="legs:0,-6; socks:3,-6; torso:0,-1; head:0,-1; hair:0,-1"/>
+            <frame index="5" layer-offsets="legs:0,-6; socks:3,-6; torso:0,-1; head:-1,-1; hair:-1,-1"/>
+            <frame index="6" layer-offsets="legs:0,-6; socks:3,-6; torso:0,-2; head:-1,-2; hair:-1,-2"/>
+            <frame index="7" layer-offsets="legs:0,-6; socks:3,-6; torso:0,-1; head:0,-1; hair:0,-1"/>
+        </animation>
+
+        <!-- === ГОТОВКА ВМЕСТЕ === -->
+
+        <animation name="cook-together" frames="8" fps="4" loop="true"
+                   frame-width="32" frame-height="48"
+                   interact-with="furniture/stove" location="kitchen">
+            <description>
+                Александр готовит в фартуке (apron overlay активен).
+                Помешивает в кастрюле — корпус покачивается
+                влево-вправо (имитация помешивания).
+                Голова слегка опущена к плите.
+                Плавный цикл: влево → центр → вправо → центр.
+            </description>
+            <frame index="0" layer-offsets="head:0,1; hair:0,1; torso:0,0; apron:0,0"/>
+            <frame index="1" layer-offsets="head:-1,1; hair:-1,1; torso:-1,0; apron:-1,0"/>
+            <frame index="2" layer-offsets="head:-1,1; hair:-1,1; torso:-1,0; apron:-1,0"/>
+            <frame index="3" layer-offsets="head:0,1; hair:0,1; torso:0,0; apron:0,0"/>
+            <frame index="4" layer-offsets="head:0,1; hair:0,1; torso:0,0; apron:0,0"/>
+            <frame index="5" layer-offsets="head:1,1; hair:1,1; torso:1,0; apron:1,0"/>
+            <frame index="6" layer-offsets="head:1,1; hair:1,1; torso:1,0; apron:1,0"/>
+            <frame index="7" layer-offsets="head:0,1; hair:0,1; torso:0,0; apron:0,0"/>
+        </animation>
+
+        <!-- === ОБНЯТЬ ТАНЮ === -->
+
+        <animation name="hug" frames="8" fps="4" loop="false"
+                   frame-width="32" frame-height="48">
+            <description>
+                Александр обнимает Таню. Одноразовая анимация.
+                Руки раскрываются (2 кадра), обхват (2 кадра),
+                покачивание в объятиях (2 кадра), отпускание (2 кадра).
+                Голова наклонена к партнёру.
+            </description>
+            <!-- Руки раскрываются -->
+            <frame index="0" layer-offsets="torso:0,0"/>
+            <frame index="1" layer-offsets="torso:0,0; head:-1,0; hair:-1,0"/>
+            <!-- Обхват -->
+            <frame index="2" layer-offsets="torso:-1,0; head:-2,-1; hair:-2,-1"/>
+            <frame index="3" layer-offsets="torso:-1,0; head:-2,-1; hair:-2,-1"/>
+            <!-- Покачивание -->
+            <frame index="4" layer-offsets="torso:-1,0; head:-2,0; hair:-2,0"/>
+            <frame index="5" layer-offsets="torso:-1,0; head:-2,-1; hair:-2,-1"/>
+            <!-- Отпускание -->
+            <frame index="6" layer-offsets="torso:0,0; head:-1,0; hair:-1,0"/>
+            <frame index="7" layer-offsets=""/>
+        </animation>
+
+        <!-- === СОН === -->
+
+        <animation name="sleep" frames="6" fps="2" loop="true"
+                   frame-width="32" frame-height="48"
+                   interact-with="furniture/bed">
+            <description>
+                Александр лежит в кровати. Аналогично Тане:
+                rotate=90, закрытые глаза, лёгкое дыхание.
+                Более глубокое дыхание — сдвиг торса на 2px.
+            </description>
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="torso:0,-1; head:0,-1; hair:0,-1"/>
+            <frame index="2" layer-offsets="torso:0,-2; head:0,-2; hair:0,-2"/>
+            <frame index="3" layer-offsets="torso:0,-1; head:0,-1; hair:0,-1"/>
+            <frame index="4" layer-offsets=""/>
+            <frame index="5" layer-offsets="torso:0,-1; head:0,-1; hair:0,-1"/>
+            <head-override>
+                <remove>
+                    <pixel x="13" y="10"/><pixel x="13" y="11"/><pixel x="12" y="10"/>
+                    <pixel x="18" y="10"/><pixel x="18" y="11"/><pixel x="19" y="10"/>
+                </remove>
+                <add>
+                    <hline x="12" y="11" len="3" color="#202020"/>
+                    <hline x="17" y="11" len="3" color="#202020"/>
+                </add>
+                <remove><hline x="14" y="13" len="3"/></remove>
+                <add>
+                    <pixel x="14" y="13" color="#B08070"/>
+                    <pixel x="15" y="13" color="#B08070"/>
+                    <pixel x="16" y="13" color="#B08070"/>
+                </add>
+            </head-override>
+            <render-transform rotate="90" anchor="center"/>
+        </animation>
+
+        <!-- === СИДЕТЬ НА ДИВАНЕ (idle в комнате) === -->
+
+        <animation name="sit-idle" frames="6" fps="2" loop="true"
+                   frame-width="32" frame-height="48">
+            <description>
+                Александр сидит расслабленно — ноги вытянуты,
+                руки на коленях. Очень медленное дыхание,
+                голова иногда поворачивается.
+            </description>
+            <frame index="0" layer-offsets="legs:0,-6; socks:3,-6; torso:0,0; head:0,0; hair:0,0"/>
+            <frame index="1" layer-offsets="legs:0,-6; socks:3,-6; torso:0,-1; head:0,-1; hair:0,-1"/>
+            <frame index="2" layer-offsets="legs:0,-6; socks:3,-6; torso:0,-1; head:1,-1; hair:1,-1"/>
+            <frame index="3" layer-offsets="legs:0,-6; socks:3,-6; torso:0,0; head:1,0; hair:1,0"/>
+            <frame index="4" layer-offsets="legs:0,-6; socks:3,-6; torso:0,0; head:0,0; hair:0,0"/>
+            <frame index="5" layer-offsets="legs:0,-6; socks:3,-6; torso:0,-1; head:-1,-1; hair:-1,-1"/>
         </animation>
     </animations>
 
