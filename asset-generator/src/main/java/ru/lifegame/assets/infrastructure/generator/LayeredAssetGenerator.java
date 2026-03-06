@@ -28,6 +28,9 @@ import java.util.regex.Pattern;
  *   <li>Each row = a variant (morning, day, evening, night)</li>
  * </ul>
  * Non-variant animations produce a classic horizontal-strip atlas (single row).
+ * <p>
+ * All animation metadata is written to a single <b>sprite-atlas.json</b> per character
+ * (config version 1.0) via {@link AtlasConfigWriter#writeSpriteAtlas}.
  */
 public class LayeredAssetGenerator implements AssetGenerationService {
 
@@ -96,14 +99,13 @@ public class LayeredAssetGenerator implements AssetGenerationService {
 
     /**
      * Groups animations by base name, detects time-of-day variants,
-     * and routes to grid or strip atlas writer.
+     * renders atlas PNGs, and writes a single sprite-atlas.json.
      */
     private List<Path> generateAnimationAtlases(AssetSpec spec, Path animDir) {
         List<Path> generated = new ArrayList<>();
         List<AssetLayer> layers = spec.layers();
 
         // Partition: baseName → ordered map of (conditionValue → AnimationSpec)
-        // Non-TOD animations go to standalone map
         LinkedHashMap<String, LinkedHashMap<String, AnimationSpec>> todGroups = new LinkedHashMap<>();
         List<AnimationSpec> standaloneAnims = new ArrayList<>();
 
@@ -119,7 +121,10 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             }
         }
 
-        // Generate grid atlases for TOD groups
+        // Collect grid animation definitions for the unified config
+        Map<String, AtlasConfigWriter.GridAnimDef> gridAnimDefs = new LinkedHashMap<>();
+
+        // Generate grid atlas PNGs for TOD groups
         for (var entry : todGroups.entrySet()) {
             String baseName = entry.getKey();
             LinkedHashMap<String, AnimationSpec> variants = entry.getValue();
@@ -143,10 +148,9 @@ public class LayeredAssetGenerator implements AssetGenerationService {
                 Path atlasPath = atlasWriter.writeGridAtlas(rowFrames, baseName, animDir);
                 generated.add(atlasPath);
 
-                String atlasFileName = atlasPath.getFileName().toString();
-                Path gridConfig = configWriter.writeGridConfig(
-                        baseName, atlasFileName, "time_of_day", sorted, animDir);
-                generated.add(gridConfig);
+                // Collect for unified config
+                gridAnimDefs.put(baseName,
+                        new AtlasConfigWriter.GridAnimDef("time_of_day", sorted));
 
                 log.info("Grid atlas '{}': {} rows × {} frames",
                         baseName, sorted.size(), sorted.values().iterator().next().frames());
@@ -155,27 +159,27 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             }
         }
 
-        // Generate strip atlases for standalone (non-TOD) animations
+        // Generate strip atlas PNGs for standalone (non-TOD) animations
         for (AnimationSpec animSpec : standaloneAnims) {
             List<BufferedImage> frames = renderer.renderAnimationFrames(layers, animSpec);
             try {
                 Path atlasPath = atlasWriter.writeAtlas(frames, animSpec, animDir);
                 generated.add(atlasPath);
-
-                String atlasFileName = atlasPath.getFileName().toString();
-                Path configPath = configWriter.writeConfig(animSpec, atlasFileName, animDir);
-                generated.add(configPath);
             } catch (IOException e) {
                 throw new UncheckedIOException("Failed to write atlas: " + animSpec.name(), e);
             }
         }
 
-        // Combined config (all animations, flat list for backward compat)
+        // Write unified sprite-atlas.json (config v1.0)
         try {
-            Path combinedConfig = configWriter.writeCombinedConfig(spec.animations(), animDir);
-            generated.add(combinedConfig);
+            int spriteW = resolveWidth(spec);
+            int spriteH = resolveHeight(spec);
+            Path configPath = configWriter.writeSpriteAtlas(
+                    spec.entityName(), spriteW, spriteH,
+                    standaloneAnims, gridAnimDefs, animDir);
+            generated.add(configPath);
         } catch (IOException e) {
-            throw new UncheckedIOException("Failed to write combined atlas config", e);
+            throw new UncheckedIOException("Failed to write sprite-atlas.json for " + spec.entityName(), e);
         }
 
         return generated;
