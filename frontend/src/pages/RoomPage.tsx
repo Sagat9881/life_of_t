@@ -4,6 +4,15 @@ import { LocationRenderer } from '../components/game/LocationRenderer';
 import { getLocationConfig, getLocationForTimeSlot } from '../config/locations';
 import styles from './RoomPage.module.css';
 
+/** Derive time slot from hour when backend doesn't provide timeSlot */
+const deriveTimeSlot = (hour: number): string => {
+  if (hour < 7) return 'NIGHT';
+  if (hour < 12) return 'MORNING';
+  if (hour < 17) return 'DAY';
+  if (hour < 21) return 'EVENING';
+  return 'NIGHT';
+};
+
 export const RoomPage: React.FC = () => {
   const { player, time, isLoading, error, fetchGameState, executeAction } = useGameStore();
   const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
@@ -13,12 +22,15 @@ export const RoomPage: React.FC = () => {
     fetchGameState();
   }, [fetchGameState]);
 
+  // Determine current time slot — use backend value or derive from hour
+  const rawTimeSlot = time?.timeSlot ?? (time ? deriveTimeSlot(time.hour) : 'MORNING');
+
   // Determine current location based on time slot
-  const locationId = time ? getLocationForTimeSlot(time.timeSlot) : 'home_room';
+  const locationId = getLocationForTimeSlot(rawTimeSlot);
   const locationConfig = getLocationConfig(locationId);
 
-  // Derive time-of-day condition from game time
-  const timeOfDay = time ? time.timeSlot.toLowerCase() : 'morning';
+  // Derive time-of-day condition from game time (lowercase for sprite conditions)
+  const timeOfDay = rawTimeSlot.toLowerCase();
 
   const handleObjectClick = (objectId: string, actionCode: string) => {
     const furniture = locationConfig.furniture.find((f) => f.id === objectId);
