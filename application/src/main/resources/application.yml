@@ -3,6 +3,15 @@
 spring:
   application:
     name: life-of-t
+  mvc:
+    static-path-pattern: /**
+  web:
+    resources:
+      static-locations:
+        - classpath:/static/
+      cache:
+        cachecontrol:
+          max-age: 365d
 
 server:
   port: 8080
@@ -10,21 +19,13 @@ server:
     enabled: true
     mime-types:
       - application/json
-      - application/javascript
+      - application/javascript  
       - text/css
       - text/html
       - image/png
-
-# Spring MVC
-spring.mvc:
-  static-path-pattern: /**
-
-spring.web.resources:
-  static-locations:
-    - classpath:/static/
-  cache:
-    cachecontrol:
-      max-age: 365d # Cache static resources for 1 year
+      - audio/ogg
+      - audio/mpeg
+    min-response-size: 1024
 
 # Actuator
 management:
