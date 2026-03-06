@@ -15,22 +15,23 @@
     <packaging>jar</packaging>
 
     <name>Life of T - Application</name>
-    <description>Main application module that launches backend and serves frontend</description>
+    <description>Main application: demo frontend + backend API + asset generation</description>
 
     <dependencies>
-        <!-- Backend module -->
+        <!-- Backend module (domain + REST API /api/v1/game) -->
         <dependency>
             <groupId>ru.lifegame</groupId>
             <artifactId>backend</artifactId>
         </dependency>
-        
-        <!-- Frontend module (static resources) -->
+
+        <!-- Demo module (working pixel-art frontend + /api/demo controllers) -->
         <dependency>
             <groupId>ru.lifegame</groupId>
-            <artifactId>frontend</artifactId>
+            <artifactId>demo</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
-        <!-- Asset generator module (for startup asset indexing) -->
+        <!-- Asset generator module -->
         <dependency>
             <groupId>ru.lifegame</groupId>
             <artifactId>asset-generator</artifactId>
@@ -52,55 +53,6 @@
 
     <build>
         <plugins>
-            <!-- Generate assets from asset-specs XMLs during build -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.1.1</version>
-                <executions>
-                    <execution>
-                        <id>generate-assets</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>ru.lifegame.assets.AssetGeneratorRunner</mainClass>
-                            <arguments>
-                                <argument>${project.basedir}/../asset-specs</argument>
-                                <argument>${project.build.directory}/generated-assets</argument>
-                            </arguments>
-                            <classpathScope>compile</classpathScope>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Copy generated assets into classpath so JAR can serve them -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-generated-assets-to-classpath</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/classes/generated-assets</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.build.directory}/generated-assets</directory>
-                                    <filtering>false</filtering>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <!-- Spring Boot Maven Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
