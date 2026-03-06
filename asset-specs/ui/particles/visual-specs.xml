@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>ui</entity-type>
+        <entity-name>particles</entity-name>
+        <version>1.0.0</version>
+        <description>
+            Система частиц для UI-эффектов.
+            Сердечки — повышение отношений.
+            Звёзды — получение достижений/уровней.
+            Стресс — красные искры при росте стресса.
+            Монеты — получение денег.
+            Используются как reward-only (по DESIGN_SYSTEM).
+        </description>
+    </meta>
+
+    <layers>
+        <!-- === СЕРДЕЧКИ (отношения) === -->
+        <layer id="heart" type="animated-overlay" z-order="100" width="8" height="8">
+            <pixel-data>
+                <!-- Маленькое пиксельное сердечко 5x5 -->
+                <pixel x="1" y="1" color="#FF6B9D"/>
+                <pixel x="2" y="0" color="#FF6B9D"/>
+                <pixel x="3" y="1" color="#FF6B9D"/>
+                <pixel x="4" y="1" color="#FF6B9D"/>
+                <pixel x="5" y="0" color="#FF6B9D"/>
+                <pixel x="6" y="1" color="#FF6B9D"/>
+                <rect x="1" y="2" w="6" h="1" color="#FF6B9D"/>
+                <rect x="2" y="3" w="4" h="1" color="#FF6B9D"/>
+                <rect x="3" y="4" w="2" h="1" color="#FF6B9D"/>
+                <!-- Блик -->
+                <pixel x="2" y="1" color="#FFB0C8"/>
+            </pixel-data>
+        </layer>
+
+        <!-- === ЗВЁЗДЫ (достижения/уровень) === -->
+        <layer id="star" type="animated-overlay" z-order="100" width="8" height="8">
+            <pixel-data>
+                <!-- Пиксельная звёздочка 5x5 -->
+                <pixel x="3" y="0" color="#FFE66D"/>
+                <pixel x="2" y="1" color="#FFE66D"/>
+                <pixel x="3" y="1" color="#FFD740"/>
+                <pixel x="4" y="1" color="#FFE66D"/>
+                <rect x="0" y="2" w="7" h="1" color="#FFE66D"/>
+                <pixel x="3" y="2" color="#FFD740"/>
+                <rect x="1" y="3" w="5" h="1" color="#FFE66D"/>
+                <pixel x="1" y="4" color="#FFE66D"/>
+                <pixel x="5" y="4" color="#FFE66D"/>
+                <!-- Блик -->
+                <pixel x="3" y="1" color="#FFF8B0"/>
+            </pixel-data>
+        </layer>
+
+        <!-- === СТРЕСС (красные искры) === -->
+        <layer id="stress-spark" type="animated-overlay" z-order="100" width="6" height="6">
+            <pixel-data>
+                <pixel x="2" y="0" color="#E74C3C"/>
+                <pixel x="4" y="1" color="#FF6B6B"/>
+                <pixel x="1" y="2" color="#E74C3C"/>
+                <pixel x="3" y="3" color="#FF4444"/>
+                <pixel x="5" y="4" color="#E74C3C"/>
+                <pixel x="0" y="5" color="#FF6B6B"/>
+            </pixel-data>
+        </layer>
+
+        <!-- === МОНЕТЫ (деньги) === -->
+        <layer id="coin" type="animated-overlay" z-order="100" width="8" height="8">
+            <pixel-data>
+                <rect x="2" y="1" w="4" h="6" color="#FFD700"/>
+                <pixel x="1" y="2" color="#FFD700"/>
+                <pixel x="1" y="5" color="#FFD700"/>
+                <pixel x="6" y="2" color="#FFD700"/>
+                <pixel x="6" y="5" color="#FFD700"/>
+                <!-- Символ ₽ внутри -->
+                <pixel x="3" y="3" color="#DAA520"/>
+                <pixel x="4" y="3" color="#DAA520"/>
+                <pixel x="3" y="4" color="#DAA520"/>
+                <!-- Блик -->
+                <pixel x="3" y="2" color="#FFF0A0"/>
+                <pixel x="2" y="2" color="#FFE870"/>
+            </pixel-data>
+        </layer>
+
+        <!-- === ЭНЕРГИЯ (зелёные искры) === -->
+        <layer id="energy-spark" type="animated-overlay" z-order="100" width="6" height="6">
+            <pixel-data>
+                <pixel x="3" y="0" color="#4CAF50"/>
+                <pixel x="1" y="1" color="#66BB6A"/>
+                <pixel x="5" y="2" color="#4CAF50"/>
+                <pixel x="2" y="3" color="#81C784"/>
+                <pixel x="4" y="4" color="#66BB6A"/>
+                <pixel x="0" y="5" color="#4CAF50"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <!-- Сердечки: всплывают вверх, покачиваясь, и исчезают -->
+        <animation name="hearts-float" frames="8" fps="6" loop="false"
+                   frame-width="8" frame-height="8"
+                   spawn="random-x, above-character" count="3-5">
+            <description>
+                3-5 сердечек появляются над персонажем,
+                плавно поднимаются вверх, покачиваясь
+                влево-вправо. Каждое с небольшой задержкой.
+                Последние кадры — fade (alpha уменьшается).
+            </description>
+            <frame index="0" layer-offsets="heart:0,0" alpha="1.0"/>
+            <frame index="1" layer-offsets="heart:-1,-2" alpha="1.0"/>
+            <frame index="2" layer-offsets="heart:0,-4" alpha="1.0"/>
+            <frame index="3" layer-offsets="heart:1,-6" alpha="0.9"/>
+            <frame index="4" layer-offsets="heart:0,-8" alpha="0.8"/>
+            <frame index="5" layer-offsets="heart:-1,-10" alpha="0.6"/>
+            <frame index="6" layer-offsets="heart:0,-12" alpha="0.4"/>
+            <frame index="7" layer-offsets="heart:1,-14" alpha="0.2"/>
+        </animation>
+
+        <!-- Звёзды: взрываются от центра наружу -->
+        <animation name="stars-burst" frames="6" fps="8" loop="false"
+                   frame-width="8" frame-height="8"
+                   spawn="center-character" count="5-8">
+            <description>
+                5-8 звёзд разлетаются от центра персонажа
+                во все стороны. Быстрый burst,
+                затем fade. Эффект «фейерверка».
+            </description>
+            <frame index="0" layer-offsets="star:0,0" alpha="1.0"/>
+            <frame index="1" layer-offsets="star:2,-2" alpha="1.0"/>
+            <frame index="2" layer-offsets="star:4,-4" alpha="0.9"/>
+            <frame index="3" layer-offsets="star:6,-5" alpha="0.7"/>
+            <frame index="4" layer-offsets="star:7,-6" alpha="0.4"/>
+            <frame index="5" layer-offsets="star:8,-6" alpha="0.1"/>
+        </animation>
+
+        <!-- Стресс: искры вздрагивают вокруг головы -->
+        <animation name="stress-crackle" frames="6" fps="8" loop="false"
+                   frame-width="6" frame-height="6"
+                   spawn="around-head" count="4-6">
+            <description>
+                4-6 красных искр появляются вокруг головы,
+                хаотично подёргиваются и исчезают.
+                Эффект «нервного потрескивания».
+            </description>
+            <frame index="0" layer-offsets="stress-spark:0,0" alpha="0.8"/>
+            <frame index="1" layer-offsets="stress-spark:1,-1" alpha="1.0"/>
+            <frame index="2" layer-offsets="stress-spark:-1,1" alpha="1.0"/>
+            <frame index="3" layer-offsets="stress-spark:1,0" alpha="0.8"/>
+            <frame index="4" layer-offsets="stress-spark:-1,-1" alpha="0.5"/>
+            <frame index="5" layer-offsets="stress-spark:0,0" alpha="0.2"/>
+        </animation>
+
+        <!-- Монеты: подпрыгивают и разлетаются -->
+        <animation name="coins-pop" frames="8" fps="6" loop="false"
+                   frame-width="8" frame-height="8"
+                   spawn="above-character" count="3-5">
+            <description>
+                3-5 монет выскакивают вверх из персонажа,
+                описывают параболу и исчезают.
+                Звенящий эффект получения денег.
+            </description>
+            <frame index="0" layer-offsets="coin:0,0" alpha="1.0"/>
+            <frame index="1" layer-offsets="coin:1,-3" alpha="1.0"/>
+            <frame index="2" layer-offsets="coin:2,-5" alpha="1.0"/>
+            <frame index="3" layer-offsets="coin:3,-6" alpha="1.0"/>
+            <frame index="4" layer-offsets="coin:3,-5" alpha="0.9"/>
+            <frame index="5" layer-offsets="coin:4,-3" alpha="0.7"/>
+            <frame index="6" layer-offsets="coin:4,-1" alpha="0.4"/>
+            <frame index="7" layer-offsets="coin:4,0" alpha="0.1"/>
+        </animation>
+
+        <!-- Энергия: искры поднимаются спиралью -->
+        <animation name="energy-rise" frames="6" fps="6" loop="false"
+                   frame-width="6" frame-height="6"
+                   spawn="around-character" count="4-6">
+            <description>
+                4-6 зелёных искр поднимаются вокруг персонажа
+                спиралью вверх — эффект восстановления энергии.
+            </description>
+            <frame index="0" layer-offsets="energy-spark:0,0" alpha="1.0"/>
+            <frame index="1" layer-offsets="energy-spark:2,-2" alpha="1.0"/>
+            <frame index="2" layer-offsets="energy-spark:-1,-4" alpha="0.9"/>
+            <frame index="3" layer-offsets="energy-spark:2,-6" alpha="0.7"/>
+            <frame index="4" layer-offsets="energy-spark:-1,-8" alpha="0.4"/>
+            <frame index="5" layer-offsets="energy-spark:0,-10" alpha="0.1"/>
+        </animation>
+    </animations>
+
+    <naming>
+        <output-dir>ui/particles</output-dir>
+    </naming>
+</asset-spec>
