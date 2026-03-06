@@ -24,19 +24,17 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 
 #room-bg {
     position: absolute; inset: 0;
-    background-image: url('/assets/generated/locations/home_room/home_room.png');
     background-size: 100% 100%;
     background-repeat: no-repeat;
     image-rendering: pixelated;
 }
 
-#room-floor {
+.scene-element {
     position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 40%;
-    background:
-        repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 32px),
-        repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 32px);
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background-repeat: no-repeat;
+    pointer-events: none;
 }
 
 .sprite {
@@ -51,39 +49,13 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 .sprite.clickable:hover { filter: brightness(1.3) drop-shadow(0 0 6px rgba(200,160,255,0.5)); }
 .sprite.clickable:active { filter: brightness(1.5); transform: scale(0.97); }
 
-#bed {
-    bottom: 28%; right: 8%;
-    width: 192px; height: 192px;
-    background-image: url('/assets/generated/locations/home_room/bed.png');
-    background-size: 100% 100%;
-}
-#desk {
-    bottom: 22%; left: 10%;
-    width: 192px; height: 192px;
-    background-image: url('/assets/generated/locations/home_room/desk.png');
-    background-size: 100% 100%;
-}
-
-/* Character sprites — initial sizes, overridden by SpriteController */
-#sam {
-    bottom: 24%; right: 22%;
-    width: 96px; height: 80px;
-}
-#tanya {
-    bottom: 22%; left: 35%;
-    width: 128px; height: 128px;
-}
-#alexander {
-    bottom: 22%; right: 30%;
-    width: 128px; height: 128px;
-}
-
 .activity-icon {
     position: absolute;
     font-size: 18px;
     pointer-events: none;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
     transition: opacity 0.3s;
+    z-index: 10;
 }
 
 #side-panel {
@@ -139,7 +111,7 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
     background: rgba(0,0,0,0.6); border: 1px solid #3a3a5a;
     padding: 4px 12px; font-size: 0.65rem; color: #8080a0; pointer-events: none;
-    transition: all 0.3s;
+    transition: all 0.3s; z-index: 20;
 }
 #loading {
     position: fixed; inset: 0; background: #0d0d14;
@@ -160,6 +132,7 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     position: absolute; font-size: 9px; color: #a098b8;
     text-align: center; pointer-events: none;
     text-shadow: 1px 1px 0 #000; white-space: nowrap;
+    z-index: 10;
 }
 
 .sprite-placeholder {
@@ -168,7 +141,6 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     font-size: 24px;
 }
 
-/* ======================== Interaction Modal ======================== */
 .interaction-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.5);
     z-index: 50; display: flex; align-items: center; justify-content: center;
@@ -279,9 +251,7 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 
     <main id="room-container">
         <div id="room-bg"></div>
-        <div id="room-floor"></div>
-        <div id="bed" class="sprite" title="Кровать"></div>
-        <div id="desk" class="sprite" title="Стол"></div>
+        <!-- No hardcoded ambient div — created by SceneElement from config -->
 
         <div id="sam" class="sprite clickable" title="Сэм (собака)"></div>
         <span id="label-sam" class="sprite-label">Сэм 🐾</span>
@@ -339,6 +309,9 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 <script>
 'use strict';
 
+const BG_NATIVE_W = 320;
+const BG_NATIVE_H = 240;
+
 // ============================================================
 //  Utilities
 // ============================================================
@@ -367,26 +340,46 @@ function getTimeSlot(hour) {
 }
 
 // ============================================================
+//  ScaleManager
+// ============================================================
+class ScaleManager {
+    constructor(containerEl) {
+        this.container = containerEl;
+        this._scale = 1;
+        this._listeners = [];
+        this._recalc();
+        const ro = new ResizeObserver(() => {
+            this._recalc();
+            this._listeners.forEach(fn => fn(this._scale));
+        });
+        ro.observe(containerEl);
+    }
+    get scale() { return this._scale; }
+    onChange(fn) { this._listeners.push(fn); }
+    _recalc() { this._scale = this.container.clientWidth / BG_NATIVE_W; }
+}
+
+// ============================================================
 //  SpriteController — universal animation engine
 //
-//  Reads sprite-atlas.json config (v1.*), plays any named
-//  animation by driving CSS background-position on 2 axes.
+//  renderMode = "sprite" (default):
+//    CSS background-image + background-position animation.
 //
-//  v1.1: reads frameWidth/frameHeight per animation entry.
-//        Resizes the DOM element to match current animation.
+//  renderMode = "overlay":
+//    CSS backgroundColor + opacity + mix-blend-mode.
+//    Reads tint/opacity from row definitions in config.
+//    No background-image used — pure color overlay.
 // ============================================================
 class SpriteController {
 
     static async create(el, configUrl) {
         const config = await fetchJSON(configUrl);
         if (!config || !config.animations) return null;
-
         const v = config.configVersion || '0';
         if (!v.startsWith('1.')) {
             console.warn(`[SpriteController] Unsupported config version: ${v}`);
             return null;
         }
-
         return new SpriteController(el, config);
     }
 
@@ -394,7 +387,7 @@ class SpriteController {
         this.el = el;
         this.config = config;
         this.baseUrl = '';
-
+        this.scale = 1;
         this._timer = null;
         this._currentAnim = null;
         this._currentAnimConfig = null;
@@ -404,37 +397,35 @@ class SpriteController {
         this._totalRows = 1;
         this._frameW = 0;
         this._frameH = 0;
+        this._fps = 1;
         this._rowMap = null;
+        this._renderMode = 'sprite';
     }
 
     get currentAnimation() { return this._currentAnim; }
     get isPlaying() { return this._timer !== null; }
     get frameWidth() { return this._frameW; }
     get frameHeight() { return this._frameH; }
+    get displayWidth() { return this._frameW * this.scale; }
+    get displayHeight() { return this._frameH * this.scale; }
 
-    setBaseUrl(url) {
-        this.baseUrl = url.endsWith('/') ? url : url + '/';
+    setBaseUrl(url) { this.baseUrl = url.endsWith('/') ? url : url + '/'; }
+
+    setScale(s) {
+        this.scale = s;
+        if (this._currentAnimConfig) this._applySize();
     }
 
-    /**
-     * Start playing a named animation.
-     * Reads frameWidth/frameHeight from the animation entry (v1.1),
-     * falls back to global spriteWidth/spriteHeight (v1.0 compat).
-     */
     async play(name, opts) {
         const animCfg = this.config.animations[name];
-        if (!animCfg) {
-            console.warn(`[SpriteController] Animation "${name}" not found`);
-            return false;
-        }
-
+        if (!animCfg) return false;
         this.stop();
 
         this._currentAnim = name;
         this._currentAnimConfig = animCfg;
         this._frame = 0;
+        this._renderMode = animCfg.renderMode || 'sprite';
 
-        // Frame dimensions: per-animation (v1.1) > global (v1.0 compat)
         this._frameW = animCfg.frameWidth  || this.config.spriteWidth  || 64;
         this._frameH = animCfg.frameHeight || this.config.spriteHeight || 64;
 
@@ -458,18 +449,22 @@ class SpriteController {
             this._applyCondition(opts.condition);
         }
 
+        if (this._renderMode === 'overlay') {
+            this._applyOverlay();
+            this._applySize();
+            return true;
+        }
+
+        // Sprite mode
         const atlasUrl = this.baseUrl + animCfg.file;
         const ok = await preloadImage(atlasUrl);
         if (!ok) return false;
 
-        // Resize DOM element to exactly one frame
-        this.el.style.width  = this._frameW + 'px';
-        this.el.style.height = this._frameH + 'px';
-
-        // Background covers the full atlas grid
         this.el.style.backgroundImage = `url('${atlasUrl}')`;
-        this.el.style.backgroundSize =
-            `${this._columns * this._frameW}px ${this._totalRows * this._frameH}px`;
+        this.el.style.backgroundColor = '';
+        this.el.style.opacity = '';
+        this.el.style.mixBlendMode = '';
+        this._applySize();
         this._paint();
 
         if (this._columns > 1) {
@@ -479,46 +474,64 @@ class SpriteController {
                 this._paint();
             }, interval);
         }
-
         return true;
     }
 
     setCondition(conditionValue) {
         if (!this._rowMap) return;
         if (this._applyCondition(conditionValue)) {
-            if (this._timer) {
-                clearInterval(this._timer);
-                const interval = Math.round(1000 / this._fps);
-                this._timer = setInterval(() => {
-                    this._frame = (this._frame + 1) % this._columns;
-                    this._paint();
-                }, interval);
+            if (this._renderMode === 'overlay') {
+                this._applyOverlay();
+            } else {
+                if (this._timer) {
+                    clearInterval(this._timer);
+                    const interval = Math.round(1000 / this._fps);
+                    this._timer = setInterval(() => {
+                        this._frame = (this._frame + 1) % this._columns;
+                        this._paint();
+                    }, interval);
+                }
+                this._paint();
             }
-            this._paint();
         }
     }
 
     stop() {
-        if (this._timer) {
-            clearInterval(this._timer);
-            this._timer = null;
+        if (this._timer) { clearInterval(this._timer); this._timer = null; }
+    }
+
+    _applySize() {
+        const s = this.scale;
+        const dw = Math.round(this._frameW * s);
+        const dh = Math.round(this._frameH * s);
+        this.el.style.width  = dw + 'px';
+        this.el.style.height = dh + 'px';
+        if (this._renderMode === 'sprite') {
+            this.el.style.backgroundSize =
+                `${Math.round(this._columns * this._frameW * s)}px ${Math.round(this._totalRows * this._frameH * s)}px`;
         }
     }
 
-    reapply() {
-        if (!this._currentAnimConfig) return;
-        const atlasUrl = this.baseUrl + this._currentAnimConfig.file;
-        this.el.style.backgroundImage = `url('${atlasUrl}')`;
-        this.el.style.width  = this._frameW + 'px';
-        this.el.style.height = this._frameH + 'px';
-        this.el.style.backgroundSize =
-            `${this._columns * this._frameW}px ${this._totalRows * this._frameH}px`;
-        this._paint();
+    _paint() {
+        if (this._renderMode !== 'sprite') return;
+        const s = this.scale;
+        this.el.style.backgroundPosition =
+            `${-Math.round(this._frame * this._frameW * s)}px ${-Math.round(this._row * this._frameH * s)}px`;
     }
 
-    _paint() {
-        this.el.style.backgroundPosition =
-            `${-(this._frame * this._frameW)}px ${-(this._row * this._frameH)}px`;
+    _applyOverlay() {
+        const rowDef = this._findCurrentRowDef();
+        if (!rowDef) return;
+        this.el.style.backgroundImage = 'none';
+        this.el.style.backgroundColor = rowDef.tint || '#000000';
+        this.el.style.opacity = rowDef.opacity != null ? rowDef.opacity : 0.1;
+        this.el.style.mixBlendMode = 'multiply';
+        this.el.style.transition = 'background-color 1.5s ease, opacity 1.5s ease';
+    }
+
+    _findCurrentRowDef() {
+        if (!this._currentAnimConfig || !this._currentAnimConfig.rows) return null;
+        return this._currentAnimConfig.rows.find(r => r.rowIndex === this._row);
     }
 
     _buildRowMap(rows) {
@@ -539,27 +552,97 @@ class SpriteController {
 }
 
 // ============================================================
+//  SceneElement — animated or static element on the scene
+//  Uses SpriteController for BOTH sprite and overlay modes.
+// ============================================================
+class SceneElement {
+
+    constructor(def, scaleManager) {
+        this.def = def;
+        this.scaleManager = scaleManager;
+        this.sprite = null;
+        this.el = null;
+        this._ready = this._initAsync();
+    }
+
+    async _initAsync() {
+        const container = this.scaleManager.container;
+        this.el = document.createElement('div');
+        this.el.className = 'scene-element';
+        this.el.style.zIndex = this.def.zIndex || 2;
+        container.appendChild(this.el);
+
+        if (this.def.atlasConfig) {
+            this.sprite = await SpriteController.create(this.el, this.def.atlasConfig);
+            if (this.sprite) {
+                this.sprite.setBaseUrl(this.def.assetsBase + '/');
+                this.sprite.setScale(this.scaleManager.scale);
+                const slot = getTimeSlot(currentGameTime.hour);
+                const animName = this.def.animation || 'idle';
+                await this.sprite.play(animName, { condition: slot });
+                this._applyPosition();
+            }
+        }
+
+        if (!this.sprite && this.def.staticImage) {
+            const ok = await preloadImage(this.def.staticImage);
+            if (ok) {
+                const s = this.scaleManager.scale;
+                const w = (this.def.nativeW || BG_NATIVE_W);
+                const h = (this.def.nativeH || BG_NATIVE_H);
+                this.el.style.backgroundImage = `url('${this.def.staticImage}')`;
+                this.el.style.width  = Math.round(w * s) + 'px';
+                this.el.style.height = Math.round(h * s) + 'px';
+                this.el.style.backgroundSize = '100% 100%';
+                this._applyPosition();
+            }
+        }
+
+        this.scaleManager.onChange(scale => this.onScaleChange(scale));
+    }
+
+    _applyPosition() {
+        const s = this.scaleManager.scale;
+        if (this.def.nativeX != null) this.el.style.left = Math.round(this.def.nativeX * s) + 'px';
+        if (this.def.nativeY != null) this.el.style.top = Math.round(this.def.nativeY * s) + 'px';
+    }
+
+    onScaleChange(scale) {
+        if (this.sprite) {
+            this.sprite.setScale(scale);
+        } else if (this.def.staticImage) {
+            const w = (this.def.nativeW || BG_NATIVE_W);
+            const h = (this.def.nativeH || BG_NATIVE_H);
+            this.el.style.width  = Math.round(w * scale) + 'px';
+            this.el.style.height = Math.round(h * scale) + 'px';
+        }
+        this._applyPosition();
+    }
+
+    onTimeSlotChange(slot) {
+        if (this.sprite) this.sprite.setCondition(slot);
+    }
+}
+
+// ============================================================
 //  SceneActor — character on the scene
 // ============================================================
 class SceneActor {
 
-    constructor(layout) {
+    constructor(layout, scaleManager) {
         this.layout = layout;
+        this.scaleManager = scaleManager;
         this.el = document.getElementById(layout.el);
         this.labelEl  = document.getElementById(layout.labelEl);
         this.activityEl = document.getElementById(layout.activityEl);
-
         this.sprite = null;
         this.state = 'idle';
         this.isStatic = false;
-
-        const rect = this.el.getBoundingClientRect();
-        const container = this.el.parentElement.getBoundingClientRect();
-        this.posX = rect.left - container.left;
+        this.posX = layout.startX || (BG_NATIVE_W * layout.startPct / 100);
         this.targetX = this.posX;
         this.moveRAF = null;
-
         this._initAsync();
+        scaleManager.onChange(() => this._onScaleChange());
     }
 
     async _initAsync() {
@@ -569,6 +652,7 @@ class SceneActor {
 
         if (this.sprite) {
             this.sprite.setBaseUrl(L.assetsBase + '/');
+            this.sprite.setScale(this.scaleManager.scale);
             const slot = getTimeSlot(currentGameTime.hour);
             const started = await this.sprite.play('idle', { condition: slot });
             if (started) {
@@ -582,7 +666,7 @@ class SceneActor {
         } else {
             this._tryStaticFallback() || this._applyPlaceholder();
         }
-
+        this._updatePosition();
         this._scheduleNextWalk();
         this._rotateActivity();
     }
@@ -591,11 +675,11 @@ class SceneActor {
         const L = this.layout;
         const ok = await preloadImage(L.staticFallback);
         if (!ok) return false;
+        const s = this.scaleManager.scale;
         this.el.style.backgroundImage = `url('${L.staticFallback}')`;
-        this.el.style.width  = L.fallbackW + 'px';
-        this.el.style.height = L.fallbackH + 'px';
-        this.el.style.backgroundSize = `${L.fallbackW}px ${L.fallbackH}px`;
-        this.el.style.backgroundPosition = '0 0';
+        this.el.style.width  = Math.round(L.nativeW * s) + 'px';
+        this.el.style.height = Math.round(L.nativeH * s) + 'px';
+        this.el.style.backgroundSize = '100% 100%';
         this.isStatic = true;
         this.state = 'idle';
         return true;
@@ -603,14 +687,23 @@ class SceneActor {
 
     _applyPlaceholder() {
         const L = this.layout;
+        const s = this.scaleManager.scale;
+        const dw = Math.round(L.nativeW * s);
+        const dh = Math.round(L.nativeH * s);
         this.el.style.backgroundImage = 'none';
-        this.el.style.width  = L.fallbackW + 'px';
-        this.el.style.height = L.fallbackH + 'px';
+        this.el.style.width  = dw + 'px';
+        this.el.style.height = dh + 'px';
         this.el.style.backgroundColor = L.placeholderColor;
         this.el.classList.add('sprite-placeholder');
-        this.el.innerHTML = `<span style="font-size:${L.fallbackH/3}px">${L.placeholderEmoji}</span>`;
+        this.el.innerHTML = `<span style="font-size:${dh/3}px">${L.placeholderEmoji}</span>`;
         this.isStatic = true;
-        this.state = 'idle';
+    }
+
+    get displayW() {
+        return this.sprite ? this.sprite.displayWidth : this.layout.nativeW * this.scaleManager.scale;
+    }
+    get displayH() {
+        return this.sprite ? this.sprite.displayHeight : this.layout.nativeH * this.scaleManager.scale;
     }
 
     async switchToIdle() {
@@ -630,16 +723,19 @@ class SceneActor {
     }
 
     onTimeSlotChange(newSlot) {
-        if (this.sprite && this.state === 'idle') {
-            this.sprite.setCondition(newSlot);
-        }
+        if (this.sprite && this.state === 'idle') this.sprite.setCondition(newSlot);
     }
 
-    /** Current display height (from sprite or fallback) */
-    get displayHeight() {
-        return this.sprite && this.sprite.frameHeight
-            ? this.sprite.frameHeight
-            : this.layout.fallbackH;
+    _onScaleChange() {
+        if (this.sprite) {
+            this.sprite.setScale(this.scaleManager.scale);
+        } else if (this.isStatic) {
+            const s = this.scaleManager.scale;
+            const L = this.layout;
+            this.el.style.width  = Math.round(L.nativeW * s) + 'px';
+            this.el.style.height = Math.round(L.nativeH * s) + 'px';
+        }
+        this._updatePosition();
     }
 
     _scheduleNextWalk() {
@@ -650,27 +746,21 @@ class SceneActor {
 
     async _startWalk() {
         if (!this.sprite || !this.sprite.config.animations.walk) {
-            this._scheduleNextWalk();
-            return;
+            this._scheduleNextWalk(); return;
         }
-        const container = this.el.parentElement;
-        if (!container) return;
-        const cw = container.clientWidth;
         const L = this.layout;
-        const sprW = this.sprite.frameWidth || L.fallbackW;
-        const minPx = cw * L.minX / 100;
-        const maxPx = cw * L.maxX / 100 - sprW;
-        this.targetX = minPx + Math.random() * (maxPx - minPx);
-        if (Math.abs(this.targetX - this.posX) < 20) { this._scheduleNextWalk(); return; }
-
+        const nativeW = this.sprite.frameWidth || L.nativeW;
+        const minNX = BG_NATIVE_W * L.minX / 100;
+        const maxNX = BG_NATIVE_W * L.maxX / 100 - nativeW;
+        this.targetX = minNX + Math.random() * (maxNX - minNX);
+        if (Math.abs(this.targetX - this.posX) < 5) { this._scheduleNextWalk(); return; }
         this.el.style.transform = this.targetX < this.posX ? 'scaleX(-1)' : 'scaleX(1)';
         const ok = await this.switchToWalk();
-        if (ok) this._move();
-        else this._scheduleNextWalk();
+        if (ok) this._move(); else this._scheduleNextWalk();
     }
 
     _move() {
-        const speed = this.layout.speed || 1.5;
+        const speed = (this.layout.speed || 1.5) / 60;
         const step = () => {
             const dx = this.targetX - this.posX;
             if (Math.abs(dx) < speed) {
@@ -689,20 +779,23 @@ class SceneActor {
     }
 
     _updatePosition() {
+        const s = this.scaleManager.scale;
         const L = this.layout;
-        const sprW = this.sprite && this.sprite.frameWidth  ? this.sprite.frameWidth  : L.fallbackW;
-        const sprH = this.sprite && this.sprite.frameHeight ? this.sprite.frameHeight : L.fallbackH;
-        this.el.style.left = this.posX + 'px';
+        const screenX = Math.round(this.posX * s);
+        this.el.style.left = screenX + 'px';
         this.el.style.right = 'auto';
+        this.el.style.bottom = L.bottomPct + '%';
+        const dw = this.displayW;
+        const dh = this.displayH;
         if (this.labelEl) {
-            this.labelEl.style.left = (this.posX + sprW / 2 - 30) + 'px';
+            this.labelEl.style.left = (screenX + dw / 2 - 30) + 'px';
             this.labelEl.style.right = 'auto';
             this.labelEl.style.bottom = `calc(${L.bottomPct}% - 14px)`;
         }
         if (this.activityEl) {
-            this.activityEl.style.left = (this.posX + sprW / 2 - 9) + 'px';
+            this.activityEl.style.left = (screenX + dw / 2 - 9) + 'px';
             this.activityEl.style.right = 'auto';
-            this.activityEl.style.bottom = `calc(${L.bottomPct}% + ${sprH}px + 4px)`;
+            this.activityEl.style.bottom = `calc(${L.bottomPct}% + ${dh}px + 4px)`;
         }
     }
 
@@ -715,19 +808,18 @@ class SceneActor {
 }
 
 // ============================================================
-//  Actor layout configs (scene positioning only)
-//  fallbackW/fallbackH used for static/placeholder; actual
-//  animation dimensions come from sprite-atlas.json per-anim.
+//  Layout configs
 // ============================================================
 const BASE = '/assets/generated/characters';
+const LOC_BASE = '/assets/generated/locations/home_room';
 
 const ACTOR_LAYOUTS = {
     tanya: {
         el: 'tanya', labelEl: 'label-tanya', activityEl: 'activity-tanya',
         assetsBase: `${BASE}/tanya/animations`,
         staticFallback: `${BASE}/tanya/tanya.png`,
-        fallbackW: 128, fallbackH: 192,
-        minX: 5, maxX: 80, bottomPct: 22, speed: 1.8,
+        nativeW: 32, nativeH: 48,
+        startPct: 35, minX: 5, maxX: 80, bottomPct: 22, speed: 1.5,
         idleMinSec: 2, idleMaxSec: 6,
         activities: ['☕', '📖', '🎮', '💭', '🎵', '💅'],
         placeholderEmoji: '👩', placeholderColor: '#90D8C0'
@@ -736,8 +828,8 @@ const ACTOR_LAYOUTS = {
         el: 'alexander', labelEl: 'label-alexander', activityEl: 'activity-alexander',
         assetsBase: `${BASE}/alexander/animations`,
         staticFallback: `${BASE}/alexander/alexander.png`,
-        fallbackW: 128, fallbackH: 192,
-        minX: 10, maxX: 85, bottomPct: 22, speed: 1.4,
+        nativeW: 32, nativeH: 48,
+        startPct: 55, minX: 10, maxX: 85, bottomPct: 22, speed: 1.2,
         idleMinSec: 3, idleMaxSec: 8,
         activities: ['📖', '💻', '☕', '📱', '🎵', '🤔'],
         placeholderEmoji: '👨', placeholderColor: '#4060A0'
@@ -746,16 +838,29 @@ const ACTOR_LAYOUTS = {
         el: 'sam', labelEl: 'label-sam', activityEl: 'activity-sam',
         assetsBase: `${BASE}/sam/animations`,
         staticFallback: `${BASE}/sam/sam.png`,
-        fallbackW: 96, fallbackH: 80,
-        minX: 5, maxX: 90, bottomPct: 24, speed: 2.5,
+        nativeW: 24, nativeH: 16,
+        startPct: 72, minX: 5, maxX: 90, bottomPct: 24, speed: 2.0,
         idleMinSec: 1, idleMaxSec: 4,
         activities: ['🧸', '🦴', '😴', '🐾', '👀'],
         placeholderEmoji: '🐕', placeholderColor: '#0A0A0A'
     }
 };
 
+// Scene elements: ALL driven by sprite-atlas.json configs.
+// ambient_light uses renderMode:"overlay" — SpriteController handles it.
+const SCENE_ELEMENTS = [
+    {
+        atlasConfig: `${LOC_BASE}/animations/sprite-atlas.json?v=latest`,
+        assetsBase: `${LOC_BASE}/animations`,
+        animation: 'ambient_light',
+        nativeX: 0, nativeY: 0,
+        nativeW: BG_NATIVE_W, nativeH: BG_NATIVE_H,
+        zIndex: 3
+    }
+];
+
 // ============================================================
-//  NPC Action Definitions
+//  NPC Actions
 // ============================================================
 const NPC_ACTIONS = {
     alexander: {
@@ -788,7 +893,7 @@ const NPC_ACTIONS = {
 };
 
 // ============================================================
-//  Interaction Modal
+//  InteractionModal
 // ============================================================
 class InteractionModal {
     constructor() {
@@ -801,12 +906,10 @@ class InteractionModal {
         this.closeBtn    = document.getElementById('modal-close');
         this.currentTarget = null;
         this.busy = false;
-
         this.closeBtn.addEventListener('click', () => this.hide());
         this.overlay.addEventListener('click', e => { if (e.target === this.overlay) this.hide(); });
         document.addEventListener('keydown', e => { if (e.key === 'Escape') this.hide(); });
     }
-
     show(targetId) {
         const cfg = NPC_ACTIONS[targetId];
         if (!cfg) return;
@@ -815,7 +918,6 @@ class InteractionModal {
         this.nameEl.textContent   = cfg.name;
         this.narrativeEl.style.display = 'none';
         this.narrativeEl.innerHTML = '';
-
         const remainH = 24 - currentGameTime.hour;
         let html = `<div class="modal-desc">${cfg.desc}</div>`;
         for (const a of cfg.actions) {
@@ -829,14 +931,11 @@ class InteractionModal {
         });
         this.overlay.classList.add('visible');
     }
-
     hide() { this.overlay.classList.remove('visible'); this.currentTarget = null; }
-
     async doAction(actionCode) {
         if (this.busy) return;
         this.busy = true;
         this.bodyEl.querySelectorAll('.action-btn').forEach(b => b.disabled = true);
-
         try {
             const resp = await fetch('/api/demo/action', {
                 method: 'POST',
@@ -844,7 +943,6 @@ class InteractionModal {
                 body: JSON.stringify({ target: this.currentTarget, actionCode })
             });
             const result = await resp.json();
-
             if (result.success) {
                 let nHtml = `<p>${result.narrativeText}</p><div style="margin-top:8px">`;
                 if (result.statChanges) {
@@ -957,7 +1055,10 @@ function syncFromServerState(state) {
         document.getElementById('game-time').textContent =
             'День ' + state.gameTime.day + ' | ' + String(state.gameTime.hour).padStart(2,'0') + ':00';
         const newSlot = getTimeSlot(state.gameTime.hour);
-        if (newSlot !== prevSlot) actors.forEach(a => a.onTimeSlotChange(newSlot));
+        if (newSlot !== prevSlot) {
+            actors.forEach(a => a.onTimeSlotChange(newSlot));
+            sceneElements.forEach(e => e.onTimeSlotChange(newSlot));
+        }
     }
     if (state.activeQuests) renderQuests(state.activeQuests);
 }
@@ -985,13 +1086,32 @@ function renderQuests(quests) {
 //  Init
 // ============================================================
 const actors = [];
+const sceneElements = [];
 let modal;
+let scaleManager;
 
 async function init() {
+    const container = document.getElementById('room-container');
+
+    // Background
+    const bgEl = document.getElementById('room-bg');
+    bgEl.style.backgroundImage = `url('${LOC_BASE}/home_room.png')`;
+
+    // Scale manager
+    scaleManager = new ScaleManager(container);
+
+    // Scene elements (ambient_light overlay + future location animations)
+    // ALL driven by sprite-atlas.json — no hardcoded presets
+    for (const def of SCENE_ELEMENTS) {
+        sceneElements.push(new SceneElement(def, scaleManager));
+    }
+
+    // Interaction modal
     modal = new InteractionModal();
 
+    // Character actors
     for (const [id, layout] of Object.entries(ACTOR_LAYOUTS)) {
-        actors.push(new SceneActor(layout));
+        actors.push(new SceneActor(layout, scaleManager));
     }
 
     ['alexander', 'sam', 'tanya'].forEach(id => {

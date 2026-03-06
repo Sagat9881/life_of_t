@@ -80,12 +80,46 @@ public class XmlAssetSpecParser {
             int height = intAttr(el, "height", 0);
             String description = "";
 
-            // Parse pixel-data if present
             PixelData pixelData = parsePixelData(el);
+            List<LayerCondition> conditions = parseLayerConditions(el);
 
-            layers.add(new AssetLayer(id, type, description, zOrder, width, height, pixelData));
+            layers.add(new AssetLayer(id, type, description, zOrder, width, height, pixelData, conditions));
         }
         return layers;
+    }
+
+    /**
+     * Parses {@code <conditions>} block within a layer.
+     * Each {@code <condition>} has an id and an {@code <override>} with tint and opacity.
+     * <pre>
+     * &lt;conditions&gt;
+     *   &lt;condition id="time_morning"&gt;
+     *     &lt;override layer-ref="ambient_light" tint="#E8F4FF" opacity="0.12"/&gt;
+     *   &lt;/condition&gt;
+     * &lt;/conditions&gt;
+     * </pre>
+     */
+    private List<LayerCondition> parseLayerConditions(Element layerEl) {
+        List<LayerCondition> conditions = new ArrayList<>();
+        Element conditionsEl = getFirstChildOrNull(layerEl, "conditions");
+        if (conditionsEl == null) return conditions;
+
+        NodeList condNodes = conditionsEl.getElementsByTagName("condition");
+        for (int i = 0; i < condNodes.getLength(); i++) {
+            Element condEl = (Element) condNodes.item(i);
+            String condId = condEl.getAttribute("id");
+            if (condId.isBlank()) continue;
+
+            Element overrideEl = getFirstChildOrNull(condEl, "override");
+            if (overrideEl == null) continue;
+
+            String layerRef = overrideEl.getAttribute("layer-ref");
+            String tint = overrideEl.getAttribute("tint");
+            String opacity = overrideEl.getAttribute("opacity");
+
+            conditions.add(new LayerCondition(condId, tint, opacity, layerRef));
+        }
+        return conditions;
     }
 
     private PixelData parsePixelData(Element layerEl) {
