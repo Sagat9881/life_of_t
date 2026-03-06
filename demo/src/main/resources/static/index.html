@@ -67,7 +67,7 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 #sam {
     bottom: 24%; right: 22%;
     width: 96px; height: 80px;
-    background-image: url('/generated-assets/characters/sam/animations/idle_atlas.png');
+    background-image: url('/generated-assets/characters/sam/animations/idle_morning_atlas.png');
     background-size: 384px 80px;
     background-position: 0 0;
 }
@@ -345,6 +345,20 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 'use strict';
 
 // ============================================================
+// Time-of-day atlas resolver for characters with conditional idles
+// ============================================================
+const TIME_SLOT_MAP = {
+    MORNING: 'morning', DAY: 'day', EVENING: 'evening', NIGHT: 'night'
+};
+
+function getTimeSlot(hour) {
+    if (hour >= 6 && hour < 12) return 'morning';
+    if (hour >= 12 && hour < 18) return 'day';
+    if (hour >= 18 && hour < 23) return 'evening';
+    return 'night';
+}
+
+// ============================================================
 // NPC Action Definitions
 // ============================================================
 const NPC_ACTIONS = {
@@ -411,9 +425,19 @@ class CharacterWalker {
         this.targetX = this.posX; this.moveRAF = null;
         this._setIdleAnim(); this._scheduleNextWalk(); this._rotateActivity();
     }
+    _resolveIdleAtlas() {
+        const c = this.cfg;
+        // If character has time-based idle atlases, resolve by current time
+        if (c.idleAtlasByTime) {
+            const slot = getTimeSlot(currentGameTime.hour);
+            return c.idleAtlasByTime[slot] || c.idleAtlas;
+        }
+        return c.idleAtlas;
+    }
     _setIdleAnim() {
         const c = this.cfg;
-        this.el.style.backgroundImage = `url('${c.idleAtlas}')`;
+        const atlas = this._resolveIdleAtlas();
+        this.el.style.backgroundImage = `url('${atlas}')`;
         this.el.style.backgroundSize = `${c.spriteW * c.idleFrames}px ${c.spriteH}px`;
         if (this.animator) this.animator.stop();
         this.animator = new SpriteAnimator(this.el, c.spriteW, c.idleFrames, c.idleFps);
@@ -740,9 +764,16 @@ function initWalkers() {
         el: document.getElementById('sam'),
         labelEl: document.getElementById('label-sam'),
         activityEl: document.getElementById('activity-sam'),
-        idleAtlas: '/generated-assets/characters/sam/animations/idle_atlas.png',
+        // Sam has time-of-day idle atlases, not a generic 'idle'
+        idleAtlas: '/generated-assets/characters/sam/animations/idle_morning_atlas.png',
+        idleAtlasByTime: {
+            morning: '/generated-assets/characters/sam/animations/idle_morning_atlas.png',
+            day:     '/generated-assets/characters/sam/animations/idle_day_atlas.png',
+            evening: '/generated-assets/characters/sam/animations/idle_evening_atlas.png',
+            night:   '/generated-assets/characters/sam/animations/idle_night_atlas.png',
+        },
         walkAtlas: '/generated-assets/characters/sam/animations/walk_atlas.png',
-        idleFrames: 4, idleFps: 4, walkFrames: 4, walkFps: 6,
+        idleFrames: 4, idleFps: 4, walkFrames: 6, walkFps: 8,
         spriteW: 96, spriteH: 80, minX: 5, maxX: 90, bottomPct: 24, speed: 2.5,
         idleMinSec: 1, idleMaxSec: 4,
         activities: ['🧸', '🦴', '😴', '🐾', '👀']
