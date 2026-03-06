@@ -4,19 +4,20 @@
  * Composes:
  * - PixelScene (container with auto-scaling)
  * - Static background image
- * - Ambient overlay (time-of-day tint)
+ * - Overlay animations from location's sprite-atlas.json (time-of-day ambient)
+ * - Hardcoded ambient fallback (if atlas not loaded)
  * - SpriteAnimator for each furniture item
  * - SpriteAnimator for each character
  */
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { PixelScene } from '@/components/shared/PixelScene/PixelScene';
 import { SpriteAnimator } from '@/components/shared/SpriteAnimator/SpriteAnimator';
-import { getCompositeUrl } from '@/services/assetService';
+import { getCompositeUrl, loadAtlasConfig, listOverlayAnimations } from '@/services/assetService';
 import type { LocationConfig, FurniturePlacement } from '@/config/locations';
 import './LocationRenderer.css';
 
-/** Time-of-day ambient tint colors */
-const AMBIENT_TINTS: Record<string, { color: string; opacity: number }> = {
+/** Fallback ambient tint colors (used when location has no sprite-atlas.json) */
+const AMBIENT_FALLBACK: Record<string, { color: string; opacity: number }> = {
   morning: { color: '#E8F4FF', opacity: 0.10 },
   day:     { color: '#FFF8E8', opacity: 0.0 },
   evening: { color: '#FFB060', opacity: 0.15 },
@@ -61,8 +62,33 @@ export const LocationRenderer = memo(function LocationRenderer({
     [onObjectClick]
   );
 
-  const ambient = AMBIENT_TINTS[timeOfDay] ?? AMBIENT_TINTS['day']!;
   const condition = TIME_SLOT_TO_CONDITION[timeOfDay] ?? 'day';
+
+  // Load location's sprite-atlas.json for overlay animations
+  const [overlayNames, setOverlayNames] = useState<string[]>([]);
+  const [atlasLoaded, setAtlasLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadAtlasConfig('locations', config.locationAsset)
+      .then((atlasConfig) => {
+        if (cancelled) return;
+        const overlays = listOverlayAnimations(atlasConfig);
+        setOverlayNames(overlays);
+        setAtlasLoaded(true);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setOverlayNames([]);
+          setAtlasLoaded(true);
+        }
+      });
+    return () => { cancelled = true; };
+  }, [config.locationAsset]);
+
+  // Use hardcoded fallback only if atlas has no overlay animations
+  const useFallbackAmbient = atlasLoaded && overlayNames.length === 0;
+  const fallbackAmbient = AMBIENT_FALLBACK[condition] ?? AMBIENT_FALLBACK['day']!;
 
   return (
     <PixelScene className="location-renderer">
@@ -79,14 +105,31 @@ export const LocationRenderer = memo(function LocationRenderer({
         />
       </div>
 
-      {/* Ambient overlay — time-of-day tint */}
-      {ambient.opacity > 0 && (
+      {/* Overlay animations from sprite-atlas.json (replaces hardcoded ambient) */}
+      {overlayNames.map((overlayName) => (
+        <div
+          key={overlayName}
+          className="pixel-scene__layer location-renderer__overlay-anim"
+          style={{ zIndex: 5 }}
+        >
+          <SpriteAnimator
+            entityType="locations"
+            entityName={config.locationAsset}
+            animation={overlayName}
+            condition={condition}
+            className="location-renderer__overlay-sprite"
+          />
+        </div>
+      ))}
+
+      {/* Fallback ambient overlay — only if no atlas overlays */}
+      {useFallbackAmbient && fallbackAmbient.opacity > 0 && (
         <div
           className="pixel-scene__layer location-renderer__ambient"
           style={{
             zIndex: 5,
-            backgroundColor: ambient.color,
-            opacity: ambient.opacity,
+            backgroundColor: fallbackAmbient.color,
+            opacity: fallbackAmbient.opacity,
             pointerEvents: 'none',
             mixBlendMode: 'multiply',
           }}

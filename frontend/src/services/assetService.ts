@@ -1,6 +1,6 @@
 /**
  * Asset loading service.
- * Loads sprite-atlas.json (v1.1) and resolves animations.
+ * Loads sprite-atlas.json (v1.3) and resolves animations.
  */
 import { ASSETS_BASE_URL } from '@/utils/constants';
 import type { AtlasConfig, AtlasAnimationEntry, SpriteAnimation } from '@/types/sprite';
@@ -16,7 +16,8 @@ export const getCompositeUrl = (entityType: string, entityName: string): string 
 };
 
 /**
- * Loads and caches sprite-atlas.json (v1.1 object format) for an entity.
+ * Loads and caches sprite-atlas.json for an entity.
+ * Accepts v1.0 through v1.3 (any 1.* version).
  */
 export const loadAtlasConfig = async (
   entityType: string,
@@ -49,7 +50,7 @@ export const loadAtlasConfig = async (
 
 /**
  * Resolves a specific animation from sprite-atlas.json into a renderable SpriteAnimation.
- * Supports both strip and grid layouts.
+ * Supports strip, grid, and overlay layouts.
  *
  * @param condition - current condition value for grid row selection (e.g. "morning")
  */
@@ -65,6 +66,8 @@ export const resolveAnimation = (
 
   const baseUrl = getEntityBaseUrl(entityType, entityName);
   const atlasUrl = `${baseUrl}/animations/${entry.file}`;
+  const displayScale = config.displayScale ?? 1.0;
+  const renderMode = entry.renderMode ?? 'sprite';
 
   if (entry.layout === 'grid' && entry.rows && entry.rows.length > 0) {
     // Grid layout: find the row matching the condition
@@ -86,8 +89,12 @@ export const resolveAnimation = (
       fps: row!.fps,
       loop: row!.loop,
       layout: 'grid',
+      renderMode,
       totalRows: entry.rows.length,
       currentRow: row!.rowIndex,
+      displayScale,
+      tint: row!.tint,
+      opacity: row!.opacity,
     };
   }
 
@@ -101,9 +108,27 @@ export const resolveAnimation = (
     fps: entry.fps ?? 8,
     loop: entry.loop ?? true,
     layout: 'strip',
+    renderMode,
     totalRows: 1,
     currentRow: 0,
+    displayScale,
   };
+};
+
+/**
+ * Lists all animation names from an atlas config.
+ */
+export const listAnimations = (config: AtlasConfig): string[] => {
+  return Object.keys(config.animations);
+};
+
+/**
+ * Lists overlay animations from an atlas config.
+ */
+export const listOverlayAnimations = (config: AtlasConfig): string[] => {
+  return Object.entries(config.animations)
+    .filter(([, entry]) => (entry.renderMode ?? 'sprite') === 'overlay')
+    .map(([name]) => name);
 };
 
 export const preloadAtlasImage = (url: string): Promise<HTMLImageElement> => {

@@ -15,13 +15,19 @@
     <packaging>jar</packaging>
 
     <name>Life of T - Application</name>
-    <description>Main application: backend API + asset generation</description>
+    <description>Main application: backend API + frontend SPA + asset generation</description>
 
     <dependencies>
         <!-- Backend module (domain + REST API /api/v1/game) -->
         <dependency>
             <groupId>ru.lifegame</groupId>
             <artifactId>backend</artifactId>
+        </dependency>
+
+        <!-- Frontend module (React SPA — provides classpath:/static/) -->
+        <dependency>
+            <groupId>ru.lifegame</groupId>
+            <artifactId>frontend</artifactId>
         </dependency>
 
         <!-- Asset generator module -->
