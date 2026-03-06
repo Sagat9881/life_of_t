@@ -4,15 +4,20 @@
  *
  * ── COORDINATE SYSTEM ──
  * All coordinates are in PERCENTAGE (0-100) relative to the scene viewport.
- * Scale values are in NATIVE pixel scale (not CSS pixels).
+ *
+ * ── SCALE SYSTEM ──
+ * Character/furniture sizing is driven by `displayScale` in sprite-atlas.json:
+ *   - Characters: displayScale=3.0 (32px frame → 96px CSS in native scene)
+ *   - Pets: displayScale=2.0
+ *   - Furniture: displayScale=2.0
+ *   - Locations: displayScale=1.0
+ *
+ * The `scale` field here is an OPTIONAL MULTIPLIER on top of displayScale.
+ *   Final CSS size = frameWidth × displayScale × scale
+ *   scale=1.0 (default) = use atlas displayScale as-is.
+ *   scale=1.5 = 50% bigger than atlas default.
  *
  * PixelScene renders at native resolution (480×270) and auto-upscales.
- * A character at scale=1 shows at their real pixel size (e.g. 32×48).
- * Scale=5 means 160×240 in the 480×270 native scene = ~55% height.
- *
- * For human characters: scale=5 → occupies ~55% of scene height. Good default.
- * For pets: scale=3 → occupies ~30% of scene height.
- * For furniture: scale=2-3 → depends on furniture size.
  */
 
 export interface FurniturePlacement {
@@ -21,6 +26,7 @@ export interface FurniturePlacement {
   readonly animation: string;
   readonly x: number;
   readonly y: number;
+  /** Optional multiplier on top of displayScale from atlas. Default 1.0 */
   readonly scale: number;
   readonly zOrder: number;
   readonly actionCode?: string;
@@ -33,6 +39,7 @@ export interface CharacterSlot {
   readonly defaultAnimation: string;
   readonly x: number;
   readonly y: number;
+  /** Optional multiplier on top of displayScale from atlas. Default 1.0 */
   readonly scale: number;
   readonly zOrder: number;
 }
@@ -59,7 +66,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         animation: 'idle',
         x: 8,
         y: 60,
-        scale: 3,
+        scale: 1,
         zOrder: 10,
         actionCode: 'REST_AT_HOME',
         label: 'Кровать',
@@ -70,7 +77,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         animation: 'idle',
         x: 52,
         y: 55,
-        scale: 2,
+        scale: 1,
         zOrder: 10,
         actionCode: 'WORK_ON_PROJECT',
         label: 'Компьютер',
@@ -81,7 +88,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         animation: 'idle',
         x: 22,
         y: 80,
-        scale: 2,
+        scale: 1,
         zOrder: 15,
         actionCode: 'CALL_HUSBAND',
         label: 'Телефон',
@@ -92,7 +99,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         animation: 'idle',
         x: 75,
         y: 60,
-        scale: 2,
+        scale: 1,
         zOrder: 10,
         actionCode: 'BEAUTY_ROUTINE',
         label: 'Зеркало',
@@ -103,7 +110,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         animation: 'idle',
         x: 90,
         y: 55,
-        scale: 2,
+        scale: 1,
         zOrder: 8,
       },
     ],
@@ -114,7 +121,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         defaultAnimation: 'idle',
         x: 30,
         y: 88,
-        scale: 5,
+        scale: 1,
         zOrder: 50,
       },
       {
@@ -123,7 +130,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         defaultAnimation: 'idle',
         x: 55,
         y: 88,
-        scale: 5,
+        scale: 1,
         zOrder: 48,
       },
     ],
@@ -141,7 +148,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         animation: 'idle',
         x: 25,
         y: 55,
-        scale: 3,
+        scale: 1,
         zOrder: 10,
         actionCode: 'COOK_FOOD',
         label: 'Плита',
@@ -152,7 +159,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         animation: 'idle',
         x: 75,
         y: 50,
-        scale: 3,
+        scale: 1,
         zOrder: 10,
         actionCode: 'EAT_FOOD',
         label: 'Холодильник',
@@ -163,7 +170,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         animation: 'idle',
         x: 50,
         y: 80,
-        scale: 2,
+        scale: 1,
         zOrder: 15,
         actionCode: 'FEED_PETS',
         label: 'Миски',
@@ -174,7 +181,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         animation: 'idle',
         x: 50,
         y: 60,
-        scale: 3,
+        scale: 1,
         zOrder: 12,
       },
     ],
@@ -185,7 +192,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         defaultAnimation: 'idle',
         x: 45,
         y: 88,
-        scale: 5,
+        scale: 1,
         zOrder: 50,
       },
     ],
@@ -203,7 +210,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         animation: 'idle',
         x: 20,
         y: 70,
-        scale: 3,
+        scale: 1,
         zOrder: 10,
         actionCode: 'WALK_DOG',
         label: 'Будка Сэма',
@@ -214,7 +221,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         animation: 'idle',
         x: 70,
         y: 55,
-        scale: 3,
+        scale: 1,
         zOrder: 10,
         actionCode: 'REST_AT_HOME',
         label: 'Гамак',
@@ -225,7 +232,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         animation: 'burning',
         x: 50,
         y: 80,
-        scale: 2,
+        scale: 1,
         zOrder: 15,
       },
     ],
@@ -236,7 +243,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         defaultAnimation: 'idle',
         x: 50,
         y: 88,
-        scale: 5,
+        scale: 1,
         zOrder: 50,
       },
       {
@@ -245,7 +252,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         defaultAnimation: 'idle',
         x: 30,
         y: 90,
-        scale: 3,
+        scale: 1,
         zOrder: 45,
       },
     ],
@@ -263,7 +270,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         animation: 'burning',
         x: 30,
         y: 55,
-        scale: 3,
+        scale: 1,
         zOrder: 10,
       },
       {
@@ -272,7 +279,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         animation: 'idle',
         x: 60,
         y: 60,
-        scale: 3,
+        scale: 1,
         zOrder: 12,
       },
     ],
@@ -283,7 +290,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         defaultAnimation: 'idle',
         x: 40,
         y: 88,
-        scale: 5,
+        scale: 1,
         zOrder: 50,
       },
       {
@@ -292,7 +299,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         defaultAnimation: 'idle',
         x: 60,
         y: 88,
-        scale: 5,
+        scale: 1,
         zOrder: 48,
       },
     ],
@@ -310,7 +317,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         animation: 'idle',
         x: 25,
         y: 55,
-        scale: 3,
+        scale: 1,
         zOrder: 10,
       },
       {
@@ -319,7 +326,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         animation: 'burning',
         x: 55,
         y: 75,
-        scale: 2,
+        scale: 1,
         zOrder: 15,
       },
     ],
@@ -330,7 +337,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         defaultAnimation: 'idle',
         x: 50,
         y: 88,
-        scale: 5,
+        scale: 1,
         zOrder: 50,
       },
     ],

@@ -12,3 +12,13 @@
 .location-renderer__ambient {
   transition: background-color 1s ease, opacity 1s ease;
 }
+
+/* Overlay animation layer — fills entire scene */
+.location-renderer__overlay-anim {
+  pointer-events: none;
+}
+
+.location-renderer__overlay-sprite {
+  width: 100% !important;
+  height: 100% !important;
+}

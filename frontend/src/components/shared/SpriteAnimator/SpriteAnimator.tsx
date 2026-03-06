@@ -4,9 +4,12 @@
  * Supports:
  * - strip layout: single-row horizontal atlas (background-position X)
  * - grid layout: multi-row atlas (background-position X + Y) with condition-based row selection
+ * - overlay renderMode: renders as a colored overlay (tint + opacity + blend mode)
  *
- * Usage:
- *   <SpriteAnimator entityType="characters" entityName="tanya" animation="idle" scale={5} condition="morning" />
+ * Scale logic:
+ *   CSS size = frameWidth × displayScale × scale
+ *   - displayScale comes from sprite-atlas.json (characters=3, locations=1)
+ *   - scale is an optional multiplier from the parent (default 1.0)
  */
 import { type CSSProperties, memo, useMemo } from 'react';
 import type { SpriteAnimatorProps } from '@/types/sprite';
@@ -14,8 +17,8 @@ import { useSpriteAnimation } from '@/hooks/useSpriteAnimation';
 import type { UseSpriteAnimationOptions } from '@/hooks/useSpriteAnimation';
 import './SpriteAnimator.css';
 
-/** Default scale for sprites in the native PixelScene coordinate system (480×270) */
-const DEFAULT_SCALE = 5;
+/** Default optional multiplier (no extra scaling beyond displayScale) */
+const DEFAULT_SCALE = 1;
 
 export const SpriteAnimator = memo(function SpriteAnimator({
   entityType,
@@ -56,15 +59,41 @@ export const SpriteAnimator = memo(function SpriteAnimator({
       <div
         className={`sprite-animator sprite-animator--loading ${className ?? ''}`}
         style={{
-          width: 32 * scale,
-          height: 48 * scale,
+          width: 32 * (scale > 1 ? scale : 3),
+          height: 48 * (scale > 1 ? scale : 3),
         }}
       />
     );
   }
 
-  const displayWidth = anim.frameWidth * scale;
-  const displayHeight = anim.frameHeight * scale;
+  // Effective scale = displayScale from config × optional parent multiplier
+  const effectiveScale = anim.displayScale * scale;
+
+  // Overlay renderMode — render as a colored div, not a sprite sheet
+  if (anim.renderMode === 'overlay') {
+    const style: CSSProperties = {
+      width: '100%',
+      height: '100%',
+      backgroundColor: anim.tint ?? '#000000',
+      opacity: anim.opacity ?? 0.1,
+      mixBlendMode: 'multiply',
+      pointerEvents: 'none',
+      transition: 'background-color 1s ease, opacity 1s ease',
+    };
+
+    return (
+      <div
+        className={`sprite-animator sprite-animator--overlay ${className ?? ''}`}
+        style={style}
+        role="presentation"
+        aria-label={`${entityName} ${animation} overlay`}
+      />
+    );
+  }
+
+  // Sprite renderMode (default)
+  const displayWidth = anim.frameWidth * effectiveScale;
+  const displayHeight = anim.frameHeight * effectiveScale;
 
   // Background-size: full atlas dimensions scaled
   const bgWidth = anim.frameCount * displayWidth;
