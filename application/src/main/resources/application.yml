@@ -3,6 +3,11 @@
 spring:
   application:
     name: life-of-t
+  web:
+    resources:
+      static-locations:
+        - classpath:/static/
+        - classpath:/generated-assets/
 
 server:
   port: 8080
