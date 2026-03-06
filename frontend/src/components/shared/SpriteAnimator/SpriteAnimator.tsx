@@ -6,7 +6,7 @@
  * - grid layout: multi-row atlas (background-position X + Y) with condition-based row selection
  *
  * Usage:
- *   <SpriteAnimator entityType="characters" entityName="tanya" animation="idle" scale={4} condition="morning" />
+ *   <SpriteAnimator entityType="characters" entityName="tanya" animation="idle" scale={5} condition="morning" />
  */
 import { type CSSProperties, memo, useMemo } from 'react';
 import type { SpriteAnimatorProps } from '@/types/sprite';
@@ -14,7 +14,8 @@ import { useSpriteAnimation } from '@/hooks/useSpriteAnimation';
 import type { UseSpriteAnimationOptions } from '@/hooks/useSpriteAnimation';
 import './SpriteAnimator.css';
 
-const DEFAULT_SCALE = 4;
+/** Default scale for sprites in the native PixelScene coordinate system (480×270) */
+const DEFAULT_SCALE = 5;
 
 export const SpriteAnimator = memo(function SpriteAnimator({
   entityType,
@@ -55,8 +56,8 @@ export const SpriteAnimator = memo(function SpriteAnimator({
       <div
         className={`sprite-animator sprite-animator--loading ${className ?? ''}`}
         style={{
-          width: 16 * scale,
-          height: 16 * scale,
+          width: 32 * scale,
+          height: 48 * scale,
         }}
       />
     );

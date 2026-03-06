@@ -1,14 +1,13 @@
 /**
  * PixelScene — container for pixel-art game scenes.
  *
- * Renders at a native pixel resolution (e.g. 320×240) and auto-scales
+ * Renders at a native pixel resolution (e.g. 480×270) and auto-scales
  * the entire scene to fit the parent container. All children are rendered
  * inside the native-resolution viewport, so coordinates/sizes stay in
  * "native pixels" and get uniformly upscaled by CSS transform.
  *
- * This means:
- * - A 32×48 character sprite always occupies 32/320 = 10% of the scene width
- * - No need for manual scale calculations — everything scales together
+ * Default resolution is 480×270 (16:9) which matches modern screen ratios
+ * and the typical background image aspect ratio.
  */
 import { type ReactNode, memo, useRef, useState, useEffect, useCallback } from 'react';
 import './PixelScene.css';
@@ -23,8 +22,8 @@ export interface PixelSceneProps {
 }
 
 export const PixelScene = memo(function PixelScene({
-  width = 320,
-  height = 240,
+  width = 480,
+  height = 270,
   className,
   children,
 }: PixelSceneProps) {

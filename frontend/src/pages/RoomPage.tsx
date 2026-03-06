@@ -17,6 +17,9 @@ export const RoomPage: React.FC = () => {
   const locationId = time ? getLocationForTimeSlot(time.timeSlot) : 'home_room';
   const locationConfig = getLocationConfig(locationId);
 
+  // Derive time-of-day condition from game time
+  const timeOfDay = time ? time.timeSlot.toLowerCase() : 'morning';
+
   const handleObjectClick = (objectId: string, actionCode: string) => {
     const furniture = locationConfig.furniture.find((f) => f.id === objectId);
     setSelectedObjectId(objectId);
@@ -99,6 +102,7 @@ export const RoomPage: React.FC = () => {
             config={locationConfig}
             selectedObjectId={selectedObjectId}
             onObjectClick={handleObjectClick}
+            timeOfDay={timeOfDay}
           />
         </div>
       </div>
