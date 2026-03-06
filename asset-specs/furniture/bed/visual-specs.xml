@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>furniture</entity-type>
+        <entity-name>bed</entity-name>
+        <version>1.0.0</version>
+        <location>home_room</location>
+        <description>
+            Кровать — основной интерактивный объект для действия "Сон".
+            Восстанавливает энергию и снижает стресс.
+            Расположена в midground-слое home_room.
+        </description>
+    </meta>
+
+    <layers>
+        <!-- Каркас кровати (z=0, основа) -->
+        <layer id="frame" type="base" z-order="0" width="64" height="48">
+            <pixel-data>
+                <!-- Ножки кровати -->
+                <rect x="4" y="42" w="3" h="6" color="#5C3A1E"/>
+                <rect x="57" y="42" w="3" h="6" color="#5C3A1E"/>
+                <rect x="4" y="36" w="3" h="6" color="#5C3A1E"/>
+                <rect x="57" y="36" w="3" h="6" color="#5C3A1E"/>
+                <!-- Боковые бортики -->
+                <rect x="4" y="38" w="56" h="2" color="#8B5E3C"/>
+                <hline x="4" y="37" len="56" color="#A0703C"/>
+                <!-- Спинка (изголовье) — слева -->
+                <rect x="2" y="20" w="4" h="18" color="#8B5E3C"/>
+                <rect x="3" y="18" w="2" h="2" color="#A0703C"/>
+                <pixel x="3" y="17" color="#8B5E3C"/>
+                <pixel x="4" y="17" color="#8B5E3C"/>
+                <!-- Спинка (ножная) — справа -->
+                <rect x="58" y="28" w="4" h="10" color="#8B5E3C"/>
+                <rect x="59" y="26" w="2" h="2" color="#A0703C"/>
+                <!-- Основание матраса -->
+                <rect x="6" y="30" w="52" h="8" color="#F5E6D3"/>
+                <hline x="6" y="30" len="52" color="#E8D5C0"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Подушки (z=1, статичные) -->
+        <layer id="pillows" type="base" z-order="1" width="64" height="48">
+            <pixel-data>
+                <!-- Подушка верхняя -->
+                <rect x="8" y="24" w="14" h="8" color="#FFFAF0"/>
+                <rect x="9" y="25" w="12" h="6" color="#FFF5E6"/>
+                <hline x="8" y="24" len="14" color="#E8D5C0"/>
+                <!-- Подушка нижняя -->
+                <rect x="8" y="30" w="14" h="6" color="#FFFAF0"/>
+                <rect x="9" y="31" w="12" h="4" color="#FFF5E6"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Одеяло — анимируемый слой (z=2) -->
+        <layer id="blanket" type="animated" z-order="2" width="64" height="48">
+            <pixel-data>
+                <!-- Основное полотно одеяла -->
+                <rect x="20" y="26" w="36" h="12" color="#B5EAD7"/>
+                <rect x="21" y="27" w="34" h="10" color="#C8F0E0"/>
+                <!-- Верхний край (отворот) -->
+                <rect x="20" y="26" w="36" h="3" color="#A0D8C0"/>
+                <hline x="20" y="25" len="36" color="#90C8B0"/>
+                <!-- Складки -->
+                <vline x="32" y="28" len="8" color="#A0D8C0"/>
+                <vline x="44" y="28" len="8" color="#A0D8C0"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Overlay: вмятина подушки (z=3, только при состоянии occupied) -->
+        <layer id="pillow-dent" type="overlay" z-order="3" width="64" height="48"
+               condition="state:occupied">
+            <pixel-data>
+                <!-- Вмятина от головы -->
+                <rect x="11" y="26" w="8" h="4" color="#F0E0D0"/>
+                <rect x="12" y="27" w="6" h="2" color="#E8D0B8"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Overlay: Zzz-эффект (z=4, только при состоянии sleeping) -->
+        <layer id="zzz-effect" type="animated-overlay" z-order="4" width="64" height="48"
+               condition="state:sleeping">
+            <pixel-data>
+                <!-- Рисуется покадрово в анимации zzz ниже -->
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <!-- Idle: лёгкое "дыхание" одеяла -->
+        <animation name="idle" frames="6" fps="2" loop="true"
+                   frame-width="64" frame-height="48">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="blanket:0,-1"/>
+            <frame index="2" layer-offsets="blanket:0,-1"/>
+            <frame index="3" layer-offsets=""/>
+            <frame index="4" layer-offsets=""/>
+            <frame index="5" layer-offsets=""/>
+        </animation>
+
+        <!-- Zzz: буквы Z всплывают над кроватью -->
+        <animation name="zzz" frames="4" fps="3" loop="true"
+                   frame-width="64" frame-height="48"
+                   condition="state:sleeping">
+            <description>
+                Кадр 0: маленькая "z" появляется (x=18, y=16, color=#A0A0C0)
+                Кадр 1: "z" поднимается (y=12), появляется средняя "Z" (x=20, y=18, color=#8888B0)
+                Кадр 2: обе поднимаются, появляется большая "Z" (x=22, y=20, color=#7070A0)
+                Кадр 3: все три буквы fade — пустой кадр (пауза перед циклом)
+            </description>
+            <frame index="0" layer-offsets="zzz-effect:0,0"/>
+            <frame index="1" layer-offsets="zzz-effect:0,-2"/>
+            <frame index="2" layer-offsets="zzz-effect:0,-4"/>
+            <frame index="3" layer-offsets=""/>
+        </animation>
+
+        <!-- Occupied: статичное состояние с вмятиной подушки, одеяло чуть сдвинуто -->
+        <animation name="occupied-idle" frames="6" fps="2" loop="true"
+                   frame-width="64" frame-height="48"
+                   condition="state:occupied">
+            <frame index="0" layer-offsets="blanket:0,-1; pillow-dent:0,0"/>
+            <frame index="1" layer-offsets="blanket:0,-2; pillow-dent:0,0"/>
+            <frame index="2" layer-offsets="blanket:0,-2; pillow-dent:0,0"/>
+            <frame index="3" layer-offsets="blanket:0,-1; pillow-dent:0,0"/>
+            <frame index="4" layer-offsets="blanket:0,-1; pillow-dent:0,0"/>
+            <frame index="5" layer-offsets="blanket:0,-1; pillow-dent:0,0"/>
+        </animation>
+    </animations>
+
+    <states>
+        <state name="empty" description="Кровать пустая, одеяло расправлено"/>
+        <state name="occupied" description="Таня лежит — вмятина на подушке, одеяло сдвинуто"/>
+        <state name="sleeping" description="Таня спит — Zzz-эффект + дыхание одеяла"/>
+    </states>
+
+    <interaction>
+        <action code="SLEEP" description="Лечь спать — переход empty → occupied → sleeping"/>
+        <action code="WAKE_UP" description="Проснуться — переход sleeping → occupied → empty"/>
+    </interaction>
+
+    <naming>
+        <output-dir>furniture/bed</output-dir>
+    </naming>
+</asset-spec>
