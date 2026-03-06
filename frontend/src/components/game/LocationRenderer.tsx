@@ -23,6 +23,18 @@ const AMBIENT_TINTS: Record<string, { color: string; opacity: number }> = {
   night:   { color: '#1A1830', opacity: 0.45 },
 };
 
+/** Map game time slot names to condition values used by sprite atlas */
+const TIME_SLOT_TO_CONDITION: Record<string, string> = {
+  MORNING: 'morning',
+  DAY: 'day',
+  EVENING: 'evening',
+  NIGHT: 'night',
+  morning: 'morning',
+  day: 'day',
+  evening: 'evening',
+  night: 'night',
+};
+
 export interface LocationRendererProps {
   readonly config: LocationConfig;
   readonly selectedObjectId?: string | null;
@@ -50,6 +62,7 @@ export const LocationRenderer = memo(function LocationRenderer({
   );
 
   const ambient = AMBIENT_TINTS[timeOfDay] ?? AMBIENT_TINTS['day']!;
+  const condition = TIME_SLOT_TO_CONDITION[timeOfDay] ?? 'day';
 
   return (
     <PixelScene className="location-renderer">
@@ -111,7 +124,7 @@ export const LocationRenderer = memo(function LocationRenderer({
                 entityName={item.entityName}
                 animation={item.animation}
                 scale={item.scale}
-                condition={timeOfDay}
+                condition={condition}
               />
               {item.label ? (
                 <span className="pixel-scene__label">{item.label}</span>
@@ -145,7 +158,7 @@ export const LocationRenderer = memo(function LocationRenderer({
                 entityName={char.entityName}
                 animation={animation}
                 scale={char.scale}
-                condition={timeOfDay}
+                condition={condition}
               />
             </div>
           );
