@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>furniture</entity-type>
+        <entity-name>mirror</entity-name>
+        <version>1.0.0</version>
+        <location>home_room</location>
+        <description>
+            Зеркало — декоративно-интерактивный объект для действия
+            «Посмотреть на себя». Влияет на selfEsteem.
+            Висит на стене в home_room (midground/foreground).
+        </description>
+    </meta>
+
+    <layers>
+        <!-- Крепление к стене (z=0) -->
+        <layer id="mount" type="base" z-order="0" width="20" height="32">
+            <pixel-data>
+                <rect x="9" y="2" w="2" h="3" color="#8B6538"/>
+                <pixel x="9" y="2" color="#A07848"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Рамка зеркала (z=1) -->
+        <layer id="frame" type="base" z-order="1" width="20" height="32">
+            <pixel-data>
+                <!-- Внешняя рамка -->
+                <rect x="3" y="4" w="14" h="24" color="#8B5E3C"/>
+                <!-- Внутренний край (highlight) -->
+                <rect x="4" y="5" w="12" h="22" color="#A07848"/>
+                <!-- Скругления углов (имитация овала) -->
+                <pixel x="3" y="4" color="#A07848"/>
+                <pixel x="16" y="4" color="#A07848"/>
+                <pixel x="3" y="27" color="#A07848"/>
+                <pixel x="16" y="27" color="#A07848"/>
+                <!-- Декоративные элементы рамки -->
+                <pixel x="10" y="4" color="#C0A070"/>
+                <pixel x="10" y="27" color="#C0A070"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Зеркальная поверхность (z=2) -->
+        <layer id="glass" type="base" z-order="2" width="20" height="32">
+            <pixel-data>
+                <!-- Основное стекло -->
+                <rect x="5" y="6" w="10" h="20" color="#C8D8E8"/>
+                <!-- Градиент сверху (светлее) -->
+                <rect x="5" y="6" w="10" h="4" color="#D8E8F4"/>
+                <!-- Градиент снизу (темнее) -->
+                <rect x="5" y="22" w="10" h="4" color="#B0C0D0"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Отражение — плавный блик (z=3, анимируемый) -->
+        <layer id="reflection" type="animated-overlay" z-order="3" width="20" height="32">
+            <pixel-data>
+                <!-- Вертикальная полоска блика -->
+                <pixel x="7" y="8" color="#E8F0FF"/>
+                <pixel x="7" y="9" color="#F0F8FF"/>
+                <pixel x="7" y="10" color="#E8F0FF"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Вспышка-блик при взаимодействии (z=4, overlay по условию) -->
+        <layer id="glint" type="animated-overlay" z-order="4" width="20" height="32"
+               condition="state:active">
+            <pixel-data>
+                <pixel x="13" y="8" color="#FFFFFF"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <!-- Idle: плавный блик перемещается сверху вниз -->
+        <animation name="idle" frames="4" fps="1" loop="true"
+                   frame-width="20" frame-height="32">
+            <description>
+                Медленный блик скользит по поверхности зеркала
+                сверху вниз, создавая эффект «живого» стекла.
+            </description>
+            <frame index="0" layer-offsets="reflection:0,0"/>
+            <frame index="1" layer-offsets="reflection:0,4"/>
+            <frame index="2" layer-offsets="reflection:0,8"/>
+            <frame index="3" layer-offsets="reflection:0,12"/>
+        </animation>
+
+        <!-- Glint: вспышка при подходе Тани -->
+        <animation name="glint" frames="3" fps="6" loop="false"
+                   frame-width="20" frame-height="32"
+                   condition="state:active">
+            <description>
+                Однократная вспышка в правом верхнем углу зеркала:
+                появление → яркий пиксель → исчезновение.
+                Играется один раз при подходе персонажа.
+            </description>
+            <frame index="0" layer-offsets="glint:0,0"/>
+            <frame index="1" layer-offsets="glint:-1,0"/>
+            <frame index="2" layer-offsets=""/>
+        </animation>
+    </animations>
+
+    <states>
+        <state name="idle" description="Зеркало висит, плавный блик"/>
+        <state name="active" description="Таня подошла — вспышка + взаимодействие"/>
+    </states>
+
+    <interaction>
+        <action code="LOOK_AT_SELF" description="Посмотреть на себя — влияет на selfEsteem (± в зависимости от mood)"/>
+    </interaction>
+
+    <naming>
+        <output-dir>furniture/mirror</output-dir>
+    </naming>
+</asset-spec>
