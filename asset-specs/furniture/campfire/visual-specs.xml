@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>furniture</entity-type>
+        <entity-name>campfire</entity-name>
+        <version>1.0.0</version>
+        <location>summer_camp</location>
+        <description>
+            Костёр — центральный объект вечерних/ночных сцен summer_camp.
+            Рядом сидят персонажи, разговаривают, жарят маршмэллоу.
+        </description>
+    </meta>
+
+    <layers>
+        <!-- z=0: камни по кругу -->
+        <layer id="stones" type="base" z-order="0" width="32" height="32">
+            <pixel-data>
+                <!-- кольцо камней -->
+                <rect x="4" y="22" w="24" h="4" color="#666666"/>
+                <rect x="6" y="20" w="20" h="2" color="#777777"/>
+                <rect x="6" y="26" w="20" h="2" color="#555555"/>
+                <!-- отдельные камни -->
+                <pixel x="4" y="22" color="#888888"/>
+                <pixel x="27" y="22" color="#888888"/>
+                <pixel x="4" y="25" color="#707070"/>
+                <pixel x="27" y="25" color="#707070"/>
+                <pixel x="8" y="20" color="#8A8A8A"/>
+                <pixel x="22" y="20" color="#8A8A8A"/>
+                <pixel x="8" y="27" color="#606060"/>
+                <pixel x="22" y="27" color="#606060"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=1: поленья -->
+        <layer id="logs" type="base" z-order="1" width="32" height="32">
+            <pixel-data>
+                <!-- полено горизонтальное -->
+                <rect x="8" y="22" w="16" h="3" color="#5C3A1E"/>
+                <hline x="8" y="22" len="16" color="#6B4A2E"/>
+                <!-- полено крест-накрест -->
+                <rect x="12" y="20" w="3" h="6" color="#4A2E14"/>
+                <vline x="13" y="20" len="6" color="#5C3A1E"/>
+                <!-- второе полено наискось -->
+                <pixel x="10" y="21" color="#5C3A1E"/>
+                <pixel x="11" y="22" color="#5C3A1E"/>
+                <pixel x="20" y="21" color="#5C3A1E"/>
+                <pixel x="19" y="22" color="#5C3A1E"/>
+                <!-- обугленные концы -->
+                <pixel x="8" y="23" color="#1A0A00"/>
+                <pixel x="23" y="23" color="#1A0A00"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=2: световое пятно (glow) — анимируемый overlay -->
+        <layer id="glow" type="animated-overlay" z-order="2" width="32" height="32"
+               condition="state:lit">
+            <pixel-data>
+                <!-- тёплое свечение вокруг -->
+                <rect x="2" y="16" w="28" h="14" color="#331800"/>
+                <rect x="6" y="18" w="20" h="10" color="#442200"/>
+                <rect x="10" y="19" w="12" h="6" color="#553300"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=3: пламя — анимируемый overlay -->
+        <layer id="fire" type="animated-overlay" z-order="3" width="32" height="32"
+               condition="state:lit">
+            <pixel-data>
+                <!-- основное пламя -->
+                <rect x="10" y="14" w="12" h="8" color="#FF6600"/>
+                <rect x="12" y="12" w="8" h="4" color="#FFAA00"/>
+                <rect x="14" y="10" w="4" h="2" color="#FFDD00"/>
+                <!-- жёлтое ядро -->
+                <rect x="13" y="16" w="6" h="4" color="#FFCC00"/>
+                <rect x="14" y="14" w="4" h="2" color="#FFEE44"/>
+                <!-- верхушки -->
+                <pixel x="15" y="9" color="#FFEE66"/>
+                <pixel x="16" y="8" color="#FFCC22"/>
+                <!-- красное основание -->
+                <rect x="10" y="20" w="12" h="2" color="#CC3300"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=4: искры -->
+        <layer id="sparks" type="animated-overlay" z-order="4" width="32" height="32"
+               condition="state:lit">
+            <pixel-data>
+                <pixel x="12" y="8" color="#FFEE00"/>
+                <pixel x="18" y="6" color="#FFDD00"/>
+                <pixel x="14" y="5" color="#FFCC00"/>
+                <pixel x="20" y="7" color="#FFAA00"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <!-- idle: потухший костёр -->
+        <animation name="idle" frames="2" fps="1" loop="true"
+                   frame-width="32" frame-height="32">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets=""/>
+        </animation>
+
+        <!-- fire: пламя пляшет -->
+        <animation name="fire" frames="6" fps="5" loop="true"
+                   frame-width="32" frame-height="32"
+                   condition="state:lit">
+            <frame index="0" layer-offsets="fire:0,0"/>
+            <frame index="1" layer-offsets="fire:1,-1"/>
+            <frame index="2" layer-offsets="fire:-1,-2"/>
+            <frame index="3" layer-offsets="fire:0,-1"/>
+            <frame index="4" layer-offsets="fire:1,0"/>
+            <frame index="5" layer-offsets="fire:-1,-1"/>
+        </animation>
+
+        <!-- sparks-fly: искры летят вверх -->
+        <animation name="sparks-fly" frames="4" fps="3" loop="true"
+                   frame-width="32" frame-height="32"
+                   condition="state:lit">
+            <frame index="0" layer-offsets="sparks:0,0"/>
+            <frame index="1" layer-offsets="sparks:1,-1"/>
+            <frame index="2" layer-offsets="sparks:-1,-2"/>
+            <frame index="3" layer-offsets="sparks:0,-3"/>
+        </animation>
+
+        <!-- glow-pulse: свечение мерцает -->
+        <animation name="glow-pulse" frames="4" fps="2" loop="true"
+                   frame-width="32" frame-height="32"
+                   condition="state:lit">
+            <frame index="0" layer-offsets="glow:0,0"/>
+            <frame index="1" layer-offsets="glow:0,0"/>
+            <frame index="2" layer-offsets="glow:1,0"/>
+            <frame index="3" layer-offsets="glow:-1,0"/>
+        </animation>
+    </animations>
+
+    <states>
+        <state name="cold" description="Потухший костёр, только камни и поленья"/>
+        <state name="lit" description="Горит — пламя, искры, свечение"/>
+    </states>
+
+    <interaction>
+        <action code="LIGHT" description="Разжечь костёр"/>
+        <action code="SIT_NEARBY" description="Сесть рядом — общение, повышает настроение"/>
+        <action code="ROAST" description="Жарить маршмэллоу — мини-активность"/>
+    </interaction>
+
+    <naming>
+        <output-dir>furniture/campfire</output-dir>
+    </naming>
+</asset-spec>

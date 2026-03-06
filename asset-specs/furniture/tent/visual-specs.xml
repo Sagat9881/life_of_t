@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>furniture</entity-type>
+        <entity-name>tent</entity-name>
+        <version>1.0.0</version>
+        <location>summer_camp</location>
+        <description>
+            Палатка на summer_camp. Место ночёвки.
+            Действие «Спать в палатке» восстанавливает энергию.
+        </description>
+    </meta>
+
+    <layers>
+        <!-- z=0: колышки и растяжки -->
+        <layer id="stakes" type="base" z-order="0" width="48" height="36">
+            <pixel-data>
+                <!-- левый колышек -->
+                <pixel x="2" y="30" color="#888888"/>
+                <pixel x="2" y="31" color="#777777"/>
+                <!-- правый колышек -->
+                <pixel x="45" y="30" color="#888888"/>
+                <pixel x="45" y="31" color="#777777"/>
+                <!-- растяжки (верёвки) -->
+                <pixel x="3" y="29" color="#C8B896"/>
+                <pixel x="4" y="28" color="#C8B896"/>
+                <pixel x="5" y="27" color="#C8B896"/>
+                <pixel x="44" y="29" color="#C8B896"/>
+                <pixel x="43" y="28" color="#C8B896"/>
+                <pixel x="42" y="27" color="#C8B896"/>
+                <!-- задние растяжки -->
+                <pixel x="10" y="32" color="#C8B896"/>
+                <pixel x="38" y="32" color="#C8B896"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=1: каркас/основание -->
+        <layer id="frame" type="base" z-order="1" width="48" height="36">
+            <pixel-data>
+                <!-- нижняя кромка палатки -->
+                <hline x="6" y="30" len="36" color="#446644"/>
+                <!-- пол (коврик) -->
+                <rect x="8" y="28" w="32" h="2" color="#556655"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=2: ткань палатки (треугольная форма) — анимируемый -->
+        <layer id="canvas" type="animated" z-order="2" width="48" height="36">
+            <pixel-data>
+                <!-- треугольный силуэт палатки -->
+                <!-- основание -->
+                <rect x="6" y="26" w="36" h="4" color="#4A7A4A"/>
+                <!-- средняя часть -->
+                <rect x="8" y="22" w="32" h="4" color="#5A8A5A"/>
+                <!-- верхняя часть -->
+                <rect x="12" y="18" w="24" h="4" color="#6A9A6A"/>
+                <!-- сужение к верху -->
+                <rect x="16" y="14" w="16" h="4" color="#7AAA7A"/>
+                <!-- конёк -->
+                <rect x="20" y="10" w="8" h="4" color="#8ABA8A"/>
+                <rect x="22" y="8" w="4" h="2" color="#9ACA9A"/>
+                <!-- шов по центру -->
+                <vline x="24" y="8" len="22" color="#3A6A3A"/>
+                <!-- тень левой стороны -->
+                <vline x="6" y="26" len="4" color="#3A6A3A"/>
+                <vline x="8" y="22" len="4" color="#3A6A3A"/>
+                <!-- блик правой стороны -->
+                <vline x="41" y="26" len="4" color="#6AAA6A"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=3: полог входа — анимируемый overlay -->
+        <layer id="door-flap" type="animated" z-order="3" width="48" height="36">
+            <pixel-data>
+                <!-- полог — откидная часть -->
+                <rect x="16" y="18" w="8" h="12" color="#5A8A5A"/>
+                <rect x="17" y="19" w="6" h="10" color="#4A7A4A"/>
+                <!-- прорезь -->
+                <vline x="20" y="20" len="8" color="#2A1A0A"/>
+                <!-- завязка -->
+                <pixel x="23" y="18" color="#C8B896"/>
+                <pixel x="24" y="18" color="#C8B896"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=4: флажок на верхушке -->
+        <layer id="flag" type="base" z-order="4" width="48" height="36">
+            <pixel-data>
+                <!-- шест -->
+                <vline x="24" y="4" len="4" color="#888888"/>
+                <!-- флажок -->
+                <rect x="25" y="4" w="4" h="3" color="#DD4444"/>
+                <pixel x="28" y="5" color="#CC3333"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <!-- idle: ткань слегка колышется от ветра -->
+        <animation name="idle" frames="4" fps="2" loop="true"
+                   frame-width="48" frame-height="36">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="canvas:0,0; door-flap:-1,0"/>
+            <frame index="2" layer-offsets=""/>
+            <frame index="3" layer-offsets="canvas:0,0; door-flap:1,0"/>
+        </animation>
+
+        <!-- wind: сильный ветер — ткань мотает заметнее -->
+        <animation name="wind" frames="4" fps="4" loop="true"
+                   frame-width="48" frame-height="36"
+                   condition="weather:windy">
+            <frame index="0" layer-offsets="canvas:-1,0; door-flap:-2,0"/>
+            <frame index="1" layer-offsets="canvas:1,0; door-flap:0,0"/>
+            <frame index="2" layer-offsets="canvas:-1,0; door-flap:2,0"/>
+            <frame index="3" layer-offsets="canvas:0,0; door-flap:-1,0"/>
+        </animation>
+    </animations>
+
+    <states>
+        <state name="empty" description="Пустая палатка"/>
+        <state name="occupied" description="Кто-то внутри — полог закрыт"/>
+    </states>
+
+    <interaction>
+        <action code="SLEEP" description="Спать в палатке — восстанавливает энергию"/>
+        <action code="ENTER" description="Войти в палатку"/>
+    </interaction>
+
+    <naming>
+        <output-dir>furniture/tent</output-dir>
+    </naming>
+</asset-spec>

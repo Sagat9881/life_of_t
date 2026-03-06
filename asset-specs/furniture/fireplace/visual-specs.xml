@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>furniture</entity-type>
+        <entity-name>fireplace</entity-name>
+        <version>1.0.0</version>
+        <location>parents_cottage</location>
+        <description>
+            Печка/камин в parents_cottage. Создаёт уют, рядом любит лежать Воланд.
+            Фоновый объект для атмосферы зимних и вечерних сцен.
+        </description>
+    </meta>
+
+    <layers>
+        <!-- z=0: кирпичная кладка -->
+        <layer id="brickwork" type="base" z-order="0" width="40" height="48">
+            <pixel-data>
+                <!-- основная кладка -->
+                <rect x="4" y="10" w="32" h="34" color="#8B4513"/>
+                <!-- ряды кирпичей -->
+                <hline x="4" y="14" len="32" color="#6B3510"/>
+                <hline x="4" y="18" len="32" color="#6B3510"/>
+                <hline x="4" y="22" len="32" color="#6B3510"/>
+                <hline x="4" y="26" len="32" color="#6B3510"/>
+                <hline x="4" y="30" len="32" color="#6B3510"/>
+                <hline x="4" y="34" len="32" color="#6B3510"/>
+                <hline x="4" y="38" len="32" color="#6B3510"/>
+                <!-- вертикальные швы (смещённые через ряд) -->
+                <vline x="12" y="10" len="4" color="#6B3510"/>
+                <vline x="20" y="10" len="4" color="#6B3510"/>
+                <vline x="28" y="10" len="4" color="#6B3510"/>
+                <vline x="16" y="14" len="4" color="#6B3510"/>
+                <vline x="24" y="14" len="4" color="#6B3510"/>
+                <!-- фундамент -->
+                <rect x="2" y="42" w="36" h="4" color="#5A3A10"/>
+                <hline x="2" y="42" len="36" color="#6B4520"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=1: топка (тёмное отверстие) -->
+        <layer id="firebox" type="base" z-order="1" width="40" height="48">
+            <pixel-data>
+                <!-- арочный проём топки -->
+                <rect x="10" y="24" w="20" h="18" color="#1A0A00"/>
+                <!-- верх арки -->
+                <rect x="12" y="22" w="16" h="2" color="#1A0A00"/>
+                <rect x="14" y="20" w="12" h="2" color="#1A0A00"/>
+                <!-- сажа внутри -->
+                <rect x="11" y="25" w="18" h="16" color="#0D0500"/>
+                <!-- обводка арки -->
+                <hline x="10" y="24" len="1" color="#4A2A08"/>
+                <hline x="29" y="24" len="1" color="#4A2A08"/>
+                <hline x="12" y="22" len="1" color="#4A2A08"/>
+                <hline x="27" y="22" len="1" color="#4A2A08"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=2: решётка -->
+        <layer id="grate" type="base" z-order="2" width="40" height="48">
+            <pixel-data>
+                <!-- горизонтальные прутья -->
+                <hline x="12" y="38" len="16" color="#333333"/>
+                <hline x="12" y="36" len="16" color="#333333"/>
+                <!-- вертикальные прутья -->
+                <vline x="14" y="36" len="4" color="#444444"/>
+                <vline x="18" y="36" len="4" color="#444444"/>
+                <vline x="22" y="36" len="4" color="#444444"/>
+                <vline x="26" y="36" len="4" color="#444444"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=3: полка над камином -->
+        <layer id="mantel" type="base" z-order="3" width="40" height="48">
+            <pixel-data>
+                <rect x="2" y="8" w="36" h="3" color="#A0703C"/>
+                <hline x="2" y="8" len="36" color="#B88050"/>
+                <hline x="2" y="10" len="36" color="#8B5E3C"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=4: труба (верхняя часть) -->
+        <layer id="chimney" type="base" z-order="4" width="40" height="48">
+            <pixel-data>
+                <rect x="16" y="0" w="8" h="10" color="#8B4513"/>
+                <hline x="16" y="0" len="8" color="#6B3510"/>
+                <hline x="16" y="4" len="8" color="#6B3510"/>
+                <!-- навершие -->
+                <rect x="14" y="0" w="12" h="2" color="#5A3A10"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=5: огонь — анимируемый overlay -->
+        <layer id="fire" type="animated-overlay" z-order="5" width="40" height="48"
+               condition="state:lit">
+            <pixel-data>
+                <!-- языки пламени -->
+                <rect x="14" y="30" w="12" h="10" color="#FF6600"/>
+                <rect x="16" y="28" w="8" h="4" color="#FFAA00"/>
+                <rect x="18" y="26" w="4" h="2" color="#FFDD00"/>
+                <!-- основание -- угли -->
+                <rect x="12" y="38" w="16" h="3" color="#CC3300"/>
+                <pixel x="14" y="38" color="#FF4400"/>
+                <pixel x="20" y="38" color="#FF4400"/>
+                <pixel x="26" y="38" color="#FF4400"/>
+                <!-- верхушка пламени -->
+                <pixel x="19" y="25" color="#FFEE44"/>
+                <pixel x="20" y="24" color="#FFCC22"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=6: угли — overlay для состояния embers -->
+        <layer id="embers" type="animated-overlay" z-order="6" width="40" height="48"
+               condition="state:embers">
+            <pixel-data>
+                <rect x="12" y="37" w="16" h="4" color="#661100"/>
+                <pixel x="14" y="38" color="#CC3300"/>
+                <pixel x="18" y="37" color="#AA2200"/>
+                <pixel x="22" y="38" color="#CC3300"/>
+                <pixel x="26" y="37" color="#AA2200"/>
+                <pixel x="16" y="39" color="#882200"/>
+                <pixel x="24" y="39" color="#882200"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=7: дым из трубы -->
+        <layer id="smoke" type="animated-overlay" z-order="7" width="40" height="48"
+               condition="state:lit">
+            <pixel-data>
+                <pixel x="19" y="0" color="#AAAAAA"/>
+                <pixel x="20" y="0" color="#999999"/>
+                <pixel x="18" y="0" color="#888888"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <!-- idle: камин без огня, полностью статичный -->
+        <animation name="idle" frames="2" fps="1" loop="true"
+                   frame-width="40" frame-height="48">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets=""/>
+        </animation>
+
+        <!-- fire: горящий огонь — языки пляшут -->
+        <animation name="fire" frames="6" fps="4" loop="true"
+                   frame-width="40" frame-height="48"
+                   condition="state:lit">
+            <frame index="0" layer-offsets="fire:0,0"/>
+            <frame index="1" layer-offsets="fire:1,-1"/>
+            <frame index="2" layer-offsets="fire:-1,-2"/>
+            <frame index="3" layer-offsets="fire:0,-1"/>
+            <frame index="4" layer-offsets="fire:1,0"/>
+            <frame index="5" layer-offsets="fire:-1,-1"/>
+        </animation>
+
+        <!-- embers-glow: тлеющие угли мерцают -->
+        <animation name="embers-glow" frames="4" fps="2" loop="true"
+                   frame-width="40" frame-height="48"
+                   condition="state:embers">
+            <frame index="0" layer-offsets="embers:0,0"/>
+            <frame index="1" layer-offsets="embers:0,0"/>
+            <frame index="2" layer-offsets="embers:1,0"/>
+            <frame index="3" layer-offsets="embers:0,0"/>
+        </animation>
+
+        <!-- smoke-rise: дым поднимается из трубы -->
+        <animation name="smoke-rise" frames="4" fps="1" loop="true"
+                   frame-width="40" frame-height="48"
+                   condition="state:lit">
+            <frame index="0" layer-offsets="smoke:0,0"/>
+            <frame index="1" layer-offsets="smoke:0,-1"/>
+            <frame index="2" layer-offsets="smoke:1,-2"/>
+            <frame index="3" layer-offsets="smoke:-1,-3"/>
+        </animation>
+    </animations>
+
+    <states>
+        <state name="cold" description="Камин потушен, пусто"/>
+        <state name="lit" description="Горит огонь, идёт дым из трубы"/>
+        <state name="embers" description="Огонь потух, угли тлеют"/>
+    </states>
+
+    <interaction>
+        <action code="LIGHT" description="Разжечь камин — переход cold → lit"/>
+        <action code="EXTINGUISH" description="Потушить — переход lit → embers → cold"/>
+    </interaction>
+
+    <naming>
+        <output-dir>furniture/fireplace</output-dir>
+    </naming>
+</asset-spec>

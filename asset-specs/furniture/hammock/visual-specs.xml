@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>furniture</entity-type>
+        <entity-name>hammock</entity-name>
+        <version>1.0.0</version>
+        <location>dacha_yard, summer_camp</location>
+        <description>
+            Гамак между двух столбиков/деревьев.
+            Место отдыха Тани летом. Действие «Отдохнуть» восстанавливает энергию.
+        </description>
+    </meta>
+
+    <layers>
+        <!-- z=0: левый столбик/дерево -->
+        <layer id="post-left" type="base" z-order="0" width="48" height="32">
+            <pixel-data>
+                <rect x="2" y="4" w="4" h="26" color="#5C3A1E"/>
+                <hline x="2" y="4" len="4" color="#6B4A2E"/>
+                <!-- текстура коры -->
+                <pixel x="3" y="8" color="#4A2E14"/>
+                <pixel x="4" y="14" color="#4A2E14"/>
+                <pixel x="3" y="20" color="#4A2E14"/>
+                <!-- крюк -->
+                <pixel x="5" y="10" color="#888888"/>
+                <pixel x="6" y="10" color="#888888"/>
+                <pixel x="6" y="11" color="#777777"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=1: правый столбик -->
+        <layer id="post-right" type="base" z-order="1" width="48" height="32">
+            <pixel-data>
+                <rect x="42" y="4" w="4" h="26" color="#5C3A1E"/>
+                <hline x="42" y="4" len="4" color="#6B4A2E"/>
+                <pixel x="43" y="10" color="#4A2E14"/>
+                <pixel x="44" y="18" color="#4A2E14"/>
+                <!-- крюк -->
+                <pixel x="41" y="10" color="#888888"/>
+                <pixel x="40" y="10" color="#888888"/>
+                <pixel x="40" y="11" color="#777777"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=2: верёвки крепления -->
+        <layer id="ropes" type="base" z-order="2" width="48" height="32">
+            <pixel-data>
+                <!-- левая верёвка -->
+                <pixel x="6" y="11" color="#C8B896"/>
+                <pixel x="7" y="12" color="#C8B896"/>
+                <pixel x="8" y="13" color="#C8B896"/>
+                <!-- правая верёвка -->
+                <pixel x="40" y="11" color="#C8B896"/>
+                <pixel x="39" y="12" color="#C8B896"/>
+                <pixel x="38" y="13" color="#C8B896"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=3: ткань гамака — анимируемый слой -->
+        <layer id="fabric" type="animated" z-order="3" width="48" height="32">
+            <pixel-data>
+                <!-- провисающая ткань (парабола) -->
+                <hline x="9" y="14" len="30" color="#6B8E6B"/>
+                <hline x="10" y="15" len="28" color="#7A9E7A"/>
+                <hline x="11" y="16" len="26" color="#8BAE8B"/>
+                <hline x="12" y="17" len="24" color="#8BAE8B"/>
+                <hline x="13" y="18" len="22" color="#9BBE9B"/>
+                <hline x="14" y="19" len="20" color="#9BBE9B"/>
+                <hline x="16" y="20" len="16" color="#ABCEAB"/>
+                <hline x="18" y="21" len="12" color="#ABCEAB"/>
+                <hline x="20" y="22" len="8" color="#BBDEBB"/>
+                <!-- нижний край -->
+                <hline x="20" y="23" len="8" color="#6B8E6B"/>
+                <!-- сетчатая текстура -->
+                <vline x="16" y="15" len="5" color="#5A7D5A"/>
+                <vline x="24" y="15" len="7" color="#5A7D5A"/>
+                <vline x="32" y="15" len="5" color="#5A7D5A"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <!-- idle: пустой гамак слегка покачивается от ветра -->
+        <animation name="idle" frames="4" fps="2" loop="true"
+                   frame-width="48" frame-height="32">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="fabric:-1,0; ropes:-1,0"/>
+            <frame index="2" layer-offsets=""/>
+            <frame index="3" layer-offsets="fabric:1,0; ropes:1,0"/>
+        </animation>
+
+        <!-- occupied: гамак с Таней — провисает и качается мягко -->
+        <animation name="occupied" frames="6" fps="2" loop="true"
+                   frame-width="48" frame-height="32"
+                   condition="state:occupied">
+            <frame index="0" layer-offsets="fabric:0,2; ropes:0,1"/>
+            <frame index="1" layer-offsets="fabric:-1,2; ropes:-1,1"/>
+            <frame index="2" layer-offsets="fabric:-1,2; ropes:-1,1"/>
+            <frame index="3" layer-offsets="fabric:0,2; ropes:0,1"/>
+            <frame index="4" layer-offsets="fabric:1,2; ropes:1,1"/>
+            <frame index="5" layer-offsets="fabric:1,2; ropes:1,1"/>
+        </animation>
+    </animations>
+
+    <states>
+        <state name="empty" description="Пустой гамак, качается от ветра"/>
+        <state name="occupied" description="Таня лежит — гамак провисает, мягко качается"/>
+    </states>
+
+    <interaction>
+        <action code="REST" description="Лечь отдохнуть — восстанавливает энергию"/>
+    </interaction>
+
+    <naming>
+        <output-dir>furniture/hammock</output-dir>
+    </naming>
+</asset-spec>
