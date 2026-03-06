@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<time-of-day-system>
+    <meta>
+        <version>1.0.0</version>
+        <description>
+            Система смены времени суток.
+            Управляет освещением локаций, idle-анимациями персонажей,
+            расписанием NPC и доступностью действий.
+        </description>
+    </meta>
+
+    <periods>
+        <period id="morning" start="06:00" end="09:00">
+            <lighting-overlay color="#FFF5E0" opacity="0.1"/>
+            <mood>свежесть, пробуждение</mood>
+            <available-actions>walk, exercise, meditate</available-actions>
+        </period>
+        <period id="day" start="09:00" end="17:00">
+            <lighting-overlay color="#FFFFFF" opacity="0.0"/>
+            <mood>активность, рутина</mood>
+            <available-actions>work, cook, clean, shop, vet_visit</available-actions>
+        </period>
+        <period id="evening" start="17:00" end="22:00">
+            <lighting-overlay color="#FFD4A0" opacity="0.15"/>
+            <mood>усталость, уют, отдых</mood>
+            <available-actions>cook, read, social, play_pets, selfcare</available-actions>
+        </period>
+        <period id="night" start="22:00" end="06:00">
+            <lighting-overlay color="#1A1A3E" opacity="0.3"/>
+            <mood>тишина, одиночество, сон</mood>
+            <available-actions>sleep, read, phone, insomnia_walk</available-actions>
+        </period>
+    </periods>
+
+    <transition-rules>
+        <rule>Переход между периодами — мгновенная смена overlay без fade (pixel art)</rule>
+        <rule>Каждая локация имеет 4 варианта фона (morning/day/evening/night)</rule>
+        <rule>Персонажи переключают idle-анимацию по времени суток</rule>
+        <rule>NPC перемещаются между локациями по расписанию</rule>
+    </transition-rules>
+
+    <game-time>
+        <real-to-game-ratio>1 реальная минута = 1 игровой час</real-to-game-ratio>
+        <day-length-real>24 минуты = 1 игровой день</day-length-real>
+        <pause-on-action>true — время останавливается при выполнении действий</pause-on-action>
+    </game-time>
+</time-of-day-system>
