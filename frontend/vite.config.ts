@@ -4,6 +4,8 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  // Base path must be '/' — Spring Boot serves from classpath:/static/
+  base: '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -19,6 +21,8 @@ export default defineConfig({
     },
   },
   build: {
+    // Output to dist/ — frontend/pom.xml copies this to target/classes/static/
+    outDir: 'dist',
     target: 'es2020',
     minify: 'terser',
     sourcemap: true,
