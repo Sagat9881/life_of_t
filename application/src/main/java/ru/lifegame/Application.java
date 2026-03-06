@@ -10,38 +10,33 @@ import java.net.URI;
 /**
  * Главный класс приложения Life of T.
  * Запускает Spring Boot приложение с backend API и frontend статикой.
+ *
+ * scanBasePackages excludes ru.lifegame.demo to avoid picking up
+ * DemoApplication, DemoAssetService, DemoConfiguration etc.
  */
-@SpringBootApplication(scanBasePackages = "ru.lifegame")
+@SpringBootApplication(scanBasePackages = {
+        "ru.lifegame.backend",
+        "ru.lifegame.assets"
+})
 public class Application {
 
     public static void main(String[] args) {
-        // Запуск Spring Boot
         ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
         
-        // Получаем порт
         String port = context.getEnvironment().getProperty("server.port", "8080");
         String url = "http://localhost:" + port;
         
         System.out.println("\n" +
             "┌──────────────────────────────────────────────────┐\n" +
             "│                                                  │\n" +
-            "│       🎮 Life of T - Telegram Mini App 🎮        │\n" +
-            "│                                                  │\n" +
-            "│  Симулятор жизни для Telegram WebApp         │\n" +
+            "│       🎮 Life of T - Жизнь Татьяны 🎮        │\n" +
             "│                                                  │\n" +
             "└──────────────────────────────────────────────────┘\n" +
             "\n" +
-            "🌐 Приложение доступно: " + url + "\n" +
+            "🌐 Приложение: " + url + "\n" +
             "🚀 Backend API: " + url + "/api/v1/game\n" +
             "📝 Swagger UI: " + url + "/swagger-ui.html\n" +
             "💚 Health Check: " + url + "/actuator/health\n" +
-            "\n" +
-            "📦 Возможности:\n" +
-            "   • Управление персонажем и его статами\n" +
-            "   • Система отношений с NPC\n" +
-            "   • Динамические события и конфликты\n" +
-            "   • Уход за питомцами\n" +
-            "   • Система времени и ресурсов\n" +
             "\n" +
             "⏸️  Для остановки: Ctrl+C\n" +
             "\n"
@@ -58,12 +53,9 @@ public class Application {
         try {
             if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                 Desktop.getDesktop().browse(new URI(url));
-                System.out.println("✅ Браузер открыт автоматически\n");
-            } else {
-                System.out.println("⚠️ Откройте вручную: " + url + "\n");
             }
         } catch (Exception e) {
-            System.out.println("⚠️ Не удалось открыть браузер. Откройте вручную: " + url + "\n");
+            System.out.println("⚠️ Откройте вручную: " + url + "\n");
         }
     }
 }
