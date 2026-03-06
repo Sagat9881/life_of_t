@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>furniture</entity-type>
+        <entity-name>highway_car</entity-name>
+        <version>1.0.0</version>
+        <location>night_highway</location>
+        <description>
+            Фоновая проезжающая машина — декоративный объект для night_highway.
+            Не интерактивная. Создаёт атмосферу ночной трассы.
+            Несколько экземпляров пролетают в background-слое.
+        </description>
+    </meta>
+
+    <layers>
+        <!-- z=0: колёса -->
+        <layer id="wheels" type="base" z-order="0" width="32" height="16">
+            <pixel-data>
+                <!-- переднее колесо -->
+                <rect x="5" y="12" w="4" h="4" color="#1A1A1A"/>
+                <rect x="6" y="13" w="2" h="2" color="#333333"/>
+                <!-- заднее колесо -->
+                <rect x="23" y="12" w="4" h="4" color="#1A1A1A"/>
+                <rect x="24" y="13" w="2" h="2" color="#333333"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=1: кузов — тёмный силуэт седана -->
+        <layer id="body" type="base" z-order="1" width="32" height="16">
+            <pixel-data>
+                <!-- нижняя часть кузова -->
+                <rect x="2" y="8" w="28" h="5" color="#2A2A3A"/>
+                <!-- крыша / верхняя часть -->
+                <rect x="8" y="4" w="16" h="5" color="#22222E"/>
+                <!-- капот -->
+                <rect x="2" y="7" w="8" h="2" color="#2E2E3E"/>
+                <!-- багажник -->
+                <rect x="24" y="7" w="6" h="2" color="#2E2E3E"/>
+                <!-- днище -->
+                <hline x="4" y="12" len="24" color="#1A1A2A"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=2: окна — тёмные стёкла с отблесками -->
+        <layer id="windows" type="base" z-order="2" width="32" height="16">
+            <pixel-data>
+                <!-- лобовое -->
+                <rect x="9" y="5" w="4" h="3" color="#1A2040"/>
+                <pixel x="9" y="5" color="#334466"/>
+                <!-- боковые -->
+                <rect x="13" y="5" w="5" h="3" color="#1A2040"/>
+                <rect x="19" y="5" w="4" h="3" color="#1A2040"/>
+                <!-- заднее -->
+                <pixel x="22" y="5" color="#334466"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=3: фары — overlay свечение -->
+        <layer id="headlights" type="animated-overlay" z-order="3" width="32" height="16">
+            <pixel-data>
+                <!-- левая фара -->
+                <pixel x="1" y="9" color="#FFFFCC"/>
+                <pixel x="0" y="9" color="#FFFF88"/>
+                <pixel x="0" y="10" color="#AAAA44"/>
+                <!-- луч света -->
+                <pixel x="0" y="8" color="#666633"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=4: задние огни -->
+        <layer id="taillights" type="overlay" z-order="4" width="32" height="16">
+            <pixel-data>
+                <!-- правый фонарь -->
+                <pixel x="30" y="9" color="#FF2222"/>
+                <pixel x="31" y="9" color="#CC1111"/>
+                <pixel x="30" y="10" color="#881111"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <!-- drive-by: кузов слегка покачивается на подвеске -->
+        <animation name="drive-by" frames="4" fps="8" loop="true"
+                   frame-width="32" frame-height="16">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="body:0,-1; windows:0,-1; headlights:0,-1; taillights:0,-1"/>
+            <frame index="2" layer-offsets=""/>
+            <frame index="3" layer-offsets="body:0,1; windows:0,1; headlights:0,1; taillights:0,1"/>
+        </animation>
+
+        <!-- headlights-glow: мерцание фар -->
+        <animation name="headlights-glow" frames="4" fps="2" loop="true"
+                   frame-width="32" frame-height="16">
+            <frame index="0" layer-offsets="headlights:0,0"/>
+            <frame index="1" layer-offsets="headlights:0,0"/>
+            <frame index="2" layer-offsets="headlights:-1,0"/>
+            <frame index="3" layer-offsets="headlights:0,0"/>
+        </animation>
+
+        <!-- idle: стоящая машина, фары горят ровно -->
+        <animation name="idle" frames="2" fps="1" loop="true"
+                   frame-width="32" frame-height="16">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets=""/>
+        </animation>
+    </animations>
+
+    <naming>
+        <output-dir>furniture/highway_car</output-dir>
+    </naming>
+</asset-spec>

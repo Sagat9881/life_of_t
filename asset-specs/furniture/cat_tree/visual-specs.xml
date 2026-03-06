@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>furniture</entity-type>
+        <entity-name>cat_tree</entity-name>
+        <version>1.0.0</version>
+        <location>alexander_room</location>
+        <description>
+            Кошачий комплекс: когтеточка + домик + полки на разных уровнях.
+            Основное место тусовки кошек (Aijan, Cirilla, Lada, Klop).
+        </description>
+    </meta>
+
+    <layers>
+        <!-- z=0: основание -->
+        <layer id="base-platform" type="base" z-order="0" width="32" height="56">
+            <pixel-data>
+                <!-- широкая тяжёлая платформа -->
+                <rect x="4" y="50" w="24" h="4" color="#8B7355"/>
+                <hline x="4" y="50" len="24" color="#A08060"/>
+                <!-- ковровое покрытие платформы -->
+                <rect x="5" y="51" w="22" h="2" color="#A0A080"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=1: центральный столб-когтеточка -->
+        <layer id="main-post" type="base" z-order="1" width="32" height="56">
+            <pixel-data>
+                <!-- столб обмотан верёвкой -->
+                <rect x="13" y="10" w="6" h="40" color="#C8B896"/>
+                <!-- верёвочная текстура -->
+                <hline x="13" y="14" len="6" color="#B0A080"/>
+                <hline x="13" y="18" len="6" color="#B0A080"/>
+                <hline x="13" y="22" len="6" color="#B0A080"/>
+                <hline x="13" y="26" len="6" color="#B0A080"/>
+                <hline x="13" y="30" len="6" color="#B0A080"/>
+                <hline x="13" y="34" len="6" color="#B0A080"/>
+                <hline x="13" y="38" len="6" color="#B0A080"/>
+                <hline x="13" y="42" len="6" color="#B0A080"/>
+                <hline x="13" y="46" len="6" color="#B0A080"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=2: нижняя полка -->
+        <layer id="shelf-low" type="base" z-order="2" width="32" height="56">
+            <pixel-data>
+                <!-- полка на 2/3 высоты -->
+                <rect x="2" y="36" w="28" h="3" color="#8B7355"/>
+                <hline x="2" y="36" len="28" color="#A08060"/>
+                <!-- ковровое покрытие -->
+                <rect x="3" y="37" w="26" h="1" color="#90A070"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=3: верхняя полка -->
+        <layer id="shelf-high" type="base" z-order="3" width="32" height="56">
+            <pixel-data>
+                <!-- полка наверху -->
+                <rect x="4" y="20" w="24" h="3" color="#8B7355"/>
+                <hline x="4" y="20" len="24" color="#A08060"/>
+                <!-- ковровое покрытие -->
+                <rect x="5" y="21" w="22" h="1" color="#90A070"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=4: домик-коробка наверху -->
+        <layer id="house-box" type="base" z-order="4" width="32" height="56">
+            <pixel-data>
+                <!-- стенки домика -->
+                <rect x="6" y="4" w="20" h="16" color="#8B7355"/>
+                <!-- крыша -->
+                <rect x="4" y="2" w="24" h="3" color="#7A6345"/>
+                <hline x="4" y="2" len="24" color="#8B7355"/>
+                <!-- вход в домик -->
+                <rect x="11" y="8" w="10" h="10" color="#2A1A0A"/>
+                <rect x="13" y="6" w="6" h="2" color="#2A1A0A"/>
+                <!-- внутренняя обивка -->
+                <rect x="12" y="9" w="8" h="8" color="#3A2A1A"/>
+                <!-- ковровое покрытие пола домика -->
+                <hline x="12" y="17" len="8" color="#90A070"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=5: верёвка-игрушка с помпоном — анимируемый overlay -->
+        <layer id="rope-toy" type="animated" z-order="5" width="32" height="56">
+            <pixel-data>
+                <!-- верёвка свисает с верхней полки -->
+                <pixel x="26" y="23" color="#C8B896"/>
+                <pixel x="26" y="24" color="#C8B896"/>
+                <pixel x="26" y="25" color="#C8B896"/>
+                <pixel x="26" y="26" color="#C8B896"/>
+                <pixel x="26" y="27" color="#C8B896"/>
+                <!-- помпон -->
+                <rect x="24" y="28" w="4" h="4" color="#DD4444"/>
+                <rect x="25" y="29" w="2" h="2" color="#EE5555"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=6: царапки — overlay при использовании -->
+        <layer id="scratch-marks" type="overlay" z-order="6" width="32" height="56"
+               condition="state:in_use">
+            <pixel-data>
+                <!-- свежие царапины на столбике -->
+                <pixel x="13" y="28" color="#E8D8B0"/>
+                <pixel x="14" y="29" color="#E8D8B0"/>
+                <pixel x="13" y="30" color="#E8D8B0"/>
+                <pixel x="18" y="32" color="#E8D8B0"/>
+                <pixel x="17" y="33" color="#E8D8B0"/>
+                <pixel x="18" y="34" color="#E8D8B0"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <!-- idle: помпон раскачивается -->
+        <animation name="idle" frames="4" fps="3" loop="true"
+                   frame-width="32" frame-height="56">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="rope-toy:-1,0"/>
+            <frame index="2" layer-offsets=""/>
+            <frame index="3" layer-offsets="rope-toy:1,0"/>
+        </animation>
+
+        <!-- play: помпон раскачивается сильнее (кошка играет) -->
+        <animation name="play" frames="4" fps="6" loop="true"
+                   frame-width="32" frame-height="56"
+                   condition="state:in_use">
+            <frame index="0" layer-offsets="rope-toy:-2,0"/>
+            <frame index="1" layer-offsets="rope-toy:0,1"/>
+            <frame index="2" layer-offsets="rope-toy:2,0"/>
+            <frame index="3" layer-offsets="rope-toy:0,-1"/>
+        </animation>
+    </animations>
+
+    <states>
+        <state name="empty" description="Никого нет, помпон качается лениво"/>
+        <state name="in_use" description="Кошка точит когти или играет — помпон мотается активно, видны царапки"/>
+        <state name="occupied" description="Кошка сидит на полке или в домике"/>
+    </states>
+
+    <interaction>
+        <action code="SCRATCH" description="Кошка точит когти — повышает comfort"/>
+        <action code="PLAY" description="Кошка играет с помпоном — повышает happiness"/>
+        <action code="REST" description="Кошка ложится на полку или в домик"/>
+    </interaction>
+
+    <naming>
+        <output-dir>furniture/cat_tree</output-dir>
+    </naming>
+</asset-spec>

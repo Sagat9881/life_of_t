@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>furniture</entity-type>
+        <entity-name>dog_house</entity-name>
+        <version>1.0.0</version>
+        <location>parents_cottage, dacha_yard</location>
+        <description>
+            Будка для собак. Воланд спит рядом или внутри,
+            Duke прячется от дождя. Деревянная классическая конструкция.
+        </description>
+    </meta>
+
+    <layers>
+        <!-- z=0: основание — деревянный пол будки -->
+        <layer id="base" type="base" z-order="0" width="48" height="40">
+            <pixel-data>
+                <!-- платформа-основание -->
+                <rect x="4" y="34" w="40" h="4" color="#5C3A1E"/>
+                <hline x="4" y="34" len="40" color="#6B4A2E"/>
+                <!-- тень под будкой -->
+                <rect x="6" y="38" w="36" h="2" color="#3A2210"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=1: стены — основной корпус -->
+        <layer id="walls" type="base" z-order="1" width="48" height="40">
+            <pixel-data>
+                <!-- задняя стенка -->
+                <rect x="6" y="14" w="36" h="20" color="#8B6B4A"/>
+                <!-- боковые стены (перспектива) -->
+                <rect x="6" y="14" w="3" h="20" color="#7A5A3A"/>
+                <rect x="39" y="14" w="3" h="20" color="#7A5A3A"/>
+                <!-- доски горизонтальные (текстура) -->
+                <hline x="6" y="18" len="36" color="#6B4A2E"/>
+                <hline x="6" y="22" len="36" color="#6B4A2E"/>
+                <hline x="6" y="26" len="36" color="#6B4A2E"/>
+                <hline x="6" y="30" len="36" color="#6B4A2E"/>
+                <!-- передняя стенка с вырезом -->
+                <rect x="6" y="14" w="36" h="2" color="#9B7B5A"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=2: вход — тёмная арка -->
+        <layer id="entrance" type="base" z-order="2" width="48" height="40">
+            <pixel-data>
+                <!-- арочный вход (полукруг аппроксимация) -->
+                <rect x="16" y="20" w="16" h="14" color="#1A1008"/>
+                <!-- верх арки скруглённый -->
+                <rect x="18" y="18" w="12" h="2" color="#1A1008"/>
+                <rect x="20" y="16" w="8" h="2" color="#1A1008"/>
+                <!-- обводка входа -->
+                <hline x="16" y="20" len="1" color="#5C3A1E"/>
+                <hline x="31" y="20" len="1" color="#5C3A1E"/>
+                <hline x="18" y="18" len="1" color="#5C3A1E"/>
+                <hline x="29" y="18" len="1" color="#5C3A1E"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=3: крыша — двускатная -->
+        <layer id="roof" type="base" z-order="3" width="48" height="40">
+            <pixel-data>
+                <!-- левый скат -->
+                <rect x="2" y="10" w="22" h="6" color="#A0522D"/>
+                <!-- правый скат -->
+                <rect x="24" y="10" w="22" h="6" color="#8B4513"/>
+                <!-- конёк -->
+                <hline x="4" y="10" len="40" color="#CD853F"/>
+                <!-- свес крыши -->
+                <hline x="2" y="15" len="44" color="#6B3A10"/>
+                <!-- гребень -->
+                <rect x="20" y="8" w="8" h="3" color="#B8652A"/>
+                <hline x="20" y="8" len="8" color="#D4853A"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=4: шторка на входе — анимируемый overlay -->
+        <layer id="door-curtain" type="animated" z-order="4" width="48" height="40">
+            <pixel-data>
+                <!-- тканевая шторка, свисает сверху входа -->
+                <rect x="18" y="18" w="12" h="14" color="#8B7355"/>
+                <!-- прорезь посередине -->
+                <vline x="24" y="20" len="12" color="#1A1008"/>
+                <!-- складки ткани -->
+                <vline x="21" y="20" len="10" color="#7A6345"/>
+                <vline x="27" y="20" len="10" color="#7A6345"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=5: снег на крыше — зимний overlay -->
+        <layer id="roof-snow" type="overlay" z-order="5" width="48" height="40"
+               condition="season:winter">
+            <pixel-data>
+                <!-- слой снега -->
+                <rect x="2" y="8" w="44" h="3" color="#F0F8FF"/>
+                <hline x="4" y="8" len="40" color="#FFFFFF"/>
+                <!-- сугробики по краям -->
+                <rect x="0" y="10" w="4" h="2" color="#E8F0F8"/>
+                <rect x="44" y="10" w="4" h="2" color="#E8F0F8"/>
+                <!-- сосульки -->
+                <pixel x="6" y="16" color="#D0E8F8"/>
+                <pixel x="12" y="16" color="#D0E8F8"/>
+                <pixel x="36" y="16" color="#D0E8F8"/>
+                <pixel x="40" y="16" color="#D0E8F8"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <!-- idle: шторка слегка колышется от ветра -->
+        <animation name="idle" frames="4" fps="2" loop="true"
+                   frame-width="48" frame-height="40">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="door-curtain:-1,0"/>
+            <frame index="2" layer-offsets=""/>
+            <frame index="3" layer-offsets="door-curtain:1,0"/>
+        </animation>
+
+        <!-- snow-shimmer: зимний снег мерцает -->
+        <animation name="snow-shimmer" frames="4" fps="1" loop="true"
+                   frame-width="48" frame-height="40"
+                   condition="season:winter">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="roof-snow:0,-1"/>
+            <frame index="2" layer-offsets=""/>
+            <frame index="3" layer-offsets="roof-snow:0,-1"/>
+        </animation>
+    </animations>
+
+    <states>
+        <state name="empty" description="Будка пустая"/>
+        <state name="occupied" description="Собака внутри — видна морда в проёме"/>
+    </states>
+
+    <interaction>
+        <action code="REST" description="Собака заходит в будку отдыхать"/>
+    </interaction>
+
+    <naming>
+        <output-dir>furniture/dog_house</output-dir>
+    </naming>
+</asset-spec>
