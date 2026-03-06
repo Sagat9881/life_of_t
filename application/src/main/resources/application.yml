@@ -20,10 +20,9 @@ server:
       - audio/mpeg
     min-response-size: 1024
 
-# Demo asset location (same as demo standalone)
-demo:
-  assets:
-    output-dir: ${user.dir}/asset-generator/target/generated-assets
+# Asset generation output
+assets:
+  output-dir: ${user.dir}/asset-generator/target/generated-assets
 
 # Actuator
 management:
