@@ -80,6 +80,8 @@ export const resolveAnimation = (
       row = entry.rows.find((r) => r.rowIndex === defaultIdx) ?? entry.rows[0];
     }
 
+    // Use conditional spread to avoid assigning undefined to optional props
+    // (required by exactOptionalPropertyTypes in tsconfig)
     return {
       name: animationName,
       atlasUrl,
@@ -93,8 +95,8 @@ export const resolveAnimation = (
       totalRows: entry.rows.length,
       currentRow: row!.rowIndex,
       displayScale,
-      tint: row!.tint,
-      opacity: row!.opacity,
+      ...(row!.tint !== undefined ? { tint: row!.tint } : {}),
+      ...(row!.opacity !== undefined ? { opacity: row!.opacity } : {}),
     };
   }
 
