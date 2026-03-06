@@ -67,23 +67,14 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 #sam {
     bottom: 24%; right: 22%;
     width: 96px; height: 80px;
-    background-image: url('/assets/generated/characters/sam/animations/idle_morning_atlas.png');
-    background-size: 384px 80px;
-    background-position: 0 0;
 }
 #tanya {
     bottom: 22%; left: 35%;
     width: 128px; height: 192px;
-    background-image: url('/assets/generated/characters/tanya/animations/idle_atlas.png');
-    background-size: 768px 192px;
-    background-position: 0 0;
 }
 #alexander {
     bottom: 22%; right: 30%;
     width: 128px; height: 192px;
-    background-image: url('/assets/generated/characters/alexander/animations/idle_atlas.png');
-    background-size: 512px 192px;
-    background-position: 0 0;
 }
 
 .activity-icon {
@@ -168,6 +159,13 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     position: absolute; font-size: 9px; color: #a098b8;
     text-align: center; pointer-events: none;
     text-shadow: 1px 1px 0 #000; white-space: nowrap;
+}
+
+/* Placeholder rectangle for characters with missing assets */
+.sprite-placeholder {
+    border: 2px dashed rgba(200,160,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
 }
 
 /* ======================== Interaction Modal ======================== */
@@ -278,7 +276,7 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 <div id="app">
     <header id="header">
         <h1>Life of T</h1>
-        <span class="subtitle">Demo v0.6</span>
+        <span class="subtitle">Demo v0.7</span>
         <span id="game-time">День 1 | 08:00</span>
     </header>
 
@@ -345,12 +343,31 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 'use strict';
 
 // ============================================================
-// Time-of-day atlas resolver for characters with conditional idles
+// Asset preloader with fallback chain
 // ============================================================
-const TIME_SLOT_MAP = {
-    MORNING: 'morning', DAY: 'day', EVENING: 'evening', NIGHT: 'night'
-};
+const assetCache = {};
 
+function preloadImage(url) {
+    if (assetCache[url] !== undefined) return Promise.resolve(assetCache[url]);
+    return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => { assetCache[url] = true; resolve(true); };
+        img.onerror = () => { assetCache[url] = false; resolve(false); };
+        img.src = url;
+    });
+}
+
+async function resolveAtlas(candidates) {
+    for (const url of candidates) {
+        const ok = await preloadImage(url);
+        if (ok) return url;
+    }
+    return null;
+}
+
+// ============================================================
+// Time-of-day logic
+// ============================================================
 function getTimeSlot(hour) {
     if (hour >= 6 && hour < 12) return 'morning';
     if (hour >= 12 && hour < 18) return 'day';
@@ -395,6 +412,71 @@ const NPC_ACTIONS = {
 };
 
 // ============================================================
+// Character configs with atlas resolution
+//
+// Per visual-specs.xml:
+//   Sam:       idle_morning, idle_day, idle_evening, idle_night (4 time-of-day variants)
+//   Tanya:     idle (single, no time variants)
+//   Alexander: idle (single, no time variants)
+//
+// Generator output naming: {animation_name}_atlas.png
+// Fallback: static composite PNG (e.g. sam.png, tanya.png)
+// ============================================================
+const BASE = '/assets/generated/characters';
+
+const CHARACTER_CONFIGS = {
+    tanya: {
+        el: 'tanya', labelEl: 'label-tanya', activityEl: 'activity-tanya',
+        hasTimedIdle: false,
+        idleAtlasCandidates: () => [
+            `${BASE}/tanya/animations/idle_atlas.png`,
+            `${BASE}/tanya/tanya.png`
+        ],
+        walkAtlasCandidates: [
+            `${BASE}/tanya/animations/walk_atlas.png`
+        ],
+        idleFrames: 6, idleFps: 8, walkFrames: 8, walkFps: 10,
+        spriteW: 128, spriteH: 192, minX: 5, maxX: 80, bottomPct: 22, speed: 1.8,
+        idleMinSec: 2, idleMaxSec: 6,
+        activities: ['☕', '📖', '🎮', '💭', '🎵', '💅'],
+        placeholderEmoji: '👩', placeholderColor: '#90D8C0'
+    },
+    alexander: {
+        el: 'alexander', labelEl: 'label-alexander', activityEl: 'activity-alexander',
+        hasTimedIdle: false,
+        idleAtlasCandidates: () => [
+            `${BASE}/alexander/animations/idle_atlas.png`,
+            `${BASE}/alexander/alexander.png`
+        ],
+        walkAtlasCandidates: [
+            `${BASE}/alexander/animations/walk_atlas.png`
+        ],
+        idleFrames: 4, idleFps: 4, walkFrames: 8, walkFps: 8,
+        spriteW: 128, spriteH: 192, minX: 10, maxX: 85, bottomPct: 22, speed: 1.4,
+        idleMinSec: 3, idleMaxSec: 8,
+        activities: ['📖', '💻', '☕', '📱', '🎵', '🤔'],
+        placeholderEmoji: '👨', placeholderColor: '#4060A0'
+    },
+    sam: {
+        el: 'sam', labelEl: 'label-sam', activityEl: 'activity-sam',
+        hasTimedIdle: true,
+        idleAtlasCandidates: (slot) => [
+            `${BASE}/sam/animations/idle_${slot}_atlas.png`,
+            `${BASE}/sam/animations/idle_atlas.png`,
+            `${BASE}/sam/sam.png`
+        ],
+        walkAtlasCandidates: [
+            `${BASE}/sam/animations/walk_atlas.png`
+        ],
+        idleFrames: 4, idleFps: 4, walkFrames: 6, walkFps: 8,
+        spriteW: 96, spriteH: 80, minX: 5, maxX: 90, bottomPct: 24, speed: 2.5,
+        idleMinSec: 1, idleMaxSec: 4,
+        activities: ['🧸', '🦴', '😴', '🐾', '👀'],
+        placeholderEmoji: '🐕', placeholderColor: '#0A0A0A'
+    }
+};
+
+// ============================================================
 // Sprite Animator
 // ============================================================
 class SpriteAnimator {
@@ -403,7 +485,7 @@ class SpriteAnimator {
         this.interval = Math.round(1000 / fps); this.current = 0; this.timer = null;
     }
     start() {
-        if (this.timer) return;
+        if (this.timer || this.fc <= 1) return;
         this.timer = setInterval(() => {
             this.el.style.backgroundPositionX = -(this.current * this.fw) + 'px';
             this.current = (this.current + 1) % this.fc;
@@ -413,82 +495,169 @@ class SpriteAnimator {
 }
 
 // ============================================================
-// Character Walker
+// Character Walker — with async atlas resolution
 // ============================================================
 class CharacterWalker {
     constructor(cfg) {
-        this.cfg = cfg; this.el = cfg.el; this.labelEl = cfg.labelEl; this.activityEl = cfg.activityEl;
-        this.state = 'idle'; this.animator = null;
+        this.cfg = cfg;
+        this.el = document.getElementById(cfg.el);
+        this.labelEl = document.getElementById(cfg.labelEl);
+        this.activityEl = document.getElementById(cfg.activityEl);
+        this.state = 'idle';
+        this.animator = null;
+        this.resolvedIdleAtlas = null;
+        this.resolvedWalkAtlas = null;
+        this.isStatic = false;
+        this.lastTimeSlot = null;
+
         const rect = this.el.getBoundingClientRect();
         const container = this.el.parentElement.getBoundingClientRect();
         this.posX = rect.left - container.left;
-        this.targetX = this.posX; this.moveRAF = null;
-        this._setIdleAnim(); this._scheduleNextWalk(); this._rotateActivity();
+        this.targetX = this.posX;
+        this.moveRAF = null;
+
+        this._initAsync();
     }
-    _resolveIdleAtlas() {
+
+    async _initAsync() {
+        await this._resolveAndSetIdle();
+        await this._resolveWalk();
+        this._scheduleNextWalk();
+        this._rotateActivity();
+    }
+
+    async _resolveAndSetIdle() {
         const c = this.cfg;
-        if (c.idleAtlasByTime) {
-            const slot = getTimeSlot(currentGameTime.hour);
-            return c.idleAtlasByTime[slot] || c.idleAtlas;
+        const slot = getTimeSlot(currentGameTime.hour);
+        this.lastTimeSlot = slot;
+
+        const candidates = c.idleAtlasCandidates(slot);
+        const atlas = await resolveAtlas(candidates);
+
+        if (atlas) {
+            this.resolvedIdleAtlas = atlas;
+            this.isStatic = atlas.endsWith('.png') && !atlas.includes('_atlas');
+            this._applyIdleVisual();
+        } else {
+            this._applyPlaceholder();
         }
-        return c.idleAtlas;
     }
-    _setIdleAnim() {
+
+    _applyIdleVisual() {
         const c = this.cfg;
-        const atlas = this._resolveIdleAtlas();
-        this.el.style.backgroundImage = `url('${atlas}')`;
-        this.el.style.backgroundSize = `${c.spriteW * c.idleFrames}px ${c.spriteH}px`;
-        if (this.animator) this.animator.stop();
-        this.animator = new SpriteAnimator(this.el, c.spriteW, c.idleFrames, c.idleFps);
-        this.animator.start(); this.state = 'idle';
+        this.el.classList.remove('sprite-placeholder');
+        this.el.style.backgroundImage = `url('${this.resolvedIdleAtlas}')`;
+
+        if (this.isStatic) {
+            this.el.style.backgroundSize = `${c.spriteW}px ${c.spriteH}px`;
+            this.el.style.backgroundPosition = '0 0';
+            if (this.animator) this.animator.stop();
+            this.animator = null;
+        } else {
+            this.el.style.backgroundSize = `${c.spriteW * c.idleFrames}px ${c.spriteH}px`;
+            if (this.animator) this.animator.stop();
+            this.animator = new SpriteAnimator(this.el, c.spriteW, c.idleFrames, c.idleFps);
+            this.animator.start();
+        }
+        this.state = 'idle';
     }
+
+    _applyPlaceholder() {
+        const c = this.cfg;
+        this.el.style.backgroundImage = 'none';
+        this.el.style.backgroundColor = c.placeholderColor;
+        this.el.classList.add('sprite-placeholder');
+        this.el.innerHTML = `<span style="font-size:${c.spriteH/3}px">${c.placeholderEmoji}</span>`;
+        this.isStatic = true;
+        this.state = 'idle';
+    }
+
+    async _resolveWalk() {
+        const atlas = await resolveAtlas(this.cfg.walkAtlasCandidates);
+        this.resolvedWalkAtlas = atlas;
+    }
+
+    async checkTimeSlotChange() {
+        if (!this.cfg.hasTimedIdle) return;
+        const slot = getTimeSlot(currentGameTime.hour);
+        if (slot !== this.lastTimeSlot && this.state === 'idle') {
+            await this._resolveAndSetIdle();
+        }
+    }
+
     _setWalkAnim() {
         const c = this.cfg;
-        this.el.style.backgroundImage = `url('${c.walkAtlas}')`;
+        if (!this.resolvedWalkAtlas) return;
+        this.el.classList.remove('sprite-placeholder');
+        this.el.innerHTML = '';
+        this.el.style.backgroundColor = '';
+        this.el.style.backgroundImage = `url('${this.resolvedWalkAtlas}')`;
         this.el.style.backgroundSize = `${c.spriteW * c.walkFrames}px ${c.spriteH}px`;
         if (this.animator) this.animator.stop();
         this.animator = new SpriteAnimator(this.el, c.spriteW, c.walkFrames, c.walkFps);
-        this.animator.start(); this.state = 'walking';
+        this.animator.start();
+        this.state = 'walking';
     }
+
     _scheduleNextWalk() {
-        const delay = (this.cfg.idleMinSec + Math.random() * (this.cfg.idleMaxSec - this.cfg.idleMinSec)) * 1000;
+        const c = this.cfg;
+        const delay = (c.idleMinSec + Math.random() * (c.idleMaxSec - c.idleMinSec)) * 1000;
         setTimeout(() => this._startWalk(), delay);
     }
+
     _startWalk() {
-        const container = this.el.parentElement; if (!container) return;
+        if (!this.resolvedWalkAtlas) {
+            this._scheduleNextWalk();
+            return;
+        }
+        const container = this.el.parentElement;
+        if (!container) return;
         const cw = container.clientWidth;
-        const minPx = cw * this.cfg.minX / 100, maxPx = cw * this.cfg.maxX / 100 - this.cfg.spriteW;
+        const c = this.cfg;
+        const minPx = cw * c.minX / 100, maxPx = cw * c.maxX / 100 - c.spriteW;
         this.targetX = minPx + Math.random() * (maxPx - minPx);
         if (Math.abs(this.targetX - this.posX) < 20) { this._scheduleNextWalk(); return; }
         const goingLeft = this.targetX < this.posX;
         this.el.style.transform = goingLeft ? 'scaleX(-1)' : 'scaleX(1)';
-        this._setWalkAnim(); this._move();
+        this._setWalkAnim();
+        this._move();
     }
+
     _move() {
         const speed = this.cfg.speed || 1.5;
         const step = () => {
             const dx = this.targetX - this.posX;
             if (Math.abs(dx) < speed) {
-                this.posX = this.targetX; this._updatePosition();
+                this.posX = this.targetX;
+                this._updatePosition();
                 this.el.style.transform = 'scaleX(1)';
-                this._setIdleAnim(); this._scheduleNextWalk(); return;
+                this._applyIdleVisual();
+                this._scheduleNextWalk();
+                return;
             }
-            this.posX += dx > 0 ? speed : -speed; this._updatePosition();
+            this.posX += dx > 0 ? speed : -speed;
+            this._updatePosition();
             this.moveRAF = requestAnimationFrame(step);
         };
         this.moveRAF = requestAnimationFrame(step);
     }
+
     _updatePosition() {
-        this.el.style.left = this.posX + 'px'; this.el.style.right = 'auto';
+        const c = this.cfg;
+        this.el.style.left = this.posX + 'px';
+        this.el.style.right = 'auto';
         if (this.labelEl) {
-            this.labelEl.style.left = (this.posX + this.cfg.spriteW / 2 - 30) + 'px';
-            this.labelEl.style.right = 'auto'; this.labelEl.style.bottom = `calc(${this.cfg.bottomPct}% - 14px)`;
+            this.labelEl.style.left = (this.posX + c.spriteW / 2 - 30) + 'px';
+            this.labelEl.style.right = 'auto';
+            this.labelEl.style.bottom = `calc(${c.bottomPct}% - 14px)`;
         }
         if (this.activityEl) {
-            this.activityEl.style.left = (this.posX + this.cfg.spriteW / 2 - 9) + 'px';
-            this.activityEl.style.right = 'auto'; this.activityEl.style.bottom = `calc(${this.cfg.bottomPct}% + ${this.cfg.spriteH}px + 4px)`;
+            this.activityEl.style.left = (this.posX + c.spriteW / 2 - 9) + 'px';
+            this.activityEl.style.right = 'auto';
+            this.activityEl.style.bottom = `calc(${c.bottomPct}% + ${c.spriteH}px + 4px)`;
         }
     }
+
     _rotateActivity() {
         if (!this.activityEl || !this.cfg.activities) return;
         const act = this.cfg.activities[Math.floor(Math.random() * this.cfg.activities.length)];
@@ -693,9 +862,15 @@ function syncFromServerState(state) {
         if (f) document.getElementById('rel-father').textContent = hearts(f.closeness);
     }
     if (state.gameTime) {
+        const prevSlot = getTimeSlot(currentGameTime.hour);
         currentGameTime = state.gameTime;
         document.getElementById('game-time').textContent =
             'День ' + state.gameTime.day + ' | ' + String(state.gameTime.hour).padStart(2,'0') + ':00';
+
+        const newSlot = getTimeSlot(state.gameTime.hour);
+        if (newSlot !== prevSlot) {
+            walkers.forEach(w => w.checkTimeSlotChange());
+        }
     }
     if (state.activeQuests) {
         renderQuests(state.activeQuests);
@@ -732,45 +907,9 @@ const walkers = [];
 let modal;
 
 function initWalkers() {
-    walkers.push(new CharacterWalker({
-        el: document.getElementById('tanya'),
-        labelEl: document.getElementById('label-tanya'),
-        activityEl: document.getElementById('activity-tanya'),
-        idleAtlas: '/assets/generated/characters/tanya/animations/idle_atlas.png',
-        walkAtlas: '/assets/generated/characters/tanya/animations/walk_atlas.png',
-        idleFrames: 6, idleFps: 8, walkFrames: 8, walkFps: 10,
-        spriteW: 128, spriteH: 192, minX: 5, maxX: 80, bottomPct: 22, speed: 1.8,
-        idleMinSec: 2, idleMaxSec: 6,
-        activities: ['☕', '📖', '🎮', '💭', '🎵', '💅']
-    }));
-    walkers.push(new CharacterWalker({
-        el: document.getElementById('alexander'),
-        labelEl: document.getElementById('label-alexander'),
-        activityEl: document.getElementById('activity-alexander'),
-        idleAtlas: '/assets/generated/characters/alexander/animations/idle_atlas.png',
-        walkAtlas: '/assets/generated/characters/alexander/animations/walk_atlas.png',
-        idleFrames: 4, idleFps: 4, walkFrames: 8, walkFps: 8,
-        spriteW: 128, spriteH: 192, minX: 10, maxX: 85, bottomPct: 22, speed: 1.4,
-        idleMinSec: 3, idleMaxSec: 8,
-        activities: ['📖', '💻', '☕', '📱', '🎵', '🤔']
-    }));
-    walkers.push(new CharacterWalker({
-        el: document.getElementById('sam'),
-        labelEl: document.getElementById('label-sam'),
-        activityEl: document.getElementById('activity-sam'),
-        idleAtlas: '/assets/generated/characters/sam/animations/idle_morning_atlas.png',
-        idleAtlasByTime: {
-            morning: '/assets/generated/characters/sam/animations/idle_morning_atlas.png',
-            day:     '/assets/generated/characters/sam/animations/idle_day_atlas.png',
-            evening: '/assets/generated/characters/sam/animations/idle_evening_atlas.png',
-            night:   '/assets/generated/characters/sam/animations/idle_night_atlas.png',
-        },
-        walkAtlas: '/assets/generated/characters/sam/animations/walk_atlas.png',
-        idleFrames: 4, idleFps: 4, walkFrames: 6, walkFps: 8,
-        spriteW: 96, spriteH: 80, minX: 5, maxX: 90, bottomPct: 24, speed: 2.5,
-        idleMinSec: 1, idleMaxSec: 4,
-        activities: ['🧸', '🦴', '😴', '🐾', '👀']
-    }));
+    for (const [id, cfg] of Object.entries(CHARACTER_CONFIGS)) {
+        walkers.push(new CharacterWalker(cfg));
+    }
 }
 
 function initClickHandlers() {
