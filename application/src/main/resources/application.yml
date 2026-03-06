@@ -3,15 +3,6 @@
 spring:
   application:
     name: life-of-t
-  mvc:
-    static-path-pattern: /**
-  web:
-    resources:
-      static-locations:
-        - classpath:/static/
-      cache:
-        cachecontrol:
-          max-age: 365d
 
 server:
   port: 8080
@@ -19,7 +10,7 @@ server:
     enabled: true
     mime-types:
       - application/json
-      - application/javascript  
+      - application/javascript
       - text/css
       - text/html
       - image/png
