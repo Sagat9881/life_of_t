@@ -26,16 +26,32 @@ public class WebConfig {
 
             @Override
             public void addResourceHandlers(ResourceHandlerRegistry registry) {
-                // Vite-built assets (JS/CSS with content hashes) — long cache
+                // Frontend requests assets as /assets/{type}/{name}/...
+                // Asset generator outputs to target/generated-assets/{type}/{name}/...
+                // Map /assets/** -> generated-assets directories
                 registry.addResourceHandler("/assets/**")
                         .addResourceLocations(
-                                "classpath:/static/assets/",
+                                "file:./asset-generator/target/generated-assets/",
                                 "file:../asset-generator/target/generated-assets/",
                                 "classpath:/generated-assets/"
                         )
+                        .setCacheControl(CacheControl.maxAge(Duration.ofDays(7)));
+
+                // Also support legacy /generated-assets/** path (used by demo)
+                registry.addResourceHandler("/generated-assets/**")
+                        .addResourceLocations(
+                                "file:./asset-generator/target/generated-assets/",
+                                "file:../asset-generator/target/generated-assets/",
+                                "classpath:/generated-assets/"
+                        )
+                        .setCacheControl(CacheControl.maxAge(Duration.ofDays(7)));
+
+                // Vite-built frontend assets (JS/CSS with content hashes) — long cache
+                registry.addResourceHandler("/static-assets/**")
+                        .addResourceLocations("classpath:/static/assets/")
                         .setCacheControl(CacheControl.maxAge(Duration.ofDays(365)));
 
-                // All other static files (index.html, favicon, etc.) — no cache
+                // All other static files (index.html, favicon) — no cache
                 registry.addResourceHandler("/**")
                         .addResourceLocations("classpath:/static/")
                         .setCacheControl(CacheControl.noCache());
