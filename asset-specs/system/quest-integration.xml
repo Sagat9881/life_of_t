@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest-integration>
+    <meta>
+        <version>1.0.0</version>
+        <description>
+            Интеграция 16 квестов из narrative/quests/ с игровым движком.
+            Определяет условия старта, шаги прогресса, завершение и награды.
+        </description>
+    </meta>
+
+    <quest-states>
+        <state id="NOT_STARTED" description="Квест ещё не активирован"/>
+        <state id="ACTIVE" description="Квест в процессе выполнения"/>
+        <state id="STEP_COMPLETE" description="Текущий шаг завершён, ожидает следующий"/>
+        <state id="COMPLETED" description="Квест успешно завершён"/>
+        <state id="FAILED" description="Квест провален (для квестов с таймером)"/>
+    </quest-states>
+
+    <!-- НАЧАЛЬНЫЕ КВЕСТЫ (day 1-3) -->
+
+    <quest id="feed_the_pride">
+        <narrative-file>narrative/quests/feed_the_pride.xml</narrative-file>
+        <trigger>day_count == 1 (автоматически при старте игры)</trigger>
+        <type>tutorial</type>
+        <steps>
+            <step n="1" action="FEED_CATS" description="Покормить кошек утром"/>
+            <step n="2" action="FEED_CATS" description="Покормить кошек вечером"/>
+            <step n="3" action="COOK" description="Приготовить еду для себя"/>
+        </steps>
+        <completion>Все 3 шага выполнены</completion>
+        <reward>
+            <effect stat="happiness" value="+10"/>
+            <unlock description="Разблокирует действие BRUSH_CAT"/>
+        </reward>
+        <presentation>modal с подсказками (tutorial)</presentation>
+    </quest>
+
+    <quest id="walk_sam">
+        <narrative-file>narrative/quests/walk_sam.xml</narrative-file>
+        <trigger>day_count == 1 AND time == morning</trigger>
+        <type>tutorial</type>
+        <steps>
+            <step n="1" action="WALK_DOG" description="Выгулять Сэма в парке"/>
+        </steps>
+        <completion>1 прогулка завершена</completion>
+        <reward>
+            <effect stat="happiness" value="+5"/>
+            <unlock description="Парк доступен постоянно"/>
+        </reward>
+        <presentation>toast-подсказка</presentation>
+    </quest>
+
+    <!-- КВЕСТЫ ПИТОМЦЕВ (day 3-15) -->
+
+    <quest id="save_lada">
+        <narrative-file>narrative/quests/save_lada.xml</narrative-file>
+        <trigger>event:lada_sick fired</trigger>
+        <type>urgent</type>
+        <timer>2 игровых дня</timer>
+        <steps>
+            <step n="1" action="PHONE" description="Позвонить в ветклинику"/>
+            <step n="2" action="VET_VISIT" npc="lada" description="Отвезти Ладу к ветеринару"/>
+            <step n="3" action="FEED_CATS" npc="lada" count="3" description="Давать лекарство 3 дня (через кормление)"/>
+        </steps>
+        <completion>Все шаги в течение таймера</completion>
+        <failure>Таймер истёк — Лада в тяжёлом состоянии, happiness -30</failure>
+        <reward>
+            <effect stat="happiness" value="+20"/>
+            <effect stat="stress" value="-10"/>
+        </reward>
+        <presentation>scene при старте, modal при шагах</presentation>
+    </quest>
+
+    <quest id="duke_arrives">
+        <narrative-file>narrative/quests/duke_arrives.xml</narrative-file>
+        <trigger>event:duke_found fired</trigger>
+        <type>story</type>
+        <steps>
+            <step n="1" action="VET_VISIT" npc="duke" description="Осмотреть Дюка у ветеринара"/>
+            <step n="2" action="FEED_CATS" count="3" description="Кормить Дюка 3 дня"/>
+            <step n="3" action="PLAY_CAT" npc="duke" count="2" description="Поиграть с Дюком 2 раза"/>
+        </steps>
+        <completion>Все шаги выполнены</completion>
+        <reward>
+            <effect stat="happiness" value="+15"/>
+            <unlock description="Duke становится постоянным NPC"/>
+        </reward>
+        <side-effect>Конфликт garfield_vs_duke активируется</side-effect>
+        <presentation>scene</presentation>
+    </quest>
+
+    <quest id="tame_aijan">
+        <narrative-file>narrative/quests/tame_aijan.xml</narrative-file>
+        <trigger>day_count >= 3</trigger>
+        <type>long-term</type>
+        <steps>
+            <step n="1" action="FEED_CATS" count="5" description="Кормить регулярно (Айжан ест когда никто не видит)"/>
+            <step n="2" action="passive" description="Не пугать — не делать резких действий при Айжан"/>
+            <step n="3" action="PLAY_CAT" npc="aijan" description="Попробовать поиграть (доступно при taming >= 50)"/>
+            <step n="4" action="BRUSH_CAT" npc="aijan" description="Расчесать (доступно при taming >= 80)"/>
+        </steps>
+        <progress-metric>aijan.taming_progress (0-100)</progress-metric>
+        <completion>taming_progress >= 100</completion>
+        <reward>
+            <effect stat="happiness" value="+25"/>
+            <description>Айжан перестаёт шипеть, мурлычет</description>
+        </reward>
+        <presentation>toast при прогрессе, modal при завершении</presentation>
+    </quest>
+
+    <!-- КВЕСТЫ ОТНОШЕНИЙ -->
+
+    <quest id="work_deadline">
+        <narrative-file>narrative/quests/work_deadline.xml</narrative-file>
+        <trigger>day_count >= 5 AND career >= 30</trigger>
+        <type>timed</type>
+        <timer>3 игровых дня</timer>
+        <steps>
+            <step n="1" action="WORK_OFFICE" count="3" description="Работать в офисе 3 раза"/>
+            <step n="2" action="WORK_HOME" count="2" description="Доработать дома 2 раза"/>
+        </steps>
+        <completion>Все рабочие сессии завершены в срок</completion>
+        <failure>Срок истёк — career -20, stress +20</failure>
+        <reward>
+            <effect stat="career" value="+30"/>
+            <effect stat="stress" value="+10"/>
+        </reward>
+        <conflict>Меньше времени на питомцев — их happiness падает</conflict>
+        <presentation>modal</presentation>
+    </quest>
+
+    <quest id="wedding">
+        <narrative-file>narrative/quests/wedding.xml</narrative-file>
+        <trigger>day_count >= 20 AND alexander_relation >= 60</trigger>
+        <type>story-finale</type>
+        <steps>
+            <step n="1" action="SHOP" count="2" description="Купить подготовки к свадьбе"/>
+            <step n="2" action="PHONE" count="3" description="Обзвонить гостей"/>
+            <step n="3" action="SELFCARE" description="Подготовиться"/>
+            <step n="4" action="special:ceremony" description="Церемония (автоматическая сцена)"/>
+        </steps>
+        <completion>Все шаги + финальная сцена</completion>
+        <reward>
+            <effect stat="happiness" value="+50"/>
+            <unlock description="Эндинг: Happy Wedding"/>
+        </reward>
+        <presentation>scene (полная кат-сцена)</presentation>
+    </quest>
+
+    <quest id="lost_sam">
+        <narrative-file>narrative/quests/lost_sam.xml</narrative-file>
+        <trigger>sam.walk_count == 0 for 3 days (не гуляли)</trigger>
+        <type>urgent</type>
+        <timer>1 игровой день</timer>
+        <steps>
+            <step n="1" action="special:search_park" description="Искать в парке"/>
+            <step n="2" action="special:search_street" description="Искать на улице"/>
+            <step n="3" action="PHONE" description="Расклеить объявления (через телефон)"/>
+        </steps>
+        <completion>Сэм найден (шаг 1 или 2)</completion>
+        <failure>Не найден за день — happiness -40, ending path affected</failure>
+        <reward>
+            <effect stat="happiness" value="+20"/>
+            <effect stat="stress" value="-15"/>
+        </reward>
+        <presentation>scene</presentation>
+    </quest>
+
+    <quest id="alexander_conflict">
+        <narrative-file>narrative/quests/alexander_conflict.xml</narrative-file>
+        <trigger>alexander_relation &lt;= 30 AND stress >= 60</trigger>
+        <type>story</type>
+        <steps>
+            <step n="1" action="PHONE" npc="alexander" description="Поговорить по телефону"/>
+            <step n="2" action="COOK" description="Приготовить ужин (примирение)"/>
+            <step n="3" action="special:talk" npc="alexander" description="Серьёзный разговор (вечером)"/>
+        </steps>
+        <completion>Все шаги завершены</completion>
+        <reward>
+            <effect stat="alexander_relation" value="+20"/>
+            <effect stat="stress" value="-15"/>
+        </reward>
+        <presentation>modal для разговоров, scene для финала</presentation>
+    </quest>
+
+    <quest id="parents_visit">
+        <narrative-file>narrative/quests/parents_visit.xml</narrative-file>
+        <trigger>day_count >= 12</trigger>
+        <type>story</type>
+        <steps>
+            <step n="1" action="COOK" count="2" description="Подготовить угощение"/>
+            <step n="2" action="special:clean_house" description="Убрать квартиру"/>
+            <step n="3" action="special:parents_arrive" description="Визит (автоматическая сцена)"/>
+        </steps>
+        <completion>Сцена визита пройдена</completion>
+        <reward>
+            <effect stat="happiness" value="+15"/>
+        </reward>
+        <presentation>scene</presentation>
+    </quest>
+
+    <quest id="summer_camp">
+        <narrative-file>narrative/quests/summer_camp.xml</narrative-file>
+        <trigger>day_count >= 18</trigger>
+        <type>story</type>
+        <steps>
+            <step n="1" action="special:pack" description="Собрать вещи"/>
+            <step n="2" action="special:travel" description="Доехать (ночная трасса)"/>
+            <step n="3" action="special:camp_scene" description="Сцена в лагере"/>
+        </steps>
+        <completion>Все сцены пройдены</completion>
+        <reward>
+            <effect stat="happiness" value="+20"/>
+            <effect stat="stress" value="-20"/>
+        </reward>
+        <uses-locations>night_highway, summer_camp</uses-locations>
+        <presentation>scene (цепочка сцен)</presentation>
+    </quest>
+
+    <quest id="dacha_weekend">
+        <narrative-file>narrative/quests/dacha_weekend.xml</narrative-file>
+        <trigger>day_count >= 8 AND stress >= 50</trigger>
+        <type>optional</type>
+        <steps>
+            <step n="1" action="special:travel_dacha" description="Поехать на дачу"/>
+            <step n="2" action="MEDITATE" description="Отдохнуть на природе"/>
+            <step n="3" action="special:bbq" description="Шашлыки (сцена)"/>
+        </steps>
+        <completion>Вернуться домой</completion>
+        <reward>
+            <effect stat="stress" value="-30"/>
+            <effect stat="happiness" value="+15"/>
+            <effect stat="energy" value="+20"/>
+        </reward>
+        <uses-locations>dacha_yard</uses-locations>
+        <presentation>scene</presentation>
+    </quest>
+
+    <quest id="find_yourself">
+        <narrative-file>narrative/quests/find_yourself.xml</narrative-file>
+        <trigger>day_count >= 7</trigger>
+        <type>long-term</type>
+        <steps>
+            <step n="1" action="EXERCISE" count="3" description="Сходить в зал 3 раза"/>
+            <step n="2" action="MEDITATE" count="3" description="Помедитировать 3 раза"/>
+            <step n="3" action="READ" count="3" description="Почитать 3 раза"/>
+            <step n="4" action="SELFCARE" count="3" description="Уход за собой 3 раза"/>
+        </steps>
+        <completion>Все 4 направления выполнены</completion>
+        <reward>
+            <effect stat="happiness" value="+25"/>
+            <effect stat="health" value="+15"/>
+            <description>Таня нашла баланс</description>
+        </reward>
+        <presentation>toast при прогрессе, scene при завершении</presentation>
+    </quest>
+
+    <quest id="cat_harmony">
+        <narrative-file>narrative/quests/cat_harmony.xml</narrative-file>
+        <trigger>all cats happiness >= 60</trigger>
+        <type>hidden</type>
+        <steps>
+            <step n="1" condition="garfield.happiness >= 60"/>
+            <step n="2" condition="cirilla.happiness >= 60"/>
+            <step n="3" condition="klop.happiness >= 60"/>
+            <step n="4" condition="lada.happiness >= 60"/>
+            <step n="5" condition="persi.happiness >= 60"/>
+            <step n="6" condition="thelma.happiness >= 60"/>
+            <step n="7" condition="voland.happiness >= 60"/>
+            <step n="8" condition="aijan.happiness >= 60"/>
+        </steps>
+        <completion>Все кошки счастливы одновременно</completion>
+        <reward>
+            <effect stat="happiness" value="+30"/>
+            <unlock description="Секретная сцена: все коты вместе мурлычат"/>
+        </reward>
+        <presentation>scene (секретная)</presentation>
+    </quest>
+
+    <!-- ПОРЯДОК КВЕСТОВ -->
+
+    <quest-flow>
+        <phase name="Tutorial" days="1-2" quests="feed_the_pride, walk_sam"/>
+        <phase name="Early Game" days="3-7" quests="tame_aijan, save_lada, work_deadline"/>
+        <phase name="Mid Game" days="8-15" quests="duke_arrives, dacha_weekend, find_yourself, alexander_conflict, parents_visit"/>
+        <phase name="Late Game" days="16-25" quests="summer_camp, lost_sam, wedding, cat_harmony"/>
+    </quest-flow>
+
+</quest-integration>
