@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<conflicts-and-endings>
+    <meta>
+        <version>1.0.0</version>
+        <description>
+            Система конфликтов и концовок.
+            Конфликты — столкновения между NPC, требующие выбора игрока.
+            Концовки — финальные сцены, зависящие от накопленных решений.
+        </description>
+    </meta>
+
+    <!-- КОНФЛИКТЫ -->
+
+    <conflicts>
+
+        <conflict id="alexander_vs_sam">
+            <name>Александр против Сэма</name>
+            <description>
+                Александр не любит собаку. Сэм чувствует враждебность.
+                Нарастающий конфликт — от ворчания до ультиматума.
+            </description>
+            <trigger>alexander_relation &lt;= 40 AND sam_relation >= 50</trigger>
+            <escalation-stages>
+                <stage n="1" name="Раздражение">
+                    <condition>alexander_relation &lt;= 40</condition>
+                    <event>Александр жалуется на шерсть и лай</event>
+                    <animation>
+                        <npc id="alexander" play="annoyed"/>
+                        <npc id="sam" play="sad-ears-down"/>
+                    </animation>
+                </stage>
+                <stage n="2" name="Ссора">
+                    <condition>alexander_relation &lt;= 25</condition>
+                    <event>Открытая ссора — «Или я, или собака»</event>
+                    <animation>
+                        <npc id="alexander" play="angry"/>
+                        <npc id="sam" play="bark-angry"/>
+                        <tanya play="cry"/>
+                        <particles type="conflict-sparks" count="6"/>
+                    </animation>
+                    <player-choices>
+                        <choice id="side_sam" text="Сэм — часть семьи">
+                            <effect stat="alexander_relation" value="-15"/>
+                            <effect stat="sam_relation" value="+15"/>
+                            <effect stat="stress" value="+20"/>
+                            <ending-weight ending="alone_with_pets" value="+20"/>
+                        </choice>
+                        <choice id="compromise" text="Найти компромисс">
+                            <effect stat="stress" value="+10"/>
+                            <effect stat="energy" value="-15"/>
+                            <ending-weight ending="balanced" value="+15"/>
+                        </choice>
+                        <choice id="side_alexander" text="Может, отдать Сэма родителям...">
+                            <effect stat="alexander_relation" value="+10"/>
+                            <effect stat="sam_relation" value="-20"/>
+                            <effect stat="happiness" value="-20"/>
+                            <ending-weight ending="marriage_first" value="+15"/>
+                        </choice>
+                    </player-choices>
+                </stage>
+                <stage n="3" name="Кризис">
+                    <condition>alexander_relation &lt;= 10</condition>
+                    <event>Александр уходит ночевать к друзьям</event>
+                    <animation>
+                        <location-change to="home_room" time="night"/>
+                        <tanya play="cry"/>
+                        <overlay type="dark-vignette" opacity="0.5"/>
+                    </animation>
+                    <ending-weight ending="alone_with_pets" value="+30"/>
+                </stage>
+            </escalation-stages>
+        </conflict>
+
+        <conflict id="garfield_vs_duke">
+            <name>Гарфилд против Дюка</name>
+            <description>
+                Гарфилд — альфа-кот, не принимает нового Дюка.
+                Драки, метки территории, стресс.
+            </description>
+            <trigger>duke.exists AND garfield.location == duke.location</trigger>
+            <escalation-stages>
+                <stage n="1" name="Шипение">
+                    <condition>duke.days_home &lt;= 3</condition>
+                    <event>Гарфилд шипит на Дюка при встрече</event>
+                    <animation>
+                        <npc id="garfield" play="hiss"/>
+                        <npc id="duke" play="scared"/>
+                    </animation>
+                </stage>
+                <stage n="2" name="Драка">
+                    <condition>duke.days_home >= 4 AND garfield.happiness &lt; 40</condition>
+                    <event>Настоящая драка — шерсть летит</event>
+                    <animation>
+                        <npc id="garfield" play="fight"/>
+                        <npc id="duke" play="fight"/>
+                        <particles type="fur-cloud" count="8"/>
+                        <overlay type="screen-shake" duration="800ms"/>
+                    </animation>
+                    <player-choices>
+                        <choice id="separate" text="Разнять">
+                            <effect stat="energy" value="-10"/>
+                            <effect stat="stress" value="+10"/>
+                        </choice>
+                        <choice id="spray" text="Брызнуть водой">
+                            <effect stat="garfield_relation" value="-5"/>
+                            <description>Эффективно, но Гарфилд обижается</description>
+                        </choice>
+                    </player-choices>
+                </stage>
+                <stage n="3" name="Примирение">
+                    <condition>duke.days_home >= 10 AND garfield.happiness >= 50</condition>
+                    <event>Коты начинают терпеть друг друга. Спят на одном кресле.</event>
+                    <animation>
+                        <npc id="garfield" play="idle-day"/>
+                        <npc id="duke" play="idle-day"/>
+                        <particles type="hearts" count="3"/>
+                    </animation>
+                    <auto-resolve>true</auto-resolve>
+                </stage>
+            </escalation-stages>
+        </conflict>
+
+        <conflict id="cats_vs_sam">
+            <name>Коты против Сэма</name>
+            <description>Общий фоновый конфликт — коты занимают места Сэма.</description>
+            <trigger>permanent — фоновый конфликт</trigger>
+            <events>
+                <event probability="20%" description="Кот сидит в миске Сэма">
+                    <animation>
+                        <npc id="thelma" play="sit-in-bowl"/>
+                        <npc id="sam" play="confused"/>
+                    </animation>
+                    <effect stat="happiness" value="+2" note="милый момент"/>
+                </event>
+                <event probability="15%" description="Гарфилд шлёпает Сэма лапой">
+                    <animation>
+                        <npc id="garfield" play="swat"/>
+                        <npc id="sam" play="yelp"/>
+                    </animation>
+                    <effect stat="stress" value="+3"/>
+                </event>
+            </events>
+        </conflict>
+
+        <conflict id="work_vs_pets">
+            <name>Работа против питомцев</name>
+            <description>
+                Карьерные квесты отнимают время у питомцев.
+                Их happiness падает, события грусти учащаются.
+            </description>
+            <trigger>career >= 50 AND average_pet_happiness &lt;= 40</trigger>
+            <event>
+                <presentation>modal</presentation>
+                <text>Коты грустят. Сэм не гулял 2 дня. Может, стоит взять выходной?</text>
+                <player-choices>
+                    <choice id="take_break" text="Взять выходной">
+                        <effect stat="career" value="-10"/>
+                        <effect stat="pet_happiness_all" value="+15"/>
+                        <ending-weight ending="balanced" value="+10"/>
+                    </choice>
+                    <choice id="keep_working" text="Работа важнее">
+                        <effect stat="career" value="+5"/>
+                        <effect stat="pet_happiness_all" value="-10"/>
+                        <ending-weight ending="career_focused" value="+15"/>
+                    </choice>
+                </player-choices>
+            </event>
+        </conflict>
+
+    </conflicts>
+
+    <!-- КОНЦОВКИ -->
+
+    <endings>
+
+        <ending id="balanced">
+            <name>Гармония</name>
+            <description>Таня нашла баланс между работой, отношениями и питомцами.</description>
+            <conditions>
+                <condition>happiness >= 70</condition>
+                <condition>stress &lt;= 30</condition>
+                <condition>alexander_relation >= 50</condition>
+                <condition>average_pet_happiness >= 50</condition>
+                <condition>career >= 40</condition>
+            </conditions>
+            <scene>
+                <location>home_room</location>
+                <time>evening</time>
+                <animation>
+                    <tanya play="happy"/>
+                    <npc id="alexander" play="idle-couch"/>
+                    <npc id="sam" play="sleep" position="at-feet"/>
+                    <npc id="garfield" play="sleep" position="on-bed"/>
+                    <particles type="warm-light" count="10"/>
+                    <overlay type="golden-glow" opacity="0.2"/>
+                </animation>
+                <text>Вечер. Все дома. Все счастливы. Таня улыбается.</text>
+            </scene>
+            <tone>тёплый, удовлетворённый</tone>
+        </ending>
+
+        <ending id="alone_with_pets">
+            <name>Кошатница</name>
+            <description>Александр ушёл. Таня осталась с питомцами. Грустно, но они рядом.</description>
+            <conditions>
+                <condition>alexander_relation &lt;= 15</condition>
+                <condition>average_pet_happiness >= 60</condition>
+            </conditions>
+            <scene>
+                <location>home_room</location>
+                <time>night</time>
+                <animation>
+                    <tanya play="sad-smile"/>
+                    <npc id="sam" play="sleep" position="at-feet"/>
+                    <npc id="garfield" play="purr" position="on-lap"/>
+                    <npc id="klop" play="sleep" position="on-pillow"/>
+                    <overlay type="blue-tint" opacity="0.15"/>
+                </animation>
+                <text>Тишина. Только мурлыканье. Может, так и лучше.</text>
+            </scene>
+            <tone>горько-сладкий, меланхоличный</tone>
+        </ending>
+
+        <ending id="career_focused">
+            <name>Карьеристка</name>
+            <description>Таня пожертвовала личным ради карьеры. Успешна, но одинока.</description>
+            <conditions>
+                <condition>career >= 80</condition>
+                <condition>happiness &lt;= 40</condition>
+                <condition>stress >= 60</condition>
+            </conditions>
+            <scene>
+                <location>workplace</location>
+                <time>evening</time>
+                <animation>
+                    <tanya play="tired-work"/>
+                    <object id="office_desk" state="working"/>
+                    <overlay type="cold-fluorescent" opacity="0.2"/>
+                </animation>
+                <text>Пустой офис. Мерцание экрана. Дома некому ждать.</text>
+            </scene>
+            <tone>холодный, одинокий</tone>
+        </ending>
+
+        <ending id="marriage_first">
+            <name>Семья прежде всего</name>
+            <description>Таня выбрала Александра. Отдала часть питомцев. Стабильно, но с сожалениями.</description>
+            <conditions>
+                <condition>alexander_relation >= 70</condition>
+                <condition>average_pet_happiness &lt;= 30</condition>
+            </conditions>
+            <scene>
+                <location>home_room</location>
+                <time>evening</time>
+                <animation>
+                    <tanya play="neutral"/>
+                    <npc id="alexander" play="happy"/>
+                    <overlay type="warm" opacity="0.1"/>
+                </animation>
+                <text>Квартира чистая. Тихая. Слишком тихая. Таня смотрит на пустую миску.</text>
+            </scene>
+            <tone>ностальгический, с сожалением</tone>
+        </ending>
+
+        <ending id="burnout">
+            <name>Выгорание</name>
+            <description>Таня не справилась. Стресс сломал. Депрессия.</description>
+            <conditions>
+                <condition>stress >= 90</condition>
+                <condition>happiness &lt;= 15</condition>
+                <condition>health &lt;= 20</condition>
+            </conditions>
+            <scene>
+                <location>home_room</location>
+                <time>day</time>
+                <animation>
+                    <tanya play="cry"/>
+                    <overlay type="dark-heavy" opacity="0.5"/>
+                    <particles type="rain" count="20"/>
+                </animation>
+                <text>Шторы закрыты. Телефон молчит. Коты жмутся рядом. Нужна помощь.</text>
+            </scene>
+            <tone>тяжёлый, но с искрой надежды (коты рядом)</tone>
+            <post-credits>Контакты психологической помощи</post-credits>
+        </ending>
+
+        <ending id="secret_perfect">
+            <name>Идеальная жизнь</name>
+            <description>Секретная концовка — все квесты выполнены, все счастливы.</description>
+            <conditions>
+                <condition>quest:cat_harmony COMPLETED</condition>
+                <condition>quest:wedding COMPLETED</condition>
+                <condition>quest:find_yourself COMPLETED</condition>
+                <condition>alexander_relation >= 80</condition>
+                <condition>happiness >= 85</condition>
+            </conditions>
+            <scene>
+                <location>dacha_yard</location>
+                <time>evening</time>
+                <animation>
+                    <tanya play="happy"/>
+                    <npc id="alexander" play="happy"/>
+                    <npc id="sam" play="walk-happy"/>
+                    <!-- Все коты на участке -->
+                    <npc id="garfield" play="sleep" position="on-hammock"/>
+                    <npc id="cirilla" play="hunt" position="in-grass"/>
+                    <npc id="klop" play="play" position="near-tanya"/>
+                    <npc id="lada" play="purr" position="on-blanket"/>
+                    <npc id="persi" play="diva-pose" position="on-steps"/>
+                    <npc id="thelma" play="sneak-eat" position="near-grill"/>
+                    <npc id="voland" play="mystic-glow" position="on-fence"/>
+                    <npc id="aijan" play="purr" position="near-tanya"/>
+                    <npc id="duke" play="play" position="with-klop"/>
+                    <particles type="fireflies" count="15"/>
+                    <overlay type="golden-sunset" opacity="0.25"/>
+                </animation>
+                <text>Дача. Закат. Все вместе. Все дома. Таня счастлива.</text>
+            </scene>
+            <tone>волшебный, тёплый, финальный</tone>
+        </ending>
+
+    </endings>
+
+    <!-- МЕХАНИКА ПОДСЧЁТА -->
+
+    <ending-calculation>
+        <rule>Каждый выбор в конфликтах добавляет ending-weight к соответствующей концовке</rule>
+        <rule>В конце игры (day 25) выбирается концовка с максимальным весом</rule>
+        <rule>Если условия secret_perfect выполнены — она перекрывает все остальные</rule>
+        <rule>burnout может сработать досрочно (до day 25) если условия выполнены</rule>
+        <rule>Если веса равны — приоритет: balanced > alone_with_pets > marriage_first > career_focused</rule>
+    </ending-calculation>
+
+</conflicts-and-endings>
