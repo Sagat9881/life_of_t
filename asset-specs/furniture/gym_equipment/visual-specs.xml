@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>furniture</entity-type>
+        <entity-name>gym_equipment</entity-name>
+        <version>1.0.0</version>
+        <location>gym</location>
+        <description>
+            Беговая дорожка — интерактивный объект для действия "Тренировка".
+            Повышает здоровье, снижает стресс, расходует энергию.
+            Расположена в midground-слое gym.
+        </description>
+    </meta>
+
+    <layers>
+        <layer id="frame" type="base" z-order="0" width="48" height="40">
+            <pixel-data>
+                <!-- Корпус дорожки -->
+                <rect x="4" y="10" w="40" h="24" color="#404040"/>
+                <rect x="4" y="10" w="40" h="2" color="#505050"/>
+                <!-- Стойки с дисплеем -->
+                <rect x="6" y="2" w="3" h="10" color="#505050"/>
+                <rect x="39" y="2" w="3" h="10" color="#505050"/>
+                <!-- Дисплей -->
+                <rect x="8" y="2" w="32" h="8" color="#1A1A2E"/>
+                <rect x="10" y="3" w="28" h="6" color="#0F3460"/>
+                <!-- Полотно -->
+                <rect x="8" y="14" w="32" h="16" color="#333333"/>
+                <rect x="8" y="14" w="32" h="1" color="#444444"/>
+                <!-- Ножки -->
+                <rect x="6" y="34" w="4" h="6" color="#303030"/>
+                <rect x="38" y="34" w="4" h="6" color="#303030"/>
+                <!-- Поручни -->
+                <rect x="4" y="8" w="2" h="14" color="#606060"/>
+                <rect x="42" y="8" w="2" h="14" color="#606060"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="display_glow" type="animated" z-order="1" width="48" height="40">
+            <pixel-data>
+                <rect x="12" y="4" w="8" h="4" color="#00FF88"/>
+                <rect x="22" y="4" w="6" h="4" color="#00FF88"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="belt_lines" type="animated" z-order="2" width="48" height="40">
+            <pixel-data>
+                <hline x="8" y="18" len="32" color="#3A3A3A"/>
+                <hline x="8" y="22" len="32" color="#3A3A3A"/>
+                <hline x="8" y="26" len="32" color="#3A3A3A"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="sweat_drops" type="animated-overlay" z-order="3" width="48" height="40"
+               condition="state:active">
+            <pixel-data>
+                <pixel x="20" y="0" color="#87CEEB"/>
+                <pixel x="28" y="1" color="#87CEEB"/>
+                <pixel x="24" y="-1" color="#87CEEB"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <animation name="idle" frames="2" fps="1" loop="true"
+                   frame-width="48" frame-height="40">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="display_glow:0,0"/>
+        </animation>
+
+        <animation name="active" frames="4" fps="4" loop="true"
+                   frame-width="48" frame-height="40"
+                   condition="state:active">
+            <description>
+                Полотно движется: линии сдвигаются вниз.
+                Дисплей мигает. Капли пота летят.
+            </description>
+            <frame index="0" layer-offsets="belt_lines:0,0; sweat_drops:0,0"/>
+            <frame index="1" layer-offsets="belt_lines:0,2; sweat_drops:1,-1"/>
+            <frame index="2" layer-offsets="belt_lines:0,4; sweat_drops:-1,-2"/>
+            <frame index="3" layer-offsets="belt_lines:0,6; sweat_drops:0,-3"/>
+        </animation>
+    </animations>
+
+    <states>
+        <state name="idle" description="Дорожка выключена, дисплей в standby"/>
+        <state name="active" description="Таня бежит — полотно движется, пот летит"/>
+    </states>
+
+    <interaction>
+        <action code="EXERCISE" description="Начать тренировку — idle → active"/>
+        <action code="STOP_EXERCISE" description="Закончить — active → idle"/>
+    </interaction>
+
+    <naming>
+        <output-dir>furniture/gym_equipment</output-dir>
+    </naming>
+</asset-spec>

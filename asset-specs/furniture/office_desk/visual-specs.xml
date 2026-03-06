@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>furniture</entity-type>
+        <entity-name>office_desk</entity-name>
+        <version>1.0.0</version>
+        <location>workplace</location>
+        <description>
+            Рабочий стол в офисе — для действия "Работать".
+            Повышает карьеру, расходует энергию, может увеличить стресс.
+            Расположен в midground-слое workplace.
+        </description>
+    </meta>
+
+    <layers>
+        <layer id="desk" type="base" z-order="0" width="56" height="40">
+            <pixel-data>
+                <!-- Столешница -->
+                <rect x="2" y="18" w="52" h="4" color="#C8A882"/>
+                <rect x="2" y="18" w="52" h="1" color="#D4B892"/>
+                <!-- Ножки -->
+                <rect x="4" y="22" w="3" h="18" color="#B09070"/>
+                <rect x="49" y="22" w="3" h="18" color="#B09070"/>
+                <!-- Тумба -->
+                <rect x="36" y="22" w="16" h="16" color="#B89878"/>
+                <rect x="36" y="22" w="16" h="1" color="#C8A888"/>
+                <!-- Ручки ящиков -->
+                <pixel x="44" y="27" color="#808080"/>
+                <pixel x="44" y="33" color="#808080"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="monitor" type="base" z-order="1" width="56" height="40">
+            <pixel-data>
+                <!-- Подставка монитора -->
+                <rect x="22" y="14" w="12" h="4" color="#333333"/>
+                <rect x="26" y="16" w="4" h="2" color="#444444"/>
+                <!-- Экран -->
+                <rect x="12" y="2" w="32" h="14" color="#1A1A2E"/>
+                <rect x="13" y="3" w="30" h="12" color="#2A2A4E"/>
+                <!-- Рамка -->
+                <rect x="12" y="2" w="32" h="1" color="#222222"/>
+                <rect x="12" y="2" w="1" h="14" color="#222222"/>
+                <rect x="43" y="2" w="1" h="14" color="#222222"/>
+                <rect x="12" y="15" w="32" h="1" color="#222222"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="screen_content" type="animated" z-order="2" width="56" height="40">
+            <pixel-data>
+                <!-- Строки кода / документ -->
+                <hline x="15" y="5" len="18" color="#4EC9B0"/>
+                <hline x="15" y="7" len="24" color="#9CDCFE"/>
+                <hline x="15" y="9" len="14" color="#CE9178"/>
+                <hline x="15" y="11" len="20" color="#DCDCAA"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="keyboard" type="base" z-order="3" width="56" height="40">
+            <pixel-data>
+                <rect x="14" y="20" w="28" h="4" color="#404040"/>
+                <rect x="14" y="20" w="28" h="1" color="#505050"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="coffee_cup" type="overlay" z-order="4" width="56" height="40">
+            <pixel-data>
+                <rect x="4" y="15" w="6" h="5" color="#D2691E"/>
+                <rect x="5" y="14" w="4" h="1" color="#F5DEB3"/>
+                <!-- Пар -->
+                <pixel x="6" y="12" color="#E8E8E8"/>
+                <pixel x="7" y="11" color="#E8E8E8"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <animation name="idle" frames="4" fps="1" loop="true"
+                   frame-width="56" frame-height="40">
+            <description>Экран мерцает, пар от кофе поднимается</description>
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="coffee_cup:0,-1"/>
+            <frame index="2" layer-offsets="screen_content:0,0"/>
+            <frame index="3" layer-offsets="coffee_cup:0,0"/>
+        </animation>
+
+        <animation name="working" frames="6" fps="3" loop="true"
+                   frame-width="56" frame-height="40"
+                   condition="state:working">
+            <description>
+                Экран мигает активнее — смена строк.
+                Кадр 0-2: одни строки, 3-5: другие.
+            </description>
+            <frame index="0" layer-offsets="screen_content:0,0"/>
+            <frame index="1" layer-offsets="screen_content:0,-1"/>
+            <frame index="2" layer-offsets="screen_content:0,-2"/>
+            <frame index="3" layer-offsets="screen_content:0,0"/>
+            <frame index="4" layer-offsets="screen_content:0,1"/>
+            <frame index="5" layer-offsets="screen_content:0,0"/>
+        </animation>
+    </animations>
+
+    <states>
+        <state name="idle" description="Стол пустой, монитор в screensaver"/>
+        <state name="working" description="Таня работает — экран активен"/>
+    </states>
+
+    <interaction>
+        <action code="WORK" description="Начать работу — idle → working"/>
+        <action code="STOP_WORK" description="Закончить — working → idle"/>
+    </interaction>
+
+    <naming>
+        <output-dir>furniture/office_desk</output-dir>
+    </naming>
+</asset-spec>
