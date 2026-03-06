@@ -15,20 +15,13 @@
     <packaging>jar</packaging>
 
     <name>Life of T - Application</name>
-    <description>Main application: demo frontend + backend API + asset generation</description>
+    <description>Main application: backend API + asset generation</description>
 
     <dependencies>
         <!-- Backend module (domain + REST API /api/v1/game) -->
         <dependency>
             <groupId>ru.lifegame</groupId>
             <artifactId>backend</artifactId>
-        </dependency>
-
-        <!-- Demo module (working pixel-art frontend + /api/demo controllers) -->
-        <dependency>
-            <groupId>ru.lifegame</groupId>
-            <artifactId>demo</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <!-- Asset generator module -->

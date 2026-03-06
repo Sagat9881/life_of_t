@@ -9,15 +9,13 @@ import java.net.URI;
 
 /**
  * Main application entry point.
- * Combines demo frontend (pixel-art scene) with full backend API.
+ * Combines backend API with asset generation.
  *
  * Scans:
- * - ru.lifegame.demo    — demo frontend controllers, asset service, config
  * - ru.lifegame.backend — full game backend API (/api/v1/game)
  * - ru.lifegame.assets  — asset generator classes
  */
 @SpringBootApplication(scanBasePackages = {
-        "ru.lifegame.demo",
         "ru.lifegame.backend",
         "ru.lifegame.assets"
 })
@@ -30,18 +28,14 @@ public class Application {
         String url = "http://localhost:" + port;
         
         System.out.println("\n" +
-            "┌──────────────────────────────────────────────────┐\n" +
-            "│                                                  │\n" +
-            "│       🎮 Life of T — Жизнь Татьяны 🎮        │\n" +
-            "│                                                  │\n" +
-            "└──────────────────────────────────────────────────┘\n" +
+            "======================================================\n" +
+            "  \uD83C\uDFAE Life of T — \u0416\u0438\u0437\u043D\u044C \u0422\u0430\u0442\u044C\u044F\u043D\u044B \uD83C\uDFAE\n" +
+            "======================================================\n" +
             "\n" +
-            "🌐 Игра: " + url + "\n" +
-            "🚀 Backend API: " + url + "/api/v1/game\n" +
-            "🎮 Demo API: " + url + "/api/demo\n" +
-            "💚 Health: " + url + "/actuator/health\n" +
+            "\uD83D\uDE80 Backend API: " + url + "/api/v1/game\n" +
+            "\uD83D\uDC9A Health: " + url + "/actuator/health\n" +
             "\n" +
-            "⏸️  Ctrl+C для остановки\n" +
+            "\u23F8\uFE0F  Ctrl+C \u0434\u043B\u044F \u043E\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0438\n" +
             "\n"
         );
         
@@ -57,7 +51,7 @@ public class Application {
                 Desktop.getDesktop().browse(new URI(url));
             }
         } catch (Exception e) {
-            System.out.println("⚠️ Откройте вручную: " + url + "\n");
+            System.out.println("\u26A0\uFE0F \u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u0432\u0440\u0443\u0447\u043D\u0443\u044E: " + url + "\n");
         }
     }
 }

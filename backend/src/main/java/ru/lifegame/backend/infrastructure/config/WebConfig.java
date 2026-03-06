@@ -7,9 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * Web MVC configuration for the backend module.
- * 
- * Resource handlers for /generated-assets/** are configured in
- * DemoConfiguration (demo module). This config only handles CORS.
+ * Handles CORS for frontend development.
  */
 @Configuration
 public class WebConfig {

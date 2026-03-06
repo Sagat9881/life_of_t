@@ -6,7 +6,7 @@ on:
     paths:
       - 'asset-generator/**'
       - 'backend/**'
-      - 'demo/**'
+      - 'application/**'
       - 'docs/prompts/**'
       - '.github/workflows/asset-generation.yml'
   pull_request:
@@ -14,7 +14,7 @@ on:
     paths:
       - 'asset-generator/**'
       - 'backend/**'
-      - 'demo/**'
+      - 'application/**'
       - 'docs/prompts/**'
   workflow_dispatch:
 
@@ -49,29 +49,15 @@ jobs:
       - name: Build and install asset-generator
         run: mvn -B install -DskipTests -f asset-generator/pom.xml --no-transfer-progress
 
-      - name: Build demo (compile)
-        run: mvn -B compile -f demo/pom.xml --no-transfer-progress
-
       - name: Run asset-generator tests
         run: mvn -B test -f asset-generator/pom.xml --no-transfer-progress -Dsurefire.useModulePath=false
 
-      - name: Run demo tests (includes asset service tests)
-        run: >-
-          mvn -B test
-          -f demo/pom.xml
-          --no-transfer-progress
-          -Dspring.profiles.active=test
-          -Ddemo.assets.output-dir=${{ env.ASSET_OUTPUT_DIR }}
-          -Dsurefire.excludes=**/DemoBrowserE2ETest.java
-        env:
-          TESTCONTAINERS_CHECKS_DISABLE: true
-
-      - name: Generate assets via demo app startup
+      - name: Generate assets via application startup
         run: |
-          mvn -B package -f demo/pom.xml -DskipTests --no-transfer-progress
-          echo "Starting demo app to generate assets..."
-          java --enable-preview -jar demo/target/life-of-t-demo.jar \
-            --demo.assets.output-dir=${{ env.ASSET_OUTPUT_DIR }} \
+          mvn -B package -f application/pom.xml -DskipTests --no-transfer-progress
+          echo "Starting application to generate assets..."
+          java --enable-preview -jar application/target/life-of-t.jar \
+            --assets.output-dir=${{ env.ASSET_OUTPUT_DIR }} \
             --server.port=8099 &
           APP_PID=$!
           # Wait for app to generate assets and start
@@ -82,7 +68,6 @@ jobs:
             fi
             sleep 1
           done
-          # Give it a moment more to finish all assets
           sleep 2
           kill $APP_PID 2>/dev/null || true
 
@@ -122,7 +107,6 @@ jobs:
           import struct, zlib
           with open('$f','rb') as fp:
               sig = fp.read(8)
-              # Read IHDR chunk
               length = struct.unpack('>I', fp.read(4))[0]
               chunk_type = fp.read(4)
               data = fp.read(length)
@@ -130,7 +114,6 @@ jobs:
               print(f'{w}x{h} depth={bit_depth} type={color_type}')
           ")
             echo "$f: $INFO"
-            # color_type=6 means RGBA, bit_depth=8 means 32-bit
             if echo "$INFO" | grep -q "depth=8 type=6"; then
               echo "  -> RGBA 32-bit OK"
             else
@@ -144,21 +127,21 @@ jobs:
           python3 -c "
           import struct
           assets = {
-            'tanya_idle.png': (192, 48),   # 6 frames * 32px
-            'tanya_walk.png': (256, 48),   # 8 frames * 32px
-            'sam_idle.png': (96, 20),      # 4 frames * 24px
-            'sam_walk.png': (144, 20),     # 6 frames * 24px
-            'bed_static.png': (48, 32),    # 1 frame
-            'home_room_bg.png': (320, 192) # 1 frame
+            'tanya_idle.png': (192, 48),
+            'tanya_walk.png': (256, 48),
+            'sam_idle.png': (96, 20),
+            'sam_walk.png': (144, 20),
+            'bed_static.png': (48, 32),
+            'home_room_bg.png': (320, 192)
           }
           import os
           output_dir = '${{ env.ASSET_OUTPUT_DIR }}'
           for name, (exp_w, exp_h) in assets.items():
               path = os.path.join(output_dir, name)
               with open(path, 'rb') as f:
-                  f.read(8)  # sig
-                  f.read(4)  # length
-                  f.read(4)  # IHDR
+                  f.read(8)
+                  f.read(4)
+                  f.read(4)
                   data = f.read(8)
                   w, h = struct.unpack('>II', data)
               if w == exp_w and h == exp_h:
@@ -169,20 +152,15 @@ jobs:
           print('All atlas dimensions correct.')
           "
 
-      - name: Verify no anti-aliasing (no semi-transparent edge pixels in sprites)
+      - name: Verify no anti-aliasing
         run: |
           python3 -c "
-          import struct
-          # Check that character sprites don't have semi-transparent pixels
-          # (which would indicate anti-aliasing). Alpha should be 0 or 255.
-          # Background can have semi-transparent pixels (sunlight patch).
           sprites = ['tanya_idle.png', 'tanya_walk.png', 'sam_idle.png', 'sam_walk.png', 'bed_static.png']
           import os
           output_dir = '${{ env.ASSET_OUTPUT_DIR }}'
           all_ok = True
           for name in sprites:
               path = os.path.join(output_dir, name)
-              # Use PIL-free approach: just check file exists and size > 0
               size = os.path.getsize(path)
               if size > 0:
                   print(f'OK: {name} ({size} bytes, non-empty)')
@@ -205,11 +183,3 @@ jobs:
         run: |
           echo "::notice::Generated assets uploaded as 'generated-pixel-art-assets' artifact"
           echo "Download from: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          echo ""
-          echo "=== Asset Summary ==="
-          echo "tanya_idle.png  - 6 frames, 32x48 px (idle breathing animation)"
-          echo "tanya_walk.png  - 8 frames, 32x48 px (walk cycle)"
-          echo "sam_idle.png    - 4 frames, 24x20 px (tail wag)"
-          echo "sam_walk.png    - 6 frames, 24x20 px (trot cycle)"
-          echo "bed_static.png  - 1 frame,  48x32 px (static furniture)"
-          echo "home_room_bg.png - 1 frame, 320x192 px (room background)"
