@@ -5,9 +5,8 @@
   width: 100%;
   max-width: 100%;
   overflow: hidden;
-  background: #1a1a2e;
-  border-radius: 8px;
-  /* Pixel-art rendering */
+  background: #1a1230;
+  /* NO border-radius — pixel art! */
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
@@ -16,8 +15,6 @@
   position: absolute;
   top: 0;
   left: 0;
-  /* Size is set by inline styles (native resolution).
-     Transform scale is computed dynamically to fit parent. */
 }
 
 /* Layer positioning helpers */
@@ -37,7 +34,7 @@
 /* Entity positioned within the scene (% coordinates) */
 .pixel-scene__entity {
   position: absolute;
-  transform: translate(-50%, -100%); /* anchor at bottom-center */
+  transform: translate(-50%, -100%);
   transition: filter 0.2s ease;
 }
 
@@ -51,7 +48,7 @@
 }
 
 .pixel-scene__entity--selected {
-  filter: brightness(1.4) drop-shadow(0 0 8px rgba(245, 87, 108, 0.9));
+  filter: brightness(1.4) drop-shadow(0 0 6px rgba(240, 147, 251, 0.9));
 }
 
 /* Entity label tooltip */
@@ -60,11 +57,11 @@
   bottom: 105%;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.9);
   color: #fff;
   padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 11px;
+  border: 1px solid #4a3f5d;
+  font-size: 8px;
   font-family: 'Press Start 2P', monospace, sans-serif;
   white-space: nowrap;
   pointer-events: none;
@@ -78,5 +75,5 @@
 
 .pixel-scene__entity--selected .pixel-scene__label {
   opacity: 1;
-  background: rgba(245, 87, 108, 0.9);
+  border-color: #f093fb;
 }

@@ -1,0 +1,189 @@
+/* ═══════════════════════════════════════════
+   GameScreen — pixel-art desktop layout
+   Matches the original vanilla-JS demo style.
+   ═══════════════════════════════════════════ */
+
+/* ── Root Container ── */
+.gs {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #2a1f3d;
+  overflow: hidden;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  color: #fff;
+}
+
+/* ── Header ── */
+.gs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #1a1230;
+  border-bottom: 2px solid #4a3f5d;
+  flex-shrink: 0;
+  height: 40px;
+}
+
+.gs-header__left {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.gs-header__logo {
+  font-size: 14px;
+  color: #f093fb;
+  letter-spacing: 3px;
+  text-shadow: 0 0 8px rgba(240, 147, 251, 0.5);
+}
+
+.gs-header__version {
+  font-size: 8px;
+  color: #8a7fa0;
+}
+
+.gs-header__right {
+  display: flex;
+  align-items: center;
+}
+
+.gs-header__time {
+  font-size: 10px;
+  color: #e0d8f0;
+  letter-spacing: 1px;
+}
+
+/* ── Main Area ── */
+.gs-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  min-height: 0;
+}
+
+/* ── Scene ── */
+.gs-scene {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Footer ── */
+.gs-footer {
+  text-align: center;
+  padding: 6px 16px;
+  background: #1a1230;
+  border-top: 2px solid #4a3f5d;
+  font-size: 8px;
+  color: #8a7fa0;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+/* ── Loading State ── */
+.gs-loading {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a1f3d;
+  color: #f093fb;
+  font-size: 12px;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+}
+
+/* ── Action Dialog ── */
+.gs-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.gs-dialog {
+  background: #1a1230;
+  border: 3px solid #f093fb;
+  padding: 24px 32px;
+  max-width: 360px;
+  text-align: center;
+  image-rendering: pixelated;
+}
+
+.gs-dialog__title {
+  font-size: 12px;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.gs-dialog__text {
+  font-size: 9px;
+  color: #c0b8d0;
+  margin-bottom: 20px;
+}
+
+.gs-dialog__buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.gs-dialog__btn {
+  padding: 8px 24px;
+  font-size: 9px;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  border: 2px solid;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  background: transparent;
+  color: #fff;
+}
+
+.gs-dialog__btn--confirm {
+  border-color: #4caf50;
+  color: #4caf50;
+}
+
+.gs-dialog__btn--confirm:hover:not(:disabled) {
+  background: #4caf50;
+  color: #fff;
+}
+
+.gs-dialog__btn--cancel {
+  border-color: #8a7fa0;
+  color: #8a7fa0;
+}
+
+.gs-dialog__btn--cancel:hover:not(:disabled) {
+  background: #8a7fa0;
+  color: #1a1230;
+}
+
+.gs-dialog__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Responsive (smaller screens) ── */
+@media (max-width: 900px) {
+  .gs-main {
+    grid-template-columns: 1fr 260px;
+  }
+}
+
+@media (max-width: 700px) {
+  .gs-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+}

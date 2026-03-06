@@ -1,22 +1,23 @@
-/* Global styles */
+/* ═══════════════════════════════════════════
+   Global styles — pixel-art game theme
+   ═══════════════════════════════════════════ */
 
-/* CSS Variables */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
 :root {
-  /* Colors from PROJECT_CONTEXT.md */
-  --color-primary: #ff6b9d;
-  --color-secondary: #4ecdc4;
-  --color-accent: #ffe66d;
-  --color-background: #f7f7f7;
-  --color-text: #2c3e50;
-
-  /* Semantic colors */
+  --color-bg: #2a1f3d;
+  --color-panel: #1a1230;
+  --color-border: #4a3f5d;
+  --color-text: #e0d8f0;
+  --color-text-dim: #8a7fa0;
+  --color-accent: #f093fb;
   --color-success: #4caf50;
+  --color-danger: #f44336;
   --color-warning: #ff9800;
-  --color-error: #f44336;
   --color-info: #2196f3;
+  --color-money: #ffe66d;
 }
 
-/* Reset */
 *,
 *::before,
 *::after {
@@ -34,61 +35,22 @@ body {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    'Helvetica Neue', Arial, sans-serif;
-  line-height: 1.6;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  line-height: 1.4;
   color: var(--color-text);
-  background: var(--color-background);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  background: var(--color-bg);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: auto;
+  overflow: hidden;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
-/* Typography */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: 'Comfortaa', 'Nunito', sans-serif;
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 0.5rem;
+#root {
+  height: 100vh;
+  height: 100dvh;
 }
 
-h1 {
-  font-size: 2rem;
-}
-
-h2 {
-  font-size: 1.5rem;
-}
-
-h3 {
-  font-size: 1.25rem;
-}
-
-p {
-  margin-bottom: 1rem;
-}
-
-/* Links */
-a {
-  color: var(--color-primary);
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-/* Buttons reset */
-button {
-  font-family: inherit;
-}
-
-/* Images */
 img,
 picture,
 video,
@@ -98,7 +60,6 @@ svg {
   max-width: 100%;
 }
 
-/* Form elements */
 input,
 button,
 textarea,
@@ -106,28 +67,34 @@ select {
   font: inherit;
 }
 
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-background);
+  background: var(--color-panel);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-primary);
-  border-radius: 4px;
+  background: var(--color-border);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--color-primary) 80%, black);
-}
-
-/* Root element */
-#root {
-  min-height: 100vh;
-  min-height: 100dvh;
+/* Hide spinners in number inputs */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 /* Accessibility */
@@ -141,10 +108,4 @@ select {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
-}
-
-/* Focus visible */
-:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
 }

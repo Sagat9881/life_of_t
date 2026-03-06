@@ -1,0 +1,163 @@
+/* ═══════════════════════════════════════════
+   Sidebar — right panel, pixel-art style
+   ═══════════════════════════════════════════ */
+
+.sb {
+  background: #1a1230;
+  border-left: 2px solid #4a3f5d;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+}
+
+/* ── Section ── */
+.sb-section {
+  padding: 12px 14px;
+  border-bottom: 2px solid #4a3f5d;
+}
+
+.sb-section:last-child {
+  border-bottom: none;
+}
+
+.sb-section__title {
+  font-size: 9px;
+  color: #e0d8f0;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+/* ── Stats ── */
+.sb-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sb-stat {
+  display: grid;
+  grid-template-columns: 100px 1fr 30px;
+  align-items: center;
+  gap: 8px;
+}
+
+.sb-stat__label {
+  font-size: 7px;
+  color: #c0b8d0;
+  text-align: right;
+}
+
+.sb-stat__bar {
+  height: 10px;
+  background: #2a1f3d;
+  border: 1px solid #4a3f5d;
+  position: relative;
+  overflow: hidden;
+}
+
+.sb-stat__fill {
+  height: 100%;
+  transition: width 0.5s ease;
+  image-rendering: pixelated;
+}
+
+.sb-stat__value {
+  font-size: 7px;
+  color: #e0d8f0;
+  text-align: right;
+}
+
+/* ── Quests ── */
+.sb-quests {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sb-quest__tag {
+  display: inline-block;
+  font-size: 6px;
+  padding: 2px 6px;
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+
+.sb-quest__tag--care {
+  background: #4caf50;
+  color: #000;
+}
+
+.sb-quest__tag--family {
+  background: #f44336;
+  color: #fff;
+}
+
+.sb-quest__name {
+  font-size: 8px;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.sb-quest__tasks {
+  list-style: none;
+  padding: 0;
+}
+
+.sb-quest__tasks li {
+  font-size: 6px;
+  color: #8a7fa0;
+  padding: 1px 0;
+}
+
+.sb-quest__tasks li::before {
+  content: '• ';
+  color: #4a3f5d;
+}
+
+/* ── Relationships ── */
+.sb-relationships {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sb-rel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sb-rel__name {
+  font-size: 8px;
+  color: #e0d8f0;
+}
+
+.sb-hearts {
+  font-size: 8px;
+  color: #f093fb;
+  letter-spacing: 1px;
+}
+
+/* ── Scrollbar ── */
+.sb::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sb::-webkit-scrollbar-track {
+  background: #1a1230;
+}
+
+.sb::-webkit-scrollbar-thumb {
+  background: #4a3f5d;
+}
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .sb {
+    border-left: none;
+    border-top: 2px solid #4a3f5d;
+    max-height: 40vh;
+  }
+}
