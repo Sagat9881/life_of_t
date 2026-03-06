@@ -8,25 +8,19 @@ import java.awt.Desktop;
 import java.net.URI;
 
 /**
- * Главный класс приложения Life of T.
- * Запускает Spring Boot приложение с backend API и frontend статикой.
+ * Main application entry point.
+ * Combines demo frontend (pixel-art scene) with full backend API.
  *
- * Scan packages:
- * - ru.lifegame (this package — Application itself)
- * - ru.lifegame.backend (backend controllers, services, config)
- * - ru.lifegame.assets (asset-generator classes)
- *
- * Explicitly excludes ru.lifegame.demo to prevent DemoApplication,
- * DemoAssetService, and DemoConfiguration from being loaded.
+ * Scans:
+ * - ru.lifegame.demo    — demo frontend controllers, asset service, config
+ * - ru.lifegame.backend — full game backend API (/api/v1/game)
+ * - ru.lifegame.assets  — asset generator classes
  */
-@SpringBootApplication(
-    scanBasePackages = {
-        "ru.lifegame",
+@SpringBootApplication(scanBasePackages = {
+        "ru.lifegame.demo",
         "ru.lifegame.backend",
         "ru.lifegame.assets"
-    },
-    exclude = {}
-)
+})
 public class Application {
 
     public static void main(String[] args) {
@@ -38,16 +32,16 @@ public class Application {
         System.out.println("\n" +
             "┌──────────────────────────────────────────────────┐\n" +
             "│                                                  │\n" +
-            "│       🎮 Life of T - Жизнь Татьяны 🎮        │\n" +
+            "│       🎮 Life of T — Жизнь Татьяны 🎮        │\n" +
             "│                                                  │\n" +
             "└──────────────────────────────────────────────────┘\n" +
             "\n" +
-            "🌐 Приложение: " + url + "\n" +
+            "🌐 Игра: " + url + "\n" +
             "🚀 Backend API: " + url + "/api/v1/game\n" +
-            "📝 Swagger UI: " + url + "/swagger-ui.html\n" +
-            "💚 Health Check: " + url + "/actuator/health\n" +
+            "🎮 Demo API: " + url + "/api/demo\n" +
+            "💚 Health: " + url + "/actuator/health\n" +
             "\n" +
-            "⏸️  Для остановки: Ctrl+C\n" +
+            "⏸️  Ctrl+C для остановки\n" +
             "\n"
         );
         
