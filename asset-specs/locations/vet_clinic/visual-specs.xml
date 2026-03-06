@@ -1,78 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <asset-spec>
     <meta>
-        <entity-type>locations</entity-type>
+        <entity-type>location</entity-type>
         <entity-name>vet_clinic</entity-name>
         <version>1.0.0</version>
+        <description>
+            Ветеринарная клиника — для квестов save_lada, duke_arrives.
+            Чистая, стерильная обстановка.
+            Три слоя: background (стены/шкафы), midground (vet_table/оборудование), foreground (плакаты/аптечка).
+        </description>
     </meta>
-    <!-- Veterinary clinic. Canvas: 320x180.
-         Clean white/green walls, examination table, medicine cabinet. -->
+
+    <atmosphere>
+        <mood>тревожный, стерильный, но с надеждой</mood>
+        <lighting>яркий белый хирургический свет</lighting>
+        <colors>
+            <dominant>#F5F5FF</dominant>
+            <accent>#00BCD4</accent>
+            <accent>#FF9800</accent>
+            <neutral>#E0E0E0</neutral>
+        </colors>
+    </atmosphere>
+
     <layers>
-        <layer id="walls" type="base" z-order="0" width="320" height="180">
-            <pixel-data>
-                <rect x="0" y="0" w="320" h="95" color="#F0F5F0"/>
-                <rect x="0" y="40" w="320" h="4" color="#4CAF50"/>
-                <rect x="0" y="93" w="320" h="4" color="#E0E5E0"/>
-            </pixel-data>
+        <layer type="background" description="Стены, шкафы с лекарствами">
+            <elements>
+                <element>Белые стены с бирюзовой полосой</element>
+                <element>Стеклянный шкаф с медикаментами</element>
+                <element>Рентгеновский снимок на стене</element>
+                <element>Плакат "Анатомия кошки"</element>
+            </elements>
         </layer>
-        <layer id="floor" type="base" z-order="1" width="320" height="180">
-            <pixel-data>
-                <rect x="0" y="95" w="320" h="85" color="#E8E8E8"/>
-                <!-- tile grid -->
-                <hline x="0" y="120" len="320" color="#D8D8D8"/>
-                <hline x="0" y="145" len="320" color="#D8D8D8"/>
-            </pixel-data>
+
+        <layer type="midground" description="Оборудование">
+            <elements>
+                <element>Ветеринарный стол осмотра (vet_table)</element>
+                <element>Стул врача</element>
+                <element>Весы для животных</element>
+                <element>Раковина</element>
+            </elements>
         </layer>
-        <layer id="exam_table" type="base" z-order="2" width="320" height="180">
-            <pixel-data>
-                <!-- table top -->
-                <rect x="100" y="100" w="120" h="8" color="#B0B0B0"/>
-                <rect x="100" y="100" w="120" h="2" color="#A0A0A0"/>
-                <!-- legs -->
-                <rect x="105" y="108" w="4" h="30" color="#909090"/>
-                <rect x="211" y="108" w="4" h="30" color="#909090"/>
-                <!-- base -->
-                <rect x="100" y="136" w="120" h="4" color="#808080"/>
-            </pixel-data>
-        </layer>
-        <layer id="medicine_cabinet" type="base" z-order="3" width="320" height="180">
-            <pixel-data>
-                <rect x="250" y="10" w="60" h="75" color="#FFFFFF"/>
-                <rect x="250" y="10" w="60" h="2" color="#C0C0C0"/>
-                <rect x="250" y="10" w="2" h="75" color="#C0C0C0"/>
-                <rect x="308" y="10" w="2" h="75" color="#C0C0C0"/>
-                <rect x="250" y="83" w="60" h="2" color="#C0C0C0"/>
-                <!-- shelves -->
-                <hline x="252" y="30" len="56" color="#D0D0D0"/>
-                <hline x="252" y="50" len="56" color="#D0D0D0"/>
-                <hline x="252" y="70" len="56" color="#D0D0D0"/>
-                <!-- bottles -->
-                <rect x="258" y="14" w="6" h="14" color="#4CAF50"/>
-                <rect x="270" y="16" w="6" h="12" color="#2196F3"/>
-                <rect x="282" y="14" w="6" h="14" color="#FF9800"/>
-                <rect x="258" y="34" w="8" h="14" color="#9C27B0"/>
-                <rect x="275" y="36" w="6" h="12" color="#F44336"/>
-            </pixel-data>
-        </layer>
-        <layer id="poster" type="overlay" z-order="4" width="320" height="180">
-            <pixel-data>
-                <rect x="20" y="10" w="50" h="35" color="#FFF9C4"/>
-                <rect x="20" y="10" w="50" h="2" color="#F0E68C"/>
-                <!-- paw print icon -->
-                <pixel x="40" y="22" color="#795548"/>
-                <pixel x="44" y="20" color="#795548"/>
-                <pixel x="48" y="22" color="#795548"/>
-                <pixel x="44" y="26" color="#795548"/>
-                <rect x="42" y="24" w="5" h="5" color="#795548"/>
-            </pixel-data>
+
+        <layer type="foreground" description="Ближние предметы">
+            <elements>
+                <element>Переноска для кошки</element>
+                <element>Аптечка на стене</element>
+                <element>Бахилы в контейнере</element>
+            </elements>
         </layer>
     </layers>
-    <animations>
-        <animation name="idle" frames="2" fps="1" loop="true" frame-width="320" frame-height="180">
-            <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="poster:0,0"/>
-        </animation>
-    </animations>
+
+    <animated-details>
+        <detail id="drip">
+            <name>Капельница</name>
+            <atlas>assets/locations/vet_clinic/animations/drip-atlas.png</atlas>
+            <frames>8</frames>
+            <animation-type>Капли падают по трубке</animation-type>
+        </detail>
+        <detail id="heart-monitor">
+            <name>Монитор пульса</name>
+            <atlas>assets/locations/vet_clinic/animations/heart-monitor-atlas.png</atlas>
+            <frames>12</frames>
+            <animation-type>Бегущая линия пульса</animation-type>
+        </detail>
+    </animated-details>
+
+    <time-of-day-variations>
+        <variation time="day">
+            <lighting>Стандартный приём — яркий свет</lighting>
+            <mood>Профессиональный</mood>
+        </variation>
+        <variation time="night">
+            <lighting>Экстренный ночной визит — приглушённый</lighting>
+            <mood>Тревога, экстренность</mood>
+        </variation>
+    </time-of-day-variations>
+
     <naming>
         <output-dir>locations/vet_clinic</output-dir>
     </naming>

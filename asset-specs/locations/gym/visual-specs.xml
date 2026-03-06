@@ -1,61 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <asset-spec>
     <meta>
-        <entity-type>locations</entity-type>
+        <entity-type>location</entity-type>
         <entity-name>gym</entity-name>
         <version>1.0.0</version>
+        <description>
+            Спортзал — небольшой фитнес-клуб.
+            Действие "Тренировка" — повышает здоровье, снижает стресс, тратит энергию.
+            Три слоя: background (стены/зеркала), midground (тренажёры), foreground (бутылка/полотенце).
+        </description>
     </meta>
-    <!-- Small gym / fitness room. Canvas: 320x180.
-         Mirrored wall, rubber floor, equipment. -->
+
+    <atmosphere>
+        <mood>энергичный, мотивирующий</mood>
+        <lighting>яркий верхний свет, зеркала отражают</lighting>
+        <colors>
+            <dominant>#E8E8E8</dominant>
+            <accent>#FF6B6B</accent>
+            <accent>#4ECDC4</accent>
+            <neutral>#606060</neutral>
+        </colors>
+    </atmosphere>
+
     <layers>
-        <layer id="back_wall" type="base" z-order="0" width="320" height="180">
-            <pixel-data>
-                <rect x="0" y="0" w="320" h="90" color="#E8E0D0"/>
-                <rect x="0" y="88" w="320" h="4" color="#C8B898"/>
-            </pixel-data>
+        <layer type="background" description="Стены, зеркала, мотивационные постеры">
+            <elements>
+                <element>Серые стены с красными акцентами</element>
+                <element>Большое зеркало в полный рост</element>
+                <element>Мотивационный постер "NO PAIN NO GAIN"</element>
+                <element>Вентиляционная решётка</element>
+            </elements>
         </layer>
-        <layer id="mirror_wall" type="base" z-order="1" width="320" height="180">
-            <pixel-data>
-                <rect x="30" y="10" w="120" h="70" color="#C8D8E8"/>
-                <rect x="30" y="10" w="120" h="2" color="#A0A0A0"/>
-                <rect x="30" y="10" w="2" h="70" color="#A0A0A0"/>
-                <rect x="148" y="10" w="2" h="70" color="#A0A0A0"/>
-                <rect x="30" y="78" w="120" h="2" color="#A0A0A0"/>
-            </pixel-data>
+
+        <layer type="midground" description="Тренажёры">
+            <elements>
+                <element>Беговая дорожка (gym_equipment) — основной интерактив</element>
+                <element>Стойка с гантелями (декоративная)</element>
+                <element>Скамья для жима (декоративная)</element>
+            </elements>
         </layer>
-        <layer id="floor" type="base" z-order="2" width="320" height="180">
-            <pixel-data>
-                <rect x="0" y="90" w="320" h="90" color="#404850"/>
-                <!-- rubber mat pattern -->
-                <rect x="10" y="100" w="140" h="70" color="#384048"/>
-                <rect x="160" y="100" w="140" h="70" color="#384048"/>
-            </pixel-data>
-        </layer>
-        <layer id="dumbbell_rack" type="base" z-order="3" width="320" height="180">
-            <pixel-data>
-                <rect x="200" y="40" w="80" h="45" color="#606060"/>
-                <rect x="200" y="40" w="80" h="2" color="#505050"/>
-                <!-- dumbbells -->
-                <rect x="210" y="50" w="16" h="6" color="#333333"/>
-                <rect x="230" y="50" w="16" h="6" color="#333333"/>
-                <rect x="250" y="50" w="16" h="6" color="#333333"/>
-                <rect x="210" y="62" w="20" h="6" color="#444444"/>
-                <rect x="240" y="62" w="20" h="6" color="#444444"/>
-                <rect x="210" y="74" w="24" h="6" color="#555555"/>
-            </pixel-data>
-        </layer>
-        <layer id="yoga_mat" type="overlay" z-order="4" width="320" height="180">
-            <pixel-data>
-                <rect x="40" y="120" w="80" h="40" color="#7B68EE"/>
-                <rect x="40" y="120" w="80" h="2" color="#6A5ACD"/>
-            </pixel-data>
+
+        <layer type="foreground" description="Ближние предметы">
+            <elements>
+                <element>Бутылка воды</element>
+                <element>Полотенце на крючке</element>
+                <element>Сумка Тани</element>
+            </elements>
         </layer>
     </layers>
-    <animations>
-        <animation name="idle" frames="1" fps="1" loop="false" frame-width="320" frame-height="180">
-            <frame index="0" layer-offsets=""/>
-        </animation>
-    </animations>
+
+    <animated-details>
+        <detail id="fan">
+            <name>Вентилятор</name>
+            <atlas>assets/locations/gym/animations/fan-atlas.png</atlas>
+            <frames>4</frames>
+            <animation-type>Лопасти крутятся</animation-type>
+        </detail>
+        <detail id="mirror-reflection">
+            <name>Отражение в зеркале</name>
+            <atlas>assets/locations/gym/animations/mirror-atlas.png</atlas>
+            <frames>6</frames>
+            <animation-type>Лёгкое мерцание отражения</animation-type>
+        </detail>
+    </animated-details>
+
+    <time-of-day-variations>
+        <variation time="morning">
+            <lighting>Свежий утренний свет</lighting>
+            <mood>Бодрость, пустой зал</mood>
+        </variation>
+        <variation time="day">
+            <lighting>Полный яркий свет</lighting>
+            <mood>Активность</mood>
+        </variation>
+        <variation time="evening">
+            <lighting>Приглушённый, уставший свет</lighting>
+            <mood>Вечерняя тренировка после работы</mood>
+        </variation>
+    </time-of-day-variations>
+
     <naming>
         <output-dir>locations/gym</output-dir>
     </naming>

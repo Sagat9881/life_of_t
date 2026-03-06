@@ -1,84 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <asset-spec>
     <meta>
-        <entity-type>locations</entity-type>
+        <entity-type>location</entity-type>
         <entity-name>park</entity-name>
         <version>1.0.0</version>
+        <description>
+            Городской парк — для прогулок с Sam, медитации, отдыха.
+            Снижает стресс, повышает настроение.
+            Три слоя: background (небо/деревья), midground (дорожки/скамейки), foreground (кусты/цветы).
+        </description>
     </meta>
-    <!-- City park for dog walking. Canvas: 320x180.
-         Green grass, trees, bench, path. -->
+
+    <atmosphere>
+        <mood>расслабленный, свежий, природный</mood>
+        <lighting>естественный солнечный свет через кроны</lighting>
+        <colors>
+            <dominant>#90C695</dominant>
+            <accent>#FFD93D</accent>
+            <accent>#87CEEB</accent>
+            <neutral>#8B7355</neutral>
+        </colors>
+    </atmosphere>
+
     <layers>
-        <layer id="sky" type="base" z-order="0" width="320" height="180">
-            <pixel-data>
-                <rect x="0" y="0" w="320" h="80" color="#87CEEB"/>
-                <!-- clouds -->
-                <rect x="40" y="15" w="30" h="10" color="#FFFFFF"/>
-                <rect x="35" y="18" w="40" h="8" color="#FFFFFF"/>
-                <rect x="200" y="25" w="25" h="8" color="#F0F0F0"/>
-                <rect x="195" y="28" w="35" h="6" color="#F0F0F0"/>
-            </pixel-data>
+        <layer type="background" description="Небо, дальние деревья">
+            <elements>
+                <element>Голубое небо с облаками</element>
+                <element>Ряд деревьев (дальний план)</element>
+                <element>Верхушки многоэтажек вдали</element>
+            </elements>
         </layer>
-        <layer id="far_trees" type="base" z-order="1" width="320" height="180">
-            <pixel-data>
-                <rect x="0" y="60" w="320" h="25" color="#5A8A4A"/>
-                <!-- tree trunks -->
-                <rect x="30" y="50" w="6" h="30" color="#6B4226"/>
-                <rect x="22" y="35" w="22" h="20" color="#4A7A3A"/>
-                <rect x="120" y="45" w="8" h="35" color="#6B4226"/>
-                <rect x="110" y="28" w="28" h="22" color="#4A7A3A"/>
-                <rect x="250" y="48" w="6" h="32" color="#6B4226"/>
-                <rect x="242" y="32" w="22" h="20" color="#4A7A3A"/>
-            </pixel-data>
+
+        <layer type="midground" description="Дорожки, скамейки">
+            <elements>
+                <element>Гравийная дорожка</element>
+                <element>Парковая скамейка (место для "Медитация")</element>
+                <element>Фонарный столб</element>
+                <element>Урна</element>
+                <element>Голуби (декоративные, 2-3 штуки)</element>
+            </elements>
         </layer>
-        <layer id="grass" type="base" z-order="2" width="320" height="180">
-            <pixel-data>
-                <rect x="0" y="80" w="320" h="100" color="#6AAF50"/>
-                <rect x="0" y="80" w="320" h="4" color="#5A9F40"/>
-            </pixel-data>
-        </layer>
-        <layer id="path" type="base" z-order="3" width="320" height="180">
-            <pixel-data>
-                <rect x="100" y="90" w="120" h="90" color="#C8B898"/>
-                <rect x="100" y="90" w="120" h="2" color="#B8A888"/>
-            </pixel-data>
-        </layer>
-        <layer id="bench" type="base" z-order="4" width="320" height="180">
-            <pixel-data>
-                <!-- bench seat -->
-                <rect x="40" y="105" w="40" h="6" color="#8B6914"/>
-                <rect x="40" y="111" w="40" h="4" color="#8B6914"/>
-                <!-- legs -->
-                <rect x="42" y="115" w="4" h="10" color="#555555"/>
-                <rect x="74" y="115" w="4" h="10" color="#555555"/>
-                <!-- back -->
-                <rect x="40" y="95" w="40" h="4" color="#8B6914"/>
-                <rect x="40" y="99" w="40" h="4" color="#8B6914"/>
-                <rect x="42" y="95" w="4" h="20" color="#555555"/>
-                <rect x="74" y="95" w="4" h="20" color="#555555"/>
-            </pixel-data>
-        </layer>
-        <layer id="flowers" type="overlay" z-order="5" width="320" height="180">
-            <pixel-data>
-                <pixel x="250" y="100" color="#FF6B6B"/>
-                <pixel x="255" y="102" color="#FFD700"/>
-                <pixel x="260" y="99" color="#FF69B4"/>
-                <pixel x="265" y="103" color="#FF6B6B"/>
-                <pixel x="270" y="100" color="#FFD700"/>
-                <pixel x="252" y="105" color="#FF69B4"/>
-                <pixel x="258" y="106" color="#FF6B6B"/>
-                <pixel x="264" y="104" color="#FFD700"/>
-            </pixel-data>
+
+        <layer type="foreground" description="Ближняя растительность">
+            <elements>
+                <element>Куст сирени</element>
+                <element>Клумба с цветами</element>
+                <element>Одуванчики на газоне</element>
+            </elements>
         </layer>
     </layers>
-    <animations>
-        <animation name="idle" frames="4" fps="2" loop="true" frame-width="320" frame-height="180">
-            <description>Gentle wind rustling leaves and flowers</description>
-            <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="flowers:1,0; far_trees:0,-1"/>
-            <frame index="2" layer-offsets="flowers:-1,0"/>
-            <frame index="3" layer-offsets="flowers:1,0; far_trees:0,1"/>
-        </animation>
-    </animations>
+
+    <animated-details>
+        <detail id="leaves">
+            <name>Листья</name>
+            <atlas>assets/locations/park/animations/leaves-atlas.png</atlas>
+            <frames>12</frames>
+            <animation-type>Листья качаются на ветру</animation-type>
+        </detail>
+        <detail id="pigeons">
+            <name>Голуби</name>
+            <atlas>assets/locations/park/animations/pigeons-atlas.png</atlas>
+            <frames>6</frames>
+            <animation-type>Голуби клюют и ходят</animation-type>
+        </detail>
+        <detail id="fountain">
+            <name>Фонтанчик</name>
+            <atlas>assets/locations/park/animations/fountain-atlas.png</atlas>
+            <frames>8</frames>
+            <animation-type>Струя воды плещется</animation-type>
+        </detail>
+    </animated-details>
+
+    <time-of-day-variations>
+        <variation time="morning">
+            <lighting>Тёплый утренний свет, роса</lighting>
+            <mood>Свежесть, утренняя пробежка с Sam</mood>
+        </variation>
+        <variation time="day">
+            <lighting>Яркое солнце, тени от деревьев</lighting>
+            <mood>Активность, гуляющие люди</mood>
+        </variation>
+        <variation time="evening">
+            <lighting>Золотой закат, фонари зажигаются</lighting>
+            <mood>Романтика, спокойствие</mood>
+        </variation>
+        <variation time="night">
+            <lighting>Фонари, лунный свет</lighting>
+            <mood>Тишина, ночная прогулка</mood>
+        </variation>
+    </time-of-day-variations>
+
     <naming>
         <output-dir>locations/park</output-dir>
     </naming>
