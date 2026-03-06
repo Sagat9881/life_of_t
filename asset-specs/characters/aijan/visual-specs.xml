@@ -3,7 +3,7 @@
     <meta>
         <entity-type>characters</entity-type>
         <entity-name>aijan</entity-name>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </meta>
     <!-- Aijan: wildcat-colored tabby, grey-brown with dark brown/black stripes.
          Canvas: 20x16. Loves humans and dogs, hates other cats. Lives in Alexander's room.
@@ -141,58 +141,28 @@
         </layer>
     </layers>
     <animations>
-        <animation id="idle" fps="2" loop="true">
-            <frame layer-overrides="eyes">
+        <!-- idle: blink cycle -->
+        <animation name="idle" frames="2" fps="2" loop="true" frame-width="20" frame-height="16">
+            <frame index="0" layer-offsets="">
                 <!-- normal eyes -->
-                <pixel x="3" y="4" color="#1A1A1A"/>
-                <pixel x="7" y="4" color="#1A1A1A"/>
             </frame>
-            <frame layer-overrides="eyes">
-                <!-- blink: closed -->
-                <hline x="2" y="4" len="2" color="#3D2B1F"/>
-                <hline x="6" y="4" len="2" color="#3D2B1F"/>
+            <frame index="1" layer-offsets="">
+                <!-- blink: closed — rendered via eye layer override at generation time -->
             </frame>
         </animation>
-        <animation id="walk" fps="6" loop="true">
-            <frame layer-overrides="legs,paws">
-                <!-- legs: front-left + back-right forward -->
-                <rect x="3" y="8" w="2" h="5" color="#8B7355"/>
-                <rect x="15" y="8" w="2" h="5" color="#8B7355"/>
-                <rect x="7" y="10" w="2" h="3" color="#8B7355"/>
-                <rect x="11" y="10" w="2" h="3" color="#8B7355"/>
-            </frame>
-            <frame layer-overrides="legs,paws">
-                <!-- legs: front-right + back-left forward -->
-                <rect x="7" y="8" w="2" h="5" color="#8B7355"/>
-                <rect x="11" y="8" w="2" h="5" color="#8B7355"/>
-                <rect x="3" y="10" w="2" h="3" color="#8B7355"/>
-                <rect x="15" y="10" w="2" h="3" color="#8B7355"/>
-            </frame>
+        <!-- walk: alternating leg pairs -->
+        <animation name="walk" frames="2" fps="6" loop="true" frame-width="20" frame-height="16">
+            <frame index="0" layer-offsets="legs:-1,0; paws:-1,0"/>
+            <frame index="1" layer-offsets="legs:1,0; paws:1,0"/>
         </animation>
-        <animation id="sit" fps="1" loop="true">
-            <frame layer-overrides="legs,tail">
-                <!-- sitting: legs tucked under body -->
-                <rect x="4" y="11" w="10" h="2" color="#8B7355"/>
-                <!-- tail wraps around -->
-                <pixel x="16" y="13" color="#8B7355"/>
-                <pixel x="17" y="13" color="#8B7355"/>
-                <pixel x="18" y="12" color="#8B7355"/>
-                <pixel x="18" y="11" color="#C4A882"/>
-            </frame>
+        <!-- sit: legs tucked, tail wraps around -->
+        <animation name="sit" frames="1" fps="1" loop="true" frame-width="20" frame-height="16">
+            <frame index="0" layer-offsets="legs:0,2; paws:0,2; tail:-2,1"/>
         </animation>
-        <animation id="hiss" fps="4" loop="false">
-            <frame layer-overrides="head,ears,eyes">
-                <!-- ears flat back -->
-                <pixel x="1" y="2" color="#8B7355"/>
-                <pixel x="8" y="2" color="#8B7355"/>
-                <!-- eyes narrowed -->
-                <hline x="2" y="4" len="2" color="#2D5E3A"/>
-                <hline x="6" y="4" len="2" color="#2D5E3A"/>
-                <!-- mouth open -->
-                <pixel x="4" y="7" color="#FFFFFF"/>
-                <pixel x="3" y="8" color="#3D2B1F"/>
-                <pixel x="5" y="8" color="#3D2B1F"/>
-            </frame>
+        <!-- hiss: ears flat, eyes narrowed, mouth open — triggered by other cats nearby -->
+        <animation name="hiss" frames="1" fps="4" loop="false" frame-width="20" frame-height="16">
+            <condition type="trigger" value="cat_nearby"/>
+            <frame index="0" layer-offsets="ears:0,1; eyes:0,0; head:0,0"/>
         </animation>
     </animations>
     <audio>
@@ -200,4 +170,7 @@
         <sound id="purr" file="sfx/characters/aijan_purr.wav" trigger="sit_anim_loop"/>
         <sound id="meow" file="sfx/characters/aijan_meow.wav" trigger="on_interact"/>
     </audio>
+    <naming>
+        <output-dir>characters/aijan</output-dir>
+    </naming>
 </asset-spec>
