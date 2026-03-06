@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sound-design>
+    <meta>
+        <version>1.0.0</version>
+        <description>
+            Звуковое оформление Life of T.
+            Формат: OGG Vorbis (основной), MP3 (fallback).
+            Все файлы в frontend/public/assets/audio/.
+            При сборке Vite копирует public/ → dist/ автоматически.
+        </description>
+    </meta>
+
+    <technical-constraints>
+        <format primary="ogg" fallback="mp3" reason="OGG лучше сжатие, MP3 для Safari fallback"/>
+        <max-file-size>200KB per file (Telegram WebApp constraint)</max-file-size>
+        <max-total-audio>2MB all audio combined</max-total-audio>
+        <sample-rate>44100Hz</sample-rate>
+        <channels>mono for SFX, stereo for ambient/music</channels>
+        <bitrate>96kbps for ambient, 64kbps for SFX</bitrate>
+        <preload>ambient текущей локации + SFX текущего действия</preload>
+        <lazy-load>музыка и ambient других локаций — по требованию</lazy-load>
+    </technical-constraints>
+
+    <!-- АМБИЕНТ ЛОКАЦИЙ -->
+
+    <category name="ambient" description="Фоновые звуки локаций, loop">
+
+        <sound id="amb_home">
+            <name>Квартира</name>
+            <file>ambient/home.ogg</file>
+            <description>Тихий гул холодильника, тикающие часы, далёкий город за окном</description>
+            <duration>30s loop</duration>
+            <volume>0.3</volume>
+            <locations>home_room, kitchen</locations>
+        </sound>
+
+        <sound id="amb_home_night">
+            <name>Квартира ночь</name>
+            <file>ambient/home-night.ogg</file>
+            <description>Тишина, мурлыканье далёкое, тиканье часов тише</description>
+            <duration>30s loop</duration>
+            <volume>0.2</volume>
+            <locations>home_room, kitchen</locations>
+            <time-of-day>night</time-of-day>
+        </sound>
+
+        <sound id="amb_workplace">
+            <name>Офис</name>
+            <file>ambient/workplace.ogg</file>
+            <description>Клавиатуры стучат, кондиционер гудит, далёкие разговоры</description>
+            <duration>30s loop</duration>
+            <volume>0.25</volume>
+            <locations>workplace</locations>
+        </sound>
+
+        <sound id="amb_gym">
+            <name>Спортзал</name>
+            <file>ambient/gym.ogg</file>
+            <description>Далёкая энергичная музыка, звон железа, шум вентиляции</description>
+            <duration>30s loop</duration>
+            <volume>0.3</volume>
+            <locations>gym</locations>
+        </sound>
+
+        <sound id="amb_park">
+            <name>Парк</name>
+            <file>ambient/park.ogg</file>
+            <description>Птицы поют, ветер в листве, далёкий фонтан, дети смеются</description>
+            <duration>30s loop</duration>
+            <volume>0.35</volume>
+            <locations>park</locations>
+        </sound>
+
+        <sound id="amb_park_night">
+            <name>Парк ночью</name>
+            <file>ambient/park-night.ogg</file>
+            <description>Сверчки, далёкие машины, ветер тише</description>
+            <duration>30s loop</duration>
+            <volume>0.25</volume>
+            <locations>park</locations>
+            <time-of-day>night</time-of-day>
+        </sound>
+
+        <sound id="amb_street">
+            <name>Улица</name>
+            <file>ambient/street.ogg</file>
+            <description>Машины проезжают, шаги людей, далёкий сигнал</description>
+            <duration>30s loop</duration>
+            <volume>0.3</volume>
+            <locations>city_street</locations>
+        </sound>
+
+        <sound id="amb_vet">
+            <name>Ветклиника</name>
+            <file>ambient/vet-clinic.ogg</file>
+            <description>Стерильная тишина, далёкое мяуканье, пикание прибора</description>
+            <duration>30s loop</duration>
+            <volume>0.2</volume>
+            <locations>vet_clinic</locations>
+        </sound>
+
+        <sound id="amb_dacha">
+            <name>Дача</name>
+            <file>ambient/dacha.ogg</file>
+            <description>Птицы, ветер, костёр потрескивает, далёкий лай</description>
+            <duration>30s loop</duration>
+            <volume>0.35</volume>
+            <locations>dacha_yard</locations>
+        </sound>
+
+        <sound id="amb_highway">
+            <name>Ночная трасса</name>
+            <file>ambient/highway.ogg</file>
+            <description>Мотор гудит, шины по асфальту, ветер в окне</description>
+            <duration>30s loop</duration>
+            <volume>0.3</volume>
+            <locations>night_highway</locations>
+        </sound>
+
+        <sound id="amb_camp">
+            <name>Летний лагерь</name>
+            <file>ambient/camp.ogg</file>
+            <description>Костёр, сверчки, гитара вдалеке, смех</description>
+            <duration>30s loop</duration>
+            <volume>0.35</volume>
+            <locations>summer_camp</locations>
+        </sound>
+
+    </category>
+
+    <!-- SFX ДЕЙСТВИЙ -->
+
+    <category name="sfx" description="Короткие звуковые эффекты">
+
+        <!-- Питомцы -->
+        <sound id="sfx_purr"><file>sfx/purr.ogg</file><description>Мурлыканье кошки</description><duration>3s</duration><volume>0.5</volume></sound>
+        <sound id="sfx_meow"><file>sfx/meow.ogg</file><description>Мяуканье</description><duration>1s</duration><volume>0.5</volume></sound>
+        <sound id="sfx_hiss"><file>sfx/hiss.ogg</file><description>Шипение кошки</description><duration>1s</duration><volume>0.6</volume></sound>
+        <sound id="sfx_bark"><file>sfx/bark.ogg</file><description>Лай Сэма (весёлый)</description><duration>1s</duration><volume>0.5</volume></sound>
+        <sound id="sfx_bark_angry"><file>sfx/bark-angry.ogg</file><description>Лай Сэма (агрессивный)</description><duration>1.5s</duration><volume>0.6</volume></sound>
+        <sound id="sfx_whine"><file>sfx/whine.ogg</file><description>Скулёж Сэма</description><duration>2s</duration><volume>0.4</volume></sound>
+        <sound id="sfx_eat_pet"><file>sfx/eat-pet.ogg</file><description>Хруст корма</description><duration>2s</duration><volume>0.4</volume></sound>
+        <sound id="sfx_cat_fight"><file>sfx/cat-fight.ogg</file><description>Кошачья драка</description><duration>2s</duration><volume>0.6</volume></sound>
+
+        <!-- Кухня -->
+        <sound id="sfx_cooking"><file>sfx/cooking.ogg</file><description>Шкворчание на плите</description><duration>3s</duration><volume>0.4</volume></sound>
+        <sound id="sfx_fridge"><file>sfx/fridge-open.ogg</file><description>Открытие холодильника</description><duration>1s</duration><volume>0.3</volume></sound>
+        <sound id="sfx_kettle"><file>sfx/kettle.ogg</file><description>Чайник закипает</description><duration>3s</duration><volume>0.3</volume></sound>
+
+        <!-- Работа/Дом -->
+        <sound id="sfx_keyboard"><file>sfx/keyboard.ogg</file><description>Стук клавиатуры</description><duration>3s loop</duration><volume>0.3</volume></sound>
+        <sound id="sfx_phone_ring"><file>sfx/phone-ring.ogg</file><description>Звонок телефона</description><duration>3s</duration><volume>0.5</volume></sound>
+        <sound id="sfx_alarm"><file>sfx/alarm.ogg</file><description>Будильник</description><duration>3s</duration><volume>0.5</volume></sound>
+        <sound id="sfx_door"><file>sfx/door.ogg</file><description>Открытие двери</description><duration>1s</duration><volume>0.4</volume></sound>
+
+        <!-- UI -->
+        <sound id="sfx_click"><file>sfx/ui-click.ogg</file><description>Нажатие кнопки (пиксельный)</description><duration>0.1s</duration><volume>0.3</volume></sound>
+        <sound id="sfx_success"><file>sfx/ui-success.ogg</file><description>Успех / квест завершён</description><duration>1s</duration><volume>0.4</volume></sound>
+        <sound id="sfx_fail"><file>sfx/ui-fail.ogg</file><description>Провал</description><duration>1s</duration><volume>0.4</volume></sound>
+        <sound id="sfx_notification"><file>sfx/ui-notification.ogg</file><description>Toast уведомление</description><duration>0.5s</duration><volume>0.3</volume></sound>
+        <sound id="sfx_quest_start"><file>sfx/quest-start.ogg</file><description>Новый квест</description><duration>1.5s</duration><volume>0.5</volume></sound>
+        <sound id="sfx_level_up"><file>sfx/level-up.ogg</file><description>Повышение (8-bit jingle)</description><duration>2s</duration><volume>0.5</volume></sound>
+
+        <!-- Эмоции -->
+        <sound id="sfx_heartbeat"><file>sfx/heartbeat.ogg</file><description>Стресс — сердцебиение</description><duration>3s loop</duration><volume>0.4</volume></sound>
+        <sound id="sfx_sigh"><file>sfx/sigh.ogg</file><description>Вздох усталости</description><duration>1.5s</duration><volume>0.3</volume></sound>
+
+    </category>
+
+    <!-- МУЗЫКА -->
+
+    <category name="music" description="Музыкальные темы по времени суток">
+
+        <sound id="mus_morning">
+            <name>Утро</name>
+            <file>music/morning.ogg</file>
+            <description>Лёгкая акустическая гитара, тёплая, обнадёживающая. Lo-fi пиксельный стиль.</description>
+            <duration>60s loop</duration>
+            <volume>0.2</volume>
+            <time-of-day>morning</time-of-day>
+        </sound>
+
+        <sound id="mus_day">
+            <name>День</name>
+            <file>music/day.ogg</file>
+            <description>Нейтральная, деловая. Пианино + лёгкие биты. Не мешает думать.</description>
+            <duration>60s loop</duration>
+            <volume>0.15</volume>
+            <time-of-day>day</time-of-day>
+        </sound>
+
+        <sound id="mus_evening">
+            <name>Вечер</name>
+            <file>music/evening.ogg</file>
+            <description>Тёплая, уютная. Фортепиано + скрипка тихая. Домашний уют.</description>
+            <duration>60s loop</duration>
+            <volume>0.2</volume>
+            <time-of-day>evening</time-of-day>
+        </sound>
+
+        <sound id="mus_night">
+            <name>Ночь</name>
+            <file>music/night.ogg</file>
+            <description>Минимальная. Эмбиент пэды, тихое пианино. Одинокая, задумчивая.</description>
+            <duration>60s loop</duration>
+            <volume>0.15</volume>
+            <time-of-day>night</time-of-day>
+        </sound>
+
+        <sound id="mus_tension">
+            <name>Напряжение</name>
+            <file>music/tension.ogg</file>
+            <description>Для конфликтов и срочных квестов. Пульсирующий бас, тревожные ноты.</description>
+            <duration>30s loop</duration>
+            <volume>0.25</volume>
+            <condition>conflict active OR quest urgent</condition>
+        </sound>
+
+        <sound id="mus_ending_happy">
+            <name>Счастливый финал</name>
+            <file>music/ending-happy.ogg</file>
+            <description>Полная оркестровка (8-bit). Торжественная, тёплая.</description>
+            <duration>90s</duration>
+            <volume>0.3</volume>
+            <condition>ending:balanced OR ending:secret_perfect</condition>
+        </sound>
+
+        <sound id="mus_ending_sad">
+            <name>Грустный финал</name>
+            <file>music/ending-sad.ogg</file>
+            <description>Одинокое пианино. Дождь. Меланхолия.</description>
+            <duration>90s</duration>
+            <volume>0.25</volume>
+            <condition>ending:burnout OR ending:alone_with_pets</condition>
+        </sound>
+
+    </category>
+
+    <!-- ПРАВИЛА ВОСПРОИЗВЕДЕНИЯ -->
+
+    <playback-rules>
+        <rule>Одновременно играет: 1 ambient + 1 music + до 2 SFX</rule>
+        <rule>Ambient crossfade при смене локации: 500ms</rule>
+        <rule>Music crossfade при смене времени суток: 1000ms</rule>
+        <rule>SFX прерывают друг друга только в одной категории</rule>
+        <rule>Пользователь может отключить звук в настройках</rule>
+        <rule>По умолчанию звук выключен (Telegram WebApp UX)</rule>
+        <rule>Первое включение — по кнопке 🔊 в UI</rule>
+        <rule>Громкость сохраняется в localStorage</rule>
+        <rule>При prefers-reduced-motion — только UI SFX, без ambient/music</rule>
+    </playback-rules>
+
+    <directory-structure>
+        <root>frontend/public/assets/audio/</root>
+        <dir name="ambient/" description="Фоновые звуки локаций (OGG, ~30s loop)"/>
+        <dir name="sfx/" description="Короткие звуковые эффекты (OGG, 0.1-3s)"/>
+        <dir name="music/" description="Музыкальные темы (OGG, 30-90s loop)"/>
+    </directory-structure>
+
+</sound-design>
