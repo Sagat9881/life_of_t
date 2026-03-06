@@ -3,151 +3,161 @@ package ru.lifegame.assets.infrastructure.writer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.lifegame.assets.domain.model.asset.AnimationSpec;
+import ru.lifegame.assets.domain.model.asset.AtlasConfigSchema;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 /**
- * Writes atlas-config.json metadata files for animation atlases.
+ * Writes sprite-atlas.json — the unified, versioned atlas configuration.
  * <p>
- * Supports two formats:
+ * Output conforms to {@link AtlasConfigSchema} (config version 1.0).
+ * <p>
+ * Features:
  * <ul>
- *   <li><b>Strip config</b> — flat JSON for single-row atlases</li>
- *   <li><b>Grid config</b> — JSON with rows array for multi-row atlases (time-of-day variants)</li>
+ *   <li>Single file per character containing ALL animation entries</li>
+ *   <li>Schema version ({@code configVersion}) for frontend compatibility checks</li>
+ *   <li>Revision field — defaults to "latest" for dev, can be pinned for production</li>
+ *   <li>Supports both strip (1 row) and grid (N rows with conditions) layouts</li>
  * </ul>
  */
 public class AtlasConfigWriter {
 
     private static final Logger log = LoggerFactory.getLogger(AtlasConfigWriter.class);
 
+    private String revision = AtlasConfigSchema.LATEST_REVISION;
+
     /**
-     * Writes a single atlas config entry as a JSON file.
+     * Set a specific revision tag. Pass null or "latest" for default behavior.
      */
-    public Path writeConfig(AnimationSpec spec, String atlasFileName, Path outputDir) throws IOException {
-        String json = formatSingleEntry(spec, atlasFileName);
-        Files.createDirectories(outputDir);
-        Path configPath = outputDir.resolve(spec.name() + "-atlas-config.json");
-        Files.writeString(configPath, json, StandardCharsets.UTF_8);
-        log.info("Wrote atlas config: {}", configPath);
-        return configPath;
+    public AtlasConfigWriter withRevision(String revision) {
+        this.revision = (revision == null || revision.isBlank())
+                ? AtlasConfigSchema.LATEST_REVISION
+                : revision;
+        return this;
     }
 
     /**
-     * Writes a grid atlas config for animations grouped by condition (e.g. time_of_day).
-     * <p>
-     * Output format:
-     * <pre>
-     * {
-     *   "name": "idle",
-     *   "file": "idle_atlas.png",
-     *   "layout": "grid",
-     *   "frameWidth": 24,
-     *   "frameHeight": 20,
-     *   "columns": 4,
-     *   "rows": [
-     *     { "condition": { "type": "time_of_day", "value": "morning" }, "rowIndex": 0, "fps": 4, "loop": true },
-     *     { "condition": { "type": "time_of_day", "value": "day" },     "rowIndex": 1, "fps": 4, "loop": true },
-     *     ...
-     *   ],
-     *   "defaultRow": 0
-     * }
-     * </pre>
-     *
-     * @param baseName          base animation name (e.g. "idle")
-     * @param atlasFileName     filename of the grid atlas PNG
-     * @param conditionType     condition type (e.g. "time_of_day")
-     * @param rowSpecs          ordered map: conditionValue → AnimationSpec for that row
-     * @param outputDir         output directory
-     * @return path to the generated config file
+     * Generate a timestamp-based revision string (e.g. "20260306-1").
      */
-    public Path writeGridConfig(String baseName, String atlasFileName, String conditionType,
-                                LinkedHashMap<String, AnimationSpec> rowSpecs,
-                                Path outputDir) throws IOException {
-        var firstSpec = rowSpecs.values().iterator().next();
+    public AtlasConfigWriter withTimestampRevision() {
+        this.revision = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE) + "-1";
+        return this;
+    }
+
+    /**
+     * Writes the unified sprite-atlas.json for a character.
+     *
+     * @param characterName   character identifier (e.g. "sam")
+     * @param spriteWidth     display width of one frame
+     * @param spriteHeight    display height of one frame
+     * @param stripAnims      list of simple strip animations (walk, eat, tremble, etc.)
+     * @param gridAnims       map of baseName → (conditionType, orderedRowSpecs)
+     * @param outputDir       target directory
+     * @return path to generated sprite-atlas.json
+     */
+    public Path writeSpriteAtlas(
+            String characterName,
+            int spriteWidth,
+            int spriteHeight,
+            List<AnimationSpec> stripAnims,
+            Map<String, GridAnimDef> gridAnims,
+            Path outputDir
+    ) throws IOException {
 
         StringBuilder sb = new StringBuilder();
         sb.append("{\n");
-        sb.append("  \"name\": \"").append(baseName).append("\",\n");
-        sb.append("  \"file\": \"").append(atlasFileName).append("\",\n");
-        sb.append("  \"layout\": \"grid\",\n");
-        sb.append("  \"frameWidth\": ").append(firstSpec.frameWidth()).append(",\n");
-        sb.append("  \"frameHeight\": ").append(firstSpec.frameHeight()).append(",\n");
-        sb.append("  \"columns\": ").append(firstSpec.frames()).append(",\n");
-        sb.append("  \"rows\": [\n");
+        sb.append("  \"configVersion\": \"").append(AtlasConfigSchema.CURRENT_VERSION).append("\",\n");
+        sb.append("  \"revision\": \"").append(revision).append("\",\n");
+        sb.append("  \"character\": \"").append(characterName).append("\",\n");
+        sb.append("  \"spriteWidth\": ").append(spriteWidth).append(",\n");
+        sb.append("  \"spriteHeight\": ").append(spriteHeight).append(",\n");
+        sb.append("  \"animations\": {\n");
+
+        List<String> entries = new ArrayList<>();
+
+        // Grid animations (e.g. idle with time-of-day rows)
+        if (gridAnims != null) {
+            for (var ge : gridAnims.entrySet()) {
+                entries.add(formatGridEntry(ge.getKey(), ge.getValue()));
+            }
+        }
+
+        // Strip animations (e.g. walk, eat)
+        if (stripAnims != null) {
+            for (AnimationSpec spec : stripAnims) {
+                entries.add(formatStripEntry(spec));
+            }
+        }
+
+        sb.append(String.join(",\n", entries));
+        sb.append("\n  }\n");
+        sb.append("}\n");
+
+        Files.createDirectories(outputDir);
+        Path configPath = outputDir.resolve("sprite-atlas.json");
+        Files.writeString(configPath, sb.toString(), StandardCharsets.UTF_8);
+        log.info("Wrote sprite-atlas.json (v{}, rev {}): {}",
+                AtlasConfigSchema.CURRENT_VERSION, revision, configPath);
+        return configPath;
+    }
+
+    private String formatStripEntry(AnimationSpec spec) {
+        return "    \"" + spec.name() + "\": {\n"
+                + "      \"file\": \"" + spec.name() + "_atlas.png\",\n"
+                + "      \"layout\": \"strip\",\n"
+                + "      \"columns\": " + spec.frames() + ",\n"
+                + "      \"fps\": " + spec.fps() + ",\n"
+                + "      \"loop\": " + spec.loop() + "\n"
+                + "    }";
+    }
+
+    private String formatGridEntry(String baseName, GridAnimDef def) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("    \"").append(baseName).append("\": {\n");
+        sb.append("      \"file\": \"").append(baseName).append("_atlas.png\",\n");
+        sb.append("      \"layout\": \"grid\",\n");
+
+        var firstSpec = def.rowSpecs().values().iterator().next();
+        sb.append("      \"columns\": ").append(firstSpec.frames()).append(",\n");
+        sb.append("      \"rows\": [\n");
 
         int rowIdx = 0;
-        for (var entry : rowSpecs.entrySet()) {
+        List<Map.Entry<String, AnimationSpec>> rowList = new ArrayList<>(def.rowSpecs().entrySet());
+        for (int i = 0; i < rowList.size(); i++) {
+            var entry = rowList.get(i);
             AnimationSpec spec = entry.getValue();
-            sb.append("    { ");
-            sb.append("\"condition\": { \"type\": \"").append(conditionType)
-              .append("\", \"value\": \"").append(entry.getKey()).append("\" }, ");
-            sb.append("\"rowIndex\": ").append(rowIdx).append(", ");
-            sb.append("\"fps\": ").append(spec.fps()).append(", ");
-            sb.append("\"loop\": ").append(spec.loop());
-            sb.append(" }");
-            if (rowIdx < rowSpecs.size() - 1) sb.append(",");
+            sb.append("        {\n");
+            sb.append("          \"rowIndex\": ").append(rowIdx).append(",\n");
+            sb.append("          \"condition\": { \"type\": \"").append(def.conditionType())
+              .append("\", \"value\": \"").append(entry.getKey()).append("\" },\n");
+            sb.append("          \"fps\": ").append(spec.fps()).append(",\n");
+            sb.append("          \"loop\": ").append(spec.loop()).append("\n");
+            sb.append("        }");
+            if (i < rowList.size() - 1) sb.append(",");
             sb.append("\n");
             rowIdx++;
         }
 
-        sb.append("  ],\n");
-        sb.append("  \"defaultRow\": 0\n");
-        sb.append("}\n");
-
-        Files.createDirectories(outputDir);
-        Path configPath = outputDir.resolve(baseName + "-atlas-config.json");
-        Files.writeString(configPath, sb.toString(), StandardCharsets.UTF_8);
-        log.info("Wrote grid atlas config: {}", configPath);
-        return configPath;
+        sb.append("      ],\n");
+        sb.append("      \"defaultRow\": 0\n");
+        sb.append("    }");
+        return sb.toString();
     }
 
     /**
-     * Writes a combined atlas-config.json with entries for all animations.
+     * Definition of a grid animation group.
+     *
+     * @param conditionType condition type (e.g. "time_of_day")
+     * @param rowSpecs      ordered map: conditionValue → AnimationSpec per row
      */
-    public Path writeCombinedConfig(List<AnimationSpec> specs, Path outputDir) throws IOException {
-        StringBuilder sb = new StringBuilder("[\n");
-        for (int i = 0; i < specs.size(); i++) {
-            AnimationSpec spec = specs.get(i);
-            sb.append(formatEntry(spec));
-            if (i < specs.size() - 1) sb.append(",");
-            sb.append("\n");
-        }
-        sb.append("]");
-
-        Files.createDirectories(outputDir);
-        Path configPath = outputDir.resolve("atlas-config.json");
-        Files.writeString(configPath, sb.toString(), StandardCharsets.UTF_8);
-        log.info("Wrote combined atlas config: {}", configPath);
-        return configPath;
-    }
-
-    public String formatSingleEntry(AnimationSpec spec, String atlasFileName) {
-        return "{\n"
-                + "  \"name\": \"" + spec.name() + "\",\n"
-                + "  \"file\": \"" + atlasFileName + "\",\n"
-                + "  \"layout\": \"strip\",\n"
-                + "  \"frameWidth\": " + spec.frameWidth() + ",\n"
-                + "  \"frameHeight\": " + spec.frameHeight() + ",\n"
-                + "  \"frames\": " + spec.frames() + ",\n"
-                + "  \"fps\": " + spec.fps() + ",\n"
-                + "  \"loop\": " + spec.loop() + "\n"
-                + "}";
-    }
-
-    private String formatEntry(AnimationSpec spec) {
-        return "  {\n"
-                + "    \"name\": \"" + spec.name() + "\",\n"
-                + "    \"layout\": \"strip\",\n"
-                + "    \"frameWidth\": " + spec.frameWidth() + ",\n"
-                + "    \"frameHeight\": " + spec.frameHeight() + ",\n"
-                + "    \"frames\": " + spec.frames() + ",\n"
-                + "    \"fps\": " + spec.fps() + ",\n"
-                + "    \"loop\": " + spec.loop() + "\n"
-                + "  }";
-    }
+    public record GridAnimDef(
+            String conditionType,
+            LinkedHashMap<String, AnimationSpec> rowSpecs
+    ) {}
 }

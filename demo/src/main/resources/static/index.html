@@ -272,7 +272,7 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 <div id="app">
     <header id="header">
         <h1>Life of T</h1>
-        <span class="subtitle">Demo v0.8</span>
+        <span class="subtitle">Demo v0.9</span>
         <span id="game-time">День 1 | 08:00</span>
     </header>
 
@@ -339,16 +339,16 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 'use strict';
 
 // ============================================================
-//  Asset helpers
+//  Utilities
 // ============================================================
-const assetCache = {};
+const imageCache = {};
 
 function preloadImage(url) {
-    if (assetCache[url] !== undefined) return Promise.resolve(assetCache[url]);
+    if (imageCache[url] !== undefined) return Promise.resolve(imageCache[url]);
     return new Promise(resolve => {
         const img = new Image();
-        img.onload  = () => { assetCache[url] = true;  resolve(true);  };
-        img.onerror = () => { assetCache[url] = false; resolve(false); };
+        img.onload  = () => { imageCache[url] = true;  resolve(true);  };
+        img.onerror = () => { imageCache[url] = false; resolve(false); };
         img.src = url;
     });
 }
@@ -358,9 +358,6 @@ async function fetchJSON(url) {
     catch(_) { return null; }
 }
 
-// ============================================================
-//  Time-of-day
-// ============================================================
 function getTimeSlot(hour) {
     if (hour >= 6  && hour < 12) return 'morning';
     if (hour >= 12 && hour < 18) return 'day';
@@ -369,101 +366,413 @@ function getTimeSlot(hour) {
 }
 
 // ============================================================
-//  GridSpriteAnimator
+//  SpriteController — universal animation engine
 //
-//  Drives CSS background-position on a DOM element.
-//  Atlas layout (PNG file):
-//    columns = animation frames  (X axis)
-//    rows    = variants          (Y axis)
+//  Pure rendering class. Zero knowledge of game logic.
+//  Reads sprite-atlas.json config (v1.0), plays any named
+//  animation by driving CSS background-position on 2 axes.
 //
-//  background-size is set to (columns * frameW) × (rows * frameH)
-//  so each "cell" maps 1:1 to the element size.
-//
-//  tick():
-//    backgroundPositionX = -(currentFrame * frameW)
-//    backgroundPositionY = -(currentRow   * frameH)
+//  API:
+//    const ctrl = await SpriteController.create(el, configUrl)
+//    ctrl.play('idle')           — start named animation
+//    ctrl.play('idle', {condition: 'morning'})  — start with row
+//    ctrl.setCondition('evening')  — switch row mid-animation
+//    ctrl.stop()                 — freeze on current frame
+//    ctrl.currentAnimation       — name of playing animation
+//    ctrl.config                 — parsed sprite-atlas.json
 // ============================================================
-class GridSpriteAnimator {
+class SpriteController {
+
     /**
-     * @param {HTMLElement} el       — DOM element to animate
-     * @param {Object}      config   — atlas config object from JSON:
-     *   For "grid" layout:
-     *     { layout:"grid", file, frameWidth, frameHeight, columns, rows:[{condition,rowIndex,fps,loop}], defaultRow }
-     *   For "strip" layout:
-     *     { layout:"strip", file, frameWidth, frameHeight, frames, fps, loop }
-     * @param {string}      atlasUrl — resolved full URL to atlas PNG
+     * Async factory. Loads & validates config, preloads default atlas.
+     * @param {HTMLElement} el         — DOM element to animate
+     * @param {string}      configUrl  — URL to sprite-atlas.json
+     * @returns {SpriteController|null} — null if config load fails
      */
-    constructor(el, config, atlasUrl) {
-        this.el = el;
-        this.config = config;
-        this.atlasUrl = atlasUrl;
+    static async create(el, configUrl) {
+        const config = await fetchJSON(configUrl);
+        if (!config || !config.animations) return null;
 
-        this.frameW = config.frameWidth;
-        this.frameH = config.frameHeight;
-
-        if (config.layout === 'grid') {
-            this.columns  = config.columns;
-            this.totalRows = config.rows.length;
-            this.rowMap = {};
-            for (const r of config.rows) {
-                if (r.condition) this.rowMap[r.condition.value] = r;
-            }
-            const def = config.rows.find(r => r.rowIndex === (config.defaultRow || 0)) || config.rows[0];
-            this.currentRow = def.rowIndex;
-            this.fps = def.fps;
-            this.loop = def.loop;
-        } else {
-            this.columns   = config.frames;
-            this.totalRows = 1;
-            this.currentRow = 0;
-            this.fps  = config.fps;
-            this.loop = config.loop;
+        // Version check
+        const v = config.configVersion || '0';
+        if (!v.startsWith('1.')) {
+            console.warn(`[SpriteController] Unsupported config version: ${v}`);
+            return null;
         }
 
-        this.currentFrame = 0;
-        this.timer = null;
-
-        this._applyBackground();
+        return new SpriteController(el, config);
     }
 
-    _applyBackground() {
-        this.el.style.backgroundImage = `url('${this.atlasUrl}')`;
+    constructor(el, config) {
+        this.el = el;
+        this.config = config;
+        this.baseUrl = ''; // set by caller or derived
+
+        this._timer = null;
+        this._currentAnim = null;
+        this._currentAnimConfig = null;
+        this._frame = 0;
+        this._row = 0;
+        this._columns = 0;
+        this._totalRows = 1;
+        this._frameW = config.spriteWidth;
+        this._frameH = config.spriteHeight;
+        this._rowMap = null; // condition → row def (for grid)
+    }
+
+    /** Currently playing animation name */
+    get currentAnimation() { return this._currentAnim; }
+
+    /** Whether any animation is actively playing */
+    get isPlaying() { return this._timer !== null; }
+
+    /**
+     * Resolve the base URL for atlas PNGs.
+     * Must be called before play() if not using absolute paths in config.
+     */
+    setBaseUrl(url) {
+        this.baseUrl = url.endsWith('/') ? url : url + '/';
+    }
+
+    /**
+     * Start playing a named animation.
+     * @param {string} name      — animation name from config ("idle", "walk", etc.)
+     * @param {Object} [opts]    — options
+     * @param {string} [opts.condition] — initial condition value for grid row
+     * @returns {boolean} true if animation started
+     */
+    async play(name, opts) {
+        const animCfg = this.config.animations[name];
+        if (!animCfg) {
+            console.warn(`[SpriteController] Animation "${name}" not found in config`);
+            return false;
+        }
+
+        // Stop previous
+        this.stop();
+
+        this._currentAnim = name;
+        this._currentAnimConfig = animCfg;
+        this._frame = 0;
+
+        // Layout
+        if (animCfg.layout === 'grid') {
+            this._columns = animCfg.columns;
+            this._totalRows = animCfg.rows.length;
+            this._buildRowMap(animCfg.rows);
+            const defaultRow = animCfg.rows.find(r => r.rowIndex === (animCfg.defaultRow || 0))
+                            || animCfg.rows[0];
+            this._row = defaultRow.rowIndex;
+            this._fps = defaultRow.fps;
+        } else {
+            this._columns = animCfg.columns;
+            this._totalRows = 1;
+            this._row = 0;
+            this._fps = animCfg.fps;
+            this._rowMap = null;
+        }
+
+        // Apply condition if provided
+        if (opts && opts.condition && this._rowMap) {
+            this._applyCondition(opts.condition);
+        }
+
+        // Load atlas image
+        const atlasUrl = this.baseUrl + animCfg.file;
+        const ok = await preloadImage(atlasUrl);
+        if (!ok) return false;
+
+        // Apply to DOM
+        this.el.style.backgroundImage = `url('${atlasUrl}')`;
         this.el.style.backgroundSize =
-            `${this.columns * this.frameW}px ${this.totalRows * this.frameH}px`;
+            `${this._columns * this._frameW}px ${this._totalRows * this._frameH}px`;
+        this._paint();
+
+        // Start ticking
+        if (this._columns > 1) {
+            const interval = Math.round(1000 / this._fps);
+            this._timer = setInterval(() => {
+                this._frame = (this._frame + 1) % this._columns;
+                this._paint();
+            }, interval);
+        }
+
+        return true;
+    }
+
+    /**
+     * Switch to a different row by condition value (e.g. "morning", "evening").
+     * Only works for grid-layout animations.
+     */
+    setCondition(conditionValue) {
+        if (!this._rowMap) return;
+        if (this._applyCondition(conditionValue)) {
+            // Restart timer with new FPS
+            if (this._timer) {
+                clearInterval(this._timer);
+                const interval = Math.round(1000 / this._fps);
+                this._timer = setInterval(() => {
+                    this._frame = (this._frame + 1) % this._columns;
+                    this._paint();
+                }, interval);
+            }
+            this._paint();
+        }
+    }
+
+    /** Stop animation on current frame */
+    stop() {
+        if (this._timer) {
+            clearInterval(this._timer);
+            this._timer = null;
+        }
+    }
+
+    /** Re-apply current animation background (useful after walk→idle switch) */
+    reapply() {
+        if (!this._currentAnimConfig) return;
+        const atlasUrl = this.baseUrl + this._currentAnimConfig.file;
+        this.el.style.backgroundImage = `url('${atlasUrl}')`;
+        this.el.style.backgroundSize =
+            `${this._columns * this._frameW}px ${this._totalRows * this._frameH}px`;
         this._paint();
     }
+
+    // --- Private ---
 
     _paint() {
         this.el.style.backgroundPosition =
-            `${-(this.currentFrame * this.frameW)}px ${-(this.currentRow * this.frameH)}px`;
+            `${-(this._frame * this._frameW)}px ${-(this._row * this._frameH)}px`;
     }
 
-    /** Switch to a different row by condition value (e.g. "morning") */
-    setRowByCondition(conditionValue) {
-        const rowDef = this.rowMap && this.rowMap[conditionValue];
-        if (!rowDef || rowDef.rowIndex === this.currentRow) return;
-        this.currentRow = rowDef.rowIndex;
-        this.fps = rowDef.fps;
-        this.loop = rowDef.loop;
-        this.currentFrame = 0;
-        this._paint();
-        // restart timer with new fps
-        if (this.timer) { this.stop(); this.start(); }
+    _buildRowMap(rows) {
+        this._rowMap = {};
+        for (const r of rows) {
+            if (r.condition) this._rowMap[r.condition.value] = r;
+        }
     }
 
-    start() {
-        if (this.timer || this.columns <= 1) return;
-        const interval = Math.round(1000 / this.fps);
-        this.timer = setInterval(() => {
-            this.currentFrame = (this.currentFrame + 1) % this.columns;
-            this._paint();
-        }, interval);
-    }
-
-    stop() {
-        if (this.timer) { clearInterval(this.timer); this.timer = null; }
+    _applyCondition(value) {
+        const rowDef = this._rowMap[value];
+        if (!rowDef || rowDef.rowIndex === this._row) return false;
+        this._row = rowDef.rowIndex;
+        this._fps = rowDef.fps;
+        this._frame = 0;
+        return true;
     }
 }
+
+// ============================================================
+//  SceneActor — character on the scene
+//
+//  Orchestrates: position, movement, labels, activity icons.
+//  Delegates ALL sprite rendering to SpriteController.
+//  Knows how to request animations by name ("idle", "walk").
+// ============================================================
+class SceneActor {
+
+    /**
+     * @param {Object} layout  — layout config from ACTOR_LAYOUTS
+     */
+    constructor(layout) {
+        this.layout = layout;
+        this.el = document.getElementById(layout.el);
+        this.labelEl  = document.getElementById(layout.labelEl);
+        this.activityEl = document.getElementById(layout.activityEl);
+
+        this.sprite = null; // SpriteController, set after init
+        this.state = 'idle';
+        this.isStatic = false;
+
+        const rect = this.el.getBoundingClientRect();
+        const container = this.el.parentElement.getBoundingClientRect();
+        this.posX = rect.left - container.left;
+        this.targetX = this.posX;
+        this.moveRAF = null;
+
+        this._initAsync();
+    }
+
+    async _initAsync() {
+        const L = this.layout;
+        const configUrl = `${L.assetsBase}/sprite-atlas.json?v=latest`;
+        this.sprite = await SpriteController.create(this.el, configUrl);
+
+        if (this.sprite) {
+            this.sprite.setBaseUrl(L.assetsBase + '/');
+            const slot = getTimeSlot(currentGameTime.hour);
+            const started = await this.sprite.play('idle', { condition: slot });
+            if (started) {
+                this.el.classList.remove('sprite-placeholder');
+                this.el.innerHTML = '';
+                this.el.style.backgroundColor = '';
+                this.state = 'idle';
+            } else {
+                this._tryStaticFallback() || this._applyPlaceholder();
+            }
+        } else {
+            // Config not found — try static fallback
+            this._tryStaticFallback() || this._applyPlaceholder();
+        }
+
+        this._scheduleNextWalk();
+        this._rotateActivity();
+    }
+
+    async _tryStaticFallback() {
+        const ok = await preloadImage(this.layout.staticFallback);
+        if (!ok) return false;
+        this.el.style.backgroundImage = `url('${this.layout.staticFallback}')`;
+        this.el.style.backgroundSize = `${this.layout.spriteW}px ${this.layout.spriteH}px`;
+        this.el.style.backgroundPosition = '0 0';
+        this.isStatic = true;
+        this.state = 'idle';
+        return true;
+    }
+
+    _applyPlaceholder() {
+        const L = this.layout;
+        this.el.style.backgroundImage = 'none';
+        this.el.style.backgroundColor = L.placeholderColor;
+        this.el.classList.add('sprite-placeholder');
+        this.el.innerHTML = `<span style="font-size:${L.spriteH/3}px">${L.placeholderEmoji}</span>`;
+        this.isStatic = true;
+        this.state = 'idle';
+    }
+
+    // --- Animation switching ---
+
+    async switchToIdle() {
+        if (!this.sprite) return;
+        this.sprite.stop();
+        const slot = getTimeSlot(currentGameTime.hour);
+        await this.sprite.play('idle', { condition: slot });
+        this.state = 'idle';
+    }
+
+    async switchToWalk() {
+        if (!this.sprite) return false;
+        this.sprite.stop();
+        const started = await this.sprite.play('walk');
+        if (started) { this.state = 'walking'; return true; }
+        return false;
+    }
+
+    /** Called when game time slot changes */
+    onTimeSlotChange(newSlot) {
+        if (this.sprite && this.state === 'idle') {
+            this.sprite.setCondition(newSlot);
+        }
+    }
+
+    // --- Movement ---
+
+    _scheduleNextWalk() {
+        const L = this.layout;
+        const delay = (L.idleMinSec + Math.random() * (L.idleMaxSec - L.idleMinSec)) * 1000;
+        setTimeout(() => this._startWalk(), delay);
+    }
+
+    async _startWalk() {
+        if (!this.sprite || !this.sprite.config.animations.walk) {
+            this._scheduleNextWalk();
+            return;
+        }
+        const container = this.el.parentElement;
+        if (!container) return;
+        const cw = container.clientWidth;
+        const L = this.layout;
+        const minPx = cw * L.minX / 100;
+        const maxPx = cw * L.maxX / 100 - L.spriteW;
+        this.targetX = minPx + Math.random() * (maxPx - minPx);
+        if (Math.abs(this.targetX - this.posX) < 20) { this._scheduleNextWalk(); return; }
+
+        this.el.style.transform = this.targetX < this.posX ? 'scaleX(-1)' : 'scaleX(1)';
+        const ok = await this.switchToWalk();
+        if (ok) this._move();
+        else this._scheduleNextWalk();
+    }
+
+    _move() {
+        const speed = this.layout.speed || 1.5;
+        const step = () => {
+            const dx = this.targetX - this.posX;
+            if (Math.abs(dx) < speed) {
+                this.posX = this.targetX;
+                this._updatePosition();
+                this.el.style.transform = 'scaleX(1)';
+                this.switchToIdle();
+                this._scheduleNextWalk();
+                return;
+            }
+            this.posX += dx > 0 ? speed : -speed;
+            this._updatePosition();
+            this.moveRAF = requestAnimationFrame(step);
+        };
+        this.moveRAF = requestAnimationFrame(step);
+    }
+
+    _updatePosition() {
+        const L = this.layout;
+        this.el.style.left = this.posX + 'px';
+        this.el.style.right = 'auto';
+        if (this.labelEl) {
+            this.labelEl.style.left = (this.posX + L.spriteW / 2 - 30) + 'px';
+            this.labelEl.style.right = 'auto';
+            this.labelEl.style.bottom = `calc(${L.bottomPct}% - 14px)`;
+        }
+        if (this.activityEl) {
+            this.activityEl.style.left = (this.posX + L.spriteW / 2 - 9) + 'px';
+            this.activityEl.style.right = 'auto';
+            this.activityEl.style.bottom = `calc(${L.bottomPct}% + ${L.spriteH}px + 4px)`;
+        }
+    }
+
+    _rotateActivity() {
+        if (!this.activityEl || !this.layout.activities) return;
+        const arr = this.layout.activities;
+        this.activityEl.textContent = arr[Math.floor(Math.random() * arr.length)];
+        setTimeout(() => this._rotateActivity(), (3 + Math.random() * 4) * 1000);
+    }
+}
+
+// ============================================================
+//  Actor layout configs (scene positioning only — no animation params)
+// ============================================================
+const BASE = '/assets/generated/characters';
+
+const ACTOR_LAYOUTS = {
+    tanya: {
+        el: 'tanya', labelEl: 'label-tanya', activityEl: 'activity-tanya',
+        assetsBase: `${BASE}/tanya/animations`,
+        staticFallback: `${BASE}/tanya/tanya.png`,
+        spriteW: 128, spriteH: 192,
+        minX: 5, maxX: 80, bottomPct: 22, speed: 1.8,
+        idleMinSec: 2, idleMaxSec: 6,
+        activities: ['☕', '📖', '🎮', '💭', '🎵', '💅'],
+        placeholderEmoji: '👩', placeholderColor: '#90D8C0'
+    },
+    alexander: {
+        el: 'alexander', labelEl: 'label-alexander', activityEl: 'activity-alexander',
+        assetsBase: `${BASE}/alexander/animations`,
+        staticFallback: `${BASE}/alexander/alexander.png`,
+        spriteW: 128, spriteH: 192,
+        minX: 10, maxX: 85, bottomPct: 22, speed: 1.4,
+        idleMinSec: 3, idleMaxSec: 8,
+        activities: ['📖', '💻', '☕', '📱', '🎵', '🤔'],
+        placeholderEmoji: '👨', placeholderColor: '#4060A0'
+    },
+    sam: {
+        el: 'sam', labelEl: 'label-sam', activityEl: 'activity-sam',
+        assetsBase: `${BASE}/sam/animations`,
+        staticFallback: `${BASE}/sam/sam.png`,
+        spriteW: 96, spriteH: 80,
+        minX: 5, maxX: 90, bottomPct: 24, speed: 2.5,
+        idleMinSec: 1, idleMaxSec: 4,
+        activities: ['🧸', '🦴', '😴', '🐾', '👀'],
+        placeholderEmoji: '🐕', placeholderColor: '#0A0A0A'
+    }
+};
 
 // ============================================================
 //  NPC Action Definitions
@@ -497,271 +806,6 @@ const NPC_ACTIONS = {
         ]
     }
 };
-
-// ============================================================
-//  Character configs (layout only — animation params come from atlas-config.json)
-// ============================================================
-const BASE = '/assets/generated/characters';
-
-const CHARACTER_CONFIGS = {
-    tanya: {
-        el: 'tanya', labelEl: 'label-tanya', activityEl: 'activity-tanya',
-        animDir: `${BASE}/tanya/animations`,
-        staticFallback: `${BASE}/tanya/tanya.png`,
-        spriteW: 128, spriteH: 192,
-        minX: 5, maxX: 80, bottomPct: 22, speed: 1.8,
-        idleMinSec: 2, idleMaxSec: 6,
-        activities: ['☕', '📖', '🎮', '💭', '🎵', '💅'],
-        placeholderEmoji: '👩', placeholderColor: '#90D8C0'
-    },
-    alexander: {
-        el: 'alexander', labelEl: 'label-alexander', activityEl: 'activity-alexander',
-        animDir: `${BASE}/alexander/animations`,
-        staticFallback: `${BASE}/alexander/alexander.png`,
-        spriteW: 128, spriteH: 192,
-        minX: 10, maxX: 85, bottomPct: 22, speed: 1.4,
-        idleMinSec: 3, idleMaxSec: 8,
-        activities: ['📖', '💻', '☕', '📱', '🎵', '🤔'],
-        placeholderEmoji: '👨', placeholderColor: '#4060A0'
-    },
-    sam: {
-        el: 'sam', labelEl: 'label-sam', activityEl: 'activity-sam',
-        animDir: `${BASE}/sam/animations`,
-        staticFallback: `${BASE}/sam/sam.png`,
-        spriteW: 96, spriteH: 80,
-        minX: 5, maxX: 90, bottomPct: 24, speed: 2.5,
-        idleMinSec: 1, idleMaxSec: 4,
-        activities: ['🧸', '🦴', '😴', '🐾', '👀'],
-        placeholderEmoji: '🐕', placeholderColor: '#0A0A0A'
-    }
-};
-
-// ============================================================
-//  CharacterWalker — config-driven, uses GridSpriteAnimator
-// ============================================================
-class CharacterWalker {
-    constructor(cfg) {
-        this.cfg = cfg;
-        this.el = document.getElementById(cfg.el);
-        this.labelEl  = document.getElementById(cfg.labelEl);
-        this.activityEl = document.getElementById(cfg.activityEl);
-        this.state = 'idle';
-
-        // Animation state
-        this.idleAnimator = null;   // GridSpriteAnimator | null
-        this.walkAnimator = null;   // GridSpriteAnimator | null
-        this.idleConfig = null;     // atlas-config entry for idle
-        this.walkConfig = null;     // atlas-config entry for walk
-        this.isStatic = false;
-        this.lastTimeSlot = null;
-
-        const rect = this.el.getBoundingClientRect();
-        const container = this.el.parentElement.getBoundingClientRect();
-        this.posX = rect.left - container.left;
-        this.targetX = this.posX;
-        this.moveRAF = null;
-
-        this._initAsync();
-    }
-
-    async _initAsync() {
-        // Load atlas-config.json for this character's animation directory
-        const configs = await fetchJSON(this.cfg.animDir + '/atlas-config.json');
-        const configMap = {};
-
-        // Also load individual *-atlas-config.json files for grid configs
-        // The combined atlas-config.json has flat entries; grid configs are separate files
-        if (configs && Array.isArray(configs)) {
-            for (const c of configs) configMap[c.name] = c;
-        }
-
-        // Try loading per-animation config files (grid configs)
-        // For each known animation name, try fetching {name}-atlas-config.json
-        for (const animName of ['idle', 'walk', 'tremble', 'eat']) {
-            if (!configMap[animName]) {
-                const gridCfg = await fetchJSON(this.cfg.animDir + '/' + animName + '-atlas-config.json');
-                if (gridCfg) configMap[animName] = gridCfg;
-            }
-        }
-
-        // Resolve idle config
-        await this._setupIdleFromConfig(configMap['idle']);
-        // Resolve walk config
-        await this._setupWalkFromConfig(configMap['walk']);
-
-        this._scheduleNextWalk();
-        this._rotateActivity();
-    }
-
-    async _setupIdleFromConfig(idleCfg) {
-        if (idleCfg) {
-            const atlasUrl = this.cfg.animDir + '/' + idleCfg.file;
-            const ok = await preloadImage(atlasUrl);
-            if (ok) {
-                this.idleConfig = idleCfg;
-                this.idleAnimator = new GridSpriteAnimator(this.el, idleCfg, atlasUrl);
-                this.isStatic = false;
-
-                // Set initial row based on current time
-                if (idleCfg.layout === 'grid') {
-                    const slot = getTimeSlot(currentGameTime.hour);
-                    this.lastTimeSlot = slot;
-                    this.idleAnimator.setRowByCondition(slot);
-                }
-
-                this.idleAnimator.start();
-                this.state = 'idle';
-                return;
-            }
-        }
-
-        // Fallback: static composite PNG
-        const ok = await preloadImage(this.cfg.staticFallback);
-        if (ok) {
-            this.el.style.backgroundImage = `url('${this.cfg.staticFallback}')`;
-            this.el.style.backgroundSize = `${this.cfg.spriteW}px ${this.cfg.spriteH}px`;
-            this.el.style.backgroundPosition = '0 0';
-            this.isStatic = true;
-            this.state = 'idle';
-            return;
-        }
-
-        // Fallback: colored placeholder
-        this._applyPlaceholder();
-    }
-
-    async _setupWalkFromConfig(walkCfg) {
-        if (!walkCfg) return;
-        const atlasUrl = this.cfg.animDir + '/' + walkCfg.file;
-        const ok = await preloadImage(atlasUrl);
-        if (ok) {
-            this.walkConfig = walkCfg;
-            // Don't create animator yet — will create on walk start
-        }
-    }
-
-    _applyPlaceholder() {
-        const c = this.cfg;
-        this.el.style.backgroundImage = 'none';
-        this.el.style.backgroundColor = c.placeholderColor;
-        this.el.classList.add('sprite-placeholder');
-        this.el.innerHTML = `<span style="font-size:${c.spriteH/3}px">${c.placeholderEmoji}</span>`;
-        this.isStatic = true;
-        this.state = 'idle';
-    }
-
-    checkTimeSlotChange() {
-        if (!this.idleAnimator || !this.idleConfig) return;
-        if (this.idleConfig.layout !== 'grid') return;
-
-        const slot = getTimeSlot(currentGameTime.hour);
-        if (slot !== this.lastTimeSlot) {
-            this.lastTimeSlot = slot;
-            if (this.state === 'idle') {
-                this.idleAnimator.setRowByCondition(slot);
-            }
-        }
-    }
-
-    _switchToIdle() {
-        if (this.walkAnimator) { this.walkAnimator.stop(); this.walkAnimator = null; }
-        this.el.classList.remove('sprite-placeholder');
-        this.el.innerHTML = '';
-        this.el.style.backgroundColor = '';
-
-        if (this.idleAnimator) {
-            this.idleAnimator._applyBackground();
-            if (this.idleConfig && this.idleConfig.layout === 'grid') {
-                const slot = getTimeSlot(currentGameTime.hour);
-                this.idleAnimator.setRowByCondition(slot);
-            }
-            this.idleAnimator.start();
-        } else if (this.isStatic) {
-            this.el.style.backgroundImage = `url('${this.cfg.staticFallback}')`;
-            this.el.style.backgroundSize = `${this.cfg.spriteW}px ${this.cfg.spriteH}px`;
-            this.el.style.backgroundPosition = '0 0';
-        }
-        this.state = 'idle';
-    }
-
-    _switchToWalk() {
-        if (!this.walkConfig) return false;
-        if (this.idleAnimator) this.idleAnimator.stop();
-
-        this.el.classList.remove('sprite-placeholder');
-        this.el.innerHTML = '';
-        this.el.style.backgroundColor = '';
-
-        const atlasUrl = this.cfg.animDir + '/' + this.walkConfig.file;
-        this.walkAnimator = new GridSpriteAnimator(this.el, this.walkConfig, atlasUrl);
-        this.walkAnimator.start();
-        this.state = 'walking';
-        return true;
-    }
-
-    _scheduleNextWalk() {
-        const c = this.cfg;
-        const delay = (c.idleMinSec + Math.random() * (c.idleMaxSec - c.idleMinSec)) * 1000;
-        setTimeout(() => this._startWalk(), delay);
-    }
-
-    _startWalk() {
-        if (!this.walkConfig) { this._scheduleNextWalk(); return; }
-        const container = this.el.parentElement;
-        if (!container) return;
-        const cw = container.clientWidth;
-        const c = this.cfg;
-        const minPx = cw * c.minX / 100, maxPx = cw * c.maxX / 100 - c.spriteW;
-        this.targetX = minPx + Math.random() * (maxPx - minPx);
-        if (Math.abs(this.targetX - this.posX) < 20) { this._scheduleNextWalk(); return; }
-        const goingLeft = this.targetX < this.posX;
-        this.el.style.transform = goingLeft ? 'scaleX(-1)' : 'scaleX(1)';
-        this._switchToWalk();
-        this._move();
-    }
-
-    _move() {
-        const speed = this.cfg.speed || 1.5;
-        const step = () => {
-            const dx = this.targetX - this.posX;
-            if (Math.abs(dx) < speed) {
-                this.posX = this.targetX;
-                this._updatePosition();
-                this.el.style.transform = 'scaleX(1)';
-                this._switchToIdle();
-                this._scheduleNextWalk();
-                return;
-            }
-            this.posX += dx > 0 ? speed : -speed;
-            this._updatePosition();
-            this.moveRAF = requestAnimationFrame(step);
-        };
-        this.moveRAF = requestAnimationFrame(step);
-    }
-
-    _updatePosition() {
-        const c = this.cfg;
-        this.el.style.left = this.posX + 'px';
-        this.el.style.right = 'auto';
-        if (this.labelEl) {
-            this.labelEl.style.left = (this.posX + c.spriteW / 2 - 30) + 'px';
-            this.labelEl.style.right = 'auto';
-            this.labelEl.style.bottom = `calc(${c.bottomPct}% - 14px)`;
-        }
-        if (this.activityEl) {
-            this.activityEl.style.left = (this.posX + c.spriteW / 2 - 9) + 'px';
-            this.activityEl.style.right = 'auto';
-            this.activityEl.style.bottom = `calc(${c.bottomPct}% + ${c.spriteH}px + 4px)`;
-        }
-    }
-
-    _rotateActivity() {
-        if (!this.activityEl || !this.cfg.activities) return;
-        const act = this.cfg.activities[Math.floor(Math.random() * this.cfg.activities.length)];
-        this.activityEl.textContent = act;
-        setTimeout(() => this._rotateActivity(), (3 + Math.random() * 4) * 1000);
-    }
-}
 
 // ============================================================
 //  Interaction Modal
@@ -933,7 +977,7 @@ function syncFromServerState(state) {
         document.getElementById('game-time').textContent =
             'День ' + state.gameTime.day + ' | ' + String(state.gameTime.hour).padStart(2,'0') + ':00';
         const newSlot = getTimeSlot(state.gameTime.hour);
-        if (newSlot !== prevSlot) walkers.forEach(w => w.checkTimeSlotChange());
+        if (newSlot !== prevSlot) actors.forEach(a => a.onTimeSlotChange(newSlot));
     }
     if (state.activeQuests) renderQuests(state.activeQuests);
 }
@@ -960,14 +1004,14 @@ function renderQuests(quests) {
 // ============================================================
 //  Init
 // ============================================================
-const walkers = [];
+const actors = [];
 let modal;
 
 async function init() {
     modal = new InteractionModal();
 
-    for (const [id, cfg] of Object.entries(CHARACTER_CONFIGS)) {
-        walkers.push(new CharacterWalker(cfg));
+    for (const [id, layout] of Object.entries(ACTOR_LAYOUTS)) {
+        actors.push(new SceneActor(layout));
     }
 
     ['alexander', 'sam', 'tanya'].forEach(id => {
