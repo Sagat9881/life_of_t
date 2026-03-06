@@ -1,79 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Visual specification for Tanya – player character sprite sheet.
+<asset-spec version="1.0.0">
 
-  Naming conventions:
-    - Directory (outputDir):  snake_case  → characters/tanya
-    - Prompt files:           kebab-case  → visual-specs.xml
-    - Output PNG (idle):      snake_case  → tanya_idle.png
-    - Output PNG (walk):      snake_case  → tanya_walk.png
-
-  Atlas format: horizontal-strip.
-    tanya_idle: 6 frames × 32px wide = 192px total, 48px tall
-    tanya_walk: 8 frames × 32px wide = 256px total, 48px tall
-  No anti-aliasing. No GIF. Max 50 frames per animation.
--->
-<asset id="tanya">
-
-    <naming>
-        <outputDir>characters/tanya</outputDir>
-    </naming>
+    <meta>
+        <entity-type>characters</entity-type>
+        <entity-name>tanya</entity-name>
+        <version>1.0.0</version>
+    </meta>
 
     <layers>
-        <layer id="body" type="BODY" zOrder="0">
-            <description>
-                Female character, young adult, pixel-art style, 32×48 px per frame.
-                Body colour: #4A90D9 (blue shirt). Legs: #2A3A5A (dark jeans).
-                No anti-aliasing. Solid fills only.
-                Head: round, 8×8px, skin tone #F0C8A0.
-                Hair: dark brown #3A2010, 6×4px block on top.
-            </description>
+        <layer id="body" type="base" z-order="0" width="32" height="48">
+            Female character, young adult, pixel-art style, 32×48 px per frame.
+            Body colour: #4A90D9 (blue shirt). Legs: #2A3A5A (dark jeans).
+            No anti-aliasing. Solid fills only.
+            Head: round, 8×8px, skin tone #F0C8A0.
+            Hair: dark brown #3A2010, 6×4px block on top.
         </layer>
-        <layer id="face" type="DETAIL" zOrder="1">
-            <description>
-                Eyes: 2×2 px black dots, positioned at y=14 within the head area.
-                Mouth: 2px wide horizontal line, colour #C86060, y=18.
-                No shading, no anti-aliasing.
-            </description>
+        <layer id="face" type="detail" z-order="1">
+            Eyes: 2×2 px black dots, positioned at y=14 within the head area.
+            Mouth: 2px wide horizontal line, colour #C86060, y=18.
+            No shading, no anti-aliasing.
         </layer>
-        <layer id="outfit" type="DETAIL" zOrder="2">
-            <description>
-                Shirt: solid #4A90D9, collar indicated by 2px lighter band.
-                No texture. Pixel-art block shading only (1px darker edges).
-            </description>
+        <layer id="outfit" type="outfit" z-order="2">
+            Shirt: solid #4A90D9, collar indicated by 2px lighter band.
+            No texture. Pixel-art block shading only (1px darker edges).
         </layer>
     </layers>
 
-    <animations>
-        <animation id="tanya_idle" frames="6" frameRate="8">
-            <description>
-                Idle breathing cycle. Frames 0-2: body shifts up 1px.
-                Frames 3-5: body returns down 1px. Very subtle movement.
-                Colour shifts: each frame slightly brighter then darker
-                to simulate breathing (no blur, integer pixel offsets only).
-            </description>
-            <layerIds>
-                <layerId>body</layerId>
-                <layerId>face</layerId>
-                <layerId>outfit</layerId>
-            </layerIds>
-        </animation>
+    <color-palette>
+        <primary>
+            <color hex="#F0C8A0" name="skin-tone"/>
+            <color hex="#4A90D9" name="shirt-blue"/>
+            <color hex="#2A3A5A" name="jeans-dark"/>
+        </primary>
+        <secondary>
+            <color hex="#3A2010" name="hair-brown"/>
+            <color hex="#C86060" name="lip-red"/>
+        </secondary>
+    </color-palette>
 
-        <animation id="tanya_walk" frames="8" frameRate="10">
-            <description>
-                Walk cycle. Alternating leg positions every 2 frames.
-                Left leg forward frames 0,1; right leg forward frames 4,5.
-                Arms swing opposite to legs. No diagonal anti-aliasing —
-                use staircase pixel lines for diagonals.
-            </description>
-            <layerIds>
-                <layerId>body</layerId>
-                <layerId>face</layerId>
-                <layerId>outfit</layerId>
-            </layerIds>
+    <animations>
+        <animation name="idle" frames="6" fps="8" loop="true"
+                   frame-width="32" frame-height="48">
+            Idle breathing cycle. Frames 0-2: body shifts up 1px.
+            Frames 3-5: body returns down 1px. Very subtle movement.
+        </animation>
+        <animation name="walk" frames="8" fps="10" loop="true"
+                   frame-width="32" frame-height="48">
+            Walk cycle. Alternating leg positions every 2 frames.
+            Arms swing opposite to legs. Staircase pixel lines for diagonals.
         </animation>
     </animations>
 
-    <canvasSize width="32" height="48"/>
+    <naming>
+        <output-dir>assets/characters/tanya</output-dir>
+    </naming>
 
-</asset>
+    <constraints>
+        <max-file-size-kb>500</max-file-size-kb>
+        <max-sprite-sheet-width>2048</max-sprite-sheet-width>
+        <max-sprite-sheet-height>2048</max-sprite-sheet-height>
+        <compression-quality>85</compression-quality>
+        <bit-depth>32</bit-depth>
+    </constraints>
+
+</asset-spec>

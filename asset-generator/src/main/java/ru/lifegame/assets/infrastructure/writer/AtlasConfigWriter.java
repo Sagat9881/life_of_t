@@ -15,16 +15,14 @@ import java.util.*;
 
 /**
  * Writes sprite-atlas.json — the unified, versioned atlas configuration.
- * <p>
- * Output conforms to {@link AtlasConfigSchema} (config version 1.1).
- * <p>
- * v1.1 changes: frameWidth/frameHeight emitted per-animation from AnimationSpec.
+ * Output conforms to {@link AtlasConfigSchema} (config version 1.3).
  */
 public class AtlasConfigWriter {
 
     private static final Logger log = LoggerFactory.getLogger(AtlasConfigWriter.class);
 
     private String revision = AtlasConfigSchema.LATEST_REVISION;
+    private double displayScale = AtlasConfigSchema.DEFAULT_DISPLAY_SCALE;
 
     public AtlasConfigWriter withRevision(String revision) {
         this.revision = (revision == null || revision.isBlank())
@@ -38,19 +36,19 @@ public class AtlasConfigWriter {
         return this;
     }
 
+    public AtlasConfigWriter withDisplayScale(double scale) {
+        this.displayScale = scale > 0 ? scale : AtlasConfigSchema.DEFAULT_DISPLAY_SCALE;
+        return this;
+    }
+
     /**
-     * Writes the unified sprite-atlas.json for a character.
-     *
-     * @param characterName character identifier (e.g. "sam")
-     * @param stripAnims    list of simple strip animations (walk, eat, tremble, etc.)
-     * @param gridAnims     map of baseName → (conditionType, orderedRowSpecs)
-     * @param outputDir     target directory
-     * @return path to generated sprite-atlas.json
+     * Writes the unified sprite-atlas.json.
      */
     public Path writeSpriteAtlas(
-            String characterName,
+            String entityName,
             List<AnimationSpec> stripAnims,
             Map<String, GridAnimDef> gridAnims,
+            Map<String, OverlayAnimDef> overlayAnims,
             Path outputDir
     ) throws IOException {
 
@@ -58,19 +56,24 @@ public class AtlasConfigWriter {
         sb.append("{\n");
         sb.append("  \"configVersion\": \"").append(AtlasConfigSchema.CURRENT_VERSION).append("\",\n");
         sb.append("  \"revision\": \"").append(revision).append("\",\n");
-        sb.append("  \"character\": \"").append(characterName).append("\",\n");
+        sb.append("  \"entity\": \"").append(entityName).append("\",\n");
+        sb.append("  \"displayScale\": ").append(displayScale).append(",\n");
         sb.append("  \"animations\": {\n");
 
         List<String> entries = new ArrayList<>();
 
-        // Grid animations (e.g. idle with time-of-day rows)
+        if (overlayAnims != null) {
+            for (var oe : overlayAnims.entrySet()) {
+                entries.add(formatOverlayEntry(oe.getKey(), oe.getValue()));
+            }
+        }
+
         if (gridAnims != null) {
             for (var ge : gridAnims.entrySet()) {
                 entries.add(formatGridEntry(ge.getKey(), ge.getValue()));
             }
         }
 
-        // Strip animations (e.g. walk, eat)
         if (stripAnims != null) {
             for (AnimationSpec spec : stripAnims) {
                 entries.add(formatStripEntry(spec));
@@ -84,32 +87,26 @@ public class AtlasConfigWriter {
         Files.createDirectories(outputDir);
         Path configPath = outputDir.resolve("sprite-atlas.json");
         Files.writeString(configPath, sb.toString(), StandardCharsets.UTF_8);
-        log.info("Wrote sprite-atlas.json (v{}, rev {}): {}",
-                AtlasConfigSchema.CURRENT_VERSION, revision, configPath);
+        log.info("Wrote sprite-atlas.json (v{}, rev {}, scale {}): {}",
+                AtlasConfigSchema.CURRENT_VERSION, revision, displayScale, configPath);
         return configPath;
     }
 
-    /**
-     * @deprecated Use {@link #writeSpriteAtlas(String, List, Map, Path)} instead.
-     *             Kept for compilation compat during migration.
-     */
-    @Deprecated(forRemoval = true)
+    /** Backward-compat overload without overlayAnims. */
     public Path writeSpriteAtlas(
-            String characterName,
-            int spriteWidth,
-            int spriteHeight,
+            String entityName,
             List<AnimationSpec> stripAnims,
             Map<String, GridAnimDef> gridAnims,
             Path outputDir
     ) throws IOException {
-        // Ignore global spriteWidth/spriteHeight — use per-animation values
-        return writeSpriteAtlas(characterName, stripAnims, gridAnims, outputDir);
+        return writeSpriteAtlas(entityName, stripAnims, gridAnims, null, outputDir);
     }
 
     private String formatStripEntry(AnimationSpec spec) {
         return "    \"" + spec.name() + "\": {\n"
                 + "      \"file\": \"" + spec.name() + "_atlas.png\",\n"
                 + "      \"layout\": \"strip\",\n"
+                + "      \"renderMode\": \"sprite\",\n"
                 + "      \"columns\": " + spec.frames() + ",\n"
                 + "      \"frameWidth\": " + spec.frameWidth() + ",\n"
                 + "      \"frameHeight\": " + spec.frameHeight() + ",\n"
@@ -123,6 +120,7 @@ public class AtlasConfigWriter {
         sb.append("    \"").append(baseName).append("\": {\n");
         sb.append("      \"file\": \"").append(baseName).append("_atlas.png\",\n");
         sb.append("      \"layout\": \"grid\",\n");
+        sb.append("      \"renderMode\": \"sprite\",\n");
 
         var firstSpec = def.rowSpecs().values().iterator().next();
         sb.append("      \"columns\": ").append(firstSpec.frames()).append(",\n");
@@ -153,14 +151,53 @@ public class AtlasConfigWriter {
         return sb.toString();
     }
 
-    /**
-     * Definition of a grid animation group.
-     *
-     * @param conditionType condition type (e.g. "time_of_day")
-     * @param rowSpecs      ordered map: conditionValue → AnimationSpec per row
-     */
+    private String formatOverlayEntry(String baseName, OverlayAnimDef def) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("    \"").append(baseName).append("\": {\n");
+        sb.append("      \"file\": \"").append(baseName).append("_atlas.png\",\n");
+        sb.append("      \"layout\": \"grid\",\n");
+        sb.append("      \"renderMode\": \"overlay\",\n");
+        sb.append("      \"columns\": 1,\n");
+        sb.append("      \"frameWidth\": ").append(def.frameWidth()).append(",\n");
+        sb.append("      \"frameHeight\": ").append(def.frameHeight()).append(",\n");
+        sb.append("      \"rows\": [\n");
+
+        List<OverlayRowDef> rows = def.rows();
+        for (int i = 0; i < rows.size(); i++) {
+            OverlayRowDef row = rows.get(i);
+            sb.append("        {\n");
+            sb.append("          \"rowIndex\": ").append(i).append(",\n");
+            sb.append("          \"condition\": { \"type\": \"time_of_day\", \"value\": \"").append(row.conditionValue()).append("\" },\n");
+            sb.append("          \"tint\": \"").append(row.tint()).append("\",\n");
+            sb.append("          \"opacity\": ").append(row.opacity()).append(",\n");
+            sb.append("          \"fps\": 1,\n");
+            sb.append("          \"loop\": false\n");
+            sb.append("        }");
+            if (i < rows.size() - 1) sb.append(",");
+            sb.append("\n");
+        }
+
+        sb.append("      ],\n");
+        sb.append("      \"defaultRow\": ").append(def.defaultRow()).append("\n");
+        sb.append("    }");
+        return sb.toString();
+    }
+
     public record GridAnimDef(
             String conditionType,
             LinkedHashMap<String, AnimationSpec> rowSpecs
+    ) {}
+
+    public record OverlayAnimDef(
+            int frameWidth,
+            int frameHeight,
+            List<OverlayRowDef> rows,
+            int defaultRow
+    ) {}
+
+    public record OverlayRowDef(
+            String conditionValue,
+            String tint,
+            double opacity
     ) {}
 }
