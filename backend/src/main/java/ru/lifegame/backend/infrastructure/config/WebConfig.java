@@ -12,8 +12,21 @@ import java.time.Duration;
 @Configuration
 public class WebConfig {
 
+    /**
+     * Common resource locations for generated pixel-art assets.
+     * These are produced by asset-generator from asset-specs/ XMLs.
+     *
+     * - classpath:/generated-assets/ — inside the JAR (copied during build)
+     * - file paths — for dev mode when running from project root
+     */
+    private static final String[] GENERATED_ASSET_LOCATIONS = {
+            "classpath:/generated-assets/",
+            "file:./asset-generator/target/generated-assets/",
+            "file:../asset-generator/target/generated-assets/",
+    };
+
     @Bean
-    public WebMvcConfigurer corsConfigurer() {
+    public WebMvcConfigurer webMvcConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
@@ -26,27 +39,17 @@ public class WebConfig {
 
             @Override
             public void addResourceHandlers(ResourceHandlerRegistry registry) {
-                // Frontend requests assets as /assets/{type}/{name}/...
-                // Asset generator outputs to target/generated-assets/{type}/{name}/...
-                // Map /assets/** -> generated-assets directories
+                // /assets/** — used by React frontend (assetService.ts)
                 registry.addResourceHandler("/assets/**")
-                        .addResourceLocations(
-                                "file:./asset-generator/target/generated-assets/",
-                                "file:../asset-generator/target/generated-assets/",
-                                "classpath:/generated-assets/"
-                        )
+                        .addResourceLocations(GENERATED_ASSET_LOCATIONS)
                         .setCacheControl(CacheControl.maxAge(Duration.ofDays(7)));
 
-                // Also support legacy /generated-assets/** path (used by demo)
+                // /generated-assets/** — used by demo module (index.html)
                 registry.addResourceHandler("/generated-assets/**")
-                        .addResourceLocations(
-                                "file:./asset-generator/target/generated-assets/",
-                                "file:../asset-generator/target/generated-assets/",
-                                "classpath:/generated-assets/"
-                        )
+                        .addResourceLocations(GENERATED_ASSET_LOCATIONS)
                         .setCacheControl(CacheControl.maxAge(Duration.ofDays(7)));
 
-                // Vite-built frontend assets (JS/CSS with content hashes) — long cache
+                // Vite-built frontend JS/CSS (content-hashed filenames)
                 registry.addResourceHandler("/static-assets/**")
                         .addResourceLocations("classpath:/static/assets/")
                         .setCacheControl(CacheControl.maxAge(Duration.ofDays(365)));
