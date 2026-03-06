@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event-trigger-system>
+    <meta>
+        <version>1.0.0</version>
+        <description>
+            Система триггеров событий.
+            Определяет при каких условиях срабатывает каждое из 15 событий из narrative/events/,
+            как оно отображается визуально и какие анимации запускает.
+        </description>
+    </meta>
+
+    <presentation-types>
+        <type id="modal" description="Полноэкранное окно с текстом и выбором. Для важных сюжетных событий."/>
+        <type id="toast" description="Небольшое уведомление сверху. Для минорных событий."/>
+        <type id="scene" description="Полная сцена с анимацией персонажей. Для ключевых моментов."/>
+    </presentation-types>
+
+    <!-- СОБЫТИЯ ПИТОМЦЕВ -->
+
+    <event id="aijan_hiss">
+        <narrative-file>narrative/events/aijan_hiss.xml</narrative-file>
+        <trigger type="proximity">
+            <condition>player enters home_room AND aijan.taming_progress &lt; 30</condition>
+            <cooldown>2 игровых часа</cooldown>
+            <probability>40%</probability>
+        </trigger>
+        <presentation>toast</presentation>
+        <animation>
+            <npc id="aijan" play="hiss"/>
+            <particles type="stress" count="3"/>
+        </animation>
+        <effects>
+            <effect stat="stress" value="+3"/>
+        </effects>
+    </event>
+
+    <event id="garfield_steals_food">
+        <narrative-file>narrative/events/garfield_steals_food.xml</narrative-file>
+        <trigger type="action">
+            <condition>action:COOK completed AND garfield.location == kitchen</condition>
+            <probability>30%</probability>
+        </trigger>
+        <presentation>toast</presentation>
+        <animation>
+            <npc id="garfield" play="eat-steal"/>
+            <tanya play="surprised"/>
+        </animation>
+        <effects>
+            <effect stat="happiness" value="-3"/>
+            <effect stat="hunger" value="+5"/>
+        </effects>
+    </event>
+
+    <event id="cirilla_night_run">
+        <narrative-file>narrative/events/cirilla_night_run.xml</narrative-file>
+        <trigger type="time">
+            <condition>time == night AND cirilla.location == home_room</condition>
+            <probability>50%</probability>
+        </trigger>
+        <presentation>toast</presentation>
+        <animation>
+            <npc id="cirilla" play="night-active"/>
+            <overlay type="screen-shake" duration="500ms"/>
+        </animation>
+        <effects>
+            <effect stat="energy" value="-5" note="просыпается"/>
+        </effects>
+    </event>
+
+    <event id="klop_cute_moment">
+        <narrative-file>narrative/events/klop_cute_moment.xml</narrative-file>
+        <trigger type="random">
+            <condition>klop.location == player.location</condition>
+            <cooldown>4 игровых часа</cooldown>
+            <probability>25%</probability>
+        </trigger>
+        <presentation>toast</presentation>
+        <animation>
+            <npc id="klop" play="cute-roll"/>
+            <particles type="hearts" count="5"/>
+        </animation>
+        <effects>
+            <effect stat="happiness" value="+5"/>
+            <effect stat="stress" value="-3"/>
+        </effects>
+    </event>
+
+    <event id="lada_sick">
+        <narrative-file>narrative/events/lada_sick.xml</narrative-file>
+        <trigger type="stat-threshold">
+            <condition>day_count &gt;= 5 AND quest:save_lada NOT started</condition>
+            <probability>100%</probability>
+            <one-time>true</one-time>
+        </trigger>
+        <presentation>modal</presentation>
+        <animation>
+            <npc id="lada" play="sick"/>
+            <tanya play="worried"/>
+            <particles type="sweat" count="2"/>
+        </animation>
+        <effects>
+            <effect stat="stress" value="+15"/>
+            <effect stat="happiness" value="-10"/>
+        </effects>
+        <quest-trigger>save_lada</quest-trigger>
+    </event>
+
+    <event id="duke_found">
+        <narrative-file>narrative/events/duke_found.xml</narrative-file>
+        <trigger type="quest-stage">
+            <condition>day_count &gt;= 10 AND quest:duke_arrives NOT started</condition>
+            <probability>100%</probability>
+            <one-time>true</one-time>
+        </trigger>
+        <presentation>scene</presentation>
+        <animation>
+            <npc id="duke" play="scared-enter"/>
+            <tanya play="surprised"/>
+            <location-change to="city_street"/>
+        </animation>
+        <effects>
+            <effect stat="happiness" value="+5"/>
+            <effect stat="stress" value="+10"/>
+        </effects>
+        <quest-trigger>duke_arrives</quest-trigger>
+    </event>
+
+    <!-- СОБЫТИЯ ОТНОШЕНИЙ -->
+
+    <event id="alexander_late">
+        <narrative-file>narrative/events/alexander_late.xml</narrative-file>
+        <trigger type="time">
+            <condition>time == evening AND alexander.location == away AND day_count &gt;= 3</condition>
+            <probability>20%</probability>
+        </trigger>
+        <presentation>modal</presentation>
+        <animation>
+            <tanya play="worried"/>
+            <object id="phone" state="ringing"/>
+        </animation>
+        <effects>
+            <effect stat="stress" value="+10"/>
+            <effect stat="happiness" value="-5"/>
+        </effects>
+        <player-choices>
+            <choice id="call" text="Позвонить" effect-stress="-5"/>
+            <choice id="wait" text="Подождать" effect-stress="+5"/>
+            <choice id="ignore" text="Не обращать внимания" effect-happiness="-3"/>
+        </player-choices>
+    </event>
+
+    <event id="sam_alexander_conflict">
+        <narrative-file>narrative/events/sam_alexander_conflict.xml</narrative-file>
+        <trigger type="proximity">
+            <condition>sam.location == alexander.location AND sam.happiness &lt; 40</condition>
+            <probability>35%</probability>
+            <cooldown>1 игровой день</cooldown>
+        </trigger>
+        <presentation>scene</presentation>
+        <animation>
+            <npc id="sam" play="bark-angry"/>
+            <npc id="alexander" play="angry"/>
+            <tanya play="stressed"/>
+            <particles type="conflict-sparks" count="4"/>
+        </animation>
+        <effects>
+            <effect stat="stress" value="+20"/>
+            <effect stat="happiness" value="-10"/>
+        </effects>
+        <player-choices>
+            <choice id="side_sam" text="Защитить Сэма" effect-alexander-relation="-10" effect-sam-relation="+10"/>
+            <choice id="side_alexander" text="Поддержать Александра" effect-alexander-relation="+10" effect-sam-relation="-10"/>
+            <choice id="mediate" text="Помирить" effect-stress="-5" effect-energy="-10"/>
+        </player-choices>
+    </event>
+
+    <event id="garfield_vs_duke">
+        <narrative-file>narrative/events/garfield_vs_duke.xml</narrative-file>
+        <trigger type="proximity">
+            <condition>duke.exists AND garfield.location == duke.location</condition>
+            <probability>40%</probability>
+            <cooldown>1 игровой день</cooldown>
+        </trigger>
+        <presentation>toast</presentation>
+        <animation>
+            <npc id="garfield" play="hiss"/>
+            <npc id="duke" play="scared"/>
+            <particles type="conflict-sparks" count="2"/>
+        </animation>
+        <effects>
+            <effect stat="stress" value="+5"/>
+        </effects>
+    </event>
+
+    <!-- СОБЫТИЯ СТАТОВ -->
+
+    <event id="burnout">
+        <narrative-file>narrative/events/burnout.xml</narrative-file>
+        <trigger type="stat-threshold">
+            <condition>stress &gt;= 80 AND energy &lt;= 20</condition>
+            <probability>100%</probability>
+            <one-time>false</one-time>
+            <cooldown>3 игровых дня</cooldown>
+        </trigger>
+        <presentation>modal</presentation>
+        <animation>
+            <tanya play="cry"/>
+            <overlay type="dark-vignette" opacity="0.4"/>
+            <particles type="stress" count="8"/>
+        </animation>
+        <effects>
+            <effect stat="happiness" value="-15"/>
+            <effect stat="health" value="-10"/>
+        </effects>
+        <player-choices>
+            <choice id="rest" text="Отдохнуть" triggers-action="SLEEP"/>
+            <choice id="pushthrough" text="Перетерпеть" effect-health="-5" effect-stress="+10"/>
+            <choice id="call_friend" text="Позвонить подруге" effect-stress="-15" effect-happiness="+5"/>
+        </player-choices>
+    </event>
+
+    <event id="hungry_collapse">
+        <narrative-file>narrative/events/hungry_collapse.xml</narrative-file>
+        <trigger type="stat-threshold">
+            <condition>hunger &gt;= 90</condition>
+            <probability>100%</probability>
+        </trigger>
+        <presentation>modal</presentation>
+        <animation>
+            <tanya play="dizzy"/>
+            <overlay type="blur" strength="2px"/>
+        </animation>
+        <effects>
+            <effect stat="energy" value="-20"/>
+            <effect stat="health" value="-5"/>
+        </effects>
+        <forced-action>EAT</forced-action>
+    </event>
+
+    <event id="voland_memory">
+        <narrative-file>narrative/events/voland_memory.xml</narrative-file>
+        <trigger type="time">
+            <condition>time == night AND voland.location == home_room AND day_count &gt;= 7</condition>
+            <probability>15%</probability>
+            <one-time>true</one-time>
+        </trigger>
+        <presentation>scene</presentation>
+        <animation>
+            <npc id="voland" play="mystic-glow"/>
+            <overlay type="dream-filter" opacity="0.5"/>
+            <particles type="stars" count="10"/>
+        </animation>
+        <effects>
+            <effect stat="happiness" value="+10"/>
+        </effects>
+        <description>Мистический момент с Воландом. Воспоминания о прошлом.</description>
+    </event>
+
+    <event id="persi_diva_moment">
+        <narrative-file>narrative/events/persi_diva_moment.xml</narrative-file>
+        <trigger type="action">
+            <condition>action:BRUSH_CAT target=persi</condition>
+            <probability>50%</probability>
+        </trigger>
+        <presentation>toast</presentation>
+        <animation>
+            <npc id="persi" play="diva-pose"/>
+            <particles type="sparkles" count="6"/>
+        </animation>
+        <effects>
+            <effect stat="happiness" value="+3"/>
+        </effects>
+    </event>
+
+    <event id="thelma_steals">
+        <narrative-file>narrative/events/thelma_steals.xml</narrative-file>
+        <trigger type="random">
+            <condition>thelma.location == kitchen AND food_on_table == true</condition>
+            <probability>35%</probability>
+        </trigger>
+        <presentation>toast</presentation>
+        <animation>
+            <npc id="thelma" play="sneak-eat"/>
+            <tanya play="facepalm"/>
+        </animation>
+        <effects>
+            <effect stat="happiness" value="-2"/>
+        </effects>
+    </event>
+
+    <!-- ОБЩИЕ ПРАВИЛА -->
+
+    <rules>
+        <rule>Максимум 2 события за 1 игровой час (чтобы не спамить)</rule>
+        <rule>scene-события блокируют ввод до выбора</rule>
+        <rule>toast-события не прерывают действия</rule>
+        <rule>modal-события паузят игровое время</rule>
+        <rule>Приоритет: scene &gt; modal &gt; toast</rule>
+        <rule>Квестовые события (one-time) всегда выше приоритетом</rule>
+    </rules>
+</event-trigger-system>
