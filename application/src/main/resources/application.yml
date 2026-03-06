@@ -13,6 +13,7 @@ server:
       - application/javascript
       - text/css
       - text/html
+      - image/png
 
 # Spring MVC
 spring.mvc:
