@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>furniture</entity-type>
+        <entity-name>fridge</entity-name>
+        <version>1.0.0</version>
+        <location>kitchen</location>
+        <description>
+            Холодильник — интерактивный объект кухни.
+            Действие «Перекусить»: быстрое восстановление energy.
+            Источник ингредиентов для готовки на плите.
+            Расположен справа от плиты в kitchen.
+        </description>
+    </meta>
+
+    <layers>
+        <!-- Корпус (z=0) -->
+        <layer id="body" type="base" z-order="0" width="32" height="56">
+            <pixel-data>
+                <!-- Основной корпус -->
+                <rect x="4" y="4" w="24" h="48" color="#F0EDE8"/>
+                <!-- Левая грань (тень) -->
+                <rect x="4" y="4" w="1" h="48" color="#D8D4D0"/>
+                <!-- Правая грань (блик) -->
+                <rect x="27" y="4" w="1" h="48" color="#F8F8F4"/>
+                <!-- Нижний край -->
+                <hline x="4" y="51" len="24" color="#C8C4C0"/>
+                <!-- Ножки -->
+                <rect x="6" y="52" w="3" h="3" color="#A0A0A0"/>
+                <rect x="23" y="52" w="3" h="3" color="#A0A0A0"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Дверца (z=1, анимируемая) -->
+        <layer id="door" type="animated" z-order="1" width="32" height="56">
+            <pixel-data>
+                <!-- Верхняя секция -->
+                <rect x="5" y="5" w="22" h="22" color="#E8E4E0"/>
+                <!-- Разделитель (уплотнитель) -->
+                <hline x="5" y="27" len="22" color="#B0ACA8"/>
+                <!-- Нижняя секция -->
+                <rect x="5" y="28" w="22" h="22" color="#E8E4E0"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Ручка (z=2) -->
+        <layer id="handle" type="base" z-order="2" width="32" height="56">
+            <pixel-data>
+                <!-- Верхняя ручка -->
+                <rect x="24" y="14" w="1" h="6" color="#C0C0C0"/>
+                <rect x="24" y="14" w="1" h="1" color="#D0D0D0"/>
+                <!-- Нижняя ручка -->
+                <rect x="24" y="36" w="1" h="6" color="#C0C0C0"/>
+                <rect x="24" y="36" w="1" h="1" color="#D0D0D0"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Магнитики (z=3, декор) -->
+        <layer id="magnets" type="overlay" z-order="3" width="32" height="56">
+            <pixel-data>
+                <pixel x="10" y="8" color="#FF6B9D"/>
+                <pixel x="14" y="10" color="#4ECDC4"/>
+                <pixel x="18" y="7" color="#FFE66D"/>
+            </pixel-data>
+        </layer>
+
+        <!-- LED-индикатор (z=4, анимируемый) -->
+        <layer id="led" type="animated-overlay" z-order="4" width="32" height="56">
+            <pixel-data>
+                <pixel x="8" y="30" color="#40C040"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Внутренности (полки + продукты, z=5, overlay по условию) -->
+        <layer id="interior" type="overlay" z-order="5" width="32" height="56"
+               condition="state:open">
+            <pixel-data>
+                <!-- Внутренняя подсветка -->
+                <rect x="6" y="6" w="20" h="20" color="#FFF8E0"/>
+                <!-- Полки -->
+                <hline x="6" y="12" len="20" color="#D0D0D0"/>
+                <hline x="6" y="18" len="20" color="#D0D0D0"/>
+                <!-- Продукты (цветные пиксели) -->
+                <rect x="8" y="7" w="3" h="4" color="#FF8080"/>
+                <rect x="13" y="7" w="2" h="4" color="#80C0FF"/>
+                <rect x="18" y="8" w="4" h="3" color="#FFD070"/>
+                <rect x="8" y="13" w="4" h="4" color="#90D890"/>
+                <rect x="14" y="14" w="3" h="3" color="#F0C080"/>
+                <rect x="8" y="19" w="5" h="4" color="#E0E0E0"/>
+                <rect x="16" y="19" w="3" h="3" color="#FFB0B0"/>
+                <!-- Нижняя секция (морозилка) -->
+                <rect x="6" y="29" w="20" h="20" color="#E0F0FF"/>
+                <hline x="6" y="38" len="20" color="#C0D0E0"/>
+                <rect x="8" y="30" w="6" h="7" color="#C8E0F8"/>
+                <rect x="16" y="31" w="5" h="5" color="#D0D8F0"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <!-- Idle: LED мерцает -->
+        <animation name="idle" frames="2" fps="1" loop="true"
+                   frame-width="32" frame-height="56">
+            <description>
+                LED-индикатор пульсирует:
+                кадр 0 — яркий зелёный (#40C040)
+                кадр 1 — тусклый зелёный (#206020)
+            </description>
+            <frame index="0" layer-offsets="led:0,0"/>
+            <frame index="1" layer-offsets="led:0,0"/>
+        </animation>
+
+        <!-- Open: дверца открывается -->
+        <animation name="open" frames="4" fps="6" loop="false"
+                   frame-width="32" frame-height="56"
+                   condition="state:opening">
+            <description>
+                Дверца сдвигается вправо, обнажая внутренности.
+                Ручка и магнитики двигаются вместе с дверцей.
+            </description>
+            <frame index="0" layer-offsets="door:0,0; handle:0,0; magnets:0,0"/>
+            <frame index="1" layer-offsets="door:1,0; handle:1,0; magnets:1,0; interior:0,0"/>
+            <frame index="2" layer-offsets="door:2,0; handle:2,0; magnets:2,0; interior:0,0"/>
+            <frame index="3" layer-offsets="door:2,0; handle:2,0; magnets:2,0; interior:0,0"/>
+        </animation>
+
+        <!-- Open-idle: дверца открыта, статика -->
+        <animation name="open-idle" frames="1" fps="1" loop="false"
+                   frame-width="32" frame-height="56"
+                   condition="state:open">
+            <frame index="0" layer-offsets="door:2,0; handle:2,0; magnets:2,0; interior:0,0"/>
+        </animation>
+
+        <!-- Close: дверца закрывается -->
+        <animation name="close" frames="3" fps="6" loop="false"
+                   frame-width="32" frame-height="56"
+                   condition="state:closing">
+            <frame index="0" layer-offsets="door:2,0; handle:2,0; magnets:2,0; interior:0,0"/>
+            <frame index="1" layer-offsets="door:1,0; handle:1,0; magnets:1,0"/>
+            <frame index="2" layer-offsets=""/>
+        </animation>
+    </animations>
+
+    <states>
+        <state name="idle" description="Холодильник закрыт, LED мерцает"/>
+        <state name="opening" description="Дверца открывается (анимация)"/>
+        <state name="open" description="Дверца открыта, видны полки с продуктами"/>
+        <state name="closing" description="Дверца закрывается (анимация)"/>
+    </states>
+
+    <interaction>
+        <action code="SNACK" description="Перекусить — переход idle → opening → open → closing → idle"/>
+        <action code="GET_INGREDIENTS" description="Взять ингредиенты для готовки на плите"/>
+    </interaction>
+
+    <naming>
+        <output-dir>furniture/fridge</output-dir>
+    </naming>
+</asset-spec>
