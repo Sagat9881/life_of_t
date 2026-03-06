@@ -13,14 +13,14 @@ import { memo, useCallback } from 'react';
 import { PixelScene } from '@/components/shared/PixelScene/PixelScene';
 import { SpriteAnimator } from '@/components/shared/SpriteAnimator/SpriteAnimator';
 import { getCompositeUrl } from '@/services/assetService';
-import type { LocationConfig, FurniturePlacement, CharacterSlot } from '@/config/locations';
+import type { LocationConfig, FurniturePlacement } from '@/config/locations';
 import './LocationRenderer.css';
 
 export interface LocationRendererProps {
   readonly config: LocationConfig;
   readonly selectedObjectId?: string | null;
   readonly onObjectClick?: (objectId: string, actionCode: string) => void;
-  readonly characterAnimations?: Record<string, string>; // entityName -> animation override
+  readonly characterAnimations?: Record<string, string>;
 }
 
 export const LocationRenderer = memo(function LocationRenderer({

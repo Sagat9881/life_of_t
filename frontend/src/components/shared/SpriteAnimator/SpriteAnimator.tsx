@@ -12,9 +12,10 @@
  *     scale={4}
  *   />
  */
-import { type CSSProperties, memo } from 'react';
+import { type CSSProperties, memo, useMemo } from 'react';
 import type { SpriteAnimatorProps } from '@/types/sprite';
 import { useSpriteAnimation } from '@/hooks/useSpriteAnimation';
+import type { UseSpriteAnimationOptions } from '@/hooks/useSpriteAnimation';
 import './SpriteAnimator.css';
 
 const DEFAULT_SCALE = 4;
@@ -28,13 +29,20 @@ export const SpriteAnimator = memo(function SpriteAnimator({
   className,
   onComplete,
 }: SpriteAnimatorProps) {
-  const { currentFrame, isLoaded, error, animation: anim } = useSpriteAnimation({
-    entityType,
-    entityName,
-    animation,
-    playing,
-    onComplete,
-  });
+  const hookOptions: UseSpriteAnimationOptions = useMemo(() => {
+    const opts: UseSpriteAnimationOptions = {
+      entityType,
+      entityName,
+      animation,
+      playing,
+    };
+    if (onComplete !== undefined) {
+      return { ...opts, onComplete };
+    }
+    return opts;
+  }, [entityType, entityName, animation, playing, onComplete]);
+
+  const { currentFrame, isLoaded, error, animation: anim } = useSpriteAnimation(hookOptions);
 
   if (error) {
     return (

@@ -10,8 +10,8 @@ export interface UseSpriteAnimationOptions {
   readonly entityType: string;
   readonly entityName: string;
   readonly animation: string;
-  readonly playing?: boolean;
-  readonly onComplete?: () => void;
+  readonly playing?: boolean | undefined;
+  readonly onComplete?: (() => void) | undefined;
 }
 
 export const useSpriteAnimation = ({
@@ -67,7 +67,7 @@ export const useSpriteAnimation = ({
         setState({
           currentFrame: 0,
           isLoaded: true,
-          isPlaying: playing,
+          isPlaying: playing ?? true,
           error: null,
           animation: resolved,
         });
@@ -122,7 +122,8 @@ export const useSpriteAnimation = ({
 
   // Start/stop animation loop
   useEffect(() => {
-    if (state.isLoaded && playing) {
+    const isPlaying = playing ?? true;
+    if (state.isLoaded && isPlaying) {
       lastFrameTimeRef.current = 0;
       rafRef.current = requestAnimationFrame(tick);
       setState((prev) => ({ ...prev, isPlaying: true }));
