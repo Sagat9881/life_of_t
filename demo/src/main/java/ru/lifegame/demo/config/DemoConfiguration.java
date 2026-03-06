@@ -14,7 +14,11 @@ import java.nio.file.Path;
  *
  * <p>Registers the generated asset output directory as an additional static-resource
  * location so that pre-built PNGs from asset-generator are accessible via
- * {@code /generated-assets/characters/tanya/tanya.png} etc.</p>
+ * {@code /assets/generated/characters/tanya/tanya.png} etc.</p>
+ *
+ * <p>In standalone demo mode, assets are loaded from the filesystem.
+ * In the combined application JAR, assets are already packaged inside
+ * {@code classpath:/static/assets/generated/} by the frontend module.</p>
  */
 @Configuration
 public class DemoConfiguration implements WebMvcConfigurer {
@@ -33,7 +37,7 @@ public class DemoConfiguration implements WebMvcConfigurer {
         Path resolved = Path.of(assetOutputDir).toAbsolutePath().normalize();
         String location = "file:" + resolved + "/";
         log.info("Serving generated assets from: {}", location);
-        registry.addResourceHandler("/generated-assets/**")
+        registry.addResourceHandler("/assets/generated/**")
                 .addResourceLocations(location)
                 .setCachePeriod(0);
     }

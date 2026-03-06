@@ -24,7 +24,7 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 
 #room-bg {
     position: absolute; inset: 0;
-    background-image: url('/generated-assets/locations/home_room/home_room.png');
+    background-image: url('/assets/generated/locations/home_room/home_room.png');
     background-size: 100% 100%;
     background-repeat: no-repeat;
     image-rendering: pixelated;
@@ -54,34 +54,34 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 #bed {
     bottom: 28%; right: 8%;
     width: 192px; height: 192px;
-    background-image: url('/generated-assets/locations/home_room/bed.png');
+    background-image: url('/assets/generated/locations/home_room/bed.png');
     background-size: 100% 100%;
 }
 #desk {
     bottom: 22%; left: 10%;
     width: 192px; height: 192px;
-    background-image: url('/generated-assets/locations/home_room/desk.png');
+    background-image: url('/assets/generated/locations/home_room/desk.png');
     background-size: 100% 100%;
 }
 
 #sam {
     bottom: 24%; right: 22%;
     width: 96px; height: 80px;
-    background-image: url('/generated-assets/characters/sam/animations/idle_morning_atlas.png');
+    background-image: url('/assets/generated/characters/sam/animations/idle_morning_atlas.png');
     background-size: 384px 80px;
     background-position: 0 0;
 }
 #tanya {
     bottom: 22%; left: 35%;
     width: 128px; height: 192px;
-    background-image: url('/generated-assets/characters/tanya/animations/idle_atlas.png');
+    background-image: url('/assets/generated/characters/tanya/animations/idle_atlas.png');
     background-size: 768px 192px;
     background-position: 0 0;
 }
 #alexander {
     bottom: 22%; right: 30%;
     width: 128px; height: 192px;
-    background-image: url('/generated-assets/characters/alexander/animations/idle_atlas.png');
+    background-image: url('/assets/generated/characters/alexander/animations/idle_atlas.png');
     background-size: 512px 192px;
     background-position: 0 0;
 }
@@ -427,7 +427,6 @@ class CharacterWalker {
     }
     _resolveIdleAtlas() {
         const c = this.cfg;
-        // If character has time-based idle atlases, resolve by current time
         if (c.idleAtlasByTime) {
             const slot = getTimeSlot(currentGameTime.hour);
             return c.idleAtlasByTime[slot] || c.idleAtlas;
@@ -569,7 +568,6 @@ class InteractionModal {
             const result = await resp.json();
 
             if (result.success) {
-                // Show narrative
                 let nHtml = `<p>${result.narrativeText}</p><div style="margin-top:8px">`;
                 if (result.statChanges) {
                     for (const [k, v] of Object.entries(result.statChanges)) {
@@ -589,16 +587,13 @@ class InteractionModal {
                 this.narrativeEl.innerHTML = nHtml;
                 this.narrativeEl.style.display = 'block';
 
-                // Spawn floaters over the sprite
                 spawnStatFloaters(this.currentTarget, result.statChanges);
 
-                // Heart particles on relationship boost
                 if (result.relationshipChanges) {
                     const hasPositive = Object.values(result.relationshipChanges).some(v => v > 0);
                     if (hasPositive) spawnHeartParticles(this.currentTarget);
                 }
 
-                // Update full game state from server
                 if (result.updatedState) {
                     syncFromServerState(result.updatedState);
                 }
@@ -612,7 +607,6 @@ class InteractionModal {
         }
 
         this.busy = false;
-        // Re-enable buttons after 1s so player can do another action
         setTimeout(() => {
             if (this.currentTarget) {
                 this.show(this.currentTarget);
@@ -742,8 +736,8 @@ function initWalkers() {
         el: document.getElementById('tanya'),
         labelEl: document.getElementById('label-tanya'),
         activityEl: document.getElementById('activity-tanya'),
-        idleAtlas: '/generated-assets/characters/tanya/animations/idle_atlas.png',
-        walkAtlas: '/generated-assets/characters/tanya/animations/walk_atlas.png',
+        idleAtlas: '/assets/generated/characters/tanya/animations/idle_atlas.png',
+        walkAtlas: '/assets/generated/characters/tanya/animations/walk_atlas.png',
         idleFrames: 6, idleFps: 8, walkFrames: 8, walkFps: 10,
         spriteW: 128, spriteH: 192, minX: 5, maxX: 80, bottomPct: 22, speed: 1.8,
         idleMinSec: 2, idleMaxSec: 6,
@@ -753,8 +747,8 @@ function initWalkers() {
         el: document.getElementById('alexander'),
         labelEl: document.getElementById('label-alexander'),
         activityEl: document.getElementById('activity-alexander'),
-        idleAtlas: '/generated-assets/characters/alexander/animations/idle_atlas.png',
-        walkAtlas: '/generated-assets/characters/alexander/animations/walk_atlas.png',
+        idleAtlas: '/assets/generated/characters/alexander/animations/idle_atlas.png',
+        walkAtlas: '/assets/generated/characters/alexander/animations/walk_atlas.png',
         idleFrames: 4, idleFps: 4, walkFrames: 8, walkFps: 8,
         spriteW: 128, spriteH: 192, minX: 10, maxX: 85, bottomPct: 22, speed: 1.4,
         idleMinSec: 3, idleMaxSec: 8,
@@ -764,15 +758,14 @@ function initWalkers() {
         el: document.getElementById('sam'),
         labelEl: document.getElementById('label-sam'),
         activityEl: document.getElementById('activity-sam'),
-        // Sam has time-of-day idle atlases, not a generic 'idle'
-        idleAtlas: '/generated-assets/characters/sam/animations/idle_morning_atlas.png',
+        idleAtlas: '/assets/generated/characters/sam/animations/idle_morning_atlas.png',
         idleAtlasByTime: {
-            morning: '/generated-assets/characters/sam/animations/idle_morning_atlas.png',
-            day:     '/generated-assets/characters/sam/animations/idle_day_atlas.png',
-            evening: '/generated-assets/characters/sam/animations/idle_evening_atlas.png',
-            night:   '/generated-assets/characters/sam/animations/idle_night_atlas.png',
+            morning: '/assets/generated/characters/sam/animations/idle_morning_atlas.png',
+            day:     '/assets/generated/characters/sam/animations/idle_day_atlas.png',
+            evening: '/assets/generated/characters/sam/animations/idle_evening_atlas.png',
+            night:   '/assets/generated/characters/sam/animations/idle_night_atlas.png',
         },
-        walkAtlas: '/generated-assets/characters/sam/animations/walk_atlas.png',
+        walkAtlas: '/assets/generated/characters/sam/animations/walk_atlas.png',
         idleFrames: 4, idleFps: 4, walkFrames: 6, walkFps: 8,
         spriteW: 96, spriteH: 80, minX: 5, maxX: 90, bottomPct: 24, speed: 2.5,
         idleMinSec: 1, idleMaxSec: 4,
@@ -801,7 +794,6 @@ async function init() {
     loading.classList.add('hidden');
     setTimeout(() => loading.remove(), 500);
 
-    // Periodic refresh
     setInterval(async () => {
         const s = await fetchJSON('/api/demo/status');
         if (s) syncFromServerState(s);
