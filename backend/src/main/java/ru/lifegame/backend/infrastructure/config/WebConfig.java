@@ -13,11 +13,8 @@ import java.time.Duration;
 public class WebConfig {
 
     /**
-     * Common resource locations for generated pixel-art assets.
-     * These are produced by asset-generator from asset-specs/ XMLs.
-     *
-     * - classpath:/generated-assets/ — inside the JAR (copied during build)
-     * - file paths — for dev mode when running from project root
+     * Resource locations for generated pixel-art assets.
+     * Produced by asset-generator from asset-specs/ XMLs.
      */
     private static final String[] GENERATED_ASSET_LOCATIONS = {
             "classpath:/generated-assets/",
@@ -39,25 +36,22 @@ public class WebConfig {
 
             @Override
             public void addResourceHandlers(ResourceHandlerRegistry registry) {
-                // /assets/** — used by React frontend (assetService.ts)
+                // /assets/** — game generated assets (characters, locations, furniture)
+                // Produced by asset-generator module during build
                 registry.addResourceHandler("/assets/**")
                         .addResourceLocations(GENERATED_ASSET_LOCATIONS)
                         .setCacheControl(CacheControl.maxAge(Duration.ofDays(7)));
 
-                // /generated-assets/** — used by demo module (index.html)
+                // /generated-assets/** — same assets, used by demo module
                 registry.addResourceHandler("/generated-assets/**")
                         .addResourceLocations(GENERATED_ASSET_LOCATIONS)
                         .setCacheControl(CacheControl.maxAge(Duration.ofDays(7)));
 
-                // Vite-built frontend JS/CSS (content-hashed filenames)
-                registry.addResourceHandler("/static-assets/**")
-                        .addResourceLocations("classpath:/static/assets/")
+                // /_app/** — Vite-built JS/CSS bundles (content-hashed filenames)
+                // Vite assetsDir is set to '_app' to avoid conflict with /assets/
+                registry.addResourceHandler("/_app/**")
+                        .addResourceLocations("classpath:/static/_app/")
                         .setCacheControl(CacheControl.maxAge(Duration.ofDays(365)));
-
-                // All other static files (index.html, favicon) — no cache
-                registry.addResourceHandler("/**")
-                        .addResourceLocations("classpath:/static/")
-                        .setCacheControl(CacheControl.noCache());
             }
         };
     }
