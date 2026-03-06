@@ -1,16 +1,12 @@
 /**
- * SpriteAnimator — renders an animated pixel-art sprite from a horizontal-strip atlas.
+ * SpriteAnimator — renders an animated pixel-art sprite from atlas.
  *
- * Uses CSS background-position to show the current frame of the atlas.
- * The atlas is a single-row PNG where all frames are placed side-by-side.
+ * Supports:
+ * - strip layout: single-row horizontal atlas (background-position X)
+ * - grid layout: multi-row atlas (background-position X + Y) with condition-based row selection
  *
  * Usage:
- *   <SpriteAnimator
- *     entityType="characters"
- *     entityName="tanya"
- *     animation="idle"
- *     scale={4}
- *   />
+ *   <SpriteAnimator entityType="characters" entityName="tanya" animation="idle" scale={4} condition="morning" />
  */
 import { type CSSProperties, memo, useMemo } from 'react';
 import type { SpriteAnimatorProps } from '@/types/sprite';
@@ -28,6 +24,7 @@ export const SpriteAnimator = memo(function SpriteAnimator({
   playing = true,
   className,
   onComplete,
+  condition,
 }: SpriteAnimatorProps) {
   const hookOptions: UseSpriteAnimationOptions = useMemo(() => {
     const opts: UseSpriteAnimationOptions = {
@@ -35,12 +32,13 @@ export const SpriteAnimator = memo(function SpriteAnimator({
       entityName,
       animation,
       playing,
+      condition,
     };
     if (onComplete !== undefined) {
       return { ...opts, onComplete };
     }
     return opts;
-  }, [entityType, entityName, animation, playing, onComplete]);
+  }, [entityType, entityName, animation, playing, onComplete, condition]);
 
   const { currentFrame, isLoaded, error, animation: anim } = useSpriteAnimation(hookOptions);
 
@@ -66,15 +64,22 @@ export const SpriteAnimator = memo(function SpriteAnimator({
 
   const displayWidth = anim.frameWidth * scale;
   const displayHeight = anim.frameHeight * scale;
+
+  // Background-size: full atlas dimensions scaled
   const bgWidth = anim.frameCount * displayWidth;
+  const bgHeight = anim.totalRows * displayHeight;
+
+  // X offset: frame column
   const bgOffsetX = -(currentFrame * displayWidth);
+  // Y offset: row (for grid layouts; 0 for strips)
+  const bgOffsetY = -(anim.currentRow * displayHeight);
 
   const style: CSSProperties = {
     width: displayWidth,
     height: displayHeight,
     backgroundImage: `url(${anim.atlasUrl})`,
-    backgroundSize: `${bgWidth}px ${displayHeight}px`,
-    backgroundPosition: `${bgOffsetX}px 0px`,
+    backgroundSize: `${bgWidth}px ${bgHeight}px`,
+    backgroundPosition: `${bgOffsetX}px ${bgOffsetY}px`,
     backgroundRepeat: 'no-repeat',
     imageRendering: 'pixelated',
   };

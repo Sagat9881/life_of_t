@@ -1,41 +1,73 @@
 /**
  * PixelScene — container for pixel-art game scenes.
  *
- * Provides a fixed-aspect-ratio viewport with layered rendering zones:
- * - background: location background (z: 0-9)
- * - midground: furniture and objects (z: 10-49)
- * - foreground: characters and effects (z: 50+)
+ * Renders at a native pixel resolution (e.g. 320×240) and auto-scales
+ * the entire scene to fit the parent container. All children are rendered
+ * inside the native-resolution viewport, so coordinates/sizes stay in
+ * "native pixels" and get uniformly upscaled by CSS transform.
  *
- * All child elements are positioned absolutely within the scene using % coordinates.
- * The scene scales uniformly via CSS to fit the parent while preserving pixel-art crispness.
+ * This means:
+ * - A 32×48 character sprite always occupies 32/320 = 10% of the scene width
+ * - No need for manual scale calculations — everything scales together
  */
-import { type ReactNode, memo } from 'react';
+import { type ReactNode, memo, useRef, useState, useEffect, useCallback } from 'react';
 import './PixelScene.css';
 
 export interface PixelSceneProps {
-  /** Scene width in logical pixels (default: 320 — classic pixel game width) */
+  /** Scene width in logical pixels (native resolution) */
   readonly width?: number;
-  /** Scene height in logical pixels (default: 180 — 16:9 ratio) */
+  /** Scene height in logical pixels (native resolution) */
   readonly height?: number;
-  /** CSS scale multiplier for the scene (default: auto-fit parent) */
   readonly className?: string;
   readonly children?: ReactNode;
 }
 
 export const PixelScene = memo(function PixelScene({
   width = 320,
-  height = 180,
+  height = 240,
   className,
   children,
 }: PixelSceneProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  const updateScale = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const parentW = el.clientWidth;
+    const parentH = el.clientHeight;
+    // Fit inside parent while preserving aspect ratio
+    const scaleX = parentW / width;
+    const scaleY = parentH / height;
+    setScale(Math.min(scaleX, scaleY));
+  }, [width, height]);
+
+  useEffect(() => {
+    updateScale();
+    const observer = new ResizeObserver(updateScale);
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    return () => observer.disconnect();
+  }, [updateScale]);
+
   return (
     <div
+      ref={containerRef}
       className={`pixel-scene ${className ?? ''}`}
       style={{
         aspectRatio: `${width} / ${height}`,
       }}
     >
-      <div className="pixel-scene__viewport">
+      <div
+        className="pixel-scene__viewport"
+        style={{
+          width: `${width}px`,
+          height: `${height}px`,
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+        }}
+      >
         {children}
       </div>
     </div>

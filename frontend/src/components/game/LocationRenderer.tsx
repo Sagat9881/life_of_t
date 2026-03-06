@@ -2,12 +2,11 @@
  * LocationRenderer — renders a complete game location with pixel-art sprites.
  *
  * Composes:
- * - PixelScene (container)
- * - SpriteAnimator for location background
+ * - PixelScene (container with auto-scaling)
+ * - Static background image
+ * - Ambient overlay (time-of-day tint)
  * - SpriteAnimator for each furniture item
  * - SpriteAnimator for each character
- *
- * Furniture with actionCode is clickable and triggers game actions.
  */
 import { memo, useCallback } from 'react';
 import { PixelScene } from '@/components/shared/PixelScene/PixelScene';
@@ -16,11 +15,21 @@ import { getCompositeUrl } from '@/services/assetService';
 import type { LocationConfig, FurniturePlacement } from '@/config/locations';
 import './LocationRenderer.css';
 
+/** Time-of-day ambient tint colors */
+const AMBIENT_TINTS: Record<string, { color: string; opacity: number }> = {
+  morning: { color: '#E8F4FF', opacity: 0.10 },
+  day:     { color: '#FFF8E8', opacity: 0.0 },
+  evening: { color: '#FFB060', opacity: 0.15 },
+  night:   { color: '#1A1830', opacity: 0.45 },
+};
+
 export interface LocationRendererProps {
   readonly config: LocationConfig;
   readonly selectedObjectId?: string | null;
   readonly onObjectClick?: (objectId: string, actionCode: string) => void;
   readonly characterAnimations?: Record<string, string>;
+  /** Current time-of-day for ambient + grid animation row selection */
+  readonly timeOfDay?: string;
 }
 
 export const LocationRenderer = memo(function LocationRenderer({
@@ -28,6 +37,7 @@ export const LocationRenderer = memo(function LocationRenderer({
   selectedObjectId,
   onObjectClick,
   characterAnimations,
+  timeOfDay = 'day',
 }: LocationRendererProps) {
 
   const handleFurnitureClick = useCallback(
@@ -38,6 +48,8 @@ export const LocationRenderer = memo(function LocationRenderer({
     },
     [onObjectClick]
   );
+
+  const ambient = AMBIENT_TINTS[timeOfDay] ?? AMBIENT_TINTS['day']!;
 
   return (
     <PixelScene className="location-renderer">
@@ -53,6 +65,20 @@ export const LocationRenderer = memo(function LocationRenderer({
           draggable={false}
         />
       </div>
+
+      {/* Ambient overlay — time-of-day tint */}
+      {ambient.opacity > 0 && (
+        <div
+          className="pixel-scene__layer location-renderer__ambient"
+          style={{
+            zIndex: 5,
+            backgroundColor: ambient.color,
+            opacity: ambient.opacity,
+            pointerEvents: 'none',
+            mixBlendMode: 'multiply',
+          }}
+        />
+      )}
 
       {/* Furniture layer */}
       <div
@@ -85,6 +111,7 @@ export const LocationRenderer = memo(function LocationRenderer({
                 entityName={item.entityName}
                 animation={item.animation}
                 scale={item.scale}
+                condition={timeOfDay}
               />
               {item.label ? (
                 <span className="pixel-scene__label">{item.label}</span>
@@ -118,6 +145,7 @@ export const LocationRenderer = memo(function LocationRenderer({
                 entityName={char.entityName}
                 animation={animation}
                 scale={char.scale}
+                condition={timeOfDay}
               />
             </div>
           );
