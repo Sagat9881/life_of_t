@@ -23,6 +23,9 @@ export default defineConfig({
   build: {
     // Output to dist/ — frontend/pom.xml copies this to target/classes/static/
     outDir: 'dist',
+    // IMPORTANT: Use '_app' instead of default 'assets' to avoid conflict
+    // with /assets/** route used for game generated assets (sprites, atlases)
+    assetsDir: '_app',
     target: 'es2020',
     minify: 'terser',
     sourcemap: true,
