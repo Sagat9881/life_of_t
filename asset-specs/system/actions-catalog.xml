@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions-catalog>
+    <meta>
+        <version>1.0.0</version>
+        <description>
+            Полный каталог действий игрока.
+            Каждое действие привязано к локации, объекту, времени суток
+            и влияет на характеристики (energy, stress, health, happiness, hunger, career).
+        </description>
+    </meta>
+
+    <category name="furniture" description="Действия с мебелью">
+
+        <action code="SLEEP">
+            <name>Спать</name>
+            <location>home_room</location>
+            <object>bed</object>
+            <time-of-day>night, evening</time-of-day>
+            <duration>3 игровых часа</duration>
+            <effects>
+                <effect stat="energy" value="+40"/>
+                <effect stat="stress" value="-20"/>
+                <effect stat="health" value="+5"/>
+            </effects>
+            <animation-trigger>
+                <tanya>sleep</tanya>
+                <object-state>bed:occupied</object-state>
+                <overlay>zzz-particles</overlay>
+            </animation-trigger>
+            <description>Таня ложится спать. Одеяло «дышит», над кроватью всплывают Z.</description>
+        </action>
+
+        <action code="COOK">
+            <name>Готовить</name>
+            <location>kitchen</location>
+            <object>stove</object>
+            <time-of-day>morning, day, evening</time-of-day>
+            <duration>1 игровой час</duration>
+            <effects>
+                <effect stat="hunger" value="-30"/>
+                <effect stat="energy" value="-10"/>
+                <effect stat="happiness" value="+5"/>
+            </effects>
+            <animation-trigger>
+                <tanya>cook</tanya>
+                <object-state>stove:active</object-state>
+                <overlay>steam-particles</overlay>
+            </animation-trigger>
+            <description>Таня готовит на плите. Пар поднимается, огонь горит.</description>
+        </action>
+
+        <action code="WORK_HOME">
+            <name>Работать дома</name>
+            <location>home_room</location>
+            <object>computer</object>
+            <time-of-day>day, evening</time-of-day>
+            <duration>2 игровых часа</duration>
+            <effects>
+                <effect stat="career" value="+10"/>
+                <effect stat="energy" value="-20"/>
+                <effect stat="stress" value="+10"/>
+            </effects>
+            <animation-trigger>
+                <tanya>work</tanya>
+                <object-state>computer:active</object-state>
+            </animation-trigger>
+            <description>Таня работает за домашним ПК. Экран мерцает.</description>
+        </action>
+
+        <action code="WORK_OFFICE">
+            <name>Работать в офисе</name>
+            <location>workplace</location>
+            <object>office_desk</object>
+            <time-of-day>day</time-of-day>
+            <duration>4 игровых часа</duration>
+            <effects>
+                <effect stat="career" value="+25"/>
+                <effect stat="energy" value="-30"/>
+                <effect stat="stress" value="+15"/>
+                <effect stat="hunger" value="+15"/>
+            </effects>
+            <animation-trigger>
+                <tanya>work</tanya>
+                <object-state>office_desk:working</object-state>
+            </animation-trigger>
+            <description>Полноценный рабочий день в офисе. Больше карьеры, но и стресс.</description>
+        </action>
+
+        <action code="EAT">
+            <name>Поесть</name>
+            <location>kitchen</location>
+            <object>fridge</object>
+            <time-of-day>any</time-of-day>
+            <duration>30 игровых минут</duration>
+            <effects>
+                <effect stat="hunger" value="-20"/>
+                <effect stat="energy" value="+5"/>
+            </effects>
+            <animation-trigger>
+                <tanya>eat</tanya>
+                <object-state>fridge:open</object-state>
+            </animation-trigger>
+            <description>Быстрый перекус из холодильника.</description>
+        </action>
+
+        <action code="LOOK_MIRROR">
+            <name>Посмотреть в зеркало</name>
+            <location>home_room</location>
+            <object>mirror</object>
+            <time-of-day>any</time-of-day>
+            <duration>10 игровых минут</duration>
+            <effects>
+                <effect stat="happiness" value="+3"/>
+            </effects>
+            <animation-trigger>
+                <tanya>selfcare</tanya>
+                <object-state>mirror:active</object-state>
+            </animation-trigger>
+            <description>Таня смотрится в зеркало. Отражение мерцает.</description>
+        </action>
+
+    </category>
+
+    <category name="pets" description="Действия с питомцами">
+
+        <action code="FEED_CATS">
+            <name>Покормить кошек</name>
+            <location>kitchen</location>
+            <object>pet_bowl</object>
+            <time-of-day>morning, evening</time-of-day>
+            <duration>15 игровых минут</duration>
+            <effects>
+                <effect stat="happiness" value="+5"/>
+                <effect stat="energy" value="-5"/>
+            </effects>
+            <npc-affected>garfield, cirilla, klop, lada, persi, thelma, voland, aijan</npc-affected>
+            <animation-trigger>
+                <tanya>feed</tanya>
+                <object-state>pet_bowl:filling</object-state>
+                <npc-reaction>eat</npc-reaction>
+            </animation-trigger>
+            <description>Таня насыпает корм. Кошки бегут к мискам.</description>
+        </action>
+
+        <action code="PLAY_CAT">
+            <name>Поиграть с кошкой</name>
+            <location>home_room</location>
+            <object>none</object>
+            <time-of-day>any</time-of-day>
+            <duration>30 игровых минут</duration>
+            <effects>
+                <effect stat="happiness" value="+10"/>
+                <effect stat="stress" value="-10"/>
+                <effect stat="energy" value="-5"/>
+            </effects>
+            <npc-affected>garfield, cirilla, klop, lada, persi, thelma, voland, aijan</npc-affected>
+            <npc-selection>player-choice или случайный кот в локации</npc-selection>
+            <animation-trigger>
+                <tanya>play</tanya>
+                <npc-reaction>play</npc-reaction>
+                <overlay>heart-particles</overlay>
+            </animation-trigger>
+            <description>Таня играет с кошкой. Сердечки летят.</description>
+        </action>
+
+        <action code="BRUSH_CAT">
+            <name>Расчесать кошку</name>
+            <location>home_room</location>
+            <object>none</object>
+            <time-of-day>any</time-of-day>
+            <duration>20 игровых минут</duration>
+            <effects>
+                <effect stat="happiness" value="+8"/>
+                <effect stat="stress" value="-8"/>
+            </effects>
+            <npc-affected>garfield, cirilla, klop, lada, persi, thelma, voland, aijan</npc-affected>
+            <animation-trigger>
+                <tanya>brush</tanya>
+                <npc-reaction>purr</npc-reaction>
+                <overlay>sparkle-particles</overlay>
+            </animation-trigger>
+            <description>Таня расчёсывает кошку. Блёстки летят, кошка мурлычет.</description>
+        </action>
+
+        <action code="WALK_DOG">
+            <name>Погулять с Сэмом</name>
+            <location>park</location>
+            <object>none</object>
+            <time-of-day>morning, day, evening</time-of-day>
+            <duration>1 игровой час</duration>
+            <effects>
+                <effect stat="happiness" value="+15"/>
+                <effect stat="stress" value="-15"/>
+                <effect stat="health" value="+10"/>
+                <effect stat="energy" value="-15"/>
+            </effects>
+            <npc-affected>sam</npc-affected>
+            <animation-trigger>
+                <tanya>walk</tanya>
+                <npc-reaction>walk-happy</npc-reaction>
+                <overlay>paw-particles</overlay>
+            </animation-trigger>
+            <description>Прогулка с Сэмом в парке. Оба счастливы.</description>
+        </action>
+
+        <action code="VET_VISIT">
+            <name>Визит к ветеринару</name>
+            <location>vet_clinic</location>
+            <object>vet_table</object>
+            <time-of-day>day</time-of-day>
+            <duration>2 игровых часа</duration>
+            <effects>
+                <effect stat="stress" value="+10"/>
+                <effect stat="energy" value="-15"/>
+            </effects>
+            <quest-only>true — доступно только в рамках квестов save_lada, duke_arrives</quest-only>
+            <npc-affected>выбранный питомец</npc-affected>
+            <animation-trigger>
+                <tanya>worried</tanya>
+                <object-state>vet_table:examining</object-state>
+            </animation-trigger>
+            <description>Таня с питомцем у ветеринара. Квестовое действие.</description>
+        </action>
+
+    </category>
+
+    <category name="self" description="Действия для себя">
+
+        <action code="EXERCISE">
+            <name>Тренировка</name>
+            <location>gym</location>
+            <object>gym_equipment</object>
+            <time-of-day>morning, day, evening</time-of-day>
+            <duration>1 игровой час</duration>
+            <effects>
+                <effect stat="health" value="+15"/>
+                <effect stat="stress" value="-15"/>
+                <effect stat="energy" value="-20"/>
+                <effect stat="happiness" value="+5"/>
+            </effects>
+            <animation-trigger>
+                <tanya>exercise</tanya>
+                <object-state>gym_equipment:active</object-state>
+                <overlay>sweat-particles</overlay>
+            </animation-trigger>
+            <description>Таня бежит на дорожке. Пот летит, дисплей мигает.</description>
+        </action>
+
+        <action code="MEDITATE">
+            <name>Медитировать</name>
+            <location>park, home_room</location>
+            <object>none</object>
+            <time-of-day>morning, evening</time-of-day>
+            <duration>30 игровых минут</duration>
+            <effects>
+                <effect stat="stress" value="-20"/>
+                <effect stat="happiness" value="+10"/>
+                <effect stat="energy" value="+5"/>
+            </effects>
+            <animation-trigger>
+                <tanya>meditate</tanya>
+                <overlay>zen-particles</overlay>
+            </animation-trigger>
+            <description>Таня медитирует. Звёзды и круги дзена вокруг.</description>
+        </action>
+
+        <action code="READ">
+            <name>Читать</name>
+            <location>home_room</location>
+            <object>none</object>
+            <time-of-day>any</time-of-day>
+            <duration>1 игровой час</duration>
+            <effects>
+                <effect stat="happiness" value="+8"/>
+                <effect stat="stress" value="-5"/>
+                <effect stat="energy" value="-5"/>
+            </effects>
+            <animation-trigger>
+                <tanya>read</tanya>
+            </animation-trigger>
+            <description>Таня читает книгу на кровати или кресле.</description>
+        </action>
+
+        <action code="SELFCARE">
+            <name>Уход за собой</name>
+            <location>home_room</location>
+            <object>mirror</object>
+            <time-of-day>morning, evening</time-of-day>
+            <duration>30 игровых минут</duration>
+            <effects>
+                <effect stat="happiness" value="+12"/>
+                <effect stat="stress" value="-8"/>
+                <effect stat="energy" value="-5"/>
+            </effects>
+            <animation-trigger>
+                <tanya>selfcare</tanya>
+                <object-state>mirror:active</object-state>
+                <overlay>sparkle-particles</overlay>
+            </animation-trigger>
+            <description>Маска, уходовая рутина. Блёстки и сердечки.</description>
+        </action>
+
+        <action code="PHONE">
+            <name>Позвонить</name>
+            <location>any</location>
+            <object>phone</object>
+            <time-of-day>any</time-of-day>
+            <duration>20 игровых минут</duration>
+            <effects>
+                <effect stat="happiness" value="+5"/>
+                <effect stat="stress" value="-3"/>
+            </effects>
+            <npc-affected>alexander (звонок мужу)</npc-affected>
+            <animation-trigger>
+                <tanya>phone</tanya>
+                <object-state>phone:calling</object-state>
+            </animation-trigger>
+            <description>Таня звонит по телефону. Экран светится.</description>
+        </action>
+
+        <action code="SHOP">
+            <name>Сходить в магазин</name>
+            <location>city_street</location>
+            <object>none</object>
+            <time-of-day>day, evening</time-of-day>
+            <duration>1 игровой час</duration>
+            <effects>
+                <effect stat="hunger" value="-10"/>
+                <effect stat="energy" value="-10"/>
+                <effect stat="happiness" value="+3"/>
+            </effects>
+            <animation-trigger>
+                <tanya>walk</tanya>
+            </animation-trigger>
+            <description>Таня идёт в магазин за продуктами.</description>
+        </action>
+
+    </category>
+
+    <balance-notes>
+        <note>Сумма energy за день должна уходить в ноль — игрок вынужден спать</note>
+        <note>Стресс копится от work/career, снижается от pets/exercise/meditate</note>
+        <note>Hunger растёт со временем (+5 в час), снижается от cook/eat/shop</note>
+        <note>Happiness — главный показатель для концовок</note>
+    </balance-notes>
+</actions-catalog>
