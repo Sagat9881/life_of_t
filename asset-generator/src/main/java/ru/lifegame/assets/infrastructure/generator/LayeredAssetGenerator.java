@@ -22,15 +22,12 @@ import java.util.regex.Pattern;
  * Generates layered PNG assets and animation atlases from XML-driven AssetSpec.
  * <p>
  * Animations with time-of-day variants (e.g. idle_morning, idle_day, idle_evening, idle_night)
- * are automatically detected and merged into a single <b>grid atlas</b> where:
- * <ul>
- *   <li>Each column = animation frame</li>
- *   <li>Each row = a variant (morning, day, evening, night)</li>
- * </ul>
+ * are automatically detected and merged into a single <b>grid atlas</b>.
  * Non-variant animations produce a classic horizontal-strip atlas (single row).
  * <p>
  * All animation metadata is written to a single <b>sprite-atlas.json</b> per character
- * (config version 1.0) via {@link AtlasConfigWriter#writeSpriteAtlas}.
+ * (config version 1.1) via {@link AtlasConfigWriter#writeSpriteAtlas}.
+ * Frame dimensions come from each AnimationSpec.frameWidth/frameHeight.
  */
 public class LayeredAssetGenerator implements AssetGenerationService {
 
@@ -38,7 +35,6 @@ public class LayeredAssetGenerator implements AssetGenerationService {
     private static final int DEFAULT_WIDTH = 128;
     private static final int DEFAULT_HEIGHT = 128;
 
-    /** Known time-of-day suffixes in the canonical row order */
     private static final List<String> TOD_SUFFIXES = List.of("morning", "day", "evening", "night");
     private static final Pattern TOD_PATTERN = Pattern.compile(
             "^(.+?)_(" + String.join("|", TOD_SUFFIXES) + ")$");
@@ -86,7 +82,7 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             }
         }
 
-        // 3. Animation atlases — group time-of-day variants into grids
+        // 3. Animation atlases
         if (!spec.animations().isEmpty()) {
             Path animDir = entityDir.resolve("animations");
             generated.addAll(generateAnimationAtlases(spec, animDir));
@@ -97,15 +93,10 @@ public class LayeredAssetGenerator implements AssetGenerationService {
         return generated;
     }
 
-    /**
-     * Groups animations by base name, detects time-of-day variants,
-     * renders atlas PNGs, and writes a single sprite-atlas.json.
-     */
     private List<Path> generateAnimationAtlases(AssetSpec spec, Path animDir) {
         List<Path> generated = new ArrayList<>();
         List<AssetLayer> layers = spec.layers();
 
-        // Partition: baseName → ordered map of (conditionValue → AnimationSpec)
         LinkedHashMap<String, LinkedHashMap<String, AnimationSpec>> todGroups = new LinkedHashMap<>();
         List<AnimationSpec> standaloneAnims = new ArrayList<>();
 
@@ -121,15 +112,12 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             }
         }
 
-        // Collect grid animation definitions for the unified config
         Map<String, AtlasConfigWriter.GridAnimDef> gridAnimDefs = new LinkedHashMap<>();
 
-        // Generate grid atlas PNGs for TOD groups
         for (var entry : todGroups.entrySet()) {
             String baseName = entry.getKey();
             LinkedHashMap<String, AnimationSpec> variants = entry.getValue();
 
-            // Sort rows into canonical TOD order
             LinkedHashMap<String, AnimationSpec> sorted = new LinkedHashMap<>();
             for (String tod : TOD_SUFFIXES) {
                 if (variants.containsKey(tod)) {
@@ -137,7 +125,6 @@ public class LayeredAssetGenerator implements AssetGenerationService {
                 }
             }
 
-            // Render frames per row
             LinkedHashMap<String, List<BufferedImage>> rowFrames = new LinkedHashMap<>();
             for (var rowEntry : sorted.entrySet()) {
                 List<BufferedImage> frames = renderer.renderAnimationFrames(layers, rowEntry.getValue());
@@ -147,11 +134,8 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             try {
                 Path atlasPath = atlasWriter.writeGridAtlas(rowFrames, baseName, animDir);
                 generated.add(atlasPath);
-
-                // Collect for unified config
                 gridAnimDefs.put(baseName,
                         new AtlasConfigWriter.GridAnimDef("time_of_day", sorted));
-
                 log.info("Grid atlas '{}': {} rows × {} frames",
                         baseName, sorted.size(), sorted.values().iterator().next().frames());
             } catch (IOException e) {
@@ -159,7 +143,6 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             }
         }
 
-        // Generate strip atlas PNGs for standalone (non-TOD) animations
         for (AnimationSpec animSpec : standaloneAnims) {
             List<BufferedImage> frames = renderer.renderAnimationFrames(layers, animSpec);
             try {
@@ -170,13 +153,10 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             }
         }
 
-        // Write unified sprite-atlas.json (config v1.0)
+        // Write unified sprite-atlas.json (v1.1 — per-animation frame dimensions)
         try {
-            int spriteW = resolveWidth(spec);
-            int spriteH = resolveHeight(spec);
             Path configPath = configWriter.writeSpriteAtlas(
-                    spec.entityName(), spriteW, spriteH,
-                    standaloneAnims, gridAnimDefs, animDir);
+                    spec.entityName(), standaloneAnims, gridAnimDefs, animDir);
             generated.add(configPath);
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to write sprite-atlas.json for " + spec.entityName(), e);
