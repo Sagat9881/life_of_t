@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>locations</entity-type>
+        <entity-name>vet_clinic</entity-name>
+        <version>1.0.0</version>
+    </meta>
+    <!-- Veterinary clinic. Canvas: 320x180.
+         Clean white/green walls, examination table, medicine cabinet. -->
+    <layers>
+        <layer id="walls" type="base" z-order="0" width="320" height="180">
+            <pixel-data>
+                <rect x="0" y="0" w="320" h="95" color="#F0F5F0"/>
+                <rect x="0" y="40" w="320" h="4" color="#4CAF50"/>
+                <rect x="0" y="93" w="320" h="4" color="#E0E5E0"/>
+            </pixel-data>
+        </layer>
+        <layer id="floor" type="base" z-order="1" width="320" height="180">
+            <pixel-data>
+                <rect x="0" y="95" w="320" h="85" color="#E8E8E8"/>
+                <!-- tile grid -->
+                <hline x="0" y="120" len="320" color="#D8D8D8"/>
+                <hline x="0" y="145" len="320" color="#D8D8D8"/>
+            </pixel-data>
+        </layer>
+        <layer id="exam_table" type="base" z-order="2" width="320" height="180">
+            <pixel-data>
+                <!-- table top -->
+                <rect x="100" y="100" w="120" h="8" color="#B0B0B0"/>
+                <rect x="100" y="100" w="120" h="2" color="#A0A0A0"/>
+                <!-- legs -->
+                <rect x="105" y="108" w="4" h="30" color="#909090"/>
+                <rect x="211" y="108" w="4" h="30" color="#909090"/>
+                <!-- base -->
+                <rect x="100" y="136" w="120" h="4" color="#808080"/>
+            </pixel-data>
+        </layer>
+        <layer id="medicine_cabinet" type="base" z-order="3" width="320" height="180">
+            <pixel-data>
+                <rect x="250" y="10" w="60" h="75" color="#FFFFFF"/>
+                <rect x="250" y="10" w="60" h="2" color="#C0C0C0"/>
+                <rect x="250" y="10" w="2" h="75" color="#C0C0C0"/>
+                <rect x="308" y="10" w="2" h="75" color="#C0C0C0"/>
+                <rect x="250" y="83" w="60" h="2" color="#C0C0C0"/>
+                <!-- shelves -->
+                <hline x="252" y="30" len="56" color="#D0D0D0"/>
+                <hline x="252" y="50" len="56" color="#D0D0D0"/>
+                <hline x="252" y="70" len="56" color="#D0D0D0"/>
+                <!-- bottles -->
+                <rect x="258" y="14" w="6" h="14" color="#4CAF50"/>
+                <rect x="270" y="16" w="6" h="12" color="#2196F3"/>
+                <rect x="282" y="14" w="6" h="14" color="#FF9800"/>
+                <rect x="258" y="34" w="8" h="14" color="#9C27B0"/>
+                <rect x="275" y="36" w="6" h="12" color="#F44336"/>
+            </pixel-data>
+        </layer>
+        <layer id="poster" type="overlay" z-order="4" width="320" height="180">
+            <pixel-data>
+                <rect x="20" y="10" w="50" h="35" color="#FFF9C4"/>
+                <rect x="20" y="10" w="50" h="2" color="#F0E68C"/>
+                <!-- paw print icon -->
+                <pixel x="40" y="22" color="#795548"/>
+                <pixel x="44" y="20" color="#795548"/>
+                <pixel x="48" y="22" color="#795548"/>
+                <pixel x="44" y="26" color="#795548"/>
+                <rect x="42" y="24" w="5" h="5" color="#795548"/>
+            </pixel-data>
+        </layer>
+    </layers>
+    <animations>
+        <animation name="idle" frames="2" fps="1" loop="true" frame-width="320" frame-height="180">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="poster:0,0"/>
+        </animation>
+    </animations>
+    <naming>
+        <output-dir>locations/vet_clinic</output-dir>
+    </naming>
+</asset-spec>

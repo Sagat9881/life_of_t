@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>locations</entity-type>
+        <entity-name>workplace</entity-name>
+        <version>1.0.0</version>
+    </meta>
+    <!-- Tanya's office: open-plan with her desk, monitor, coffee corner.
+         Canvas: 320x180. Muted corporate blues/greys.
+         Time-of-day lighting shifts. -->
+    <layers>
+        <layer id="back_wall" type="base" z-order="0" width="320" height="180">
+            <pixel-data>
+                <rect x="0" y="0" w="320" h="100" color="#D5D8DC"/>
+                <rect x="0" y="100" w="320" h="80" color="#A9B2BD"/>
+                <!-- baseboard -->
+                <rect x="0" y="98" w="320" h="4" color="#8E99A4"/>
+            </pixel-data>
+        </layer>
+        <layer id="window" type="base" z-order="1" width="320" height="180">
+            <pixel-data>
+                <rect x="20" y="10" w="80" h="60" color="#87CEEB"/>
+                <rect x="20" y="10" w="80" h="2" color="#6B7B8D"/>
+                <rect x="20" y="10" w="2" h="60" color="#6B7B8D"/>
+                <rect x="98" y="10" w="2" h="60" color="#6B7B8D"/>
+                <rect x="20" y="68" w="80" h="2" color="#6B7B8D"/>
+                <rect x="59" y="10" w="2" h="60" color="#6B7B8D"/>
+                <!-- blinds -->
+                <hline x="22" y="15" len="36" color="#C8CDD2"/>
+                <hline x="22" y="20" len="36" color="#C8CDD2"/>
+                <hline x="22" y="25" len="36" color="#C8CDD2"/>
+            </pixel-data>
+        </layer>
+        <layer id="floor" type="base" z-order="2" width="320" height="180">
+            <pixel-data>
+                <rect x="0" y="100" w="320" h="80" color="#BDC3CB"/>
+                <!-- carpet pattern -->
+                <rect x="40" y="110" w="240" h="60" color="#A0A8B2"/>
+            </pixel-data>
+        </layer>
+        <layer id="whiteboard" type="base" z-order="3" width="320" height="180">
+            <pixel-data>
+                <rect x="200" y="15" w="100" h="50" color="#FFFFFF"/>
+                <rect x="200" y="15" w="100" h="2" color="#808080"/>
+                <rect x="200" y="15" w="2" h="50" color="#808080"/>
+                <rect x="298" y="15" w="2" h="50" color="#808080"/>
+                <rect x="200" y="63" w="100" h="2" color="#808080"/>
+                <!-- sticky notes -->
+                <rect x="210" y="22" w="12" h="12" color="#FFE066"/>
+                <rect x="230" y="25" w="12" h="12" color="#66D9FF"/>
+                <rect x="250" y="20" w="12" h="12" color="#FF9999"/>
+            </pixel-data>
+        </layer>
+        <layer id="ceiling_light" type="overlay" z-order="4" width="320" height="180">
+            <pixel-data>
+                <rect x="140" y="0" w="40" h="4" color="#E8E8E8"/>
+                <rect x="145" y="4" w="30" h="2" color="#F5F5DC"/>
+            </pixel-data>
+        </layer>
+    </layers>
+    <animations>
+        <animation name="idle" frames="2" fps="1" loop="true" frame-width="320" frame-height="180">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="ceiling_light:0,1"/>
+        </animation>
+    </animations>
+    <naming>
+        <output-dir>locations/workplace</output-dir>
+    </naming>
+</asset-spec>

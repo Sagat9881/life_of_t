@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>locations</entity-type>
+        <entity-name>city_street</entity-name>
+        <version>1.0.0</version>
+    </meta>
+    <!-- City street — transition hub. Canvas: 320x180.
+         Sidewalk, buildings, street lamp, sky. -->
+    <layers>
+        <layer id="sky" type="base" z-order="0" width="320" height="180">
+            <pixel-data>
+                <rect x="0" y="0" w="320" h="60" color="#87CEEB"/>
+            </pixel-data>
+        </layer>
+        <layer id="buildings" type="base" z-order="1" width="320" height="180">
+            <pixel-data>
+                <!-- left building -->
+                <rect x="0" y="20" w="80" h="80" color="#B8A898"/>
+                <rect x="10" y="30" w="15" h="20" color="#6B8EAD"/>
+                <rect x="35" y="30" w="15" h="20" color="#6B8EAD"/>
+                <rect x="60" y="30" w="15" h="20" color="#6B8EAD"/>
+                <rect x="10" y="60" w="15" h="20" color="#6B8EAD"/>
+                <rect x="35" y="60" w="15" h="20" color="#6B8EAD"/>
+                <rect x="60" y="60" w="15" h="20" color="#6B8EAD"/>
+                <!-- right building -->
+                <rect x="220" y="10" w="100" h="90" color="#C8B8A8"/>
+                <rect x="230" y="20" w="15" h="20" color="#6B8EAD"/>
+                <rect x="260" y="20" w="15" h="20" color="#6B8EAD"/>
+                <rect x="290" y="20" w="15" h="20" color="#6B8EAD"/>
+                <rect x="230" y="50" w="15" h="20" color="#6B8EAD"/>
+                <rect x="260" y="50" w="15" h="20" color="#6B8EAD"/>
+                <rect x="290" y="50" w="15" h="20" color="#6B8EAD"/>
+                <!-- middle gap = street view -->
+                <rect x="80" y="30" w="140" h="70" color="#A0B8C8"/>
+            </pixel-data>
+        </layer>
+        <layer id="sidewalk" type="base" z-order="2" width="320" height="180">
+            <pixel-data>
+                <rect x="0" y="100" w="320" h="80" color="#C0B8A8"/>
+                <rect x="0" y="100" w="320" h="4" color="#A89888"/>
+                <!-- road -->
+                <rect x="0" y="140" w="320" h="40" color="#505050"/>
+                <rect x="0" y="140" w="320" h="2" color="#A89888"/>
+                <!-- dashed center line -->
+                <rect x="20" y="158" w="30" h="2" color="#FFD700"/>
+                <rect x="70" y="158" w="30" h="2" color="#FFD700"/>
+                <rect x="120" y="158" w="30" h="2" color="#FFD700"/>
+                <rect x="170" y="158" w="30" h="2" color="#FFD700"/>
+                <rect x="220" y="158" w="30" h="2" color="#FFD700"/>
+                <rect x="270" y="158" w="30" h="2" color="#FFD700"/>
+            </pixel-data>
+        </layer>
+        <layer id="street_lamp" type="base" z-order="3" width="320" height="180">
+            <pixel-data>
+                <rect x="158" y="50" w="4" h="55" color="#404040"/>
+                <rect x="152" y="48" w="16" h="6" color="#505050"/>
+                <rect x="155" y="45" w="10" h="5" color="#FFE4B5"/>
+            </pixel-data>
+        </layer>
+    </layers>
+    <animations>
+        <animation name="idle" frames="1" fps="1" loop="false" frame-width="320" frame-height="180">
+            <frame index="0" layer-offsets=""/>
+        </animation>
+    </animations>
+    <naming>
+        <output-dir>locations/city_street</output-dir>
+    </naming>
+</asset-spec>
