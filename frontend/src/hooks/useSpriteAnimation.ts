@@ -1,6 +1,6 @@
 /**
  * Hook for managing sprite animation state.
- * Loads atlas config, resolves animation, and cycles frames via requestAnimationFrame.
+ * Loads sprite-atlas.json, resolves animation (strip or grid), and cycles frames.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { SpriteAnimation, SpriteAnimationState } from '@/types/sprite';
@@ -12,6 +12,8 @@ export interface UseSpriteAnimationOptions {
   readonly animation: string;
   readonly playing?: boolean | undefined;
   readonly onComplete?: (() => void) | undefined;
+  /** Condition value for grid row selection (e.g. "morning", "evening") */
+  readonly condition?: string | undefined;
 }
 
 export const useSpriteAnimation = ({
@@ -20,6 +22,7 @@ export const useSpriteAnimation = ({
   animation,
   playing = true,
   onComplete,
+  condition,
 }: UseSpriteAnimationOptions): SpriteAnimationState => {
   const [state, setState] = useState<SpriteAnimationState>({
     currentFrame: 0,
@@ -45,7 +48,7 @@ export const useSpriteAnimation = ({
         const config = await loadAtlasConfig(entityType, entityName);
         if (cancelled) return;
 
-        const resolved = resolveAnimation(entityType, entityName, animation, config);
+        const resolved = resolveAnimation(entityType, entityName, animation, config, condition);
         if (cancelled) return;
 
         if (!resolved) {
@@ -57,7 +60,6 @@ export const useSpriteAnimation = ({
           return;
         }
 
-        // Preload the atlas image
         await preloadAtlasImage(resolved.atlasUrl);
         if (cancelled) return;
 
@@ -87,7 +89,7 @@ export const useSpriteAnimation = ({
     return () => {
       cancelled = true;
     };
-  }, [entityType, entityName, animation, playing]);
+  }, [entityType, entityName, animation, playing, condition]);
 
   // Animation frame loop
   const tick = useCallback((timestamp: number) => {
@@ -104,7 +106,6 @@ export const useSpriteAnimation = ({
         if (anim.loop) {
           currentFrameRef.current = 0;
         } else {
-          // Non-looping: stay on last frame
           currentFrameRef.current = anim.frameCount - 1;
           setState((prev) => ({ ...prev, currentFrame: currentFrameRef.current, isPlaying: false }));
           onComplete?.();

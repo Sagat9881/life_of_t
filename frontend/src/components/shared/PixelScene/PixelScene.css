@@ -16,11 +16,11 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  /* Size is set by inline styles (native resolution).
+     Transform scale is computed dynamically to fit parent. */
 }
 
-/* Layer positioning helpers — children use these via inline styles */
+/* Layer positioning helpers */
 .pixel-scene__layer {
   position: absolute;
   top: 0;
@@ -34,7 +34,7 @@
   pointer-events: auto;
 }
 
-/* Entity positioned within the scene */
+/* Entity positioned within the scene (% coordinates) */
 .pixel-scene__entity {
   position: absolute;
   transform: translate(-50%, -100%); /* anchor at bottom-center */
