@@ -940,10 +940,14 @@ class InteractionModal {
         this.bodyEl.querySelectorAll('.action-btn').forEach(b => b.disabled = true);
         this.narrativeEl.textContent = '…';
         try {
-            const res = await fetch(`/api/demo/action/${target}/${action}`, { method: 'POST' });
+            const res = await fetch('/api/demo/action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ target: target, actionCode: action })
+            });
             const data = await res.json();
-            if (data.narrative) {
-                let text = data.narrative;
+            if (data.narrativeText || data.narrative) {
+                let text = data.narrativeText || data.narrative;
                 if (data.statChanges) {
                     for (const [stat, delta] of Object.entries(data.statChanges)) {
                         const cls = delta > 0 ? 'positive' : 'negative';
@@ -953,7 +957,8 @@ class InteractionModal {
                 }
                 this.narrativeEl.innerHTML = text;
             }
-            if (data.newStatus) syncFromServerState(data.newStatus);
+            if (data.updatedState) syncFromServerState(data.updatedState);
+            else if (data.newStatus) syncFromServerState(data.newStatus);
         } catch(e) {
             this.narrativeEl.textContent = 'Ошибка связи с сервером…';
         }
@@ -976,27 +981,43 @@ function syncFromServerState(s) {
         actors.forEach(a => a.onTimeSlotChange(slot));
         sceneElements.forEach(e => e.onTimeSlotChange(slot));
     }
-    if (s.stats) {
-        for (const [key, val] of Object.entries(s.stats)) {
-            const bar = document.getElementById('bar-' + key);
-            const valEl = document.getElementById('val-' + key);
+    // GameStateDto.character.stats or flat stats
+    const stats = (s.character && s.character.stats) ? s.character.stats : s.stats;
+    if (stats) {
+        const mapping = { energy:'energy', health:'health', stress:'stress', mood:'mood', money:'money', selfEsteem:'esteem' };
+        for (const [key, barKey] of Object.entries(mapping)) {
+            const val = stats[key];
+            if (val == null) continue;
+            const bar = document.getElementById('bar-' + barKey);
+            const valEl = document.getElementById('val-' + barKey);
             if (bar) bar.style.width = Math.min(100, Math.max(0, val)) + '%';
             if (valEl) valEl.textContent = Math.round(val);
         }
     }
-    if (s.quests) renderQuests(s.quests);
+    // GameStateDto.activeQuests
+    const quests = s.activeQuests || s.quests;
+    if (quests) renderQuests(quests);
+    // GameStateDto.relationships = { byNpc: { HUSBAND: {...}, FATHER: {...} } }
     if (s.relationships) renderRelationships(s.relationships);
 }
 
 function renderRelationships(rels) {
     const container = document.getElementById('relations-list');
     container.innerHTML = '';
-    for (const r of rels) {
-        const filled = Math.round(r.level / 10);
+    // rels = { byNpc: { HUSBAND: {npc,closeness,trust,...}, FATHER: {...} } }
+    const npcMap = rels.byNpc || rels;
+    const displayNames = { HUSBAND: 'Александр', FATHER: 'Папа', SAM: 'Сэм' };
+    const displayIcons = { SAM: '🐾' };
+    for (const [code, r] of Object.entries(npcMap)) {
+        if (!r) continue;
+        const name = displayNames[code] || r.npc || code;
+        const icon = displayIcons[code] ? ` ${displayIcons[code]}` : '';
+        // Composite level from closeness + trust (avg, 0-100)
+        const level = Math.round((r.closeness + r.trust) / 2);
+        const filled = Math.round(level / 10);
         const empty = 10 - filled;
         const hearts = '♥'.repeat(filled) + '♡'.repeat(empty);
-        const icon = r.icon ? ` ${r.icon}` : '';
-        container.innerHTML += `<div class="rel-row"><span class="rel-label">${r.name}${icon}</span><span class="rel-hearts">${hearts}</span></div>`;
+        container.innerHTML += `<div class="rel-row"><span class="rel-label">${name}${icon}</span><span class="rel-hearts">${hearts}</span></div>`;
     }
 }
 
@@ -1009,8 +1030,9 @@ function renderQuests(quests) {
         html += `<div class="quest-title">${q.title}</div>`;
         if (q.steps) {
             for (const step of q.steps) {
-                const done = step.current >= step.target ? 'done' : '';
-                html += `<div class="quest-step ${done}">${step.description} (${step.current}/${step.target})</div>`;
+                const req = step.required || step.target || 1;
+                const done = step.current >= req ? 'done' : '';
+                html += `<div class="quest-step ${done}">${step.description} (${step.current}/${req})</div>`;
             }
         }
         html += `</div>`;
@@ -1077,8 +1099,13 @@ async function init() {
         });
     });
 
-    const status = await fetchJSON('/api/demo/status');
-    if (status) syncFromServerState(status);
+    // Fetch initial state — wrap in try/catch so loading screen always disappears
+    try {
+        const status = await fetchJSON('/api/demo/status');
+        if (status) syncFromServerState(status);
+    } catch(e) {
+        console.warn('Failed to fetch initial status:', e);
+    }
 
     const loading = document.getElementById('loading');
     loading.classList.add('hidden');
