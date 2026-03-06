@@ -5,6 +5,9 @@
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 export const API_TIMEOUT = 10000; // 10 секунд
 
+// Assets — путь к сгенерированным ассетам (отдаются Spring Boot из /assets/)
+export const ASSETS_BASE_URL = import.meta.env.VITE_ASSETS_BASE_URL || '/assets';
+
 // Статы
 export const MIN_STAT = 0;
 export const MAX_STAT = 100;
