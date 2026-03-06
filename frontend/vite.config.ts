@@ -14,15 +14,13 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
+      // Proxy API calls to Spring Boot backend
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
-      // Proxy generated assets to Spring Boot in dev mode
-      '/assets': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-      },
+      // Assets are served from frontend/public/assets/ by Vite directly.
+      // No proxy needed — Vite serves public/ at root.
     },
   },
   build: {
