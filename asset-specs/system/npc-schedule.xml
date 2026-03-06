@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc-schedule>
+    <meta>
+        <version>1.0.0</version>
+        <description>
+            Расписание NPC по времени суток.
+            Определяет где каждый NPC находится, какую idle-анимацию показывает,
+            и какие автономные действия выполняет.
+        </description>
+    </meta>
+
+    <!-- ЛЮДИ -->
+
+    <npc id="alexander">
+        <name>Александр (муж)</name>
+        <schedule>
+            <period time="morning" location="kitchen" animation="idle-coffee" behavior="Пьёт кофе, читает газету"/>
+            <period time="day" location="away" animation="none" behavior="На работе (отсутствует)"/>
+            <period time="evening" location="home_room" animation="idle-couch" behavior="Сидит на диване, смотрит ТВ"/>
+            <period time="night" location="home_room" animation="sleep" behavior="Спит"/>
+        </schedule>
+        <special-events>
+            <event trigger="quest:wedding_anniversary" override-location="kitchen" override-animation="idle-nervous"/>
+            <event trigger="conflict:alexander_vs_sam" override-location="home_room" override-animation="angry"/>
+        </special-events>
+    </npc>
+
+    <!-- СОБАКА -->
+
+    <npc id="sam">
+        <name>Сэм (собака)</name>
+        <schedule>
+            <period time="morning" location="home_room" animation="idle-morning" behavior="Лежит у кровати, ждёт прогулки. Хвост виляет."/>
+            <period time="day" location="home_room" animation="idle-day" behavior="Спит на своём месте или бродит по квартире."/>
+            <period time="evening" location="kitchen" animation="idle-evening" behavior="Крутится у ног Тани, ждёт ужин."/>
+            <period time="night" location="home_room" animation="sleep" behavior="Спит свернувшись у кровати."/>
+        </schedule>
+        <special-events>
+            <event trigger="action:WALK_DOG" override-location="park" override-animation="walk-happy"/>
+            <event trigger="quest:lost_sam" override-location="away" override-animation="none"/>
+        </special-events>
+    </npc>
+
+    <!-- КОТЫ -->
+
+    <npc id="garfield">
+        <name>Гарфилд (кот-доминант)</name>
+        <schedule>
+            <period time="morning" location="kitchen" animation="idle-morning" behavior="Требует еду. Сидит у миски, мяукает."/>
+            <period time="day" location="home_room" animation="idle-day" behavior="Спит на кровати, занимает центр."/>
+            <period time="evening" location="home_room" animation="idle-evening" behavior="Умывается на кресле."/>
+            <period time="night" location="home_room" animation="sleep" behavior="Спит на кровати Тани."/>
+        </schedule>
+        <personality>
+            <trait>Доминантный — может прогнать других котов с места</trait>
+            <trait>Ленивый — почти не двигается днём</trait>
+            <trait>Жадный — ест больше всех</trait>
+        </personality>
+    </npc>
+
+    <npc id="cirilla">
+        <name>Цирилла (кошка-охотница)</name>
+        <schedule>
+            <period time="morning" location="home_room" animation="idle-morning" behavior="Сидит на подоконнике, следит за птицами."/>
+            <period time="day" location="home_room" animation="hunt" behavior="Охотится на мух, прыгает."/>
+            <period time="evening" location="kitchen" animation="idle-evening" behavior="Трётся об ноги Тани."/>
+            <period time="night" location="home_room" animation="night-active" behavior="Бегает по квартире, скачет."/>
+        </schedule>
+        <personality>
+            <trait>Охотница — самая активная</trait>
+            <trait>Ночная — активна ночью, мешает спать</trait>
+        </personality>
+    </npc>
+
+    <npc id="klop">
+        <name>Клоп (маленький кот)</name>
+        <schedule>
+            <period time="morning" location="home_room" animation="idle-morning" behavior="Прячется под одеялом."/>
+            <period time="day" location="home_room" animation="idle-day" behavior="Играет с шуршащей игрушкой."/>
+            <period time="evening" location="home_room" animation="idle-evening" behavior="Сидит на коленях у Тани."/>
+            <period time="night" location="home_room" animation="sleep" behavior="Спит рядом с Garfield."/>
+        </schedule>
+        <personality>
+            <trait>Маленький — самый мелкий из котов</trait>
+            <trait>Игривый — всегда в движении</trait>
+        </personality>
+    </npc>
+
+    <npc id="lada">
+        <name>Лада (кошка, часто болеет)</name>
+        <schedule>
+            <period time="morning" location="home_room" animation="idle-morning" behavior="Тихо сидит в углу."/>
+            <period time="day" location="home_room" animation="idle-day" behavior="Лежит на тёплом месте."/>
+            <period time="evening" location="home_room" animation="idle-evening" behavior="Подходит к Тане, мурлычет тихо."/>
+            <period time="night" location="home_room" animation="sleep" behavior="Спит на своей подушке."/>
+        </schedule>
+        <personality>
+            <trait>Болезненная — триггер квеста save_lada</trait>
+            <trait>Тихая — не конфликтует</trait>
+        </personality>
+    </npc>
+
+    <npc id="persi">
+        <name>Перси (персидский кот)</name>
+        <schedule>
+            <period time="morning" location="home_room" animation="idle-morning" behavior="Неспешно умывается."/>
+            <period time="day" location="home_room" animation="idle-day" behavior="Спит на высоком месте (cat_tree)."/>
+            <period time="evening" location="home_room" animation="idle-evening" behavior="Красуется, позирует."/>
+            <period time="night" location="home_room" animation="sleep" behavior="Спит на cat_tree."/>
+        </schedule>
+        <personality>
+            <trait>Аристократ — брезгливый, чистоплотный</trait>
+            <trait>Независимый — не любит, когда берут на руки</trait>
+        </personality>
+    </npc>
+
+    <npc id="thelma">
+        <name>Тельма (кошка)</name>
+        <schedule>
+            <period time="morning" location="kitchen" animation="idle-morning" behavior="Ворует еду со стола."/>
+            <period time="day" location="home_room" animation="idle-day" behavior="Спит на кресле."/>
+            <period time="evening" location="home_room" animation="idle-evening" behavior="Играет с хвостом."/>
+            <period time="night" location="home_room" animation="sleep" behavior="Спит клубком."/>
+        </schedule>
+        <personality>
+            <trait>Воровка — таскает еду</trait>
+            <trait>Любопытная — исследует новые предметы</trait>
+        </personality>
+    </npc>
+
+    <npc id="voland">
+        <name>Воланд (чёрный кот)</name>
+        <schedule>
+            <period time="morning" location="home_room" animation="idle-morning" behavior="Сидит и смотрит в одну точку."/>
+            <period time="day" location="home_room" animation="idle-day" behavior="Исчезает — его нигде не найти."/>
+            <period time="evening" location="home_room" animation="idle-evening" behavior="Появляется внезапно на шкафу."/>
+            <period time="night" location="home_room" animation="night-active" behavior="Ходит по квартире, глаза светятся."/>
+        </schedule>
+        <personality>
+            <trait>Мистический — связан с event voland_memory</trait>
+            <trait>Независимый — не идёт на руки</trait>
+            <trait>Ночной — активен ночью</trait>
+        </personality>
+    </npc>
+
+    <npc id="aijan">
+        <name>Айжан (дикая/полудикая кошка)</name>
+        <schedule>
+            <period time="morning" location="home_room" animation="idle-morning" behavior="Шипит из-под дивана."/>
+            <period time="day" location="home_room" animation="idle-day" behavior="Осторожно выходит, следит."/>
+            <period time="evening" location="kitchen" animation="idle-evening" behavior="Крадётся к миске, ест, когда никто не видит."/>
+            <period time="night" location="home_room" animation="night-active" behavior="Обходит территорию, метит."/>
+        </schedule>
+        <personality>
+            <trait>Дикая — долго приручается</trait>
+            <trait>Пугливая — убегает при резких движениях</trait>
+            <trait>Прогресс приручения — отдельная метрика</trait>
+        </personality>
+    </npc>
+
+    <npc id="duke">
+        <name>Дюк (новый кот, появляется по квесту)</name>
+        <schedule>
+            <period time="morning" location="home_room" animation="idle-morning" behavior="Осваивается, нюхает углы."/>
+            <period time="day" location="home_room" animation="idle-day" behavior="Прячется за мебелью."/>
+            <period time="evening" location="home_room" animation="idle-evening" behavior="Выходит, играет."/>
+            <period time="night" location="home_room" animation="sleep" behavior="Спит у двери."/>
+        </schedule>
+        <appearance-condition>quest:duke_arrives completed</appearance-condition>
+        <personality>
+            <trait>Новенький — адаптируется</trait>
+            <trait>Конфликтует с Garfield за территорию</trait>
+        </personality>
+    </npc>
+
+</npc-schedule>
