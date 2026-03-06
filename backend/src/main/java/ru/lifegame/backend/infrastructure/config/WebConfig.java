@@ -18,22 +18,27 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**")
-                        .allowedOrigins("*")
+                        .allowedOrigins("http://localhost:3000", "http://localhost:8080")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
 
             @Override
             public void addResourceHandlers(ResourceHandlerRegistry registry) {
-                // Serve generated pixel-art assets from asset-generator output
-                // In dev: file:../asset-generator/target/generated-assets/
-                // In prod: classpath:/generated-assets/ (copied during build)
+                // Vite-built assets (JS/CSS with content hashes) — long cache
                 registry.addResourceHandler("/assets/**")
                         .addResourceLocations(
+                                "classpath:/static/assets/",
                                 "file:../asset-generator/target/generated-assets/",
                                 "classpath:/generated-assets/"
                         )
-                        .setCacheControl(CacheControl.maxAge(Duration.ofDays(7)));
+                        .setCacheControl(CacheControl.maxAge(Duration.ofDays(365)));
+
+                // All other static files (index.html, favicon, etc.) — no cache
+                registry.addResourceHandler("/**")
+                        .addResourceLocations("classpath:/static/")
+                        .setCacheControl(CacheControl.noCache());
             }
         };
     }
