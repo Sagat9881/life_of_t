@@ -11,6 +11,7 @@ import ru.lifegame.backend.domain.model.relationship.NpcCode;
 import ru.lifegame.backend.domain.model.relationship.Relationship;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.model.session.GameSession;
+import ru.lifegame.backend.domain.model.session.GameTime;
 import ru.lifegame.backend.domain.model.stats.Stats;
 import ru.lifegame.backend.domain.quest.Quest;
 
@@ -32,7 +33,7 @@ public class GameStateViewMapper {
                 toPlayerView(session.player()),
                 toRelationshipViews(session.relationships()),
                 toPetViews(session.pets()),
-                new TimeView(session.time().day(), session.time().hour()),
+                toTimeView(session.time()),
                 toActionOptionViews(session),
                 toQuestViews(session),
                 toCompletedQuestIds(session),
@@ -45,6 +46,22 @@ public class GameStateViewMapper {
 
     public GameStateView toView(GameSession session) {
         return toView(session, null);
+    }
+
+    private TimeView toTimeView(GameTime time) {
+        return new TimeView(time.day(), time.hour(), resolveTimeSlot(time.hour()));
+    }
+
+    /**
+     * Derives time-of-day slot from hour.
+     * MORNING: 7-11, DAY: 12-16, EVENING: 17-20, NIGHT: 21+
+     */
+    static String resolveTimeSlot(int hour) {
+        if (hour < 7) return "NIGHT";
+        if (hour < 12) return "MORNING";
+        if (hour < 17) return "DAY";
+        if (hour < 21) return "EVENING";
+        return "NIGHT";
     }
 
     private PlayerView toPlayerView(PlayerCharacter p) {
