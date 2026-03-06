@@ -69,7 +69,6 @@
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- Selenium / BrowserWebDriverContainer for browser E2E -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>selenium</artifactId>
@@ -101,21 +100,9 @@
                     <argLine>--enable-preview</argLine>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <mainClass>ru.lifegame.demo.DemoApplication</mainClass>
-                    <layout>JAR</layout>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!-- No spring-boot-maven-plugin repackage here!
+                 Demo is used as a library JAR by application module.
+                 For standalone dev mode, use: mvn spring-boot:run -->
         </plugins>
         <finalName>life-of-t-demo</finalName>
     </build>
