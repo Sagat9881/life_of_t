@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>locations</entity-type>
+        <entity-name>alexander_room</entity-name>
+        <version>1.0.0</version>
+        <description>Alexander's work/gaming room. Home to Aijan (cat), Persi and Duke (dogs). Cooler tone, monitor glow, lived-in feel.</description>
+    </meta>
+    <layers>
+        <layer id="floor" type="background" z-order="0" width="320" height="240">
+            <pixel-data>
+                <rect x="0" y="160" w="320" h="80" color="#8A6E52"/>
+                <hline x="0" y="172" len="320" color="#7A5E44"/>
+                <hline x="0" y="184" len="320" color="#7C6046"/>
+                <hline x="0" y="196" len="320" color="#7A5E44"/>
+                <hline x="0" y="208" len="320" color="#7C6046"/>
+                <hline x="0" y="220" len="320" color="#7A5E44"/>
+                <rect x="55"  y="160" w="1" h="80" color="#6A4E38"/>
+                <rect x="110" y="160" w="1" h="80" color="#6A4E38"/>
+                <rect x="170" y="160" w="1" h="80" color="#6A4E38"/>
+                <rect x="230" y="160" w="1" h="80" color="#6A4E38"/>
+                <rect x="285" y="160" w="1" h="80" color="#6A4E38"/>
+                <rect x="10" y="168" w="80" h="50" color="#705A48"/>
+                <hline x="10" y="168" len="80" color="#5A4838"/>
+                <hline x="10" y="217" len="80" color="#5A4838"/>
+                <rect x="10" y="168" w="1" h="50" color="#5A4838"/>
+                <rect x="89" y="168" w="1" h="50" color="#5A4838"/>
+            </pixel-data>
+        </layer>
+        <layer id="wall" type="background" z-order="1" width="320" height="240">
+            <pixel-data>
+                <rect x="0" y="0" w="320" h="162" color="#E8EEF0"/>
+                <hline x="0" y="40"  len="320" color="#E0E8EC"/>
+                <hline x="0" y="80"  len="320" color="#E0E8EC"/>
+                <hline x="0" y="120" len="320" color="#E0E8EC"/>
+                <rect x="0" y="157" w="320" h="5" color="#C0C8CC"/>
+                <rect x="312" y="60" w="5" h="100" color="#C8D0D4"/>
+                <hline x="313" y="80"  len="3" color="#B0B8BC"/>
+                <hline x="313" y="100" len="3" color="#B0B8BC"/>
+                <hline x="313" y="120" len="3" color="#B0B8BC"/>
+                <hline x="313" y="140" len="3" color="#B0B8BC"/>
+            </pixel-data>
+        </layer>
+        <layer id="window" type="midground" z-order="2" width="320" height="240">
+            <pixel-data>
+                <rect x="10" y="20" w="70" h="80" color="#C8DDE8"/>
+                <rect x="10" y="84" w="70" h="16" color="#90B870"/>
+                <rect x="12" y="78" w="4"  h="14" color="#B09060"/>
+                <rect x="24" y="78" w="4"  h="14" color="#B09060"/>
+                <rect x="36" y="78" w="4"  h="14" color="#B09060"/>
+                <rect x="48" y="78" w="4"  h="14" color="#B09060"/>
+                <rect x="60" y="78" w="4"  h="14" color="#B09060"/>
+                <rect x="72" y="78" w="4"  h="14" color="#B09060"/>
+                <rect x="8"  y="18" w="74" h="3"  color="#B0B8BC"/>
+                <rect x="8"  y="99" w="74" h="3"  color="#B0B8BC"/>
+                <rect x="8"  y="18" w="3"  h="84" color="#B0B8BC"/>
+                <rect x="79" y="18" w="3"  h="84" color="#B0B8BC"/>
+                <rect x="8"  y="58" w="74" h="2"  color="#B0B8BC"/>
+                <rect x="44" y="18" w="2"  h="84" color="#B0B8BC"/>
+                <rect x="6"  y="102" w="78" h="5" color="#C8D0D4"/>
+            </pixel-data>
+        </layer>
+        <layer id="gaming_desk" type="foreground" z-order="3" width="320" height="240">
+            <pixel-data>
+                <rect x="120" y="135" w="190" h="38" color="#303030"/>
+                <rect x="120" y="135" w="190" h="3"  color="#404040"/>
+                <rect x="122" y="173" w="5" h="18" color="#282828"/>
+                <rect x="303" y="173" w="5" h="18" color="#282828"/>
+                <rect x="120" y="148" w="30" h="25" color="#2A2A2A"/>
+                <rect x="178" y="100" w="70" h="42" color="#181818"/>
+                <rect x="180" y="102" w="66" h="36" color="#1E3A5E"/>
+                <rect x="181" y="104" w="20" h="2"  color="#5090D0"/>
+                <hline x="181" y="108" len="40" color="#404860"/>
+                <hline x="181" y="112" len="30" color="#404860"/>
+                <hline x="181" y="116" len="38" color="#404860"/>
+                <hline x="181" y="120" len="25" color="#404860"/>
+                <hline x="181" y="124" len="35" color="#404860"/>
+                <hline x="181" y="128" len="28" color="#404860"/>
+                <rect x="181" y="108" w="8"  h="2" color="#5080FF"/>
+                <rect x="191" y="108" w="5"  h="2" color="#FF8050"/>
+                <rect x="181" y="112" w="6"  h="2" color="#50C060"/>
+                <rect x="189" y="112" w="10" h="2" color="#FF5050"/>
+                <rect x="209" y="142" w="6"  h="6"  color="#202020"/>
+                <rect x="205" y="147" w="14" h="3"  color="#1A1A1A"/>
+                <rect x="256" y="104" w="54" h="36" color="#181818"/>
+                <rect x="258" y="106" w="50" h="28" color="#101824"/>
+                <rect x="259" y="107" w="48" h="4"  color="#222830"/>
+                <rect x="260" y="108" w="12" h="2"  color="#4488BB"/>
+                <rect x="279" y="140" w="6"  h="6"  color="#202020"/>
+                <rect x="275" y="145" w="14" h="3"  color="#1A1A1A"/>
+                <rect x="178" y="148" w="90" h="14" color="#282828"/>
+                <rect x="180" y="150" w="86" h="10" color="#303030"/>
+                <hline x="181" y="152" len="84" color="#3A3A3A"/>
+                <hline x="181" y="155" len="84" color="#3A3A3A"/>
+                <hline x="181" y="158" len="84" color="#3A3A3A"/>
+                <rect x="272" y="148" w="12" h="16" color="#282828"/>
+                <rect x="273" y="149" w="10" h="8"  color="#303030"/>
+                <rect x="178" y="162" w="110" h="8" color="#1A1A1A"/>
+                <rect x="150" y="118" w="16" h="24" color="#303030"/>
+                <rect x="152" y="119" w="12" h="18" color="#282828"/>
+                <rect x="152" y="137" w="4"  h="6"  color="#383838"/>
+                <rect x="158" y="137" w="4"  h="6"  color="#383838"/>
+            </pixel-data>
+        </layer>
+        <layer id="gaming_chair" type="foreground" z-order="4" width="320" height="240">
+            <pixel-data>
+                <rect x="192" y="200" w="40" h="6"  color="#202020"/>
+                <rect x="205" y="196" w="14" h="6"  color="#282828"/>
+                <rect x="209" y="180" w="6"  h="18" color="#303030"/>
+                <rect x="188" y="168" w="48" h="16" color="#1A1A1A"/>
+                <rect x="190" y="169" w="44" h="13" color="#222222"/>
+                <rect x="194" y="170" w="36" h="10" color="#2A2A2A"/>
+                <rect x="192" y="130" w="40" h="40" color="#181818"/>
+                <rect x="194" y="132" w="36" h="36" color="#202020"/>
+                <rect x="196" y="136" w="32" h="28" color="#282828"/>
+                <rect x="192" y="135" w="4"  h="30" color="#CC2020"/>
+                <rect x="228" y="135" w="4"  h="30" color="#CC2020"/>
+                <rect x="196" y="122" w="32" h="12" color="#181818"/>
+                <rect x="200" y="124" w="24" h="8"  color="#CC2020"/>
+                <rect x="184" y="156" w="8"  h="16" color="#282828"/>
+                <rect x="232" y="156" w="8"  h="16" color="#282828"/>
+                <rect x="183" y="154" w="10" h="4"  color="#303030"/>
+                <rect x="231" y="154" w="10" h="4"  color="#303030"/>
+            </pixel-data>
+        </layer>
+        <layer id="dog_bed" type="foreground" z-order="5" width="320" height="240">
+            <pixel-data>
+                <rect x="8"  y="166" w="86" h="52" color="#6A5040"/>
+                <rect x="14" y="172" w="74" h="40" color="#8A7060"/>
+                <hline x="15" y="178" len="72" color="#806858"/>
+                <hline x="15" y="184" len="72" color="#806858"/>
+                <hline x="15" y="190" len="72" color="#806858"/>
+                <hline x="15" y="196" len="72" color="#806858"/>
+                <hline x="8"  y="172" len="86" color="#5A4030"/>
+                <rect x="14" y="166" w="74" h="2" color="#5A4030"/>
+                <rect x="22" y="183" w="4" h="4" color="#5A4030"/>
+                <pixel x="21" y="182" color="#5A4030"/>
+                <pixel x="26" y="182" color="#5A4030"/>
+                <pixel x="21" y="188" color="#5A4030"/>
+                <pixel x="26" y="188" color="#5A4030"/>
+                <rect x="96" y="192" w="12" h="6" color="#E08040"/>
+                <rect x="97" y="193" w="10" h="4" color="#F09050"/>
+            </pixel-data>
+        </layer>
+        <layer id="cat_spot" type="foreground" z-order="6" width="320" height="240">
+            <pixel-data>
+                <rect x="106" y="42" w="60" h="8" color="#9A7A5A"/>
+                <rect x="106" y="40" w="60" h="3" color="#B08A6A"/>
+                <rect x="108" y="42" w="4" h="18" color="#8A6A4A"/>
+                <rect x="158" y="42" w="4" h="18" color="#8A6A4A"/>
+                <rect x="108" y="36" w="56" h="6" color="#B8A090"/>
+                <hline x="109" y="38" len="54" color="#C8B0A0"/>
+                <rect x="118" y="26" w="28" h="14" color="#888070"/>
+                <rect x="120" y="24" w="24" h="12" color="#908878"/>
+                <rect x="136" y="20" w="12" h="10" color="#888070"/>
+                <pixel x="137" y="19" color="#888070"/>
+                <pixel x="138" y="19" color="#888070"/>
+                <pixel x="144" y="19" color="#888070"/>
+                <pixel x="145" y="19" color="#888070"/>
+                <pixel x="139" y="23" color="#40C080"/>
+                <pixel x="143" y="23" color="#40C080"/>
+                <rect x="115" y="28" w="6" h="4" color="#808070"/>
+                <pixel x="113" y="30" color="#808070"/>
+                <pixel x="113" y="31" color="#808070"/>
+                <hline x="120" y="27" len="8" color="#706860"/>
+                <hline x="120" y="30" len="8" color="#706860"/>
+                <hline x="120" y="33" len="8" color="#706860"/>
+            </pixel-data>
+        </layer>
+        <layer id="ambient" type="overlay" z-order="7" width="320" height="240">
+            <pixel-data>
+                <rect x="130" y="60"  w="180" h="100" color="#1830A010"/>
+                <rect x="160" y="80"  w="130" h="80"  color="#1830C015"/>
+                <rect x="0"   y="0"   w="320" h="240" color="#E8EEF405"/>
+                <rect x="120" y="168" w="190" h="15"  color="#3020A010"/>
+            </pixel-data>
+            <conditions>
+                <condition id="time_morning"><override layer-ref="ambient" tint="#D8E8F0" opacity="0.08"/></condition>
+                <condition id="time_day"><override layer-ref="ambient" tint="#1830A0" opacity="0.06"/></condition>
+                <condition id="time_evening"><override layer-ref="ambient" tint="#1020A0" opacity="0.20"/></condition>
+                <condition id="time_night"><override layer-ref="ambient" tint="#080818" opacity="0.60"/></condition>
+            </conditions>
+        </layer>
+    </layers>
+    <naming><output-dir>locations/alexander_room</output-dir></naming>
+</asset-spec>

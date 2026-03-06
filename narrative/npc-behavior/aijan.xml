@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc-behavior entity-id="aijan">
+    <schedules>
+        <schedule time="morning">
+            <action type="move" target="alexander_room"/>
+            <action type="idle_animation" value="door_waiting"/>
+            <action type="dialogue-chance" probability="0.6">
+                <line-ru>МРР! (требует чтобы открыли дверь и её покормили)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="day">
+            <action type="move" target="alexander_room"/>
+            <action type="idle_animation" value="window_watch"/>
+            <action type="idle_animation" value="desk_claim"/>
+            <action type="dialogue-chance" probability="0.3">
+                <line-ru>Мурр-р-р... (трётся об Александра пока он работает)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="evening">
+            <action type="move" target="home_room"/>
+            <action type="idle_animation" value="bed_sprawl"/>
+            <action type="dialogue-chance" probability="0.4">
+                <line-ru>Мурр... (занимает максимум места на кровати)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="night">
+            <action type="move" target="home_room"/>
+            <action type="idle_animation" value="bed_sleep_between_humans"/>
+        </schedule>
+    </schedules>
+    <reactions>
+        <reaction trigger="player_nearby" radius="2">
+            <action type="animation" value="approach_rub_legs"/>
+            <action type="dialogue-chance" probability="0.7">
+                <line-ru>МРР-Р-Р! (мурлыкает, трётся, всем видом говорит «погладь меня»)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="overpet_threshold">
+            <action type="animation" value="push_hand_away"/>
+            <action type="dialogue-chance" probability="0.6">
+                <line-ru>Мяу! (отталкивает руку лапкой — без когтей, но настойчиво)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="ignore_warning">
+            <action type="animation" value="bite_warning"/>
+            <action type="dialogue-chance" probability="0.8">
+                <line-ru>ШШ! (шипит и укусывает — несильно, но ясно)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="pet_nearby" pet-type="cat" relation="hostile">
+            <action type="animation" value="full_threat_display"/>
+            <action type="dialogue-chance" probability="0.9">
+                <line-ru>АААА!!! (истошный вопль, шерсть дыбом)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="pet_nearby" pet-type="cat" pet-id="garfield" relation="hostile">
+            <action type="animation" value="maximum_panic_sprint"/>
+            <action type="dialogue-chance" probability="1.0">
+                <line-ru>АААААААААА!!!! (улетает на шкаф)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="pet_nearby" pet-type="dog" relation="neutral">
+            <action type="animation" value="sniff_cautiously"/>
+            <action type="dialogue-chance" probability="0.3">
+                <line-ru>Мрр... (проверяет, можно ли доверять)</line-ru>
+            </action>
+        </reaction>
+    </reactions>
+    <personality>
+        <trait name="friendliness" value="95"/>
+        <trait name="anxiety" value="60"/>
+        <trait name="energy" value="70"/>
+        <trait name="independence" value="50"/>
+        <trait name="cat_aggression" value="90"/>
+        <trait name="human_affection" value="100"/>
+    </personality>
+</npc-behavior>

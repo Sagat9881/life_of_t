@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc-behavior entity-id="persi">
+    <schedules>
+        <schedule time="morning">
+            <action type="move" target="alexander_room"/>
+            <action type="idle_animation" value="stand_stretch_morning"/>
+            <action type="dialogue-chance" probability="0.2">
+                <line-ru>...(один тихий выдох, хвост медленно машет)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="day">
+            <!-- dacha mode -->
+            <action type="move" target="dacha_garden" location="dacha"/>
+            <action type="idle_animation" value="perimeter_patrol" location="dacha"/>
+            <action type="idle_animation" value="watch_yard_from_porch" location="dacha"/>
+            <!-- home mode -->
+            <action type="move" target="alexander_room" location="home"/>
+            <action type="idle_animation" value="lie_guard_position" location="home"/>
+            <action type="idle_animation" value="supervise_duke" location="home"/>
+        </schedule>
+        <schedule time="evening">
+            <action type="move" target="living_room"/>
+            <action type="idle_animation" value="calm_presence"/>
+            <action type="dialogue-chance" probability="0.15">
+                <line-ru>...(кладёт голову на лапы, закрывает глаза — всё под контролем)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="night">
+            <action type="move" target="alexander_room"/>
+            <action type="idle_animation" value="alert_sleep"/>
+        </schedule>
+    </schedules>
+    <reactions>
+        <reaction trigger="player_nearby" radius="3">
+            <action type="animation" value="slow_blink_look"/>
+            <action type="dialogue-chance" probability="0.25">
+                <line-ru>...(смотрит долгим мудрым взглядом)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="player_anxious">
+            <action type="animation" value="move_close_lay_beside"/>
+            <action type="dialogue-chance" probability="0.5">
+                <line-ru>...(кладёт голову на колени Тани, тёплая тяжесть)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="pet_nearby" pet-type="dog" pet-id="duke" relation="friendly">
+            <action type="animation" value="groom_duke"/>
+            <action type="idle_animation" value="mother_mode"/>
+            <action type="dialogue-chance" probability="0.4">
+                <line-ru>...(вылизывает Дюка методично, как заправская мать)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="stranger_approach">
+            <action type="animation" value="stand_assess_no_bark"/>
+        </reaction>
+        <reaction trigger="night_noise">
+            <action type="animation" value="head_up_listen_settle"/>
+        </reaction>
+        <reaction trigger="duke_mischief">
+            <action type="animation" value="gentle_nuzzle_redirect"/>
+        </reaction>
+    </reactions>
+    <personality>
+        <trait name="friendliness" value="85"/>
+        <trait name="anxiety" value="10"/>
+        <trait name="energy" value="50"/>
+        <trait name="independence" value="70"/>
+        <trait name="wisdom" value="100"/>
+        <trait name="maternal_instinct" value="95"/>
+        <trait name="calmness" value="98"/>
+    </personality>
+</npc-behavior>

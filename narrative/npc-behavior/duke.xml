@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc-behavior entity-id="duke">
+    <schedules>
+        <schedule time="morning">
+            <action type="move" target="alexander_room"/>
+            <action type="idle_animation" value="bounce_awake_immediately"/>
+            <action type="dialogue-chance" probability="0.8">
+                <line-ru>ТЯФ-ТЯФ-ТЯФ! (срывается с места моментально как только кто-то шевелится)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="day">
+            <action type="idle_animation" value="follow_persi"/>
+            <action type="idle_animation" value="chew_something"/>
+            <action type="idle_animation" value="sprint_circuit_room"/>
+            <action type="dialogue-chance" probability="0.5">
+                <line-ru>ТЯВ! (без причины, просто энергия)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="evening">
+            <action type="move" target="living_room"/>
+            <action type="idle_animation" value="play_with_persi"/>
+            <action type="idle_animation" value="chase_own_tail"/>
+            <action type="dialogue-chance" probability="0.4">
+                <line-ru>Тяф-тяф... (носится но уже чуть медленнее)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="night">
+            <action type="move" target="alexander_room"/>
+            <action type="idle_animation" value="collapse_beside_persi"/>
+            <action type="dialogue-chance" probability="0.1">
+                <line-ru>... (мгновенно засыпает)</line-ru>
+            </action>
+        </schedule>
+    </schedules>
+    <reactions>
+        <reaction trigger="player_nearby" radius="5">
+            <action type="animation" value="full_body_wag_sprint"/>
+            <action type="dialogue-chance" probability="0.9">
+                <line-ru>ТЯВ-ТЯВ-ТЯВ-ТЯВ! (несётся на человека в полном восторге)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="player_sitting">
+            <action type="animation" value="jump_on_lap"/>
+            <action type="dialogue-chance" probability="0.7">
+                <line-ru>ТЯФ! (лижет лицо)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="chewable_object_nearby">
+            <action type="animation" value="grab_and_chew"/>
+        </reaction>
+        <reaction trigger="pet_nearby" pet-type="dog" pet-id="persi" relation="friendly">
+            <action type="animation" value="wrestle_play_persi"/>
+            <action type="dialogue-chance" probability="0.5">
+                <line-ru>ТЯФ! ТЯФ! (прыгает на Перси, та терпит)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="pet_nearby" pet-type="cat" relation="curious">
+            <action type="animation" value="approach_too_fast"/>
+            <action type="dialogue-chance" probability="0.6">
+                <line-ru>ТЯВ? (искренне недоумевает почему кот шипит)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="tired_threshold">
+            <action type="animation" value="sudden_collapse_mid_sprint"/>
+            <action type="dialogue-chance" probability="0.4">
+                <line-ru>... (падает прямо там где стоял)</line-ru>
+            </action>
+        </reaction>
+    </reactions>
+    <personality>
+        <trait name="friendliness" value="100"/>
+        <trait name="anxiety" value="5"/>
+        <trait name="energy" value="100"/>
+        <trait name="independence" value="15"/>
+        <trait name="intelligence" value="45"/>
+        <trait name="destruction_tendency" value="70"/>
+        <trait name="cuteness_factor" value="100"/>
+    </personality>
+</npc-behavior>

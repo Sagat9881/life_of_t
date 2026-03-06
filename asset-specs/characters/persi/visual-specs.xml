@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>characters</entity-type>
+        <entity-name>persi</entity-name>
+        <version>1.0.0</version>
+    </meta>
+    <!-- Persi (Persefona): Full black German Shepherd, large, extremely wise.
+         Canvas: 32x24 (large dog). Found on highway at night, August 2025.
+         Color: #0D0D0D (deep black), #1A1A1A (highlight coat), #333333 (fur depth).
+         Adopted Duke as her puppy. Lives in Alexander's room. -->
+    <layers>
+        <!-- z=0: paws — large strong paws -->
+        <layer id="paws" type="base" z-order="0" width="32" height="24">
+            <pixel-data>
+                <!-- front left paw: 3px wide, strong -->
+                <rect x="4" y="20" w="3" h="3" color="#0D0D0D"/>
+                <hline x="4" y="22" len="3" color="#1A1A1A"/>
+                <!-- front right paw -->
+                <rect x="10" y="20" w="3" h="3" color="#0D0D0D"/>
+                <hline x="10" y="22" len="3" color="#1A1A1A"/>
+                <!-- rear left paw: larger, angled -->
+                <rect x="18" y="20" w="4" h="3" color="#0D0D0D"/>
+                <hline x="18" y="22" len="4" color="#1A1A1A"/>
+                <!-- rear right paw -->
+                <rect x="25" y="20" w="4" h="3" color="#0D0D0D"/>
+                <hline x="25" y="22" len="4" color="#1A1A1A"/>
+                <!-- claw hints -->
+                <pixel x="5" y="23" color="#222222"/>
+                <pixel x="11" y="23" color="#222222"/>
+                <pixel x="19" y="23" color="#222222"/>
+                <pixel x="26" y="23" color="#222222"/>
+            </pixel-data>
+        </layer>
+        <!-- z=1: legs — powerful shepherd legs -->
+        <layer id="legs" type="base" z-order="1" width="32" height="24">
+            <pixel-data>
+                <!-- front left: angled forward (shepherd stance) -->
+                <rect x="4" y="13" w="3" h="7" color="#0D0D0D"/>
+                <!-- front right -->
+                <rect x="10" y="13" w="3" h="7" color="#0D0D0D"/>
+                <!-- rear left: angled rearward (characteristic shepherd) -->
+                <rect x="18" y="13" w="3" h="7" color="#0D0D0D"/>
+                <!-- rear right -->
+                <rect x="25" y="13" w="3" h="7" color="#0D0D0D"/>
+                <!-- leg highlight (black coat sheen) -->
+                <hline x="4" y="14" len="3" color="#1A1A1A"/>
+                <hline x="10" y="14" len="3" color="#1A1A1A"/>
+                <hline x="18" y="14" len="3" color="#1A1A1A"/>
+                <hline x="25" y="14" len="3" color="#1A1A1A"/>
+            </pixel-data>
+        </layer>
+        <!-- z=2: body — large strong shepherd body, slightly angled up toward shoulders -->
+        <layer id="body" type="base" z-order="2" width="32" height="24">
+            <pixel-data>
+                <!-- main body: 20px wide, 8px tall, angled — back rises toward head -->
+                <rect x="4" y="8" w="20" h="8" color="#0D0D0D"/>
+                <!-- back rises on left (head-side): shoulder hump -->
+                <rect x="4" y="6" w="6" h="3" color="#0D0D0D"/>
+                <!-- coat sheen on back -->
+                <hline x="5" y="8" len="18" color="#1A1A1A"/>
+                <hline x="6" y="9" len="16" color="#111111"/>
+                <!-- flank muscle definition -->
+                <hline x="5" y="14" len="18" color="#080808"/>
+            </pixel-data>
+        </layer>
+        <!-- z=3: chest_markings — black shepherd has no tan, but subtle undercoat on chest -->
+        <layer id="chest_markings" type="overlay" z-order="3" width="32" height="24">
+            <pixel-data>
+                <!-- black shepherd: subtle dark grey chest fur texture -->
+                <rect x="5" y="10" w="8" h="5" color="#1A1A1A"/>
+                <!-- mane-like thicker fur at chest -->
+                <hline x="5" y="10" len="8" color="#222222"/>
+                <hline x="6" y="11" len="6" color="#1A1A1A"/>
+                <!-- subtle undercoat hue -->
+                <pixel x="6" y="12" color="#2A2A2A"/>
+                <pixel x="7" y="12" color="#2A2A2A"/>
+                <pixel x="8" y="12" color="#2A2A2A"/>
+                <pixel x="9" y="12" color="#2A2A2A"/>
+            </pixel-data>
+        </layer>
+        <!-- z=4: tail — large bushy shepherd tail, held proudly or low (wise calm) -->
+        <layer id="tail" type="base" z-order="4" width="32" height="24">
+            <pixel-data>
+                <!-- tail base at rear, curves down gently (calm dog) -->
+                <pixel x="24" y="14" color="#0D0D0D"/>
+                <pixel x="25" y="13" color="#0D0D0D"/>
+                <!-- thick tail, 2px wide -->
+                <pixel x="26" y="12" color="#0D0D0D"/>
+                <pixel x="27" y="11" color="#0D0D0D"/>
+                <pixel x="28" y="10" color="#0D0D0D"/>
+                <pixel x="29" y="10" color="#1A1A1A"/>
+                <pixel x="29" y="9" color="#0D0D0D"/>
+                <pixel x="30" y="9" color="#1A1A1A"/>
+                <!-- bushy tip -->
+                <pixel x="30" y="8" color="#1A1A1A"/>
+                <pixel x="31" y="8" color="#333333"/>
+                <pixel x="31" y="9" color="#222222"/>
+                <!-- tail underside -->
+                <pixel x="25" y="14" color="#1A1A1A"/>
+                <pixel x="26" y="13" color="#1A1A1A"/>
+                <pixel x="27" y="12" color="#1A1A1A"/>
+            </pixel-data>
+        </layer>
+        <!-- z=5: head — noble large German Shepherd head, alert and wise -->
+        <layer id="head" type="base" z-order="5" width="32" height="24">
+            <pixel-data>
+                <!-- head: 10px wide, 9px tall -->
+                <rect x="1" y="1" w="10" h="9" color="#0D0D0D"/>
+                <!-- muzzle protrudes slightly (shepherd profile) -->
+                <rect x="0" y="5" w="4" h="4" color="#0D0D0D"/>
+                <!-- crown sheen -->
+                <hline x="2" y="1" len="8" color="#1A1A1A"/>
+                <!-- cheek fur thickness -->
+                <pixel x="1" y="5" color="#1A1A1A"/>
+                <pixel x="1" y="6" color="#1A1A1A"/>
+                <pixel x="10" y="5" color="#1A1A1A"/>
+                <pixel x="10" y="6" color="#1A1A1A"/>
+                <!-- neck connection -->
+                <hline x="2" y="9" len="8" color="#111111"/>
+            </pixel-data>
+        </layer>
+        <!-- z=6: ears — large upright alert shepherd ears -->
+        <layer id="ears" type="base" z-order="6" width="32" height="24">
+            <pixel-data>
+                <!-- left ear: large, 3px wide, tall -->
+                <rect x="1" y="0" w="3" h="3" color="#0D0D0D"/>
+                <pixel x="2" y="0" color="#1A1A1A"/>
+                <!-- ear inner: dark pink-grey (barely visible on black dog) -->
+                <pixel x="2" y="1" color="#331122"/>
+                <!-- right ear -->
+                <rect x="7" y="0" w="3" h="3" color="#0D0D0D"/>
+                <pixel x="8" y="0" color="#1A1A1A"/>
+                <pixel x="8" y="1" color="#331122"/>
+            </pixel-data>
+        </layer>
+        <!-- z=7: face_details — wise amber/gold eyes, black nose, strong muzzle -->
+        <layer id="face_details" type="overlay" z-order="7" width="32" height="24">
+            <pixel-data>
+                <!-- left eye: deep amber-gold (wise, calm) -->
+                <pixel x="3" y="3" color="#AA7700"/>
+                <pixel x="4" y="2" color="#CC9900"/>
+                <pixel x="5" y="2" color="#CC9900"/>
+                <pixel x="4" y="3" color="#CC9900"/>
+                <pixel x="5" y="3" color="#111111"/>
+                <!-- right eye -->
+                <pixel x="7" y="3" color="#AA7700"/>
+                <pixel x="8" y="2" color="#CC9900"/>
+                <pixel x="9" y="2" color="#CC9900"/>
+                <pixel x="8" y="3" color="#CC9900"/>
+                <pixel x="9" y="3" color="#111111"/>
+                <!-- eye shine: small but present -->
+                <pixel x="4" y="2" color="#FFFFFF"/>
+                <pixel x="8" y="2" color="#FFFFFF"/>
+                <!-- nose: large black shepherd nose -->
+                <rect x="1" y="6" w="3" h="2" color="#0A0A0A"/>
+                <hline x="1" y="6" len="3" color="#333333"/>
+                <!-- nostril detail -->
+                <pixel x="1" y="7" color="#111111"/>
+                <pixel x="3" y="7" color="#111111"/>
+                <!-- mouth: firm shepherd lip line -->
+                <hline x="1" y="8" len="4" color="#080808"/>
+                <!-- wise expression: no whiskers on dog -->
+                <!-- eyebrow dots (shepherd expression markers) -->
+                <pixel x="4" y="1" color="#333333"/>
+                <pixel x="8" y="1" color="#333333"/>
+            </pixel-data>
+        </layer>
+    </layers>
+    <animations>
+        <!-- idle_morning: calm waking stretch, noble and deliberate -->
+        <animation name="idle_morning" frames="4" fps="3" loop="true" frame-width="32" frame-height="24">
+            <condition type="time_of_day" value="morning"/>
+            <frame index="0" layer-offsets=""/>
+            <!-- front stretch: lean forward -->
+            <frame index="1" layer-offsets="head:-1,0; ears:-1,0; face_details:-1,0; paws:-2,0"/>
+            <!-- rear stretch: hindquarters extend -->
+            <frame index="2" layer-offsets="tail:2,1"/>
+            <!-- return and shake -->
+            <frame index="3" layer-offsets=""/>
+        </animation>
+        <!-- idle_day: alert sentinel, scanning, head high -->
+        <animation name="idle_day" frames="4" fps="4" loop="true" frame-width="32" frame-height="24">
+            <condition type="time_of_day" value="day"/>
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="head:0,-1; ears:0,-1; face_details:0,-1"/>
+            <frame index="2" layer-offsets="head:-2,0; ears:-2,0; face_details:-2,0"/>
+            <frame index="3" layer-offsets="head:2,0; ears:2,0; face_details:2,0"/>
+        </animation>
+        <!-- idle_evening: relaxed guardian, eyes half closed, tail at rest -->
+        <animation name="idle_evening" frames="4" fps="3" loop="true" frame-width="32" frame-height="24">
+            <condition type="time_of_day" value="evening"/>
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="tail:0,1"/>
+            <frame index="2" layer-offsets="head:0,1; face_details:0,1; body:0,1; chest_markings:0,1"/>
+            <frame index="3" layer-offsets="tail:1,1"/>
+        </animation>
+        <!-- idle_night: lying down alert — shepherd never fully disengages -->
+        <animation name="idle_night" frames="4" fps="2" loop="true" frame-width="32" frame-height="24">
+            <condition type="time_of_day" value="night"/>
+            <frame index="0" layer-offsets="head:0,3; ears:0,3; face_details:0,3; legs:0,2; paws:0,2; tail:4,3"/>
+            <frame index="1" layer-offsets="head:0,3; ears:0,3; face_details:0,3; legs:0,2; paws:0,2; tail:4,3"/>
+            <frame index="2" layer-offsets="head:0,3; ears:0,3; face_details:0,3; body:0,1; chest_markings:0,1; legs:0,2; paws:0,2; tail:4,3"/>
+            <frame index="3" layer-offsets="head:0,3; ears:0,3; face_details:0,3; legs:0,2; paws:0,2; tail:4,3"/>
+        </animation>
+        <!-- walk: measured stately shepherd pace -->
+        <animation name="walk" frames="8" fps="8" loop="true" frame-width="32" frame-height="24">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="paws:-2,-2; legs:-1,0"/>
+            <frame index="2" layer-offsets="paws:-2,-2; legs:-1,0; body:-1,0"/>
+            <frame index="3" layer-offsets="body:-1,0"/>
+            <frame index="4" layer-offsets="paws:2,-2; legs:1,0"/>
+            <frame index="5" layer-offsets="paws:2,-2; legs:1,0; body:1,0"/>
+            <frame index="6" layer-offsets="body:1,0; tail:-1,0"/>
+            <frame index="7" layer-offsets=""/>
+        </animation>
+        <!-- nurture: unique — nuzzling and watching over Duke -->
+        <animation name="nurture" frames="6" fps="4" loop="false" frame-width="32" frame-height="24">
+            <condition type="trigger" value="duke_nearby"/>
+            <!-- frame 0: spots Duke, head turns and lowers -->
+            <frame index="0" layer-offsets="head:2,1; ears:2,1; face_details:2,1"/>
+            <!-- frame 1: bends head down to nuzzle -->
+            <frame index="1" layer-offsets="head:3,3; ears:3,2; face_details:3,3"/>
+            <!-- frame 2: nuzzle contact (head fully lowered) -->
+            <frame index="2" layer-offsets="head:4,4; ears:4,3; face_details:4,4"/>
+            <!-- frame 3: hold, gentle lick motion -->
+            <frame index="3" layer-offsets="head:4,4; ears:4,3; face_details:4,5"/>
+            <!-- frame 4: lift head, survey protectively -->
+            <frame index="4" layer-offsets="head:2,1; ears:2,1; face_details:2,1"/>
+            <!-- frame 5: return to guard stance -->
+            <frame index="5" layer-offsets=""/>
+        </animation>
+    </animations>
+    <naming>
+        <output-dir>characters/persi</output-dir>
+    </naming>
+</asset-spec>

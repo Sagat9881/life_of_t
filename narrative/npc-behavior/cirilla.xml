@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc-behavior entity-id="cirilla">
+    <schedules>
+        <schedule time="morning">
+            <action type="move" target="kitchen"/>
+            <action type="idle_animation" value="self_play_muselet"/>
+            <action type="dialogue-chance" probability="0.5">
+                <line-ru>Мяу-мяу! (подбрасывает мюзле лапой)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="day">
+            <action type="move" target="living_room"/>
+            <action type="idle_animation" value="jump_shelf_explore"/>
+            <action type="move" target="home_room"/>
+            <action type="idle_animation" value="solo_run_circuit"/>
+            <action type="dialogue-chance" probability="0.3">
+                <line-ru>Мяу! (прыгает на что-то высокое)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="evening">
+            <action type="move" target="living_room"/>
+            <action type="idle_animation" value="hang_with_garfield"/>
+            <action type="dialogue-chance" probability="0.2">
+                <line-ru>Мурр... (устраивается рядом с Гарфилдом)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="night">
+            <action type="move" target="home_room"/>
+            <action type="idle_animation" value="curl_sleep_garfield_nearby"/>
+        </schedule>
+    </schedules>
+    <reactions>
+        <reaction trigger="player_nearby" radius="2">
+            <action type="animation" value="look_up_briefly"/>
+            <action type="dialogue-chance" probability="0.25">
+                <line-ru>Мяу. (коротко, потом продолжает своё)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="muselet_visible">
+            <action type="animation" value="sprint_to_muselet"/>
+            <action type="idle_animation" value="play_muselet_loop"/>
+        </reaction>
+        <reaction trigger="player_pet" probability="0.5">
+            <action type="animation" value="allow_petting_briefly"/>
+            <action type="dialogue-chance" probability="0.4">
+                <line-ru>Мурр... (позволяет погладить, потом уходит по своим делам)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="pet_nearby" pet-type="cat" pet-id="garfield" relation="friendly">
+            <action type="animation" value="rub_against_garfield"/>
+        </reaction>
+    </reactions>
+    <personality>
+        <trait name="friendliness" value="55"/>
+        <trait name="anxiety" value="20"/>
+        <trait name="energy" value="85"/>
+        <trait name="independence" value="95"/>
+        <trait name="playfulness" value="90"/>
+    </personality>
+</npc-behavior>

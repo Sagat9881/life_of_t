@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event id="event_call_yulia" type="RANDOM">
+    <meta>
+        <title-ru>Звонок Юли Чикоты</title-ru>
+        <description-ru>Юля вдруг звонит без предупреждения. Как всегда — энергично и неожиданно.</description-ru>
+        <probability>0.2</probability>
+        <cooldown-hours>72</cooldown-hours>
+    </meta>
+    <conditions>
+        <condition type="time_of_day" value="day"/>
+    </conditions>
+    <effects>
+        <stat-change stat="happiness" value="+20"/>
+        <stat-change stat="anxiety" value="-10"/>
+        <dialogue speaker="narrator">
+            <line-ru>Телефон. Юля Чикота. Таня улыбается ещё до того как берёт трубку.</line-ru>
+        </dialogue>
+        <dialogue speaker="yulia_npc">
+            <line-ru>ТАНЯ! Привет! Я звоню потому что вспомнила тебя и захотела услышать! Как ты? Как твои коты? Как Александр? Расскажи всё!</line-ru>
+        </dialogue>
+        <dialogue speaker="tanya">
+            <line-ru>Юля! Ты всегда звонишь когда я меньше всего жду. (смеётся) Всё хорошо. Рассказывай лучше ты.</line-ru>
+        </dialogue>
+        <dialogue speaker="narrator">
+            <line-ru>Следующий час Таня ходит по квартире с телефоном и смеётся. Сэм ходит за ней. Гарфилд делает вид, что это его не касается.</line-ru>
+        </dialogue>
+    </effects>
+</event>

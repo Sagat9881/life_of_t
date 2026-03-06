@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc-behavior entity-id="voland">
+    <schedules>
+        <schedule time="morning">
+            <action type="move" target="parents_cottage_entrance"/>
+            <action type="idle_animation" value="slow_navigation_by_smell"/>
+            <action type="dialogue-chance" probability="0.3">
+                <line-ru>Хмф... (сопит, нюхает воздух, составляет карту утра)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="day">
+            <action type="move" target="parents_cottage_sunny_spot"/>
+            <action type="idle_animation" value="nap_in_sun"/>
+            <action type="dialogue-chance" probability="0.1">
+                <line-ru>... (дышит медленно, тепло)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="evening">
+            <action type="move" target="parents_cottage_kitchen"/>
+            <action type="idle_animation" value="sit_near_owner_feet"/>
+            <action type="dialogue-chance" probability="0.2">
+                <line-ru>Хмф... (знает что скоро ужин по запаху)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="night">
+            <action type="move" target="parents_cottage_bedroom"/>
+            <action type="idle_animation" value="sleep_known_spot"/>
+        </schedule>
+    </schedules>
+    <reactions>
+        <reaction trigger="player_nearby" radius="2">
+            <action type="animation" value="head_up_smell_identify"/>
+            <action type="dialogue-chance" probability="0.5">
+                <line-ru>Хмф... (узнаёт Таню по запаху, хвост начинает медленно двигаться)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="tanya_voice">
+            <action type="animation" value="rise_navigate_toward_voice"/>
+            <action type="dialogue-chance" probability="0.7">
+                <line-ru>Хр-р-р... (встаёт медленно, идёт на голос — каждый шаг осторожный но уверенный)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="obstacle_in_path">
+            <action type="animation" value="bump_sniff_navigate_around"/>
+        </reaction>
+        <reaction trigger="familiar_smell">
+            <action type="animation" value="tail_wag_slow_heavy"/>
+        </reaction>
+        <reaction trigger="stranger_smell">
+            <action type="animation" value="sniff_extended_assess"/>
+        </reaction>
+        <reaction trigger="player_sit_beside">
+            <action type="animation" value="lie_down_beside_lean"/>
+            <action type="dialogue-chance" probability="0.6">
+                <line-ru>...(кладёт тяжёлую морду на колени. Одиннадцать лет. Помнит всё.)</line-ru>
+            </action>
+        </reaction>
+    </reactions>
+    <personality>
+        <trait name="friendliness" value="80"/>
+        <trait name="anxiety" value="20"/>
+        <trait name="energy" value="15"/>
+        <trait name="independence" value="40"/>
+        <trait name="memory" value="100"/>
+        <trait name="navigation_blind" value="75"/>
+        <trait name="wisdom_age" value="90"/>
+    </personality>
+</npc-behavior>

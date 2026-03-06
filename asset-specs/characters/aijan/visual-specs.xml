@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>characters</entity-type>
+        <entity-name>aijan</entity-name>
+        <version>1.0.0</version>
+    </meta>
+    <!-- Aijan: wildcat-colored tabby, grey-brown with dark brown/black stripes.
+         Canvas: 20x16. Loves humans and dogs, hates other cats. Lives in Alexander's room.
+         Base: #8B7355 (grey-brown), stripes: #3D2B1F (dark), belly: #C4A882. -->
+    <layers>
+        <!-- z=0: paws -->
+        <layer id="paws" type="base" z-order="0" width="20" height="16">
+            <pixel-data>
+                <!-- all paws: tawny grey-brown -->
+                <rect x="3" y="13" w="2" h="2" color="#8B7355"/>
+                <hline x="3" y="14" len="2" color="#6B5335"/>
+                <rect x="7" y="13" w="2" h="2" color="#8B7355"/>
+                <hline x="7" y="14" len="2" color="#6B5335"/>
+                <rect x="11" y="13" w="2" h="2" color="#8B7355"/>
+                <hline x="11" y="14" len="2" color="#6B5335"/>
+                <rect x="15" y="13" w="2" h="2" color="#8B7355"/>
+                <hline x="15" y="14" len="2" color="#6B5335"/>
+                <!-- paw pads darker -->
+                <pixel x="4" y="14" color="#4A3520"/>
+                <pixel x="8" y="14" color="#4A3520"/>
+                <pixel x="12" y="14" color="#4A3520"/>
+                <pixel x="16" y="14" color="#4A3520"/>
+            </pixel-data>
+        </layer>
+        <!-- z=1: legs -->
+        <layer id="legs" type="base" z-order="1" width="20" height="16">
+            <pixel-data>
+                <rect x="3" y="9" w="2" h="4" color="#8B7355"/>
+                <rect x="7" y="9" w="2" h="4" color="#8B7355"/>
+                <rect x="11" y="9" w="2" h="4" color="#8B7355"/>
+                <rect x="15" y="9" w="2" h="4" color="#8B7355"/>
+                <!-- stripe on each leg -->
+                <hline x="3" y="11" len="2" color="#3D2B1F"/>
+                <hline x="7" y="11" len="2" color="#3D2B1F"/>
+                <hline x="11" y="11" len="2" color="#3D2B1F"/>
+                <hline x="15" y="11" len="2" color="#3D2B1F"/>
+            </pixel-data>
+        </layer>
+        <!-- z=2: tail -->
+        <layer id="tail" type="base" z-order="2" width="20" height="16">
+            <pixel-data>
+                <!-- tail sweeps right from body -->
+                <pixel x="16" y="12" color="#8B7355"/>
+                <pixel x="17" y="11" color="#8B7355"/>
+                <pixel x="18" y="10" color="#8B7355"/>
+                <pixel x="19" y="9" color="#8B7355"/>
+                <pixel x="19" y="8" color="#8B7355"/>
+                <!-- tail stripes -->
+                <pixel x="17" y="11" color="#3D2B1F"/>
+                <pixel x="19" y="9" color="#3D2B1F"/>
+                <!-- tail tip lighter -->
+                <pixel x="19" y="8" color="#C4A882"/>
+            </pixel-data>
+        </layer>
+        <!-- z=3: body -->
+        <layer id="body" type="base" z-order="3" width="20" height="16">
+            <pixel-data>
+                <!-- main body oval -->
+                <rect x="2" y="6" w="14" h="7" color="#8B7355"/>
+                <!-- belly lighter -->
+                <rect x="5" y="8" w="8" h="4" color="#C4A882"/>
+                <!-- dorsal stripes -->
+                <hline x="2" y="6" len="14" color="#3D2B1F"/>
+                <hline x="3" y="8" len="3" color="#3D2B1F"/>
+                <hline x="10" y="8" len="3" color="#3D2B1F"/>
+                <hline x="3" y="10" len="3" color="#3D2B1F"/>
+                <hline x="10" y="10" len="3" color="#3D2B1F"/>
+                <!-- shoulder spots -->
+                <pixel x="4" y="7" color="#3D2B1F"/>
+                <pixel x="12" y="7" color="#3D2B1F"/>
+            </pixel-data>
+        </layer>
+        <!-- z=4: head -->
+        <layer id="head" type="base" z-order="4" width="20" height="16">
+            <pixel-data>
+                <!-- head shape -->
+                <rect x="1" y="2" w="8" h="6" color="#8B7355"/>
+                <!-- forehead stripe -->
+                <hline x="2" y="2" len="6" color="#3D2B1F"/>
+                <pixel x="4" y="3" color="#3D2B1F"/>
+                <!-- cheeks lighter -->
+                <rect x="2" y="5" w="2" h="2" color="#C4A882"/>
+                <rect x="5" y="5" w="2" h="2" color="#C4A882"/>
+                <!-- nose -->
+                <pixel x="4" y="6" color="#D4756B"/>
+                <!-- mouth -->
+                <pixel x="3" y="7" color="#3D2B1F"/>
+                <pixel x="5" y="7" color="#3D2B1F"/>
+            </pixel-data>
+        </layer>
+        <!-- z=5: eyes -->
+        <layer id="eyes" type="detail" z-order="5" width="20" height="16">
+            <pixel-data>
+                <!-- left eye: green (she's a tabby) -->
+                <pixel x="2" y="4" color="#4A7C59"/>
+                <pixel x="3" y="4" color="#2D5E3A"/>
+                <!-- right eye -->
+                <pixel x="6" y="4" color="#4A7C59"/>
+                <pixel x="7" y="4" color="#2D5E3A"/>
+                <!-- pupils -->
+                <pixel x="3" y="4" color="#1A1A1A"/>
+                <pixel x="7" y="4" color="#1A1A1A"/>
+                <!-- eye shine -->
+                <pixel x="2" y="3" color="#FFFFFF"/>
+                <pixel x="6" y="3" color="#FFFFFF"/>
+            </pixel-data>
+        </layer>
+        <!-- z=6: ears -->
+        <layer id="ears" type="detail" z-order="6" width="20" height="16">
+            <pixel-data>
+                <!-- left ear -->
+                <pixel x="1" y="1" color="#8B7355"/>
+                <pixel x="2" y="0" color="#8B7355"/>
+                <pixel x="3" y="1" color="#8B7355"/>
+                <!-- left ear inner -->
+                <pixel x="2" y="1" color="#D4756B"/>
+                <!-- right ear -->
+                <pixel x="6" y="1" color="#8B7355"/>
+                <pixel x="7" y="0" color="#8B7355"/>
+                <pixel x="8" y="1" color="#8B7355"/>
+                <!-- right ear inner -->
+                <pixel x="7" y="1" color="#D4756B"/>
+            </pixel-data>
+        </layer>
+        <!-- z=7: whiskers -->
+        <layer id="whiskers" type="detail" z-order="7" width="20" height="16">
+            <pixel-data>
+                <!-- left whiskers -->
+                <pixel x="0" y="5" color="#C4A882"/>
+                <pixel x="1" y="6" color="#C4A882"/>
+                <!-- right whiskers -->
+                <pixel x="8" y="5" color="#C4A882"/>
+                <pixel x="9" y="6" color="#C4A882"/>
+            </pixel-data>
+        </layer>
+    </layers>
+    <animations>
+        <animation id="idle" fps="2" loop="true">
+            <frame layer-overrides="eyes">
+                <!-- normal eyes -->
+                <pixel x="3" y="4" color="#1A1A1A"/>
+                <pixel x="7" y="4" color="#1A1A1A"/>
+            </frame>
+            <frame layer-overrides="eyes">
+                <!-- blink: closed -->
+                <hline x="2" y="4" len="2" color="#3D2B1F"/>
+                <hline x="6" y="4" len="2" color="#3D2B1F"/>
+            </frame>
+        </animation>
+        <animation id="walk" fps="6" loop="true">
+            <frame layer-overrides="legs,paws">
+                <!-- legs: front-left + back-right forward -->
+                <rect x="3" y="8" w="2" h="5" color="#8B7355"/>
+                <rect x="15" y="8" w="2" h="5" color="#8B7355"/>
+                <rect x="7" y="10" w="2" h="3" color="#8B7355"/>
+                <rect x="11" y="10" w="2" h="3" color="#8B7355"/>
+            </frame>
+            <frame layer-overrides="legs,paws">
+                <!-- legs: front-right + back-left forward -->
+                <rect x="7" y="8" w="2" h="5" color="#8B7355"/>
+                <rect x="11" y="8" w="2" h="5" color="#8B7355"/>
+                <rect x="3" y="10" w="2" h="3" color="#8B7355"/>
+                <rect x="15" y="10" w="2" h="3" color="#8B7355"/>
+            </frame>
+        </animation>
+        <animation id="sit" fps="1" loop="true">
+            <frame layer-overrides="legs,tail">
+                <!-- sitting: legs tucked under body -->
+                <rect x="4" y="11" w="10" h="2" color="#8B7355"/>
+                <!-- tail wraps around -->
+                <pixel x="16" y="13" color="#8B7355"/>
+                <pixel x="17" y="13" color="#8B7355"/>
+                <pixel x="18" y="12" color="#8B7355"/>
+                <pixel x="18" y="11" color="#C4A882"/>
+            </frame>
+        </animation>
+        <animation id="hiss" fps="4" loop="false">
+            <frame layer-overrides="head,ears,eyes">
+                <!-- ears flat back -->
+                <pixel x="1" y="2" color="#8B7355"/>
+                <pixel x="8" y="2" color="#8B7355"/>
+                <!-- eyes narrowed -->
+                <hline x="2" y="4" len="2" color="#2D5E3A"/>
+                <hline x="6" y="4" len="2" color="#2D5E3A"/>
+                <!-- mouth open -->
+                <pixel x="4" y="7" color="#FFFFFF"/>
+                <pixel x="3" y="8" color="#3D2B1F"/>
+                <pixel x="5" y="8" color="#3D2B1F"/>
+            </frame>
+        </animation>
+    </animations>
+    <audio>
+        <sound id="hiss" file="sfx/characters/aijan_hiss.wav" trigger="hiss_anim_start"/>
+        <sound id="purr" file="sfx/characters/aijan_purr.wav" trigger="sit_anim_loop"/>
+        <sound id="meow" file="sfx/characters/aijan_meow.wav" trigger="on_interact"/>
+    </audio>
+</asset-spec>

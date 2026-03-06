@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event id="event_old_photo" type="TRIGGERED">
+    <meta>
+        <title-ru>Старая фотография из лагеря</title-ru>
+        <description-ru>Таня находит фотографию из детского лагеря 2013 года — место первой встречи с Александром.</description-ru>
+        <probability>0.15</probability>
+        <cooldown-hours>120</cooldown-hours>
+    </meta>
+    <conditions>
+        <condition type="trigger" value="search_drawer"/>
+        <condition type="location" value="home_room"/>
+    </conditions>
+    <effects>
+        <stat-change stat="happiness" value="+15"/>
+        <stat-change stat="anxiety" value="-10"/>
+        <dialogue speaker="narrator">
+            <line-ru>На дне ящика — снимок. Лето 2013. Лагерь. Двое подростков смеются в камеру. Им по пятнадцать. Они ещё не знают что будет дальше.</line-ru>
+        </dialogue>
+        <dialogue speaker="tanya">
+            <line-ru>Саша... (кричит в сторону рабочей комнаты) Саша! Поди сюда, смотри что я нашла!</line-ru>
+        </dialogue>
+        <dialogue speaker="alexander">
+            <line-ru>(подходит, смотрит на фото) О... Мы такие... маленькие.</line-ru>
+        </dialogue>
+        <dialogue speaker="tanya">
+            <line-ru>Маленькие и ничего не боялись.</line-ru>
+        </dialogue>
+        <dialogue speaker="alexander">
+            <line-ru>Ты сейчас тоже ничего не боишься. Просто знаешь больше.</line-ru>
+        </dialogue>
+    </effects>
+</event>

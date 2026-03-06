@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>locations</entity-type>
+        <entity-name>summer_camp</entity-name>
+        <version>1.0.0</version>
+        <description>Children's summer camp — flashback scene where Tanya and Alexander first met in 2013, age 15. Warm, nostalgic, golden hour. Pine trees, wooden cabins, campfire area. Soft golden memory overlay.</description>
+    </meta>
+
+    <layers>
+        <!-- z=0: Ground — dirt and grass camp ground -->
+        <layer id="ground" type="background" z-order="0" width="320" height="240">
+            <pixel-data>
+                <rect x="60"  y="158" w="200" h="82" color="#C8A870"/>
+                <hline x="60"  y="168" len="200" color="#B89860"/>
+                <rect x="0"   y="158" w="62"  h="82" color="#78B850"/>
+                <rect x="258" y="158" w="62"  h="82" color="#78B850"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=1: Camp Buildings — wooden cabins in background -->
+        <layer id="camp_buildings" type="background" z-order="1" width="320" height="240">
+            <pixel-data>
+                <rect x="20"  y="76"  w="88" h="84"  color="#D4A870"/>
+                <rect x="14"  y="54"  w="100" h="26" color="#507840"/>
+                <rect x="52"  y="118" w="22" h="42" color="#7A5838"/>
+                <rect x="212" y="80"  w="96" h="80"  color="#C8A068"/>
+                <rect x="206" y="58"  w="108" h="26" color="#487238"/>
+                <rect x="248" y="120" w="20" h="40" color="#7A5838"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=2: Campfire Area — firepit with logs and stones -->
+        <layer id="campfire_area" type="foreground" z-order="2" width="320" height="240">
+            <pixel-data>
+                <rect x="120" y="162" w="80"  h="20" color="#807060"/>
+                <rect x="145" y="154" w="30" h="16" color="#FF6020"/>
+                <rect x="148" y="150" w="24" h="14" color="#FF8030"/>
+                <rect x="152" y="146" w="16" h="12" color="#FFA040"/>
+                <rect x="155" y="144" w="10" h="8"  color="#FFCC60"/>
+                <pixel x="160" y="138" color="#FFFFFF"/>
+                <rect x="84"  y="186" w="54" h="14" color="#9A7040"/>
+                <rect x="182" y="186" w="54" h="14" color="#9A7040"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=3: Trees — tall pines surrounding camp -->
+        <layer id="trees" type="midground" z-order="3" width="320" height="240">
+            <pixel-data>
+                <rect x="0"   y="80"  w="14" h="82"  color="#7A5830"/>
+                <rect x="0"   y="42"  w="18" h="46"  color="#2E6020"/>
+                <rect x="306" y="78"  w="14" h="84"  color="#7A5830"/>
+                <rect x="302" y="40"  w="18" h="46"  color="#2E6020"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=4: Banner — camp name banner strung between posts -->
+        <layer id="banner" type="foreground" z-order="4" width="320" height="240">
+            <pixel-data>
+                <rect x="58"  y="40" w="6"  h="120" color="#9A7848"/>
+                <rect x="256" y="40" w="6"  h="120" color="#9A7848"/>
+                <rect x="58"  y="40" w="204" h="26" color="#E04040"/>
+                <rect x="80"  y="44" w="160" h="18" color="#CC3030"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=5: Activity Area — sports field or craft tables visible to side -->
+        <layer id="activity_area" type="midground" z-order="5" width="320" height="240">
+            <pixel-data>
+                <rect x="218" y="132" w="94" h="28" color="#C09A60"/>
+                <rect x="4"   y="132" w="2"  h="28" color="#A0A0A0"/>
+                <rect x="48"  y="132" w="2"  h="28" color="#A0A0A0"/>
+                <rect x="4"   y="136" w="46" h="2"  color="#E0E0E0"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=6: Sky — warm summer sunset sky -->
+        <layer id="sky" type="background" z-order="6" width="320" height="240">
+            <pixel-data>
+                <rect x="0"   y="0"   w="320" h="20"  color="#2860A8"/>
+                <rect x="0"   y="20"  w="320" h="20"  color="#4880C0"/>
+                <rect x="0"   y="40"  w="320" h="16"  color="#7090C0"/>
+                <rect x="0"   y="56"  w="320" h="14"  color="#F0A040"/>
+                <rect x="0"   y="70"  w="320" h="12"  color="#F8C060"/>
+                <rect x="0"   y="82"  w="320" h="8"   color="#FFD880"/>
+                <rect x="264" y="72"  w="30"  h="24"  color="#FFE050"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=7: Atmosphere — nostalgic golden overlay, warm memory filter -->
+        <layer id="atmosphere" type="overlay" z-order="7" width="320" height="240">
+            <pixel-data>
+                <rect x="0" y="0"   w="320" h="240" color="#FFD06018"/>
+            </pixel-data>
+            <conditions>
+                <condition id="flashback_memory">
+                    <description>Full nostalgia filter — warm golden sepia wash, softened edges, dreamy look (default for this scene)</description>
+                    <override layer-ref="atmosphere" tint="#FFD068" opacity="0.22"/>
+                </condition>
+                <condition id="present_visit">
+                    <description>If scene is visited in-game present day — cooler, sharper, less nostalgic overlay</description>
+                    <override layer-ref="atmosphere" tint="#E8EEF0" opacity="0.04"/>
+                </condition>
+                <condition id="campfire_lit">
+                    <description>Campfire burning bright — warm orange underlight from below on characters</description>
+                    <override layer-ref="campfire_area" glow="#FF601880" radius="60"/>
+                </condition>
+            </conditions>
+        </layer>
+    </layers>
+
+    <naming>
+        <output-dir>locations/summer_camp</output-dir>
+    </naming>
+</asset-spec>

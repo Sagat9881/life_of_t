@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc-behavior entity-id="lada">
+    <schedules>
+        <schedule time="morning">
+            <!-- PHASE: scared (before quest_klop_peacemaker) -->
+            <action type="move" target="behind_sofa" phase="scared"/>
+            <action type="idle_animation" value="peek_from_hiding" phase="scared"/>
+            <!-- PHASE: integrated (after quest_klop_peacemaker) -->
+            <action type="move" target="kitchen" phase="integrated"/>
+            <action type="idle_animation" value="wait_near_klop" phase="integrated"/>
+            <action type="dialogue-chance" probability="0.3" phase="integrated">
+                <line-ru>Мяу... (тихо, но уже не прячется)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="day">
+            <action type="move" target="behind_sofa" phase="scared"/>
+            <action type="idle_animation" value="watch_from_safe_distance" phase="scared"/>
+            <action type="move" target="living_room" phase="integrated"/>
+            <action type="idle_animation" value="loaf_beside_klop" phase="integrated"/>
+        </schedule>
+        <schedule time="evening">
+            <action type="idle_animation" value="shrink_if_loud" phase="scared"/>
+            <action type="move" target="home_room" phase="integrated"/>
+            <action type="idle_animation" value="comfortable_sprawl" phase="integrated"/>
+        </schedule>
+        <schedule time="night">
+            <action type="move" target="behind_sofa" phase="scared"/>
+            <action type="move" target="living_room" phase="integrated"/>
+            <action type="idle_animation" value="sleep_next_to_klop" phase="integrated"/>
+        </schedule>
+    </schedules>
+    <reactions>
+        <reaction trigger="player_nearby" radius="3" phase="scared">
+            <action type="animation" value="freeze_then_retreat"/>
+            <action type="dialogue-chance" probability="0.1">
+                <line-ru>... (смотрит большими глазами и не движется)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="player_nearby" radius="2" phase="integrated">
+            <action type="animation" value="slow_approach_sniff"/>
+            <action type="dialogue-chance" probability="0.4">
+                <line-ru>Мяу... (осторожно, но с любопытством)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="player_soft_voice">
+            <action type="animation" value="ear_forward"/>
+            <action type="dialogue-chance" probability="0.3">
+                <line-ru>... (делает один шажок вперёд)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="loud_noise">
+            <action type="animation" value="sprint_hide" phase="scared"/>
+            <action type="animation" value="startle_then_recover" phase="integrated"/>
+        </reaction>
+        <reaction trigger="pet_nearby" pet-type="cat" pet-id="klop" relation="friendly">
+            <action type="animation" value="curl_beside_klop"/>
+        </reaction>
+    </reactions>
+    <personality>
+        <trait name="friendliness" value="35"/>
+        <trait name="anxiety" value="85"/>
+        <trait name="energy" value="40"/>
+        <trait name="independence" value="60"/>
+        <trait name="trust_growth_rate" value="70"/>
+    </personality>
+</npc-behavior>

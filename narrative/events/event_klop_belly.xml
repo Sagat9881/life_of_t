@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event id="event_klop_belly" type="RANDOM">
+    <meta>
+        <title-ru>Клоп подставляет живот</title-ru>
+        <description-ru>Клоп демонстративно переворачивается пузом вверх перед Таней. Погладь его — это обязательно.</description-ru>
+        <probability>0.5</probability>
+        <cooldown-hours>6</cooldown-hours>
+    </meta>
+    <conditions>
+        <condition type="time_of_day" value="day"/>
+        <condition type="location" value="living_room"/>
+    </conditions>
+    <effects>
+        <stat-change stat="happiness" value="+10"/>
+        <stat-change stat="anxiety" value="-5"/>
+        <dialogue speaker="klop">
+            <line-ru>Пурр-р-р... (переворачивается с видом существа, которое полностью контролирует ситуацию)</line-ru>
+        </dialogue>
+        <dialogue speaker="tanya">
+            <line-ru>Клоп. Ты делаешь это каждый раз когда я прохожу мимо. (наклоняется и жмякает его живот) Ты идеальный.</line-ru>
+        </dialogue>
+        <dialogue speaker="klop">
+            <line-ru>Пурр-р-р-р-р... (интенсивнее)</line-ru>
+        </dialogue>
+    </effects>
+</event>

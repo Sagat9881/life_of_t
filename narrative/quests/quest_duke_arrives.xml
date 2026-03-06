@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest id="quest_duke_arrives" type="SIDE">
+    <meta>
+        <title>Pizdyuk</title>
+        <title-ru>Пиздюк</title-ru>
+        <description>Walking Persi near the dacha, a half-year-old German Shepherd puppy joins the walk and refuses to leave. Persi adopts him on the spot. Welcome Duke.</description>
+        <description-ru>На прогулке с Перси к ним прибивается полугодовалый щенок ВЕО — и не уходит. Перси усыновляет его моментально. Знакомьтесь: Дюк.</description-ru>
+        <chapter>4</chapter>
+        <prerequisites>quest_find_persi</prerequisites>
+    </meta>
+    <objectives>
+        <objective id="obj_morning_walk" type="TRAVEL"><description-ru>Выйди на утреннюю прогулку с Перси</description-ru><target>dacha_road</target><location>dacha_garden</location><count>1</count></objective>
+        <objective id="obj_duke_appears" type="INTERACT"><description-ru>Откуда ни возьмись появляется щенок</description-ru><target>duke</target><location>dacha_road</location><count>1</count></objective>
+        <objective id="obj_persi_reaction" type="INTERACT"><description-ru>Понаблюдай как Перси реагирует на щенка</description-ru><target>persi</target><location>dacha_road</location><count>1</count></objective>
+        <objective id="obj_check_no_owner" type="TRAVEL"><description-ru>Осмотрись — нет ли рядом хозяина или следов ошейника</description-ru><target>dacha_road</target><location>dacha_road</location><count>1</count></objective>
+        <objective id="obj_bring_duke_home" type="TRAVEL"><description-ru>Возьми обоих домой</description-ru><target>dacha</target><location>dacha_road</location><count>1</count></objective>
+    </objectives>
+    <steps>
+        <step order="1" objective-ref="obj_morning_walk">
+            <dialogue speaker="narrator"><line-ru>Утро, туман ещё не ушёл. Перси идёт рядом — чинно, по-своему. Александр держит поводок свободно.</line-ru></dialogue>
+        </step>
+        <step order="2" objective-ref="obj_duke_appears">
+            <dialogue speaker="narrator"><line-ru>Из-за поворота — щенок. Большой уже, лапы не по размеру. Увидел Перси и понёсся.</line-ru></dialogue>
+            <dialogue speaker="duke"><line-ru>ТЯВ-ТЯВ-ТЯВ! (несётся, тормозит в последний момент носом в бок Перси)</line-ru></dialogue>
+        </step>
+        <step order="3" objective-ref="obj_persi_reaction">
+            <dialogue speaker="narrator"><line-ru>Перси останавливается. Смотрит на щенка сверху вниз. Долгая пауза. Потом она наклоняется и облизывает его голову одним длинным движением.</line-ru></dialogue>
+            <dialogue speaker="alexander"><line-ru>Перси... ты только что... ты его усыновила?</line-ru></dialogue>
+            <dialogue speaker="duke"><line-ru>(виляет всем телом, запрыгивает на Перси)</line-ru></dialogue>
+        </step>
+        <step order="4" objective-ref="obj_check_no_owner">
+            <dialogue speaker="narrator"><line-ru>Никакого ошейника. Никаких следов хозяина. Щенок явно бродячий — но откормленный, здоровый. Просто потерянный.</line-ru></dialogue>
+            <dialogue speaker="alexander"><line-ru>(звонит Тане) Тань... у нас новый член семьи. Нет, я не спрашивал его мнения. Да, Перси уже решила.</line-ru></dialogue>
+        </step>
+        <step order="5" objective-ref="obj_bring_duke_home">
+            <dialogue speaker="tanya"><line-ru>Боже. Смотри на него. Он огромный. Саша, он будет огромным!</line-ru></dialogue>
+            <dialogue speaker="alexander"><line-ru>Перси не возражает.</line-ru></dialogue>
+            <dialogue speaker="tanya"><line-ru>(садится на корточки) Привет, пиздюк. Ты теперь наш пиздюк. Как тебя звать будем? Дюк. Ты похож на Дюка.</line-ru></dialogue>
+            <dialogue speaker="duke"><line-ru>ТЯВ! (лижет ей лицо)</line-ru></dialogue>
+            <on-complete>
+                <stat-change stat="happiness" value="+25"/>
+                <relationship-change target="duke" value="+10"/>
+                <relationship-change target="persi" value="+5"/>
+            </on-complete>
+        </step>
+    </steps>
+    <rewards>
+        <stat-change stat="happiness" value="+20"/>
+        <unlock type="character">duke</unlock>
+        <unlock type="animation">persi_duke_family</unlock>
+    </rewards>
+</quest>

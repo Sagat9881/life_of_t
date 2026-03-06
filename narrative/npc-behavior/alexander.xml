@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc-behavior entity-id="alexander">
+    <schedules>
+        <schedule time="morning">
+            <action type="move" target="kitchen"/>
+            <action type="idle_animation" value="coffee_pour"/>
+            <action type="dialogue-chance" probability="0.4">
+                <line-ru>Доброе утро. Как спала?</line-ru>
+            </action>
+            <action type="dialogue-chance" probability="0.2">
+                <line-ru>Сегодня важный релиз. Не теряй меня до вечера.</line-ru>
+            </action>
+        </schedule>
+        <schedule time="day">
+            <action type="move" target="alexander_room"/>
+            <action type="idle_animation" value="coding_at_desk"/>
+            <action type="dialogue-chance" probability="0.15">
+                <line-ru>Тань, ты не знаешь где мои наушники? ...Нет, вторые. ...Нет, синие.</line-ru>
+            </action>
+            <action type="dialogue-chance" probability="0.1">
+                <line-ru>Слушай, это гениально или я перегрелся? (показывает экран)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="evening">
+            <action type="move" target="kitchen"/>
+            <action type="idle_animation" value="stretch_after_work"/>
+            <action type="dialogue-chance" probability="0.5">
+                <line-ru>Ужинать будем? Я могу что-нибудь сделать.</line-ru>
+            </action>
+            <action type="dialogue-chance" probability="0.3">
+                <line-ru>Расскажи про свой день. Я слушаю.</line-ru>
+            </action>
+        </schedule>
+        <schedule time="night">
+            <action type="move" target="alexander_room"/>
+            <action type="idle_animation" value="late_coding"/>
+            <action type="dialogue-chance" probability="0.25">
+                <line-ru>Ещё час — и всё. Честно.</line-ru>
+            </action>
+            <action type="move" target="home_room"/>
+            <action type="idle_animation" value="sleep"/>
+        </schedule>
+    </schedules>
+    <reactions>
+        <reaction trigger="player_nearby" radius="2">
+            <action type="animation" value="look_up_from_screen"/>
+            <action type="dialogue-chance" probability="0.3">
+                <line-ru>Привет. Что-то нужно?</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="tanya_sad">
+            <action type="animation" value="approach_and_hug"/>
+            <action type="dialogue-chance" probability="0.8">
+                <line-ru>Эй. Иди сюда. Что случилось?</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="meal_ready">
+            <action type="animation" value="leave_desk_quickly"/>
+            <action type="dialogue-chance" probability="0.7">
+                <line-ru>Уже иду! Слышу, слышу!</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="pet_nearby" pet-type="cat" relation="friendly">
+            <action type="animation" value="absentminded_pet"/>
+        </reaction>
+        <reaction trigger="pet_nearby" pet-type="dog" pet-id="sam" relation="friendly">
+            <action type="animation" value="slow_hand_extend"/>
+            <action type="dialogue-chance" probability="0.4">
+                <line-ru>Привет, малой. Я тут. Можно подойти.</line-ru>
+            </action>
+        </reaction>
+    </reactions>
+    <personality>
+        <trait name="friendliness" value="70"/>
+        <trait name="anxiety" value="30"/>
+        <trait name="energy" value="60"/>
+        <trait name="independence" value="75"/>
+        <trait name="focus" value="85"/>
+        <trait name="awareness" value="55"/>
+    </personality>
+</npc-behavior>

@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>characters</entity-type>
+        <entity-name>klop</entity-name>
+        <version>1.0.0</version>
+    </meta>
+    <!-- Klop: Russian blue colored cat, chubby but agile. Smoky undercoat.
+         Canvas: 22x18 (slightly larger, chubby proportions).
+         Blue-grey: #8899AA base, #6677AA blue tones, #AABBCC highlights, smoky #556677.
+         Most non-aggressive being; loves all touch; social integrator. -->
+    <layers>
+        <!-- z=0: paws — chunky round paws -->
+        <layer id="paws" type="base" z-order="0" width="22" height="18">
+            <pixel-data>
+                <!-- front left paw: chubby 3px wide -->
+                <rect x="3" y="15" w="3" h="2" color="#8899AA"/>
+                <hline x="3" y="16" len="3" color="#6677AA"/>
+                <!-- front right paw -->
+                <rect x="8" y="15" w="3" h="2" color="#8899AA"/>
+                <hline x="8" y="16" len="3" color="#6677AA"/>
+                <!-- rear left paw -->
+                <rect x="13" y="15" w="3" h="2" color="#8899AA"/>
+                <hline x="13" y="16" len="3" color="#6677AA"/>
+                <!-- rear right paw -->
+                <rect x="18" y="15" w="3" h="2" color="#8899AA"/>
+                <hline x="18" y="16" len="3" color="#6677AA"/>
+                <!-- paw pads: pink-grey -->
+                <pixel x="5" y="16" color="#CCAACC"/>
+                <pixel x="10" y="16" color="#CCAACC"/>
+                <pixel x="15" y="16" color="#CCAACC"/>
+                <pixel x="20" y="16" color="#CCAACC"/>
+            </pixel-data>
+        </layer>
+        <!-- z=1: legs — short chunky legs -->
+        <layer id="legs" type="base" z-order="1" width="22" height="18">
+            <pixel-data>
+                <!-- legs are short because chubby body sits low -->
+                <rect x="3" y="11" w="3" h="4" color="#8899AA"/>
+                <rect x="8" y="11" w="3" h="4" color="#8899AA"/>
+                <rect x="13" y="11" w="3" h="4" color="#8899AA"/>
+                <rect x="18" y="11" w="3" h="4" color="#8899AA"/>
+                <!-- smoky undercoat showing at leg roots -->
+                <hline x="3" y="11" len="3" color="#556677"/>
+                <hline x="8" y="11" len="3" color="#556677"/>
+                <hline x="13" y="11" len="3" color="#556677"/>
+                <hline x="18" y="11" len="3" color="#556677"/>
+            </pixel-data>
+        </layer>
+        <!-- z=2: body/torso — wide round chubby body -->
+        <layer id="body" type="base" z-order="2" width="22" height="18">
+            <pixel-data>
+                <!-- wide chubby torso: 15px wide, 7px tall -->
+                <rect x="3" y="6" w="15" h="7" color="#8899AA"/>
+                <!-- back highlight — blue-silver sheen -->
+                <hline x="4" y="6" len="13" color="#AABBCC"/>
+                <hline x="5" y="7" len="11" color="#99AABC"/>
+                <!-- belly round underside -->
+                <hline x="4" y="12" len="13" color="#7788A0"/>
+                <!-- side roundness shading -->
+                <pixel x="3" y="7" color="#6677AA"/>
+                <pixel x="3" y="8" color="#6677AA"/>
+                <pixel x="3" y="9" color="#6677AA"/>
+                <pixel x="17" y="7" color="#6677AA"/>
+                <pixel x="17" y="8" color="#6677AA"/>
+                <pixel x="17" y="9" color="#6677AA"/>
+                <!-- smoky undercoat gradient at mid-body -->
+                <hline x="5" y="10" len="11" color="#556677"/>
+            </pixel-data>
+        </layer>
+        <!-- z=3: belly_pattern — very round plump belly, smoky undercoat visible -->
+        <layer id="belly_pattern" type="overlay" z-order="3" width="22" height="18">
+            <pixel-data>
+                <!-- big round belly patch: 8px wide -->
+                <rect x="6" y="9" w="9" h="4" color="#9BABB8"/>
+                <!-- smoky center shadow suggesting fat rolls -->
+                <hline x="7" y="11" len="7" color="#556677"/>
+                <!-- belly highlight top -->
+                <hline x="7" y="9" len="7" color="#BBCCDD"/>
+            </pixel-data>
+        </layer>
+        <!-- z=4: tail — thick fluffy tail, curved low (lazy but present) -->
+        <layer id="tail" type="base" z-order="4" width="22" height="18">
+            <pixel-data>
+                <pixel x="18" y="11" color="#8899AA"/>
+                <pixel x="19" y="10" color="#8899AA"/>
+                <!-- thick tail: 2px wide -->
+                <pixel x="20" y="9" color="#8899AA"/>
+                <pixel x="21" y="8" color="#AABBCC"/>
+                <pixel x="21" y="7" color="#8899AA"/>
+                <pixel x="20" y="6" color="#8899AA"/>
+                <!-- tail tip curled back -->
+                <pixel x="19" y="6" color="#AABBCC"/>
+                <!-- underside -->
+                <pixel x="19" y="11" color="#6677AA"/>
+                <pixel x="20" y="10" color="#6677AA"/>
+            </pixel-data>
+        </layer>
+        <!-- z=5: head — round chubby head, jowly cheeks -->
+        <layer id="head" type="base" z-order="5" width="22" height="18">
+            <pixel-data>
+                <!-- round head: wider 9px -->
+                <rect x="2" y="2" w="9" h="7" color="#8899AA"/>
+                <!-- forehead blue-silver sheen -->
+                <hline x="3" y="2" len="7" color="#AABBCC"/>
+                <!-- chubby cheek puffs -->
+                <pixel x="2" y="6" color="#99AABB"/>
+                <pixel x="2" y="5" color="#99AABB"/>
+                <pixel x="10" y="6" color="#99AABB"/>
+                <pixel x="10" y="5" color="#99AABB"/>
+                <!-- chin round underside -->
+                <hline x="3" y="8" len="6" color="#7788A0"/>
+                <!-- jaw shading -->
+                <hline x="2" y="7" len="9" color="#6677AA"/>
+            </pixel-data>
+        </layer>
+        <!-- z=6: ears — small rounded ears (Russian blue style) -->
+        <layer id="ears" type="base" z-order="6" width="22" height="18">
+            <pixel-data>
+                <!-- left ear: small -->
+                <pixel x="2" y="1" color="#8899AA"/>
+                <pixel x="3" y="0" color="#AABBCC"/>
+                <pixel x="4" y="1" color="#8899AA"/>
+                <!-- left inner -->
+                <pixel x="3" y="1" color="#CCAACC"/>
+                <!-- right ear -->
+                <pixel x="8" y="1" color="#8899AA"/>
+                <pixel x="9" y="0" color="#AABBCC"/>
+                <pixel x="10" y="1" color="#8899AA"/>
+                <!-- right inner -->
+                <pixel x="9" y="1" color="#CCAACC"/>
+            </pixel-data>
+        </layer>
+        <!-- z=7: face_details — green eyes (Russian blue trademark), small pink nose -->
+        <layer id="face_details" type="overlay" z-order="7" width="22" height="18">
+            <pixel-data>
+                <!-- left eye: vivid green (Russian blue hallmark) -->
+                <pixel x="4" y="4" color="#228B22"/>
+                <pixel x="5" y="3" color="#44BB44"/>
+                <pixel x="6" y="3" color="#44BB44"/>
+                <pixel x="5" y="4" color="#44BB44"/>
+                <pixel x="6" y="4" color="#111111"/>
+                <!-- right eye -->
+                <pixel x="7" y="4" color="#228B22"/>
+                <pixel x="8" y="3" color="#44BB44"/>
+                <pixel x="9" y="3" color="#44BB44"/>
+                <pixel x="8" y="4" color="#44BB44"/>
+                <pixel x="9" y="4" color="#111111"/>
+                <!-- eye shine: bright -->
+                <pixel x="5" y="3" color="#FFFFFF"/>
+                <pixel x="8" y="3" color="#FFFFFF"/>
+                <!-- nose: small pink, slightly wide (chubby) -->
+                <pixel x="5" y="5" color="#FFAACC"/>
+                <pixel x="6" y="5" color="#FFAACC"/>
+                <pixel x="7" y="5" color="#FFAACC"/>
+                <pixel x="6" y="6" color="#DD8899"/>
+                <!-- content mouth curve (pleased expression) -->
+                <pixel x="5" y="7" color="#557799"/>
+                <pixel x="6" y="7" color="#446688"/>
+                <pixel x="7" y="7" color="#557799"/>
+                <!-- whiskers — relaxed hanging -->
+                <hline x="0" y="5" len="3" color="#FFFFFF"/>
+                <hline x="0" y="6" len="2" color="#CCCCCC"/>
+                <hline x="11" y="5" len="3" color="#FFFFFF"/>
+                <hline x="11" y="6" len="2" color="#CCCCCC"/>
+            </pixel-data>
+        </layer>
+    </layers>
+    <animations>
+        <!-- idle_morning: slow stretch, rolls around comfortably -->
+        <animation name="idle_morning" frames="4" fps="3" loop="true" frame-width="22" frame-height="18">
+            <condition type="time_of_day" value="morning"/>
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="head:0,-1; ears:0,-1; face_details:0,-1; body:0,1; belly_pattern:0,1"/>
+            <frame index="2" layer-offsets="body:0,1; belly_pattern:0,2; legs:0,1; paws:0,1"/>
+            <frame index="3" layer-offsets=""/>
+        </animation>
+        <!-- idle_day: alert and happy, looking for attention -->
+        <animation name="idle_day" frames="4" fps="4" loop="true" frame-width="22" frame-height="18">
+            <condition type="time_of_day" value="day"/>
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="head:-1,0; ears:-1,0; face_details:-1,0"/>
+            <frame index="2" layer-offsets=""/>
+            <frame index="3" layer-offsets="head:1,0; ears:1,0; face_details:1,0"/>
+        </animation>
+        <!-- idle_evening: blissful and relaxed, purring loudly -->
+        <animation name="idle_evening" frames="4" fps="3" loop="true" frame-width="22" frame-height="18">
+            <condition type="time_of_day" value="evening"/>
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="body:0,1; belly_pattern:0,1"/>
+            <frame index="2" layer-offsets="head:0,1; face_details:0,1; body:0,1; belly_pattern:0,1; tail:0,1"/>
+            <frame index="3" layer-offsets="body:0,1; belly_pattern:0,1"/>
+        </animation>
+        <!-- idle_night: completely flat asleep, maximally spread belly -->
+        <animation name="idle_night" frames="4" fps="2" loop="true" frame-width="22" frame-height="18">
+            <condition type="time_of_day" value="night"/>
+            <frame index="0" layer-offsets="head:1,3; ears:1,3; face_details:1,3; body:0,1; belly_pattern:0,2; tail:2,2"/>
+            <frame index="1" layer-offsets="head:1,3; ears:1,3; face_details:1,3; body:0,1; belly_pattern:0,2; tail:2,2"/>
+            <frame index="2" layer-offsets="head:1,3; ears:1,3; face_details:1,3; body:0,2; belly_pattern:0,3; tail:2,2"/>
+            <frame index="3" layer-offsets="head:1,3; ears:1,3; face_details:1,3; body:0,1; belly_pattern:0,2; tail:2,2"/>
+        </animation>
+        <!-- walk: surprisingly agile waddle for a chubby cat -->
+        <animation name="walk" frames="6" fps="7" loop="true" frame-width="22" frame-height="18">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="paws:-1,-1; legs:-1,0; belly_pattern:-1,0"/>
+            <frame index="2" layer-offsets="body:-1,0; belly_pattern:-1,0"/>
+            <frame index="3" layer-offsets="paws:1,-1; legs:1,0; belly_pattern:1,0"/>
+            <frame index="4" layer-offsets="tail:0,-1; body:1,0; belly_pattern:1,0"/>
+            <frame index="5" layer-offsets=""/>
+        </animation>
+        <!-- belly_up: unique — rolling onto back for belly rubs, very trusting -->
+        <animation name="belly_up" frames="6" fps="4" loop="false" frame-width="22" frame-height="18">
+            <condition type="trigger" value="pet_interaction"/>
+            <!-- frame 0: begins to tip sideways -->
+            <frame index="0" layer-offsets="body:1,0; belly_pattern:1,0"/>
+            <!-- frame 1: rolling, legs in air -->
+            <frame index="1" layer-offsets="body:2,1; belly_pattern:2,0; legs:2,-2; paws:3,-3"/>
+            <!-- frame 2: fully on back, belly exposed -->
+            <frame index="2" layer-offsets="body:0,2; belly_pattern:0,-1; legs:1,-3; paws:0,-4; tail:3,0"/>
+            <!-- frame 3: wriggling happily (slight rock) -->
+            <frame index="3" layer-offsets="body:-1,2; belly_pattern:-1,-1; legs:0,-3; paws:-1,-4; tail:2,0"/>
+            <!-- frame 4: still, blissful -->
+            <frame index="4" layer-offsets="body:0,2; belly_pattern:0,-1; legs:1,-3; paws:0,-4; tail:3,0"/>
+            <!-- frame 5: rolls back upright -->
+            <frame index="5" layer-offsets=""/>
+        </animation>
+    </animations>
+    <naming>
+        <output-dir>characters/klop</output-dir>
+    </naming>
+</asset-spec>

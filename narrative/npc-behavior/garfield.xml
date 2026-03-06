@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc-behavior entity-id="garfield">
+    <schedules>
+        <schedule time="morning">
+            <action type="move" target="kitchen"/>
+            <action type="idle_animation" value="elegant_sit_wait"/>
+            <action type="dialogue-chance" probability="0.5">
+                <line-ru>Мрр... (смотрит на пустую миску с достоинством)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="day">
+            <action type="move" target="living_room"/>
+            <action type="idle_animation" value="patrol_perimeter"/>
+            <action type="move" target="home_room"/>
+            <action type="idle_animation" value="groom_self"/>
+            <action type="dialogue-chance" probability="0.2">
+                <line-ru>Мрр... (проверяет, всё ли в порядке в его владениях)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="evening">
+            <action type="move" target="home_room"/>
+            <action type="idle_animation" value="claim_best_spot"/>
+            <action type="dialogue-chance" probability="0.4">
+                <line-ru>Мррм... (требует внимания негромко, но настойчиво)</line-ru>
+            </action>
+        </schedule>
+        <schedule time="night">
+            <action type="move" target="home_room"/>
+            <action type="idle_animation" value="curl_sleep"/>
+        </schedule>
+    </schedules>
+    <reactions>
+        <reaction trigger="player_nearby" radius="3">
+            <action type="animation" value="slow_blink"/>
+            <action type="dialogue-chance" probability="0.35">
+                <line-ru>Мррр... (медленное моргание — знак доверия)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="loud_noise">
+            <action type="animation" value="startle_paws_sweat"/>
+            <action type="dialogue-chance" probability="0.9">
+                <line-ru>МЯУ! (вздрагивает, шерсть чуть встаёт)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="kitten_present">
+            <action type="animation" value="approach_groom_kitten"/>
+            <action type="idle_animation" value="father_mode"/>
+            <action type="dialogue-chance" probability="0.7">
+                <line-ru>Пурр... (начинает вылизывать котёнка методично)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="pet_nearby" pet-type="cat" pet-id="aijan" relation="hostile">
+            <action type="animation" value="appear_in_doorway_regally"/>
+            <action type="dialogue-chance" probability="0.5">
+                <line-ru>Мрр. (просто стоит. Этого достаточно.)</line-ru>
+            </action>
+        </reaction>
+        <reaction trigger="pet_nearby" pet-type="cat" pet-id="cirilla" relation="friendly">
+            <action type="animation" value="mutual_groom"/>
+        </reaction>
+    </reactions>
+    <personality>
+        <trait name="friendliness" value="60"/>
+        <trait name="anxiety" value="70"/>
+        <trait name="energy" value="40"/>
+        <trait name="independence" value="80"/>
+        <trait name="elegance" value="100"/>
+        <trait name="leadership" value="90"/>
+    </personality>
+</npc-behavior>

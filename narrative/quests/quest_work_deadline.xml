@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest id="quest_work_deadline" type="SIDE">
+    <meta>
+        <title>Deadline Is Burning</title>
+        <title-ru>Дедлайн горит</title-ru>
+        <description>A Tilda design project is due today. Complete it under time pressure while managing rising anxiety.</description>
+        <description-ru>Сегодня сдавать проект в Tilda. Успей закончить его под давлением времени, удерживая тревогу под контролем.</description-ru>
+        <chapter>1</chapter>
+        <prerequisites>quest_morning_routine</prerequisites>
+    </meta>
+    <objectives>
+        <objective id="obj_read_brief" type="DIALOGUE">
+            <description-ru>Перечитай техническое задание от клиента</description-ru>
+            <target>tanya_laptop</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_build_blocks" type="INTERACT">
+            <description-ru>Собери три экрана лендинга в Tilda</description-ru>
+            <target>tilda_editor</target>
+            <location>home_room</location>
+            <count>3</count>
+        </objective>
+        <objective id="obj_client_feedback" type="DIALOGUE">
+            <description-ru>Ответь клиенту на правки — спокойно или срываясь</description-ru>
+            <target>client_chat</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_send_project" type="INTERACT">
+            <description-ru>Отправь готовый проект клиенту до 18:00</description-ru>
+            <target>tanya_laptop</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+    </objectives>
+    <steps>
+        <step order="1" objective-ref="obj_read_brief">
+            <dialogue speaker="tanya">
+                <line-ru>Так... «минималистичный лендинг, светлые тона, никаких лишних элементов, и это, и то, и ещё вон то»... Минималистичный, значит. Понятно.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="anxiety" value="+5"/>
+                <stat-change stat="focus" value="+10"/>
+            </on-complete>
+        </step>
+        <step order="2" objective-ref="obj_build_blocks">
+            <dialogue speaker="narrator">
+                <line-ru>Часы идут. Гарфилд устраивается рядом с ноутбуком — тихое тёплое присутствие. Ладони слегка потеют. Таня работает.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Первый экран... второй... почему этот блок не выравнивается?! Стоп. Дышим. Просто блок. Просто работа.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="anxiety" value="+10"/>
+                <stat-change stat="focus" value="+5"/>
+            </on-complete>
+        </step>
+        <step order="3" objective-ref="obj_client_feedback">
+            <dialogue speaker="narrator">
+                <line-ru>Клиент пишет: «А можно сделать всё то же самое, но совсем по-другому?»</line-ru>
+            </dialogue>
+            <!-- CHOICE BRANCH: spicy vs calm -->
+            <dialogue speaker="tanya" choice="calm">
+                <line-ru>Конечно! Уточните, пожалуйста, что именно хотели бы изменить, и я учту в финальной версии.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya" choice="spicy">
+                <line-ru>Мы договорились о ТЗ в начале недели. Сейчас за час до дедлайна я не могу переделать всё. Давайте зафиксируем текущий вариант и обсудим правки в следующем спринте.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="self_esteem" value="+5"/>
+            </on-complete>
+        </step>
+        <step order="4" objective-ref="obj_send_project">
+            <dialogue speaker="tanya">
+                <line-ru>Готово. Отправлено. Можно выдохнуть.</line-ru>
+            </dialogue>
+            <dialogue speaker="narrator">
+                <line-ru>17:58. Таня откидывается на спинку кресла. Гарфилд немедленно перебирается к ней на колени. Тревога отступает на несколько сантиметров.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="anxiety" value="-15"/>
+                <stat-change stat="happiness" value="+10"/>
+                <stat-change stat="self_esteem" value="+10"/>
+            </on-complete>
+        </step>
+    </steps>
+    <rewards>
+        <stat-change stat="happiness" value="+10"/>
+        <stat-change stat="anxiety" value="-10"/>
+        <stat-change stat="self_esteem" value="+15"/>
+        <unlock type="item">project_payment</unlock>
+    </rewards>
+</quest>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest id="quest_family_photo" type="HIDDEN">
+    <meta>
+        <title>Family Photo</title>
+        <title-ru>Семейное фото</title-ru>
+        <description>Secret quest: gather ALL pets and both characters in one spot for a family photo. Requires all pets to be happy (above 70% relationship). Hidden achievement.</description>
+        <description-ru>Секретный квест: собери ВСЕХ питомцев и обоих персонажей в одном месте для семейного фото. Требует чтобы все питомцы были довольны (отношения выше 70%). Скрытое достижение.</description-ru>
+        <chapter>5</chapter>
+        <prerequisites>quest_dacha_summer,quest_klop_peacemaker,quest_sam_trust</prerequisites>
+    </meta>
+    <objectives>
+        <objective id="obj_check_all_happy" type="INTERACT">
+            <description-ru>Убедись что все питомцы довольны и рядом</description-ru>
+            <target>all_pets</target>
+            <location>dacha_garden</location>
+            <count>9</count>
+        </objective>
+        <objective id="obj_find_photographer" type="DIALOGUE">
+            <description-ru>Попроси кого-нибудь сфотографировать — звонок маме</description-ru>
+            <target>tanya_phone</target>
+            <location>dacha_garden</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_gather_everyone" type="INTERACT">
+            <description-ru>Собери всех в одном месте — это сложнее чем кажется</description-ru>
+            <target>all_pets</target>
+            <location>dacha_garden</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_take_photo" type="INTERACT">
+            <description-ru>Сделайте фото — все смотрят в кадр (почти)</description-ru>
+            <target>camera</target>
+            <location>dacha_garden</location>
+            <count>1</count>
+        </objective>
+    </objectives>
+    <steps>
+        <step order="1" objective-ref="obj_check_all_happy">
+            <dialogue speaker="tanya">
+                <line-ru>Смотри, сегодня все тут, все довольны... Саш, а давай сфотографируемся? Все вместе?</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>Все девять?</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Все девять. Один раз всё совпало — солнце, настроение, место.</line-ru>
+            </dialogue>
+        </step>
+        <step order="2" objective-ref="obj_find_photographer">
+            <dialogue speaker="tanya">
+                <line-ru>Мама? Ты можешь прийти на пять минут? Нам нужен фотограф. Нет, настоящий не нужен. Просто держи телефон горизонтально!</line-ru>
+            </dialogue>
+        </step>
+        <step order="3" objective-ref="obj_gather_everyone">
+            <dialogue speaker="narrator">
+                <line-ru>Организация семейного фото с девятью животными занимает сорок минут. Дюк убегает четыре раза. Айджан шипит на Гарфилда. Тельма уходит в траву и исчезает на пятнадцать минут. Клоп засыпает.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Клоп, проснись! Дюк, НЕТ, не в ту сторону! Айджан, хорошая девочка, стой здесь... Гарфилд не смотри на неё! Мам, ты держишь телефон?</line-ru>
+            </dialogue>
+            <dialogue speaker="alexander">
+                <line-ru>(тихо смеётся)</line-ru>
+            </dialogue>
+        </step>
+        <step order="4" objective-ref="obj_take_photo">
+            <dialogue speaker="narrator">
+                <line-ru>Один момент. Все на месте. Таня и Александр, плечо к плечу. Рядом — Гарфилд, Цирилла, Клоп, Лада, Тельма, Айджан, Сэм, Перси и Дюк. Кто-то смотрит в камеру. Кто-то смотрит в другую сторону. Дюк открыл рот.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>СНИМАЙ!</line-ru>
+            </dialogue>
+            <dialogue speaker="narrator">
+                <line-ru>Щелчок. Фотография.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>(смотрит на фото) Это... это идеально. Это абсолютно идеально.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="happiness" value="+50"/>
+                <stat-change stat="anxiety" value="-30"/>
+                <unlock type="animation">family_photo_scene</unlock>
+            </on-complete>
+        </step>
+    </steps>
+    <rewards>
+        <stat-change stat="happiness" value="+50"/>
+        <unlock type="animation">family_photo_scene</unlock>
+        <unlock type="item">family_photo_item</unlock>
+    </rewards>
+</quest>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event id="event_cirilla_muselet" type="RANDOM">
+    <meta>
+        <title-ru>Цирилла и мюзле</title-ru>
+        <description-ru>Цирилла нашла мюзле от шампанского и катает его по полу. Самодостаточное развлечение.</description-ru>
+        <probability>0.35</probability>
+        <cooldown-hours>12</cooldown-hours>
+    </meta>
+    <conditions>
+        <condition type="time_of_day" value="day"/>
+        <condition type="location" value="kitchen"/>
+    </conditions>
+    <effects>
+        <stat-change stat="happiness" value="+7"/>
+        <dialogue speaker="narrator">
+            <line-ru>Металлический звук по плитке — тик-тик-тик. Цирилла катит мюзле носом через всю кухню, подбрасывает лапой, ловит, катит обратно. Совершенно одна, совершенно довольна.</line-ru>
+        </dialogue>
+        <dialogue speaker="tanya">
+            <line-ru>Цирилла, откуда ты вообще достала это? (смотрит на неё) Не отвечай. Я не хочу знать.</line-ru>
+        </dialogue>
+    </effects>
+</event>

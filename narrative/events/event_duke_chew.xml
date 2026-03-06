@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event id="event_duke_chew" type="RANDOM">
+    <meta>
+        <title-ru>Дюк грызёт что-то</title-ru>
+        <description-ru>Дюк нашёл что-то и грызёт это с большим энтузиазмом. Это не его вещь.</description-ru>
+        <probability>0.55</probability>
+        <cooldown-hours>3</cooldown-hours>
+    </meta>
+    <conditions>
+        <condition type="time_of_day" value="day"/>
+    </conditions>
+    <effects>
+        <stat-change stat="happiness" value="+3"/>
+        <dialogue speaker="narrator">
+            <line-ru>Подозрительная тишина. Потом звук: хрум-хрум-хрум. Дюк лежит в углу и грызёт что-то явно не своё — судя по цвету, это был тапочек.</line-ru>
+        </dialogue>
+        <dialogue speaker="tanya">
+            <line-ru>Дюк! Это мой тапочек! Отдай! ОТДАЙ! Перси, скажи ему!</line-ru>
+        </dialogue>
+        <dialogue speaker="persi">
+            <line-ru>...(смотрит в другую сторону)</line-ru>
+        </dialogue>
+        <dialogue speaker="tanya">
+            <line-ru>Предательница.</line-ru>
+        </dialogue>
+    </effects>
+</event>

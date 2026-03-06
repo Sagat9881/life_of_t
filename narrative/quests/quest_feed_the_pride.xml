@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest id="quest_feed_the_pride" type="DAILY">
+    <meta>
+        <title>Feed the Pride</title>
+        <title-ru>Покормить прайд</title-ru>
+        <description>Feed all six cats and three dogs. Each pet has their own food preferences and quirks.</description>
+        <description-ru>Накорми всех шестерых кошек и трёх собак. У каждого питомца — свои предпочтения и характер.</description-ru>
+        <chapter>1</chapter>
+        <prerequisites>quest_morning_routine</prerequisites>
+    </meta>
+    <objectives>
+        <objective id="obj_feed_garfield" type="INTERACT">
+            <description-ru>Покорми Гарфилда — только влажный корм в его любимой миске</description-ru>
+            <target>garfield</target>
+            <location>kitchen</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_feed_cirilla" type="INTERACT">
+            <description-ru>Покорми Цириллу — сухой корм, она не любит когда мешают еду</description-ru>
+            <target>cirilla</target>
+            <location>living_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_feed_aijan" type="INTERACT">
+            <description-ru>Отнеси Айджан еду в комнату Александра — она не выйдет к кошкам</description-ru>
+            <target>aijan</target>
+            <location>alexander_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_feed_klop" type="INTERACT">
+            <description-ru>Покорми Клопа — он уже лежит пузом вверх рядом с миской</description-ru>
+            <target>klop</target>
+            <location>kitchen</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_feed_lada" type="INTERACT">
+            <description-ru>Покорми Ладу — она прячется за диваном, позови её тихо</description-ru>
+            <target>lada</target>
+            <location>living_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_feed_thelma" type="INTERACT">
+            <description-ru>Найди Тельму — она где-то спит — и покорми её</description-ru>
+            <target>thelma</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_feed_sam" type="INTERACT">
+            <description-ru>Покорми Сэма — он уже крутится вокруг ног</description-ru>
+            <target>sam</target>
+            <location>kitchen</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_feed_persi" type="INTERACT">
+            <description-ru>Накорми Перси — она ждёт тихо и терпеливо</description-ru>
+            <target>persi</target>
+            <location>alexander_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_feed_duke" type="INTERACT">
+            <description-ru>Поймай Дюка и накорми — он носится как угорелый</description-ru>
+            <target>duke</target>
+            <location>alexander_room</location>
+            <count>1</count>
+        </objective>
+    </objectives>
+    <steps>
+        <step order="1" objective-ref="obj_feed_garfield">
+            <dialogue speaker="garfield">
+                <line-ru>Мррм. (садится идеально прямо и ждёт, как истинный аристократ)</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Твой завтрак, Гарфилд. Паштет из тунца. Ты заслуживаешь лучшего, я знаю.</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="garfield" value="+1"/>
+            </on-complete>
+        </step>
+        <step order="2" objective-ref="obj_feed_cirilla">
+            <dialogue speaker="cirilla">
+                <line-ru>Мяу! Мяу-мяу! (прыгает на стул, катает мюзле по столу)</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Цирилла, брось мюзле, иди есть. Брось. Брось, я сказала. Ладно, ешь с мюзле рядом.</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="cirilla" value="+1"/>
+            </on-complete>
+        </step>
+        <step order="3" objective-ref="obj_feed_aijan">
+            <dialogue speaker="narrator">
+                <line-ru>Таня осторожно открывает дверь в комнату Александра. Айджан немедленно выходит навстречу, мурлыча.</line-ru>
+            </dialogue>
+            <dialogue speaker="aijan">
+                <line-ru>Мрр-р-р! (трётся об ноги Тани, полностью игнорируя всё остальное)</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Привет, моя котлетка. Только тихо — не буди остальных!</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="aijan" value="+1"/>
+            </on-complete>
+        </step>
+        <step order="4" objective-ref="obj_feed_klop">
+            <dialogue speaker="klop">
+                <line-ru>Ммрр... (не шевелится, лежит пузом вверх прямо у миски)</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Клоп, ну встань. Я же не могу кормить тебя в таком положении. Хотя... могу, наверное.</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="klop" value="+1"/>
+                <stat-change stat="happiness" value="+3"/>
+            </on-complete>
+        </step>
+        <step order="5" objective-ref="obj_feed_lada">
+            <dialogue speaker="tanya">
+                <line-ru>Ладуша... Ладочка... Я тут. Всё хорошо, маленькая. Никто тебя не обидит.</line-ru>
+            </dialogue>
+            <dialogue speaker="lada">
+                <line-ru>...(маленький осторожный нос появляется из-под дивана)</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="lada" value="+2"/>
+                <stat-change stat="happiness" value="+2"/>
+            </on-complete>
+        </step>
+        <step order="6" objective-ref="obj_feed_thelma">
+            <dialogue speaker="narrator">
+                <line-ru>Тельма обнаруживается на кровати, в самой середине подушки, свернувшаяся в идеальный чёрно-белый блин.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Тельма. Тельм. Еда. Тельма, я знаю что ты слышишь... Ладно, оставлю рядом.</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="thelma" value="+1"/>
+            </on-complete>
+        </step>
+        <step order="7" objective-ref="obj_feed_sam">
+            <dialogue speaker="sam">
+                <line-ru>Тяв! Тяв-тяв! (вертится волчком, хвост в режиме пропеллера)</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Сэмочка! Мой маленький. Иди сюда. Вот твоя еда, вот. Хороший мальчик.</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="sam" value="+2"/>
+                <stat-change stat="happiness" value="+5"/>
+            </on-complete>
+        </step>
+        <step order="8" objective-ref="obj_feed_persi">
+            <dialogue speaker="persi">
+                <line-ru>...(смотрит на Таню долгим мудрым взглядом, потом опускает голову к миске)</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Ты всегда ждёшь без шума. Я это ценю, Перси. Ешь.</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="persi" value="+1"/>
+            </on-complete>
+        </step>
+        <step order="9" objective-ref="obj_feed_duke">
+            <dialogue speaker="duke">
+                <line-ru>Тяф-тяф-тяф! (несётся, тормозит лапами, врезается в Перси, отскакивает, несётся снова)</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Дюк! Стой! Вот сюда! ЕДА! Да, сюда! Молодец, умница. Пиздюк ты мой любимый.</line-ru>
+            </dialogue>
+            <on-complete>
+                <relationship-change target="duke" value="+2"/>
+                <stat-change stat="happiness" value="+5"/>
+            </on-complete>
+        </step>
+    </steps>
+    <rewards>
+        <stat-change stat="happiness" value="+15"/>
+        <stat-change stat="anxiety" value="-5"/>
+        <unlock type="animation">all_pets_fed_scene</unlock>
+    </rewards>
+</quest>

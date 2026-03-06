@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-spec>
+    <meta>
+        <entity-type>locations</entity-type>
+        <entity-name>parents_cottage</entity-name>
+        <version>1.0.0</version>
+        <description>Tanya's parents' cottage at the dacha. Warm, cozy, slightly old-fashioned. Home of blind Voland (French Bulldog, ~11 years old). Family photos, a comfortable old sofa, warm light. Safe and nostalgic atmosphere.</description>
+    </meta>
+
+    <layers>
+        <!-- z=0: Floor — cozy cottage floor, wide wooden boards -->
+        <layer id="floor" type="background" z-order="0" width="320" height="240">
+            <pixel-data>
+                <!-- Floor — warm medium wood tone, wide planks -->
+                <rect x="0" y="158" w="320" h="82" color="#B89060"/>
+                <!-- Wide plank lines -->
+                <hline x="0" y="174" len="320" color="#A88050"/>
+                <hline x="0" y="190" len="320" color="#AA8252"/>
+                <hline x="0" y="206" len="320" color="#A88050"/>
+                <hline x="0" y="222" len="320" color="#AA8252"/>
+                <!-- Vertical plank joints (wide planks) -->
+                <rect x="60"  y="158" w="2" h="82" color="#986A40"/>
+                <rect x="140" y="158" w="2" h="82" color="#986A40"/>
+                <rect x="210" y="158" w="2" h="82" color="#986A40"/>
+                <rect x="280" y="158" w="2" h="82" color="#986A40"/>
+                <!-- Worn spots -->
+                <rect x="120" y="165" w="30" h="10" color="#C09868"/>
+                <rect x="200" y="180" w="20" h="8"  color="#C09868"/>
+                <!-- Baseboard trim — painted white -->
+                <rect x="0" y="155" w="320" h="5"   color="#EEE8DC"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=1: Walls — warm wooden wall paneling -->
+        <layer id="walls" type="background" z-order="1" width="320" height="240">
+            <pixel-data>
+                <!-- Main wall — warm pine wood -->
+                <rect x="0" y="0" w="320" h="160" color="#D4A870"/>
+                <!-- Horizontal wood panel lines -->
+                <hline x="0" y="14"  len="320" color="#C89860"/>
+                <hline x="0" y="28"  len="320" color="#CC9C64"/>
+                <hline x="0" y="42"  len="320" color="#C89860"/>
+                <hline x="0" y="56"  len="320" color="#CC9C64"/>
+                <hline x="0" y="70"  len="320" color="#C89860"/>
+                <hline x="0" y="84"  len="320" color="#CC9C64"/>
+                <hline x="0" y="98"  len="320" color="#C89860"/>
+                <hline x="0" y="112" len="320" color="#CC9C64"/>
+                <hline x="0" y="126" len="320" color="#C89860"/>
+                <hline x="0" y="140" len="320" color="#CC9C64"/>
+                <!-- Wood knot details -->
+                <rect x="56"  y="34" w="6" h="4"  color="#B07840"/>
+                <rect x="57"  y="35" w="4" h="2"  color="#A06830"/>
+                <rect x="200" y="56" w="5" h="4"  color="#B07840"/>
+                <rect x="201" y="57" w="3" h="2"  color="#A06830"/>
+                <rect x="130" y="98" w="6" h="4"  color="#B07840"/>
+                <rect x="131" y="99" w="4" h="2"  color="#A06830"/>
+                <!-- Corner boards (vertical frame pieces at edges) -->
+                <rect x="0"   y="0" w="8" h="160" color="#C09060"/>
+                <rect x="312" y="0" w="8" h="160" color="#C09060"/>
+                <!-- Crown molding at ceiling -->
+                <rect x="0"   y="0" w="320" h="8"  color="#E0CCB0"/>
+                <hline x="0"  y="7" len="320" color="#C8B0A0"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=2: Sofa — comfortable old sofa, worn and cozy -->
+        <layer id="sofa" type="foreground" z-order="2" width="320" height="240">
+            <pixel-data>
+                <!-- Sofa base -->
+                <rect x="44" y="148" w="160" h="40" color="#7A6050"/>
+                <!-- Sofa seat cushions -->
+                <rect x="46" y="148" w="76" h="22"  color="#9A8070"/>
+                <rect x="124" y="148" w="78" h="22"  color="#9A8070"/>
+                <!-- Cushion divider line -->
+                <rect x="122" y="148" w="4" h="22"   color="#8A7060"/>
+                <!-- Seat cushion shading -->
+                <hline x="47" y="152" len="74" color="#A89080"/>
+                <hline x="125" y="152" len="76" color="#A89080"/>
+                <!-- Sofa back -->
+                <rect x="44" y="118" w="160" h="32"  color="#8A7060"/>
+                <!-- Back cushion divisions -->
+                <rect x="44"  y="120" w="52" h="28"  color="#9A8070"/>
+                <rect x="98"  y="120" w="52" h="28"  color="#9A8070"/>
+                <rect x="152" y="120" w="50" h="28"  color="#9A8070"/>
+                <!-- Back cushion border lines -->
+                <rect x="96"  y="118" w="4" h="32"   color="#7A6050"/>
+                <rect x="150" y="118" w="4" h="32"   color="#7A6050"/>
+                <!-- Sofa arm left -->
+                <rect x="36"  y="118" w="12" h="72"  color="#6A5040"/>
+                <rect x="37"  y="119" w="10" h="6"   color="#9A8070"/>
+                <!-- Sofa arm right -->
+                <rect x="200" y="118" w="12" h="72"  color="#6A5040"/>
+                <rect x="201" y="119" w="10" h="6"   color="#9A8070"/>
+                <!-- Sofa feet (short, dark) -->
+                <rect x="44"  y="188" w="6" h="8"    color="#4A3830"/>
+                <rect x="196" y="188" w="6" h="8"    color="#4A3830"/>
+                <!-- Throw blanket over sofa arm (for Voland) -->
+                <rect x="36"  y="118" w="14" h="28"  color="#B09880"/>
+                <hline x="37" y="122" len="12" color="#A08870"/>
+                <hline x="37" y="126" len="12" color="#A08870"/>
+                <hline x="37" y="130" len="12" color="#A08870"/>
+                <!-- Small throw pillow -->
+                <rect x="60"  y="132" w="28" h="18"  color="#C8A080"/>
+                <rect x="62"  y="134" w="24" h="14"  color="#D4AA8C"/>
+                <hline x="63" y="138" len="22" color="#BCA080"/>
+                <hline x="63" y="143" len="22" color="#BCA080"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=3: Window — view of dacha yard outside -->
+        <layer id="window" type="midground" z-order="3" width="320" height="240">
+            <pixel-data>
+                <!-- Outside yard view — daytime greenery -->
+                <rect x="234" y="22" w="72" h="68" color="#90C870"/>
+                <!-- Sky above garden -->
+                <rect x="234" y="22" w="72" h="22" color="#B0D8F0"/>
+                <!-- Garden glimpse — flowers, fence -->
+                <rect x="236" y="60" w="5"  h="28" color="#70A050"/>
+                <rect x="235" y="56" w="7"  h="6"  color="#FF8090"/>
+                <rect x="246" y="60" w="5"  h="28" color="#70A050"/>
+                <rect x="245" y="54" w="7"  h="8"  color="#FFEE50"/>
+                <rect x="256" y="62" w="5"  h="26" color="#70A050"/>
+                <rect x="255" y="58" w="7"  h="6"  color="#FF8090"/>
+                <rect x="266" y="60" w="5"  h="28" color="#60A040"/>
+                <rect x="280" y="64" w="5"  h="24" color="#70A050"/>
+                <rect x="279" y="60" w="7"  h="6"  color="#FFEE50"/>
+                <rect x="292" y="60" w="5"  h="28" color="#60A040"/>
+                <!-- Fence beyond flowers -->
+                <hline x="234" y="86" len="72" color="#B08840"/>
+                <!-- Frame -->
+                <rect x="232" y="20" w="76" h="3"  color="#C09868"/>
+                <rect x="232" y="89" w="76" h="3"  color="#C09868"/>
+                <rect x="232" y="20" w="3"  h="72" color="#C09868"/>
+                <rect x="305" y="20" w="3"  h="72" color="#C09868"/>
+                <!-- Horizontal and vertical cross -->
+                <rect x="232" y="54" w="76" h="2"  color="#C09868"/>
+                <rect x="268" y="20" w="2"  h="72" color="#C09868"/>
+                <!-- Windowsill -->
+                <rect x="230" y="92" w="80" h="6"  color="#D4B080"/>
+                <!-- Net curtain / sheer -->
+                <rect x="230" y="16" w="80" h="78" color="#F8F4EC18"/>
+                <hline x="231" y="20" len="78" color="#F0EAE010"/>
+                <hline x="231" y="30" len="78" color="#F0EAE010"/>
+                <hline x="231" y="40" len="78" color="#F0EAE010"/>
+                <hline x="231" y="50" len="78" color="#F0EAE010"/>
+                <hline x="231" y="60" len="78" color="#F0EAE010"/>
+                <hline x="231" y="70" len="78" color="#F0EAE010"/>
+                <hline x="231" y="80" len="78" color="#F0EAE010"/>
+                <!-- Curtain ties left/right -->
+                <rect x="230" y="14" w="10" h="80" color="#E8E0D0"/>
+                <rect x="298" y="14" w="10" h="80" color="#E8E0D0"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=4: Voland Bed — large dog bed for blind Voland -->
+        <layer id="voland_bed" type="foreground" z-order="4" width="320" height="240">
+            <pixel-data>
+                <!-- Voland's dog bed — corner of room, low profile -->
+                <!-- Bed outer padding -->
+                <rect x="234" y="170" w="80" h="46" color="#9A8870"/>
+                <!-- Inner soft cushion -->
+                <rect x="240" y="176" w="68" h="34" color="#C8B898"/>
+                <hline x="241" y="182" len="66" color="#B8A888"/>
+                <hline x="241" y="188" len="66" color="#B8A888"/>
+                <hline x="241" y="194" len="66" color="#B8A888"/>
+                <!-- Bolster seam -->
+                <hline x="234" y="176" len="80" color="#8A7860"/>
+                <!-- Bed label/tag (small) -->
+                <rect x="288" y="170" w="12" h="6"  color="#E8C890"/>
+                <!-- Implied Voland presence — French bulldog silhouette curled up -->
+                <!-- Body outline (compact, rounded bully shape) -->
+                <rect x="248" y="178" w="34" h="20" color="#B0905C"/>
+                <rect x="250" y="176" w="30" h="18" color="#C0A06C"/>
+                <!-- Head (round, pushed face) -->
+                <rect x="266" y="174" w="18" h="14" color="#B0905C"/>
+                <rect x="268" y="172" w="14" h="14" color="#C0A06C"/>
+                <!-- Ears (pointed bully ears) -->
+                <rect x="266" y="168" w="5"  h="6"  color="#A07850"/>
+                <rect x="277" y="168" w="5"  h="6"  color="#A07850"/>
+                <!-- Nose (flat, pushed) -->
+                <rect x="272" y="179" w="6"  h="4"  color="#704030"/>
+                <!-- Closed eyes (sleeping, old dog) -->
+                <hline x="269" y="176" len="4" color="#604028"/>
+                <hline x="277" y="176" len="4" color="#604028"/>
+                <!-- Paws visible in front -->
+                <rect x="250" y="194" w="10" h="5"  color="#B0905C"/>
+                <rect x="264" y="194" w="10" h="5"  color="#B0905C"/>
+                <!-- Worn tennis ball toy beside bed (Voland's old toy) -->
+                <rect x="318" y="190" w="10" h="10" color="#C8C840"/>
+                <rect x="319" y="191" w="8"  h="8"  color="#D8D850"/>
+                <hline x="319" y="194" len="8" color="#B8B830"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=5: Family Photos — wall gallery of old photos -->
+        <layer id="family_photos" type="foreground" z-order="5" width="320" height="240">
+            <pixel-data>
+                <!-- Photo frame 1 — large wedding/family photo, center-left wall -->
+                <rect x="82"  y="14" w="52" h="40" color="#8A6840"/>
+                <rect x="84"  y="16" w="48" h="36" color="#F4ECD8"/>
+                <!-- People silhouettes in photo -->
+                <rect x="88"  y="20" w="10" h="18" color="#D4B890"/>
+                <rect x="100" y="18" w="10" h="20" color="#C8A888"/>
+                <rect x="112" y="22" w="10" h="14" color="#D4B890"/>
+                <hline x="86" y="50" len="44" color="#C0A870"/>
+                <!-- Photo 2 — young Tanya + parents (smaller) -->
+                <rect x="142" y="18" w="36" h="26" color="#7A6038"/>
+                <rect x="144" y="20" w="32" h="22" color="#F0E8D4"/>
+                <rect x="148" y="24" w="8"  h="12" color="#C8B0A0"/>
+                <rect x="158" y="22" w="8"  h="14" color="#D0B898"/>
+                <rect x="166" y="24" w="6"  h="12" color="#C8B0A0"/>
+                <!-- Photo 3 — Voland as puppy -->
+                <rect x="186" y="14" w="30" h="30" color="#806048"/>
+                <rect x="188" y="16" w="26" h="26" color="#F4ECD8"/>
+                <!-- Young Voland in photo (small bully silhouette) -->
+                <rect x="192" y="24" w="16" h="12" color="#C0A878"/>
+                <rect x="196" y="20" w="10" h="8"  color="#C8B080"/>
+                <!-- Photo 4 — dacha scene in summer -->
+                <rect x="82"  y="62" w="40" h="28" color="#6A5030"/>
+                <rect x="84"  y="64" w="36" h="24" color="#F0E8D4"/>
+                <!-- Dacha scene in photo -->
+                <rect x="86"  y="68" w="32" h="8"  color="#90B870"/>
+                <rect x="90"  y="64" w="10" h="8"  color="#C8B898"/>
+                <!-- Photo 5 — Tanya as child -->
+                <rect x="130" y="54" w="26" h="32" color="#7A6038"/>
+                <rect x="132" y="56" w="22" h="28" color="#F0E8D4"/>
+                <rect x="138" y="60" w="10" h="18" color="#E8C8A8"/>
+                <rect x="138" y="58" w="10" h="4"  color="#C87050"/>
+                <!-- Photo ornate frame border details -->
+                <hline x="82"  y="14" len="52" color="#C0A060"/>
+                <hline x="82"  y="53" len="52" color="#C0A060"/>
+                <hline x="142" y="18" len="36" color="#C0A060"/>
+                <hline x="142" y="43" len="36" color="#C0A060"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=6: Fireplace / Heater — old tile stove/heater on left wall -->
+        <layer id="fireplace" type="foreground" z-order="6" width="320" height="240">
+            <pixel-data>
+                <!-- Traditional Russian tiled heater / pechka in corner -->
+                <!-- Heater body -->
+                <rect x="0" y="68" w="30" h="94"  color="#E8E0D0"/>
+                <!-- Tile pattern on heater -->
+                <hline x="0" y="78"  len="30" color="#D0C8B8"/>
+                <hline x="0" y="88"  len="30" color="#D0C8B8"/>
+                <hline x="0" y="98"  len="30" color="#D0C8B8"/>
+                <hline x="0" y="108" len="30" color="#D0C8B8"/>
+                <hline x="0" y="118" len="30" color="#D0C8B8"/>
+                <hline x="0" y="128" len="30" color="#D0C8B8"/>
+                <hline x="0" y="138" len="30" color="#D0C8B8"/>
+                <hline x="0" y="148" len="30" color="#D0C8B8"/>
+                <!-- Tile vertical dividers -->
+                <rect x="10" y="68" w="1" h="94" color="#D0C8B8"/>
+                <rect x="20" y="68" w="1" h="94" color="#D0C8B8"/>
+                <!-- Decorative tile accents (blue flower pattern) -->
+                <rect x="2"  y="80"  w="7"  h="7"  color="#4888C8"/>
+                <rect x="3"  y="81"  w="5"  h="5"  color="#5898D8"/>
+                <pixel x="5"  y="83" color="#FFFFFF"/>
+                <rect x="12" y="80"  w="7"  h="7"  color="#4888C8"/>
+                <rect x="13" y="81"  w="5"  h="5"  color="#5898D8"/>
+                <pixel x="15" y="83" color="#FFFFFF"/>
+                <rect x="2"  y="100" w="7"  h="7"  color="#4888C8"/>
+                <rect x="3"  y="101" w="5"  h="5"  color="#5898D8"/>
+                <rect x="12" y="100" w="7"  h="7"  color="#4888C8"/>
+                <rect x="13" y="101" w="5"  h="5"  color="#5898D8"/>
+                <rect x="2"  y="120" w="7"  h="7"  color="#4888C8"/>
+                <rect x="12" y="120" w="7"  h="7"  color="#4888C8"/>
+                <rect x="2"  y="140" w="7"  h="7"  color="#4888C8"/>
+                <rect x="12" y="140" w="7"  h="7"  color="#4888C8"/>
+                <!-- Heater door (small firebox door) -->
+                <rect x="8" y="112" w="14" h="16"  color="#705840"/>
+                <rect x="9" y="113" w="12" h="14"  color="#202020"/>
+                <!-- Ember glow through door -->
+                <rect x="10" y="120" w="10" h="5"  color="#FF600820"/>
+                <!-- Heater top shelf -->
+                <rect x="0" y="66" w="32" h="4"    color="#D0C0A8"/>
+                <!-- Small object on heater shelf — jar of jam -->
+                <rect x="4" y="58" w="10" h="10"   color="#C04040"/>
+                <rect x="5" y="59" w="8"  h="8"    color="#D05050"/>
+                <rect x="5" y="58" w="8"  h="3"    color="#804030"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=7: Ambient Light — warm, cozy indoor glow -->
+        <layer id="ambient_light" type="overlay" z-order="7" width="320" height="240">
+            <pixel-data>
+                <!-- Warm overall tint — old house lamp warmth -->
+                <rect x="0"   y="0"   w="320" h="240" color="#FFE8B008"/>
+                <!-- Lamp glow area (implied ceiling lamp center-right) -->
+                <rect x="130" y="0"   w="100" h="80"  color="#FFD88012"/>
+                <!-- Heater warmth glow (left side) -->
+                <rect x="0"   y="60"  w="60"  h="100" color="#FF800010"/>
+                <!-- Window light patch on floor -->
+                <rect x="230" y="158" w="84"  h="50"  color="#E8F0D010"/>
+                <!-- Fireplace ember glow on nearby wall/floor -->
+                <rect x="0"   y="100" w="30"  h="60"  color="#FF600010"/>
+            </pixel-data>
+            <conditions>
+                <condition id="time_morning">
+                    <description>Morning — soft daylight from window, heater warm but subdued</description>
+                    <override layer-ref="ambient_light" tint="#F8F0E8" opacity="0.08"/>
+                </condition>
+                <condition id="time_day">
+                    <description>Default daytime warm cottage atmosphere</description>
+                    <override layer-ref="ambient_light" tint="#FFE8B0" opacity="0.06"/>
+                </condition>
+                <condition id="time_evening">
+                    <description>Evening — lamp on, warm amber glow dominates, cozy</description>
+                    <override layer-ref="ambient_light" tint="#FFB850" opacity="0.20"/>
+                </condition>
+                <condition id="time_night">
+                    <description>Night — only heater glow and lamp, very warm very cozy</description>
+                    <override layer-ref="ambient_light" tint="#FF6820" opacity="0.35"/>
+                </condition>
+            </conditions>
+        </layer>
+    </layers>
+
+    <naming>
+        <output-dir>locations/parents_cottage</output-dir>
+    </naming>
+</asset-spec>

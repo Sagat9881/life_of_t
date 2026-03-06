@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest id="quest_garfield_comfort" type="SIDE">
+    <meta>
+        <title>The Anxious Gentleman</title>
+        <title-ru>Тревожный джентльмен</title-ru>
+        <description>Garfield is losing fur again — patches appearing on his beautiful coat. Visit the vet, learn the truth, and foster kittens to heal him.</description>
+        <description-ru>Гарфилд снова теряет шерсть — на его безупречной шубке появляются проплешины. Отведи его к ветеринару, узнай правду и возьми котят на передержку, чтобы помочь ему.</description-ru>
+        <chapter>1</chapter>
+        <prerequisites>quest_morning_routine</prerequisites>
+    </meta>
+    <objectives>
+        <objective id="obj_notice_garfield" type="INTERACT">
+            <description-ru>Осмотри Гарфилда — проверь его шерсть и самочувствие</description-ru>
+            <target>garfield</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_vet_appointment" type="TRAVEL">
+            <description-ru>Отвези Гарфилда к ветеринару</description-ru>
+            <target>vet_clinic</target>
+            <location>city</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_vet_diagnosis" type="DIALOGUE">
+            <description-ru>Выслушай диагноз ветеринара</description-ru>
+            <target>vet_npc</target>
+            <location>vet_clinic</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_find_kittens" type="INTERACT">
+            <description-ru>Найди котят для передержки через волонтёрский чат</description-ru>
+            <target>tanya_laptop</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_bring_kittens" type="TRAVEL">
+            <description-ru>Забери котят и познакомь с Гарфилдом</description-ru>
+            <target>foster_kittens</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+        <objective id="obj_garfield_reaction" type="INTERACT">
+            <description-ru>Понаблюдай, как Гарфилд встречает котят</description-ru>
+            <target>garfield</target>
+            <location>home_room</location>
+            <count>1</count>
+        </objective>
+    </objectives>
+    <steps>
+        <step order="1" objective-ref="obj_notice_garfield">
+            <dialogue speaker="tanya">
+                <line-ru>Гарфилдик, подойди... Что за... Опять? Опять шерсть клочьями? Нет-нет-нет. Записываемся к врачу.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="anxiety" value="+8"/>
+            </on-complete>
+        </step>
+        <step order="2" objective-ref="obj_vet_appointment">
+            <dialogue speaker="narrator">
+                <line-ru>Гарфилд сидит в переноске с видом оскорблённого достоинства. Он терпит — потому что любит Таню. Не потому что ему нравится.</line-ru>
+            </dialogue>
+            <dialogue speaker="garfield">
+                <line-ru>Мрр... (тихо, почти укоризненно)</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="anxiety" value="+5"/>
+            </on-complete>
+        </step>
+        <step order="3" objective-ref="obj_vet_diagnosis">
+            <dialogue speaker="vet_npc">
+                <line-ru>Физически Гарфилд здоров. Анализы в норме. Но это классическая психосоматика. Он скучает. Ему нужна... ответственность. Цель. Котята на передержке помогали бы — он их воспитывал, был нужен.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Он теряет шерсть от скуки и одиночества? Он... как я.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="anxiety" value="-5"/>
+                <stat-change stat="happiness" value="-3"/>
+            </on-complete>
+        </step>
+        <step order="4" objective-ref="obj_find_kittens">
+            <dialogue speaker="tanya">
+                <line-ru>Так, волонтёрский чат... «Три котёнка, срочно нужна передержка на месяц». Гарфилд, я нашла тебе работу.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="happiness" value="+5"/>
+            </on-complete>
+        </step>
+        <step order="5" objective-ref="obj_bring_kittens">
+            <dialogue speaker="narrator">
+                <line-ru>Три маленьких существа появляются в доме. Два рыжих, один полосатый. Они дрожат и жмутся друг к другу в новой коробке.</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>Тихо-тихо. Всё хорошо. Вы в безопасности теперь.</line-ru>
+            </dialogue>
+        </step>
+        <step order="6" objective-ref="obj_garfield_reaction">
+            <dialogue speaker="narrator">
+                <line-ru>Гарфилд входит в комнату. Замирает. Смотрит на котят долго-долго. Потом медленно, с достоинством, подходит ближе. Один котёнок тянется к нему носом.</line-ru>
+            </dialogue>
+            <dialogue speaker="garfield">
+                <line-ru>Мррр... (тихо, почти нежно. Он вылизывает котёнка одним долгим движением)</line-ru>
+            </dialogue>
+            <dialogue speaker="tanya">
+                <line-ru>(шёпотом) Вот. Вот оно. Ты снова нужен, Гарфилд. Ты снова нужен.</line-ru>
+            </dialogue>
+            <on-complete>
+                <stat-change stat="happiness" value="+20"/>
+                <stat-change stat="anxiety" value="-10"/>
+                <relationship-change target="garfield" value="+5"/>
+            </on-complete>
+        </step>
+    </steps>
+    <rewards>
+        <stat-change stat="happiness" value="+20"/>
+        <stat-change stat="anxiety" value="-15"/>
+        <relationship-change target="garfield" value="+5"/>
+        <unlock type="character">foster_kittens</unlock>
+        <unlock type="animation">garfield_grooms_kitten</unlock>
+    </rewards>
+</quest>
