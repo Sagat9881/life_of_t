@@ -64,17 +64,18 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     background-size: 100% 100%;
 }
 
+/* Character sprites — initial sizes, overridden by SpriteController */
 #sam {
     bottom: 24%; right: 22%;
     width: 96px; height: 80px;
 }
 #tanya {
     bottom: 22%; left: 35%;
-    width: 128px; height: 192px;
+    width: 128px; height: 128px;
 }
 #alexander {
     bottom: 22%; right: 30%;
-    width: 128px; height: 192px;
+    width: 128px; height: 128px;
 }
 
 .activity-icon {
@@ -368,32 +369,18 @@ function getTimeSlot(hour) {
 // ============================================================
 //  SpriteController — universal animation engine
 //
-//  Pure rendering class. Zero knowledge of game logic.
-//  Reads sprite-atlas.json config (v1.0), plays any named
+//  Reads sprite-atlas.json config (v1.*), plays any named
 //  animation by driving CSS background-position on 2 axes.
 //
-//  API:
-//    const ctrl = await SpriteController.create(el, configUrl)
-//    ctrl.play('idle')           — start named animation
-//    ctrl.play('idle', {condition: 'morning'})  — start with row
-//    ctrl.setCondition('evening')  — switch row mid-animation
-//    ctrl.stop()                 — freeze on current frame
-//    ctrl.currentAnimation       — name of playing animation
-//    ctrl.config                 — parsed sprite-atlas.json
+//  v1.1: reads frameWidth/frameHeight per animation entry.
+//        Resizes the DOM element to match current animation.
 // ============================================================
 class SpriteController {
 
-    /**
-     * Async factory. Loads & validates config, preloads default atlas.
-     * @param {HTMLElement} el         — DOM element to animate
-     * @param {string}      configUrl  — URL to sprite-atlas.json
-     * @returns {SpriteController|null} — null if config load fails
-     */
     static async create(el, configUrl) {
         const config = await fetchJSON(configUrl);
         if (!config || !config.animations) return null;
 
-        // Version check
         const v = config.configVersion || '0';
         if (!v.startsWith('1.')) {
             console.warn(`[SpriteController] Unsupported config version: ${v}`);
@@ -406,7 +393,7 @@ class SpriteController {
     constructor(el, config) {
         this.el = el;
         this.config = config;
-        this.baseUrl = ''; // set by caller or derived
+        this.baseUrl = '';
 
         this._timer = null;
         this._currentAnim = null;
@@ -415,47 +402,42 @@ class SpriteController {
         this._row = 0;
         this._columns = 0;
         this._totalRows = 1;
-        this._frameW = config.spriteWidth;
-        this._frameH = config.spriteHeight;
-        this._rowMap = null; // condition → row def (for grid)
+        this._frameW = 0;
+        this._frameH = 0;
+        this._rowMap = null;
     }
 
-    /** Currently playing animation name */
     get currentAnimation() { return this._currentAnim; }
-
-    /** Whether any animation is actively playing */
     get isPlaying() { return this._timer !== null; }
+    get frameWidth() { return this._frameW; }
+    get frameHeight() { return this._frameH; }
 
-    /**
-     * Resolve the base URL for atlas PNGs.
-     * Must be called before play() if not using absolute paths in config.
-     */
     setBaseUrl(url) {
         this.baseUrl = url.endsWith('/') ? url : url + '/';
     }
 
     /**
      * Start playing a named animation.
-     * @param {string} name      — animation name from config ("idle", "walk", etc.)
-     * @param {Object} [opts]    — options
-     * @param {string} [opts.condition] — initial condition value for grid row
-     * @returns {boolean} true if animation started
+     * Reads frameWidth/frameHeight from the animation entry (v1.1),
+     * falls back to global spriteWidth/spriteHeight (v1.0 compat).
      */
     async play(name, opts) {
         const animCfg = this.config.animations[name];
         if (!animCfg) {
-            console.warn(`[SpriteController] Animation "${name}" not found in config`);
+            console.warn(`[SpriteController] Animation "${name}" not found`);
             return false;
         }
 
-        // Stop previous
         this.stop();
 
         this._currentAnim = name;
         this._currentAnimConfig = animCfg;
         this._frame = 0;
 
-        // Layout
+        // Frame dimensions: per-animation (v1.1) > global (v1.0 compat)
+        this._frameW = animCfg.frameWidth  || this.config.spriteWidth  || 64;
+        this._frameH = animCfg.frameHeight || this.config.spriteHeight || 64;
+
         if (animCfg.layout === 'grid') {
             this._columns = animCfg.columns;
             this._totalRows = animCfg.rows.length;
@@ -472,23 +454,24 @@ class SpriteController {
             this._rowMap = null;
         }
 
-        // Apply condition if provided
         if (opts && opts.condition && this._rowMap) {
             this._applyCondition(opts.condition);
         }
 
-        // Load atlas image
         const atlasUrl = this.baseUrl + animCfg.file;
         const ok = await preloadImage(atlasUrl);
         if (!ok) return false;
 
-        // Apply to DOM
+        // Resize DOM element to exactly one frame
+        this.el.style.width  = this._frameW + 'px';
+        this.el.style.height = this._frameH + 'px';
+
+        // Background covers the full atlas grid
         this.el.style.backgroundImage = `url('${atlasUrl}')`;
         this.el.style.backgroundSize =
             `${this._columns * this._frameW}px ${this._totalRows * this._frameH}px`;
         this._paint();
 
-        // Start ticking
         if (this._columns > 1) {
             const interval = Math.round(1000 / this._fps);
             this._timer = setInterval(() => {
@@ -500,14 +483,9 @@ class SpriteController {
         return true;
     }
 
-    /**
-     * Switch to a different row by condition value (e.g. "morning", "evening").
-     * Only works for grid-layout animations.
-     */
     setCondition(conditionValue) {
         if (!this._rowMap) return;
         if (this._applyCondition(conditionValue)) {
-            // Restart timer with new FPS
             if (this._timer) {
                 clearInterval(this._timer);
                 const interval = Math.round(1000 / this._fps);
@@ -520,7 +498,6 @@ class SpriteController {
         }
     }
 
-    /** Stop animation on current frame */
     stop() {
         if (this._timer) {
             clearInterval(this._timer);
@@ -528,17 +505,16 @@ class SpriteController {
         }
     }
 
-    /** Re-apply current animation background (useful after walk→idle switch) */
     reapply() {
         if (!this._currentAnimConfig) return;
         const atlasUrl = this.baseUrl + this._currentAnimConfig.file;
         this.el.style.backgroundImage = `url('${atlasUrl}')`;
+        this.el.style.width  = this._frameW + 'px';
+        this.el.style.height = this._frameH + 'px';
         this.el.style.backgroundSize =
             `${this._columns * this._frameW}px ${this._totalRows * this._frameH}px`;
         this._paint();
     }
-
-    // --- Private ---
 
     _paint() {
         this.el.style.backgroundPosition =
@@ -564,23 +540,16 @@ class SpriteController {
 
 // ============================================================
 //  SceneActor — character on the scene
-//
-//  Orchestrates: position, movement, labels, activity icons.
-//  Delegates ALL sprite rendering to SpriteController.
-//  Knows how to request animations by name ("idle", "walk").
 // ============================================================
 class SceneActor {
 
-    /**
-     * @param {Object} layout  — layout config from ACTOR_LAYOUTS
-     */
     constructor(layout) {
         this.layout = layout;
         this.el = document.getElementById(layout.el);
         this.labelEl  = document.getElementById(layout.labelEl);
         this.activityEl = document.getElementById(layout.activityEl);
 
-        this.sprite = null; // SpriteController, set after init
+        this.sprite = null;
         this.state = 'idle';
         this.isStatic = false;
 
@@ -611,7 +580,6 @@ class SceneActor {
                 this._tryStaticFallback() || this._applyPlaceholder();
             }
         } else {
-            // Config not found — try static fallback
             this._tryStaticFallback() || this._applyPlaceholder();
         }
 
@@ -620,10 +588,13 @@ class SceneActor {
     }
 
     async _tryStaticFallback() {
-        const ok = await preloadImage(this.layout.staticFallback);
+        const L = this.layout;
+        const ok = await preloadImage(L.staticFallback);
         if (!ok) return false;
-        this.el.style.backgroundImage = `url('${this.layout.staticFallback}')`;
-        this.el.style.backgroundSize = `${this.layout.spriteW}px ${this.layout.spriteH}px`;
+        this.el.style.backgroundImage = `url('${L.staticFallback}')`;
+        this.el.style.width  = L.fallbackW + 'px';
+        this.el.style.height = L.fallbackH + 'px';
+        this.el.style.backgroundSize = `${L.fallbackW}px ${L.fallbackH}px`;
         this.el.style.backgroundPosition = '0 0';
         this.isStatic = true;
         this.state = 'idle';
@@ -633,14 +604,14 @@ class SceneActor {
     _applyPlaceholder() {
         const L = this.layout;
         this.el.style.backgroundImage = 'none';
+        this.el.style.width  = L.fallbackW + 'px';
+        this.el.style.height = L.fallbackH + 'px';
         this.el.style.backgroundColor = L.placeholderColor;
         this.el.classList.add('sprite-placeholder');
-        this.el.innerHTML = `<span style="font-size:${L.spriteH/3}px">${L.placeholderEmoji}</span>`;
+        this.el.innerHTML = `<span style="font-size:${L.fallbackH/3}px">${L.placeholderEmoji}</span>`;
         this.isStatic = true;
         this.state = 'idle';
     }
-
-    // --- Animation switching ---
 
     async switchToIdle() {
         if (!this.sprite) return;
@@ -658,14 +629,18 @@ class SceneActor {
         return false;
     }
 
-    /** Called when game time slot changes */
     onTimeSlotChange(newSlot) {
         if (this.sprite && this.state === 'idle') {
             this.sprite.setCondition(newSlot);
         }
     }
 
-    // --- Movement ---
+    /** Current display height (from sprite or fallback) */
+    get displayHeight() {
+        return this.sprite && this.sprite.frameHeight
+            ? this.sprite.frameHeight
+            : this.layout.fallbackH;
+    }
 
     _scheduleNextWalk() {
         const L = this.layout;
@@ -682,8 +657,9 @@ class SceneActor {
         if (!container) return;
         const cw = container.clientWidth;
         const L = this.layout;
+        const sprW = this.sprite.frameWidth || L.fallbackW;
         const minPx = cw * L.minX / 100;
-        const maxPx = cw * L.maxX / 100 - L.spriteW;
+        const maxPx = cw * L.maxX / 100 - sprW;
         this.targetX = minPx + Math.random() * (maxPx - minPx);
         if (Math.abs(this.targetX - this.posX) < 20) { this._scheduleNextWalk(); return; }
 
@@ -714,17 +690,19 @@ class SceneActor {
 
     _updatePosition() {
         const L = this.layout;
+        const sprW = this.sprite && this.sprite.frameWidth  ? this.sprite.frameWidth  : L.fallbackW;
+        const sprH = this.sprite && this.sprite.frameHeight ? this.sprite.frameHeight : L.fallbackH;
         this.el.style.left = this.posX + 'px';
         this.el.style.right = 'auto';
         if (this.labelEl) {
-            this.labelEl.style.left = (this.posX + L.spriteW / 2 - 30) + 'px';
+            this.labelEl.style.left = (this.posX + sprW / 2 - 30) + 'px';
             this.labelEl.style.right = 'auto';
             this.labelEl.style.bottom = `calc(${L.bottomPct}% - 14px)`;
         }
         if (this.activityEl) {
-            this.activityEl.style.left = (this.posX + L.spriteW / 2 - 9) + 'px';
+            this.activityEl.style.left = (this.posX + sprW / 2 - 9) + 'px';
             this.activityEl.style.right = 'auto';
-            this.activityEl.style.bottom = `calc(${L.bottomPct}% + ${L.spriteH}px + 4px)`;
+            this.activityEl.style.bottom = `calc(${L.bottomPct}% + ${sprH}px + 4px)`;
         }
     }
 
@@ -737,7 +715,9 @@ class SceneActor {
 }
 
 // ============================================================
-//  Actor layout configs (scene positioning only — no animation params)
+//  Actor layout configs (scene positioning only)
+//  fallbackW/fallbackH used for static/placeholder; actual
+//  animation dimensions come from sprite-atlas.json per-anim.
 // ============================================================
 const BASE = '/assets/generated/characters';
 
@@ -746,7 +726,7 @@ const ACTOR_LAYOUTS = {
         el: 'tanya', labelEl: 'label-tanya', activityEl: 'activity-tanya',
         assetsBase: `${BASE}/tanya/animations`,
         staticFallback: `${BASE}/tanya/tanya.png`,
-        spriteW: 128, spriteH: 192,
+        fallbackW: 128, fallbackH: 192,
         minX: 5, maxX: 80, bottomPct: 22, speed: 1.8,
         idleMinSec: 2, idleMaxSec: 6,
         activities: ['☕', '📖', '🎮', '💭', '🎵', '💅'],
@@ -756,7 +736,7 @@ const ACTOR_LAYOUTS = {
         el: 'alexander', labelEl: 'label-alexander', activityEl: 'activity-alexander',
         assetsBase: `${BASE}/alexander/animations`,
         staticFallback: `${BASE}/alexander/alexander.png`,
-        spriteW: 128, spriteH: 192,
+        fallbackW: 128, fallbackH: 192,
         minX: 10, maxX: 85, bottomPct: 22, speed: 1.4,
         idleMinSec: 3, idleMaxSec: 8,
         activities: ['📖', '💻', '☕', '📱', '🎵', '🤔'],
@@ -766,7 +746,7 @@ const ACTOR_LAYOUTS = {
         el: 'sam', labelEl: 'label-sam', activityEl: 'activity-sam',
         assetsBase: `${BASE}/sam/animations`,
         staticFallback: `${BASE}/sam/sam.png`,
-        spriteW: 96, spriteH: 80,
+        fallbackW: 96, fallbackH: 80,
         minX: 5, maxX: 90, bottomPct: 24, speed: 2.5,
         idleMinSec: 1, idleMaxSec: 4,
         activities: ['🧸', '🦴', '😴', '🐾', '👀'],

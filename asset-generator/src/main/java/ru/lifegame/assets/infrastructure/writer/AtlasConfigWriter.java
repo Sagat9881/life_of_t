@@ -16,15 +16,9 @@ import java.util.*;
 /**
  * Writes sprite-atlas.json — the unified, versioned atlas configuration.
  * <p>
- * Output conforms to {@link AtlasConfigSchema} (config version 1.0).
+ * Output conforms to {@link AtlasConfigSchema} (config version 1.1).
  * <p>
- * Features:
- * <ul>
- *   <li>Single file per character containing ALL animation entries</li>
- *   <li>Schema version ({@code configVersion}) for frontend compatibility checks</li>
- *   <li>Revision field — defaults to "latest" for dev, can be pinned for production</li>
- *   <li>Supports both strip (1 row) and grid (N rows with conditions) layouts</li>
- * </ul>
+ * v1.1 changes: frameWidth/frameHeight emitted per-animation from AnimationSpec.
  */
 public class AtlasConfigWriter {
 
@@ -32,9 +26,6 @@ public class AtlasConfigWriter {
 
     private String revision = AtlasConfigSchema.LATEST_REVISION;
 
-    /**
-     * Set a specific revision tag. Pass null or "latest" for default behavior.
-     */
     public AtlasConfigWriter withRevision(String revision) {
         this.revision = (revision == null || revision.isBlank())
                 ? AtlasConfigSchema.LATEST_REVISION
@@ -42,9 +33,6 @@ public class AtlasConfigWriter {
         return this;
     }
 
-    /**
-     * Generate a timestamp-based revision string (e.g. "20260306-1").
-     */
     public AtlasConfigWriter withTimestampRevision() {
         this.revision = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE) + "-1";
         return this;
@@ -53,18 +41,14 @@ public class AtlasConfigWriter {
     /**
      * Writes the unified sprite-atlas.json for a character.
      *
-     * @param characterName   character identifier (e.g. "sam")
-     * @param spriteWidth     display width of one frame
-     * @param spriteHeight    display height of one frame
-     * @param stripAnims      list of simple strip animations (walk, eat, tremble, etc.)
-     * @param gridAnims       map of baseName → (conditionType, orderedRowSpecs)
-     * @param outputDir       target directory
+     * @param characterName character identifier (e.g. "sam")
+     * @param stripAnims    list of simple strip animations (walk, eat, tremble, etc.)
+     * @param gridAnims     map of baseName → (conditionType, orderedRowSpecs)
+     * @param outputDir     target directory
      * @return path to generated sprite-atlas.json
      */
     public Path writeSpriteAtlas(
             String characterName,
-            int spriteWidth,
-            int spriteHeight,
             List<AnimationSpec> stripAnims,
             Map<String, GridAnimDef> gridAnims,
             Path outputDir
@@ -75,8 +59,6 @@ public class AtlasConfigWriter {
         sb.append("  \"configVersion\": \"").append(AtlasConfigSchema.CURRENT_VERSION).append("\",\n");
         sb.append("  \"revision\": \"").append(revision).append("\",\n");
         sb.append("  \"character\": \"").append(characterName).append("\",\n");
-        sb.append("  \"spriteWidth\": ").append(spriteWidth).append(",\n");
-        sb.append("  \"spriteHeight\": ").append(spriteHeight).append(",\n");
         sb.append("  \"animations\": {\n");
 
         List<String> entries = new ArrayList<>();
@@ -107,11 +89,30 @@ public class AtlasConfigWriter {
         return configPath;
     }
 
+    /**
+     * @deprecated Use {@link #writeSpriteAtlas(String, List, Map, Path)} instead.
+     *             Kept for compilation compat during migration.
+     */
+    @Deprecated(forRemoval = true)
+    public Path writeSpriteAtlas(
+            String characterName,
+            int spriteWidth,
+            int spriteHeight,
+            List<AnimationSpec> stripAnims,
+            Map<String, GridAnimDef> gridAnims,
+            Path outputDir
+    ) throws IOException {
+        // Ignore global spriteWidth/spriteHeight — use per-animation values
+        return writeSpriteAtlas(characterName, stripAnims, gridAnims, outputDir);
+    }
+
     private String formatStripEntry(AnimationSpec spec) {
         return "    \"" + spec.name() + "\": {\n"
                 + "      \"file\": \"" + spec.name() + "_atlas.png\",\n"
                 + "      \"layout\": \"strip\",\n"
                 + "      \"columns\": " + spec.frames() + ",\n"
+                + "      \"frameWidth\": " + spec.frameWidth() + ",\n"
+                + "      \"frameHeight\": " + spec.frameHeight() + ",\n"
                 + "      \"fps\": " + spec.fps() + ",\n"
                 + "      \"loop\": " + spec.loop() + "\n"
                 + "    }";
@@ -125,6 +126,8 @@ public class AtlasConfigWriter {
 
         var firstSpec = def.rowSpecs().values().iterator().next();
         sb.append("      \"columns\": ").append(firstSpec.frames()).append(",\n");
+        sb.append("      \"frameWidth\": ").append(firstSpec.frameWidth()).append(",\n");
+        sb.append("      \"frameHeight\": ").append(firstSpec.frameHeight()).append(",\n");
         sb.append("      \"rows\": [\n");
 
         int rowIdx = 0;
