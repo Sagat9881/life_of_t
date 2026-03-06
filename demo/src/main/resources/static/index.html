@@ -198,112 +198,97 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     background: #161630;
 }
 .modal-narrative .stat-change {
-    display: inline-block; font-size: 0.65rem; padding: 1px 5px;
-    border-radius: 2px; margin: 2px 2px;
+    display: inline-block; font-size: 0.65rem; padding: 1px 4px;
+    border-radius: 2px; margin: 0 2px;
 }
-.modal-narrative .stat-pos { background: #1a4a1a; color: #80e880; }
-.modal-narrative .stat-neg { background: #4a1a1a; color: #e88080; }
+.modal-narrative .stat-change.positive { background: #1a3a1a; color: #80e880; }
+.modal-narrative .stat-change.negative { background: #3a1a1a; color: #e88080; }
 
-.stat-floater {
-    position: absolute; pointer-events: none;
-    font-size: 14px; font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-    animation: floatUp 1.5s ease-out forwards;
-    z-index: 40;
+#debug-bar {
+    position: fixed; bottom: 0; left: 0;
+    display: flex; gap: 2px; z-index: 60;
+    background: rgba(0,0,0,0.7); padding: 4px;
+    border-radius: 0 4px 0 0;
 }
-.stat-floater.positive { color: #80e880; }
-.stat-floater.negative { color: #e88080; }
-@keyframes floatUp {
-    0%   { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(-40px); }
+.dbg-btn {
+    width: 28px; height: 28px; border-radius: 4px;
+    border: 1px solid #3a3a5a; background: #1a1a30;
+    color: #a098b8; font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
 }
-
-.heart-particle {
-    position: absolute; pointer-events: none; font-size: 16px; z-index: 40;
-    animation: heartBurst 1.2s ease-out forwards;
-}
-@keyframes heartBurst {
-    0%   { opacity: 1; transform: translate(0,0) scale(0.5); }
-    50%  { opacity: 1; transform: translate(var(--dx), var(--dy)) scale(1.2); }
-    100% { opacity: 0; transform: translate(var(--dx), calc(var(--dy) - 20px)) scale(0.3); }
-}
-
-@keyframes questFlash {
-    0%   { background: #3a6a3a; }
-    100% { background: #1a1a30; }
-}
-.quest-complete-flash { animation: questFlash 1s ease; }
+.dbg-btn:hover { background: #3a3a6a; color: #c8a0ff; }
 </style>
 </head>
 <body>
-
-<div id="loading">
-    <div id="loading-text">LIFE OF T — DEMO</div>
-    <div id="loading-dots">загрузка ассетов...</div>
-</div>
-
 <div id="app">
-    <header id="header">
+    <div id="header">
         <h1>Life of T</h1>
         <span class="subtitle">Demo v0.9</span>
-        <span id="game-time">День 1 | 08:00</span>
-    </header>
-
-    <main id="room-container">
+        <div id="game-time">День 1 | 08:00</div>
+    </div>
+    <div id="room-container">
         <div id="room-bg"></div>
-        <!-- No hardcoded ambient div — created by SceneElement from config -->
-
-        <div id="sam" class="sprite clickable" title="Сэм (собака)"></div>
-        <span id="label-sam" class="sprite-label">Сэм 🐾</span>
-        <span id="activity-sam" class="activity-icon">🧸</span>
-
-        <div id="alexander" class="sprite clickable" title="Александр (муж)"></div>
-        <span id="label-alexander" class="sprite-label">Александр</span>
-        <span id="activity-alexander" class="activity-icon">📖</span>
-
-        <div id="tanya" class="sprite clickable" title="Таня"></div>
+        <!-- Characters -->
+        <div id="tanya" class="sprite clickable"></div>
         <span id="label-tanya" class="sprite-label">Таня</span>
-        <span id="activity-tanya" class="activity-icon">☕</span>
+        <span id="activity-tanya" class="activity-icon"></span>
+
+        <div id="alexander" class="sprite clickable"></div>
+        <span id="label-alexander" class="sprite-label">Александр</span>
+        <span id="activity-alexander" class="activity-icon"></span>
+
+        <div id="sam" class="sprite clickable"></div>
+        <span id="label-sam" class="sprite-label">Сэм</span>
+        <span id="activity-sam" class="activity-icon"></span>
 
         <div id="status-bar">Кликни на персонажа для взаимодействия</div>
-    </main>
-
-    <aside id="side-panel">
-        <div class="panel-box">
+    </div>
+    <div id="side-panel">
+        <div class="panel-box" id="stats-box">
             <h2>Таня — Статы</h2>
-            <div class="stat-row stat-energy"><span class="stat-label">Энергия</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-t-energy" style="width:70%"></div></div><span class="stat-value" id="val-t-energy">70</span></div>
-            <div class="stat-row stat-health"><span class="stat-label">Здоровье</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-t-health" style="width:80%"></div></div><span class="stat-value" id="val-t-health">80</span></div>
-            <div class="stat-row stat-stress"><span class="stat-label">Стресс</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-t-stress" style="width:30%"></div></div><span class="stat-value" id="val-t-stress">30</span></div>
-            <div class="stat-row stat-mood"><span class="stat-label">Настроение</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-t-mood" style="width:65%"></div></div><span class="stat-value" id="val-t-mood">65</span></div>
-            <div class="stat-row stat-money"><span class="stat-label">Деньги</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-t-money" style="width:50%"></div></div><span class="stat-value" id="val-t-money">50</span></div>
-            <div class="stat-row stat-esteem"><span class="stat-label">Самооценка</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-t-esteem" style="width:60%"></div></div><span class="stat-value" id="val-t-esteem">60</span></div>
+            <div class="stat-row stat-energy"><span class="stat-label">Энергия</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-energy"></div></div><span class="stat-value" id="val-energy">100</span></div>
+            <div class="stat-row stat-health"><span class="stat-label">Здоровье</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-health"></div></div><span class="stat-value" id="val-health">100</span></div>
+            <div class="stat-row stat-stress"><span class="stat-label">Стресс</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-stress"></div></div><span class="stat-value" id="val-stress">0</span></div>
+            <div class="stat-row stat-mood"><span class="stat-label">Настроение</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-mood"></div></div><span class="stat-value" id="val-mood">80</span></div>
+            <div class="stat-row stat-money"><span class="stat-label">Деньги</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-money"></div></div><span class="stat-value" id="val-money">1000</span></div>
+            <div class="stat-row stat-esteem"><span class="stat-label">Самооценка</span><div class="stat-bar-bg"><div class="stat-bar" id="bar-esteem"></div></div><span class="stat-value" id="val-esteem">70</span></div>
         </div>
-
-        <div class="panel-box">
-            <h2>Активные квесты</h2>
-            <div id="quest-list"></div>
+        <div class="panel-box" id="quests-box">
+            <h2>Активные Квесты</h2>
+            <div id="quests-list"></div>
         </div>
-
-        <div class="panel-box">
+        <div class="panel-box" id="relations-box">
             <h2>Отношения</h2>
-            <div class="rel-row"><span class="rel-label">Александр</span><span class="rel-hearts" id="rel-husband">♥♥♥♥♥♥♥</span></div>
-            <div class="rel-row"><span class="rel-label">Папа</span><span class="rel-hearts" id="rel-father">♥♥♥♥♥</span></div>
-            <div class="rel-row"><span class="rel-label">Сэм 🐾</span><span class="rel-hearts" id="rel-pet">♥♥♥♥♥♥♥♥</span></div>
+            <div id="relations-list"></div>
         </div>
-    </aside>
+    </div>
 </div>
 
 <!-- Interaction overlay -->
 <div id="interaction-overlay" class="interaction-overlay">
-    <div class="interaction-modal" id="interaction-modal">
+    <div class="interaction-modal">
         <div class="modal-header">
             <span class="modal-avatar" id="modal-avatar"></span>
             <span class="modal-name" id="modal-name"></span>
             <button class="modal-close" id="modal-close">✕</button>
         </div>
         <div class="modal-body" id="modal-body"></div>
-        <div class="modal-narrative" id="modal-narrative" style="display:none"></div>
+        <div class="modal-narrative" id="modal-narrative">Выбери действие…</div>
     </div>
+</div>
+
+<!-- Loading -->
+<div id="loading">
+    <div id="loading-text">Загрузка мира…</div>
+    <div id="loading-dots">● ● ●</div>
+</div>
+
+<!-- Debug bar -->
+<div id="debug-bar">
+    <button class="dbg-btn" title="Yandex" onclick="window.open('https://ya.ru','_blank')">Я</button>
+    <button class="dbg-btn" title="Toggle overlay" onclick="document.querySelector('.scene-element').style.display = document.querySelector('.scene-element').style.display === 'none' ? '' : 'none'">👁</button>
+    <button class="dbg-btn" title="Settings" onclick="alert('Settings TBD')">⚙</button>
+    <button class="dbg-btn" title="More" onclick="alert('Version 0.9')">⋮</button>
 </div>
 
 <script>
@@ -339,6 +324,8 @@ function getTimeSlot(hour) {
     return 'night';
 }
 
+const currentGameTime = { day: 1, hour: 8, minute: 0 };
+
 // ============================================================
 //  ScaleManager
 // ============================================================
@@ -367,7 +354,6 @@ class ScaleManager {
 //
 //  renderMode = "overlay":
 //    CSS backgroundColor + opacity + mix-blend-mode.
-//    Reads tint/opacity from row definitions in config.
 //    No background-image used — pure color overlay.
 // ============================================================
 class SpriteController {
@@ -388,6 +374,7 @@ class SpriteController {
         this.config = config;
         this.baseUrl = '';
         this.scale = 1;
+        this._displayScale = config.displayScale || 1.0;
         this._timer = null;
         this._currentAnim = null;
         this._currentAnimConfig = null;
@@ -406,8 +393,9 @@ class SpriteController {
     get isPlaying() { return this._timer !== null; }
     get frameWidth() { return this._frameW; }
     get frameHeight() { return this._frameH; }
-    get displayWidth() { return this._frameW * this.scale; }
-    get displayHeight() { return this._frameH * this.scale; }
+    get displayScale() { return this._displayScale; }
+    get displayWidth() { return this._frameW * this._displayScale * this.scale; }
+    get displayHeight() { return this._frameH * this._displayScale * this.scale; }
 
     setBaseUrl(url) { this.baseUrl = url.endsWith('/') ? url : url + '/'; }
 
@@ -502,21 +490,23 @@ class SpriteController {
 
     _applySize() {
         const s = this.scale;
-        const dw = Math.round(this._frameW * s);
-        const dh = Math.round(this._frameH * s);
+        const ds = this._displayScale;
+        const dw = Math.round(this._frameW * ds * s);
+        const dh = Math.round(this._frameH * ds * s);
         this.el.style.width  = dw + 'px';
         this.el.style.height = dh + 'px';
         if (this._renderMode === 'sprite') {
             this.el.style.backgroundSize =
-                `${Math.round(this._columns * this._frameW * s)}px ${Math.round(this._totalRows * this._frameH * s)}px`;
+                `${Math.round(this._columns * this._frameW * ds * s)}px ${Math.round(this._totalRows * this._frameH * ds * s)}px`;
         }
     }
 
     _paint() {
         if (this._renderMode !== 'sprite') return;
         const s = this.scale;
+        const ds = this._displayScale;
         this.el.style.backgroundPosition =
-            `${-Math.round(this._frame * this._frameW * s)}px ${-Math.round(this._row * this._frameH * s)}px`;
+            `${-Math.round(this._frame * this._frameW * ds * s)}px ${-Math.round(this._row * this._frameH * ds * s)}px`;
     }
 
     _applyOverlay() {
@@ -554,6 +544,7 @@ class SpriteController {
 // ============================================================
 //  SceneElement — animated or static element on the scene
 //  Uses SpriteController for BOTH sprite and overlay modes.
+//  Auto-discovers ALL animations from location sprite-atlas.json.
 // ============================================================
 class SceneElement {
 
@@ -626,6 +617,7 @@ class SceneElement {
 
 // ============================================================
 //  SceneActor — character on the scene
+//  Sizes driven entirely by SpriteController (displayScale in config).
 // ============================================================
 class SceneActor {
 
@@ -749,7 +741,8 @@ class SceneActor {
             this._scheduleNextWalk(); return;
         }
         const L = this.layout;
-        const nativeW = this.sprite.frameWidth || L.nativeW;
+        // Use sprite's native frame width (with displayScale) for collision
+        const nativeW = this.sprite.frameWidth * this.sprite.displayScale || L.nativeW;
         const minNX = BG_NATIVE_W * L.minX / 100;
         const maxNX = BG_NATIVE_W * L.maxX / 100 - nativeW;
         this.targetX = minNX + Math.random() * (maxNX - minNX);
@@ -809,6 +802,9 @@ class SceneActor {
 
 // ============================================================
 //  Layout configs
+//  nativeW/nativeH are fallback sizes for placeholder/static mode only.
+//  When SpriteController loads, displayScale from sprite-atlas.json
+//  determines the actual rendered size.
 // ============================================================
 const BASE = '/assets/generated/characters';
 const LOC_BASE = '/assets/generated/locations/home_room';
@@ -818,7 +814,7 @@ const ACTOR_LAYOUTS = {
         el: 'tanya', labelEl: 'label-tanya', activityEl: 'activity-tanya',
         assetsBase: `${BASE}/tanya/animations`,
         staticFallback: `${BASE}/tanya/tanya.png`,
-        nativeW: 32, nativeH: 48,
+        nativeW: 96, nativeH: 144,
         startPct: 35, minX: 5, maxX: 80, bottomPct: 22, speed: 1.5,
         idleMinSec: 2, idleMaxSec: 6,
         activities: ['☕', '📖', '🎮', '💭', '🎵', '💅'],
@@ -828,7 +824,7 @@ const ACTOR_LAYOUTS = {
         el: 'alexander', labelEl: 'label-alexander', activityEl: 'activity-alexander',
         assetsBase: `${BASE}/alexander/animations`,
         staticFallback: `${BASE}/alexander/alexander.png`,
-        nativeW: 32, nativeH: 48,
+        nativeW: 96, nativeH: 144,
         startPct: 55, minX: 10, maxX: 85, bottomPct: 22, speed: 1.2,
         idleMinSec: 3, idleMaxSec: 8,
         activities: ['📖', '💻', '☕', '📱', '🎵', '🤔'],
@@ -838,7 +834,7 @@ const ACTOR_LAYOUTS = {
         el: 'sam', labelEl: 'label-sam', activityEl: 'activity-sam',
         assetsBase: `${BASE}/sam/animations`,
         staticFallback: `${BASE}/sam/sam.png`,
-        nativeW: 24, nativeH: 16,
+        nativeW: 48, nativeH: 32,
         startPct: 72, minX: 5, maxX: 90, bottomPct: 24, speed: 2.0,
         idleMinSec: 1, idleMaxSec: 4,
         activities: ['🧸', '🦴', '😴', '🐾', '👀'],
@@ -846,18 +842,24 @@ const ACTOR_LAYOUTS = {
     }
 };
 
-// Scene elements: ALL driven by sprite-atlas.json configs.
-// ambient_light uses renderMode:"overlay" — SpriteController handles it.
-const SCENE_ELEMENTS = [
-    {
-        atlasConfig: `${LOC_BASE}/animations/sprite-atlas.json?v=latest`,
-        assetsBase: `${LOC_BASE}/animations`,
-        animation: 'ambient_light',
-        nativeX: 0, nativeY: 0,
-        nativeW: BG_NATIVE_W, nativeH: BG_NATIVE_H,
-        zIndex: 3
-    }
-];
+// ============================================================
+//  Location animations — auto-discovered from sprite-atlas.json
+//  No hardcoded list! Frontend reads ALL animations from config
+//  and creates SceneElements dynamically.
+// ============================================================
+const LOC_ATLAS_CONFIG_URL = `${LOC_BASE}/animations/sprite-atlas.json?v=latest`;
+const LOC_ASSETS_BASE = `${LOC_BASE}/animations`;
+
+// Position hints for known location animations (native coords).
+// Unknown animations default to 0,0 full-scene.
+const LOC_ANIM_HINTS = {
+    ambient_light:        { nativeX: 0, nativeY: 0, nativeW: BG_NATIVE_W, nativeH: BG_NATIVE_H, zIndex: 3 },
+    window_light_cycle:   { nativeX: 185, nativeY: 10, zIndex: 1 },
+    desk_computer:        { nativeX: 170, nativeY: 110, zIndex: 2 },
+    wall_clock:           { nativeX: 145, nativeY: 25, zIndex: 1 },
+    plant_sway:           { nativeX: 155, nativeY: 90, zIndex: 2 },
+    pet_bowls:            { nativeX: 225, nativeY: 170, zIndex: 2 }
+};
 
 // ============================================================
 //  NPC Actions
@@ -886,8 +888,8 @@ const NPC_ACTIONS = {
         desc: 'Это ты. Позаботься о себе.',
         actions: [
             { code: 'rest',       label: '😴 Отдохнуть',        cost: '3 ч', costH: 3 },
-            { code: 'selfcare',   label: '💅 Уход за собой',    cost: '2 ч', costH: 2 },
-            { code: 'callfather', label: '📞 Позвонить папе',   cost: '1 ч', costH: 1 },
+            { code: 'selfcare',   label: '💅 Уход за собой',     cost: '2 ч', costH: 2 },
+            { code: 'work',       label: '💻 Поработать',        cost: '4 ч', costH: 4 },
         ]
     }
 };
@@ -898,188 +900,129 @@ const NPC_ACTIONS = {
 class InteractionModal {
     constructor() {
         this.overlay = document.getElementById('interaction-overlay');
-        this.modal   = document.getElementById('interaction-modal');
-        this.avatarEl    = document.getElementById('modal-avatar');
-        this.nameEl      = document.getElementById('modal-name');
-        this.bodyEl      = document.getElementById('modal-body');
+        this.avatarEl = document.getElementById('modal-avatar');
+        this.nameEl = document.getElementById('modal-name');
+        this.bodyEl = document.getElementById('modal-body');
         this.narrativeEl = document.getElementById('modal-narrative');
-        this.closeBtn    = document.getElementById('modal-close');
         this.currentTarget = null;
-        this.busy = false;
-        this.closeBtn.addEventListener('click', () => this.hide());
+
+        document.getElementById('modal-close').addEventListener('click', () => this.hide());
         this.overlay.addEventListener('click', e => { if (e.target === this.overlay) this.hide(); });
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') this.hide(); });
     }
+
     show(targetId) {
-        const cfg = NPC_ACTIONS[targetId];
-        if (!cfg) return;
+        const npc = NPC_ACTIONS[targetId];
+        if (!npc) return;
         this.currentTarget = targetId;
-        this.avatarEl.textContent = cfg.avatar;
-        this.nameEl.textContent   = cfg.name;
-        this.narrativeEl.style.display = 'none';
-        this.narrativeEl.innerHTML = '';
-        const remainH = 24 - currentGameTime.hour;
-        let html = `<div class="modal-desc">${cfg.desc}</div>`;
-        for (const a of cfg.actions) {
-            const disabled = a.costH > remainH ? 'disabled' : '';
-            html += `<button class="action-btn" data-action="${a.code}" ${disabled}>`;
-            html += `${a.label}<span class="action-cost">⏱ ${a.cost}</span></button>`;
+        this.avatarEl.textContent = npc.avatar;
+        this.nameEl.textContent = npc.name;
+        this.narrativeEl.textContent = 'Выбери действие…';
+
+        let html = `<p class="modal-desc">${npc.desc}</p>`;
+        for (const a of npc.actions) {
+            const hourLeft = 24 - currentGameTime.hour;
+            const disabled = hourLeft < a.costH ? 'disabled' : '';
+            html += `<button class="action-btn" data-action="${a.code}" data-target="${targetId}" ${disabled}>`
+                  + `${a.label}<span class="action-cost">${a.cost}</span></button>`;
         }
         this.bodyEl.innerHTML = html;
+
         this.bodyEl.querySelectorAll('.action-btn').forEach(btn => {
-            btn.addEventListener('click', () => this.doAction(btn.dataset.action));
+            btn.addEventListener('click', () => this._onAction(btn.dataset.target, btn.dataset.action));
         });
+
         this.overlay.classList.add('visible');
     }
+
     hide() { this.overlay.classList.remove('visible'); this.currentTarget = null; }
-    async doAction(actionCode) {
-        if (this.busy) return;
-        this.busy = true;
+
+    async _onAction(target, action) {
         this.bodyEl.querySelectorAll('.action-btn').forEach(b => b.disabled = true);
+        this.narrativeEl.textContent = '…';
         try {
-            const resp = await fetch('/api/demo/action', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ target: this.currentTarget, actionCode })
-            });
-            const result = await resp.json();
-            if (result.success) {
-                let nHtml = `<p>${result.narrativeText}</p><div style="margin-top:8px">`;
-                if (result.statChanges) {
-                    for (const [k, v] of Object.entries(result.statChanges)) {
-                        const cls = v >= 0 ? 'stat-pos' : 'stat-neg';
-                        nHtml += `<span class="stat-change ${cls}">${STAT_LABELS[k]||k} ${v>=0?'+':''}${v}</span>`;
+            const res = await fetch(`/api/demo/action/${target}/${action}`, { method: 'POST' });
+            const data = await res.json();
+            if (data.narrative) {
+                let text = data.narrative;
+                if (data.statChanges) {
+                    for (const [stat, delta] of Object.entries(data.statChanges)) {
+                        const cls = delta > 0 ? 'positive' : 'negative';
+                        const sign = delta > 0 ? '+' : '';
+                        text += ` <span class="stat-change ${cls}">${stat} ${sign}${delta}</span>`;
                     }
                 }
-                if (result.relationshipChanges) {
-                    for (const [k, v] of Object.entries(result.relationshipChanges)) {
-                        const cls = v >= 0 ? 'stat-pos' : 'stat-neg';
-                        nHtml += `<span class="stat-change ${cls}">${REL_LABELS[k]||k} ${v>=0?'+':''}${v}</span>`;
-                    }
-                }
-                nHtml += '</div>';
-                this.narrativeEl.innerHTML = nHtml;
-                this.narrativeEl.style.display = 'block';
-                spawnStatFloaters(this.currentTarget, result.statChanges);
-                if (result.relationshipChanges) {
-                    const hasPos = Object.values(result.relationshipChanges).some(v => v > 0);
-                    if (hasPos) spawnHeartParticles(this.currentTarget);
-                }
-                if (result.updatedState) syncFromServerState(result.updatedState);
-            } else {
-                this.narrativeEl.innerHTML = `<p style="color:#e88080">${result.message}</p>`;
-                this.narrativeEl.style.display = 'block';
+                this.narrativeEl.innerHTML = text;
             }
-        } catch (err) {
-            this.narrativeEl.innerHTML = '<p style="color:#e88080">Ошибка соединения</p>';
-            this.narrativeEl.style.display = 'block';
+            if (data.newStatus) syncFromServerState(data.newStatus);
+        } catch(e) {
+            this.narrativeEl.textContent = 'Ошибка связи с сервером…';
         }
-        this.busy = false;
-        setTimeout(() => { if (this.currentTarget) this.show(this.currentTarget); }, 1500);
-    }
-}
-
-// ============================================================
-//  Visual feedback
-// ============================================================
-const STAT_LABELS = { energy:'⚡', health:'❤️', stress:'😰', mood:'😊', money:'💰', selfEsteem:'⭐' };
-const REL_LABELS  = { closeness:'💕 близость', trust:'🤝 доверие', romance:'💘 романтика', stability:'🏠 стабильность', father_closeness:'💕 папа', father_trust:'🤝 папа' };
-
-function spawnStatFloaters(targetId, changes) {
-    if (!changes) return;
-    const el = document.getElementById(targetId);
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const container = document.getElementById('room-container').getBoundingClientRect();
-    let i = 0;
-    for (const [k, v] of Object.entries(changes)) {
-        const f = document.createElement('div');
-        f.className = 'stat-floater ' + (v >= 0 ? 'positive' : 'negative');
-        f.textContent = (STAT_LABELS[k]||'') + (v>=0?'+':'') + v;
-        f.style.left = (rect.left - container.left + rect.width/2 - 20 + (i-1)*30) + 'px';
-        f.style.top  = (rect.top  - container.top  - 10) + 'px';
-        document.getElementById('room-container').appendChild(f);
-        setTimeout(() => f.remove(), 1600);
-        i++;
-    }
-}
-
-function spawnHeartParticles(targetId) {
-    const el = document.getElementById(targetId);
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const container = document.getElementById('room-container').getBoundingClientRect();
-    const cx = rect.left - container.left + rect.width/2;
-    const cy = rect.top  - container.top  + rect.height/3;
-    for (let i = 0; i < 6; i++) {
-        const h = document.createElement('div');
-        h.className = 'heart-particle';
-        h.textContent = '♥';
-        const dx = (Math.random()-0.5)*80, dy = -(20+Math.random()*40);
-        h.style.cssText = `left:${cx}px;top:${cy}px;--dx:${dx}px;--dy:${dy}px;animation-delay:${i*0.08}s`;
-        document.getElementById('room-container').appendChild(h);
-        setTimeout(() => h.remove(), 1400);
     }
 }
 
 // ============================================================
 //  State sync
 // ============================================================
-let currentGameTime = { day: 1, hour: 8 };
-
-function hearts(c) { const f = Math.round(c/10); return '♥'.repeat(Math.max(0,f)) + '♡'.repeat(Math.max(0,10-f)); }
-
-function setBar(id, v) {
-    const b = document.getElementById('bar-'+id), n = document.getElementById('val-'+id);
-    const p = Math.min(100, Math.max(0, Math.round(v)));
-    if (b) b.style.width = p+'%';
-    if (n) n.textContent = v;
-}
-
-function syncFromServerState(state) {
-    if (state.character && state.character.stats) {
-        const s = state.character.stats;
-        setBar('t-energy', s.energy); setBar('t-health', s.health);
-        setBar('t-stress', s.stress); setBar('t-mood',   s.mood);
-        setBar('t-money',  s.money);  setBar('t-esteem', s.selfEsteem);
-    }
-    if (state.relationships && state.relationships.byNpc) {
-        const h = state.relationships.byNpc['HUSBAND'];
-        const f = state.relationships.byNpc['FATHER'];
-        if (h) document.getElementById('rel-husband').textContent = hearts(h.closeness);
-        if (f) document.getElementById('rel-father').textContent  = hearts(f.closeness);
-    }
-    if (state.gameTime) {
-        const prevSlot = getTimeSlot(currentGameTime.hour);
-        currentGameTime = state.gameTime;
+function syncFromServerState(s) {
+    if (s.gameTime) {
+        currentGameTime.day = s.gameTime.day;
+        currentGameTime.hour = s.gameTime.hour;
+        currentGameTime.minute = s.gameTime.minute || 0;
+        const pad = n => String(n).padStart(2,'0');
         document.getElementById('game-time').textContent =
-            'День ' + state.gameTime.day + ' | ' + String(state.gameTime.hour).padStart(2,'0') + ':00';
-        const newSlot = getTimeSlot(state.gameTime.hour);
-        if (newSlot !== prevSlot) {
-            actors.forEach(a => a.onTimeSlotChange(newSlot));
-            sceneElements.forEach(e => e.onTimeSlotChange(newSlot));
+            `День ${s.gameTime.day} | ${pad(s.gameTime.hour)}:${pad(s.gameTime.minute||0)}`;
+
+        const slot = getTimeSlot(s.gameTime.hour);
+        actors.forEach(a => a.onTimeSlotChange(slot));
+        sceneElements.forEach(e => e.onTimeSlotChange(slot));
+    }
+    if (s.stats) {
+        for (const [key, val] of Object.entries(s.stats)) {
+            const bar = document.getElementById('bar-' + key);
+            const valEl = document.getElementById('val-' + key);
+            if (bar) bar.style.width = Math.min(100, Math.max(0, val)) + '%';
+            if (valEl) valEl.textContent = Math.round(val);
         }
     }
-    if (state.activeQuests) renderQuests(state.activeQuests);
+    if (s.quests) renderQuests(s.quests);
+    if (s.relationships) renderRelationships(s.relationships);
+}
+
+function renderRelationships(rels) {
+    const container = document.getElementById('relations-list');
+    container.innerHTML = '';
+    for (const r of rels) {
+        const filled = Math.round(r.level / 10);
+        const empty = 10 - filled;
+        const hearts = '♥'.repeat(filled) + '♡'.repeat(empty);
+        const icon = r.icon ? ` ${r.icon}` : '';
+        container.innerHTML += `<div class="rel-row"><span class="rel-label">${r.name}${icon}</span><span class="rel-hearts">${hearts}</span></div>`;
+    }
 }
 
 function renderQuests(quests) {
-    const container = document.getElementById('quest-list');
+    const container = document.getElementById('quests-list');
     container.innerHTML = '';
-    const typeLabel = { SELF_CARE_ARC:'ЗАБОТА О СЕБЕ', FAMILY_HARMONY:'СЕМЬЯ', CAREER_GROWTH:'КАРЬЕРА' };
     for (const q of quests) {
-        const div = document.createElement('div');
-        div.className = 'quest-item';
-        let html = `<span class="quest-type-badge quest-${q.type}">${typeLabel[q.type]||q.type}</span>`;
+        let html = `<div class="quest-item">`;
+        html += `<span class="quest-type-badge quest-${q.type}">${formatQuestType(q.type)}</span>`;
         html += `<div class="quest-title">${q.title}</div>`;
-        html += `<div class="quest-progress-bg"><div class="quest-progress-fill" style="width:${q.progressPercent}%"></div></div>`;
-        for (const s of q.steps) {
-            html += `<div class="quest-step ${s.completed?'done':''}">${s.description} (${s.current}/${s.required})</div>`;
+        if (q.steps) {
+            for (const step of q.steps) {
+                const done = step.current >= step.target ? 'done' : '';
+                html += `<div class="quest-step ${done}">${step.description} (${step.current}/${step.target})</div>`;
+            }
         }
+        html += `</div>`;
+        const div = document.createElement('div');
         div.innerHTML = html;
         if (q.status === 'COMPLETED') div.classList.add('quest-complete-flash');
         container.appendChild(div);
     }
+}
+
+function formatQuestType(type) {
+    return { 'SELF_CARE_ARC': 'Забота о себе', 'FAMILY_HARMONY': 'Семья', 'CAREER_GROWTH': 'Карьера' }[type] || type;
 }
 
 // ============================================================
@@ -1100,10 +1043,23 @@ async function init() {
     // Scale manager
     scaleManager = new ScaleManager(container);
 
-    // Scene elements (ambient_light overlay + future location animations)
-    // ALL driven by sprite-atlas.json — no hardcoded presets
-    for (const def of SCENE_ELEMENTS) {
-        sceneElements.push(new SceneElement(def, scaleManager));
+    // Auto-discover location animations from sprite-atlas.json
+    const locConfig = await fetchJSON(LOC_ATLAS_CONFIG_URL);
+    if (locConfig && locConfig.animations) {
+        for (const [animName, animDef] of Object.entries(locConfig.animations)) {
+            const hints = LOC_ANIM_HINTS[animName] || { nativeX: 0, nativeY: 0, zIndex: 2 };
+            const def = {
+                atlasConfig: LOC_ATLAS_CONFIG_URL,
+                assetsBase: LOC_ASSETS_BASE,
+                animation: animName,
+                nativeX: hints.nativeX || 0,
+                nativeY: hints.nativeY || 0,
+                nativeW: hints.nativeW || animDef.frameWidth || BG_NATIVE_W,
+                nativeH: hints.nativeH || animDef.frameHeight || BG_NATIVE_H,
+                zIndex: hints.zIndex || 2
+            };
+            sceneElements.push(new SceneElement(def, scaleManager));
+        }
     }
 
     // Interaction modal

@@ -18,21 +18,16 @@ import java.util.regex.Pattern;
 
 /**
  * Generates layered PNG assets and animation atlases from XML-driven AssetSpec.
- * <p>
- * Works for both characters and locations:
- * <ul>
- *   <li>Character animations with time-of-day variants → grid atlas</li>
- *   <li>Location overlay layers with conditions (ambient_light) → overlay atlas + config</li>
- *   <li>Non-variant animations → horizontal-strip atlas</li>
- * </ul>
  * All animation metadata is written to a single <b>sprite-atlas.json</b> per entity
- * (config version 1.2) via {@link AtlasConfigWriter}.
+ * (config version 1.3) via {@link AtlasConfigWriter}.
  */
 public class LayeredAssetGenerator implements AssetGenerationService {
 
     private static final Logger log = LoggerFactory.getLogger(LayeredAssetGenerator.class);
     private static final int DEFAULT_WIDTH = 128;
     private static final int DEFAULT_HEIGHT = 128;
+    private static final double DEFAULT_CHARACTER_DISPLAY_SCALE = 3.0;
+    private static final double DEFAULT_LOCATION_DISPLAY_SCALE = 1.0;
 
     private static final List<String> TOD_SUFFIXES = List.of("morning", "day", "evening", "night");
     private static final Pattern TOD_PATTERN = Pattern.compile(
@@ -82,7 +77,7 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             }
         }
 
-        // 3. Animation atlases (character animations + location overlay layers)
+        // 3. Animation atlases
         Path animDir = entityDir.resolve("animations");
         boolean hasCharacterAnims = !spec.animations().isEmpty();
         boolean hasOverlayLayers = spec.layers().stream().anyMatch(AssetLayer::hasConditions);
@@ -100,7 +95,7 @@ public class LayeredAssetGenerator implements AssetGenerationService {
         List<Path> generated = new ArrayList<>();
         List<AssetLayer> layers = spec.layers();
 
-        // --- Character-style animations (idle, walk, etc.) ---
+        // --- Character-style animations ---
         LinkedHashMap<String, LinkedHashMap<String, AnimationSpec>> todGroups = new LinkedHashMap<>();
         List<AnimationSpec> standaloneAnims = new ArrayList<>();
 
@@ -153,13 +148,12 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             }
         }
 
-        // --- Overlay layers with conditions (e.g. ambient_light) ---
+        // --- Overlay layers with conditions ---
         Map<String, AtlasConfigWriter.OverlayAnimDef> overlayAnimDefs = new LinkedHashMap<>();
 
         for (AssetLayer layer : layers) {
             if (!layer.hasConditions()) continue;
 
-            // Render the layer as a single-frame image for each condition
             LinkedHashMap<String, List<BufferedImage>> overlayRows = new LinkedHashMap<>();
             List<AtlasConfigWriter.OverlayRowDef> rowDefs = new ArrayList<>();
 
@@ -169,7 +163,6 @@ public class LayeredAssetGenerator implements AssetGenerationService {
                         .findFirst().orElse(null);
                 if (cond == null) continue;
 
-                // Render the base layer pixel data as the overlay frame
                 BufferedImage frame = renderer.renderLayer(layer, bgWidth, bgHeight);
                 overlayRows.put(tod, List.of(frame));
                 rowDefs.add(new AtlasConfigWriter.OverlayRowDef(
@@ -184,13 +177,16 @@ public class LayeredAssetGenerator implements AssetGenerationService {
                     throw new UncheckedIOException("Failed to write overlay atlas: " + layer.id(), e);
                 }
 
-                int defaultRow = Math.min(1, rowDefs.size() - 1); // default to 'day' (index 1)
+                int defaultRow = Math.min(1, rowDefs.size() - 1);
                 overlayAnimDefs.put(layer.id(), new AtlasConfigWriter.OverlayAnimDef(
                         bgWidth, bgHeight, rowDefs, defaultRow));
             }
         }
 
-        // Write unified sprite-atlas.json (v1.2)
+        // Determine displayScale: characters get 3x, locations get 1x
+        double scale = resolveDisplayScale(spec);
+        configWriter.withDisplayScale(scale);
+
         try {
             Path configPath = configWriter.writeSpriteAtlas(
                     spec.entityName(), standaloneAnims, gridAnimDefs, overlayAnimDefs, animDir);
@@ -200,6 +196,16 @@ public class LayeredAssetGenerator implements AssetGenerationService {
         }
 
         return generated;
+    }
+
+    private double resolveDisplayScale(AssetSpec spec) {
+        // If entity type is characters or pets, use larger scale so they're
+        // proportional to the 320×240 background.
+        return switch (spec.entityType()) {
+            case "characters" -> DEFAULT_CHARACTER_DISPLAY_SCALE;
+            case "pets" -> 2.0;
+            default -> DEFAULT_LOCATION_DISPLAY_SCALE;
+        };
     }
 
     private int resolveWidth(AssetSpec spec) {
