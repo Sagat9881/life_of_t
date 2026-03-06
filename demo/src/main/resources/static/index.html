@@ -161,7 +161,6 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     text-shadow: 1px 1px 0 #000; white-space: nowrap;
 }
 
-/* Placeholder rectangle for characters with missing assets */
 .sprite-placeholder {
     border: 2px dashed rgba(200,160,255,0.3);
     display: flex; align-items: center; justify-content: center;
@@ -232,7 +231,6 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 .modal-narrative .stat-pos { background: #1a4a1a; color: #80e880; }
 .modal-narrative .stat-neg { background: #4a1a1a; color: #e88080; }
 
-/* Floating stat change indicators */
 .stat-floater {
     position: absolute; pointer-events: none;
     font-size: 14px; font-weight: bold;
@@ -247,7 +245,6 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     100% { opacity: 0; transform: translateY(-40px); }
 }
 
-/* Heart particle burst */
 .heart-particle {
     position: absolute; pointer-events: none; font-size: 16px; z-index: 40;
     animation: heartBurst 1.2s ease-out forwards;
@@ -258,7 +255,6 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
     100% { opacity: 0; transform: translate(var(--dx), calc(var(--dy) - 20px)) scale(0.3); }
 }
 
-/* Quest completion flash */
 @keyframes questFlash {
     0%   { background: #3a6a3a; }
     100% { background: #1a1a30; }
@@ -276,7 +272,7 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 <div id="app">
     <header id="header">
         <h1>Life of T</h1>
-        <span class="subtitle">Demo v0.7</span>
+        <span class="subtitle">Demo v0.8</span>
         <span id="game-time">День 1 | 08:00</span>
     </header>
 
@@ -343,7 +339,7 @@ html, body { width: 100%; height: 100%; background: #0d0d14; color: #e0d8c8; fon
 'use strict';
 
 // ============================================================
-// Asset preloader with fallback chain
+//  Asset helpers
 // ============================================================
 const assetCache = {};
 
@@ -351,125 +347,189 @@ function preloadImage(url) {
     if (assetCache[url] !== undefined) return Promise.resolve(assetCache[url]);
     return new Promise(resolve => {
         const img = new Image();
-        img.onload = () => { assetCache[url] = true; resolve(true); };
+        img.onload  = () => { assetCache[url] = true;  resolve(true);  };
         img.onerror = () => { assetCache[url] = false; resolve(false); };
         img.src = url;
     });
 }
 
-async function resolveAtlas(candidates) {
-    for (const url of candidates) {
-        const ok = await preloadImage(url);
-        if (ok) return url;
-    }
-    return null;
+async function fetchJSON(url) {
+    try { const r = await fetch(url); return r.ok ? await r.json() : null; }
+    catch(_) { return null; }
 }
 
 // ============================================================
-// Time-of-day logic
+//  Time-of-day
 // ============================================================
 function getTimeSlot(hour) {
-    if (hour >= 6 && hour < 12) return 'morning';
+    if (hour >= 6  && hour < 12) return 'morning';
     if (hour >= 12 && hour < 18) return 'day';
     if (hour >= 18 && hour < 23) return 'evening';
     return 'night';
 }
 
 // ============================================================
-// NPC Action Definitions
+//  GridSpriteAnimator
+//
+//  Drives CSS background-position on a DOM element.
+//  Atlas layout (PNG file):
+//    columns = animation frames  (X axis)
+//    rows    = variants          (Y axis)
+//
+//  background-size is set to (columns * frameW) × (rows * frameH)
+//  so each "cell" maps 1:1 to the element size.
+//
+//  tick():
+//    backgroundPositionX = -(currentFrame * frameW)
+//    backgroundPositionY = -(currentRow   * frameH)
+// ============================================================
+class GridSpriteAnimator {
+    /**
+     * @param {HTMLElement} el       — DOM element to animate
+     * @param {Object}      config   — atlas config object from JSON:
+     *   For "grid" layout:
+     *     { layout:"grid", file, frameWidth, frameHeight, columns, rows:[{condition,rowIndex,fps,loop}], defaultRow }
+     *   For "strip" layout:
+     *     { layout:"strip", file, frameWidth, frameHeight, frames, fps, loop }
+     * @param {string}      atlasUrl — resolved full URL to atlas PNG
+     */
+    constructor(el, config, atlasUrl) {
+        this.el = el;
+        this.config = config;
+        this.atlasUrl = atlasUrl;
+
+        this.frameW = config.frameWidth;
+        this.frameH = config.frameHeight;
+
+        if (config.layout === 'grid') {
+            this.columns  = config.columns;
+            this.totalRows = config.rows.length;
+            this.rowMap = {};
+            for (const r of config.rows) {
+                if (r.condition) this.rowMap[r.condition.value] = r;
+            }
+            const def = config.rows.find(r => r.rowIndex === (config.defaultRow || 0)) || config.rows[0];
+            this.currentRow = def.rowIndex;
+            this.fps = def.fps;
+            this.loop = def.loop;
+        } else {
+            this.columns   = config.frames;
+            this.totalRows = 1;
+            this.currentRow = 0;
+            this.fps  = config.fps;
+            this.loop = config.loop;
+        }
+
+        this.currentFrame = 0;
+        this.timer = null;
+
+        this._applyBackground();
+    }
+
+    _applyBackground() {
+        this.el.style.backgroundImage = `url('${this.atlasUrl}')`;
+        this.el.style.backgroundSize =
+            `${this.columns * this.frameW}px ${this.totalRows * this.frameH}px`;
+        this._paint();
+    }
+
+    _paint() {
+        this.el.style.backgroundPosition =
+            `${-(this.currentFrame * this.frameW)}px ${-(this.currentRow * this.frameH)}px`;
+    }
+
+    /** Switch to a different row by condition value (e.g. "morning") */
+    setRowByCondition(conditionValue) {
+        const rowDef = this.rowMap && this.rowMap[conditionValue];
+        if (!rowDef || rowDef.rowIndex === this.currentRow) return;
+        this.currentRow = rowDef.rowIndex;
+        this.fps = rowDef.fps;
+        this.loop = rowDef.loop;
+        this.currentFrame = 0;
+        this._paint();
+        // restart timer with new fps
+        if (this.timer) { this.stop(); this.start(); }
+    }
+
+    start() {
+        if (this.timer || this.columns <= 1) return;
+        const interval = Math.round(1000 / this.fps);
+        this.timer = setInterval(() => {
+            this.currentFrame = (this.currentFrame + 1) % this.columns;
+            this._paint();
+        }, interval);
+    }
+
+    stop() {
+        if (this.timer) { clearInterval(this.timer); this.timer = null; }
+    }
+}
+
+// ============================================================
+//  NPC Action Definitions
 // ============================================================
 const NPC_ACTIONS = {
     alexander: {
-        name: 'Александр',
-        avatar: '👨',
+        name: 'Александр', avatar: '👨',
         desc: 'Твой муж. Можно поговорить, обнять или устроить свидание.',
         actions: [
-            { code: 'talk',  label: '💬 Поговорить',     cost: '1 ч',  costH: 1 },
-            { code: 'hug',   label: '🤗 Обнять',          cost: '1 ч',  costH: 1 },
-            { code: 'date',  label: '🕯️ Свидание',       cost: '3 ч',  costH: 3 },
+            { code: 'talk', label: '💬 Поговорить',   cost: '1 ч', costH: 1 },
+            { code: 'hug',  label: '🤗 Обнять',        cost: '1 ч', costH: 1 },
+            { code: 'date', label: '🕯️ Свидание',     cost: '3 ч', costH: 3 },
         ]
     },
     sam: {
-        name: 'Сэм',
-        avatar: '🐕',
+        name: 'Сэм', avatar: '🐕',
         desc: 'Твой цвергпинчер. Верный друг с неуёмной энергией.',
         actions: [
-            { code: 'pet',   label: '🐾 Погладить',      cost: '1 ч',  costH: 1 },
-            { code: 'feed',  label: '🦴 Покормить',      cost: '1 ч',  costH: 1 },
-            { code: 'walk',  label: '🚶 Погулять',       cost: '2 ч',  costH: 2 },
+            { code: 'pet',  label: '🐾 Погладить',    cost: '1 ч', costH: 1 },
+            { code: 'feed', label: '🦴 Покормить',    cost: '1 ч', costH: 1 },
+            { code: 'walk', label: '🚶 Погулять',     cost: '2 ч', costH: 2 },
         ]
     },
     tanya: {
-        name: 'Таня',
-        avatar: '👩',
+        name: 'Таня', avatar: '👩',
         desc: 'Это ты. Позаботься о себе.',
         actions: [
-            { code: 'rest',       label: '😴 Отдохнуть',          cost: '3 ч',  costH: 3 },
-            { code: 'selfcare',   label: '💅 Уход за собой',      cost: '2 ч',  costH: 2 },
-            { code: 'callfather', label: '📞 Позвонить папе',     cost: '1 ч',  costH: 1 },
+            { code: 'rest',       label: '😴 Отдохнуть',        cost: '3 ч', costH: 3 },
+            { code: 'selfcare',   label: '💅 Уход за собой',    cost: '2 ч', costH: 2 },
+            { code: 'callfather', label: '📞 Позвонить папе',   cost: '1 ч', costH: 1 },
         ]
     }
 };
 
 // ============================================================
-// Character configs with atlas resolution
-//
-// Per visual-specs.xml:
-//   Sam:       idle_morning, idle_day, idle_evening, idle_night (4 time-of-day variants)
-//   Tanya:     idle (single, no time variants)
-//   Alexander: idle (single, no time variants)
-//
-// Generator output naming: {animation_name}_atlas.png
-// Fallback: static composite PNG (e.g. sam.png, tanya.png)
+//  Character configs (layout only — animation params come from atlas-config.json)
 // ============================================================
 const BASE = '/assets/generated/characters';
 
 const CHARACTER_CONFIGS = {
     tanya: {
         el: 'tanya', labelEl: 'label-tanya', activityEl: 'activity-tanya',
-        hasTimedIdle: false,
-        idleAtlasCandidates: () => [
-            `${BASE}/tanya/animations/idle_atlas.png`,
-            `${BASE}/tanya/tanya.png`
-        ],
-        walkAtlasCandidates: [
-            `${BASE}/tanya/animations/walk_atlas.png`
-        ],
-        idleFrames: 6, idleFps: 8, walkFrames: 8, walkFps: 10,
-        spriteW: 128, spriteH: 192, minX: 5, maxX: 80, bottomPct: 22, speed: 1.8,
+        animDir: `${BASE}/tanya/animations`,
+        staticFallback: `${BASE}/tanya/tanya.png`,
+        spriteW: 128, spriteH: 192,
+        minX: 5, maxX: 80, bottomPct: 22, speed: 1.8,
         idleMinSec: 2, idleMaxSec: 6,
         activities: ['☕', '📖', '🎮', '💭', '🎵', '💅'],
         placeholderEmoji: '👩', placeholderColor: '#90D8C0'
     },
     alexander: {
         el: 'alexander', labelEl: 'label-alexander', activityEl: 'activity-alexander',
-        hasTimedIdle: false,
-        idleAtlasCandidates: () => [
-            `${BASE}/alexander/animations/idle_atlas.png`,
-            `${BASE}/alexander/alexander.png`
-        ],
-        walkAtlasCandidates: [
-            `${BASE}/alexander/animations/walk_atlas.png`
-        ],
-        idleFrames: 4, idleFps: 4, walkFrames: 8, walkFps: 8,
-        spriteW: 128, spriteH: 192, minX: 10, maxX: 85, bottomPct: 22, speed: 1.4,
+        animDir: `${BASE}/alexander/animations`,
+        staticFallback: `${BASE}/alexander/alexander.png`,
+        spriteW: 128, spriteH: 192,
+        minX: 10, maxX: 85, bottomPct: 22, speed: 1.4,
         idleMinSec: 3, idleMaxSec: 8,
         activities: ['📖', '💻', '☕', '📱', '🎵', '🤔'],
         placeholderEmoji: '👨', placeholderColor: '#4060A0'
     },
     sam: {
         el: 'sam', labelEl: 'label-sam', activityEl: 'activity-sam',
-        hasTimedIdle: true,
-        idleAtlasCandidates: (slot) => [
-            `${BASE}/sam/animations/idle_${slot}_atlas.png`,
-            `${BASE}/sam/animations/idle_atlas.png`,
-            `${BASE}/sam/sam.png`
-        ],
-        walkAtlasCandidates: [
-            `${BASE}/sam/animations/walk_atlas.png`
-        ],
-        idleFrames: 4, idleFps: 4, walkFrames: 6, walkFps: 8,
-        spriteW: 96, spriteH: 80, minX: 5, maxX: 90, bottomPct: 24, speed: 2.5,
+        animDir: `${BASE}/sam/animations`,
+        staticFallback: `${BASE}/sam/sam.png`,
+        spriteW: 96, spriteH: 80,
+        minX: 5, maxX: 90, bottomPct: 24, speed: 2.5,
         idleMinSec: 1, idleMaxSec: 4,
         activities: ['🧸', '🦴', '😴', '🐾', '👀'],
         placeholderEmoji: '🐕', placeholderColor: '#0A0A0A'
@@ -477,36 +537,21 @@ const CHARACTER_CONFIGS = {
 };
 
 // ============================================================
-// Sprite Animator
-// ============================================================
-class SpriteAnimator {
-    constructor(el, frameWidthCSS, frameCount, fps) {
-        this.el = el; this.fw = frameWidthCSS; this.fc = frameCount;
-        this.interval = Math.round(1000 / fps); this.current = 0; this.timer = null;
-    }
-    start() {
-        if (this.timer || this.fc <= 1) return;
-        this.timer = setInterval(() => {
-            this.el.style.backgroundPositionX = -(this.current * this.fw) + 'px';
-            this.current = (this.current + 1) % this.fc;
-        }, this.interval);
-    }
-    stop() { if (this.timer) { clearInterval(this.timer); this.timer = null; } }
-}
-
-// ============================================================
-// Character Walker — with async atlas resolution
+//  CharacterWalker — config-driven, uses GridSpriteAnimator
 // ============================================================
 class CharacterWalker {
     constructor(cfg) {
         this.cfg = cfg;
         this.el = document.getElementById(cfg.el);
-        this.labelEl = document.getElementById(cfg.labelEl);
+        this.labelEl  = document.getElementById(cfg.labelEl);
         this.activityEl = document.getElementById(cfg.activityEl);
         this.state = 'idle';
-        this.animator = null;
-        this.resolvedIdleAtlas = null;
-        this.resolvedWalkAtlas = null;
+
+        // Animation state
+        this.idleAnimator = null;   // GridSpriteAnimator | null
+        this.walkAnimator = null;   // GridSpriteAnimator | null
+        this.idleConfig = null;     // atlas-config entry for idle
+        this.walkConfig = null;     // atlas-config entry for walk
         this.isStatic = false;
         this.lastTimeSlot = null;
 
@@ -520,46 +565,79 @@ class CharacterWalker {
     }
 
     async _initAsync() {
-        await this._resolveAndSetIdle();
-        await this._resolveWalk();
+        // Load atlas-config.json for this character's animation directory
+        const configs = await fetchJSON(this.cfg.animDir + '/atlas-config.json');
+        const configMap = {};
+
+        // Also load individual *-atlas-config.json files for grid configs
+        // The combined atlas-config.json has flat entries; grid configs are separate files
+        if (configs && Array.isArray(configs)) {
+            for (const c of configs) configMap[c.name] = c;
+        }
+
+        // Try loading per-animation config files (grid configs)
+        // For each known animation name, try fetching {name}-atlas-config.json
+        for (const animName of ['idle', 'walk', 'tremble', 'eat']) {
+            if (!configMap[animName]) {
+                const gridCfg = await fetchJSON(this.cfg.animDir + '/' + animName + '-atlas-config.json');
+                if (gridCfg) configMap[animName] = gridCfg;
+            }
+        }
+
+        // Resolve idle config
+        await this._setupIdleFromConfig(configMap['idle']);
+        // Resolve walk config
+        await this._setupWalkFromConfig(configMap['walk']);
+
         this._scheduleNextWalk();
         this._rotateActivity();
     }
 
-    async _resolveAndSetIdle() {
-        const c = this.cfg;
-        const slot = getTimeSlot(currentGameTime.hour);
-        this.lastTimeSlot = slot;
+    async _setupIdleFromConfig(idleCfg) {
+        if (idleCfg) {
+            const atlasUrl = this.cfg.animDir + '/' + idleCfg.file;
+            const ok = await preloadImage(atlasUrl);
+            if (ok) {
+                this.idleConfig = idleCfg;
+                this.idleAnimator = new GridSpriteAnimator(this.el, idleCfg, atlasUrl);
+                this.isStatic = false;
 
-        const candidates = c.idleAtlasCandidates(slot);
-        const atlas = await resolveAtlas(candidates);
+                // Set initial row based on current time
+                if (idleCfg.layout === 'grid') {
+                    const slot = getTimeSlot(currentGameTime.hour);
+                    this.lastTimeSlot = slot;
+                    this.idleAnimator.setRowByCondition(slot);
+                }
 
-        if (atlas) {
-            this.resolvedIdleAtlas = atlas;
-            this.isStatic = atlas.endsWith('.png') && !atlas.includes('_atlas');
-            this._applyIdleVisual();
-        } else {
-            this._applyPlaceholder();
+                this.idleAnimator.start();
+                this.state = 'idle';
+                return;
+            }
         }
+
+        // Fallback: static composite PNG
+        const ok = await preloadImage(this.cfg.staticFallback);
+        if (ok) {
+            this.el.style.backgroundImage = `url('${this.cfg.staticFallback}')`;
+            this.el.style.backgroundSize = `${this.cfg.spriteW}px ${this.cfg.spriteH}px`;
+            this.el.style.backgroundPosition = '0 0';
+            this.isStatic = true;
+            this.state = 'idle';
+            return;
+        }
+
+        // Fallback: colored placeholder
+        this._applyPlaceholder();
     }
 
-    _applyIdleVisual() {
-        const c = this.cfg;
-        this.el.classList.remove('sprite-placeholder');
-        this.el.style.backgroundImage = `url('${this.resolvedIdleAtlas}')`;
-
-        if (this.isStatic) {
-            this.el.style.backgroundSize = `${c.spriteW}px ${c.spriteH}px`;
-            this.el.style.backgroundPosition = '0 0';
-            if (this.animator) this.animator.stop();
-            this.animator = null;
-        } else {
-            this.el.style.backgroundSize = `${c.spriteW * c.idleFrames}px ${c.spriteH}px`;
-            if (this.animator) this.animator.stop();
-            this.animator = new SpriteAnimator(this.el, c.spriteW, c.idleFrames, c.idleFps);
-            this.animator.start();
+    async _setupWalkFromConfig(walkCfg) {
+        if (!walkCfg) return;
+        const atlasUrl = this.cfg.animDir + '/' + walkCfg.file;
+        const ok = await preloadImage(atlasUrl);
+        if (ok) {
+            this.walkConfig = walkCfg;
+            // Don't create animator yet — will create on walk start
         }
-        this.state = 'idle';
     }
 
     _applyPlaceholder() {
@@ -572,31 +650,53 @@ class CharacterWalker {
         this.state = 'idle';
     }
 
-    async _resolveWalk() {
-        const atlas = await resolveAtlas(this.cfg.walkAtlasCandidates);
-        this.resolvedWalkAtlas = atlas;
-    }
+    checkTimeSlotChange() {
+        if (!this.idleAnimator || !this.idleConfig) return;
+        if (this.idleConfig.layout !== 'grid') return;
 
-    async checkTimeSlotChange() {
-        if (!this.cfg.hasTimedIdle) return;
         const slot = getTimeSlot(currentGameTime.hour);
-        if (slot !== this.lastTimeSlot && this.state === 'idle') {
-            await this._resolveAndSetIdle();
+        if (slot !== this.lastTimeSlot) {
+            this.lastTimeSlot = slot;
+            if (this.state === 'idle') {
+                this.idleAnimator.setRowByCondition(slot);
+            }
         }
     }
 
-    _setWalkAnim() {
-        const c = this.cfg;
-        if (!this.resolvedWalkAtlas) return;
+    _switchToIdle() {
+        if (this.walkAnimator) { this.walkAnimator.stop(); this.walkAnimator = null; }
         this.el.classList.remove('sprite-placeholder');
         this.el.innerHTML = '';
         this.el.style.backgroundColor = '';
-        this.el.style.backgroundImage = `url('${this.resolvedWalkAtlas}')`;
-        this.el.style.backgroundSize = `${c.spriteW * c.walkFrames}px ${c.spriteH}px`;
-        if (this.animator) this.animator.stop();
-        this.animator = new SpriteAnimator(this.el, c.spriteW, c.walkFrames, c.walkFps);
-        this.animator.start();
+
+        if (this.idleAnimator) {
+            this.idleAnimator._applyBackground();
+            if (this.idleConfig && this.idleConfig.layout === 'grid') {
+                const slot = getTimeSlot(currentGameTime.hour);
+                this.idleAnimator.setRowByCondition(slot);
+            }
+            this.idleAnimator.start();
+        } else if (this.isStatic) {
+            this.el.style.backgroundImage = `url('${this.cfg.staticFallback}')`;
+            this.el.style.backgroundSize = `${this.cfg.spriteW}px ${this.cfg.spriteH}px`;
+            this.el.style.backgroundPosition = '0 0';
+        }
+        this.state = 'idle';
+    }
+
+    _switchToWalk() {
+        if (!this.walkConfig) return false;
+        if (this.idleAnimator) this.idleAnimator.stop();
+
+        this.el.classList.remove('sprite-placeholder');
+        this.el.innerHTML = '';
+        this.el.style.backgroundColor = '';
+
+        const atlasUrl = this.cfg.animDir + '/' + this.walkConfig.file;
+        this.walkAnimator = new GridSpriteAnimator(this.el, this.walkConfig, atlasUrl);
+        this.walkAnimator.start();
         this.state = 'walking';
+        return true;
     }
 
     _scheduleNextWalk() {
@@ -606,10 +706,7 @@ class CharacterWalker {
     }
 
     _startWalk() {
-        if (!this.resolvedWalkAtlas) {
-            this._scheduleNextWalk();
-            return;
-        }
+        if (!this.walkConfig) { this._scheduleNextWalk(); return; }
         const container = this.el.parentElement;
         if (!container) return;
         const cw = container.clientWidth;
@@ -619,7 +716,7 @@ class CharacterWalker {
         if (Math.abs(this.targetX - this.posX) < 20) { this._scheduleNextWalk(); return; }
         const goingLeft = this.targetX < this.posX;
         this.el.style.transform = goingLeft ? 'scaleX(-1)' : 'scaleX(1)';
-        this._setWalkAnim();
+        this._switchToWalk();
         this._move();
     }
 
@@ -631,7 +728,7 @@ class CharacterWalker {
                 this.posX = this.targetX;
                 this._updatePosition();
                 this.el.style.transform = 'scaleX(1)';
-                this._applyIdleVisual();
+                this._switchToIdle();
                 this._scheduleNextWalk();
                 return;
             }
@@ -667,27 +764,23 @@ class CharacterWalker {
 }
 
 // ============================================================
-// Interaction Modal
+//  Interaction Modal
 // ============================================================
 class InteractionModal {
     constructor() {
         this.overlay = document.getElementById('interaction-overlay');
-        this.modal = document.getElementById('interaction-modal');
-        this.avatarEl = document.getElementById('modal-avatar');
-        this.nameEl = document.getElementById('modal-name');
-        this.bodyEl = document.getElementById('modal-body');
+        this.modal   = document.getElementById('interaction-modal');
+        this.avatarEl    = document.getElementById('modal-avatar');
+        this.nameEl      = document.getElementById('modal-name');
+        this.bodyEl      = document.getElementById('modal-body');
         this.narrativeEl = document.getElementById('modal-narrative');
-        this.closeBtn = document.getElementById('modal-close');
+        this.closeBtn    = document.getElementById('modal-close');
         this.currentTarget = null;
         this.busy = false;
 
         this.closeBtn.addEventListener('click', () => this.hide());
-        this.overlay.addEventListener('click', (e) => {
-            if (e.target === this.overlay) this.hide();
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') this.hide();
-        });
+        this.overlay.addEventListener('click', e => { if (e.target === this.overlay) this.hide(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') this.hide(); });
     }
 
     show(targetId) {
@@ -695,13 +788,11 @@ class InteractionModal {
         if (!cfg) return;
         this.currentTarget = targetId;
         this.avatarEl.textContent = cfg.avatar;
-        this.nameEl.textContent = cfg.name;
+        this.nameEl.textContent   = cfg.name;
         this.narrativeEl.style.display = 'none';
         this.narrativeEl.innerHTML = '';
 
-        const gt = currentGameTime;
-        const remainH = 24 - gt.hour;
-
+        const remainH = 24 - currentGameTime.hour;
         let html = `<div class="modal-desc">${cfg.desc}</div>`;
         for (const a of cfg.actions) {
             const disabled = a.costH > remainH ? 'disabled' : '';
@@ -709,23 +800,17 @@ class InteractionModal {
             html += `${a.label}<span class="action-cost">⏱ ${a.cost}</span></button>`;
         }
         this.bodyEl.innerHTML = html;
-
         this.bodyEl.querySelectorAll('.action-btn').forEach(btn => {
             btn.addEventListener('click', () => this.doAction(btn.dataset.action));
         });
-
         this.overlay.classList.add('visible');
     }
 
-    hide() {
-        this.overlay.classList.remove('visible');
-        this.currentTarget = null;
-    }
+    hide() { this.overlay.classList.remove('visible'); this.currentTarget = null; }
 
     async doAction(actionCode) {
         if (this.busy) return;
         this.busy = true;
-
         this.bodyEl.querySelectorAll('.action-btn').forEach(b => b.disabled = true);
 
         try {
@@ -741,31 +826,24 @@ class InteractionModal {
                 if (result.statChanges) {
                     for (const [k, v] of Object.entries(result.statChanges)) {
                         const cls = v >= 0 ? 'stat-pos' : 'stat-neg';
-                        const label = STAT_LABELS[k] || k;
-                        nHtml += `<span class="stat-change ${cls}">${label} ${v>=0?'+':''}${v}</span>`;
+                        nHtml += `<span class="stat-change ${cls}">${STAT_LABELS[k]||k} ${v>=0?'+':''}${v}</span>`;
                     }
                 }
                 if (result.relationshipChanges) {
                     for (const [k, v] of Object.entries(result.relationshipChanges)) {
                         const cls = v >= 0 ? 'stat-pos' : 'stat-neg';
-                        const label = REL_LABELS[k] || k;
-                        nHtml += `<span class="stat-change ${cls}">${label} ${v>=0?'+':''}${v}</span>`;
+                        nHtml += `<span class="stat-change ${cls}">${REL_LABELS[k]||k} ${v>=0?'+':''}${v}</span>`;
                     }
                 }
                 nHtml += '</div>';
                 this.narrativeEl.innerHTML = nHtml;
                 this.narrativeEl.style.display = 'block';
-
                 spawnStatFloaters(this.currentTarget, result.statChanges);
-
                 if (result.relationshipChanges) {
-                    const hasPositive = Object.values(result.relationshipChanges).some(v => v > 0);
-                    if (hasPositive) spawnHeartParticles(this.currentTarget);
+                    const hasPos = Object.values(result.relationshipChanges).some(v => v > 0);
+                    if (hasPos) spawnHeartParticles(this.currentTarget);
                 }
-
-                if (result.updatedState) {
-                    syncFromServerState(result.updatedState);
-                }
+                if (result.updatedState) syncFromServerState(result.updatedState);
             } else {
                 this.narrativeEl.innerHTML = `<p style="color:#e88080">${result.message}</p>`;
                 this.narrativeEl.style.display = 'block';
@@ -774,21 +852,16 @@ class InteractionModal {
             this.narrativeEl.innerHTML = '<p style="color:#e88080">Ошибка соединения</p>';
             this.narrativeEl.style.display = 'block';
         }
-
         this.busy = false;
-        setTimeout(() => {
-            if (this.currentTarget) {
-                this.show(this.currentTarget);
-            }
-        }, 1500);
+        setTimeout(() => { if (this.currentTarget) this.show(this.currentTarget); }, 1500);
     }
 }
 
 // ============================================================
-// Visual feedback helpers
+//  Visual feedback
 // ============================================================
 const STAT_LABELS = { energy:'⚡', health:'❤️', stress:'😰', mood:'😊', money:'💰', selfEsteem:'⭐' };
-const REL_LABELS = { closeness:'💕 близость', trust:'🤝 доверие', romance:'💘 романтика', stability:'🏠 стабильность', father_closeness:'💕 папа', father_trust:'🤝 папа' };
+const REL_LABELS  = { closeness:'💕 близость', trust:'🤝 доверие', romance:'💘 романтика', stability:'🏠 стабильность', father_closeness:'💕 папа', father_trust:'🤝 папа' };
 
 function spawnStatFloaters(targetId, changes) {
     if (!changes) return;
@@ -798,13 +871,13 @@ function spawnStatFloaters(targetId, changes) {
     const container = document.getElementById('room-container').getBoundingClientRect();
     let i = 0;
     for (const [k, v] of Object.entries(changes)) {
-        const floater = document.createElement('div');
-        floater.className = 'stat-floater ' + (v >= 0 ? 'positive' : 'negative');
-        floater.textContent = (STAT_LABELS[k]||'') + (v>=0?'+':'') + v;
-        floater.style.left = (rect.left - container.left + rect.width/2 - 20 + (i-1)*30) + 'px';
-        floater.style.top = (rect.top - container.top - 10) + 'px';
-        document.getElementById('room-container').appendChild(floater);
-        setTimeout(() => floater.remove(), 1600);
+        const f = document.createElement('div');
+        f.className = 'stat-floater ' + (v >= 0 ? 'positive' : 'negative');
+        f.textContent = (STAT_LABELS[k]||'') + (v>=0?'+':'') + v;
+        f.style.left = (rect.left - container.left + rect.width/2 - 20 + (i-1)*30) + 'px';
+        f.style.top  = (rect.top  - container.top  - 10) + 'px';
+        document.getElementById('room-container').appendChild(f);
+        setTimeout(() => f.remove(), 1600);
         i++;
     }
 }
@@ -815,28 +888,24 @@ function spawnHeartParticles(targetId) {
     const rect = el.getBoundingClientRect();
     const container = document.getElementById('room-container').getBoundingClientRect();
     const cx = rect.left - container.left + rect.width/2;
-    const cy = rect.top - container.top + rect.height/3;
+    const cy = rect.top  - container.top  + rect.height/3;
     for (let i = 0; i < 6; i++) {
-        const heart = document.createElement('div');
-        heart.className = 'heart-particle';
-        heart.textContent = '♥';
-        const dx = (Math.random() - 0.5) * 80;
-        const dy = -(20 + Math.random() * 40);
-        heart.style.cssText = `left:${cx}px;top:${cy}px;--dx:${dx}px;--dy:${dy}px;animation-delay:${i*0.08}s`;
-        document.getElementById('room-container').appendChild(heart);
-        setTimeout(() => heart.remove(), 1400);
+        const h = document.createElement('div');
+        h.className = 'heart-particle';
+        h.textContent = '♥';
+        const dx = (Math.random()-0.5)*80, dy = -(20+Math.random()*40);
+        h.style.cssText = `left:${cx}px;top:${cy}px;--dx:${dx}px;--dy:${dy}px;animation-delay:${i*0.08}s`;
+        document.getElementById('room-container').appendChild(h);
+        setTimeout(() => h.remove(), 1400);
     }
 }
 
 // ============================================================
-// State sync
+//  State sync
 // ============================================================
 let currentGameTime = { day: 1, hour: 8 };
 
-function hearts(c) {
-    const f = Math.round(c / 10);
-    return '♥'.repeat(Math.max(0,f)) + '♡'.repeat(Math.max(0,10-f));
-}
+function hearts(c) { const f = Math.round(c/10); return '♥'.repeat(Math.max(0,f)) + '♡'.repeat(Math.max(0,10-f)); }
 
 function setBar(id, v) {
     const b = document.getElementById('bar-'+id), n = document.getElementById('val-'+id);
@@ -848,42 +917,34 @@ function setBar(id, v) {
 function syncFromServerState(state) {
     if (state.character && state.character.stats) {
         const s = state.character.stats;
-        setBar('t-energy', s.energy);
-        setBar('t-health', s.health);
-        setBar('t-stress', s.stress);
-        setBar('t-mood', s.mood);
-        setBar('t-money', s.money);
-        setBar('t-esteem', s.selfEsteem);
+        setBar('t-energy', s.energy); setBar('t-health', s.health);
+        setBar('t-stress', s.stress); setBar('t-mood',   s.mood);
+        setBar('t-money',  s.money);  setBar('t-esteem', s.selfEsteem);
     }
     if (state.relationships && state.relationships.byNpc) {
         const h = state.relationships.byNpc['HUSBAND'];
         const f = state.relationships.byNpc['FATHER'];
         if (h) document.getElementById('rel-husband').textContent = hearts(h.closeness);
-        if (f) document.getElementById('rel-father').textContent = hearts(f.closeness);
+        if (f) document.getElementById('rel-father').textContent  = hearts(f.closeness);
     }
     if (state.gameTime) {
         const prevSlot = getTimeSlot(currentGameTime.hour);
         currentGameTime = state.gameTime;
         document.getElementById('game-time').textContent =
             'День ' + state.gameTime.day + ' | ' + String(state.gameTime.hour).padStart(2,'0') + ':00';
-
         const newSlot = getTimeSlot(state.gameTime.hour);
-        if (newSlot !== prevSlot) {
-            walkers.forEach(w => w.checkTimeSlotChange());
-        }
+        if (newSlot !== prevSlot) walkers.forEach(w => w.checkTimeSlotChange());
     }
-    if (state.activeQuests) {
-        renderQuests(state.activeQuests);
-    }
+    if (state.activeQuests) renderQuests(state.activeQuests);
 }
 
 function renderQuests(quests) {
     const container = document.getElementById('quest-list');
     container.innerHTML = '';
+    const typeLabel = { SELF_CARE_ARC:'ЗАБОТА О СЕБЕ', FAMILY_HARMONY:'СЕМЬЯ', CAREER_GROWTH:'КАРЬЕРА' };
     for (const q of quests) {
         const div = document.createElement('div');
         div.className = 'quest-item';
-        const typeLabel = { SELF_CARE_ARC: 'ЗАБОТА О СЕБЕ', FAMILY_HARMONY: 'СЕМЬЯ', CAREER_GROWTH: 'КАРЬЕРА' };
         let html = `<span class="quest-type-badge quest-${q.type}">${typeLabel[q.type]||q.type}</span>`;
         html += `<div class="quest-title">${q.title}</div>`;
         html += `<div class="quest-progress-bg"><div class="quest-progress-fill" style="width:${q.progressPercent}%"></div></div>`;
@@ -896,35 +957,25 @@ function renderQuests(quests) {
     }
 }
 
-async function fetchJSON(url) {
-    try { const r = await fetch(url); return r.ok ? await r.json() : null; } catch(_) { return null; }
-}
-
 // ============================================================
-// Init
+//  Init
 // ============================================================
 const walkers = [];
 let modal;
 
-function initWalkers() {
+async function init() {
+    modal = new InteractionModal();
+
     for (const [id, cfg] of Object.entries(CHARACTER_CONFIGS)) {
         walkers.push(new CharacterWalker(cfg));
     }
-}
 
-function initClickHandlers() {
     ['alexander', 'sam', 'tanya'].forEach(id => {
-        document.getElementById(id).addEventListener('click', (e) => {
+        document.getElementById(id).addEventListener('click', e => {
             e.stopPropagation();
             modal.show(id);
         });
     });
-}
-
-async function init() {
-    modal = new InteractionModal();
-    initWalkers();
-    initClickHandlers();
 
     const status = await fetchJSON('/api/demo/status');
     if (status) syncFromServerState(status);
