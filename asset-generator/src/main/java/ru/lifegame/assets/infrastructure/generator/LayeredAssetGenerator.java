@@ -14,18 +14,31 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Generates layered PNG assets and animation atlases from XML-driven AssetSpec.
- * Delegates all pixel rendering to UniversalPixelRenderer.
+ * <p>
+ * Animations with time-of-day variants (e.g. idle_morning, idle_day, idle_evening, idle_night)
+ * are automatically detected and merged into a single <b>grid atlas</b> where:
+ * <ul>
+ *   <li>Each column = animation frame</li>
+ *   <li>Each row = a variant (morning, day, evening, night)</li>
+ * </ul>
+ * Non-variant animations produce a classic horizontal-strip atlas (single row).
  */
 public class LayeredAssetGenerator implements AssetGenerationService {
 
     private static final Logger log = LoggerFactory.getLogger(LayeredAssetGenerator.class);
     private static final int DEFAULT_WIDTH = 128;
     private static final int DEFAULT_HEIGHT = 128;
+
+    /** Known time-of-day suffixes in the canonical row order */
+    private static final List<String> TOD_SUFFIXES = List.of("morning", "day", "evening", "night");
+    private static final Pattern TOD_PATTERN = Pattern.compile(
+            "^(.+?)_(" + String.join("|", TOD_SUFFIXES) + ")$");
 
     private final UniversalPixelRenderer renderer;
     private final PngLayerWriter pngWriter;
@@ -47,7 +60,7 @@ public class LayeredAssetGenerator implements AssetGenerationService {
         List<Path> generated = new ArrayList<>();
         Path entityDir = outputRoot.resolve(spec.naming().outputDir());
 
-        // 1. Generate composite static image from all layers
+        // 1. Composite static image
         int width = resolveWidth(spec);
         int height = resolveHeight(spec);
         BufferedImage composite = renderer.renderComposite(spec.layers(), width, height);
@@ -59,7 +72,7 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             throw new UncheckedIOException("Failed to write composite: " + spec.entityName(), e);
         }
 
-        // 2. Generate individual layers
+        // 2. Individual layers
         for (AssetLayer layer : spec.layers()) {
             BufferedImage layerImage = renderer.renderLayer(layer, width, height);
             try {
@@ -70,33 +83,101 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             }
         }
 
-        // 3. Generate animation atlases
+        // 3. Animation atlases — group time-of-day variants into grids
         if (!spec.animations().isEmpty()) {
             Path animDir = entityDir.resolve("animations");
-            for (AnimationSpec animSpec : spec.animations()) {
-                List<BufferedImage> frames = renderer.renderAnimationFrames(
-                        spec.layers(), animSpec);
-                try {
-                    Path atlasPath = atlasWriter.writeAtlas(frames, animSpec, animDir);
-                    generated.add(atlasPath);
-
-                    String atlasFileName = atlasPath.getFileName().toString();
-                    Path configPath = configWriter.writeConfig(animSpec, atlasFileName, animDir);
-                    generated.add(configPath);
-                } catch (IOException e) {
-                    throw new UncheckedIOException("Failed to write atlas: " + animSpec.name(), e);
-                }
-            }
-            try {
-                Path combinedConfig = configWriter.writeCombinedConfig(spec.animations(), animDir);
-                generated.add(combinedConfig);
-            } catch (IOException e) {
-                throw new UncheckedIOException("Failed to write combined atlas config", e);
-            }
+            generated.addAll(generateAnimationAtlases(spec, animDir));
         }
 
         log.info("Generated {} files for {}/{}", generated.size(),
                 spec.entityType(), spec.entityName());
+        return generated;
+    }
+
+    /**
+     * Groups animations by base name, detects time-of-day variants,
+     * and routes to grid or strip atlas writer.
+     */
+    private List<Path> generateAnimationAtlases(AssetSpec spec, Path animDir) {
+        List<Path> generated = new ArrayList<>();
+        List<AssetLayer> layers = spec.layers();
+
+        // Partition: baseName → ordered map of (conditionValue → AnimationSpec)
+        // Non-TOD animations go to standalone map
+        LinkedHashMap<String, LinkedHashMap<String, AnimationSpec>> todGroups = new LinkedHashMap<>();
+        List<AnimationSpec> standaloneAnims = new ArrayList<>();
+
+        for (AnimationSpec animSpec : spec.animations()) {
+            Matcher m = TOD_PATTERN.matcher(animSpec.name());
+            if (m.matches()) {
+                String baseName = m.group(1);
+                String todValue = m.group(2);
+                todGroups.computeIfAbsent(baseName, k -> new LinkedHashMap<>())
+                         .put(todValue, animSpec);
+            } else {
+                standaloneAnims.add(animSpec);
+            }
+        }
+
+        // Generate grid atlases for TOD groups
+        for (var entry : todGroups.entrySet()) {
+            String baseName = entry.getKey();
+            LinkedHashMap<String, AnimationSpec> variants = entry.getValue();
+
+            // Sort rows into canonical TOD order
+            LinkedHashMap<String, AnimationSpec> sorted = new LinkedHashMap<>();
+            for (String tod : TOD_SUFFIXES) {
+                if (variants.containsKey(tod)) {
+                    sorted.put(tod, variants.get(tod));
+                }
+            }
+
+            // Render frames per row
+            LinkedHashMap<String, List<BufferedImage>> rowFrames = new LinkedHashMap<>();
+            for (var rowEntry : sorted.entrySet()) {
+                List<BufferedImage> frames = renderer.renderAnimationFrames(layers, rowEntry.getValue());
+                rowFrames.put(rowEntry.getKey(), frames);
+            }
+
+            try {
+                Path atlasPath = atlasWriter.writeGridAtlas(rowFrames, baseName, animDir);
+                generated.add(atlasPath);
+
+                String atlasFileName = atlasPath.getFileName().toString();
+                Path gridConfig = configWriter.writeGridConfig(
+                        baseName, atlasFileName, "time_of_day", sorted, animDir);
+                generated.add(gridConfig);
+
+                log.info("Grid atlas '{}': {} rows × {} frames",
+                        baseName, sorted.size(), sorted.values().iterator().next().frames());
+            } catch (IOException e) {
+                throw new UncheckedIOException("Failed to write grid atlas: " + baseName, e);
+            }
+        }
+
+        // Generate strip atlases for standalone (non-TOD) animations
+        for (AnimationSpec animSpec : standaloneAnims) {
+            List<BufferedImage> frames = renderer.renderAnimationFrames(layers, animSpec);
+            try {
+                Path atlasPath = atlasWriter.writeAtlas(frames, animSpec, animDir);
+                generated.add(atlasPath);
+
+                String atlasFileName = atlasPath.getFileName().toString();
+                Path configPath = configWriter.writeConfig(animSpec, atlasFileName, animDir);
+                generated.add(configPath);
+            } catch (IOException e) {
+                throw new UncheckedIOException("Failed to write atlas: " + animSpec.name(), e);
+            }
+        }
+
+        // Combined config (all animations, flat list for backward compat)
+        try {
+            Path combinedConfig = configWriter.writeCombinedConfig(spec.animations(), animDir);
+            generated.add(combinedConfig);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to write combined atlas config", e);
+        }
+
         return generated;
     }
 
