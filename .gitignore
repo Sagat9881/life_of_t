@@ -4,7 +4,11 @@ target/
 !**/src/test/**/target/
 
 ### Generated assets (built from XML specs at compile time) ###
-frontend/public/assets/generated/
+### Generator copies to frontend/public/assets/{entityType}/{entityName}/ ###
+frontend/public/assets/characters/
+frontend/public/assets/furniture/
+frontend/public/assets/locations/
+frontend/public/assets/pets/
 
 ### Node ###
 node_modules/

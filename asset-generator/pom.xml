@@ -83,7 +83,13 @@
                 </executions>
             </plugin>
 
-            <!-- Copy generated assets to frontend/public/assets/generated -->
+            <!--
+              Copy generated assets into frontend/public/assets/.
+              Generator writes to: target/generated-assets/assets/{entityType}/{entityName}/...
+              We copy the CONTENTS of target/generated-assets/assets/ so that
+              Vite serves them at /assets/{entityType}/{entityName}/...
+              which matches what assetService.ts expects.
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -96,10 +102,10 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.basedir}/../frontend/public/assets/generated</outputDirectory>
+                            <outputDirectory>${project.basedir}/../frontend/public/assets</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.build.directory}/generated-assets</directory>
+                                    <directory>${project.build.directory}/generated-assets/assets</directory>
                                     <filtering>false</filtering>
                                 </resource>
                             </resources>
