@@ -1,0 +1,82 @@
+/* PixelScene — pixel-art game scene container */
+
+.pixel-scene {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  background: #1a1a2e;
+  border-radius: 8px;
+  /* Pixel-art rendering */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.pixel-scene__viewport {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Layer positioning helpers — children use these via inline styles */
+.pixel-scene__layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.pixel-scene__layer--interactive {
+  pointer-events: auto;
+}
+
+/* Entity positioned within the scene */
+.pixel-scene__entity {
+  position: absolute;
+  transform: translate(-50%, -100%); /* anchor at bottom-center */
+  transition: filter 0.2s ease;
+}
+
+.pixel-scene__entity--clickable {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.pixel-scene__entity--clickable:hover {
+  filter: brightness(1.3) drop-shadow(0 0 4px rgba(240, 147, 251, 0.8));
+}
+
+.pixel-scene__entity--selected {
+  filter: brightness(1.4) drop-shadow(0 0 8px rgba(245, 87, 108, 0.9));
+}
+
+/* Entity label tooltip */
+.pixel-scene__label {
+  position: absolute;
+  bottom: 105%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.pixel-scene__entity--clickable:hover .pixel-scene__label {
+  opacity: 1;
+}
+
+.pixel-scene__entity--selected .pixel-scene__label {
+  opacity: 1;
+  background: rgba(245, 87, 108, 0.9);
+}

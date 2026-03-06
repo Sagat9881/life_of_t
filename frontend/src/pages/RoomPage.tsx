@@ -1,46 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
+import { LocationRenderer } from '../components/game/LocationRenderer';
+import { getLocationConfig, getLocationForTimeSlot } from '../config/locations';
 import styles from './RoomPage.module.css';
-
-interface RoomObject {
-  id: string;
-  name: string;
-  actionCode: string;
-  x: number;
-  y: number;
-  icon: string;
-}
-
-const ROOM_OBJECTS: RoomObject[] = [
-  { id: 'bed', name: 'Кровать', actionCode: 'REST_AT_HOME', x: 15, y: 25, icon: '🛏️' },
-  { id: 'computer', name: 'Компьютер', actionCode: 'WORK_ON_PROJECT', x: 75, y: 30, icon: '💻' },
-  { id: 'phone', name: 'Телефон', actionCode: 'CALL_HUSBAND', x: 25, y: 65, icon: '📱' },
-  { id: 'mirror', name: 'Зеркало', actionCode: 'BEAUTY_ROUTINE', x: 80, y: 65, icon: '🪞' },
-  { id: 'dogs', name: 'Сэм', actionCode: 'WALK_DOG', x: 60, y: 75, icon: '🐕' },
-];
 
 export const RoomPage: React.FC = () => {
   const { player, time, isLoading, error, fetchGameState, executeAction } = useGameStore();
-  const [selectedObject, setSelectedObject] = useState<RoomObject | null>(null);
+  const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
+  const [selectedAction, setSelectedAction] = useState<{ id: string; code: string; label: string } | null>(null);
 
   useEffect(() => {
     fetchGameState();
   }, [fetchGameState]);
 
-  const handleObjectClick = async (obj: RoomObject) => {
-    setSelectedObject(obj);
+  // Determine current location based on time slot
+  const locationId = time ? getLocationForTimeSlot(time.timeSlot) : 'home_room';
+  const locationConfig = getLocationConfig(locationId);
+
+  const handleObjectClick = (objectId: string, actionCode: string) => {
+    const furniture = locationConfig.furniture.find((f) => f.id === objectId);
+    setSelectedObjectId(objectId);
+    setSelectedAction({
+      id: objectId,
+      code: actionCode,
+      label: furniture?.label ?? objectId,
+    });
   };
 
   const handleActionConfirm = async () => {
-    if (!selectedObject || !player) return;
-    
+    if (!selectedAction || !player) return;
     try {
-      await executeAction(selectedObject.actionCode);
-      setSelectedObject(null);
-    } catch (error: any) {
-      console.error('Action failed:', error);
-      alert(error.message || 'Действие не удалось');
+      await executeAction(selectedAction.code);
+      setSelectedObjectId(null);
+      setSelectedAction(null);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Действие не удалось';
+      console.error('Action failed:', message);
     }
+  };
+
+  const handleActionCancel = () => {
+    setSelectedObjectId(null);
+    setSelectedAction(null);
   };
 
   if (isLoading && !player) {
@@ -56,7 +57,7 @@ export const RoomPage: React.FC = () => {
   }
 
   const stats = player.stats;
-  const gameTime = time || { day: 1, hour: 7 };
+  const gameTime = time ?? { day: 1, hour: 7, timeSlot: 'MORNING' as const };
 
   return (
     <div className={styles.roomContainer}>
@@ -90,41 +91,23 @@ export const RoomPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Room with Objects */}
+      {/* Pixel-art Scene */}
       <div className={styles.room}>
-        <div className={styles.roomTitle}>✨ Комната Татьяны ✨</div>
-        <div className={styles.roomScene}>
-          {/* Tatyana Character */}
-          <div className={styles.character}>
-            <div className={styles.characterSprite}>👩‍💼</div>
-            <div className={styles.characterName}>Татьяна</div>
-            <div className={styles.characterStatus}>
-              {stats.mood >= 70 ? '😊' : stats.mood >= 40 ? '😐' : '😔'}
-            </div>
-          </div>
-
-          {/* Room Objects */}
-          {ROOM_OBJECTS.map((obj) => (
-            <button
-              key={obj.id}
-              className={`${styles.roomObject} ${
-                selectedObject?.id === obj.id ? styles.selected : ''
-              }`}
-              style={{ left: `${obj.x}%`, top: `${obj.y}%` }}
-              onClick={() => handleObjectClick(obj)}
-            >
-              <div className={styles.objectIcon}>{obj.icon}</div>
-              <div className={styles.objectLabel}>{obj.name}</div>
-            </button>
-          ))}
+        <div className={styles.roomTitle}>✨ {locationConfig.name} ✨</div>
+        <div className={styles.sceneWrapper}>
+          <LocationRenderer
+            config={locationConfig}
+            selectedObjectId={selectedObjectId}
+            onObjectClick={handleObjectClick}
+          />
         </div>
       </div>
 
       {/* Action Dialog */}
-      {selectedObject && (
+      {selectedAction ? (
         <div className={styles.actionDialog}>
           <div className={styles.dialogContent}>
-            <h3>{selectedObject.name}</h3>
+            <h3>{selectedAction.label}</h3>
             <p>Выполнить действие?</p>
             <div className={styles.dialogButtons}>
               <button
@@ -136,7 +119,7 @@ export const RoomPage: React.FC = () => {
               </button>
               <button
                 className={styles.cancelButton}
-                onClick={() => setSelectedObject(null)}
+                onClick={handleActionCancel}
                 disabled={isLoading}
               >
                 Отмена
@@ -144,7 +127,7 @@ export const RoomPage: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };
