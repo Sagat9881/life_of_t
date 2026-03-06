@@ -11,13 +11,22 @@ import java.net.URI;
  * Главный класс приложения Life of T.
  * Запускает Spring Boot приложение с backend API и frontend статикой.
  *
- * scanBasePackages excludes ru.lifegame.demo to avoid picking up
- * DemoApplication, DemoAssetService, DemoConfiguration etc.
+ * Scan packages:
+ * - ru.lifegame (this package — Application itself)
+ * - ru.lifegame.backend (backend controllers, services, config)
+ * - ru.lifegame.assets (asset-generator classes)
+ *
+ * Explicitly excludes ru.lifegame.demo to prevent DemoApplication,
+ * DemoAssetService, and DemoConfiguration from being loaded.
  */
-@SpringBootApplication(scanBasePackages = {
+@SpringBootApplication(
+    scanBasePackages = {
+        "ru.lifegame",
         "ru.lifegame.backend",
         "ru.lifegame.assets"
-})
+    },
+    exclude = {}
+)
 public class Application {
 
     public static void main(String[] args) {
@@ -42,7 +51,6 @@ public class Application {
             "\n"
         );
         
-        // Автоматически открываем браузер только в dev режиме
         String profile = context.getEnvironment().getProperty("spring.profiles.active", "default");
         if ("dev".equals(profile) || "default".equals(profile)) {
             openBrowser(url);
