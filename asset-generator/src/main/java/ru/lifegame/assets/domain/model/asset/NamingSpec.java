@@ -5,7 +5,10 @@ package ru.lifegame.assets.domain.model.asset;
  *
  * @param entityType entity type: "characters", "locations", "pets"
  * @param entityName entity name in snake_case: "tanya", "home", "garfield"
- * @param outputDir  target output directory relative to assets root
+ * @param outputDir  target output directory relative to generator output root.
+ *                   Generator writes to: {outputRoot}/{outputDir}/
+ *                   Maven copies {outputRoot}/ → frontend/public/assets/
+ *                   So final URL: /assets/{outputDir}/...
  */
 public record NamingSpec(
         String entityType,
@@ -20,7 +23,12 @@ public record NamingSpec(
             throw new IllegalArgumentException("entityName must not be blank");
         }
         if (outputDir == null || outputDir.isBlank()) {
-            outputDir = "assets/" + entityType + "/" + entityName;
+            // No "assets/" prefix — outputRoot is already the assets root.
+            // Generator: target/generated-assets/{type}/{name}/
+            // Maven copies: target/generated-assets/ → frontend/public/assets/
+            // Result: frontend/public/assets/{type}/{name}/
+            // Frontend URL: /assets/{type}/{name}/
+            outputDir = entityType + "/" + entityName;
         }
     }
 }
