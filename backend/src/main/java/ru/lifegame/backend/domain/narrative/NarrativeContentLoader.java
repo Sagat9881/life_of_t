@@ -1,9 +1,9 @@
-package ru.lifegame.backend.domain.engine;
+package ru.lifegame.backend.domain.narrative;
 
-import ru.lifegame.backend.domain.engine.parser.EventSpecParser;
-import ru.lifegame.backend.domain.engine.parser.QuestSpecParser;
-import ru.lifegame.backend.domain.engine.spec.EventSpec;
-import ru.lifegame.backend.domain.engine.spec.QuestSpec;
+import ru.lifegame.backend.domain.narrative.parser.EventSpecParser;
+import ru.lifegame.backend.domain.narrative.parser.QuestSpecParser;
+import ru.lifegame.backend.domain.npc.spec.EventSpec;
+import ru.lifegame.backend.domain.narrative.spec.QuestSpec;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;

@@ -1,4 +1,4 @@
-package ru.lifegame.backend.domain.engine.spec;
+package ru.lifegame.backend.domain.narrative.spec;
 
 public record ConditionSpec(
     String type,

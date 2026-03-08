@@ -2,9 +2,9 @@ package ru.lifegame.backend.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.lifegame.backend.domain.engine.NarrativeContentLoader;
-import ru.lifegame.backend.domain.engine.NarrativeEventEngine;
-import ru.lifegame.backend.domain.engine.NarrativeQuestEngine;
+import ru.lifegame.backend.domain.narrative.NarrativeContentLoader;
+import ru.lifegame.backend.domain.narrative.NarrativeEventEngine;
+import ru.lifegame.backend.domain.narrative.NarrativeQuestEngine;
 import ru.lifegame.backend.domain.npc.NpcSpecLoader;
 import ru.lifegame.backend.domain.npc.NpcUtilityBrain;
 import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;

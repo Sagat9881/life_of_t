@@ -1,8 +1,7 @@
-package ru.lifegame.backend.domain.engine;
+package ru.lifegame.backend.domain.narrative;
 
 
-import ru.lifegame.backend.domain.engine.spec.ConditionSpec;
-import ru.lifegame.backend.domain.engine.spec.EventSpec;
+import ru.lifegame.backend.domain.narrative.spec.EventSpec;
 
 import java.util.*;
 import java.util.stream.Collectors;

@@ -1,10 +1,10 @@
-package ru.lifegame.backend.domain.engine;
+package ru.lifegame.backend.domain.narrative;
 
-import ru.lifegame.backend.domain.engine.spec.QuestSpec;
-import ru.lifegame.backend.domain.engine.spec.QuestSpec.StepSpec;
-import ru.lifegame.backend.domain.engine.spec.QuestSpec.RewardSpec;
-import ru.lifegame.backend.domain.engine.spec.QuestSpec.DialogueEntry;
-import ru.lifegame.backend.domain.engine.spec.QuestSpec.ObjectiveSpec;
+import ru.lifegame.backend.domain.narrative.spec.QuestSpec;
+import ru.lifegame.backend.domain.narrative.spec.QuestSpec.StepSpec;
+import ru.lifegame.backend.domain.narrative.spec.QuestSpec.RewardSpec;
+import ru.lifegame.backend.domain.narrative.spec.QuestSpec.DialogueEntry;
+import ru.lifegame.backend.domain.narrative.spec.QuestSpec.ObjectiveSpec;
 
 import java.util.*;
 

@@ -1,7 +1,7 @@
-package ru.lifegame.backend.domain.engine.parser;
+package ru.lifegame.backend.domain.narrative.parser;
 
-import ru.lifegame.backend.domain.engine.spec.EventSpec;
-import ru.lifegame.backend.domain.engine.spec.EventSpec.*;
+import ru.lifegame.backend.domain.npc.spec.EventSpec;
+import ru.lifegame.backend.domain.npc.spec.EventSpec.*;
 
 import org.w3c.dom.*;
 import javax.xml.parsers.*;

@@ -1,7 +1,7 @@
-package ru.lifegame.backend.domain.engine.parser;
+package ru.lifegame.backend.domain.narrative.parser;
 
-import ru.lifegame.backend.domain.engine.spec.QuestSpec;
-import ru.lifegame.backend.domain.engine.spec.QuestSpec.*;
+import ru.lifegame.backend.domain.narrative.spec.QuestSpec;
+import ru.lifegame.backend.domain.narrative.spec.QuestSpec.*;
 
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
