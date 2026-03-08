@@ -1,104 +1,58 @@
 package ru.lifegame.backend.domain.npc;
 
-import com.life_of_t.domain.npc.NpcRelationshipGraph;
-import com.life_of_t.domain.npc.spec.ConditionSpec;
+import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
+import ru.lifegame.backend.domain.npc.graph.NpcRelationshipEdge;
+import ru.lifegame.backend.domain.npc.spec.ConditionSpec;
+import ru.lifegame.backend.domain.npc.engine.NpcRegistry;
+import ru.lifegame.backend.domain.npc.engine.ConditionEvaluator;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-/**
- * Evaluates cross-NPC triggers: conditions that involve relationships between NPCs.
- * E.g., "if player ignores husband AND visits father often => husband jealousy event".
- * Trigger definitions come from XML — engine only knows abstract conditions.
- */
 public class CrossNpcTriggerEngine {
 
-    /**
-     * A cross-NPC trigger loaded from XML.
-     */
+    public record CrossNpcCondition(
+        String type,
+        String npcA,
+        String npcB,
+        String axis,
+        String operator,
+        int threshold
+    ) {}
+
     public record CrossNpcTrigger(
-            String triggerId,
-            String sourceNpc,
-            String targetNpc,
-            String relAxis,
-            String operator,
-            int threshold,
-            List<ConditionSpec> additionalConditions,
-            String resultEventId,
-            Map<String, Integer> relAdjustments
+        String id,
+        String eventId,
+        List<CrossNpcCondition> conditions
     ) {}
 
-    private final List<CrossNpcTrigger> triggers;
+    private final List<CrossNpcTrigger> triggers = new ArrayList<>();
 
-    public CrossNpcTriggerEngine(List<CrossNpcTrigger> triggers) {
-        this.triggers = List.copyOf(triggers);
+    public void registerTrigger(CrossNpcTrigger trigger) {
+        triggers.add(trigger);
     }
 
-    public static CrossNpcTriggerEngine empty() {
-        return new CrossNpcTriggerEngine(List.of());
-    }
-
-    /**
-     * Check all cross-NPC triggers against current state.
-     * Returns list of triggered event IDs.
-     */
-    public List<TriggeredCrossEvent> evaluate(
-            NpcRelationshipGraph graph,
-            NpcRegistry registry,
-            ConditionEvaluator condEvaluator,
-            Object sessionContext
-    ) {
-        List<TriggeredCrossEvent> results = new ArrayList<>();
-
+    public List<String> checkTriggers(NpcRelationshipGraph graph) {
+        List<String> firedEventIds = new ArrayList<>();
         for (CrossNpcTrigger trigger : triggers) {
-            var edge = graph.getEdge(trigger.sourceNpc(), trigger.targetNpc());
-            if (edge.isEmpty()) continue;
-
-            int axisValue = edge.get().getAxis(trigger.relAxis());
-            boolean axisMet = evaluateOperator(axisValue, trigger.operator(), trigger.threshold());
-            if (!axisMet) continue;
-
-            // Check additional conditions (mood, memory, etc.)
-            boolean allConditionsMet = trigger.additionalConditions().stream()
-                    .allMatch(cond -> {
-                        var npc = registry.get(trigger.sourceNpc());
-                        return npc.map(n -> condEvaluator.evaluate(cond, n, null))
-                                .orElse(false);
-                    });
-
-            if (allConditionsMet) {
-                // Apply relationship adjustments
-                trigger.relAdjustments().forEach((axis, delta) ->
-                        graph.adjustRelationship(trigger.sourceNpc(), trigger.targetNpc(), axis, delta));
-
-                results.add(new TriggeredCrossEvent(
-                        trigger.triggerId(),
-                        trigger.resultEventId(),
-                        trigger.sourceNpc(),
-                        trigger.targetNpc()
-                ));
-            }
+            boolean allMet = trigger.conditions().stream().allMatch(c -> {
+                Optional<NpcRelationshipEdge> edge = graph.getEdge(c.npcA(), c.npcB());
+                if (edge.isEmpty()) return false;
+                int actual = switch (c.axis()) {
+                    case "tension" -> edge.get().tension();
+                    case "respect" -> edge.get().respect();
+                    case "familiarity" -> edge.get().familiarity();
+                    default -> 0;
+                };
+                return switch (c.operator()) {
+                    case "gte" -> actual >= c.threshold();
+                    case "lte" -> actual <= c.threshold();
+                    case "gt" -> actual > c.threshold();
+                    case "lt" -> actual < c.threshold();
+                    default -> false;
+                };
+            });
+            if (allMet) firedEventIds.add(trigger.eventId());
         }
-
-        return results;
+        return firedEventIds;
     }
-
-    private boolean evaluateOperator(int value, String operator, int threshold) {
-        return switch (operator) {
-            case "gte" -> value >= threshold;
-            case "gt" -> value > threshold;
-            case "lte" -> value <= threshold;
-            case "lt" -> value < threshold;
-            case "eq" -> value == threshold;
-            default -> false;
-        };
-    }
-
-    public record TriggeredCrossEvent(
-            String triggerId,
-            String eventId,
-            String sourceNpc,
-            String targetNpc
-    ) {}
 }

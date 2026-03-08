@@ -1,9 +1,8 @@
 package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.spec.QuestSpec;
-import ru.lifegame.backend.domain.engine.spec.QuestSpec.StepSpec;
-import ru.lifegame.backend.domain.engine.spec.QuestSpec.RewardSpec;
-import ru.lifegame.backend.domain.engine.spec.QuestSpec.DialogueEntry;
+import ru.lifegame.backend.domain.engine.spec.QuestSpec.*;
+import ru.lifegame.backend.domain.engine.spec.ConditionSpec;
 
 import java.util.*;
 
@@ -11,73 +10,47 @@ public class NarrativeQuestEngine {
 
     private final List<QuestSpec> questSpecs;
     private final Map<String, QuestState> activeQuests = new LinkedHashMap<>();
+    private final Set<String> completedQuests = new HashSet<>();
 
     public NarrativeQuestEngine(List<QuestSpec> questSpecs) {
         this.questSpecs = questSpecs;
     }
 
-    public void activateQuest(String questId) {
-        questSpecs.stream()
-                .filter(q -> q.id().equals(questId))
-                .findFirst()
-                .ifPresent(q -> activeQuests.put(questId, new QuestState(q, 0)));
-    }
-
     public record QuestState(QuestSpec spec, int currentStepIndex) {
-        public boolean isComplete() {
-            return currentStepIndex >= spec.steps().size();
-        }
         public StepSpec currentStep() {
+            if (currentStepIndex >= spec.steps().size()) return null;
             return spec.steps().get(currentStepIndex);
         }
-        public QuestState advance() {
-            return new QuestState(spec, currentStepIndex + 1);
+        public QuestState advance() { return new QuestState(spec, currentStepIndex + 1); }
+        public boolean isComplete() { return currentStepIndex >= spec.steps().size(); }
+    }
+
+    public void checkAndActivateQuests(int currentDay, Object gameContext) {
+        for (QuestSpec spec : questSpecs) {
+            if (activeQuests.containsKey(spec.id()) || completedQuests.contains(spec.id())) continue;
+            if (currentDay >= spec.meta().triggerDay()) {
+                activeQuests.put(spec.id(), new QuestState(spec, 0));
+            }
         }
     }
 
-    public Optional<StepCompletionResult> tryCompleteStep(String questId, String actionId, Map<String, Object> context) {
+    public record StepCompletionResult(String questId, DialogueEntry dialogue, RewardSpec reward) {}
+
+    public Optional<StepCompletionResult> tryCompleteStep(String questId, Object gameContext) {
         QuestState state = activeQuests.get(questId);
         if (state == null || state.isComplete()) return Optional.empty();
 
         StepSpec step = state.currentStep();
-        if (!step.actionId().equals(actionId)) return Optional.empty();
-
-        if (step.conditions() != null) {
-            for (var cond : step.conditions()) {
-                Object val = context.get(cond.target());
-                if (val == null) return Optional.empty();
-                if (val instanceof Number num) {
-                    double threshold = Double.parseDouble(cond.value());
-                    if ("gte".equals(cond.operator()) && num.doubleValue() < threshold) return Optional.empty();
-                    if ("lte".equals(cond.operator()) && num.doubleValue() > threshold) return Optional.empty();
-                }
-            }
-        }
-
         QuestState advanced = state.advance();
-        activeQuests.put(questId, advanced);
-
-        return Optional.of(new StepCompletionResult(
-                questId, step.id(), advanced.isComplete(),
-                step.dialogue(), step.rewards()
-        ));
-    }
-
-    public record StepCompletionResult(
-            String questId, String stepId, boolean questComplete,
-            List<DialogueEntry> dialogue, List<RewardSpec> rewards
-    ) {}
-
-    public Map<String, QuestState> activeQuests() {
-        return Collections.unmodifiableMap(activeQuests);
-    }
-
-    public void checkAutoActivation(int day, Map<String, Object> context) {
-        for (QuestSpec q : questSpecs) {
-            if (activeQuests.containsKey(q.id())) continue;
-            if (q.autoActivateDay() > 0 && day >= q.autoActivateDay()) {
-                activateQuest(q.id());
-            }
+        if (advanced.isComplete()) {
+            activeQuests.remove(questId);
+            completedQuests.add(questId);
+        } else {
+            activeQuests.put(questId, advanced);
         }
+        return Optional.of(new StepCompletionResult(questId, step.dialogue(), step.reward()));
     }
+
+    public Map<String, QuestState> activeQuests() { return Collections.unmodifiableMap(activeQuests); }
+    public Set<String> completedQuests() { return Collections.unmodifiableSet(completedQuests); }
 }

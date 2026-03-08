@@ -1,10 +1,12 @@
 package ru.lifegame.backend.domain.engine.runtime;
 
 import ru.lifegame.backend.domain.engine.spec.NpcSpec;
-import ru.lifegame.backend.domain.npc.engine.ConditionEvaluator;
+import ru.lifegame.backend.domain.engine.spec.ConditionSpec;
+import ru.lifegame.backend.domain.npc.engine.NpcMood;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 public class NpcUtilityBrain {
 
@@ -14,46 +16,69 @@ public class NpcUtilityBrain {
         this.conditionEvaluator = conditionEvaluator;
     }
 
-    public Optional<EvaluatedAction> evaluateBest(NpcInstance npc, Map<String, Object> context) {
-        if (npc.spec().actions() == null || npc.spec().actions().isEmpty()) {
-            return Optional.empty();
-        }
+    public record ScoredCandidate(NpcSpec.ActionSpec action, double score) {}
 
-        Map<String, Object> enrichedContext = new HashMap<>(context);
-        enrichedContext.put("npc_happiness", npc.mood().happiness());
-        enrichedContext.put("npc_anxiety", npc.mood().anxiety());
-        enrichedContext.put("npc_loneliness", npc.mood().loneliness());
-        enrichedContext.put("npc_irritability", npc.mood().irritability());
-        enrichedContext.put("npc_energy", npc.mood().energy());
-        enrichedContext.put("npc_affection", npc.mood().affection());
-
+    public Optional<ScoredCandidate> evaluate(NpcInstance npc, Object gameContext) {
         return npc.spec().actions().stream()
-                .map(action -> {
-                    boolean conditionsMet = action.conditions() == null ||
-                            action.conditions().stream()
-                                .allMatch(c -> conditionEvaluator.evaluate(c, npc, enrichedContext));
-                    if (!conditionsMet) return null;
-
-                    double score = action.baseScore();
-                    // Mood-based score modifiers
-                    if (action.id().contains("invite") || action.id().contains("call")) {
-                        score += npc.mood().loneliness() * 0.01;
-                    }
-                    if (action.id().contains("concern") || action.id().contains("worry")) {
-                        score += npc.mood().anxiety() * 0.008;
-                    }
-                    if (npc.mood().irritability() > 60) {
-                        score *= 0.7;
-                    }
-
-                    NpcSpec.ActionSpec actionSpec = action;
-                    return new EvaluatedAction(action.id(), score,
-                            actionSpec.animation() != null ? actionSpec.animation() : "idle",
-                            actionSpec.location() != null ? actionSpec.location() : npc.currentLocation());
-                })
-                .filter(Objects::nonNull)
-                .max(Comparator.comparingDouble(EvaluatedAction::score));
+            .filter(action -> allConditionsMet(action.conditions(), npc, gameContext))
+            .map(action -> new ScoredCandidate(action, calculateScore(action, npc)))
+            .max(Comparator.comparingDouble(ScoredCandidate::score));
     }
 
-    public record EvaluatedAction(String actionId, double score, String animation, String location) {}
+    private boolean allConditionsMet(List<ConditionSpec> conditions, NpcInstance npc, Object gameContext) {
+        if (conditions == null || conditions.isEmpty()) return true;
+        return conditions.stream().allMatch(c -> conditionEvaluator.evaluate(c, npc, gameContext));
+    }
+
+    private double calculateScore(NpcSpec.ActionSpec action, NpcInstance npc) {
+        double base = action.baseScore();
+        NpcMood mood = npc.mood();
+        double moodMultiplier = 1.0;
+        if (mood.loneliness() > 60) moodMultiplier += 0.3;
+        if (mood.irritability() > 50) moodMultiplier -= 0.2;
+        if (mood.energy() < 30) moodMultiplier -= 0.3;
+        if (mood.affection() > 60) moodMultiplier += 0.2;
+        double noise = (Math.random() - 0.5) * 0.1;
+        return base * Math.max(0.1, moodMultiplier) + noise;
+    }
+
+    public record ConditionEvaluator() {
+        public boolean evaluate(ConditionSpec condition, NpcInstance npc, Object gameContext) {
+            return switch (condition.type()) {
+                case "mood" -> evaluateMood(condition, npc);
+                case "schedule" -> "available".equals(condition.value());
+                case "memory" -> evaluateMemory(condition, npc);
+                default -> true;
+            };
+        }
+
+        private boolean evaluateMood(ConditionSpec c, NpcInstance npc) {
+            NpcMood mood = npc.mood();
+            int actual = switch (c.target()) {
+                case "happiness" -> mood.happiness();
+                case "anxiety" -> mood.anxiety();
+                case "loneliness" -> mood.loneliness();
+                case "irritability" -> mood.irritability();
+                case "energy" -> mood.energy();
+                case "affection" -> mood.affection();
+                default -> 0;
+            };
+            return switch (c.operator()) {
+                case "gte" -> actual >= c.intValue();
+                case "lte" -> actual <= c.intValue();
+                case "gt" -> actual > c.intValue();
+                case "lt" -> actual < c.intValue();
+                case "eq" -> actual == c.intValue();
+                default -> false;
+            };
+        }
+
+        private boolean evaluateMemory(ConditionSpec c, NpcInstance npc) {
+            return switch (c.target()) {
+                case "isBeingIgnored" -> npc.memory().isBeingIgnored();
+                case "detectWorkObsession" -> npc.memory().detectWorkObsession();
+                default -> false;
+            };
+        }
+    }
 }

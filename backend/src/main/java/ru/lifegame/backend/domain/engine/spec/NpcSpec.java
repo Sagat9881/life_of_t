@@ -1,49 +1,27 @@
-package ru.lifegame.backend.application.engine.spec;
+package ru.lifegame.backend.domain.engine.spec;
 
 import java.util.List;
 import java.util.Map;
 
-/**
- * Immutable specification of an NPC loaded from XML.
- * The engine knows nothing about specific NPCs — all behavior is data-driven.
- */
 public record NpcSpec(
-        String entityId,
-        NpcType type,
-        Map<String, Integer> personalityTraits,
-        List<ScheduleSlot> schedules,
-        List<ReactionSpec> reactions
+    String id,
+    String type,
+    String category,
+    String displayName,
+    Map<String, Integer> personality,
+    Map<String, Integer> moodInitial,
+    boolean memoryEnabled,
+    int shortTermSize,
+    List<ScheduleSlot> schedule,
+    List<ActionSpec> actions,
+    List<ReactionSpec> reactions,
+    List<String> questLines
 ) {
-    public enum NpcType { NAMED, FILLER }
+    public boolean isNamed() { return "named".equals(type); }
+    public boolean isFiller() { return "filler".equals(type); }
 
-    public record ScheduleSlot(
-            String timeOfDay,
-            List<ActionSpec> actions
-    ) {}
-
-    public record ActionSpec(
-            String type,
-            String target,
-            String value,
-            double probability,
-            String lineRu
-    ) {
-        public ActionSpec(String type, String target, String value) {
-            this(type, target, value, 1.0, null);
-        }
-    }
-
-    public record ReactionSpec(
-            String trigger,
-            Map<String, String> attributes,
-            List<ActionSpec> actions
-    ) {}
-
-    public int trait(String name) {
-        return personalityTraits.getOrDefault(name, 0);
-    }
-
-    public boolean isNamed() {
-        return type == NpcType.NAMED;
-    }
+    public record ScheduleSlot(int start, int end, String activity, String location, String animation) {}
+    public record ActionSpec(String id, double baseScore, String eventType, List<ConditionSpec> conditions, List<OptionSpec> options) {}
+    public record OptionSpec(String id, String text, String result, int energy, int stress, int mood, int money, String relationshipTarget, int relationshipDelta) {}
+    public record ReactionSpec(String id, String trigger, String type, List<ConditionSpec> conditions, String dialogueText, Map<String, Integer> effects) {}
 }

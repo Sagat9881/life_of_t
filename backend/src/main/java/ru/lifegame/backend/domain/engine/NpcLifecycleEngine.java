@@ -2,39 +2,39 @@ package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
 import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain;
-import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain.EvaluatedAction;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import ru.lifegame.backend.domain.engine.spec.NpcSpec;
+import ru.lifegame.backend.domain.npc.engine.NpcMood;
 
 public class NpcLifecycleEngine {
 
     private final NpcRegistry registry;
-    private final NpcUtilityBrain brain;
+    private final NpcUtilityBrain utilityBrain;
 
-    public NpcLifecycleEngine(NpcRegistry registry, NpcUtilityBrain brain) {
+    public NpcLifecycleEngine(NpcRegistry registry, NpcUtilityBrain utilityBrain) {
         this.registry = registry;
-        this.brain = brain;
+        this.utilityBrain = utilityBrain;
     }
 
-    public List<NpcEvent> hourlyTick(int currentHour, int currentDay) {
-        List<NpcEvent> events = new ArrayList<>();
-        for (NpcInstance npc : registry.allNamed()) {
-            Optional<EvaluatedAction> best = brain.evaluate(npc, currentHour, currentDay);
-            best.ifPresent(action -> {
-                npc.setCurrentActivity(action.actionId());
-                if (action.generatesEvent()) {
-                    events.add(new NpcEvent(npc.spec().id(), action.actionId(), action.score()));
-                }
-            });
+    public void hourlyTick(int currentHour, Object gameContext) {
+        for (NpcInstance npc : registry.all()) {
+            var scheduled = npc.spec().schedule().stream()
+                .filter(s -> currentHour >= s.start() && currentHour < s.end())
+                .findFirst();
+
+            if (scheduled.isPresent()) {
+                var slot = scheduled.get();
+                npc.updateActivity(slot.activity(), slot.location(), slot.animation());
+            } else {
+                var candidate = utilityBrain.evaluate(npc, gameContext);
+                candidate.ifPresent(c -> npc.updateActivity(c.action().id(), "dynamic", "idle"));
+            }
         }
-        return events;
     }
 
     public void dailyTick() {
-        registry.dailyTick();
+        for (NpcInstance npc : registry.all()) {
+            NpcMood mood = npc.mood();
+            npc.setMood(mood.dailyDecay());
+        }
     }
-
-    public record NpcEvent(String npcId, String actionId, double score) {}
 }
