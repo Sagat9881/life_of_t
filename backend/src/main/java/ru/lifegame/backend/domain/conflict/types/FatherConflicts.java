@@ -2,7 +2,6 @@ package ru.lifegame.backend.domain.conflict.types;
 
 import ru.lifegame.backend.domain.conflict.core.ConflictCategory;
 import ru.lifegame.backend.domain.conflict.core.ConflictType;
-import ru.lifegame.backend.domain.model.relationship.NpcCode;
 
 import java.util.Optional;
 
@@ -25,6 +24,6 @@ public enum FatherConflicts implements ConflictType {
     @Override public String code() { return code; }
     @Override public String label() { return label; }
     @Override public String description() { return description; }
-    @Override public Optional<NpcCode> opponent() { return Optional.of(NpcCode.FATHER); }
+    @Override public Optional<String> opponent() { return Optional.of("FATHER"); }
     @Override public ConflictCategory category() { return ConflictCategory.FAMILY; }
 }
