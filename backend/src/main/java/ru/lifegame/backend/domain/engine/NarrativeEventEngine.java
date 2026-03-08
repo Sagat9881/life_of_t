@@ -10,48 +10,53 @@ import java.util.stream.Collectors;
 public class NarrativeEventEngine {
 
     private final List<EventSpec> eventSpecs;
-    private final Set<String> firedOnceIds = new HashSet<>();
+    private final Set<String> firedOnceEvents = new HashSet<>();
 
     public NarrativeEventEngine(List<EventSpec> eventSpecs) {
         this.eventSpecs = eventSpecs;
     }
 
-    public List<FiredEvent> evaluate(Map<String, Object> context) {
-        List<FiredEvent> results = new ArrayList<>();
-        for (EventSpec spec : eventSpecs) {
-            if (spec.once() && firedOnceIds.contains(spec.id())) continue;
-            if (allConditionsMet(spec.conditions(), context)) {
-                results.add(new FiredEvent(spec, spec.effects()));
-                if (spec.once()) firedOnceIds.add(spec.id());
-            }
-        }
-        return results;
+    public List<FiredEvent> evaluate(Map<String, Object> context, int day) {
+        return eventSpecs.stream()
+                .filter(e -> !e.once() || !firedOnceEvents.contains(e.id()))
+                .filter(e -> matchesConditions(e.conditions(), context, day))
+                .map(e -> {
+                    if (e.once()) firedOnceEvents.add(e.id());
+                    return new FiredEvent(e, e.effects());
+                })
+                .collect(Collectors.toList());
     }
 
     public record FiredEvent(EventSpec spec, List<EffectSpec> effects) {}
 
-    private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> context) {
+    private boolean matchesConditions(List<ConditionSpec> conditions, Map<String, Object> ctx, int day) {
         if (conditions == null || conditions.isEmpty()) return true;
-        for (ConditionSpec cond : conditions) {
-            if (!evaluateCondition(cond, context)) return false;
+        for (ConditionSpec c : conditions) {
+            if (!evaluateCondition(c, ctx, day)) return false;
         }
         return true;
     }
 
-    private boolean evaluateCondition(ConditionSpec cond, Map<String, Object> context) {
-        Object val = context.get(cond.target());
+    private boolean evaluateCondition(ConditionSpec c, Map<String, Object> ctx, int day) {
+        if ("day".equals(c.type())) {
+            return evaluateNumeric(day, c.operator(), Integer.parseInt(c.value()));
+        }
+        Object val = ctx.get(c.target());
         if (val == null) return false;
         if (val instanceof Number num) {
-            double v = num.doubleValue();
-            return switch (cond.operator()) {
-                case "gte" -> v >= cond.value();
-                case "lte" -> v <= cond.value();
-                case "gt" -> v > cond.value();
-                case "lt" -> v < cond.value();
-                case "eq" -> v == cond.value();
-                default -> false;
-            };
+            return evaluateNumeric(num.doubleValue(), c.operator(), Double.parseDouble(c.value()));
         }
-        return false;
+        return val.toString().equals(c.value());
+    }
+
+    private boolean evaluateNumeric(double actual, String operator, double expected) {
+        return switch (operator) {
+            case "gte" -> actual >= expected;
+            case "lte" -> actual <= expected;
+            case "gt" -> actual > expected;
+            case "lt" -> actual < expected;
+            case "eq" -> actual == expected;
+            default -> false;
+        };
     }
 }

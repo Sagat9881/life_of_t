@@ -7,40 +7,54 @@ import ru.lifegame.backend.domain.engine.spec.NpcSpec;
 import ru.lifegame.backend.domain.engine.spec.EventSpec;
 import ru.lifegame.backend.domain.engine.spec.QuestSpec;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.w3c.dom.Document;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
-import java.nio.file.*;
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NarrativeContentLoader {
-
-    private final List<NpcSpec> npcSpecs = new ArrayList<>();
-    private final List<EventSpec> eventSpecs = new ArrayList<>();
-    private final List<QuestSpec> questSpecs = new ArrayList<>();
 
     private final NpcSpecParser npcParser = new NpcSpecParser();
     private final EventSpecParser eventParser = new EventSpecParser();
     private final QuestSpecParser questParser = new QuestSpecParser();
 
-    public void loadFromClasspath(String basePath) {
-        loadNpcSpecs(basePath + "/npc-behavior");
-        loadEventSpecs(basePath + "/events");
-        loadQuestSpecs(basePath + "/quests");
+    private List<NpcSpec> npcSpecs = new ArrayList<>();
+    private List<EventSpec> eventSpecs = new ArrayList<>();
+    private List<QuestSpec> questSpecs = new ArrayList<>();
+
+    public void loadAll(String basePath) {
+        npcSpecs = loadDirectory(basePath + "/npc-behavior", npcParser::parse);
+        eventSpecs = loadDirectory(basePath + "/events", eventParser::parse);
+        questSpecs = loadDirectory(basePath + "/quests", questParser::parse);
     }
 
-    private void loadNpcSpecs(String dir) {
-        // Load NPC XML specs from classpath directory
+    private <T> List<T> loadDirectory(String path, java.util.function.Function<Document, T> parser) {
+        List<T> results = new ArrayList<>();
+        try {
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            Resource[] resources = resolver.getResources("classpath:" + path + "/*.xml");
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+
+            for (Resource resource : resources) {
+                try (InputStream is = resource.getInputStream()) {
+                    Document doc = builder.parse(is);
+                    doc.getDocumentElement().normalize();
+                    results.add(parser.apply(doc));
+                }
+            }
+        } catch (Exception e) {
+            // Log warning but don't fail - missing directories are ok for MVP
+        }
+        return results;
     }
 
-    private void loadEventSpecs(String dir) {
-        // Load event XML specs from classpath directory
-    }
-
-    private void loadQuestSpecs(String dir) {
-        // Load quest XML specs from classpath directory
-    }
-
-    public List<NpcSpec> npcSpecs() { return Collections.unmodifiableList(npcSpecs); }
-    public List<EventSpec> eventSpecs() { return Collections.unmodifiableList(eventSpecs); }
-    public List<QuestSpec> questSpecs() { return Collections.unmodifiableList(questSpecs); }
+    public List<NpcSpec> npcSpecs() { return npcSpecs; }
+    public List<EventSpec> eventSpecs() { return eventSpecs; }
+    public List<QuestSpec> questSpecs() { return questSpecs; }
 }

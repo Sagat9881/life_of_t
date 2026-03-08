@@ -13,7 +13,7 @@ public class NpcRegistry {
     private final Map<String, NpcInstance> instances = new LinkedHashMap<>();
     private final NpcRelationshipGraph relationshipGraph;
 
-    public NpcRegistry(List<NpcSpec> specs, NpcUtilityBrain brain) {
+    public NpcRegistry(List<NpcSpec> specs) {
         this.relationshipGraph = new NpcRelationshipGraph();
         for (NpcSpec spec : specs) {
             NpcInstance instance = NpcInstance.fromSpec(spec);
@@ -39,7 +39,7 @@ public class NpcRegistry {
         return relationshipGraph;
     }
 
-    public int size() {
-        return instances.size();
+    public void dailyTick() {
+        instances.values().forEach(NpcInstance::dailyTick);
     }
 }
