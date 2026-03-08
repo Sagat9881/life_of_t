@@ -3,7 +3,7 @@ package ru.lifegame.backend.domain.action.spec;
 import ru.lifegame.backend.domain.action.*;
 import ru.lifegame.backend.domain.model.stats.StatChanges;
 
-import java.util.Map;
+import java.util.*;
 
 /**
  * Universal GameAction implementation driven entirely by PlayerActionSpec.
@@ -53,6 +53,11 @@ public class DataDrivenAction implements GameAction {
 
         PlayerActionSpec.ActionFlags f = spec.flags();
 
+        // Build interactedNpcs: explicit flags + all relationship targets
+        Set<String> interacted = new LinkedHashSet<>(f.interactedNpcs());
+        spec.relationshipChanges().keySet().forEach(npc -> interacted.add(npc.toUpperCase()));
+        spec.extraRelationshipEffects().forEach(e -> interacted.add(e.target().toUpperCase()));
+
         return new ActionResult(
                 actionType,
                 timeCost,
@@ -62,8 +67,7 @@ public class DataDrivenAction implements GameAction {
                 Map.copyOf(spec.petMoodChanges()),
                 f.rested(),
                 f.worked(),
-                f.interactedHusband(),
-                f.interactedFather()
+                Set.copyOf(interacted)
         );
     }
 

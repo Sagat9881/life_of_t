@@ -2,12 +2,13 @@ package ru.lifegame.backend.domain.model.session;
 
 import ru.lifegame.backend.domain.action.ActionResult;
 import ru.lifegame.backend.domain.action.GameAction;
+import ru.lifegame.backend.domain.action.spec.DataDrivenAction;
+import ru.lifegame.backend.domain.action.spec.PlayerActionSpec;
 import ru.lifegame.backend.domain.event.domain.ActionExecutedEvent;
 import ru.lifegame.backend.domain.exception.InvalidActionException;
 import ru.lifegame.backend.domain.exception.NotEnoughTimeException;
 import ru.lifegame.backend.domain.model.pet.PetCode;
 import ru.lifegame.backend.domain.model.pet.Pets;
-import ru.lifegame.backend.domain.model.relationship.NpcCode;
 import ru.lifegame.backend.domain.model.relationship.RelationshipChanges;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 
@@ -20,7 +21,7 @@ public class ActionExecutor {
     ) {
         validateActionPreconditions(action, context);
         ActionResult result = action.calculate(context.asReadModel());
-        applyActionResult(result, context);
+        applyActionResult(result, context, action);
         eventPublisher.publish(new ActionExecutedEvent(context.sessionId(), action.type().code()));
         return result;
     }
@@ -35,7 +36,7 @@ public class ActionExecutor {
         }
     }
 
-    private void applyActionResult(ActionResult result, GameSessionContext context) {
+    private void applyActionResult(ActionResult result, GameSessionContext context, GameAction action) {
         context.player().applyStatChanges(result.statChanges());
         context.advanceTime(result.timeCost());
 
@@ -44,45 +45,31 @@ public class ActionExecutor {
 
         applyRelationshipChanges(result, context);
         applyPetChanges(result, context);
-        applySkillProgression(result, context);
-        applyJobProgression(result, context);
 
-        String actionCode = result.actionType().code();
-        if ("HOUSEHOLD".equals(actionCode) || "household".equals(actionCode)) {
-            context.player().resetHouseholdDays();
+        // Data-driven skill gains + job effects from spec
+        if (action instanceof DataDrivenAction dda) {
+            applySkillGains(dda.spec(), context);
+            applyJobEffects(dda.spec(), context);
+            applyExtraRelationshipEffects(dda.spec(), context);
+            if (dda.spec().flags().resetHouseholdDays()) {
+                context.player().resetHouseholdDays();
+            }
+        }
+
+        // Mark NPC interactions from interactedNpcs set
+        int currentDay = context.time().day();
+        if (result.interactedNpcs() != null) {
+            for (String npcId : result.interactedNpcs()) {
+                context.relationships().markInteraction(npcId, currentDay);
+            }
         }
     }
 
     private void applyRelationshipChanges(ActionResult result, GameSessionContext context) {
         Relationships relationships = context.relationships();
-        int currentDay = context.time().day();
-
-        result.relationshipChanges().forEach((npcStr, delta) -> {
-            try {
-                NpcCode npc = NpcCode.valueOf(npcStr.toUpperCase());
-                relationships.applyChanges(npc, new RelationshipChanges(npc, delta, 0, 0, 0));
-                relationships.markInteraction(npc, currentDay);
-            } catch (IllegalArgumentException e) { /* skip unknown NPC */ }
+        result.relationshipChanges().forEach((npcId, delta) -> {
+            relationships.applyChanges(npcId, new RelationshipChanges(npcId, delta, 0, 0, 0));
         });
-
-        String code = result.actionType().code();
-        if ("DATE_WITH_HUSBAND".equals(code)) {
-            relationships.applyChanges(NpcCode.HUSBAND,
-                new RelationshipChanges(NpcCode.HUSBAND, 0, 5, 0, 15));
-            relationships.markInteraction(NpcCode.HUSBAND, currentDay);
-        }
-        if ("VISIT_FATHER".equals(code)) {
-            relationships.applyChanges(NpcCode.FATHER,
-                new RelationshipChanges(NpcCode.FATHER, 0, 5, 0, 0));
-            relationships.markInteraction(NpcCode.FATHER, currentDay);
-        }
-
-        if (result.interactedWithHusband()) {
-            relationships.markInteraction(NpcCode.HUSBAND, currentDay);
-        }
-        if (result.interactedWithFather()) {
-            relationships.markInteraction(NpcCode.FATHER, currentDay);
-        }
     }
 
     private void applyPetChanges(ActionResult result, GameSessionContext context) {
@@ -96,37 +83,31 @@ public class ActionExecutor {
         });
     }
 
-    private void applySkillProgression(ActionResult result, GameSessionContext context) {
-        String code = result.actionType().code();
-        switch (code) {
-            case "GO_TO_WORK" -> context.player().improveSkill("efficiency", 2);
-            case "DATE_WITH_HUSBAND" -> {
-                context.player().improveSkill("charisma", 2);
-                context.player().improveSkill("empathy", 1);
-            }
-            case "VISIT_FATHER" -> {
-                context.player().improveSkill("empathy", 2);
-                context.player().improveSkill("communication", 1);
-            }
-            case "PLAY_WITH_CAT" -> context.player().improveSkill("empathy", 1);
-            case "WALK_DOG" -> context.player().improveSkill("dog_care", 2);
-            case "SELF_CARE" -> {
-                context.player().improveSkill("assertiveness", 2);
-                context.player().improveSkill("communication", 1);
-            }
-            case "REST_AT_HOME" -> context.player().improveSkill("humor", 1);
-            case "HOUSEHOLD" -> context.player().improveSkill("cooking", 2);
-            default -> { }
+    private void applySkillGains(PlayerActionSpec spec, GameSessionContext context) {
+        if (spec.skillGains() != null) {
+            spec.skillGains().forEach((skill, xp) ->
+                    context.player().improveSkill(skill, xp));
         }
     }
 
-    private void applyJobProgression(ActionResult result, GameSessionContext context) {
-        String code = result.actionType().code();
-        if ("GO_TO_WORK".equals(code)) {
-            context.player().changeJobSatisfaction(2);
+    private void applyJobEffects(PlayerActionSpec spec, GameSessionContext context) {
+        if (spec.jobEffects() != null) {
+            if (spec.jobEffects().satisfaction() != 0) {
+                context.player().changeJobSatisfaction(spec.jobEffects().satisfaction());
+            }
+            if (spec.jobEffects().burnoutRisk() != 0) {
+                context.player().changeJobBurnoutRisk(spec.jobEffects().burnoutRisk());
+            }
         }
-        if ("SELF_CARE".equals(code)) {
-            context.player().changeJobBurnoutRisk(-3);
+    }
+
+    private void applyExtraRelationshipEffects(PlayerActionSpec spec, GameSessionContext context) {
+        if (spec.extraRelationshipEffects() != null) {
+            Relationships relationships = context.relationships();
+            for (PlayerActionSpec.ExtraRelEffect e : spec.extraRelationshipEffects()) {
+                relationships.applyChanges(e.target(),
+                        new RelationshipChanges(e.target(), e.closeness(), e.trust(), e.stability(), e.romance()));
+            }
         }
     }
 }

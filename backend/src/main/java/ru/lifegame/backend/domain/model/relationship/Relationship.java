@@ -3,7 +3,7 @@ package ru.lifegame.backend.domain.model.relationship;
 import ru.lifegame.backend.domain.balance.GameBalance;
 
 public record Relationship(
-        NpcCode npcCode,
+        String npcId,
         int closeness,
         int trust,
         int stability,
@@ -20,7 +20,7 @@ public record Relationship(
 
     public Relationship applyChanges(RelationshipChanges c) {
         return new Relationship(
-                npcCode,
+                npcId,
                 closeness + c.closeness(),
                 trust + c.trust(),
                 stability + c.stability(),
@@ -31,7 +31,7 @@ public record Relationship(
     }
 
     public Relationship markInteraction(int currentDay) {
-        return new Relationship(npcCode, closeness, trust, stability, romance, currentDay, broken);
+        return new Relationship(npcId, closeness, trust, stability, romance, currentDay, broken);
     }
 
     public Relationship applyDecay(int currentDay) {
@@ -40,19 +40,19 @@ public record Relationship(
             return this;
         }
         if (gap < GameBalance.NO_INTERACTION_DAYS_SEVERE) {
-            return new Relationship(npcCode,
+            return new Relationship(npcId,
                     closeness - GameBalance.DECAY_MILD_CLOSENESS,
                     trust - GameBalance.DECAY_MILD_TRUST,
                     stability, romance, lastInteractionDay, broken);
         }
-        return new Relationship(npcCode,
+        return new Relationship(npcId,
                 closeness - GameBalance.DECAY_SEVERE_CLOSENESS,
                 trust - GameBalance.DECAY_SEVERE_TRUST,
                 stability, romance, lastInteractionDay, broken);
     }
 
     public Relationship breakRelationship() {
-        return new Relationship(npcCode, closeness, trust, stability, romance, lastInteractionDay, true);
+        return new Relationship(npcId, closeness, trust, stability, romance, lastInteractionDay, true);
     }
 
     private static int clamp(int value) {

@@ -12,7 +12,11 @@
             <change target="FATHER" delta="-2"/>
         </relationships>
         <pet-mood/>
-        <flags rested="false" worked="true" interacted-husband="false" interacted-father="false"/>
+        <flags rested="false" worked="true" interacted-npcs="" reset-household-days="false"/>
+        <skill-gains>
+            <skill name="efficiency" xp="2"/>
+        </skill-gains>
+        <job-effects satisfaction="2" burnout-risk="0"/>
     </action>
 
     <action id="VISIT_FATHER" code="VISIT_FATHER" time-cost="4">
@@ -24,7 +28,14 @@
             <change target="FATHER" delta="15"/>
         </relationships>
         <pet-mood/>
-        <flags rested="false" worked="false" interacted-husband="false" interacted-father="true"/>
+        <flags rested="false" worked="false" interacted-npcs="FATHER" reset-household-days="false"/>
+        <skill-gains>
+            <skill name="empathy" xp="2"/>
+            <skill name="communication" xp="1"/>
+        </skill-gains>
+        <extra-relationship-effects>
+            <effect target="FATHER" closeness="0" trust="5" stability="0" romance="0"/>
+        </extra-relationship-effects>
     </action>
 
     <action id="DATE_WITH_HUSBAND" code="DATE_WITH_HUSBAND" time-cost="3">
@@ -36,7 +47,14 @@
             <change target="HUSBAND" delta="10"/>
         </relationships>
         <pet-mood/>
-        <flags rested="false" worked="false" interacted-husband="true" interacted-father="false"/>
+        <flags rested="false" worked="false" interacted-npcs="HUSBAND" reset-household-days="false"/>
+        <skill-gains>
+            <skill name="charisma" xp="2"/>
+            <skill name="empathy" xp="1"/>
+        </skill-gains>
+        <extra-relationship-effects>
+            <effect target="HUSBAND" closeness="0" trust="5" stability="0" romance="15"/>
+        </extra-relationship-effects>
     </action>
 
     <action id="PLAY_WITH_CAT" code="PLAY_WITH_CAT" time-cost="1">
@@ -48,7 +66,10 @@
         <pet-mood>
             <change target="BARSIK" delta="20"/>
         </pet-mood>
-        <flags rested="false" worked="false" interacted-husband="false" interacted-father="false"/>
+        <flags rested="false" worked="false" interacted-npcs="" reset-household-days="false"/>
+        <skill-gains>
+            <skill name="empathy" xp="1"/>
+        </skill-gains>
     </action>
 
     <action id="WALK_DOG" code="WALK_DOG" time-cost="2">
@@ -61,7 +82,10 @@
         <pet-mood>
             <change target="SAM" delta="25"/>
         </pet-mood>
-        <flags rested="false" worked="false" interacted-husband="false" interacted-father="false"/>
+        <flags rested="false" worked="false" interacted-npcs="" reset-household-days="false"/>
+        <skill-gains>
+            <skill name="dog_care" xp="2"/>
+        </skill-gains>
     </action>
 
     <action id="SELF_CARE" code="SELF_CARE" time-cost="2">
@@ -71,7 +95,12 @@
         <stats energy="-10" health="0" stress="-15" mood="15" money="0" self-esteem="10"/>
         <relationships/>
         <pet-mood/>
-        <flags rested="false" worked="false" interacted-husband="false" interacted-father="false"/>
+        <flags rested="false" worked="false" interacted-npcs="" reset-household-days="false"/>
+        <skill-gains>
+            <skill name="assertiveness" xp="2"/>
+            <skill name="communication" xp="1"/>
+        </skill-gains>
+        <job-effects satisfaction="0" burnout-risk="-3"/>
     </action>
 
     <action id="REST_AT_HOME" code="REST_AT_HOME" time-cost="3">
@@ -81,7 +110,10 @@
         <stats energy="40" health="0" stress="-20" mood="10" money="0" self-esteem="0"/>
         <relationships/>
         <pet-mood/>
-        <flags rested="true" worked="false" interacted-husband="false" interacted-father="false"/>
+        <flags rested="true" worked="false" interacted-npcs="" reset-household-days="false"/>
+        <skill-gains>
+            <skill name="humor" xp="1"/>
+        </skill-gains>
     </action>
 
     <action id="HOUSEHOLD" code="HOUSEHOLD" time-cost="2">
@@ -93,7 +125,10 @@
             <change target="HUSBAND" delta="5"/>
         </relationships>
         <pet-mood/>
-        <flags rested="false" worked="false" interacted-husband="true" interacted-father="false"/>
+        <flags rested="false" worked="false" interacted-npcs="HUSBAND" reset-household-days="true"/>
+        <skill-gains>
+            <skill name="cooking" xp="2"/>
+        </skill-gains>
     </action>
 
 </player-actions>

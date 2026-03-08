@@ -7,7 +7,6 @@ import ru.lifegame.backend.domain.conflict.core.Conflict;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.pet.Pet;
 import ru.lifegame.backend.domain.model.pet.Pets;
-import ru.lifegame.backend.domain.model.relationship.NpcCode;
 import ru.lifegame.backend.domain.model.relationship.Relationship;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.model.session.GameSession;
@@ -52,10 +51,6 @@ public class GameStateViewMapper {
         return new TimeView(time.day(), time.hour(), resolveTimeSlot(time.hour()));
     }
 
-    /**
-     * Derives time-of-day slot from hour.
-     * MORNING: 7-11, DAY: 12-16, EVENING: 17-20, NIGHT: 21+
-     */
     static String resolveTimeSlot(int hour) {
         if (hour < 7) return "NIGHT";
         if (hour < 12) return "MORNING";
@@ -82,9 +77,9 @@ public class GameStateViewMapper {
         return rels.all().entrySet().stream()
                 .map(e -> {
                     Relationship r = e.getValue();
-                    NpcCode npc = e.getKey();
+                    String npcId = e.getKey();
                     return new RelationshipView(
-                            npc.name(), npc.name(),
+                            npcId, npcId,
                             r.closeness(), r.trust(), r.stability(), r.romance()
                     );
                 })
@@ -117,9 +112,9 @@ public class GameStateViewMapper {
     }
 
     private String resolveUnavailableReason(GameSession session, int timeCost) {
-        if (!session.time().hasEnoughTime(timeCost)) return "Недостаточно времени";
-        if (session.player().stats().energy() < 5) return "Недостаточно энергии";
-        return "Действие недоступно";
+        if (!session.time().hasEnoughTime(timeCost)) return "\u041d\u0435\u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u043e \u0432\u0440\u0435\u043c\u0435\u043d\u0438";
+        if (session.player().stats().energy() < 5) return "\u041d\u0435\u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u043e \u044d\u043d\u0435\u0440\u0433\u0438\u0438";
+        return "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u043d\u043e";
     }
 
     private List<QuestView> toQuestViews(GameSession session) {

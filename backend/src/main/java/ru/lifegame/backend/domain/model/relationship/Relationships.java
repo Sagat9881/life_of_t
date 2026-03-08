@@ -1,73 +1,55 @@
 package ru.lifegame.backend.domain.model.relationship;
 
 import ru.lifegame.backend.domain.balance.GameBalance;
-import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 
 public class Relationships {
-    private final Map<NpcCode, Relationship> map;
+    private final Map<String, Relationship> map;
 
-    public Relationships(Map<NpcCode, Relationship> map) {
-        this.map = new EnumMap<>(map);
+    public Relationships(Map<String, Relationship> map) {
+        this.map = new LinkedHashMap<>(map);
     }
 
-    public Relationship get(NpcCode npc) {
-        return map.get(npc);
+    public Relationship get(String npcId) {
+        return map.get(NpcCode.normalize(npcId));
     }
 
-    public void applyChanges(NpcCode npc, RelationshipChanges changes) {
-        Relationship r = map.get(npc);
+    public void applyChanges(String npcId, RelationshipChanges changes) {
+        String key = NpcCode.normalize(npcId);
+        Relationship r = map.get(key);
         if (r != null && !r.broken()) {
-            map.put(npc, r.applyChanges(changes));
+            map.put(key, r.applyChanges(changes));
         }
     }
 
-    public void markInteraction(NpcCode npc, int currentDay) {
-        Relationship r = map.get(npc);
+    public void markInteraction(String npcId, int currentDay) {
+        String key = NpcCode.normalize(npcId);
+        Relationship r = map.get(key);
         if (r != null) {
-            map.put(npc, r.markInteraction(currentDay));
+            map.put(key, r.markInteraction(currentDay));
         }
     }
 
     public void applyDailyDecay(int currentDay) {
-        for (NpcCode npc : map.keySet()) {
-            Relationship r = map.get(npc);
+        for (String key : map.keySet()) {
+            Relationship r = map.get(key);
             if (!r.broken()) {
-                map.put(npc, r.applyDecay(currentDay));
+                map.put(key, r.applyDecay(currentDay));
             }
         }
     }
 
-    public boolean isHusbandConflictTriggered(PlayerCharacter player) {
-        Relationship husband = map.get(NpcCode.HUSBAND);
-        if (husband == null || husband.broken()) return false;
-        if (husband.closeness() < GameBalance.HUSBAND_CLOSENESS_ATTENTION) return true;
-        if (husband.romance() < GameBalance.HUSBAND_ROMANCE_CRISIS
-                && player.consecutiveWorkDays() >= GameBalance.HUSBAND_CONSECUTIVE_WORK_DAYS) return true;
-        return false;
-    }
-
-    public boolean isFatherConflictTriggered(PlayerCharacter player) {
-        Relationship father = map.get(NpcCode.FATHER);
-        if (father == null || father.broken()) return false;
-        if (father.closeness() < GameBalance.FATHER_CLOSENESS_NEGLECTED) return true;
-        if (player.job().satisfaction() < GameBalance.FATHER_CRITICISM_SATISFACTION
-                || player.stats().selfEsteem() < GameBalance.FATHER_CRITICISM_SELF_ESTEEM) return true;
-        return false;
-    }
-
-    public void breakRelationship(NpcCode npc) {
-        Relationship r = map.get(npc);
+    public void breakRelationship(String npcId) {
+        String key = NpcCode.normalize(npcId);
+        Relationship r = map.get(key);
         if (r != null) {
-            map.put(npc, r.breakRelationship());
+            map.put(key, r.breakRelationship());
         }
     }
 
     public boolean isDivorced() {
-        Relationship husband = map.get(NpcCode.HUSBAND);
+        Relationship husband = get(NpcCode.HUSBAND);
         return husband != null && husband.broken();
     }
 
@@ -78,12 +60,12 @@ public class Relationships {
                 .sum();
     }
 
-    public Map<NpcCode, Relationship> all() {
+    public Map<String, Relationship> all() {
         return Collections.unmodifiableMap(map);
     }
 
     public static Relationships initial() {
-        var m = new EnumMap<NpcCode, Relationship>(NpcCode.class);
+        var m = new LinkedHashMap<String, Relationship>();
         m.put(NpcCode.HUSBAND, new Relationship(NpcCode.HUSBAND,
                 GameBalance.HUSBAND_INITIAL_CLOSENESS, GameBalance.HUSBAND_INITIAL_TRUST,
                 GameBalance.HUSBAND_INITIAL_STABILITY, GameBalance.HUSBAND_INITIAL_ROMANCE, 1, false));

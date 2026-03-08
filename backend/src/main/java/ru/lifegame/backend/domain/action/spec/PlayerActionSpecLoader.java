@@ -55,10 +55,14 @@ public class PlayerActionSpecLoader {
         Map<String, Integer> relChanges = parseChanges(el, "relationships");
         Map<String, Integer> petChanges = parseChanges(el, "pet-mood");
         PlayerActionSpec.ActionFlags flags = parseFlags(el);
+        Map<String, Integer> skillGains = parseSkillGains(el);
+        PlayerActionSpec.JobEffects jobEffects = parseJobEffects(el);
+        List<PlayerActionSpec.ExtraRelEffect> extraRels = parseExtraRelEffects(el);
 
         return new PlayerActionSpec(
                 id, code, label, description, resultText,
-                baseTimeCost, skillMod, stats, relChanges, petChanges, flags
+                baseTimeCost, skillMod, stats, relChanges, petChanges, flags,
+                skillGains, jobEffects, extraRels
         );
     }
 
@@ -105,15 +109,64 @@ public class PlayerActionSpecLoader {
     private PlayerActionSpec.ActionFlags parseFlags(Element parent) {
         NodeList nodes = parent.getElementsByTagName("flags");
         if (nodes.getLength() == 0) {
-            return new PlayerActionSpec.ActionFlags(false, false, false, false);
+            return new PlayerActionSpec.ActionFlags(false, false, Set.of(), false);
         }
         Element el = (Element) nodes.item(0);
+        Set<String> interacted = new LinkedHashSet<>();
+        String interactedStr = attrOr(el, "interacted-npcs", "");
+        if (!interactedStr.isEmpty()) {
+            for (String npc : interactedStr.split(",")) {
+                interacted.add(npc.trim().toUpperCase());
+            }
+        }
         return new PlayerActionSpec.ActionFlags(
                 Boolean.parseBoolean(attrOr(el, "rested", "false")),
                 Boolean.parseBoolean(attrOr(el, "worked", "false")),
-                Boolean.parseBoolean(attrOr(el, "interacted-husband", "false")),
-                Boolean.parseBoolean(attrOr(el, "interacted-father", "false"))
+                interacted,
+                Boolean.parseBoolean(attrOr(el, "reset-household-days", "false"))
         );
+    }
+
+    private Map<String, Integer> parseSkillGains(Element parent) {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        NodeList wrappers = parent.getElementsByTagName("skill-gains");
+        if (wrappers.getLength() == 0) return map;
+        Element wrapper = (Element) wrappers.item(0);
+        NodeList gains = wrapper.getElementsByTagName("skill");
+        for (int i = 0; i < gains.getLength(); i++) {
+            Element g = (Element) gains.item(i);
+            map.put(g.getAttribute("name"), Integer.parseInt(g.getAttribute("xp")));
+        }
+        return map;
+    }
+
+    private PlayerActionSpec.JobEffects parseJobEffects(Element parent) {
+        NodeList nodes = parent.getElementsByTagName("job-effects");
+        if (nodes.getLength() == 0) return new PlayerActionSpec.JobEffects(0, 0);
+        Element el = (Element) nodes.item(0);
+        return new PlayerActionSpec.JobEffects(
+                intAttr(el, "satisfaction"),
+                intAttr(el, "burnout-risk")
+        );
+    }
+
+    private List<PlayerActionSpec.ExtraRelEffect> parseExtraRelEffects(Element parent) {
+        List<PlayerActionSpec.ExtraRelEffect> list = new ArrayList<>();
+        NodeList wrappers = parent.getElementsByTagName("extra-relationship-effects");
+        if (wrappers.getLength() == 0) return list;
+        Element wrapper = (Element) wrappers.item(0);
+        NodeList effects = wrapper.getElementsByTagName("effect");
+        for (int i = 0; i < effects.getLength(); i++) {
+            Element e = (Element) effects.item(i);
+            list.add(new PlayerActionSpec.ExtraRelEffect(
+                    e.getAttribute("target"),
+                    intAttr(e, "closeness"),
+                    intAttr(e, "trust"),
+                    intAttr(e, "stability"),
+                    intAttr(e, "romance")
+            ));
+        }
+        return list;
     }
 
     private String getTagText(Element parent, String tag, String defaultValue) {
