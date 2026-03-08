@@ -41,6 +41,10 @@ const TIME_SLOT_TO_CONDITION: Record<string, string> = {
   morning: 'morning', day: 'day', evening: 'evening', night: 'night',
 };
 
+/** Fallback sceneRelativeHeight for furniture when atlas can't be loaded.
+ * Most furniture has 192px height canvas → 192/480 = 0.40 */
+const FURNITURE_FALLBACK_REL_HEIGHT = 0.40;
+
 /** Cache of loaded atlas configs for computing relative heights */
 const atlasCache = new Map<string, AtlasConfig>();
 
@@ -130,7 +134,7 @@ export const LocationRenderer = memo(function LocationRenderer({
             const ac = await loadAtlasConfig('furniture', item.entityName);
             atlasCache.set(key, ac);
             result[item.entityName] = ac;
-          } catch { /* furniture without atlas renders at native size */ }
+          } catch { /* furniture without atlas renders at fallback size */ }
         })
       );
       if (!cancelled) setFurnitureAtlases(result);
@@ -221,7 +225,7 @@ export const LocationRenderer = memo(function LocationRenderer({
           const isClickable = Boolean(item.actionCode);
           const isSelected = selectedObjectId === item.id;
           const furnitureAtlas = furnitureAtlases[item.entityName];
-          const relHeight = getRelativeHeight(furnitureAtlas, item.animation);
+          const relHeight = getRelativeHeight(furnitureAtlas, item.animation) ?? FURNITURE_FALLBACK_REL_HEIGHT;
 
           return (
             <div
