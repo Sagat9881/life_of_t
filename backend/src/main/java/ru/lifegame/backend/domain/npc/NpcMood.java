@@ -1,81 +1,207 @@
 package ru.lifegame.backend.domain.npc;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 /**
- * Represents the internal emotional state of an NPC.
- * Updated daily based on relationship metrics + random variance.
+ * 6-axis mood system for NPC. All values 0-100.
+ * Axes: happiness, anxiety, loneliness, irritability, energy, affection.
+ * Mood is modified by MoodModifiers with duration and decays daily.
+ * Extreme values can override scheduled behavior.
  */
 public class NpcMood {
-    private int happiness;     // 0-100
-    private int irritation;    // 0-100
-    private int energy;        // 0-100
-    private int loneliness;    // 0-100
 
-    public NpcMood(int happiness, int irritation, int energy, int loneliness) {
+    private int happiness;
+    private int anxiety;
+    private int loneliness;
+    private int irritability;
+    private int energy;
+    private int affection;
+    private final List<MoodModifier> activeModifiers;
+
+    public record MoodModifier(
+            String axis,
+            int delta,
+            int remainingDays,
+            String source
+    ) {
+        public MoodModifier withDecrementedDuration() {
+            return new MoodModifier(axis, delta, remainingDays - 1, source);
+        }
+
+        public boolean isExpired() {
+            return remainingDays <= 0;
+        }
+    }
+
+    public NpcMood(int happiness, int anxiety, int loneliness,
+                   int irritability, int energy, int affection) {
         this.happiness = clamp(happiness);
-        this.irritation = clamp(irritation);
-        this.energy = clamp(energy);
+        this.anxiety = clamp(anxiety);
         this.loneliness = clamp(loneliness);
-    }
-
-    public static NpcMood initialHusband() {
-        return new NpcMood(70, 10, 80, 20);
-    }
-
-    public static NpcMood initialFather() {
-        return new NpcMood(50, 15, 50, 40);
+        this.irritability = clamp(irritability);
+        this.energy = clamp(energy);
+        this.affection = clamp(affection);
+        this.activeModifiers = new ArrayList<>();
     }
 
     /**
-     * Daily tick: mood drifts based on relationship closeness and days since interaction.
+     * Create from XML initial values map.
+     * Expected keys: happiness, anxiety, loneliness, irritability, energy, affection.
+     * Missing keys default to 50.
      */
-    public NpcMood dailyTick(int closeness, int daysSinceInteraction) {
-        int dLoneliness = daysSinceInteraction >= 3 ? 10 : (daysSinceInteraction >= 2 ? 5 : -5);
-        int dIrritation = daysSinceInteraction >= 3 ? 8 : -3;
-        int dHappiness = closeness >= 60 ? 3 : (closeness >= 40 ? 0 : -5);
-        int dEnergy = (int)(Math.random() * 10) - 5; // slight random drift
-
+    public static NpcMood fromSpec(Map<String, Integer> initialValues) {
         return new NpcMood(
-            happiness + dHappiness,
-            irritation + dIrritation,
-            energy + dEnergy,
-            loneliness + dLoneliness
+                initialValues.getOrDefault("happiness", 50),
+                initialValues.getOrDefault("anxiety", 50),
+                initialValues.getOrDefault("loneliness", 50),
+                initialValues.getOrDefault("irritability", 50),
+                initialValues.getOrDefault("energy", 50),
+                initialValues.getOrDefault("affection", 50)
         );
     }
 
     /**
-     * After player interacts with this NPC, mood improves.
+     * Simplified mood for filler NPCs — only happiness and energy are tracked.
      */
-    public NpcMood onInteraction(int qualityBonus) {
-        return new NpcMood(
-            happiness + 10 + qualityBonus,
-            irritation - 15,
-            energy + 5,
-            loneliness - 20
-        );
+    public static NpcMood fillerMood(int happiness, int energy) {
+        return new NpcMood(happiness, 0, 0, 0, energy, 0);
     }
 
+    public void addModifier(MoodModifier modifier) {
+        activeModifiers.add(modifier);
+        applyDelta(modifier.axis(), modifier.delta());
+    }
+
+    /**
+     * Called at end of each day. Decrements modifier durations,
+     * removes expired ones, applies base decay toward neutral (50).
+     */
+    public void dailyTick() {
+        Iterator<MoodModifier> it = activeModifiers.iterator();
+        while (it.hasNext()) {
+            MoodModifier mod = it.next();
+            if (mod.isExpired()) {
+                reverseDelta(mod.axis(), mod.delta());
+                it.remove();
+            } else {
+                int idx = activeModifiers.indexOf(mod);
+                activeModifiers.set(idx, mod.withDecrementedDuration());
+            }
+        }
+        decayTowardNeutral();
+    }
+
+    /**
+     * Natural decay: each axis moves 5 points toward 50 per day.
+     */
+    private void decayTowardNeutral() {
+        this.happiness = decayAxis(happiness);
+        this.anxiety = decayAxis(anxiety);
+        this.loneliness = decayAxis(loneliness);
+        this.irritability = decayAxis(irritability);
+        this.energy = decayAxis(energy);
+        this.affection = decayAxis(affection);
+    }
+
+    private int decayAxis(int current) {
+        int neutral = 50;
+        int decayRate = 5;
+        if (current > neutral) {
+            return Math.max(neutral, current - decayRate);
+        } else if (current < neutral) {
+            return Math.min(neutral, current + decayRate);
+        }
+        return current;
+    }
+
+    public int getAxis(String axisName) {
+        return switch (axisName.toLowerCase()) {
+            case "happiness" -> happiness;
+            case "anxiety" -> anxiety;
+            case "loneliness" -> loneliness;
+            case "irritability" -> irritability;
+            case "energy" -> energy;
+            case "affection" -> affection;
+            default -> throw new IllegalArgumentException("Unknown mood axis: " + axisName);
+        };
+    }
+
+    public void setAxis(String axisName, int value) {
+        switch (axisName.toLowerCase()) {
+            case "happiness" -> this.happiness = clamp(value);
+            case "anxiety" -> this.anxiety = clamp(value);
+            case "loneliness" -> this.loneliness = clamp(value);
+            case "irritability" -> this.irritability = clamp(value);
+            case "energy" -> this.energy = clamp(value);
+            case "affection" -> this.affection = clamp(value);
+            default -> throw new IllegalArgumentException("Unknown mood axis: " + axisName);
+        }
+    }
+
+    /**
+     * Returns the most extreme axis (furthest from 50) — used for mood override checks.
+     */
+    public String dominantAxis() {
+        int maxDev = 0;
+        String dominant = "happiness";
+        Map<String, Integer> axes = Map.of(
+                "happiness", happiness, "anxiety", anxiety,
+                "loneliness", loneliness, "irritability", irritability,
+                "energy", energy, "affection", affection
+        );
+        for (var entry : axes.entrySet()) {
+            int deviation = Math.abs(entry.getValue() - 50);
+            if (deviation > maxDev) {
+                maxDev = deviation;
+                dominant = entry.getKey();
+            }
+        }
+        return dominant;
+    }
+
+    /**
+     * True if any axis exceeds extreme threshold (>80 or <20).
+     * Used to trigger mood override of scheduled activity.
+     */
+    public boolean hasExtremeState() {
+        return happiness < 20 || happiness > 80 ||
+               anxiety > 80 || loneliness > 80 ||
+               irritability > 80 || energy < 20 || affection < 20;
+    }
+
+    /**
+     * Urgency score: higher means NPC needs attention more urgently.
+     * Sum of deviations from neutral for negative axes.
+     */
+    public double urgencyScore() {
+        return (Math.max(0, anxiety - 50) * 1.5) +
+               (Math.max(0, loneliness - 50) * 1.2) +
+               (Math.max(0, irritability - 50) * 1.3) +
+               (Math.max(0, 50 - happiness) * 1.0) +
+               (Math.max(0, 50 - energy) * 0.8);
+    }
+
+    private void applyDelta(String axis, int delta) {
+        setAxis(axis, getAxis(axis) + delta);
+    }
+
+    private void reverseDelta(String axis, int delta) {
+        setAxis(axis, getAxis(axis) - delta);
+    }
+
+    private static int clamp(int value) {
+        return Math.max(0, Math.min(100, value));
+    }
+
+    // Getters
     public int happiness() { return happiness; }
-    public int irritation() { return irritation; }
-    public int energy() { return energy; }
+    public int anxiety() { return anxiety; }
     public int loneliness() { return loneliness; }
-
-    /**
-     * Composite score used by BehaviorEngine to pick NPC actions.
-     * High = NPC is stressed/unhappy and likely to initiate.
-     */
-    public int urgencyScore() {
-        return (irritation + loneliness) - (happiness + energy) / 2;
-    }
-
-    public String dominantEmotion() {
-        if (loneliness >= 60) return "lonely";
-        if (irritation >= 60) return "irritated";
-        if (happiness >= 70) return "happy";
-        if (energy <= 30) return "tired";
-        return "neutral";
-    }
-
-    private static int clamp(int v) {
-        return Math.max(0, Math.min(100, v));
-    }
+    public int irritability() { return irritability; }
+    public int energy() { return energy; }
+    public int affection() { return affection; }
+    public List<MoodModifier> activeModifiers() { return List.copyOf(activeModifiers); }
 }

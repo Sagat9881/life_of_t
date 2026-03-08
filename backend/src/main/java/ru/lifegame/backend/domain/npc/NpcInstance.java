@@ -1,83 +1,123 @@
 package ru.lifegame.backend.domain.npc;
 
-import java.util.Set;
+import com.life_of_t.domain.npc.NpcActivity;
+import com.life_of_t.domain.npc.NpcSchedule;
+import com.life_of_t.domain.npc.spec.NpcSpec;
+
+import java.util.stream.Collectors;
 
 /**
- * A live NPC instance in a game session.
- * Created from NpcSpec at session start.
- * Named NPCs get full brain (6-axis mood, memory, utility AI).
- * Filler NPCs get light brain (2-axis mood, fixed schedule, no memory).
+ * A live NPC instance in the game session.
+ * Created from NpcSpec (XML) by NpcRegistry.
+ * Named NPCs get full brain (mood 6 axes + memory + utility AI).
+ * Filler NPCs get simplified brain (mood 2 axes + no memory).
  */
 public class NpcInstance {
+
     private final NpcSpec spec;
-    private NpcMood mood;
-    private final NpcMemory memory;
-    private final NpcSchedule schedule;
-    private NpcActivity currentActivity;
+    private final ru.lifegame.backend.domain.npc.NpcMood mood;
+    private final ru.lifegame.backend.domain.npc.NpcMemory memory;
+    private final ru.lifegame.backend.domain.npc.NpcSchedule schedule;
+    private ru.lifegame.backend.domain.npc.NpcActivity currentActivity;
 
-    public NpcInstance(NpcSpec spec) {
+    private NpcInstance(NpcSpec spec, ru.lifegame.backend.domain.npc.NpcMood mood, ru.lifegame.backend.domain.npc.NpcMemory memory, ru.lifegame.backend.domain.npc.NpcSchedule schedule) {
         this.spec = spec;
-        this.mood = NpcMood.fromInitial(spec.moodInitial(), spec.isNamed());
-        this.memory = spec.memoryEnabled()
-            ? new NpcMemory(spec.shortTermMemorySize())
-            : NpcMemory.disabled();
-        this.schedule = NpcSchedule.fromSpec(spec.scheduleSlots());
-        this.currentActivity = NpcActivity.away();
+        this.mood = mood;
+        this.memory = memory;
+        this.schedule = schedule;
+        this.currentActivity = ru.lifegame.backend.domain.npc.NpcActivity.idle("default");
     }
 
     /**
-     * Called every game hour by NpcLifecycleEngine.
-     * Updates current activity based on schedule.
+     * Create a fully-featured named NPC from spec.
      */
-    public void hourlyTick(int currentHour) {
-        NpcSpec.ScheduleSlot slot = schedule.slotAt(currentHour);
-        this.currentActivity = (slot != null)
-            ? NpcActivity.fromScheduleSlot(slot)
-            : NpcActivity.away();
+    public static NpcInstance createNamed(NpcSpec spec) {
+        ru.lifegame.backend.domain.npc.NpcMood mood = ru.lifegame.backend.domain.npc.NpcMood.fromSpec(spec.moodInitial());
+        ru.lifegame.backend.domain.npc.NpcMemory memory = new ru.lifegame.backend.domain.npc.NpcMemory(spec.memoryShortTermSize());
+        ru.lifegame.backend.domain.npc.NpcSchedule schedule = buildSchedule(spec);
+        return new NpcInstance(spec, mood, memory, schedule);
     }
 
     /**
-     * Called at end of day by NpcLifecycleEngine.
-     * Mood drifts based on relationship closeness and days since interaction.
+     * Create a simplified filler NPC from spec.
      */
-    public void dailyTick(int closeness, int daysSinceInteraction) {
-        this.mood = mood.dailyTick(closeness, daysSinceInteraction, spec.personalityTraits());
+    public static NpcInstance createFiller(NpcSpec spec) {
+        ru.lifegame.backend.domain.npc.NpcMood mood = ru.lifegame.backend.domain.npc.NpcMood.fillerMood(
+                spec.moodInitial().getOrDefault("happiness", 50),
+                spec.moodInitial().getOrDefault("energy", 70)
+        );
+        ru.lifegame.backend.domain.npc.NpcMemory memory = ru.lifegame.backend.domain.npc.NpcMemory.disabled();
+        ru.lifegame.backend.domain.npc.NpcSchedule schedule = buildSchedule(spec);
+        return new NpcInstance(spec, mood, memory, schedule);
+    }
+
+    private static ru.lifegame.backend.domain.npc.NpcSchedule buildSchedule(NpcSpec spec) {
+        var slots = spec.scheduleSlots().stream()
+                .map(s -> new ru.lifegame.backend.domain.npc.NpcSchedule.ScheduleSlot(
+                        s.startHour(), s.endHour(),
+                        s.activityId(), s.locationId(), s.animationKey()))
+                .collect(Collectors.toList());
+        return new ru.lifegame.backend.domain.npc.NpcSchedule(slots);
     }
 
     /**
-     * Player directly interacted with this NPC.
+     * Update current activity based on schedule resolution for given hour.
+     * Returns the resolved activity (for rendering).
      */
-    public void onPlayerInteraction(int day, String actionCode) {
-        if (memory.isEnabled()) {
-            memory.record(day, actionCode, "direct");
+    public ru.lifegame.backend.domain.npc.NpcActivity resolveActivity(int currentHour) {
+        var slot = schedule.resolveSlot(currentHour);
+        if (slot.isPresent()) {
+            var s = slot.get();
+            this.currentActivity = new ru.lifegame.backend.domain.npc.NpcActivity(s.activityId(), s.animationKey(), s.locationId());
+        } else {
+            this.currentActivity = ru.lifegame.backend.domain.npc.NpcActivity.idle("default");
         }
-        this.mood = mood.onInteraction(spec.personalityTrait("warmth"));
+        return this.currentActivity;
     }
 
     /**
-     * Player performed an action that this NPC can observe.
+     * Apply mood override to schedule if mood is extreme.
+     * Called by NpcLifecycleEngine during hourly tick.
      */
-    public void observePlayerAction(int day, String actionCode) {
-        if (memory.isEnabled()) {
-            memory.record(day, actionCode, "observed");
-        }
+    public void checkMoodOverride(int currentHour) {
+        if (!mood.hasExtremeState()) return;
+
+        String dominant = mood.dominantAxis();
+        // Find mood-override action from spec
+        spec.moodOverrideActions().stream()
+                .filter(a -> a.triggerAxis().equals(dominant))
+                .findFirst()
+                .ifPresent(override -> {
+                    var overrideSlot = new ru.lifegame.backend.domain.npc.NpcSchedule.ScheduleSlot(
+                            currentHour, currentHour + override.durationHours(),
+                            override.activityId(), override.locationId(), override.animationKey());
+                    schedule.setMoodOverride(overrideSlot);
+                });
     }
 
     /**
-     * Override current activity due to mood extreme or event.
+     * Record that the player performed an action observed by this NPC.
      */
-    public void overrideActivity(NpcActivity override) {
-        this.currentActivity = override;
+    public void observePlayerAction(String actionId, int day, int hour) {
+        memory.observe(new ru.lifegame.backend.domain.npc.NpcMemory.MemoryEntry(actionId, day, hour, ""));
+    }
+
+    /**
+     * Daily tick: mood decay, clear schedule overrides, prepare for new day.
+     */
+    public void dailyTick() {
+        mood.dailyTick();
+        schedule.clearOverrides();
     }
 
     // Accessors
     public String id() { return spec.id(); }
+    public String type() { return spec.type(); }
+    public String category() { return spec.category(); }
+    public String displayName() { return spec.displayName(); }
     public NpcSpec spec() { return spec; }
     public NpcMood mood() { return mood; }
-    public NpcMemory memory() { return memory; }
+    public ru.lifegame.backend.domain.npc.NpcMemory memory() { return memory; }
     public NpcSchedule schedule() { return schedule; }
     public NpcActivity currentActivity() { return currentActivity; }
-    public boolean hasMemory() { return memory.isEnabled(); }
-    public boolean isNamed() { return spec.isNamed(); }
-    public boolean isPresent(int hour) { return schedule.isAvailable(hour); }
 }

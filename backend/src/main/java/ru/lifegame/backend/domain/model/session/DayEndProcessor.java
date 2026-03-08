@@ -10,8 +10,6 @@ import ru.lifegame.backend.domain.event.domain.EndingAchievedEvent;
 import ru.lifegame.backend.domain.event.domain.EventTriggeredEvent;
 import ru.lifegame.backend.domain.event.domain.GameOverEvent;
 import ru.lifegame.backend.domain.event.game.GameEvent;
-import ru.lifegame.backend.domain.npc.NpcBehaviorEngine;
-import ru.lifegame.backend.domain.npc.NpcProfile;
 
 import java.util.List;
 import java.util.Optional;

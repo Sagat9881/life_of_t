@@ -1,23 +1,19 @@
 package ru.lifegame.backend.domain.npc;
 
 /**
- * Current physical activity of an NPC at a given moment.
- * Sent to frontend for rendering correct animation + location.
+ * Current physical activity of an NPC.
+ * All fields are opaque string IDs loaded from XML — the engine
+ * does not know what "eating" or "kitchen" means, only the frontend does.
  */
 public record NpcActivity(
-    String activityId,
-    String animationKey,
-    String locationId
+        String activityId,
+        String animationKey,
+        String locationId
 ) {
-    public static NpcActivity away() {
-        return new NpcActivity("away", "none", "away");
-    }
-
-    public static NpcActivity fromScheduleSlot(NpcSpec.ScheduleSlot slot) {
-        return new NpcActivity(slot.activityId(), slot.animationKey(), slot.locationId());
-    }
-
-    public boolean isPresent() {
-        return !"away".equals(locationId);
+    /**
+     * Default idle activity when no schedule slot is active.
+     */
+    public static NpcActivity idle(String defaultLocation) {
+        return new NpcActivity("idle", "idle", defaultLocation);
     }
 }

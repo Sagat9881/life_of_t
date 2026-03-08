@@ -1,10 +1,10 @@
-package ru.lifegame.backend.application.view;
+package com.life_of_t.application.view;
 
 import java.util.List;
 
 /**
- * Aggregate DTO: all NPC activities for the current game hour.
- * Returned by GET /npc/activities endpoint.
+ * Aggregated view of all NPC activities for a given game hour.
+ * Frontend calls GET /npc/activities to get this.
  */
 public record AllNpcActivitiesView(
         int currentDay,
