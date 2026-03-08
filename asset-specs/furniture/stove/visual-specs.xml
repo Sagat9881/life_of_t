@@ -1,151 +1,194 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<asset-spec>
+<asset-spec extends="abstract/materials/metal@1.0" version="2.0.0">
     <meta>
         <entity-type>furniture</entity-type>
         <entity-name>stove</entity-name>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
+        <canvas width="192" height="192" displayScale="1.0"/>
         <location>kitchen</location>
         <description>
             Плита — основной интерактивный объект кухни.
-            Действие «Готовить»: восстановление health,
-            снижение hunger питомцев, повышение отношений
-            при совместной готовке.
+            Canvas ×4: 48×48 → 192×192.
         </description>
     </meta>
 
+    <color-palette>
+        <color name="$body_main" value="#F0EDE8"/>
+        <color name="$body_shadow" value="#D8D4D0"/>
+        <color name="$body_bottom" value="#C8C4C0"/>
+        <color name="$feet" value="#A0A0A0"/>
+        <color name="$cooktop" value="#E0DCD8"/>
+        <color name="$burner_off" value="#808080"/>
+        <color name="$burner_ring" value="#909090"/>
+        <color name="$knob" value="#C0C0C0"/>
+        <color name="$oven_frame" value="#D8D4D0"/>
+        <color name="$oven_glass" value="#2A2A30"/>
+        <color name="$oven_inner" value="#1A1A20"/>
+        <color name="$oven_handle" value="#B0B0B0"/>
+        <color name="$burner_on" value="#FF6030"/>
+        <color name="$burner_glow" value="#FF8050"/>
+        <color name="$steam" value="#E8E8E8"/>
+        <color name="$oven_light" value="#FFE0A0"/>
+        <color name="$oven_warm" value="#FFD080"/>
+    </color-palette>
+
     <layers>
-        <!-- Корпус плиты (z=0) -->
-        <layer id="body" type="base" z-order="0" width="48" height="48">
+        <!-- z=0: Корпус -->
+        <layer id="body" type="base" z-order="0" width="192" height="192">
             <pixel-data>
-                <!-- Основной корпус -->
-                <rect x="8" y="10" w="32" h="34" color="#F0EDE8"/>
-                <!-- Левая грань (тень) -->
-                <rect x="8" y="10" w="1" h="34" color="#D8D4D0"/>
-                <!-- Нижний край -->
-                <hline x="8" y="43" len="32" color="#C8C4C0"/>
+                <rect x="32" y="40" w="128" h="136" color="$body_main"/>
+                <rect x="32" y="40" w="4" h="136" color="$body_shadow"/>
+                <hline x="32" y="172" len="128" color="$body_bottom"/>
                 <!-- Ножки -->
-                <rect x="10" y="44" w="3" h="3" color="#A0A0A0"/>
-                <rect x="35" y="44" w="3" h="3" color="#A0A0A0"/>
+                <rect x="40" y="176" w="12" h="12" color="$feet"/>
+                <rect x="140" y="176" w="12" h="12" color="$feet"/>
+                <!-- Тень под ножками -->
+                <rect x="40" y="186" w="12" h="2" color="#888888"/>
+                <rect x="140" y="186" w="12" h="2" color="#888888"/>
+                <!-- Текстура brushed metal -->
+                <hline x="40" y="80" len="112" color="#E8E8E4"/>
+                <hline x="40" y="120" len="112" color="#E8E8E4"/>
+                <hline x="40" y="160" len="112" color="#E8E8E4"/>
             </pixel-data>
         </layer>
 
-        <!-- Варочная панель с конфорками (z=1) -->
-        <layer id="cooktop" type="base" z-order="1" width="48" height="48">
+        <!-- z=1: Варочная панель -->
+        <layer id="cooktop" type="base" z-order="1" width="192" height="192">
             <pixel-data>
-                <!-- Поверхность -->
-                <rect x="9" y="10" w="30" h="3" color="#E0DCD8"/>
-                <!-- Конфорка левая верхняя -->
-                <rect x="13" y="11" w="4" h="1" color="#808080"/>
-                <pixel x="12" y="11" color="#909090"/>
-                <pixel x="17" y="11" color="#909090"/>
-                <!-- Конфорка правая верхняя -->
-                <rect x="29" y="11" w="4" h="1" color="#808080"/>
-                <pixel x="28" y="11" color="#909090"/>
-                <pixel x="33" y="11" color="#909090"/>
+                <rect x="36" y="40" w="120" h="12" color="$cooktop"/>
+                <!-- Левая конфорка -->
+                <rect x="52" y="44" w="16" h="4" color="$burner_off"/>
+                <rect x="48" y="44" w="4" h="4" color="$burner_ring"/>
+                <rect x="68" y="44" w="4" h="4" color="$burner_ring"/>
+                <!-- Правая конфорка -->
+                <rect x="116" y="44" w="16" h="4" color="$burner_off"/>
+                <rect x="112" y="44" w="4" h="4" color="$burner_ring"/>
+                <rect x="132" y="44" w="4" h="4" color="$burner_ring"/>
             </pixel-data>
         </layer>
 
-        <!-- Ручки на фасаде (z=2) -->
-        <layer id="knobs" type="base" z-order="2" width="48" height="48">
+        <!-- z=2: Ручки -->
+        <layer id="knobs" type="base" z-order="2" width="192" height="192">
             <pixel-data>
-                <pixel x="14" y="16" color="#C0C0C0"/>
-                <pixel x="20" y="16" color="#C0C0C0"/>
-                <pixel x="28" y="16" color="#C0C0C0"/>
-                <pixel x="34" y="16" color="#C0C0C0"/>
+                <rect x="56" y="64" w="6" h="6" color="$knob"/>
+                <rect x="80" y="64" w="6" h="6" color="$knob"/>
+                <rect x="112" y="64" w="6" h="6" color="$knob"/>
+                <rect x="136" y="64" w="6" h="6" color="$knob"/>
+                <!-- Блики на ручках -->
+                <pixel x="57" y="65" color="#D8D8D8"/>
+                <pixel x="81" y="65" color="#D8D8D8"/>
+                <pixel x="113" y="65" color="#D8D8D8"/>
+                <pixel x="137" y="65" color="#D8D8D8"/>
             </pixel-data>
         </layer>
 
-        <!-- Духовка (z=3) -->
-        <layer id="oven" type="base" z-order="3" width="48" height="48">
+        <!-- z=3: Духовка -->
+        <layer id="oven" type="base" z-order="3" width="192" height="192">
             <pixel-data>
-                <!-- Рамка духовки -->
-                <rect x="12" y="20" w="24" h="18" color="#D8D4D0"/>
-                <!-- Стекло -->
-                <rect x="14" y="22" w="20" h="14" color="#2A2A30"/>
-                <rect x="15" y="23" w="18" h="12" color="#1A1A20"/>
+                <rect x="48" y="80" w="96" h="72" color="$oven_frame"/>
+                <rect x="56" y="88" w="80" h="56" color="$oven_glass"/>
+                <rect x="60" y="92" w="72" h="48" color="$oven_inner"/>
                 <!-- Ручка духовки -->
-                <rect x="20" y="20" w="8" h="1" color="#B0B0B0"/>
+                <rect x="80" y="80" w="32" h="4" color="$oven_handle"/>
+                <rect x="80" y="80" w="32" h="2" color="#C0C0C0"/>
+                <!-- Вентиляция -->
+                <rect x="56" y="156" w="80" h="2" color="#CCCCCC"/>
+                <rect x="60" y="156" w="4" h="2" color="#BBBBBB"/>
+                <rect x="72" y="156" w="4" h="2" color="#BBBBBB"/>
+                <rect x="84" y="156" w="4" h="2" color="#BBBBBB"/>
+                <rect x="96" y="156" w="4" h="2" color="#BBBBBB"/>
+                <rect x="108" y="156" w="4" h="2" color="#BBBBBB"/>
+                <rect x="120" y="156" w="4" h="2" color="#BBBBBB"/>
             </pixel-data>
         </layer>
 
-        <!-- Конфорка горит (z=4, анимируемый overlay) -->
-        <layer id="burner-glow" type="animated-overlay" z-order="4" width="48" height="48"
+        <!-- z=4: Конфорка горит -->
+        <layer id="burner-glow" type="animated-overlay" z-order="4" width="192" height="192"
                condition="state:cooking">
             <pixel-data>
-                <!-- Левая конфорка горит -->
-                <rect x="13" y="11" w="4" h="1" color="#FF6030"/>
-                <pixel x="12" y="11" color="#FF8050"/>
-                <pixel x="17" y="11" color="#FF8050"/>
+                <rect x="52" y="44" w="16" h="4" color="$burner_on"/>
+                <rect x="48" y="44" w="4" h="4" color="$burner_glow"/>
+                <rect x="68" y="44" w="4" h="4" color="$burner_glow"/>
+                <!-- Кастрюля -->
+                <rect x="44" y="32" w="28" h="12" color="#606060"/>
+                <rect x="44" y="32" w="28" h="2" color="#707070"/>
+                <rect x="42" y="32" w="2" h="4" color="#555555"/>
+                <rect x="72" y="32" w="2" h="4" color="#555555"/>
             </pixel-data>
         </layer>
 
-        <!-- Пар от кастрюли (z=5, анимируемый overlay) -->
-        <layer id="pot-steam" type="animated-overlay" z-order="5" width="48" height="48"
+        <!-- z=5: Пар -->
+        <layer id="pot-steam" type="animated-overlay" z-order="5" width="192" height="192"
                condition="state:cooking">
             <pixel-data>
-                <pixel x="14" y="8" color="#E8E8E8"/>
-                <pixel x="15" y="7" color="#E0E0E0"/>
-                <pixel x="16" y="8" color="#D8D8D8"/>
+                <rect x="56" y="28" w="4" h="4" color="$steam"/>
+                <rect x="60" y="24" w="4" h="4" color="#E0E0E0"/>
+                <rect x="64" y="28" w="4" h="4" color="#D8D8D8"/>
+                <rect x="52" y="20" w="4" h="4" color="#D0D0D0"/>
             </pixel-data>
         </layer>
 
-        <!-- Духовка светится (z=6, анимируемый overlay) -->
-        <layer id="oven-glow" type="animated-overlay" z-order="6" width="48" height="48"
+        <!-- z=6: Духовка светится -->
+        <layer id="oven-glow" type="animated-overlay" z-order="6" width="192" height="192"
                condition="state:baking">
             <pixel-data>
-                <rect x="15" y="23" w="18" h="12" color="#FFE0A0"/>
-                <rect x="16" y="24" w="16" h="10" color="#FFD080"/>
+                <rect x="60" y="92" w="72" h="48" color="$oven_light"/>
+                <rect x="64" y="96" w="64" h="40" color="$oven_warm"/>
+                <!-- Силуэт выпечки -->
+                <rect x="76" y="116" w="24" h="12" color="#E8C070"/>
+                <rect x="104" y="120" w="16" h="8" color="#E0B860"/>
             </pixel-data>
         </layer>
     </layers>
 
     <animations>
-        <!-- Idle: плита выключена -->
-        <animation name="idle" frames="1" fps="1" loop="false"
-                   frame-width="48" frame-height="48">
+        <animation name="idle" frames="2" fps="1" loop="true"
+                   frame-width="192" frame-height="192">
             <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets=""/>
         </animation>
 
-        <!-- Cooking: конфорка мерцает + пар поднимается -->
-        <animation name="cooking" frames="4" fps="3" loop="true"
-                   frame-width="48" frame-height="48"
+        <animation name="cooking" frames="10" fps="3" loop="true"
+                   frame-width="192" frame-height="192"
                    condition="state:cooking">
-            <description>
-                Конфорка мерцает между двумя оттенками
-                оранжевого (#FF6030 / #FF8050).
-                Пар поднимается тремя пикселями вверх
-                и рассеивается.
-            </description>
             <frame index="0" layer-offsets="burner-glow:0,0; pot-steam:0,0"/>
-            <frame index="1" layer-offsets="burner-glow:0,0; pot-steam:0,-2"/>
-            <frame index="2" layer-offsets="burner-glow:0,0; pot-steam:1,-4"/>
-            <frame index="3" layer-offsets="burner-glow:0,0; pot-steam:0,-6"/>
+            <frame index="1" layer-offsets="burner-glow:0,0; pot-steam:0,-4"/>
+            <frame index="2" layer-offsets="burner-glow:0,0; pot-steam:2,-8"/>
+            <frame index="3" layer-offsets="burner-glow:0,0; pot-steam:0,-12"/>
+            <frame index="4" layer-offsets="burner-glow:0,0; pot-steam:-2,-16"/>
+            <frame index="5" layer-offsets="burner-glow:0,0; pot-steam:0,0"/>
+            <frame index="6" layer-offsets="burner-glow:0,0; pot-steam:2,-4"/>
+            <frame index="7" layer-offsets="burner-glow:0,0; pot-steam:-2,-8"/>
+            <frame index="8" layer-offsets="burner-glow:0,0; pot-steam:0,-12"/>
+            <frame index="9" layer-offsets="burner-glow:0,0; pot-steam:2,-16"/>
         </animation>
 
-        <!-- Baking: духовка пульсирует тёплым светом -->
-        <animation name="baking" frames="2" fps="1" loop="true"
-                   frame-width="48" frame-height="48"
+        <animation name="baking" frames="8" fps="1" loop="true"
+                   frame-width="192" frame-height="192"
                    condition="state:baking">
-            <description>
-                Стекло духовки пульсирует между
-                тёплым жёлтым (#FFE0A0) и насыщенным (#FFD080).
-            </description>
             <frame index="0" layer-offsets="oven-glow:0,0"/>
             <frame index="1" layer-offsets="oven-glow:0,0"/>
+            <frame index="2" layer-offsets="oven-glow:0,0"/>
+            <frame index="3" layer-offsets="oven-glow:0,1"/>
+            <frame index="4" layer-offsets="oven-glow:0,0"/>
+            <frame index="5" layer-offsets="oven-glow:0,0"/>
+            <frame index="6" layer-offsets="oven-glow:0,-1"/>
+            <frame index="7" layer-offsets="oven-glow:0,0"/>
         </animation>
 
-        <!-- Cooking + Baking одновременно -->
-        <animation name="full-cooking" frames="4" fps="3" loop="true"
-                   frame-width="48" frame-height="48"
+        <animation name="full-cooking" frames="10" fps="3" loop="true"
+                   frame-width="192" frame-height="192"
                    condition="state:full-cooking">
-            <description>
-                Конфорка + пар + духовка все активны.
-                Максимальная активность плиты.
-            </description>
             <frame index="0" layer-offsets="burner-glow:0,0; pot-steam:0,0; oven-glow:0,0"/>
-            <frame index="1" layer-offsets="burner-glow:0,0; pot-steam:0,-2; oven-glow:0,0"/>
-            <frame index="2" layer-offsets="burner-glow:0,0; pot-steam:1,-4; oven-glow:0,0"/>
-            <frame index="3" layer-offsets="burner-glow:0,0; pot-steam:0,-6; oven-glow:0,0"/>
+            <frame index="1" layer-offsets="burner-glow:0,0; pot-steam:0,-4; oven-glow:0,0"/>
+            <frame index="2" layer-offsets="burner-glow:0,0; pot-steam:2,-8; oven-glow:0,0"/>
+            <frame index="3" layer-offsets="burner-glow:0,0; pot-steam:0,-12; oven-glow:0,1"/>
+            <frame index="4" layer-offsets="burner-glow:0,0; pot-steam:-2,-16; oven-glow:0,0"/>
+            <frame index="5" layer-offsets="burner-glow:0,0; pot-steam:0,0; oven-glow:0,0"/>
+            <frame index="6" layer-offsets="burner-glow:0,0; pot-steam:2,-4; oven-glow:0,-1"/>
+            <frame index="7" layer-offsets="burner-glow:0,0; pot-steam:-2,-8; oven-glow:0,0"/>
+            <frame index="8" layer-offsets="burner-glow:0,0; pot-steam:0,-12; oven-glow:0,0"/>
+            <frame index="9" layer-offsets="burner-glow:0,0; pot-steam:2,-16; oven-glow:0,1"/>
         </animation>
     </animations>
 
@@ -157,10 +200,10 @@
     </states>
 
     <interaction>
-        <action code="COOK" description="Готовить на плите — переход idle → cooking"/>
-        <action code="BAKE" description="Печь в духовке — переход idle → baking"/>
+        <action code="COOK" description="Готовить — idle → cooking"/>
+        <action code="BAKE" description="Печь — idle → baking"/>
         <action code="COOK_TOGETHER" description="Готовить с Александром — повышение relationship"/>
-        <action code="FINISH" description="Завершить — переход * → idle"/>
+        <action code="FINISH" description="Завершить — * → idle"/>
     </interaction>
 
     <naming>

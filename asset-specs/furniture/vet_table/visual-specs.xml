@@ -1,64 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<asset-spec>
+<asset-spec extends="abstract/materials/metal@1.0" version="2.0.0">
     <meta>
         <entity-type>furniture</entity-type>
         <entity-name>vet_table</entity-name>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
+        <canvas width="192" height="144" displayScale="1.0"/>
         <location>vet_clinic</location>
         <description>
             Ветеринарный стол осмотра — для квестов save_lada, duke_arrives.
-            Визуально — стальной стол с лампой.
-            Не является регулярным действием, используется в квестах.
+            Canvas ×4: 48×36 → 192×144.
         </description>
     </meta>
 
+    <color-palette>
+        <color name="$table_main" value="#B0B0B0"/>
+        <color name="$table_top" value="#C0C0C0"/>
+        <color name="$legs" value="#909090"/>
+        <color name="$base" value="#808080"/>
+        <color name="$cushion" value="#E8E8F0"/>
+        <color name="$cushion_edge" value="#D8D8E0"/>
+        <color name="$lamp_pole" value="#606060"/>
+        <color name="$lamp_shade" value="#808080"/>
+        <color name="$lamp_bulb" value="#FFFACD"/>
+        <color name="$light_cone" value="#FFFDE8"/>
+    </color-palette>
+
     <layers>
-        <layer id="table" type="base" z-order="0" width="48" height="36">
+        <!-- z=0: Стол -->
+        <layer id="table" type="base" z-order="0" width="192" height="144">
             <pixel-data>
                 <!-- Столешница -->
-                <rect x="4" y="16" w="40" h="4" color="#B0B0B0"/>
-                <rect x="4" y="16" w="40" h="1" color="#C0C0C0"/>
+                <rect x="16" y="64" w="160" h="16" color="$table_main"/>
+                <rect x="16" y="64" w="160" h="4" color="$table_top"/>
                 <!-- Ножки -->
-                <rect x="8" y="20" w="3" h="16" color="#909090"/>
-                <rect x="37" y="20" w="3" h="16" color="#909090"/>
+                <rect x="32" y="80" w="12" h="64" color="$legs"/>
+                <rect x="148" y="80" w="12" h="64" color="$legs"/>
                 <!-- Основание -->
-                <rect x="4" y="34" w="40" h="2" color="#808080"/>
+                <rect x="16" y="136" w="160" h="8" color="$base"/>
+                <hline x="16" y="136" len="160" color="$table_main"/>
                 <!-- Подушка для питомца -->
-                <rect x="10" y="12" w="28" h="6" color="#E8E8F0"/>
-                <rect x="10" y="12" w="28" h="1" color="#D8D8E0"/>
+                <rect x="40" y="48" w="112" h="24" color="$cushion"/>
+                <rect x="40" y="48" w="112" h="4" color="$cushion_edge"/>
+                <!-- Стежки подушки -->
+                <hline x="56" y="56" len="80" color="#D0D0D8"/>
+                <hline x="56" y="64" len="80" color="#D0D0D8"/>
+                <vline x="80" y="48" len="24" color="#D0D0D8"/>
+                <vline x="112" y="48" len="24" color="#D0D0D8"/>
+                <!-- Полочка внизу -->
+                <rect x="40" y="112" w="112" h="4" color="#999999"/>
+                <!-- Инструменты на полочке -->
+                <rect x="56" y="108" w="8" h="4" color="#A0C0A0"/>
+                <rect x="72" y="108" w="12" h="4" color="#C0A0A0"/>
+                <rect x="100" y="108" w="6" h="4" color="#A0A0C0"/>
             </pixel-data>
         </layer>
 
-        <layer id="lamp" type="base" z-order="1" width="48" height="36">
+        <!-- z=1: Лампа -->
+        <layer id="lamp" type="base" z-order="1" width="192" height="144">
             <pixel-data>
-                <!-- Стойка лампы -->
-                <rect x="40" y="2" w="2" h="14" color="#606060"/>
+                <!-- Стойка -->
+                <rect x="160" y="8" w="8" h="56" color="$lamp_pole"/>
+                <!-- Шарнир -->
+                <rect x="156" y="8" w="4" h="4" color="$lamp_pole"/>
                 <!-- Плафон -->
-                <rect x="34" y="0" w="12" h="4" color="#808080"/>
-                <rect x="36" y="3" w="8" h="2" color="#FFFACD"/>
+                <rect x="136" y="0" w="48" h="16" color="$lamp_shade"/>
+                <rect x="140" y="12" w="40" h="8" color="$lamp_bulb"/>
+                <!-- Текстура плафона -->
+                <hline x="136" y="4" len="48" color="#909090"/>
+                <hline x="136" y="8" len="48" color="#707070"/>
             </pixel-data>
         </layer>
 
-        <layer id="light_cone" type="animated-overlay" z-order="2" width="48" height="36"
+        <!-- z=2: Конус света -->
+        <layer id="light_cone" type="animated-overlay" z-order="2" width="192" height="144"
                condition="state:examining">
             <pixel-data>
-                <rect x="14" y="6" w="20" h="10" color="#FFFDE880"/>
+                <rect x="56" y="24" w="80" h="40" color="$light_cone"/>
+                <!-- Градиент к краям -->
+                <rect x="56" y="24" w="8" h="40" color="#FFFDE0"/>
+                <rect x="128" y="24" w="8" h="40" color="#FFFDE0"/>
+                <!-- Яркий центр -->
+                <rect x="80" y="32" w="32" h="24" color="#FFFFF0"/>
             </pixel-data>
         </layer>
     </layers>
 
     <animations>
-        <animation name="idle" frames="1" fps="1" loop="false"
-                   frame-width="48" frame-height="36">
+        <animation name="idle" frames="2" fps="1" loop="true"
+                   frame-width="192" frame-height="144">
             <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets=""/>
         </animation>
 
-        <animation name="examining" frames="2" fps="1" loop="true"
-                   frame-width="48" frame-height="36"
+        <animation name="examining" frames="8" fps="1" loop="true"
+                   frame-width="192" frame-height="144"
                    condition="state:examining">
-            <description>Лампа включена, лёгкое мерцание конуса света</description>
             <frame index="0" layer-offsets="light_cone:0,0"/>
-            <frame index="1" layer-offsets="light_cone:0,1"/>
+            <frame index="1" layer-offsets="light_cone:0,0"/>
+            <frame index="2" layer-offsets="light_cone:0,2"/>
+            <frame index="3" layer-offsets="light_cone:0,0"/>
+            <frame index="4" layer-offsets="light_cone:0,0"/>
+            <frame index="5" layer-offsets="light_cone:0,-2"/>
+            <frame index="6" layer-offsets="light_cone:0,0"/>
+            <frame index="7" layer-offsets="light_cone:0,0"/>
         </animation>
     </animations>
 

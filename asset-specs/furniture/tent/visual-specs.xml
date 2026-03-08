@@ -1,118 +1,148 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<asset-spec>
+<asset-spec extends="abstract/materials/fabric@1.0" version="2.0.0">
     <meta>
         <entity-type>furniture</entity-type>
         <entity-name>tent</entity-name>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
+        <canvas width="192" height="144" displayScale="1.0"/>
         <location>summer_camp</location>
         <description>
             Палатка на summer_camp. Место ночёвки.
-            Действие «Спать в палатке» восстанавливает энергию.
+            Canvas ×4: 48×36 → 192×144.
         </description>
     </meta>
 
+    <color-palette>
+        <color name="$stake" value="#888888"/>
+        <color name="$stake_shadow" value="#777777"/>
+        <color name="$rope" value="#C8B896"/>
+        <color name="$base_edge" value="#446644"/>
+        <color name="$floor" value="#556655"/>
+        <color name="$canvas_dark" value="#4A7A4A"/>
+        <color name="$canvas_mid" value="#5A8A5A"/>
+        <color name="$canvas_main" value="#6A9A6A"/>
+        <color name="$canvas_light" value="#7AAA7A"/>
+        <color name="$canvas_top" value="#8ABA8A"/>
+        <color name="$canvas_peak" value="#9ACA9A"/>
+        <color name="$canvas_seam" value="#3A6A3A"/>
+        <color name="$canvas_highlight" value="#6AAA6A"/>
+        <color name="$door_inside" value="#2A1A0A"/>
+        <color name="$flag_red" value="#DD4444"/>
+        <color name="$flag_shadow" value="#CC3333"/>
+        <color name="$pole" value="#888888"/>
+    </color-palette>
+
     <layers>
         <!-- z=0: колышки и растяжки -->
-        <layer id="stakes" type="base" z-order="0" width="48" height="36">
+        <layer id="stakes" type="base" z-order="0" width="192" height="144">
             <pixel-data>
-                <!-- левый колышек -->
-                <pixel x="2" y="30" color="#888888"/>
-                <pixel x="2" y="31" color="#777777"/>
-                <!-- правый колышек -->
-                <pixel x="45" y="30" color="#888888"/>
-                <pixel x="45" y="31" color="#777777"/>
-                <!-- растяжки (верёвки) -->
-                <pixel x="3" y="29" color="#C8B896"/>
-                <pixel x="4" y="28" color="#C8B896"/>
-                <pixel x="5" y="27" color="#C8B896"/>
-                <pixel x="44" y="29" color="#C8B896"/>
-                <pixel x="43" y="28" color="#C8B896"/>
-                <pixel x="42" y="27" color="#C8B896"/>
-                <!-- задние растяжки -->
-                <pixel x="10" y="32" color="#C8B896"/>
-                <pixel x="38" y="32" color="#C8B896"/>
+                <!-- Левый колышек -->
+                <rect x="8" y="120" w="4" h="8" color="$stake"/>
+                <rect x="8" y="124" w="4" h="4" color="$stake_shadow"/>
+                <!-- Правый колышек -->
+                <rect x="180" y="120" w="4" h="8" color="$stake"/>
+                <rect x="180" y="124" w="4" h="4" color="$stake_shadow"/>
+                <!-- Растяжки левые -->
+                <rect x="12" y="116" w="4" h="4" color="$rope"/>
+                <rect x="16" y="112" w="4" h="4" color="$rope"/>
+                <rect x="20" y="108" w="4" h="4" color="$rope"/>
+                <!-- Растяжки правые -->
+                <rect x="176" y="116" w="4" h="4" color="$rope"/>
+                <rect x="172" y="112" w="4" h="4" color="$rope"/>
+                <rect x="168" y="108" w="4" h="4" color="$rope"/>
+                <!-- Задние растяжки -->
+                <rect x="40" y="128" w="4" h="4" color="$rope"/>
+                <rect x="152" y="128" w="4" h="4" color="$rope"/>
             </pixel-data>
         </layer>
 
-        <!-- z=1: каркас/основание -->
-        <layer id="frame" type="base" z-order="1" width="48" height="36">
+        <!-- z=1: каркас -->
+        <layer id="frame" type="base" z-order="1" width="192" height="144">
             <pixel-data>
-                <!-- нижняя кромка палатки -->
-                <hline x="6" y="30" len="36" color="#446644"/>
-                <!-- пол (коврик) -->
-                <rect x="8" y="28" w="32" h="2" color="#556655"/>
+                <rect x="24" y="120" w="144" h="4" color="$base_edge"/>
+                <rect x="32" y="112" w="128" h="8" color="$floor"/>
             </pixel-data>
         </layer>
 
-        <!-- z=2: ткань палатки (треугольная форма) — анимируемый -->
-        <layer id="canvas" type="animated" z-order="2" width="48" height="36">
+        <!-- z=2: ткань палатки -->
+        <layer id="canvas" type="animated" z-order="2" width="192" height="144">
             <pixel-data>
-                <!-- треугольный силуэт палатки -->
-                <!-- основание -->
-                <rect x="6" y="26" w="36" h="4" color="#4A7A4A"/>
-                <!-- средняя часть -->
-                <rect x="8" y="22" w="32" h="4" color="#5A8A5A"/>
-                <!-- верхняя часть -->
-                <rect x="12" y="18" w="24" h="4" color="#6A9A6A"/>
-                <!-- сужение к верху -->
-                <rect x="16" y="14" w="16" h="4" color="#7AAA7A"/>
-                <!-- конёк -->
-                <rect x="20" y="10" w="8" h="4" color="#8ABA8A"/>
-                <rect x="22" y="8" w="4" h="2" color="#9ACA9A"/>
-                <!-- шов по центру -->
-                <vline x="24" y="8" len="22" color="#3A6A3A"/>
-                <!-- тень левой стороны -->
-                <vline x="6" y="26" len="4" color="#3A6A3A"/>
-                <vline x="8" y="22" len="4" color="#3A6A3A"/>
-                <!-- блик правой стороны -->
-                <vline x="41" y="26" len="4" color="#6AAA6A"/>
+                <!-- Основание -->
+                <rect x="24" y="104" w="144" h="16" color="$canvas_dark"/>
+                <!-- Средняя часть -->
+                <rect x="32" y="88" w="128" h="16" color="$canvas_mid"/>
+                <!-- Верхняя часть -->
+                <rect x="48" y="72" w="96" h="16" color="$canvas_main"/>
+                <!-- Сужение -->
+                <rect x="64" y="56" w="64" h="16" color="$canvas_light"/>
+                <!-- Конёк -->
+                <rect x="80" y="40" w="32" h="16" color="$canvas_top"/>
+                <rect x="88" y="32" w="16" h="8" color="$canvas_peak"/>
+                <!-- Центральный шов -->
+                <rect x="96" y="32" w="2" h="88" color="$canvas_seam"/>
+                <!-- Тень левой стороны -->
+                <rect x="24" y="104" w="4" h="16" color="$canvas_seam"/>
+                <rect x="32" y="88" w="4" h="16" color="$canvas_seam"/>
+                <!-- Блик правой стороны -->
+                <rect x="164" y="104" w="4" h="16" color="$canvas_highlight"/>
+                <!-- Текстура стежков -->
+                <hline x="40" y="96" len="112" color="$canvas_seam"/>
+                <hline x="56" y="80" len="80" color="$canvas_seam"/>
+                <hline x="72" y="64" len="48" color="$canvas_seam"/>
             </pixel-data>
         </layer>
 
-        <!-- z=3: полог входа — анимируемый overlay -->
-        <layer id="door-flap" type="animated" z-order="3" width="48" height="36">
+        <!-- z=3: полог входа -->
+        <layer id="door-flap" type="animated" z-order="3" width="192" height="144">
             <pixel-data>
-                <!-- полог — откидная часть -->
-                <rect x="16" y="18" w="8" h="12" color="#5A8A5A"/>
-                <rect x="17" y="19" w="6" h="10" color="#4A7A4A"/>
-                <!-- прорезь -->
-                <vline x="20" y="20" len="8" color="#2A1A0A"/>
-                <!-- завязка -->
-                <pixel x="23" y="18" color="#C8B896"/>
-                <pixel x="24" y="18" color="#C8B896"/>
+                <rect x="64" y="72" w="32" h="48" color="$canvas_mid"/>
+                <rect x="68" y="76" w="24" h="40" color="$canvas_dark"/>
+                <!-- Прорезь -->
+                <rect x="80" y="80" w="2" h="32" color="$door_inside"/>
+                <!-- Завязки -->
+                <rect x="92" y="72" w="4" h="4" color="$rope"/>
+                <rect x="96" y="72" w="4" h="4" color="$rope"/>
             </pixel-data>
         </layer>
 
-        <!-- z=4: флажок на верхушке -->
-        <layer id="flag" type="base" z-order="4" width="48" height="36">
+        <!-- z=4: флажок -->
+        <layer id="flag" type="base" z-order="4" width="192" height="144">
             <pixel-data>
-                <!-- шест -->
-                <vline x="24" y="4" len="4" color="#888888"/>
-                <!-- флажок -->
-                <rect x="25" y="4" w="4" h="3" color="#DD4444"/>
-                <pixel x="28" y="5" color="#CC3333"/>
+                <rect x="96" y="16" w="2" h="16" color="$pole"/>
+                <rect x="100" y="16" w="16" h="12" color="$flag_red"/>
+                <rect x="112" y="20" w="4" h="4" color="$flag_shadow"/>
             </pixel-data>
         </layer>
     </layers>
 
     <animations>
-        <!-- idle: ткань слегка колышется от ветра -->
-        <animation name="idle" frames="4" fps="2" loop="true"
-                   frame-width="48" frame-height="36">
+        <animation name="idle" frames="10" fps="2" loop="true"
+                   frame-width="192" frame-height="144">
             <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="canvas:0,0; door-flap:-1,0"/>
-            <frame index="2" layer-offsets=""/>
-            <frame index="3" layer-offsets="canvas:0,0; door-flap:1,0"/>
+            <frame index="1" layer-offsets="canvas:0,0; door-flap:-2,0; flag:0,0"/>
+            <frame index="2" layer-offsets="canvas:-2,0; door-flap:-4,0; flag:-2,0"/>
+            <frame index="3" layer-offsets="canvas:-2,0; door-flap:-2,0; flag:-2,0"/>
+            <frame index="4" layer-offsets="canvas:0,0; door-flap:0,0; flag:0,0"/>
+            <frame index="5" layer-offsets=""/>
+            <frame index="6" layer-offsets="canvas:0,0; door-flap:2,0; flag:2,0"/>
+            <frame index="7" layer-offsets="canvas:2,0; door-flap:4,0; flag:2,0"/>
+            <frame index="8" layer-offsets="canvas:2,0; door-flap:2,0; flag:2,0"/>
+            <frame index="9" layer-offsets="canvas:0,0; door-flap:0,0; flag:0,0"/>
         </animation>
 
-        <!-- wind: сильный ветер — ткань мотает заметнее -->
-        <animation name="wind" frames="4" fps="4" loop="true"
-                   frame-width="48" frame-height="36"
+        <animation name="wind" frames="10" fps="4" loop="true"
+                   frame-width="192" frame-height="144"
                    condition="weather:windy">
-            <frame index="0" layer-offsets="canvas:-1,0; door-flap:-2,0"/>
-            <frame index="1" layer-offsets="canvas:1,0; door-flap:0,0"/>
-            <frame index="2" layer-offsets="canvas:-1,0; door-flap:2,0"/>
-            <frame index="3" layer-offsets="canvas:0,0; door-flap:-1,0"/>
+            <frame index="0" layer-offsets="canvas:-4,0; door-flap:-8,0; flag:-4,0"/>
+            <frame index="1" layer-offsets="canvas:4,0; door-flap:0,0; flag:4,0"/>
+            <frame index="2" layer-offsets="canvas:-4,0; door-flap:8,0; flag:-4,0"/>
+            <frame index="3" layer-offsets="canvas:0,0; door-flap:-4,0; flag:0,0"/>
+            <frame index="4" layer-offsets="canvas:-4,0; door-flap:-8,0; flag:-4,0"/>
+            <frame index="5" layer-offsets="canvas:4,0; door-flap:4,0; flag:4,0"/>
+            <frame index="6" layer-offsets="canvas:-2,0; door-flap:0,0; flag:-2,0"/>
+            <frame index="7" layer-offsets="canvas:2,0; door-flap:-4,0; flag:2,0"/>
+            <frame index="8" layer-offsets="canvas:-4,0; door-flap:8,0; flag:-4,0"/>
+            <frame index="9" layer-offsets="canvas:0,0; door-flap:0,0; flag:0,0"/>
         </animation>
     </animations>
 

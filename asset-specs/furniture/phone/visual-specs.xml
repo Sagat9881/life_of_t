@@ -1,109 +1,122 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<asset-spec>
+<asset-spec version="2.0.0">
     <meta>
         <entity-type>furniture</entity-type>
         <entity-name>phone</entity-name>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
+        <canvas width="64" height="80" displayScale="1.0"/>
         <location>home_room</location>
         <description>
             Смартфон Тани — используется для действий «Позвонить»,
             «Листать соцсети», получения уведомлений о событиях.
-            Лежит на столе/тумбочке. В руке обрабатывается
-            анимацией персонажа (tanya/phone-talk).
+            Canvas ×4: 16×20 → 64×80.
         </description>
     </meta>
 
+    <color-palette>
+        <color name="$body_main" value="#2A2A2A"/>
+        <color name="$body_edge" value="#3A3A3A"/>
+        <color name="$body_highlight" value="#404040"/>
+        <color name="$screen_off" value="#1A1A1A"/>
+        <color name="$screen_glow" value="#FF6B9D"/>
+        <color name="$screen_bright" value="#FFB6C1"/>
+        <color name="$screen_dim" value="#3A2030"/>
+        <color name="$camera" value="#1A1A3A"/>
+        <color name="$notif_red" value="#E74C3C"/>
+    </color-palette>
+
     <layers>
-        <!-- Корпус телефона (z=0) -->
-        <layer id="body" type="base" z-order="0" width="16" height="20">
+        <!-- z=0: Корпус -->
+        <layer id="body" type="base" z-order="0" width="64" height="80">
             <pixel-data>
-                <!-- Корпус -->
-                <rect x="4" y="3" w="8" h="14" color="#2A2A2A"/>
+                <rect x="16" y="12" w="32" h="56" color="$body_main"/>
                 <!-- Скругления углов -->
-                <pixel x="4" y="3" color="#3A3A3A"/>
-                <pixel x="11" y="3" color="#3A3A3A"/>
-                <pixel x="4" y="16" color="#3A3A3A"/>
-                <pixel x="11" y="16" color="#3A3A3A"/>
+                <rect x="16" y="12" w="4" h="4" color="$body_edge"/>
+                <rect x="44" y="12" w="4" h="4" color="$body_edge"/>
+                <rect x="16" y="64" w="4" h="4" color="$body_edge"/>
+                <rect x="44" y="64" w="4" h="4" color="$body_edge"/>
                 <!-- Боковая грань (блик) -->
-                <vline x="12" y="4" len="12" color="#404040"/>
+                <rect x="48" y="16" w="2" h="48" color="$body_highlight"/>
                 <!-- Фронтальная камера -->
-                <pixel x="8" y="4" color="#1A1A3A"/>
+                <rect x="32" y="16" w="4" h="4" color="$camera"/>
+                <!-- Кнопка питания -->
+                <rect x="48" y="28" w="2" h="8" color="$body_highlight"/>
+                <!-- Динамик -->
+                <rect x="28" y="14" w="8" h="2" color="#222222"/>
+                <!-- Текстура задней крышки -->
+                <hline x="18" y="32" len="28" color="#2E2E2E"/>
+                <hline x="18" y="48" len="28" color="#2E2E2E"/>
             </pixel-data>
         </layer>
 
-        <!-- Экран (z=1, анимируемый) -->
-        <layer id="screen" type="animated" z-order="1" width="16" height="20">
+        <!-- z=1: Экран (анимируемый) -->
+        <layer id="screen" type="animated" z-order="1" width="64" height="80">
             <pixel-data>
-                <!-- Экран выключен (базовое состояние) -->
-                <rect x="5" y="5" w="6" h="10" color="#1A1A1A"/>
+                <rect x="20" y="20" w="24" h="40" color="$screen_off"/>
+                <!-- Отражение на выключенном экране -->
+                <rect x="22" y="22" w="4" h="8" color="#222222"/>
             </pixel-data>
         </layer>
 
-        <!-- Notification dot (z=2, overlay по условию) -->
-        <layer id="notification-dot" type="overlay" z-order="2" width="16" height="20"
+        <!-- z=2: Notification dot -->
+        <layer id="notification-dot" type="overlay" z-order="2" width="64" height="80"
                condition="state:has-notification">
             <pixel-data>
-                <pixel x="10" y="3" color="#E74C3C"/>
+                <rect x="40" y="12" w="6" h="6" color="$notif_red"/>
+                <!-- Блик на точке -->
+                <pixel x="41" y="13" color="#FF6B6B"/>
             </pixel-data>
         </layer>
     </layers>
 
     <animations>
-        <!-- Idle: телефон лежит, экран выключен -->
-        <animation name="idle" frames="1" fps="1" loop="false"
-                   frame-width="16" frame-height="20">
-            <frame index="0" layer-offsets=""/>
-        </animation>
-
-        <!-- Incoming: экран мигает розовым + вибрация корпуса -->
-        <animation name="incoming" frames="6" fps="8" loop="true"
-                   frame-width="16" frame-height="20"
-                   condition="state:incoming">
-            <description>
-                Кадр 0: экран вспыхивает розовым (#FF6B9D), корпус сдвиг +1px X
-                Кадр 1: экран яркий (#FFB6C1), корпус сдвиг -1px X
-                Кадр 2: экран вспыхивает (#FF6B9D), корпус сдвиг +1px X
-                Кадр 3: экран затухает (#FF8AAE), корпус сдвиг -1px X
-                Кадр 4: экран тусклый (#3A2030), корпус нейтрально
-                Кадр 5: экран выключен, пауза перед циклом
-            </description>
-            <frame index="0" layer-offsets="body:1,0; screen:1,0"/>
-            <frame index="1" layer-offsets="body:-1,0; screen:-1,0"/>
-            <frame index="2" layer-offsets="body:1,0; screen:1,0"/>
-            <frame index="3" layer-offsets="body:-1,0; screen:-1,0"/>
-            <frame index="4" layer-offsets=""/>
-            <frame index="5" layer-offsets=""/>
-        </animation>
-
-        <!-- Notification: однократная вспышка экрана -->
-        <animation name="notification-pulse" frames="4" fps="3" loop="true"
-                   frame-width="16" frame-height="20"
-                   condition="state:has-notification">
-            <description>
-                Кадр 0: экран подсвечивается (#FF6B9D)
-                Кадр 1: экран ярко (#FFB6C1)
-                Кадр 2: экран затухает (#3A2030)
-                Кадр 3: экран выключен (пауза)
-            </description>
+        <animation name="idle" frames="2" fps="1" loop="true"
+                   frame-width="64" frame-height="80">
             <frame index="0" layer-offsets=""/>
             <frame index="1" layer-offsets=""/>
-            <frame index="2" layer-offsets=""/>
-            <frame index="3" layer-offsets=""/>
+        </animation>
+
+        <animation name="incoming" frames="10" fps="8" loop="true"
+                   frame-width="64" frame-height="80"
+                   condition="state:incoming">
+            <frame index="0" layer-offsets="body:2,0; screen:2,0"/>
+            <frame index="1" layer-offsets="body:-2,0; screen:-2,0"/>
+            <frame index="2" layer-offsets="body:2,0; screen:2,0"/>
+            <frame index="3" layer-offsets="body:-2,0; screen:-2,0"/>
+            <frame index="4" layer-offsets="body:1,0; screen:1,0"/>
+            <frame index="5" layer-offsets="body:-1,0; screen:-1,0"/>
+            <frame index="6" layer-offsets=""/>
+            <frame index="7" layer-offsets=""/>
+            <frame index="8" layer-offsets=""/>
+            <frame index="9" layer-offsets=""/>
+        </animation>
+
+        <animation name="notification-pulse" frames="8" fps="3" loop="true"
+                   frame-width="64" frame-height="80"
+                   condition="state:has-notification">
+            <frame index="0" layer-offsets="notification-dot:0,0"/>
+            <frame index="1" layer-offsets="notification-dot:0,0"/>
+            <frame index="2" layer-offsets="notification-dot:0,0"/>
+            <frame index="3" layer-offsets="notification-dot:0,-1"/>
+            <frame index="4" layer-offsets="notification-dot:0,0"/>
+            <frame index="5" layer-offsets="notification-dot:0,0"/>
+            <frame index="6" layer-offsets=""/>
+            <frame index="7" layer-offsets=""/>
         </animation>
     </animations>
 
     <states>
         <state name="idle" description="Телефон лежит, экран выключен"/>
         <state name="incoming" description="Входящий звонок — экран мигает, корпус вибрирует"/>
-        <state name="has-notification" description="Есть непрочитанное уведомление — красная точка + пульс экрана"/>
-        <state name="in-hand" description="Телефон в руке Тани — объект скрыт, используется анимация персонажа phone-talk"/>
+        <state name="has-notification" description="Непрочитанное уведомление — красная точка + пульс"/>
+        <state name="in-hand" description="Телефон в руке Тани — объект скрыт"/>
     </states>
 
     <interaction>
-        <action code="PHONE_CALL" description="Позвонить — переход idle → in-hand (объект скрыт, Таня играет phone-talk)"/>
-        <action code="BROWSE_SOCIAL" description="Листать соцсети — переход idle → in-hand"/>
-        <action code="ANSWER_CALL" description="Ответить на входящий — переход incoming → in-hand"/>
-        <action code="DISMISS" description="Отклонить — переход incoming → idle"/>
+        <action code="PHONE_CALL" description="Позвонить — idle → in-hand"/>
+        <action code="BROWSE_SOCIAL" description="Листать соцсети — idle → in-hand"/>
+        <action code="ANSWER_CALL" description="Ответить — incoming → in-hand"/>
+        <action code="DISMISS" description="Отклонить — incoming → idle"/>
     </interaction>
 
     <naming>
