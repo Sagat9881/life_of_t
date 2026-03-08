@@ -1,24 +1,10 @@
 /**
  * GameScreen — main pixel-art game layout.
  *
- * Replaces the old mobile-first AppLayout+BottomNav with a desktop
- * pixel-art layout matching the original vanilla-JS demo:
- *   ┌─────────────────────────────────────────────┐
- *   │ HEADER: "LIFE OF T" logo   │  День X │ HH:00│
- *   ├───────────────────────────┬─────────────────┤
- *   │                           │  ТАНЯ — СТАТЫ   │
- *   │      PIXEL SCENE          │  Энергия ████   │
- *   │   (LocationRenderer)      │  Здоровье ███   │
- *   │                           │  ...            │
- *   │                           ├─────────────────┤
- *   │                           │ АКТИВНЫЕ КВЕСТЫ │
- *   │                           ├─────────────────┤
- *   │                           │ ОТНОШЕНИЯ       │
- *   ├───────────────────────────┴─────────────────┤
- *   │ Кликни на персонажа для взаимодействия      │
- *   └─────────────────────────────────────────────┘
+ * Maps backend NPC behavior/activity to sprite animation names
+ * and passes them to LocationRenderer.
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { LocationRenderer } from './LocationRenderer';
 import { Sidebar } from './Sidebar';
@@ -31,6 +17,41 @@ const deriveTimeSlot = (hour: number): string => {
   if (hour < 17) return 'DAY';
   if (hour < 21) return 'EVENING';
   return 'NIGHT';
+};
+
+/**
+ * Maps backend behavior/activity codes to sprite animation names.
+ * Backend sends things like SLEEPING, WORKING, EXERCISING, WALKING, IDLE.
+ * Sprite atlases have: idle, walk, sleep, work, exercise.
+ */
+const BEHAVIOR_TO_ANIMATION: Record<string, string> = {
+  IDLE: 'idle',
+  SLEEPING: 'sleep',
+  RESTING: 'sleep',
+  WORKING: 'work',
+  WORKING_ON_PROJECT: 'work',
+  STUDYING: 'work',
+  COOKING: 'work',
+  WALKING: 'walk',
+  WALKING_DOG: 'walk',
+  EXERCISING: 'exercise',
+  EXERCISE: 'exercise',
+  EATING: 'idle',
+  SOCIALIZING: 'idle',
+  TALKING: 'idle',
+  BEAUTY_ROUTINE: 'idle',
+};
+
+const mapBehaviorToAnimation = (behavior?: string, activity?: string): string => {
+  if (activity) {
+    const mapped = BEHAVIOR_TO_ANIMATION[activity.toUpperCase()];
+    if (mapped) return mapped;
+  }
+  if (behavior) {
+    const mapped = BEHAVIOR_TO_ANIMATION[behavior.toUpperCase()];
+    if (mapped) return mapped;
+  }
+  return 'idle';
 };
 
 export function GameScreen() {
@@ -51,6 +72,33 @@ export function GameScreen() {
   const locationConfig = getLocationConfig(locationId);
   const timeOfDay = rawTimeSlot.toLowerCase();
   const gameTime = time ?? { day: 1, hour: 7, timeSlot: 'MORNING' as const };
+
+  // Map backend NPC state to sprite animations
+  const characterAnimations = useMemo(() => {
+    const anims: Record<string, string> = {};
+
+    // Player character (tanya)
+    if (player) {
+      const playerActivity = (player as Record<string, unknown>).currentActivity as string | undefined;
+      const playerBehavior = (player as Record<string, unknown>).currentBehavior as string | undefined;
+      anims['tanya'] = mapBehaviorToAnimation(playerBehavior, playerActivity);
+    }
+
+    // NPCs
+    if (npcs && Array.isArray(npcs)) {
+      for (const npc of npcs) {
+        const n = npc as Record<string, unknown>;
+        const name = (n.name as string ?? n.entityName as string ?? '').toLowerCase();
+        const behavior = n.currentBehavior as string | undefined;
+        const activity = n.currentActivity as string | undefined;
+        if (name) {
+          anims[name] = mapBehaviorToAnimation(behavior, activity);
+        }
+      }
+    }
+
+    return anims;
+  }, [player, npcs]);
 
   const handleObjectClick = (objectId: string, actionCode: string) => {
     const furniture = locationConfig.furniture.find((f) => f.id === objectId);
@@ -113,6 +161,7 @@ export function GameScreen() {
             config={locationConfig}
             selectedObjectId={selectedObjectId}
             onObjectClick={handleObjectClick}
+            characterAnimations={characterAnimations}
             timeOfDay={timeOfDay}
           />
         </div>

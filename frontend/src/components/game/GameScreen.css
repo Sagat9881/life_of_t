@@ -1,6 +1,5 @@
 /* ═══════════════════════════════════════════
    GameScreen — pixel-art desktop layout
-   Matches the original vanilla-JS demo style.
    ═══════════════════════════════════════════ */
 
 /* ── Root Container ── */
@@ -62,15 +61,12 @@
   display: grid;
   grid-template-columns: 1fr 320px;
   min-height: 0;
+  gap: 0;
 }
 
-/* ── Scene ── */
+/* ── Scene — fills all available space, no gap ── */
 .gs-scene {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
   min-height: 0;
   overflow: hidden;
 }
@@ -174,7 +170,7 @@
   cursor: not-allowed;
 }
 
-/* ── Responsive (smaller screens) ── */
+/* ── Responsive ── */
 @media (max-width: 900px) {
   .gs-main {
     grid-template-columns: 1fr 260px;
