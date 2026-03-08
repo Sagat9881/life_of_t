@@ -77,73 +77,94 @@
     </color-palette>
 
     <animations>
-        <!-- IDLE: 24 frames @ 12fps = 2s loop, breathing + subtle blink -->
-        <animation name="idle" frames="24" fps="12" loop="true"
+        <!--
+            IDLE: 16 frames @ 6fps = 2.67s loop
+            Breathing cycle with visible blink.
+
+            BODY COHERENCE RULE: pelvis, torso, neck, head, face, hair_back,
+            hair_front, upper_arm_right, upper_arm_left ALWAYS move together.
+            This prevents any gaps between body parts.
+
+            Breathing: 2px amplitude (frames 0-7 inhale up, 8-15 exhale down)
+            Blink: 3-frame sequence at frames 5-6 and 12-13 (face shifts down 2px)
+        -->
+        <animation name="idle" frames="16" fps="6" loop="true"
                    frame-width="128" frame-height="192">
-            <!-- Breathing cycle: frames 0-11 inhale, 12-23 exhale -->
-            <!-- Blink: frames 8, 16, 20 (face shifts down 1px) -->
-            <!-- Pelvis/torso move together to prevent separation -->
+            <!-- Inhale phase: upper body rises 1px then 2px -->
             <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1"/>
-            <frame index="2" layer-offsets=""/>
-            <frame index="3" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1"/>
-            <frame index="4" layer-offsets=""/>
-            <frame index="5" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1"/>
-            <frame index="6" layer-offsets=""/>
-            <frame index="7" layer-offsets="pelvis:0,-1; torso:0,-1"/>
-            <frame index="8" layer-offsets="pelvis:0,-1; torso:0,-1; face:0,1"/>
-            <frame index="9" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1"/>
-            <frame index="10" layer-offsets="pelvis:0,-1; torso:0,-1"/>
-            <frame index="11" layer-offsets=""/>
-            <frame index="12" layer-offsets=""/>
-            <frame index="13" layer-offsets="pelvis:0,1; torso:0,1; neck:0,1; upper_arm_right:0,1; upper_arm_left:0,1"/>
+            <frame index="1" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1; accessory:0,-1"/>
+            <frame index="2" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; accessory:0,-2"/>
+            <frame index="3" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; accessory:0,-2"/>
+            <frame index="4" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1; accessory:0,-1"/>
+            <!-- Blink 1: face drops 2px relative to head (eyes close) -->
+            <frame index="5" layer-offsets="face:0,2"/>
+            <frame index="6" layer-offsets="face:0,2"/>
+            <frame index="7" layer-offsets=""/>
+            <!-- Exhale phase: upper body drops 1px then 2px -->
+            <frame index="8" layer-offsets="pelvis:0,1; torso:0,1; neck:0,1; head:0,1; face:0,1; hair_back:0,1; hair_front:0,1; upper_arm_right:0,1; upper_arm_left:0,1; accessory:0,1"/>
+            <frame index="9" layer-offsets="pelvis:0,2; torso:0,2; neck:0,2; head:0,2; face:0,2; hair_back:0,2; hair_front:0,2; upper_arm_right:0,2; upper_arm_left:0,2; accessory:0,2"/>
+            <frame index="10" layer-offsets="pelvis:0,2; torso:0,2; neck:0,2; head:0,2; face:0,2; hair_back:0,2; hair_front:0,2; upper_arm_right:0,2; upper_arm_left:0,2; accessory:0,2"/>
+            <frame index="11" layer-offsets="pelvis:0,1; torso:0,1; neck:0,1; head:0,1; face:0,1; hair_back:0,1; hair_front:0,1; upper_arm_right:0,1; upper_arm_left:0,1; accessory:0,1"/>
+            <!-- Blink 2: face drops 2px (eyes close) -->
+            <frame index="12" layer-offsets="face:0,2"/>
+            <frame index="13" layer-offsets="face:0,2"/>
             <frame index="14" layer-offsets=""/>
-            <frame index="15" layer-offsets="pelvis:0,1; torso:0,1"/>
-            <frame index="16" layer-offsets="pelvis:0,1; torso:0,1; face:0,1"/>
-            <frame index="17" layer-offsets="pelvis:0,1; torso:0,1; neck:0,1; upper_arm_right:0,1; upper_arm_left:0,1"/>
-            <frame index="18" layer-offsets=""/>
-            <frame index="19" layer-offsets="pelvis:0,1; torso:0,1"/>
-            <frame index="20" layer-offsets="pelvis:0,1; torso:0,1; face:0,1"/>
-            <frame index="21" layer-offsets="pelvis:0,1; torso:0,1; neck:0,1; head:0,1; upper_arm_right:0,1; upper_arm_left:0,1"/>
-            <frame index="22" layer-offsets=""/>
-            <frame index="23" layer-offsets=""/>
+            <frame index="15" layer-offsets=""/>
         </animation>
 
-        <!-- WALK: 8 frames @ 8fps = 1s loop -->
+        <!--
+            WALK: 8 frames @ 8fps = 1s loop
+            Legs alternate stepping, upper body bobs slightly.
+            Arms swing opposite to legs for natural gait.
+        -->
         <animation name="walk" frames="8" fps="8" loop="true"
                    frame-width="128" frame-height="192">
+            <!-- Contact pose: right foot forward -->
             <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="foot_right:0,-4; shin_right:0,-2; thigh_right:0,-1; pelvis:0,-1; torso:0,-1; neck:0,-1"/>
-            <frame index="2" layer-offsets="foot_right:0,-2; shin_right:0,-1"/>
-            <frame index="3" layer-offsets="foot_left:0,-2; shin_left:0,-1; neck:0,-1"/>
+            <!-- Right leg lifts, body rises, left arm swings forward -->
+            <frame index="1" layer-offsets="foot_right:0,-4; shin_right:0,-2; thigh_right:0,-1; pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_left:0,-1; forearm_left:0,-2; upper_arm_right:0,1; accessory:0,-1"/>
+            <!-- Right leg passes -->
+            <frame index="2" layer-offsets="foot_right:0,-2; shin_right:0,-1; upper_arm_left:0,-1; upper_arm_right:0,1"/>
+            <!-- Right foot lands, head nods -->
+            <frame index="3" layer-offsets="neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; accessory:0,-1"/>
+            <!-- Contact pose: left foot forward -->
             <frame index="4" layer-offsets=""/>
-            <frame index="5" layer-offsets="foot_left:0,-4; shin_left:0,-2; thigh_left:0,-1; pelvis:0,-1; torso:0,-1; neck:0,-1"/>
-            <frame index="6" layer-offsets="foot_left:0,-2; shin_left:0,-1"/>
-            <frame index="7" layer-offsets="foot_right:0,-2; shin_right:0,-1; neck:0,-1"/>
+            <!-- Left leg lifts, body rises, right arm swings forward -->
+            <frame index="5" layer-offsets="foot_left:0,-4; shin_left:0,-2; thigh_left:0,-1; pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; forearm_right:0,-2; upper_arm_left:0,1; accessory:0,-1"/>
+            <!-- Left leg passes -->
+            <frame index="6" layer-offsets="foot_left:0,-2; shin_left:0,-1; upper_arm_right:0,-1; upper_arm_left:0,1"/>
+            <!-- Left foot lands, head nods -->
+            <frame index="7" layer-offsets="neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; accessory:0,-1"/>
         </animation>
 
-        <!-- SLEEP: 16 frames @ 4fps = 4s loop (slow breathing) -->
+        <!--
+            SLEEP: 16 frames @ 4fps = 4s loop (slow breathing)
+            Very gentle movement, all parts coherent.
+        -->
         <animation name="sleep" frames="16" fps="4" loop="true"
                    frame-width="128" frame-height="192">
             <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="torso:0,-1; pelvis:0,-1"/>
-            <frame index="2" layer-offsets="torso:0,-1; pelvis:0,-1"/>
-            <frame index="3" layer-offsets="torso:0,-2; pelvis:0,-1"/>
-            <frame index="4" layer-offsets="torso:0,-2; pelvis:0,-1"/>
-            <frame index="5" layer-offsets="torso:0,-2; pelvis:0,-1"/>
-            <frame index="6" layer-offsets="torso:0,-2; pelvis:0,-1"/>
-            <frame index="7" layer-offsets="torso:0,-1; pelvis:0,-1"/>
+            <frame index="1" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1; accessory:0,-1"/>
+            <frame index="2" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1; accessory:0,-1"/>
+            <frame index="3" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; accessory:0,-2"/>
+            <frame index="4" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; accessory:0,-2"/>
+            <frame index="5" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; accessory:0,-2"/>
+            <frame index="6" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; accessory:0,-2"/>
+            <frame index="7" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1; accessory:0,-1"/>
             <frame index="8" layer-offsets=""/>
             <frame index="9" layer-offsets=""/>
-            <frame index="10" layer-offsets="torso:0,1; pelvis:0,1"/>
-            <frame index="11" layer-offsets="torso:0,1; pelvis:0,1"/>
+            <frame index="10" layer-offsets="pelvis:0,1; torso:0,1; neck:0,1; head:0,1; face:0,1; hair_back:0,1; hair_front:0,1; upper_arm_right:0,1; upper_arm_left:0,1; accessory:0,1"/>
+            <frame index="11" layer-offsets="pelvis:0,1; torso:0,1; neck:0,1; head:0,1; face:0,1; hair_back:0,1; hair_front:0,1; upper_arm_right:0,1; upper_arm_left:0,1; accessory:0,1"/>
             <frame index="12" layer-offsets=""/>
             <frame index="13" layer-offsets=""/>
             <frame index="14" layer-offsets=""/>
             <frame index="15" layer-offsets=""/>
         </animation>
 
-        <!-- WORK: 12 frames @ 6fps = 2s loop (typing motion) -->
+        <!--
+            WORK: 12 frames @ 6fps = 2s loop (typing motion)
+            Hands alternate tapping, slight head nod.
+        -->
         <animation name="work" frames="12" fps="6" loop="true"
                    frame-width="128" frame-height="192">
             <frame index="0" layer-offsets=""/>
@@ -157,17 +178,21 @@
             <frame index="8" layer-offsets="forearm_left:0,-1; hand_left:0,-2"/>
             <frame index="9" layer-offsets="forearm_right:0,-1; hand_right:0,-2"/>
             <frame index="10" layer-offsets=""/>
-            <frame index="11" layer-offsets="neck:0,-1"/>
+            <!-- Head nod -->
+            <frame index="11" layer-offsets="neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; accessory:0,-1"/>
         </animation>
 
-        <!-- EXERCISE: 8 frames @ 10fps = 0.8s loop (jumping jacks) -->
+        <!--
+            EXERCISE: 8 frames @ 10fps = 0.8s loop (jumping jacks)
+            Full body moves coherently — no detachment.
+        -->
         <animation name="exercise" frames="8" fps="10" loop="true"
                    frame-width="128" frame-height="192">
             <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="upper_arm_left:0,-2; upper_arm_right:0,-2; thigh_left:-2,0; thigh_right:2,0; pelvis:0,-2; torso:0,-2"/>
-            <frame index="2" layer-offsets="upper_arm_left:0,-4; upper_arm_right:0,-4; thigh_left:-4,0; thigh_right:4,0; pelvis:0,-4; torso:0,-4"/>
-            <frame index="3" layer-offsets="upper_arm_left:0,-4; upper_arm_right:0,-4; thigh_left:-4,0; thigh_right:4,0; pelvis:0,-4; torso:0,-4"/>
-            <frame index="4" layer-offsets="upper_arm_left:0,-2; upper_arm_right:0,-2; thigh_left:-2,0; thigh_right:2,0; pelvis:0,-2; torso:0,-2"/>
+            <frame index="1" layer-offsets="upper_arm_left:0,-2; upper_arm_right:0,-2; forearm_left:0,-2; forearm_right:0,-2; thigh_left:-2,0; thigh_right:2,0; pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; accessory:0,-2"/>
+            <frame index="2" layer-offsets="upper_arm_left:0,-4; upper_arm_right:0,-4; forearm_left:0,-4; forearm_right:0,-4; hand_left:0,-4; hand_right:0,-4; thigh_left:-4,0; thigh_right:4,0; shin_left:-2,0; shin_right:2,0; pelvis:0,-4; torso:0,-4; neck:0,-4; head:0,-4; face:0,-4; hair_back:0,-4; hair_front:0,-4; accessory:0,-4"/>
+            <frame index="3" layer-offsets="upper_arm_left:0,-4; upper_arm_right:0,-4; forearm_left:0,-4; forearm_right:0,-4; hand_left:0,-4; hand_right:0,-4; thigh_left:-4,0; thigh_right:4,0; shin_left:-2,0; shin_right:2,0; pelvis:0,-4; torso:0,-4; neck:0,-4; head:0,-4; face:0,-4; hair_back:0,-4; hair_front:0,-4; accessory:0,-4"/>
+            <frame index="4" layer-offsets="upper_arm_left:0,-2; upper_arm_right:0,-2; forearm_left:0,-2; forearm_right:0,-2; thigh_left:-2,0; thigh_right:2,0; pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; accessory:0,-2"/>
             <frame index="5" layer-offsets=""/>
             <frame index="6" layer-offsets=""/>
             <frame index="7" layer-offsets=""/>
