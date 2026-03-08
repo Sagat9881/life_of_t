@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Life of T — Abstract Cat Visual Spec v1.0
+    Canvas: 128×96
+    10 layers: paws(z=0) hind_legs(z=1) front_legs(z=2) body(z=3) belly(z=4)
+               tail(z=5) neck(z=6) head(z=7) ears(z=8) face_details(z=9)
+    5 animations: idle(16), walk(16), sleep(8), play(16), eat(12)
+    Override colors for each cat via extends="abstract/entities/cat@1"
+-->
+<asset-spec abstract="true" version="1.0">
+    <meta>
+        <entity-type>abstract</entity-type>
+        <entity-name>cat</entity-name>
+        <spec-version>1.0</spec-version>
+        <canvas width="128" height="96"/>
+        <display-scale>1.5</display-scale>
+    </meta>
+
+    <color-palette>
+        <color id="fur_base" value="#D2691E" description="Primary fur color"/>
+        <color id="fur_shadow" value="#A0522D" description="Fur shadow"/>
+        <color id="fur_highlight" value="#E87722" description="Fur highlight"/>
+        <color id="belly_base" value="#F5CBA0" description="Belly/underbody"/>
+        <color id="belly_highlight" value="#FFF0D8" description="Belly center"/>
+        <color id="nose_color" value="#FF9999" description="Nose leather"/>
+        <color id="eye_color" value="#228B22" description="Eye iris"/>
+        <color id="eye_bright" value="#32CD32" description="Eye highlight"/>
+        <color id="paw_pad" value="#FFAABB" description="Toe bean color"/>
+        <color id="ear_inner" value="#FFB0C0" description="Inner ear pink"/>
+    </color-palette>
+
+    <layers>
+        <layer id="paws" type="base" z-order="0" width="128" height="96">
+            <pixel-data>
+                <!-- front left paw -->
+                <rect x="16" y="72" w="12" h="12" color="$fur_base"/>
+                <hline x="16" y="83" len="12" color="$fur_shadow"/>
+                <pixel x="20" y="76" color="$paw_pad"/>
+                <pixel x="16" y="80" color="$paw_pad"/>
+                <pixel x="24" y="80" color="$paw_pad"/>
+                <!-- front right paw -->
+                <rect x="36" y="72" w="12" h="12" color="$fur_base"/>
+                <hline x="36" y="83" len="12" color="$fur_shadow"/>
+                <pixel x="40" y="76" color="$paw_pad"/>
+                <pixel x="36" y="80" color="$paw_pad"/>
+                <pixel x="44" y="80" color="$paw_pad"/>
+                <!-- hind left paw -->
+                <rect x="64" y="72" w="16" h="12" color="$fur_base"/>
+                <hline x="64" y="83" len="16" color="$fur_shadow"/>
+                <pixel x="68" y="76" color="$paw_pad"/>
+                <pixel x="64" y="80" color="$paw_pad"/>
+                <pixel x="72" y="80" color="$paw_pad"/>
+                <!-- hind right paw -->
+                <rect x="88" y="72" w="16" h="12" color="$fur_base"/>
+                <hline x="88" y="83" len="16" color="$fur_shadow"/>
+                <pixel x="92" y="76" color="$paw_pad"/>
+                <pixel x="88" y="80" color="$paw_pad"/>
+                <pixel x="96" y="80" color="$paw_pad"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="hind_legs" type="base" z-order="1" width="128" height="96">
+            <pixel-data>
+                <rect x="60" y="48" w="20" h="32" color="$fur_base"/>
+                <rect x="64" y="48" w="8" h="32" color="$fur_highlight"/>
+                <rect x="60" y="48" w="4" h="32" color="$fur_shadow"/>
+                <rect x="88" y="48" w="20" h="32" color="$fur_base"/>
+                <rect x="92" y="48" w="8" h="32" color="$fur_highlight"/>
+                <rect x="104" y="48" w="4" h="32" color="$fur_shadow"/>
+                <hline x="60" y="56" len="20" color="$fur_shadow"/>
+                <hline x="88" y="56" len="20" color="$fur_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="front_legs" type="base" z-order="2" width="128" height="96">
+            <pixel-data>
+                <rect x="16" y="40" w="16" h="36" color="$fur_base"/>
+                <rect x="20" y="40" w="4" h="36" color="$fur_highlight"/>
+                <rect x="16" y="40" w="4" h="36" color="$fur_shadow"/>
+                <rect x="36" y="40" w="16" h="36" color="$fur_base"/>
+                <rect x="44" y="40" w="4" h="36" color="$fur_highlight"/>
+                <rect x="48" y="40" w="4" h="36" color="$fur_shadow"/>
+                <hline x="16" y="48" len="16" color="$fur_shadow"/>
+                <hline x="36" y="48" len="16" color="$fur_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="body" type="base" z-order="3" width="128" height="96">
+            <pixel-data>
+                <rect x="16" y="32" w="88" h="48" color="$fur_base"/>
+                <hline x="20" y="32" len="80" color="$fur_highlight"/>
+                <hline x="24" y="28" len="72" color="$fur_base"/>
+                <rect x="40" y="32" w="40" h="12" color="$fur_highlight"/>
+                <rect x="16" y="40" w="12" h="32" color="$fur_shadow"/>
+                <rect x="92" y="40" w="12" h="32" color="$fur_shadow"/>
+                <hline x="20" y="76" len="80" color="$fur_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="belly" type="overlay" z-order="4" width="128" height="96">
+            <pixel-data>
+                <rect x="32" y="52" w="56" h="28" color="$belly_base"/>
+                <rect x="44" y="56" w="32" h="20" color="$belly_highlight"/>
+                <rect x="40" y="40" w="32" h="20" color="$belly_base"/>
+                <rect x="48" y="40" w="16" h="16" color="$belly_highlight"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="tail" type="base" z-order="5" width="128" height="96">
+            <pixel-data>
+                <pixel x="100" y="52" color="$fur_base"/>
+                <pixel x="104" y="48" color="$fur_base"/>
+                <pixel x="108" y="44" color="$fur_base"/>
+                <pixel x="108" y="40" color="$fur_base"/>
+                <pixel x="112" y="36" color="$fur_base"/>
+                <pixel x="112" y="32" color="$fur_highlight"/>
+                <pixel x="112" y="28" color="$fur_highlight"/>
+                <pixel x="108" y="24" color="$fur_highlight"/>
+                <pixel x="104" y="16" color="$fur_highlight"/>
+                <pixel x="100" y="12" color="$fur_highlight"/>
+                <pixel x="104" y="12" color="$fur_highlight"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="neck" type="base" z-order="6" width="128" height="96">
+            <pixel-data>
+                <rect x="24" y="16" w="24" h="24" color="$fur_base"/>
+                <rect x="24" y="16" w="4" h="24" color="$fur_shadow"/>
+                <rect x="44" y="16" w="4" h="24" color="$fur_shadow"/>
+                <rect x="28" y="16" w="16" h="24" color="$fur_highlight"/>
+                <rect x="28" y="24" w="16" h="12" color="$belly_base"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="head" type="base" z-order="7" width="128" height="96">
+            <pixel-data>
+                <rect x="12" y="0" w="56" h="32" color="$fur_base"/>
+                <rect x="20" y="0" w="32" h="12" color="$fur_highlight"/>
+                <rect x="8" y="8" w="8" h="20" color="$fur_base"/>
+                <rect x="60" y="8" w="8" h="20" color="$fur_base"/>
+                <hline x="12" y="28" len="20" color="$fur_shadow"/>
+                <hline x="48" y="28" len="20" color="$fur_shadow"/>
+                <hline x="20" y="32" len="40" color="$fur_shadow"/>
+                <rect x="20" y="20" w="40" h="12" color="$fur_highlight"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="ears" type="base" z-order="8" width="128" height="96">
+            <pixel-data>
+                <pixel x="12" y="8" color="$fur_base"/>
+                <pixel x="12" y="4" color="$fur_base"/>
+                <pixel x="16" y="0" color="$fur_shadow"/>
+                <pixel x="16" y="4" color="$ear_inner"/>
+                <pixel x="20" y="8" color="$ear_inner"/>
+                <pixel x="56" y="8" color="$fur_base"/>
+                <pixel x="56" y="4" color="$fur_base"/>
+                <pixel x="52" y="0" color="$fur_shadow"/>
+                <pixel x="52" y="4" color="$ear_inner"/>
+                <pixel x="48" y="8" color="$ear_inner"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="face_details" type="overlay" z-order="9" width="128" height="96">
+            <pixel-data>
+                <!-- Eyes -->
+                <rect x="16" y="12" w="16" h="12" color="#FFFFFF"/>
+                <rect x="16" y="8" w="16" h="16" color="$eye_color"/>
+                <rect x="20" y="12" w="8" h="8" color="$eye_bright"/>
+                <pixel x="24" y="12" color="#080808"/>
+                <pixel x="24" y="16" color="#080808"/>
+                <hline x="16" y="8" len="16" color="#8B4513"/>
+                <rect x="44" y="12" w="16" h="12" color="#FFFFFF"/>
+                <rect x="44" y="8" w="16" h="16" color="$eye_color"/>
+                <rect x="48" y="12" w="8" h="8" color="$eye_bright"/>
+                <pixel x="52" y="12" color="#080808"/>
+                <pixel x="52" y="16" color="#080808"/>
+                <hline x="44" y="8" len="16" color="#8B4513"/>
+                <!-- Nose -->
+                <rect x="32" y="24" w="8" h="8" color="$nose_color"/>
+                <pixel x="32" y="28" color="#DD6666"/>
+                <!-- Whiskers -->
+                <hline x="0" y="20" len="16" color="#FFFFFF"/>
+                <hline x="0" y="24" len="12" color="#FFFFFF"/>
+                <hline x="0" y="28" len="16" color="#EEEEEE"/>
+                <hline x="52" y="20" len="16" color="#FFFFFF"/>
+                <hline x="56" y="24" len="12" color="#FFFFFF"/>
+                <hline x="52" y="28" len="16" color="#EEEEEE"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <animation name="idle" frames="16" fps="4" loop="true" frame-width="128" frame-height="96">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="belly:0,0; body:0,-1; neck:0,-1; head:0,-1; ears:0,-1; face_details:0,-1"/>
+            <frame index="2" layer-offsets=""/>
+            <frame index="3" layer-offsets="head:2,0; ears:2,0; face_details:2,0; neck:2,0"/>
+            <frame index="4" layer-offsets="head:2,0; ears:0,-2; face_details:2,0; neck:2,0"/>
+            <frame index="5" layer-offsets=""/>
+            <frame index="6" layer-offsets="tail:0,-2"/>
+            <frame index="7" layer-offsets="paws:-2,0"/>
+            <frame index="8" layer-offsets=""/>
+            <frame index="9" layer-offsets="face_details:0,2"/>
+            <frame index="10" layer-offsets="head:0,-2; ears:0,-2"/>
+            <frame index="11" layer-offsets=""/>
+            <frame index="12" layer-offsets="tail:2,0"/>
+            <frame index="13" layer-offsets="tail:-2,0"/>
+            <frame index="14" layer-offsets="body:0,-1; belly:0,-1; neck:0,-1; head:0,-1; ears:0,-1; face_details:0,-1"/>
+            <frame index="15" layer-offsets=""/>
+        </animation>
+
+        <animation name="walk" frames="16" fps="6" loop="true" frame-width="128" frame-height="96">
+            <frame index="0" layer-offsets="front_legs:-2,0; paws:-2,0; hind_legs:2,0"/>
+            <frame index="1" layer-offsets="front_legs:-2,0; paws:-2,0; hind_legs:2,-2; body:0,-2; belly:0,-2; neck:0,-2; head:0,-2; ears:0,-2; face_details:0,-2; tail:0,-2"/>
+            <frame index="2" layer-offsets="front_legs:0,-2; paws:0,0; body:0,-2; belly:0,-2; neck:0,-2; head:0,-2; ears:0,-2; face_details:0,-2; tail:2,0"/>
+            <frame index="3" layer-offsets="front_legs:0,-2; paws:0,0; hind_legs:-2,0; body:0,-2; belly:0,-2; neck:0,-2; head:0,-2; ears:0,-2; face_details:0,-2; tail:2,-2"/>
+            <frame index="4" layer-offsets="front_legs:2,0; paws:2,0; hind_legs:-2,0"/>
+            <frame index="5" layer-offsets="front_legs:2,0; paws:2,0; hind_legs:-2,-2; body:0,-2; belly:0,-2; neck:0,-2; head:0,-2; ears:0,-2; face_details:0,-2; tail:0,-2"/>
+            <frame index="6" layer-offsets="front_legs:0,-2; paws:0,0; body:0,-2; belly:0,-2; neck:0,-2; head:0,-2; ears:0,-2; face_details:0,-2; tail:-2,0"/>
+            <frame index="7" layer-offsets="front_legs:0,-2; paws:0,0; hind_legs:2,0; body:0,-2; belly:0,-2; neck:0,-2; head:0,-2; ears:0,-2; face_details:0,-2; tail:-2,-2"/>
+            <frame index="8" layer-offsets="front_legs:-2,0; paws:-2,0; hind_legs:2,0; head:0,2; ears:0,2; face_details:0,2"/>
+            <frame index="9" layer-offsets="front_legs:0,-2; paws:0,0; body:0,-2; belly:0,-2; neck:0,-2; head:0,-2; ears:0,-2; face_details:0,-2; tail:2,0"/>
+            <frame index="10" layer-offsets="front_legs:2,0; paws:2,0; hind_legs:-2,0; head:0,2; ears:0,2; face_details:0,2"/>
+            <frame index="11" layer-offsets="front_legs:0,-2; paws:0,0; body:0,-2; belly:0,-2; neck:0,-2; head:0,-2; ears:0,-2; face_details:0,-2; tail:-2,0"/>
+            <frame index="12" layer-offsets="front_legs:-2,0; paws:-2,0; hind_legs:2,0"/>
+            <frame index="13" layer-offsets="body:0,-2; belly:0,-2; neck:0,-2; head:0,-2; ears:0,-2; face_details:0,-2"/>
+            <frame index="14" layer-offsets="front_legs:2,0; paws:2,0; hind_legs:-2,0"/>
+            <frame index="15" layer-offsets="body:0,-2; belly:0,-2; neck:0,-2; head:0,-2; ears:0,-2; face_details:0,-2"/>
+        </animation>
+
+        <animation name="sleep" frames="8" fps="2" loop="true" frame-width="128" frame-height="96">
+            <frame index="0" layer-offsets="head:8,8; ears:8,8; face_details:8,10; neck:6,6; body:0,4; belly:0,4; front_legs:4,6; paws:6,8; hind_legs:2,4; tail:-8,2"/>
+            <frame index="1" layer-offsets="head:8,6; ears:8,6; face_details:8,8; neck:6,4; body:0,2; belly:0,2; front_legs:4,6; paws:6,8; hind_legs:2,4; tail:-8,2"/>
+            <frame index="2" layer-offsets="head:8,6; ears:8,6; face_details:8,8; neck:6,4; body:0,2; belly:0,2; front_legs:4,6; paws:6,8; hind_legs:2,4; tail:-8,2"/>
+            <frame index="3" layer-offsets="head:8,8; ears:8,8; face_details:8,10; neck:6,6; body:0,4; belly:0,4; front_legs:4,6; paws:6,8; hind_legs:2,4; tail:-8,2"/>
+            <frame index="4" layer-offsets="head:8,10; ears:8,10; face_details:8,12; neck:6,8; body:0,6; belly:0,6; front_legs:4,8; paws:6,10; hind_legs:2,6; tail:-8,4"/>
+            <frame index="5" layer-offsets="head:8,10; ears:8,10; face_details:8,12; neck:6,8; body:0,6; belly:0,6; front_legs:4,8; paws:6,10; hind_legs:2,6; tail:-8,4"/>
+            <frame index="6" layer-offsets="head:8,8; ears:10,8; face_details:8,10; neck:6,6; body:0,4; belly:0,4; front_legs:4,6; paws:6,8; hind_legs:2,4; tail:-8,2"/>
+            <frame index="7" layer-offsets="head:8,8; ears:8,8; face_details:8,10; neck:6,6; body:0,4; belly:0,4; front_legs:4,6; paws:6,8; hind_legs:2,4; tail:-8,2"/>
+        </animation>
+
+        <animation name="play" frames="16" fps="5" loop="true" frame-width="128" frame-height="96">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="front_legs:-2,-4; paws:-2,-2; head:0,4; ears:0,4; face_details:0,4; neck:0,2; body:0,2"/>
+            <frame index="2" layer-offsets="front_legs:-4,6; paws:-4,8; neck:0,2; head:0,4; ears:0,4; face_details:0,4; body:0,2"/>
+            <frame index="3" layer-offsets="front_legs:-4,6; paws:-4,8; neck:0,2; head:0,4; ears:2,4; face_details:0,4; body:0,2"/>
+            <frame index="4" layer-offsets="front_legs:-2,0; paws:-2,0"/>
+            <frame index="5" layer-offsets="hind_legs:0,-4; body:0,-4; belly:0,-4; neck:0,-4; head:0,-6; ears:-2,-8; face_details:0,-6; front_legs:0,-4; paws:0,-2; tail:0,-4"/>
+            <frame index="6" layer-offsets="hind_legs:0,-4; body:0,-4; belly:0,-4; neck:0,-4; head:0,-6; ears:2,-8; face_details:0,-6; front_legs:0,-4; paws:0,-2; tail:0,-4"/>
+            <frame index="7" layer-offsets="hind_legs:0,-2; body:0,-2; belly:0,-2; neck:0,-2; head:0,-2; ears:0,-2; face_details:0,-2; front_legs:0,-2; paws:0,0; tail:0,-2"/>
+            <frame index="8" layer-offsets=""/>
+            <frame index="9" layer-offsets="front_legs:2,-4; paws:2,-2; head:0,4; ears:0,4; face_details:0,4; neck:0,2; body:0,2"/>
+            <frame index="10" layer-offsets="front_legs:4,6; paws:4,8; neck:0,2; head:0,4; ears:0,4; face_details:0,4; body:0,2"/>
+            <frame index="11" layer-offsets="front_legs:4,6; paws:4,8; neck:0,2; head:0,4; ears:-2,4; face_details:0,4; body:0,2"/>
+            <frame index="12" layer-offsets="front_legs:2,0; paws:2,0"/>
+            <frame index="13" layer-offsets="tail:4,-4; hind_legs:2,0"/>
+            <frame index="14" layer-offsets="tail:-4,-4; hind_legs:-2,0"/>
+            <frame index="15" layer-offsets="tail:0,-2"/>
+        </animation>
+
+        <animation name="eat" frames="12" fps="6" loop="true" frame-width="128" frame-height="96">
+            <frame index="0" layer-offsets="head:0,4; neck:0,4; ears:0,4; face_details:0,4; front_legs:0,2; paws:0,2"/>
+            <frame index="1" layer-offsets="head:0,6; neck:0,6; ears:0,6; face_details:0,6; front_legs:0,2; paws:0,2"/>
+            <frame index="2" layer-offsets="head:0,6; neck:0,6; ears:0,6; face_details:0,8; front_legs:0,2; paws:0,2"/>
+            <frame index="3" layer-offsets="head:0,4; neck:0,4; ears:0,4; face_details:0,4; front_legs:0,2; paws:0,2"/>
+            <frame index="4" layer-offsets="head:0,6; neck:0,6; ears:0,6; face_details:0,6; front_legs:0,2; paws:0,2"/>
+            <frame index="5" layer-offsets="head:0,6; neck:0,6; ears:0,6; face_details:0,8; front_legs:0,2; paws:0,2; tail:0,-4"/>
+            <frame index="6" layer-offsets="head:-2,2; neck:-2,2; ears:-2,2; face_details:-2,2; front_legs:0,2; paws:0,2; tail:0,-2"/>
+            <frame index="7" layer-offsets="head:0,6; neck:0,6; ears:0,6; face_details:0,6; front_legs:0,2; paws:0,2; tail:0,-4"/>
+            <frame index="8" layer-offsets="head:0,6; neck:0,6; ears:0,6; face_details:0,8; front_legs:0,0; paws:0,0; tail:0,-4"/>
+            <frame index="9" layer-offsets="head:0,4; neck:0,4; ears:0,4; face_details:0,4; front_legs:0,2; paws:0,2; tail:0,-2"/>
+            <frame index="10" layer-offsets="head:0,4; neck:0,4; ears:0,4; face_details:0,4; front_legs:0,2; paws:0,2"/>
+            <frame index="11" layer-offsets="front_legs:0,0; paws:0,0; head:0,0; neck:0,0; ears:0,0; face_details:0,2"/>
+        </animation>
+    </animations>
+</asset-spec>
