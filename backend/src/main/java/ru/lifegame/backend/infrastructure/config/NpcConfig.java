@@ -6,30 +6,20 @@ import ru.lifegame.backend.domain.npc.engine.ConditionEvaluator;
 import ru.lifegame.backend.domain.npc.engine.NpcLifecycleEngine;
 import ru.lifegame.backend.domain.npc.engine.NpcRegistry;
 import ru.lifegame.backend.domain.npc.engine.NpcUtilityBrain;
-import ru.lifegame.backend.domain.npc.graph.CrossNpcConditionSpec;
 import ru.lifegame.backend.domain.npc.graph.CrossNpcTriggerEngine;
 import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
-import ru.lifegame.backend.domain.npc.spec.NpcSpec;
 import ru.lifegame.backend.infrastructure.narrative.NarrativeContentLoader;
 
-import java.util.List;
-
+/**
+ * Spring configuration for the data-driven NPC engine.
+ * All beans are abstract engine components — no concrete NPC knowledge.
+ */
 @Configuration
 public class NpcConfig {
 
     @Bean
     public NarrativeContentLoader narrativeContentLoader() {
         return new NarrativeContentLoader();
-    }
-
-    @Bean
-    public List<NpcSpec> npcSpecs(NarrativeContentLoader loader) {
-        return loader.loadAllNpcSpecs();
-    }
-
-    @Bean
-    public NpcRegistry npcRegistry(List<NpcSpec> npcSpecs) {
-        return NpcRegistry.fromSpecs(npcSpecs);
     }
 
     @Bean
@@ -43,8 +33,8 @@ public class NpcConfig {
     }
 
     @Bean
-    public NpcLifecycleEngine npcLifecycleEngine(NpcUtilityBrain brain) {
-        return new NpcLifecycleEngine(brain);
+    public NpcRegistry npcRegistry() {
+        return new NpcRegistry();
     }
 
     @Bean
@@ -53,14 +43,15 @@ public class NpcConfig {
     }
 
     @Bean
-    public List<CrossNpcConditionSpec> crossNpcConditions(NarrativeContentLoader loader) {
-        return loader.loadCrossNpcConditions();
+    public CrossNpcTriggerEngine crossNpcTriggerEngine(NpcRelationshipGraph graph) {
+        return new CrossNpcTriggerEngine(graph);
     }
 
     @Bean
-    public CrossNpcTriggerEngine crossNpcTriggerEngine(
-            NpcRelationshipGraph graph,
-            List<CrossNpcConditionSpec> conditions) {
-        return new CrossNpcTriggerEngine(graph, conditions);
+    public NpcLifecycleEngine npcLifecycleEngine(
+            NpcRegistry registry,
+            NpcUtilityBrain brain,
+            CrossNpcTriggerEngine crossNpcTriggerEngine) {
+        return new NpcLifecycleEngine(registry, brain, crossNpcTriggerEngine);
     }
 }
