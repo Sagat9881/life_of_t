@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Life of T — Abstract Indoor Room Environment Spec v1.0
+    Canvas: 640×480
+    6 base layers: floor, baseboard, wall, ceiling, ambient_light, shadow_overlay
+    Concrete rooms override wall/floor colors, add furniture-specific shadow layers
+    extends="abstract/environments/indoor_room@1"
+-->
+<asset-spec abstract="true" version="1.0">
+    <meta>
+        <entity-type>environment</entity-type>
+        <entity-name>indoor_room</entity-name>
+        <spec-version>1.0</spec-version>
+        <canvas width="640" height="480"/>
+        <display-scale>1.0</display-scale>
+    </meta>
+
+    <color-palette>
+        <color id="floor_base" value="#C8B090" description="Floor main color"/>
+        <color id="floor_shadow" value="#A89070" description="Floor shadow"/>
+        <color id="floor_highlight" value="#E0D0B0" description="Floor highlight"/>
+        <color id="floor_pattern" value="#B8A080" description="Floor pattern accent"/>
+        <color id="wall_base" value="#E8E0D0" description="Wall main color"/>
+        <color id="wall_shadow" value="#D0C8B8" description="Wall shadow"/>
+        <color id="wall_highlight" value="#F0E8E0" description="Wall highlight"/>
+        <color id="wall_accent" value="#D8D0C0" description="Wall accent/trim"/>
+        <color id="baseboard_color" value="#F0E8D8" description="Baseboard color"/>
+        <color id="ceiling_color" value="#F8F4F0" description="Ceiling color"/>
+        <color id="ambient_warm" value="#FFF8E0" description="Warm ambient tint"/>
+        <color id="shadow_color" value="#00000020" description="Shadow overlay"/>
+    </color-palette>
+
+    <layers>
+        <layer id="floor" type="base" z-order="0" width="640" height="480">
+            <pixel-data>
+                <!-- Main floor area y=280-480 -->
+                <rect x="0" y="280" w="640" h="200" color="$floor_base"/>
+                <!-- Wood plank lines -->
+                <hline x="0" y="300" len="640" color="$floor_pattern"/>
+                <hline x="0" y="320" len="640" color="$floor_shadow"/>
+                <hline x="0" y="340" len="640" color="$floor_pattern"/>
+                <hline x="0" y="360" len="640" color="$floor_shadow"/>
+                <hline x="0" y="380" len="640" color="$floor_pattern"/>
+                <hline x="0" y="400" len="640" color="$floor_shadow"/>
+                <hline x="0" y="420" len="640" color="$floor_pattern"/>
+                <hline x="0" y="440" len="640" color="$floor_shadow"/>
+                <hline x="0" y="460" len="640" color="$floor_pattern"/>
+                <!-- Floor highlights (near window) -->
+                <rect x="0" y="280" w="320" h="8" color="$floor_highlight"/>
+                <rect x="400" y="300" w="40" h="180" color="$floor_highlight"/>
+                <rect x="100" y="320" w="80" h="4" color="$floor_highlight"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="baseboard" type="base" z-order="1" width="640" height="480">
+            <pixel-data>
+                <!-- Bottom of wall, top of floor junction -->
+                <rect x="0" y="272" w="640" h="12" color="$baseboard_color"/>
+                <hline x="0" y="272" len="640" color="$wall_shadow"/>
+                <hline x="0" y="283" len="640" color="$floor_shadow"/>
+                <!-- Left wall baseboard -->
+                <rect x="0" y="100" w="12" h="184" color="$baseboard_color"/>
+                <!-- Right wall baseboard -->
+                <rect x="628" y="100" w="12" h="184" color="$baseboard_color"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="wall" type="base" z-order="2" width="640" height="480">
+            <pixel-data>
+                <!-- Main wall y=60-280 -->
+                <rect x="0" y="60" w="640" h="220" color="$wall_base"/>
+                <!-- Wall texture: subtle horizontal lines -->
+                <hline x="0" y="80" len="640" color="$wall_accent"/>
+                <hline x="0" y="120" len="640" color="$wall_accent"/>
+                <hline x="0" y="160" len="640" color="$wall_accent"/>
+                <hline x="0" y="200" len="640" color="$wall_accent"/>
+                <hline x="0" y="240" len="640" color="$wall_accent"/>
+                <!-- Light from left side -->
+                <rect x="0" y="60" w="200" h="220" color="$wall_highlight"/>
+                <!-- Shadow on right -->
+                <rect x="500" y="60" w="140" h="220" color="$wall_shadow"/>
+                <!-- Wall cracks for character -->
+                <pixel x="320" y="140" color="$wall_shadow"/>
+                <pixel x="321" y="141" color="$wall_shadow"/>
+                <pixel x="322" y="142" color="$wall_shadow"/>
+                <pixel x="180" y="200" color="$wall_shadow"/>
+                <pixel x="181" y="201" color="$wall_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="ceiling" type="base" z-order="3" width="640" height="480">
+            <pixel-data>
+                <!-- Ceiling y=0-60 -->
+                <rect x="0" y="0" w="640" h="60" color="$ceiling_color"/>
+                <!-- Crown molding -->
+                <hline x="0" y="56" len="640" color="$wall_accent"/>
+                <hline x="0" y="58" len="640" color="$wall_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="ambient_light" type="overlay" z-order="4" width="640" height="480">
+            <pixel-data>
+                <!-- Warm light cone from upper-left (simulated window) -->
+                <rect x="40" y="80" w="200" h="300" color="$ambient_warm"/>
+                <rect x="80" y="120" w="120" h="200" color="$ambient_warm"/>
+                <!-- Floor light patch -->
+                <rect x="60" y="300" w="180" h="100" color="$ambient_warm"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="shadow_overlay" type="overlay" z-order="5" width="640" height="480">
+            <pixel-data>
+                <!-- Corner shadows -->
+                <rect x="580" y="60" w="60" h="220" color="$shadow_color"/>
+                <rect x="0" y="440" w="640" h="40" color="$shadow_color"/>
+                <!-- Floor-wall junction shadow -->
+                <rect x="0" y="280" w="640" h="8" color="$shadow_color"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <!-- Subtle ambient light flicker -->
+        <animation name="idle" frames="8" fps="2" loop="true" frame-width="640" frame-height="480">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="ambient_light:2,0"/>
+            <frame index="2" layer-offsets="ambient_light:2,2"/>
+            <frame index="3" layer-offsets="ambient_light:0,2"/>
+            <frame index="4" layer-offsets=""/>
+            <frame index="5" layer-offsets="ambient_light:-2,0"/>
+            <frame index="6" layer-offsets="ambient_light:-2,-2"/>
+            <frame index="7" layer-offsets="ambient_light:0,-2"/>
+        </animation>
+    </animations>
+</asset-spec>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Life of T — Abstract Outdoor Area Environment Spec v1.0
+    Canvas: 640×480
+    6 layers: ground, grass_detail, sky, clouds, ambient_light, weather_overlay
+    Concrete outdoor locations override ground type, sky colors, add trees/structures
+    extends="abstract/environments/outdoor_area@1"
+-->
+<asset-spec abstract="true" version="1.0">
+    <meta>
+        <entity-type>environment</entity-type>
+        <entity-name>outdoor_area</entity-name>
+        <spec-version>1.0</spec-version>
+        <canvas width="640" height="480"/>
+        <display-scale>1.0</display-scale>
+    </meta>
+
+    <color-palette>
+        <color id="ground_base" value="#8B7355" description="Ground/dirt base"/>
+        <color id="ground_shadow" value="#6B5335" description="Ground shadow"/>
+        <color id="ground_highlight" value="#AB9375" description="Ground highlight"/>
+        <color id="grass_base" value="#4A8C3F" description="Grass base color"/>
+        <color id="grass_light" value="#5AA84F" description="Grass highlight"/>
+        <color id="grass_dark" value="#3A6C2F" description="Grass shadow"/>
+        <color id="sky_top" value="#4488CC" description="Sky zenith"/>
+        <color id="sky_mid" value="#6AA8DD" description="Sky middle"/>
+        <color id="sky_bottom" value="#A0C8EE" description="Sky horizon"/>
+        <color id="cloud_base" value="#FFFFFF" description="Cloud white"/>
+        <color id="cloud_shadow" value="#D0D8E0" description="Cloud shadow"/>
+        <color id="sun_color" value="#FFF8D0" description="Sunlight tint"/>
+    </color-palette>
+
+    <layers>
+        <layer id="ground" type="base" z-order="0" width="640" height="480">
+            <pixel-data>
+                <!-- Ground area y=300-480 -->
+                <rect x="0" y="300" w="640" h="180" color="$grass_base"/>
+                <!-- Path/dirt patches -->
+                <rect x="200" y="320" w="240" h="160" color="$ground_base"/>
+                <rect x="220" y="340" w="200" h="120" color="$ground_highlight"/>
+                <!-- Ground texture -->
+                <hline x="0" y="320" len="200" color="$grass_dark"/>
+                <hline x="440" y="320" len="200" color="$grass_dark"/>
+                <hline x="0" y="360" len="640" color="$grass_dark"/>
+                <hline x="0" y="400" len="640" color="$grass_dark"/>
+                <hline x="0" y="440" len="640" color="$grass_dark"/>
+                <!-- Grass edge at horizon -->
+                <rect x="0" y="296" w="640" h="8" color="$grass_light"/>
+                <!-- Shadow near bottom -->
+                <rect x="0" y="460" w="640" h="20" color="$ground_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="grass_detail" type="overlay" z-order="1" width="640" height="480">
+            <pixel-data>
+                <!-- Individual grass tufts -->
+                <pixel x="20" y="308" color="$grass_light"/>
+                <pixel x="20" y="306" color="$grass_light"/>
+                <pixel x="60" y="310" color="$grass_light"/>
+                <pixel x="60" y="308" color="$grass_light"/>
+                <pixel x="100" y="306" color="$grass_light"/>
+                <pixel x="100" y="304" color="$grass_light"/>
+                <pixel x="140" y="312" color="$grass_light"/>
+                <pixel x="140" y="310" color="$grass_light"/>
+                <pixel x="480" y="306" color="$grass_light"/>
+                <pixel x="480" y="304" color="$grass_light"/>
+                <pixel x="520" y="310" color="$grass_light"/>
+                <pixel x="520" y="308" color="$grass_light"/>
+                <pixel x="560" y="308" color="$grass_light"/>
+                <pixel x="560" y="306" color="$grass_light"/>
+                <pixel x="600" y="312" color="$grass_light"/>
+                <pixel x="600" y="310" color="$grass_light"/>
+                <!-- Wildflowers -->
+                <pixel x="40" y="330" color="#FF6060"/>
+                <pixel x="80" y="350" color="#FFFF60"/>
+                <pixel x="500" y="340" color="#FF60FF"/>
+                <pixel x="580" y="360" color="#6060FF"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="sky" type="base" z-order="2" width="640" height="480">
+            <pixel-data>
+                <!-- Sky gradient y=0-300 -->
+                <rect x="0" y="0" w="640" h="100" color="$sky_top"/>
+                <rect x="0" y="100" w="640" h="100" color="$sky_mid"/>
+                <rect x="0" y="200" w="640" h="100" color="$sky_bottom"/>
+                <!-- Horizon glow -->
+                <rect x="0" y="280" w="640" h="20" color="$sun_color"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="clouds" type="overlay" z-order="3" width="640" height="480">
+            <pixel-data>
+                <!-- Cloud 1 -->
+                <rect x="60" y="40" w="120" h="40" color="$cloud_base"/>
+                <rect x="80" y="30" w="80" h="20" color="$cloud_base"/>
+                <rect x="60" y="60" w="120" h="20" color="$cloud_shadow"/>
+                <!-- Cloud 2 -->
+                <rect x="300" y="80" w="80" h="30" color="$cloud_base"/>
+                <rect x="310" y="70" w="60" h="20" color="$cloud_base"/>
+                <rect x="300" y="100" w="80" h="10" color="$cloud_shadow"/>
+                <!-- Cloud 3 -->
+                <rect x="480" y="50" w="100" h="36" color="$cloud_base"/>
+                <rect x="500" y="40" w="60" h="20" color="$cloud_base"/>
+                <rect x="480" y="70" w="100" h="16" color="$cloud_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="ambient_light" type="overlay" z-order="4" width="640" height="480">
+            <pixel-data>
+                <!-- Sun rays from upper right -->
+                <rect x="400" y="0" w="240" h="200" color="$sun_color"/>
+                <rect x="500" y="0" w="140" h="100" color="$sun_color"/>
+                <!-- Ground light patch -->
+                <rect x="300" y="300" w="200" h="100" color="$sun_color"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="weather_overlay" type="overlay" z-order="5" width="640" height="480">
+            <pixel-data>
+                <!-- Empty by default (clear weather). Override for rain, snow, fog -->
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <!-- Cloud drift + grass sway -->
+        <animation name="idle" frames="12" fps="2" loop="true" frame-width="640" frame-height="480">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="clouds:2,0; grass_detail:1,0"/>
+            <frame index="2" layer-offsets="clouds:4,0; grass_detail:2,0"/>
+            <frame index="3" layer-offsets="clouds:6,0; grass_detail:1,0"/>
+            <frame index="4" layer-offsets="clouds:8,0"/>
+            <frame index="5" layer-offsets="clouds:10,0; grass_detail:-1,0"/>
+            <frame index="6" layer-offsets="clouds:12,0; grass_detail:-2,0"/>
+            <frame index="7" layer-offsets="clouds:14,0; grass_detail:-1,0"/>
+            <frame index="8" layer-offsets="clouds:16,0"/>
+            <frame index="9" layer-offsets="clouds:14,0; grass_detail:1,0"/>
+            <frame index="10" layer-offsets="clouds:12,0; grass_detail:2,0"/>
+            <frame index="11" layer-offsets="clouds:10,0; grass_detail:1,0"/>
+        </animation>
+
+        <!-- Day-night cycle (optional, for locations that use it) -->
+        <animation name="day_cycle" frames="8" fps="1" loop="true" frame-width="640" frame-height="480">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="ambient_light:40,0"/>
+            <frame index="2" layer-offsets="ambient_light:80,0"/>
+            <frame index="3" layer-offsets="ambient_light:120,0"/>
+            <frame index="4" layer-offsets="ambient_light:160,0"/>
+            <frame index="5" layer-offsets="ambient_light:120,0"/>
+            <frame index="6" layer-offsets="ambient_light:80,0"/>
+            <frame index="7" layer-offsets="ambient_light:40,0"/>
+        </animation>
+    </animations>
+</asset-spec>
