@@ -84,11 +84,43 @@
             </plugin>
 
             <!--
+              Cleanup stale assets before copying fresh ones.
+              Removes any leftover 'generated/' subdirectory and old placeholder files.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>cleanup-stale-assets</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <echo message="Cleaning stale generated assets from frontend/public/assets/..."/>
+                                <!-- Remove old 'generated/' directory from previous pipeline versions -->
+                                <delete dir="${project.basedir}/../frontend/public/assets/generated" failonerror="false"/>
+                                <!-- Remove generated entity directories (they'll be recreated by copy below) -->
+                                <delete dir="${project.basedir}/../frontend/public/assets/characters" failonerror="false"/>
+                                <delete dir="${project.basedir}/../frontend/public/assets/locations" failonerror="false"/>
+                                <delete dir="${project.basedir}/../frontend/public/assets/pets" failonerror="false"/>
+                                <delete dir="${project.basedir}/../frontend/public/assets/furniture" failonerror="false"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
               Copy generated assets into frontend/public/assets/.
-              Generator writes to: target/generated-assets/assets/{entityType}/{entityName}/...
-              We copy the CONTENTS of target/generated-assets/assets/ so that
+              Generator writes to: target/generated-assets/{entityType}/{entityName}/...
+              (NamingSpec no longer adds "assets/" prefix)
+              We copy the CONTENTS of target/generated-assets/ so that
               Vite serves them at /assets/{entityType}/{entityName}/...
-              which matches what assetService.ts expects.
+              which matches what assetService.ts expects (ASSETS_BASE_URL = '/assets').
             -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -105,7 +137,7 @@
                             <outputDirectory>${project.basedir}/../frontend/public/assets</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.build.directory}/generated-assets/assets</directory>
+                                    <directory>${project.build.directory}/generated-assets</directory>
                                     <filtering>false</filtering>
                                 </resource>
                             </resources>

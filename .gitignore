@@ -9,6 +9,8 @@ frontend/public/assets/characters/
 frontend/public/assets/furniture/
 frontend/public/assets/locations/
 frontend/public/assets/pets/
+# Legacy path from old pipeline versions — should not exist but clean up
+frontend/public/assets/generated/
 
 ### Node ###
 node_modules/
