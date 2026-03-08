@@ -1,70 +1,48 @@
-package ru.lifegame.backend.application.engine.runtime;
+package ru.lifegame.backend.domain.engine.runtime;
 
-import com.sagat.life_of_t.domain.engine.spec.NpcSpec;
+import ru.lifegame.backend.domain.engine.spec.NpcSpec;
+import ru.lifegame.backend.domain.npc.engine.NpcMood;
+import ru.lifegame.backend.domain.npc.engine.NpcMemory;
 
-/**
- * A live NPC instance = spec + runtime state.
- * Named NPCs get full mood (6 axes) + memory.
- * Filler NPCs get minimal mood (2 axes) + no memory.
- */
 public class NpcInstance {
-    private final NpcSpec spec;
-    private final NpcMoodState mood;
-    private final NpcMemoryLog memory;
-    private String currentActivity;
-    private String currentLocation;
-    private String currentAnimation;
 
-    private NpcInstance(NpcSpec spec, NpcMoodState mood, NpcMemoryLog memory) {
+    private final NpcSpec spec;
+    private final NpcMood mood;
+    private final NpcMemory memory;
+    private String currentActivityId;
+    private String currentAnimation;
+    private String currentLocation;
+
+    public NpcInstance(NpcSpec spec, NpcMood mood, NpcMemory memory) {
         this.spec = spec;
         this.mood = mood;
         this.memory = memory;
-        this.currentActivity = "idle";
-        this.currentLocation = "unknown";
-        this.currentAnimation = "idle";
     }
 
-    public static NpcInstance createNamed(NpcSpec spec) {
-        return new NpcInstance(
-                spec,
-                NpcMoodState.fromTraits(spec.personalityTraits()),
-                new NpcMemoryLog()
+    public static NpcInstance fromSpec(NpcSpec spec) {
+        NpcMood mood = NpcMood.fromInitialValues(
+            spec.moodInitial().getOrDefault("happiness", 50.0),
+            spec.moodInitial().getOrDefault("anxiety", 20.0),
+            spec.moodInitial().getOrDefault("loneliness", 20.0),
+            spec.moodInitial().getOrDefault("irritability", 10.0),
+            spec.moodInitial().getOrDefault("energy", 70.0),
+            spec.moodInitial().getOrDefault("affection", 50.0)
         );
+        boolean memoryEnabled = "named".equals(spec.type());
+        NpcMemory memory = new NpcMemory(memoryEnabled ? 10 : 0);
+        return new NpcInstance(spec, mood, memory);
     }
 
-    public static NpcInstance createFiller(NpcSpec spec) {
-        return new NpcInstance(
-                spec,
-                NpcMoodState.fillerDefaults(),
-                null
-        );
-    }
-
-    public String entityId() { return spec.entityId(); }
-    public NpcSpec spec() { return spec; }
-    public NpcMoodState mood() { return mood; }
-    public boolean hasMemory() { return memory != null; }
-    public NpcMemoryLog memory() { return memory; }
-
-    public String currentActivity() { return currentActivity; }
-    public String currentLocation() { return currentLocation; }
-    public String currentAnimation() { return currentAnimation; }
-
-    public void updateActivity(String activity, String location, String animation) {
-        this.currentActivity = activity;
-        this.currentLocation = location;
+    public void setCurrentActivity(String activityId, String animation, String location) {
+        this.currentActivityId = activityId;
         this.currentAnimation = animation;
+        this.currentLocation = location;
     }
 
-    public void observePlayerAction(String actionId, int day, int hour) {
-        if (memory != null) memory.observe(actionId, day, hour);
-    }
-
-    public void onPlayerInteraction() {
-        mood.onPlayerInteraction();
-    }
-
-    public void dailyTick() {
-        mood.dailyTick();
-    }
+    public NpcSpec spec() { return spec; }
+    public NpcMood getMood() { return mood; }
+    public NpcMemory getMemory() { return memory; }
+    public String getCurrentActivityId() { return currentActivityId; }
+    public String getCurrentAnimation() { return currentAnimation; }
+    public String getCurrentLocation() { return currentLocation; }
 }

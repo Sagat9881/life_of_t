@@ -2,7 +2,7 @@ package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
 import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain;
-import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain.EvaluatedAction;
+import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain.ScoredResult;
 
 import java.util.*;
 
@@ -16,25 +16,23 @@ public class NpcLifecycleEngine {
         this.brain = brain;
     }
 
-    public List<NpcActionResult> hourlyTick(int currentHour, Map<String, Object> context) {
-        List<NpcActionResult> results = new ArrayList<>();
-        for (NpcInstance npc : registry.allNpcs()) {
-            npc.updateScheduledActivity(currentHour);
-            Optional<EvaluatedAction> action = brain.evaluate(npc, context);
-            action.ifPresent(a -> {
-                npc.setCurrentActivity(a.actionId(), a.animation(), a.location());
-                results.add(new NpcActionResult(npc.spec().id(), a.actionId(), a.score()));
-            });
-        }
-        return results;
-    }
-
-    public void dailyTick() {
-        for (NpcInstance npc : registry.allNpcs()) {
-            npc.mood().dailyDecay();
-            npc.memory().trimOldEntries();
+    public void hourlyTick(int currentHour, Map<String, Object> gameContext) {
+        for (NpcInstance npc : registry.getAll()) {
+            Optional<ScoredResult> best = brain.evaluate(npc, currentHour, gameContext);
+            best.ifPresent(result -> npc.setCurrentActivity(
+                result.actionId(), result.animation(), result.location()
+            ));
         }
     }
 
-    public record NpcActionResult(String npcId, String actionId, double score) {}
+    public void dailyTick(Map<String, Object> gameContext) {
+        for (NpcInstance npc : registry.getAll()) {
+            npc.getMood().dailyTick();
+            npc.getMemory().onDayEnd();
+        }
+    }
+
+    public NpcRegistry getRegistry() {
+        return registry;
+    }
 }

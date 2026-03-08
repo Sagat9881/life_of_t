@@ -2,69 +2,74 @@ package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.spec.QuestSpec;
 import ru.lifegame.backend.domain.engine.spec.QuestSpec.StepSpec;
-import ru.lifegame.backend.domain.engine.spec.QuestSpec.RewardSpec;
 import ru.lifegame.backend.domain.engine.spec.QuestSpec.DialogueEntry;
+import ru.lifegame.backend.domain.engine.spec.QuestSpec.RewardSpec;
 
 import java.util.*;
 
 public class NarrativeQuestEngine {
 
+    private final List<QuestSpec> questSpecs;
     private final Map<String, QuestState> activeQuests = new LinkedHashMap<>();
-    private final Map<String, QuestState> completedQuests = new LinkedHashMap<>();
 
-    public void startQuest(QuestSpec spec) {
-        if (!activeQuests.containsKey(spec.id()) && !completedQuests.containsKey(spec.id())) {
-            activeQuests.put(spec.id(), new QuestState(spec, 0));
-        }
+    public NarrativeQuestEngine(List<QuestSpec> questSpecs) {
+        this.questSpecs = questSpecs;
     }
 
-    public static class QuestState {
-        private final QuestSpec spec;
-        private int currentStepIndex;
-
-        public QuestState(QuestSpec spec, int currentStepIndex) {
-            this.spec = spec;
-            this.currentStepIndex = currentStepIndex;
-        }
-
+    public record QuestState(
+        String questId,
+        String title,
+        int currentStepIndex,
+        QuestSpec spec,
+        boolean completed
+    ) {
         public StepSpec currentStep() {
             if (currentStepIndex >= spec.steps().size()) return null;
             return spec.steps().get(currentStepIndex);
         }
+    }
 
-        public boolean isComplete() {
-            return currentStepIndex >= spec.steps().size();
+    public void tryActivateQuests(Map<String, Object> context, int currentDay) {
+        for (QuestSpec spec : questSpecs) {
+            if (activeQuests.containsKey(spec.id())) continue;
+            if (spec.triggerDay() > 0 && currentDay >= spec.triggerDay()) {
+                activeQuests.put(spec.id(), new QuestState(spec.id(), spec.title(), 0, spec, false));
+            }
         }
+    }
 
-        public QuestSpec spec() { return spec; }
-        public int currentStepIndex() { return currentStepIndex; }
-        public void advanceStep() { currentStepIndex++; }
+    public List<QuestState> getActiveQuests() {
+        return activeQuests.values().stream().filter(q -> !q.completed()).toList();
+    }
+
+    public List<QuestState> getCompletedQuests() {
+        return activeQuests.values().stream().filter(QuestState::completed).toList();
     }
 
     public Optional<StepCompletionResult> tryCompleteStep(String questId, String actionId, Map<String, Object> context) {
         QuestState state = activeQuests.get(questId);
-        if (state == null || state.isComplete()) return Optional.empty();
+        if (state == null || state.completed()) return Optional.empty();
         StepSpec step = state.currentStep();
         if (step == null) return Optional.empty();
-        if (!step.requiredAction().equals(actionId)) return Optional.empty();
+        if (!step.actionId().equals(actionId)) return Optional.empty();
 
-        state.advanceStep();
-        if (state.isComplete()) {
-            activeQuests.remove(questId);
-            completedQuests.put(questId, state);
-        }
+        int nextIndex = state.currentStepIndex() + 1;
+        boolean isComplete = nextIndex >= state.spec().steps().size();
+        activeQuests.put(questId, new QuestState(
+            questId, state.title(), nextIndex, state.spec(), isComplete
+        ));
 
         return Optional.of(new StepCompletionResult(
-            questId, step.id(), state.isComplete(),
+            questId, step.id(), isComplete,
             step.dialogue(), step.reward()
         ));
     }
 
     public record StepCompletionResult(
-        String questId, String stepId, boolean questComplete,
-        List<DialogueEntry> dialogue, RewardSpec reward
+        String questId,
+        String stepId,
+        boolean questCompleted,
+        DialogueEntry dialogue,
+        RewardSpec reward
     ) {}
-
-    public Map<String, QuestState> activeQuests() { return Collections.unmodifiableMap(activeQuests); }
-    public Map<String, QuestState> completedQuests() { return Collections.unmodifiableMap(completedQuests); }
 }
