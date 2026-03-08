@@ -4,8 +4,7 @@ import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
 import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain;
 import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain.EvaluatedAction;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class NpcLifecycleEngine {
 
@@ -17,26 +16,32 @@ public class NpcLifecycleEngine {
         this.brain = brain;
     }
 
-    public void hourlyTick(int currentHour) {
-        for (NpcInstance npc : registry.getAll()) {
+    public List<NpcAction> hourlyTick(int currentHour, Map<String, Object> context) {
+        List<NpcAction> actions = new ArrayList<>();
+        for (NpcInstance npc : registry.all()) {
             var scheduled = npc.getScheduledActivity(currentHour);
             if (scheduled.isPresent()) {
-                npc.setCurrentActivity(scheduled.get().activity());
-                npc.setCurrentLocation(scheduled.get().location());
-                npc.setCurrentAnimation(scheduled.get().animation());
+                var slot = scheduled.get();
+                npc.setCurrentActivity(slot.activity());
+                npc.setCurrentLocation(slot.location());
+                npc.setCurrentAnimation(slot.animation());
+                actions.add(new NpcAction(npc.spec().id(), slot.activity(), slot.location(), slot.animation(), "schedule"));
+            } else {
+                Optional<EvaluatedAction> best = brain.evaluate(npc, context);
+                best.ifPresent(a -> {
+                    npc.setCurrentActivity(a.actionId());
+                    actions.add(new NpcAction(npc.spec().id(), a.actionId(), npc.currentLocation(), "idle", "utility_ai"));
+                });
             }
+        }
+        return actions;
+    }
+
+    public void dailyTick(Map<String, Object> context) {
+        for (NpcInstance npc : registry.all()) {
+            npc.mood().dailyDecay();
         }
     }
 
-    public List<EvaluatedAction> dailyTick() {
-        List<EvaluatedAction> initiatedActions = new ArrayList<>();
-        for (NpcInstance npc : registry.getNamed()) {
-            npc.mood().dailyDecay();
-            var best = brain.evaluate(npc);
-            if (best.isPresent() && best.get().score() > 0.5) {
-                initiatedActions.add(best.get());
-            }
-        }
-        return initiatedActions;
-    }
+    public record NpcAction(String npcId, String activity, String location, String animation, String source) {}
 }

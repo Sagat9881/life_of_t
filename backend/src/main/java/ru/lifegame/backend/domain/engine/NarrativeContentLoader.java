@@ -1,65 +1,49 @@
 package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.parser.NpcSpecParser;
-import ru.lifegame.backend.domain.engine.parser.EventSpecParser;
 import ru.lifegame.backend.domain.engine.parser.QuestSpecParser;
+import ru.lifegame.backend.domain.engine.parser.EventSpecParser;
 import ru.lifegame.backend.domain.engine.spec.NpcSpec;
-import ru.lifegame.backend.domain.engine.spec.EventSpec;
 import ru.lifegame.backend.domain.engine.spec.QuestSpec;
+import ru.lifegame.backend.domain.engine.spec.EventSpec;
 
-import java.io.IOException;
-import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
+import java.io.File;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class NarrativeContentLoader {
 
+    private final String narrativeBasePath;
     private final NpcSpecParser npcParser = new NpcSpecParser();
-    private final EventSpecParser eventParser = new EventSpecParser();
     private final QuestSpecParser questParser = new QuestSpecParser();
+    private final EventSpecParser eventParser = new EventSpecParser();
 
-    private List<NpcSpec> npcSpecs = new ArrayList<>();
-    private List<EventSpec> eventSpecs = new ArrayList<>();
-    private List<QuestSpec> questSpecs = new ArrayList<>();
+    private List<NpcSpec> npcSpecs = List.of();
+    private List<QuestSpec> questSpecs = List.of();
+    private List<EventSpec> eventSpecs = List.of();
 
-    public void loadFromDirectory(Path narrativeRoot) throws IOException {
-        Path npcDir = narrativeRoot.resolve("npc-behavior");
-        Path eventDir = narrativeRoot.resolve("events");
-        Path questDir = narrativeRoot.resolve("quests");
+    public NarrativeContentLoader(String narrativeBasePath) {
+        this.narrativeBasePath = narrativeBasePath;
+    }
 
-        if (Files.isDirectory(npcDir)) {
-            try (Stream<Path> files = Files.list(npcDir)) {
-                files.filter(p -> p.toString().endsWith(".xml"))
-                     .forEach(p -> {
-                         try { npcSpecs.add(npcParser.parse(p)); }
-                         catch (Exception e) { System.err.println("Failed to parse NPC: " + p + " - " + e.getMessage()); }
-                     });
-            }
-        }
+    public void loadAll() {
+        npcSpecs = loadDirectory(narrativeBasePath + "/npc-behavior", npcParser::parse);
+        questSpecs = loadDirectory(narrativeBasePath + "/quests", questParser::parse);
+        eventSpecs = loadDirectory(narrativeBasePath + "/events", eventParser::parse);
+    }
 
-        if (Files.isDirectory(eventDir)) {
-            try (Stream<Path> files = Files.list(eventDir)) {
-                files.filter(p -> p.toString().endsWith(".xml"))
-                     .forEach(p -> {
-                         try { eventSpecs.add(eventParser.parse(p)); }
-                         catch (Exception e) { System.err.println("Failed to parse event: " + p + " - " + e.getMessage()); }
-                     });
-            }
-        }
-
-        if (Files.isDirectory(questDir)) {
-            try (Stream<Path> files = Files.list(questDir)) {
-                files.filter(p -> p.toString().endsWith(".xml"))
-                     .forEach(p -> {
-                         try { questSpecs.add(questParser.parse(p)); }
-                         catch (Exception e) { System.err.println("Failed to parse quest: " + p + " - " + e.getMessage()); }
-                     });
-            }
-        }
+    private <T> List<T> loadDirectory(String dirPath, java.util.function.Function<File, T> parser) {
+        File dir = new File(dirPath);
+        if (!dir.exists() || !dir.isDirectory()) return List.of();
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".xml"));
+        if (files == null) return List.of();
+        return Arrays.stream(files)
+                .map(parser)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     public List<NpcSpec> npcSpecs() { return npcSpecs; }
-    public List<EventSpec> eventSpecs() { return eventSpecs; }
     public List<QuestSpec> questSpecs() { return questSpecs; }
+    public List<EventSpec> eventSpecs() { return eventSpecs; }
 }

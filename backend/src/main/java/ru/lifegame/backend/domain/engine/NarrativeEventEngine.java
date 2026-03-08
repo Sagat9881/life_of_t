@@ -1,7 +1,7 @@
 package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.spec.EventSpec;
-import ru.lifegame.backend.domain.engine.spec.ConditionSpec;
+import ru.lifegame.backend.domain.engine.spec.EventSpec.ConditionSpec;
 import ru.lifegame.backend.domain.engine.spec.EventSpec.EffectSpec;
 
 import java.util.*;
@@ -10,48 +10,52 @@ import java.util.stream.Collectors;
 public class NarrativeEventEngine {
 
     private final List<EventSpec> eventSpecs;
-    private final Set<String> firedOnceIds = new HashSet<>();
+    private final Set<String> firedOneTimeEvents = new HashSet<>();
 
     public NarrativeEventEngine(List<EventSpec> eventSpecs) {
         this.eventSpecs = eventSpecs;
     }
 
-    public record FiredEvent(
-            String eventId,
-            String type,
-            EventSpec spec,
-            EffectSpec chosenEffect
-    ) {}
+    public List<FiredEvent> evaluate(Map<String, Object> context) {
+        return eventSpecs.stream()
+                .filter(spec -> !spec.oneTime() || !firedOneTimeEvents.contains(spec.id()))
+                .filter(spec -> allConditionsMet(spec.conditions(), context))
+                .map(spec -> {
+                    if (spec.oneTime()) firedOneTimeEvents.add(spec.id());
+                    return new FiredEvent(spec, resolveEffects(spec, context));
+                })
+                .collect(Collectors.toList());
+    }
 
-    public List<EventSpec> checkTriggers(Map<String, Object> context) {
-        List<EventSpec> triggered = new ArrayList<>();
-        for (EventSpec spec : eventSpecs) {
-            if (spec.oneShot() && firedOnceIds.contains(spec.id())) continue;
-            boolean allMet = spec.conditions().stream()
-                    .allMatch(c -> evaluateCondition(c, context));
-            if (allMet) {
-                triggered.add(spec);
-                if (spec.oneShot()) firedOnceIds.add(spec.id());
-            }
-        }
-        return triggered;
+    public record FiredEvent(EventSpec spec, List<EffectSpec> effects) {}
+
+    private List<EffectSpec> resolveEffects(EventSpec spec, Map<String, Object> context) {
+        if (spec.effects() == null) return List.of();
+        return spec.effects().stream()
+                .filter(e -> e.conditions() == null || allConditionsMet(e.conditions(), context))
+                .collect(Collectors.toList());
+    }
+
+    private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> context) {
+        if (conditions == null || conditions.isEmpty()) return true;
+        return conditions.stream().allMatch(c -> evaluateCondition(c, context));
     }
 
     private boolean evaluateCondition(ConditionSpec condition, Map<String, Object> context) {
         Object value = context.get(condition.target());
         if (value == null) return false;
         if (value instanceof Number num) {
-            double v = num.doubleValue();
-            double threshold = Double.parseDouble(condition.value());
+            double actual = num.doubleValue();
+            double expected = Double.parseDouble(condition.value());
             return switch (condition.operator()) {
-                case "gte" -> v >= threshold;
-                case "lte" -> v <= threshold;
-                case "gt" -> v > threshold;
-                case "lt" -> v < threshold;
-                case "eq" -> v == threshold;
+                case "gte" -> actual >= expected;
+                case "lte" -> actual <= expected;
+                case "gt" -> actual > expected;
+                case "lt" -> actual < expected;
+                case "eq" -> actual == expected;
                 default -> false;
             };
         }
-        return String.valueOf(value).equals(condition.value());
+        return value.toString().equals(condition.value());
     }
 }
