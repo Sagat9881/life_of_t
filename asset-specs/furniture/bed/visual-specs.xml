@@ -1,140 +1,206 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<asset-spec>
+<!--
+  Bed — main sleep object in home_room.
+  Canvas ×4: 256×192 (was 64×48). Wood frame + fabric blanket.
+  Enhanced: wood grain texture on frame, quilted blanket pattern,
+  pillow stitching, shadow under bed, dust particles.
+-->
+<asset-spec extends="abstract/materials/wood@1.0">
     <meta>
         <entity-type>furniture</entity-type>
         <entity-name>bed</entity-name>
-        <version>1.0.0</version>
+        <version>3.0.0</version>
         <location>home_room</location>
-        <description>
-            Кровать — основной интерактивный объект для действия "Сон".
-            Восстанавливает энергию и снижает стресс.
-            Расположена в midground-слое home_room.
-        </description>
     </meta>
 
+    <color-palette>
+        <color name="$wood_base" value="#8B5E3C"/>
+        <color name="$wood_light" value="#A0703C"/>
+        <color name="$wood_dark" value="#5C3A1E"/>
+        <color name="$wood_grain" value="#7A5030"/>
+        <color name="$wood_highlight" value="#B88850"/>
+        <color name="$mattress" value="#F5E6D3"/>
+        <color name="$mattress_shadow" value="#E8D5C0"/>
+        <color name="$pillow_white" value="#FFFAF0"/>
+        <color name="$pillow_cream" value="#FFF5E6"/>
+        <color name="$pillow_shadow" value="#E8D5C0"/>
+        <color name="$blanket_main" value="#B5EAD7"/>
+        <color name="$blanket_light" value="#C8F0E0"/>
+        <color name="$blanket_fold" value="#A0D8C0"/>
+        <color name="$blanket_edge" value="#90C8B0"/>
+        <color name="$shadow_floor" value="#D0C0A8"/>
+        <color name="$zzz_color" value="#A0A0C0"/>
+    </color-palette>
+
     <layers>
-        <!-- Каркас кровати (z=0, основа) -->
-        <layer id="frame" type="base" z-order="0" width="64" height="48">
+        <!-- z=0: floor shadow -->
+        <layer id="shadow" type="base" z-order="0" width="256" height="192">
             <pixel-data>
-                <!-- Ножки кровати -->
-                <rect x="4" y="42" w="3" h="6" color="#5C3A1E"/>
-                <rect x="57" y="42" w="3" h="6" color="#5C3A1E"/>
-                <rect x="4" y="36" w="3" h="6" color="#5C3A1E"/>
-                <rect x="57" y="36" w="3" h="6" color="#5C3A1E"/>
-                <!-- Боковые бортики -->
-                <rect x="4" y="38" w="56" h="2" color="#8B5E3C"/>
-                <hline x="4" y="37" len="56" color="#A0703C"/>
-                <!-- Спинка (изголовье) — слева -->
-                <rect x="2" y="20" w="4" h="18" color="#8B5E3C"/>
-                <rect x="3" y="18" w="2" h="2" color="#A0703C"/>
-                <pixel x="3" y="17" color="#8B5E3C"/>
-                <pixel x="4" y="17" color="#8B5E3C"/>
-                <!-- Спинка (ножная) — справа -->
-                <rect x="58" y="28" w="4" h="10" color="#8B5E3C"/>
-                <rect x="59" y="26" w="2" h="2" color="#A0703C"/>
-                <!-- Основание матраса -->
-                <rect x="6" y="30" w="52" h="8" color="#F5E6D3"/>
-                <hline x="6" y="30" len="52" color="#E8D5C0"/>
+                <rect x="20" y="176" w="216" h="8" color="#C8B8A0"/>
+                <hline x="24" y="180" len="208" color="#D0C0A8"/>
+                <rect x="28" y="184" w="200" h="4" color="#D8C8B0"/>
             </pixel-data>
         </layer>
 
-        <!-- Подушки (z=1, статичные) -->
-        <layer id="pillows" type="base" z-order="1" width="64" height="48">
+        <!-- z=1: bed frame (wood) -->
+        <layer id="frame" type="base" z-order="1" width="256" height="192">
             <pixel-data>
-                <!-- Подушка верхняя -->
-                <rect x="8" y="24" w="14" h="8" color="#FFFAF0"/>
-                <rect x="9" y="25" w="12" h="6" color="#FFF5E6"/>
-                <hline x="8" y="24" len="14" color="#E8D5C0"/>
-                <!-- Подушка нижняя -->
-                <rect x="8" y="30" w="14" h="6" color="#FFFAF0"/>
-                <rect x="9" y="31" w="12" h="4" color="#FFF5E6"/>
+                <!-- legs -->
+                <rect x="16" y="168" w="12" h="24" color="$wood_dark"/>
+                <rect x="228" y="168" w="12" h="24" color="$wood_dark"/>
+                <rect x="16" y="144" w="12" h="24" color="$wood_dark"/>
+                <rect x="228" y="144" w="12" h="24" color="$wood_dark"/>
+                <!-- leg wood grain -->
+                <vline x="20" y="168" len="24" color="$wood_grain"/>
+                <vline x="232" y="168" len="24" color="$wood_grain"/>
+                <!-- side rails -->
+                <rect x="16" y="152" w="224" h="8" color="$wood_base"/>
+                <hline x="16" y="148" len="224" color="$wood_light"/>
+                <hline x="16" y="156" len="224" color="$wood_dark"/>
+                <!-- rail grain texture -->
+                <hline x="24" y="152" len="208" color="$wood_grain"/>
+                <hline x="32" y="154" len="192" color="$wood_highlight"/>
+                <!-- headboard (left) -->
+                <rect x="8" y="80" w="16" h="72" color="$wood_base"/>
+                <rect x="12" y="72" w="8" h="8" color="$wood_light"/>
+                <pixel x="12" y="68" color="$wood_base"/>
+                <pixel x="16" y="68" color="$wood_base"/>
+                <!-- headboard grain -->
+                <vline x="14" y="80" len="72" color="$wood_grain"/>
+                <vline x="18" y="84" len="64" color="$wood_highlight"/>
+                <!-- footboard (right) -->
+                <rect x="232" y="112" w="16" h="40" color="$wood_base"/>
+                <rect x="236" y="104" w="8" h="8" color="$wood_light"/>
+                <!-- footboard grain -->
+                <vline x="238" y="112" len="40" color="$wood_grain"/>
+                <!-- mattress base -->
+                <rect x="24" y="120" w="208" h="32" color="$mattress"/>
+                <hline x="24" y="120" len="208" color="$mattress_shadow"/>
+                <hline x="24" y="148" len="208" color="$mattress_shadow"/>
+                <!-- mattress quilting -->
+                <hline x="40" y="128" len="176" color="#EED8C4"/>
+                <hline x="40" y="136" len="176" color="#EED8C4"/>
+                <hline x="40" y="144" len="176" color="#EED8C4"/>
             </pixel-data>
         </layer>
 
-        <!-- Одеяло — анимируемый слой (z=2) -->
-        <layer id="blanket" type="animated" z-order="2" width="64" height="48">
+        <!-- z=2: pillows -->
+        <layer id="pillows" type="base" z-order="2" width="256" height="192">
             <pixel-data>
-                <!-- Основное полотно одеяла -->
-                <rect x="20" y="26" w="36" h="12" color="#B5EAD7"/>
-                <rect x="21" y="27" w="34" h="10" color="#C8F0E0"/>
-                <!-- Верхний край (отворот) -->
-                <rect x="20" y="26" w="36" h="3" color="#A0D8C0"/>
-                <hline x="20" y="25" len="36" color="#90C8B0"/>
-                <!-- Складки -->
-                <vline x="32" y="28" len="8" color="#A0D8C0"/>
-                <vline x="44" y="28" len="8" color="#A0D8C0"/>
+                <!-- upper pillow -->
+                <rect x="32" y="96" w="56" h="32" color="$pillow_white"/>
+                <rect x="36" y="100" w="48" h="24" color="$pillow_cream"/>
+                <hline x="32" y="96" len="56" color="$pillow_shadow"/>
+                <!-- pillow stitching -->
+                <hline x="40" y="108" len="40" color="#EEE5D8"/>
+                <vline x="56" y="100" len="24" color="#EEE5D8"/>
+                <!-- lower pillow -->
+                <rect x="32" y="120" w="56" h="24" color="$pillow_white"/>
+                <rect x="36" y="124" w="48" h="16" color="$pillow_cream"/>
+                <!-- pillow stitching lower -->
+                <hline x="40" y="132" len="40" color="#EEE5D8"/>
             </pixel-data>
         </layer>
 
-        <!-- Overlay: вмятина подушки (z=3, только при состоянии occupied) -->
-        <layer id="pillow-dent" type="overlay" z-order="3" width="64" height="48"
+        <!-- z=3: blanket (animated) -->
+        <layer id="blanket" type="animated" z-order="3" width="256" height="192">
+            <pixel-data>
+                <!-- main blanket body -->
+                <rect x="80" y="104" w="144" h="48" color="$blanket_main"/>
+                <rect x="84" y="108" w="136" h="40" color="$blanket_light"/>
+                <!-- top fold -->
+                <rect x="80" y="104" w="144" h="12" color="$blanket_fold"/>
+                <hline x="80" y="100" len="144" color="$blanket_edge"/>
+                <!-- vertical folds -->
+                <vline x="128" y="112" len="32" color="$blanket_fold"/>
+                <vline x="176" y="112" len="32" color="$blanket_fold"/>
+                <!-- quilted pattern -->
+                <hline x="88" y="120" len="128" color="#A8E0C8"/>
+                <hline x="88" y="132" len="128" color="#A8E0C8"/>
+                <hline x="88" y="144" len="128" color="#A8E0C8"/>
+                <!-- shadow at bottom edge -->
+                <hline x="80" y="148" len="144" color="#88C0A8"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=4: pillow dent (occupied only) -->
+        <layer id="pillow-dent" type="overlay" z-order="4" width="256" height="192"
                condition="state:occupied">
             <pixel-data>
-                <!-- Вмятина от головы -->
-                <rect x="11" y="26" w="8" h="4" color="#F0E0D0"/>
-                <rect x="12" y="27" w="6" h="2" color="#E8D0B8"/>
+                <rect x="44" y="104" w="32" h="16" color="#F0E0D0"/>
+                <rect x="48" y="108" w="24" h="8" color="#E8D0B8"/>
             </pixel-data>
         </layer>
 
-        <!-- Overlay: Zzz-эффект (z=4, только при состоянии sleeping) -->
-        <layer id="zzz-effect" type="animated-overlay" z-order="4" width="64" height="48"
+        <!-- z=5: zzz effect (sleeping only) -->
+        <layer id="zzz-effect" type="animated-overlay" z-order="5" width="256" height="192"
                condition="state:sleeping">
             <pixel-data>
-                <!-- Рисуется покадрово в анимации zzz ниже -->
+                <pixel x="72" y="64" color="$zzz_color"/>
+                <pixel x="76" y="60" color="$zzz_color"/>
+                <pixel x="80" y="56" color="$zzz_color"/>
             </pixel-data>
         </layer>
     </layers>
 
     <animations>
-        <!-- Idle: лёгкое "дыхание" одеяла -->
-        <animation name="idle" frames="6" fps="2" loop="true"
-                   frame-width="64" frame-height="48">
+        <!-- idle: blanket breathing, 10 frames -->
+        <animation name="idle" frames="10" fps="2" loop="true"
+                   frame-width="256" frame-height="192">
             <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="blanket:0,-1"/>
-            <frame index="2" layer-offsets="blanket:0,-1"/>
-            <frame index="3" layer-offsets=""/>
-            <frame index="4" layer-offsets=""/>
+            <frame index="1" layer-offsets="blanket:0,-2"/>
+            <frame index="2" layer-offsets="blanket:0,-4"/>
+            <frame index="3" layer-offsets="blanket:0,-4"/>
+            <frame index="4" layer-offsets="blanket:0,-2"/>
             <frame index="5" layer-offsets=""/>
+            <frame index="6" layer-offsets=""/>
+            <frame index="7" layer-offsets="blanket:0,-2"/>
+            <frame index="8" layer-offsets="blanket:0,-2"/>
+            <frame index="9" layer-offsets=""/>
         </animation>
 
-        <!-- Zzz: буквы Z всплывают над кроватью -->
-        <animation name="zzz" frames="4" fps="3" loop="true"
-                   frame-width="64" frame-height="48"
+        <!-- zzz: Z letters float up -->
+        <animation name="zzz" frames="10" fps="3" loop="true"
+                   frame-width="256" frame-height="192"
                    condition="state:sleeping">
-            <description>
-                Кадр 0: маленькая "z" появляется (x=18, y=16, color=#A0A0C0)
-                Кадр 1: "z" поднимается (y=12), появляется средняя "Z" (x=20, y=18, color=#8888B0)
-                Кадр 2: обе поднимаются, появляется большая "Z" (x=22, y=20, color=#7070A0)
-                Кадр 3: все три буквы fade — пустой кадр (пауза перед циклом)
-            </description>
-            <frame index="0" layer-offsets="zzz-effect:0,0"/>
-            <frame index="1" layer-offsets="zzz-effect:0,-2"/>
-            <frame index="2" layer-offsets="zzz-effect:0,-4"/>
-            <frame index="3" layer-offsets=""/>
+            <frame index="0" layer-offsets="zzz-effect:0,0; blanket:0,-2"/>
+            <frame index="1" layer-offsets="zzz-effect:0,-4; blanket:0,-4"/>
+            <frame index="2" layer-offsets="zzz-effect:4,-8; blanket:0,-4"/>
+            <frame index="3" layer-offsets="zzz-effect:4,-12; blanket:0,-2"/>
+            <frame index="4" layer-offsets="zzz-effect:0,-16; blanket:0,-2"/>
+            <frame index="5" layer-offsets="zzz-effect:-4,-20"/>
+            <frame index="6" layer-offsets="zzz-effect:-4,-24"/>
+            <frame index="7" layer-offsets="blanket:0,-2"/>
+            <frame index="8" layer-offsets="blanket:0,-4"/>
+            <frame index="9" layer-offsets="blanket:0,-2"/>
         </animation>
 
-        <!-- Occupied: статичное состояние с вмятиной подушки, одеяло чуть сдвинуто -->
-        <animation name="occupied-idle" frames="6" fps="2" loop="true"
-                   frame-width="64" frame-height="48"
+        <!-- occupied-idle: pillow dented + blanket moved -->
+        <animation name="occupied-idle" frames="10" fps="2" loop="true"
+                   frame-width="256" frame-height="192"
                    condition="state:occupied">
-            <frame index="0" layer-offsets="blanket:0,-1; pillow-dent:0,0"/>
-            <frame index="1" layer-offsets="blanket:0,-2; pillow-dent:0,0"/>
-            <frame index="2" layer-offsets="blanket:0,-2; pillow-dent:0,0"/>
-            <frame index="3" layer-offsets="blanket:0,-1; pillow-dent:0,0"/>
-            <frame index="4" layer-offsets="blanket:0,-1; pillow-dent:0,0"/>
-            <frame index="5" layer-offsets="blanket:0,-1; pillow-dent:0,0"/>
+            <frame index="0" layer-offsets="blanket:0,-4; pillow-dent:0,0"/>
+            <frame index="1" layer-offsets="blanket:0,-8; pillow-dent:0,0"/>
+            <frame index="2" layer-offsets="blanket:0,-8; pillow-dent:0,0"/>
+            <frame index="3" layer-offsets="blanket:0,-4; pillow-dent:0,0"/>
+            <frame index="4" layer-offsets="blanket:0,-4; pillow-dent:0,0"/>
+            <frame index="5" layer-offsets="blanket:0,-4; pillow-dent:0,0"/>
+            <frame index="6" layer-offsets="blanket:0,-8; pillow-dent:0,0"/>
+            <frame index="7" layer-offsets="blanket:0,-8; pillow-dent:0,0"/>
+            <frame index="8" layer-offsets="blanket:0,-4; pillow-dent:0,0"/>
+            <frame index="9" layer-offsets="blanket:0,-4; pillow-dent:0,0"/>
         </animation>
     </animations>
 
     <states>
-        <state name="empty" description="Кровать пустая, одеяло расправлено"/>
-        <state name="occupied" description="Таня лежит — вмятина на подушке, одеяло сдвинуто"/>
-        <state name="sleeping" description="Таня спит — Zzz-эффект + дыхание одеяла"/>
+        <state name="empty" description="Empty bed, blanket smooth"/>
+        <state name="occupied" description="Person lying — pillow dent, blanket shifted"/>
+        <state name="sleeping" description="Person sleeping — Zzz effect + breathing blanket"/>
     </states>
 
     <interaction>
-        <action code="SLEEP" description="Лечь спать — переход empty → occupied → sleeping"/>
-        <action code="WAKE_UP" description="Проснуться — переход sleeping → occupied → empty"/>
+        <action code="SLEEP" description="Go to sleep — empty → occupied → sleeping"/>
+        <action code="WAKE_UP" description="Wake up — sleeping → occupied → empty"/>
     </interaction>
 
     <naming>

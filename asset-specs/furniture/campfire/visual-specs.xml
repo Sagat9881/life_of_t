@@ -1,148 +1,251 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<asset-spec>
+<!--
+  Campfire — central evening/night object at summer_camp.
+  Canvas ×4: 128×128 (was 32×32). Stone ring + logs + animated fire.
+  Enhanced: individual stone shapes, charred log detail, layered fire,
+  ember particles, warm glow gradient, smoke wisps.
+-->
+<asset-spec extends="abstract/materials/stone@1.0">
     <meta>
         <entity-type>furniture</entity-type>
         <entity-name>campfire</entity-name>
-        <version>1.0.0</version>
+        <version>3.0.0</version>
         <location>summer_camp</location>
-        <description>
-            Костёр — центральный объект вечерних/ночных сцен summer_camp.
-            Рядом сидят персонажи, разговаривают, жарят маршмэллоу.
-        </description>
     </meta>
 
+    <color-palette>
+        <color name="$stone_base" value="#666666"/>
+        <color name="$stone_light" value="#888888"/>
+        <color name="$stone_dark" value="#555555"/>
+        <color name="$stone_highlight" value="#8A8A8A"/>
+        <color name="$log_base" value="#5C3A1E"/>
+        <color name="$log_light" value="#6B4A2E"/>
+        <color name="$log_dark" value="#4A2E14"/>
+        <color name="$char" value="#1A0A00"/>
+        <color name="$fire_red" value="#CC3300"/>
+        <color name="$fire_orange" value="#FF6600"/>
+        <color name="$fire_yellow" value="#FFAA00"/>
+        <color name="$fire_bright" value="#FFDD00"/>
+        <color name="$fire_core" value="#FFEE44"/>
+        <color name="$fire_tip" value="#FFEE66"/>
+        <color name="$spark" value="#FFEE00"/>
+        <color name="$spark_dim" value="#FFAA00"/>
+        <color name="$glow_inner" value="#553300"/>
+        <color name="$glow_mid" value="#442200"/>
+        <color name="$glow_outer" value="#331800"/>
+        <color name="$smoke" value="#808080"/>
+        <color name="$smoke_light" value="#A0A0A0"/>
+    </color-palette>
+
     <layers>
-        <!-- z=0: камни по кругу -->
-        <layer id="stones" type="base" z-order="0" width="32" height="32">
+        <!-- z=0: ground scorch mark -->
+        <layer id="scorch" type="base" z-order="0" width="128" height="128">
             <pixel-data>
-                <!-- кольцо камней -->
-                <rect x="4" y="22" w="24" h="4" color="#666666"/>
-                <rect x="6" y="20" w="20" h="2" color="#777777"/>
-                <rect x="6" y="26" w="20" h="2" color="#555555"/>
-                <!-- отдельные камни -->
-                <pixel x="4" y="22" color="#888888"/>
-                <pixel x="27" y="22" color="#888888"/>
-                <pixel x="4" y="25" color="#707070"/>
-                <pixel x="27" y="25" color="#707070"/>
-                <pixel x="8" y="20" color="#8A8A8A"/>
-                <pixel x="22" y="20" color="#8A8A8A"/>
-                <pixel x="8" y="27" color="#606060"/>
-                <pixel x="22" y="27" color="#606060"/>
+                <rect x="12" y="92" w="104" h="20" color="#2A2218"/>
+                <rect x="20" y="96" w="88" h="12" color="#221A10"/>
+                <hline x="16" y="108" len="96" color="#302820"/>
             </pixel-data>
         </layer>
 
-        <!-- z=1: поленья -->
-        <layer id="logs" type="base" z-order="1" width="32" height="32">
+        <!-- z=1: stone ring -->
+        <layer id="stones" type="base" z-order="1" width="128" height="128">
             <pixel-data>
-                <!-- полено горизонтальное -->
-                <rect x="8" y="22" w="16" h="3" color="#5C3A1E"/>
-                <hline x="8" y="22" len="16" color="#6B4A2E"/>
-                <!-- полено крест-накрест -->
-                <rect x="12" y="20" w="3" h="6" color="#4A2E14"/>
-                <vline x="13" y="20" len="6" color="#5C3A1E"/>
-                <!-- второе полено наискось -->
-                <pixel x="10" y="21" color="#5C3A1E"/>
-                <pixel x="11" y="22" color="#5C3A1E"/>
-                <pixel x="20" y="21" color="#5C3A1E"/>
-                <pixel x="19" y="22" color="#5C3A1E"/>
-                <!-- обугленные концы -->
-                <pixel x="8" y="23" color="#1A0A00"/>
-                <pixel x="23" y="23" color="#1A0A00"/>
+                <!-- stone ring base -->
+                <rect x="16" y="88" w="96" h="16" color="$stone_base"/>
+                <rect x="24" y="80" w="80" h="8" color="$stone_light"/>
+                <rect x="24" y="104" w="80" h="8" color="$stone_dark"/>
+                <!-- individual stone highlights -->
+                <pixel x="16" y="88" color="$stone_highlight"/>
+                <pixel x="108" y="88" color="$stone_highlight"/>
+                <pixel x="16" y="100" color="#707070"/>
+                <pixel x="108" y="100" color="#707070"/>
+                <pixel x="32" y="80" color="$stone_highlight"/>
+                <pixel x="88" y="80" color="$stone_highlight"/>
+                <pixel x="32" y="108" color="#606060"/>
+                <pixel x="88" y="108" color="#606060"/>
+                <!-- stone texture -->
+                <pixel x="40" y="92" color="#777777"/>
+                <pixel x="56" y="88" color="#5A5A5A"/>
+                <pixel x="72" y="96" color="#6A6A6A"/>
+                <pixel x="88" y="92" color="#777777"/>
+                <!-- mortar lines -->
+                <hline x="24" y="92" len="80" color="#4A4A4A"/>
+                <hline x="24" y="100" len="80" color="#4A4A4A"/>
             </pixel-data>
         </layer>
 
-        <!-- z=2: световое пятно (glow) — анимируемый overlay -->
-        <layer id="glow" type="animated-overlay" z-order="2" width="32" height="32"
+        <!-- z=2: logs -->
+        <layer id="logs" type="base" z-order="2" width="128" height="128">
+            <pixel-data>
+                <!-- horizontal log -->
+                <rect x="32" y="88" w="64" h="12" color="$log_base"/>
+                <hline x="32" y="88" len="64" color="$log_light"/>
+                <hline x="32" y="96" len="64" color="$log_dark"/>
+                <!-- cross log -->
+                <rect x="48" y="80" w="12" h="24" color="$log_dark"/>
+                <vline x="52" y="80" len="24" color="$log_base"/>
+                <!-- diagonal pieces -->
+                <pixel x="40" y="84" color="$log_base"/>
+                <pixel x="44" y="88" color="$log_base"/>
+                <pixel x="80" y="84" color="$log_base"/>
+                <pixel x="76" y="88" color="$log_base"/>
+                <!-- charred ends -->
+                <pixel x="32" y="92" color="$char"/>
+                <pixel x="92" y="92" color="$char"/>
+                <pixel x="36" y="96" color="$char"/>
+                <pixel x="88" y="96" color="$char"/>
+                <!-- bark texture -->
+                <hline x="36" y="90" len="56" color="#503018"/>
+                <pixel x="48" y="94" color="#503018"/>
+                <pixel x="64" y="94" color="#503018"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=3: warm glow (animated) -->
+        <layer id="glow" type="animated-overlay" z-order="3" width="128" height="128"
                condition="state:lit">
             <pixel-data>
-                <!-- тёплое свечение вокруг -->
-                <rect x="2" y="16" w="28" h="14" color="#331800"/>
-                <rect x="6" y="18" w="20" h="10" color="#442200"/>
-                <rect x="10" y="19" w="12" h="6" color="#553300"/>
+                <rect x="8" y="64" w="112" h="56" color="$glow_outer"/>
+                <rect x="24" y="72" w="80" h="40" color="$glow_mid"/>
+                <rect x="40" y="76" w="48" h="24" color="$glow_inner"/>
             </pixel-data>
         </layer>
 
-        <!-- z=3: пламя — анимируемый overlay -->
-        <layer id="fire" type="animated-overlay" z-order="3" width="32" height="32"
+        <!-- z=4: fire (animated) -->
+        <layer id="fire" type="animated-overlay" z-order="4" width="128" height="128"
                condition="state:lit">
             <pixel-data>
-                <!-- основное пламя -->
-                <rect x="10" y="14" w="12" h="8" color="#FF6600"/>
-                <rect x="12" y="12" w="8" h="4" color="#FFAA00"/>
-                <rect x="14" y="10" w="4" h="2" color="#FFDD00"/>
-                <!-- жёлтое ядро -->
-                <rect x="13" y="16" w="6" h="4" color="#FFCC00"/>
-                <rect x="14" y="14" w="4" h="2" color="#FFEE44"/>
-                <!-- верхушки -->
-                <pixel x="15" y="9" color="#FFEE66"/>
-                <pixel x="16" y="8" color="#FFCC22"/>
-                <!-- красное основание -->
-                <rect x="10" y="20" w="12" h="2" color="#CC3300"/>
+                <!-- main flame body -->
+                <rect x="40" y="56" w="48" h="32" color="$fire_orange"/>
+                <rect x="48" y="48" w="32" h="16" color="$fire_yellow"/>
+                <rect x="56" y="40" w="16" h="8" color="$fire_bright"/>
+                <!-- yellow core -->
+                <rect x="52" y="64" w="24" h="16" color="#FFCC00"/>
+                <rect x="56" y="56" w="16" h="8" color="$fire_core"/>
+                <!-- flame tips -->
+                <pixel x="60" y="36" color="$fire_tip"/>
+                <pixel x="64" y="32" color="#FFCC22"/>
+                <pixel x="56" y="40" color="$fire_tip"/>
+                <pixel x="68" y="40" color="$fire_tip"/>
+                <!-- red base -->
+                <rect x="40" y="80" w="48" h="8" color="$fire_red"/>
+                <!-- flame detail -->
+                <pixel x="48" y="52" color="$fire_bright"/>
+                <pixel x="72" y="52" color="$fire_bright"/>
+                <pixel x="44" y="60" color="$fire_yellow"/>
+                <pixel x="80" y="60" color="$fire_yellow"/>
             </pixel-data>
         </layer>
 
-        <!-- z=4: искры -->
-        <layer id="sparks" type="animated-overlay" z-order="4" width="32" height="32"
+        <!-- z=5: sparks (animated) -->
+        <layer id="sparks" type="animated-overlay" z-order="5" width="128" height="128"
                condition="state:lit">
             <pixel-data>
-                <pixel x="12" y="8" color="#FFEE00"/>
-                <pixel x="18" y="6" color="#FFDD00"/>
-                <pixel x="14" y="5" color="#FFCC00"/>
-                <pixel x="20" y="7" color="#FFAA00"/>
+                <pixel x="48" y="32" color="$spark"/>
+                <pixel x="72" y="24" color="#FFDD00"/>
+                <pixel x="56" y="20" color="#FFCC00"/>
+                <pixel x="80" y="28" color="$spark_dim"/>
+                <pixel x="44" y="16" color="$spark"/>
+                <pixel x="68" y="12" color="#FFDD00"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=6: smoke wisps -->
+        <layer id="smoke" type="animated-overlay" z-order="6" width="128" height="128"
+               condition="state:lit">
+            <pixel-data>
+                <pixel x="60" y="24" color="$smoke"/>
+                <pixel x="64" y="20" color="$smoke_light"/>
+                <pixel x="56" y="16" color="$smoke"/>
+                <pixel x="68" y="12" color="$smoke_light"/>
             </pixel-data>
         </layer>
     </layers>
 
     <animations>
-        <!-- idle: потухший костёр -->
-        <animation name="idle" frames="2" fps="1" loop="true"
-                   frame-width="32" frame-height="32">
+        <!-- idle: cold campfire -->
+        <animation name="idle" frames="4" fps="1" loop="true"
+                   frame-width="128" frame-height="128">
             <frame index="0" layer-offsets=""/>
             <frame index="1" layer-offsets=""/>
+            <frame index="2" layer-offsets=""/>
+            <frame index="3" layer-offsets=""/>
         </animation>
 
-        <!-- fire: пламя пляшет -->
-        <animation name="fire" frames="6" fps="5" loop="true"
-                   frame-width="32" frame-height="32"
+        <!-- fire: dancing flames, 10 frames -->
+        <animation name="fire" frames="10" fps="6" loop="true"
+                   frame-width="128" frame-height="128"
                    condition="state:lit">
-            <frame index="0" layer-offsets="fire:0,0"/>
-            <frame index="1" layer-offsets="fire:1,-1"/>
-            <frame index="2" layer-offsets="fire:-1,-2"/>
-            <frame index="3" layer-offsets="fire:0,-1"/>
-            <frame index="4" layer-offsets="fire:1,0"/>
-            <frame index="5" layer-offsets="fire:-1,-1"/>
+            <frame index="0" layer-offsets="fire:0,0; glow:0,0"/>
+            <frame index="1" layer-offsets="fire:4,-4; glow:0,0"/>
+            <frame index="2" layer-offsets="fire:-4,-8; glow:4,0"/>
+            <frame index="3" layer-offsets="fire:0,-4; glow:0,0"/>
+            <frame index="4" layer-offsets="fire:4,0; glow:-4,0"/>
+            <frame index="5" layer-offsets="fire:-4,-4; glow:0,0"/>
+            <frame index="6" layer-offsets="fire:0,-8; glow:4,0"/>
+            <frame index="7" layer-offsets="fire:4,-4; glow:0,0"/>
+            <frame index="8" layer-offsets="fire:-4,0; glow:-4,0"/>
+            <frame index="9" layer-offsets="fire:0,-4; glow:0,0"/>
         </animation>
 
-        <!-- sparks-fly: искры летят вверх -->
-        <animation name="sparks-fly" frames="4" fps="3" loop="true"
-                   frame-width="32" frame-height="32"
+        <!-- sparks flying up, 10 frames -->
+        <animation name="sparks-fly" frames="10" fps="4" loop="true"
+                   frame-width="128" frame-height="128"
                    condition="state:lit">
             <frame index="0" layer-offsets="sparks:0,0"/>
-            <frame index="1" layer-offsets="sparks:1,-1"/>
-            <frame index="2" layer-offsets="sparks:-1,-2"/>
-            <frame index="3" layer-offsets="sparks:0,-3"/>
+            <frame index="1" layer-offsets="sparks:4,-4"/>
+            <frame index="2" layer-offsets="sparks:-4,-8"/>
+            <frame index="3" layer-offsets="sparks:0,-12"/>
+            <frame index="4" layer-offsets="sparks:4,-16"/>
+            <frame index="5" layer-offsets="sparks:-4,-20"/>
+            <frame index="6" layer-offsets="sparks:0,-24"/>
+            <frame index="7" layer-offsets="sparks:4,-28"/>
+            <frame index="8" layer-offsets="sparks:-4,-32"/>
+            <frame index="9" layer-offsets="sparks:0,-36"/>
         </animation>
 
-        <!-- glow-pulse: свечение мерцает -->
-        <animation name="glow-pulse" frames="4" fps="2" loop="true"
-                   frame-width="32" frame-height="32"
+        <!-- glow pulse, 10 frames -->
+        <animation name="glow-pulse" frames="10" fps="2" loop="true"
+                   frame-width="128" frame-height="128"
                    condition="state:lit">
             <frame index="0" layer-offsets="glow:0,0"/>
             <frame index="1" layer-offsets="glow:0,0"/>
-            <frame index="2" layer-offsets="glow:1,0"/>
-            <frame index="3" layer-offsets="glow:-1,0"/>
+            <frame index="2" layer-offsets="glow:4,0"/>
+            <frame index="3" layer-offsets="glow:4,0"/>
+            <frame index="4" layer-offsets="glow:0,0"/>
+            <frame index="5" layer-offsets="glow:-4,0"/>
+            <frame index="6" layer-offsets="glow:-4,0"/>
+            <frame index="7" layer-offsets="glow:0,0"/>
+            <frame index="8" layer-offsets="glow:4,0"/>
+            <frame index="9" layer-offsets="glow:0,0"/>
+        </animation>
+
+        <!-- smoke rising, 10 frames -->
+        <animation name="smoke-rise" frames="10" fps="3" loop="true"
+                   frame-width="128" frame-height="128"
+                   condition="state:lit">
+            <frame index="0" layer-offsets="smoke:0,0"/>
+            <frame index="1" layer-offsets="smoke:4,-4"/>
+            <frame index="2" layer-offsets="smoke:-4,-8"/>
+            <frame index="3" layer-offsets="smoke:0,-12"/>
+            <frame index="4" layer-offsets="smoke:4,-16"/>
+            <frame index="5" layer-offsets="smoke:-4,-20"/>
+            <frame index="6" layer-offsets="smoke:0,-24"/>
+            <frame index="7" layer-offsets="smoke:4,-28"/>
+            <frame index="8" layer-offsets="smoke:-4,-32"/>
+            <frame index="9" layer-offsets="smoke:0,-36"/>
         </animation>
     </animations>
 
     <states>
-        <state name="cold" description="Потухший костёр, только камни и поленья"/>
-        <state name="lit" description="Горит — пламя, искры, свечение"/>
+        <state name="cold" description="Unlit campfire — just stones and logs"/>
+        <state name="lit" description="Burning — fire, sparks, glow, smoke"/>
     </states>
 
     <interaction>
-        <action code="LIGHT" description="Разжечь костёр"/>
-        <action code="SIT_NEARBY" description="Сесть рядом — общение, повышает настроение"/>
-        <action code="ROAST" description="Жарить маршмэллоу — мини-активность"/>
+        <action code="LIGHT" description="Light the fire"/>
+        <action code="SIT_NEARBY" description="Sit nearby — socialize, boost mood"/>
+        <action code="ROAST" description="Roast marshmallows — mini activity"/>
     </interaction>
 
     <naming>

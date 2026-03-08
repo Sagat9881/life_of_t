@@ -1,147 +1,182 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<asset-spec>
+<!--
+  Cat Tree — scratching post + house + shelves.
+  Canvas ×4: 128×224 (was 32×56). Extends wood material.
+  Enhanced: rope texture on post, carpet on platforms, detailed house interior,
+  dangling toy with momentum swing, scratch marks with particles.
+-->
+<asset-spec extends="abstract/materials/wood@1.0">
     <meta>
         <entity-type>furniture</entity-type>
         <entity-name>cat_tree</entity-name>
-        <version>1.0.0</version>
+        <version>3.0.0</version>
         <location>alexander_room</location>
-        <description>
-            Кошачий комплекс: когтеточка + домик + полки на разных уровнях.
-            Основное место тусовки кошек (Aijan, Cirilla, Lada, Klop).
-        </description>
     </meta>
 
+    <color-palette>
+        <color name="$wood_base" value="#8B7355"/>
+        <color name="$wood_light" value="#A08060"/>
+        <color name="$wood_dark" value="#7A6345"/>
+        <color name="$rope" value="#C8B896"/>
+        <color name="$rope_shadow" value="#B0A080"/>
+        <color name="$carpet" value="#90A070"/>
+        <color name="$carpet_light" value="#A0B080"/>
+        <color name="$house_interior" value="#3A2A1A"/>
+        <color name="$house_entrance" value="#2A1A0A"/>
+        <color name="$toy_red" value="#DD4444"/>
+        <color name="$toy_highlight" value="#EE5555"/>
+        <color name="$scratch" value="#E8D8B0"/>
+    </color-palette>
+
     <layers>
-        <!-- z=0: основание -->
-        <layer id="base-platform" type="base" z-order="0" width="32" height="56">
+        <!-- z=0: base platform -->
+        <layer id="base-platform" type="base" z-order="0" width="128" height="224">
             <pixel-data>
-                <!-- широкая тяжёлая платформа -->
-                <rect x="4" y="50" w="24" h="4" color="#8B7355"/>
-                <hline x="4" y="50" len="24" color="#A08060"/>
-                <!-- ковровое покрытие платформы -->
-                <rect x="5" y="51" w="22" h="2" color="#A0A080"/>
+                <rect x="16" y="200" w="96" h="16" color="$wood_base"/>
+                <hline x="16" y="200" len="96" color="$wood_light"/>
+                <rect x="20" y="204" w="88" h="8" color="$carpet"/>
+                <hline x="20" y="204" len="88" color="$carpet_light"/>
+                <!-- shadow under base -->
+                <rect x="20" y="216" w="88" h="4" color="#C8B8A0"/>
             </pixel-data>
         </layer>
 
-        <!-- z=1: центральный столб-когтеточка -->
-        <layer id="main-post" type="base" z-order="1" width="32" height="56">
+        <!-- z=1: main post (rope-wrapped) -->
+        <layer id="main-post" type="base" z-order="1" width="128" height="224">
             <pixel-data>
-                <!-- столб обмотан верёвкой -->
-                <rect x="13" y="10" w="6" h="40" color="#C8B896"/>
-                <!-- верёвочная текстура -->
-                <hline x="13" y="14" len="6" color="#B0A080"/>
-                <hline x="13" y="18" len="6" color="#B0A080"/>
-                <hline x="13" y="22" len="6" color="#B0A080"/>
-                <hline x="13" y="26" len="6" color="#B0A080"/>
-                <hline x="13" y="30" len="6" color="#B0A080"/>
-                <hline x="13" y="34" len="6" color="#B0A080"/>
-                <hline x="13" y="38" len="6" color="#B0A080"/>
-                <hline x="13" y="42" len="6" color="#B0A080"/>
-                <hline x="13" y="46" len="6" color="#B0A080"/>
+                <rect x="52" y="40" w="24" h="160" color="$rope"/>
+                <!-- rope texture lines every 16px -->
+                <hline x="52" y="56" len="24" color="$rope_shadow"/>
+                <hline x="52" y="72" len="24" color="$rope_shadow"/>
+                <hline x="52" y="88" len="24" color="$rope_shadow"/>
+                <hline x="52" y="104" len="24" color="$rope_shadow"/>
+                <hline x="52" y="120" len="24" color="$rope_shadow"/>
+                <hline x="52" y="136" len="24" color="$rope_shadow"/>
+                <hline x="52" y="152" len="24" color="$rope_shadow"/>
+                <hline x="52" y="168" len="24" color="$rope_shadow"/>
+                <hline x="52" y="184" len="24" color="$rope_shadow"/>
+                <!-- post edge shadow -->
+                <vline x="52" y="40" len="160" color="#A89878"/>
+                <vline x="72" y="40" len="160" color="#B8A888"/>
             </pixel-data>
         </layer>
 
-        <!-- z=2: нижняя полка -->
-        <layer id="shelf-low" type="base" z-order="2" width="32" height="56">
+        <!-- z=2: lower shelf -->
+        <layer id="shelf-low" type="base" z-order="2" width="128" height="224">
             <pixel-data>
-                <!-- полка на 2/3 высоты -->
-                <rect x="2" y="36" w="28" h="3" color="#8B7355"/>
-                <hline x="2" y="36" len="28" color="#A08060"/>
-                <!-- ковровое покрытие -->
-                <rect x="3" y="37" w="26" h="1" color="#90A070"/>
+                <rect x="8" y="144" w="112" h="12" color="$wood_base"/>
+                <hline x="8" y="144" len="112" color="$wood_light"/>
+                <rect x="12" y="148" w="104" h="4" color="$carpet"/>
+                <hline x="12" y="148" len="104" color="$carpet_light"/>
             </pixel-data>
         </layer>
 
-        <!-- z=3: верхняя полка -->
-        <layer id="shelf-high" type="base" z-order="3" width="32" height="56">
+        <!-- z=3: upper shelf -->
+        <layer id="shelf-high" type="base" z-order="3" width="128" height="224">
             <pixel-data>
-                <!-- полка наверху -->
-                <rect x="4" y="20" w="24" h="3" color="#8B7355"/>
-                <hline x="4" y="20" len="24" color="#A08060"/>
-                <!-- ковровое покрытие -->
-                <rect x="5" y="21" w="22" h="1" color="#90A070"/>
+                <rect x="16" y="80" w="96" h="12" color="$wood_base"/>
+                <hline x="16" y="80" len="96" color="$wood_light"/>
+                <rect x="20" y="84" w="88" h="4" color="$carpet"/>
+                <hline x="20" y="84" len="88" color="$carpet_light"/>
             </pixel-data>
         </layer>
 
-        <!-- z=4: домик-коробка наверху -->
-        <layer id="house-box" type="base" z-order="4" width="32" height="56">
+        <!-- z=4: house box at top -->
+        <layer id="house-box" type="base" z-order="4" width="128" height="224">
             <pixel-data>
-                <!-- стенки домика -->
-                <rect x="6" y="4" w="20" h="16" color="#8B7355"/>
-                <!-- крыша -->
-                <rect x="4" y="2" w="24" h="3" color="#7A6345"/>
-                <hline x="4" y="2" len="24" color="#8B7355"/>
-                <!-- вход в домик -->
-                <rect x="11" y="8" w="10" h="10" color="#2A1A0A"/>
-                <rect x="13" y="6" w="6" h="2" color="#2A1A0A"/>
-                <!-- внутренняя обивка -->
-                <rect x="12" y="9" w="8" h="8" color="#3A2A1A"/>
-                <!-- ковровое покрытие пола домика -->
-                <hline x="12" y="17" len="8" color="#90A070"/>
+                <!-- walls -->
+                <rect x="24" y="16" w="80" h="64" color="$wood_base"/>
+                <!-- roof -->
+                <rect x="16" y="8" w="96" h="12" color="$wood_dark"/>
+                <hline x="16" y="8" len="96" color="$wood_base"/>
+                <!-- entrance hole -->
+                <rect x="44" y="32" w="40" h="40" color="$house_entrance"/>
+                <rect x="52" y="24" w="24" h="8" color="$house_entrance"/>
+                <!-- interior -->
+                <rect x="48" y="36" w="32" h="32" color="$house_interior"/>
+                <!-- carpet floor -->
+                <hline x="48" y="68" len="32" color="$carpet"/>
+                <!-- arch detail -->
+                <pixel x="44" y="32" color="$wood_light"/>
+                <pixel x="80" y="32" color="$wood_light"/>
             </pixel-data>
         </layer>
 
-        <!-- z=5: верёвка-игрушка с помпоном — анимируемый overlay -->
-        <layer id="rope-toy" type="animated" z-order="5" width="32" height="56">
+        <!-- z=5: rope toy (animated) -->
+        <layer id="rope-toy" type="animated" z-order="5" width="128" height="224">
             <pixel-data>
-                <!-- верёвка свисает с верхней полки -->
-                <pixel x="26" y="23" color="#C8B896"/>
-                <pixel x="26" y="24" color="#C8B896"/>
-                <pixel x="26" y="25" color="#C8B896"/>
-                <pixel x="26" y="26" color="#C8B896"/>
-                <pixel x="26" y="27" color="#C8B896"/>
-                <!-- помпон -->
-                <rect x="24" y="28" w="4" h="4" color="#DD4444"/>
-                <rect x="25" y="29" w="2" h="2" color="#EE5555"/>
+                <!-- string from upper shelf -->
+                <pixel x="104" y="92" color="$rope"/>
+                <pixel x="104" y="96" color="$rope"/>
+                <pixel x="104" y="100" color="$rope"/>
+                <pixel x="104" y="104" color="$rope"/>
+                <pixel x="104" y="108" color="$rope"/>
+                <!-- pom-pom -->
+                <rect x="96" y="112" w="16" h="16" color="$toy_red"/>
+                <rect x="100" y="116" w="8" h="8" color="$toy_highlight"/>
             </pixel-data>
         </layer>
 
-        <!-- z=6: царапки — overlay при использовании -->
-        <layer id="scratch-marks" type="overlay" z-order="6" width="32" height="56"
+        <!-- z=6: scratch marks (in_use only) -->
+        <layer id="scratch-marks" type="overlay" z-order="6" width="128" height="224"
                condition="state:in_use">
             <pixel-data>
-                <!-- свежие царапины на столбике -->
-                <pixel x="13" y="28" color="#E8D8B0"/>
-                <pixel x="14" y="29" color="#E8D8B0"/>
-                <pixel x="13" y="30" color="#E8D8B0"/>
-                <pixel x="18" y="32" color="#E8D8B0"/>
-                <pixel x="17" y="33" color="#E8D8B0"/>
-                <pixel x="18" y="34" color="#E8D8B0"/>
+                <pixel x="52" y="112" color="$scratch"/>
+                <pixel x="56" y="116" color="$scratch"/>
+                <pixel x="52" y="120" color="$scratch"/>
+                <pixel x="72" y="128" color="$scratch"/>
+                <pixel x="68" y="132" color="$scratch"/>
+                <pixel x="72" y="136" color="$scratch"/>
+                <!-- scratch particles -->
+                <pixel x="48" y="116" color="#F0E0C0"/>
+                <pixel x="76" y="132" color="#F0E0C0"/>
             </pixel-data>
         </layer>
     </layers>
 
     <animations>
-        <!-- idle: помпон раскачивается -->
-        <animation name="idle" frames="4" fps="3" loop="true"
-                   frame-width="32" frame-height="56">
+        <!-- idle: pom-pom swings lazily, 10 frames -->
+        <animation name="idle" frames="10" fps="3" loop="true"
+                   frame-width="128" frame-height="224">
             <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="rope-toy:-1,0"/>
-            <frame index="2" layer-offsets=""/>
-            <frame index="3" layer-offsets="rope-toy:1,0"/>
+            <frame index="1" layer-offsets="rope-toy:-4,0"/>
+            <frame index="2" layer-offsets="rope-toy:-8,4"/>
+            <frame index="3" layer-offsets="rope-toy:-4,4"/>
+            <frame index="4" layer-offsets=""/>
+            <frame index="5" layer-offsets="rope-toy:4,0"/>
+            <frame index="6" layer-offsets="rope-toy:8,4"/>
+            <frame index="7" layer-offsets="rope-toy:4,4"/>
+            <frame index="8" layer-offsets=""/>
+            <frame index="9" layer-offsets="rope-toy:-4,0"/>
         </animation>
 
-        <!-- play: помпон раскачивается сильнее (кошка играет) -->
-        <animation name="play" frames="4" fps="6" loop="true"
-                   frame-width="32" frame-height="56"
+        <!-- play: pom-pom swings wildly, 10 frames -->
+        <animation name="play" frames="10" fps="8" loop="true"
+                   frame-width="128" frame-height="224"
                    condition="state:in_use">
-            <frame index="0" layer-offsets="rope-toy:-2,0"/>
-            <frame index="1" layer-offsets="rope-toy:0,1"/>
-            <frame index="2" layer-offsets="rope-toy:2,0"/>
-            <frame index="3" layer-offsets="rope-toy:0,-1"/>
+            <frame index="0" layer-offsets="rope-toy:-8,0; scratch-marks:0,0"/>
+            <frame index="1" layer-offsets="rope-toy:0,8; scratch-marks:0,0"/>
+            <frame index="2" layer-offsets="rope-toy:8,0; scratch-marks:0,0"/>
+            <frame index="3" layer-offsets="rope-toy:0,-8; scratch-marks:0,0"/>
+            <frame index="4" layer-offsets="rope-toy:-12,4; scratch-marks:0,0"/>
+            <frame index="5" layer-offsets="rope-toy:0,12; scratch-marks:0,0"/>
+            <frame index="6" layer-offsets="rope-toy:12,4; scratch-marks:0,0"/>
+            <frame index="7" layer-offsets="rope-toy:0,-12; scratch-marks:0,0"/>
+            <frame index="8" layer-offsets="rope-toy:-8,0; scratch-marks:0,0"/>
+            <frame index="9" layer-offsets="rope-toy:8,0; scratch-marks:0,0"/>
         </animation>
     </animations>
 
     <states>
-        <state name="empty" description="Никого нет, помпон качается лениво"/>
-        <state name="in_use" description="Кошка точит когти или играет — помпон мотается активно, видны царапки"/>
-        <state name="occupied" description="Кошка сидит на полке или в домике"/>
+        <state name="empty" description="Nobody around, pom-pom swings lazily"/>
+        <state name="in_use" description="Cat scratching or playing — active pom-pom, scratch marks"/>
+        <state name="occupied" description="Cat resting on shelf or in house"/>
     </states>
 
     <interaction>
-        <action code="SCRATCH" description="Кошка точит когти — повышает comfort"/>
-        <action code="PLAY" description="Кошка играет с помпоном — повышает happiness"/>
-        <action code="REST" description="Кошка ложится на полку или в домик"/>
+        <action code="SCRATCH" description="Cat scratches — boost comfort"/>
+        <action code="PLAY" description="Cat plays with pom-pom — boost happiness"/>
+        <action code="REST" description="Cat lies on shelf or inside house"/>
     </interaction>
 
     <naming>

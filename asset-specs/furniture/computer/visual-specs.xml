@@ -1,156 +1,213 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<asset-spec>
+<!--
+  Computer — Tanya's work station. Main object for WORK action.
+  Canvas ×4: 192×192 (was 48×48). Monitor + keyboard + pink mug + steam.
+  Enhanced: desk wood grain, monitor bezel detail, screen content lines,
+  keyboard individual keys, mug gradient, layered steam particles.
+-->
+<asset-spec extends="abstract/materials/metal@1.0">
     <meta>
         <entity-type>furniture</entity-type>
         <entity-name>computer</entity-name>
-        <version>1.0.0</version>
+        <version>3.0.0</version>
         <location>home_room</location>
-        <description>
-            Рабочий компьютер Тани — основной объект для действия «Работа».
-            Дизайн на Tilda, фриланс. Расположен на столе в home_room.
-            Ключевой интерактивный предмет повседневного геймплея.
-        </description>
     </meta>
 
+    <color-palette>
+        <color name="$desk_base" value="#A07850"/>
+        <color name="$desk_light" value="#B08860"/>
+        <color name="$desk_dark" value="#906840"/>
+        <color name="$desk_leg" value="#8B6538"/>
+        <color name="$desk_brace" value="#7A5830"/>
+        <color name="$desk_grain" value="#987048"/>
+        <color name="$monitor_frame" value="#3A3A3A"/>
+        <color name="$monitor_inner" value="#2A2A2A"/>
+        <color name="$monitor_stand" value="#4A4A4A"/>
+        <color name="$screen_base" value="#D0E8F8"/>
+        <color name="$screen_bright" value="#E0F0FF"/>
+        <color name="$cursor" value="#FF6B9D"/>
+        <color name="$keyboard_base" value="#505050"/>
+        <color name="$keyboard_light" value="#606060"/>
+        <color name="$key" value="#787878"/>
+        <color name="$mug_body" value="#FFB6C1"/>
+        <color name="$mug_dark" value="#FF9AAF"/>
+        <color name="$coffee" value="#8B4513"/>
+        <color name="$steam" value="#E0E0E0"/>
+        <color name="$steam_light" value="#D0D0D0"/>
+        <color name="$shadow" value="#D0C0A8"/>
+    </color-palette>
+
     <layers>
-        <!-- Стол (z=0, основа) -->
-        <layer id="desk" type="base" z-order="0" width="48" height="48">
+        <!-- z=0: desk -->
+        <layer id="desk" type="base" z-order="0" width="192" height="192">
             <pixel-data>
-                <!-- Столешница -->
-                <rect x="4" y="28" w="40" h="3" color="#A07850"/>
-                <hline x="4" y="28" len="40" color="#B08860"/>
-                <hline x="4" y="30" len="40" color="#906840"/>
-                <!-- Ножки стола -->
-                <rect x="6" y="31" w="3" h="14" color="#8B6538"/>
-                <rect x="39" y="31" w="3" h="14" color="#8B6538"/>
-                <!-- Перекладина -->
-                <rect x="9" y="38" w="30" h="2" color="#7A5830"/>
-                <!-- Тень под столом -->
-                <hline x="6" y="45" len="36" color="#D0C0A8"/>
+                <!-- desktop surface -->
+                <rect x="16" y="112" w="160" h="12" color="$desk_base"/>
+                <hline x="16" y="112" len="160" color="$desk_light"/>
+                <hline x="16" y="120" len="160" color="$desk_dark"/>
+                <!-- grain -->
+                <hline x="24" y="114" len="144" color="$desk_grain"/>
+                <hline x="32" y="118" len="128" color="$desk_grain"/>
+                <!-- legs -->
+                <rect x="24" y="124" w="12" h="56" color="$desk_leg"/>
+                <rect x="156" y="124" w="12" h="56" color="$desk_leg"/>
+                <vline x="28" y="124" len="56" color="$desk_grain"/>
+                <vline x="160" y="124" len="56" color="$desk_grain"/>
+                <!-- cross brace -->
+                <rect x="36" y="152" w="120" h="8" color="$desk_brace"/>
+                <!-- floor shadow -->
+                <hline x="24" y="180" len="144" color="$shadow"/>
             </pixel-data>
         </layer>
 
-        <!-- Монитор — корпус (z=1, статичный) -->
-        <layer id="monitor-frame" type="base" z-order="1" width="48" height="48">
+        <!-- z=1: monitor frame -->
+        <layer id="monitor-frame" type="base" z-order="1" width="192" height="192">
             <pixel-data>
-                <!-- Рамка монитора -->
-                <rect x="12" y="8" w="24" h="18" color="#3A3A3A"/>
-                <rect x="13" y="9" w="22" h="16" color="#2A2A2A"/>
-                <!-- Ножка монитора -->
-                <rect x="21" y="26" w="6" h="2" color="#3A3A3A"/>
-                <!-- Подставка -->
-                <rect x="18" y="27" w="12" h="1" color="#4A4A4A"/>
+                <!-- outer bezel -->
+                <rect x="48" y="32" w="96" h="72" color="$monitor_frame"/>
+                <rect x="52" y="36" w="88" h="64" color="$monitor_inner"/>
+                <!-- stand neck -->
+                <rect x="84" y="104" w="24" h="8" color="$monitor_frame"/>
+                <!-- stand base -->
+                <rect x="72" y="108" w="48" h="4" color="$monitor_stand"/>
+                <!-- bezel highlight top -->
+                <hline x="48" y="32" len="96" color="#4A4A4A"/>
+                <!-- power LED -->
+                <pixel x="96" y="100" color="#00FF00"/>
             </pixel-data>
         </layer>
 
-        <!-- Экран — анимируемый слой (z=2) -->
-        <layer id="screen-glow" type="animated" z-order="2" width="48" height="48">
+        <!-- z=2: screen glow (animated) -->
+        <layer id="screen-glow" type="animated" z-order="2" width="192" height="192">
             <pixel-data>
-                <!-- Базовое свечение экрана -->
-                <rect x="14" y="10" w="20" h="14" color="#D0E8F8"/>
-                <rect x="15" y="11" w="18" h="12" color="#E0F0FF"/>
+                <rect x="56" y="40" w="80" h="56" color="$screen_base"/>
+                <rect x="60" y="44" w="72" h="48" color="$screen_bright"/>
+                <!-- content lines hint -->
+                <hline x="64" y="52" len="64" color="#C8E0F0"/>
+                <hline x="64" y="60" len="56" color="#C8E0F0"/>
+                <hline x="64" y="68" len="60" color="#C8E0F0"/>
+                <hline x="64" y="76" len="48" color="#C8E0F0"/>
             </pixel-data>
         </layer>
 
-        <!-- Курсор на экране (z=3, только при active) -->
-        <layer id="cursor" type="animated-overlay" z-order="3" width="48" height="48"
+        <!-- z=3: cursor (active only) -->
+        <layer id="cursor" type="animated-overlay" z-order="3" width="192" height="192"
                condition="state:active">
             <pixel-data>
-                <pixel x="20" y="16" color="#FF6B9D"/>
+                <pixel x="80" y="64" color="$cursor"/>
+                <pixel x="84" y="64" color="$cursor"/>
             </pixel-data>
         </layer>
 
-        <!-- Клавиатура (z=4, статичная) -->
-        <layer id="keyboard" type="base" z-order="4" width="48" height="48">
+        <!-- z=4: keyboard -->
+        <layer id="keyboard" type="base" z-order="4" width="192" height="192">
             <pixel-data>
-                <rect x="16" y="29" w="16" h="2" color="#505050"/>
-                <rect x="17" y="29" w="14" h="1" color="#606060"/>
-                <!-- Точки-клавиши -->
-                <pixel x="18" y="29" color="#787878"/>
-                <pixel x="20" y="29" color="#787878"/>
-                <pixel x="22" y="29" color="#787878"/>
-                <pixel x="24" y="29" color="#787878"/>
-                <pixel x="26" y="29" color="#787878"/>
-                <pixel x="28" y="29" color="#787878"/>
+                <rect x="64" y="116" w="64" h="8" color="$keyboard_base"/>
+                <rect x="68" y="116" w="56" h="4" color="$keyboard_light"/>
+                <!-- individual keys row 1 -->
+                <pixel x="72" y="116" color="$key"/>
+                <pixel x="76" y="116" color="$key"/>
+                <pixel x="80" y="116" color="$key"/>
+                <pixel x="84" y="116" color="$key"/>
+                <pixel x="88" y="116" color="$key"/>
+                <pixel x="92" y="116" color="$key"/>
+                <pixel x="96" y="116" color="$key"/>
+                <pixel x="100" y="116" color="$key"/>
+                <pixel x="104" y="116" color="$key"/>
+                <pixel x="108" y="116" color="$key"/>
+                <pixel x="112" y="116" color="$key"/>
+                <pixel x="116" y="116" color="$key"/>
+                <!-- row 2 -->
+                <pixel x="74" y="120" color="$key"/>
+                <pixel x="78" y="120" color="$key"/>
+                <pixel x="82" y="120" color="$key"/>
+                <pixel x="86" y="120" color="$key"/>
+                <pixel x="90" y="120" color="$key"/>
+                <pixel x="94" y="120" color="$key"/>
+                <pixel x="98" y="120" color="$key"/>
+                <pixel x="102" y="120" color="$key"/>
+                <pixel x="106" y="120" color="$key"/>
+                <pixel x="110" y="120" color="$key"/>
             </pixel-data>
         </layer>
 
-        <!-- Кружка (z=5, статичная) -->
-        <layer id="mug" type="base" z-order="5" width="48" height="48">
+        <!-- z=5: mug -->
+        <layer id="mug" type="base" z-order="5" width="192" height="192">
             <pixel-data>
-                <!-- Корпус кружки -->
-                <rect x="36" y="24" w="5" h="5" color="#FFB6C1"/>
-                <rect x="37" y="25" w="3" h="3" color="#FF9AAF"/>
-                <!-- Ручка -->
-                <pixel x="41" y="25" color="#FFB6C1"/>
-                <pixel x="42" y="26" color="#FFB6C1"/>
-                <pixel x="41" y="27" color="#FFB6C1"/>
-                <!-- Жидкость внутри -->
-                <rect x="37" y="25" w="3" h="1" color="#8B4513"/>
+                <rect x="144" y="96" w="20" h="20" color="$mug_body"/>
+                <rect x="148" y="100" w="12" h="12" color="$mug_dark"/>
+                <!-- handle -->
+                <pixel x="164" y="100" color="$mug_body"/>
+                <pixel x="168" y="104" color="$mug_body"/>
+                <pixel x="164" y="108" color="$mug_body"/>
+                <!-- coffee inside -->
+                <rect x="148" y="100" w="12" h="4" color="$coffee"/>
+                <!-- mug rim highlight -->
+                <hline x="144" y="96" len="20" color="#FFD0D8"/>
             </pixel-data>
         </layer>
 
-        <!-- Пар от кружки (z=6, анимированный overlay) -->
-        <layer id="mug-steam" type="animated-overlay" z-order="6" width="48" height="48">
+        <!-- z=6: steam (animated) -->
+        <layer id="mug-steam" type="animated-overlay" z-order="6" width="192" height="192">
             <pixel-data>
-                <pixel x="38" y="22" color="#E0E0E0"/>
-                <pixel x="39" y="23" color="#D0D0D0"/>
+                <pixel x="152" y="88" color="$steam"/>
+                <pixel x="156" y="92" color="$steam_light"/>
+                <pixel x="148" y="84" color="$steam"/>
+                <pixel x="160" y="80" color="$steam_light"/>
             </pixel-data>
         </layer>
     </layers>
 
     <animations>
-        <!-- Idle: мягкое пульсирование экрана + пар от кружки -->
-        <animation name="idle" frames="4" fps="2" loop="true"
-                   frame-width="48" frame-height="48">
-            <description>
-                Экран мягко мерцает между двумя оттенками голубого.
-                Пар от кружки поднимается двумя пикселями.
-            </description>
+        <!-- idle: screen pulse + steam, 10 frames -->
+        <animation name="idle" frames="10" fps="2" loop="true"
+                   frame-width="192" frame-height="192">
             <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="screen-glow:0,0; mug-steam:0,-1"/>
-            <frame index="2" layer-offsets="mug-steam:0,-2"/>
-            <frame index="3" layer-offsets="mug-steam:1,-3"/>
+            <frame index="1" layer-offsets="mug-steam:0,-4"/>
+            <frame index="2" layer-offsets="mug-steam:4,-8"/>
+            <frame index="3" layer-offsets="mug-steam:0,-12"/>
+            <frame index="4" layer-offsets="mug-steam:-4,-16"/>
+            <frame index="5" layer-offsets=""/>
+            <frame index="6" layer-offsets="mug-steam:0,-4"/>
+            <frame index="7" layer-offsets="mug-steam:-4,-8"/>
+            <frame index="8" layer-offsets="mug-steam:0,-12"/>
+            <frame index="9" layer-offsets="mug-steam:4,-16"/>
         </animation>
 
-        <!-- Active: Таня работает — экран более активен, курсор двигается -->
-        <animation name="active-work" frames="6" fps="4" loop="true"
-                   frame-width="48" frame-height="48"
+        <!-- active-work: cursor moves, steam rises, 10 frames -->
+        <animation name="active-work" frames="10" fps="4" loop="true"
+                   frame-width="192" frame-height="192"
                    condition="state:active">
-            <description>
-                Экран показывает смену «строк» — горизонтальные полоски
-                чередуются, имитируя код/дизайн. Курсор двигается по экрану.
-                Пар продолжает подниматься.
-            </description>
-            <frame index="0" layer-offsets="cursor:0,0; mug-steam:0,-1"/>
-            <frame index="1" layer-offsets="cursor:2,0; mug-steam:0,-2"/>
-            <frame index="2" layer-offsets="cursor:4,1; mug-steam:1,-3"/>
-            <frame index="3" layer-offsets="cursor:2,2; mug-steam:0,0"/>
-            <frame index="4" layer-offsets="cursor:0,3; mug-steam:0,-1"/>
-            <frame index="5" layer-offsets="cursor:-1,1; mug-steam:0,-2"/>
+            <frame index="0" layer-offsets="cursor:0,0; mug-steam:0,-4"/>
+            <frame index="1" layer-offsets="cursor:8,0; mug-steam:0,-8"/>
+            <frame index="2" layer-offsets="cursor:16,4; mug-steam:4,-12"/>
+            <frame index="3" layer-offsets="cursor:8,8; mug-steam:0,0"/>
+            <frame index="4" layer-offsets="cursor:0,12; mug-steam:0,-4"/>
+            <frame index="5" layer-offsets="cursor:-4,4; mug-steam:0,-8"/>
+            <frame index="6" layer-offsets="cursor:4,0; mug-steam:-4,-12"/>
+            <frame index="7" layer-offsets="cursor:12,4; mug-steam:0,0"/>
+            <frame index="8" layer-offsets="cursor:8,8; mug-steam:0,-4"/>
+            <frame index="9" layer-offsets="cursor:0,4; mug-steam:0,-8"/>
         </animation>
 
-        <!-- Screen-off: экран выключен (ночь / Таня спит) -->
+        <!-- screen-off: dark screen, no steam -->
         <animation name="screen-off" frames="1" fps="1" loop="false"
-                   frame-width="48" frame-height="48"
+                   frame-width="192" frame-height="192"
                    condition="state:off">
-            <description>
-                Экран чёрный. Пар от кружки отсутствует (остыла).
-            </description>
-            <frame index="0" layer-offsets="screen-glow:0,100"/>
+            <frame index="0" layer-offsets="screen-glow:0,400"/>
         </animation>
     </animations>
 
     <states>
-        <state name="idle" description="Компьютер включён, Таня не работает — экран светится, пар идёт"/>
-        <state name="active" description="Таня работает — активная смена экрана, курсор двигается"/>
-        <state name="off" description="Компьютер выключен (ночь) — тёмный экран, нет пара"/>
+        <state name="idle" description="Computer on, Tanya not working — screen glows, steam rises"/>
+        <state name="active" description="Tanya working — cursor moves, active screen"/>
+        <state name="off" description="Computer off (night) — dark screen, no steam"/>
     </states>
 
     <interaction>
-        <action code="WORK_TILDA" description="Работать на Tilda — переход idle → active"/>
-        <action code="BROWSE" description="Сёрфить интернет — аналогично active, но другой паттерн экрана"/>
-        <action code="TURN_OFF" description="Выключить — переход active/idle → off"/>
+        <action code="WORK_TILDA" description="Work on Tilda — idle → active"/>
+        <action code="BROWSE" description="Browse internet — similar to active"/>
+        <action code="TURN_OFF" description="Turn off — active/idle → off"/>
     </interaction>
 
     <naming>
