@@ -8,9 +8,11 @@ public record QuestSpec(
     QuestMeta meta,
     List<StepSpec> steps
 ) {
-    public record QuestMeta(String title, String description, String category, int triggerDay, List<ConditionSpec> prerequisites) {}
-    public record StepSpec(String id, String description, List<ObjectiveSpec> objectives, DialogueEntry dialogue, RewardSpec reward) {}
-    public record ObjectiveSpec(String type, String target, int count, List<ConditionSpec> conditions) {}
-    public record DialogueEntry(String speaker, String text, List<String> choices) {}
-    public record RewardSpec(int energy, int stress, int mood, int money, Map<String, Integer> relationships, Map<String, Integer> skills) {}
+    public record QuestMeta(String title, String description, String category, int triggerDay) {}
+    public record StepSpec(String id, String type, String description,
+                           List<ObjectiveSpec> objectives, List<RewardSpec> rewards,
+                           DialogueEntry dialogue) {}
+    public record ObjectiveSpec(String type, String target, int required) {}
+    public record RewardSpec(String type, String target, int value) {}
+    public record DialogueEntry(String speaker, String text) {}
 }
