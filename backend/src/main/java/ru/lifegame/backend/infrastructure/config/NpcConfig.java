@@ -11,8 +11,8 @@ import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
 import ru.lifegame.backend.infrastructure.narrative.NarrativeContentLoader;
 
 /**
- * Spring configuration for the data-driven NPC engine.
- * All beans are abstract engine components — no concrete NPC knowledge.
+ * Spring configuration for NPC engine beans.
+ * All concrete NPC data comes from XML — this config only wires abstract engine components.
  */
 @Configuration
 public class NpcConfig {
@@ -33,13 +33,15 @@ public class NpcConfig {
     }
 
     @Bean
-    public NpcRegistry npcRegistry() {
-        return new NpcRegistry();
+    public NpcRegistry npcRegistry(NarrativeContentLoader loader) {
+        var specs = loader.loadAllNpcSpecsFromDirectory("narrative/npc-behavior");
+        return NpcRegistry.fromSpecs(specs);
     }
 
     @Bean
-    public NpcRelationshipGraph npcRelationshipGraph() {
-        return new NpcRelationshipGraph();
+    public NpcRelationshipGraph npcRelationshipGraph(NarrativeContentLoader loader) {
+        var edges = loader.loadRelationshipEdges("narrative/npc-relationships.xml");
+        return NpcRelationshipGraph.fromEdges(edges);
     }
 
     @Bean

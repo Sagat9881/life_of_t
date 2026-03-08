@@ -1,19 +1,18 @@
 package ru.lifegame.backend.application.view;
 
 /**
- * DTO representing the current activity state of a single NPC.
- * Sent to frontend for rendering NPC animations and positions.
+ * DTO representing a single NPC's current state for the frontend.
+ * Contains everything the renderer needs to display an NPC.
  */
 public record NpcActivityView(
-        String npcId,
-        String displayName,
-        String type,
-        String category,
-        String currentActivity,
-        String currentLocation,
-        String animation,
-        int happiness,
-        int energy,
-        boolean isAvailable
+    String npcId,
+    String displayName,
+    String category,
+    String currentActivity,
+    String currentLocation,
+    String animationKey,
+    int happiness,
+    int energy,
+    boolean isAvailableForInteraction
 ) {
 }

@@ -2,6 +2,5 @@
 
 All files from `com.life_of_t.*` have been relocated to `ru.lifegame.backend.*`.
 
-This directory should be deleted. The files here are no longer used.
-
-See commits for migration history.
+This marker file will be removed in the next cleanup commit.
+See commit history for migration details.
