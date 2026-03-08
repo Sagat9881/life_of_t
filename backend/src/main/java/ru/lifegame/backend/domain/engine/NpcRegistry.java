@@ -24,20 +24,19 @@ public class NpcRegistry {
         return Optional.ofNullable(instances.get(npcId));
     }
 
-    public List<NpcInstance> allNamed() {
-        return instances.values().stream()
-                .filter(i -> "named".equals(i.spec().type()))
-                .collect(Collectors.toList());
-    }
-
-    public List<NpcInstance> allFiller() {
-        return instances.values().stream()
-                .filter(i -> "filler".equals(i.spec().type()))
-                .collect(Collectors.toList());
+    public NpcInstance getOrThrow(String npcId) {
+        return Optional.ofNullable(instances.get(npcId))
+                .orElseThrow(() -> new IllegalArgumentException("NPC not found: " + npcId));
     }
 
     public Collection<NpcInstance> all() {
         return Collections.unmodifiableCollection(instances.values());
+    }
+
+    public List<NpcInstance> named() {
+        return instances.values().stream()
+                .filter(npc -> "named".equals(npc.spec().type()))
+                .collect(Collectors.toList());
     }
 
     public NpcRelationshipGraph relationshipGraph() {

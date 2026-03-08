@@ -22,12 +22,17 @@ public class NarrativeEventEngine {
                 .filter(spec -> allConditionsMet(spec.conditions(), context))
                 .map(spec -> {
                     if (spec.oneTime()) firedOneTimeEvents.add(spec.id());
-                    return new FiredEvent(spec, spec.effects());
+                    return new FiredEvent(spec, resolveEffects(spec, context));
                 })
                 .collect(Collectors.toList());
     }
 
     public record FiredEvent(EventSpec spec, List<EffectSpec> effects) {}
+
+    private List<EffectSpec> resolveEffects(EventSpec spec, Map<String, Object> context) {
+        if (spec.effects() == null) return List.of();
+        return spec.effects();
+    }
 
     private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> context) {
         if (conditions == null || conditions.isEmpty()) return true;

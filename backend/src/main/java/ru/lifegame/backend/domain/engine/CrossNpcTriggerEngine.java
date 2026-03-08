@@ -5,13 +5,14 @@ import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
 import ru.lifegame.backend.domain.npc.graph.NpcRelationshipEdge;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CrossNpcTriggerEngine {
 
     private final List<CrossNpcTrigger> triggers;
 
     public CrossNpcTriggerEngine(List<CrossNpcTrigger> triggers) {
-        this.triggers = triggers != null ? triggers : List.of();
+        this.triggers = triggers;
     }
 
     public record CrossNpcTrigger(
@@ -25,28 +26,26 @@ public class CrossNpcTriggerEngine {
     ) {}
 
     public List<String> evaluate(NpcRegistry registry) {
-        List<String> firedEventIds = new ArrayList<>();
         NpcRelationshipGraph graph = registry.relationshipGraph();
-
-        for (CrossNpcTrigger trigger : triggers) {
-            Optional<NpcRelationshipEdge> edge = graph.getEdge(trigger.npcA(), trigger.npcB());
-            edge.ifPresent(e -> {
-                double value = switch (trigger.axis()) {
-                    case "tension" -> e.tension();
-                    case "respect" -> e.respect();
-                    case "familiarity" -> e.familiarity();
-                    default -> 0;
-                };
-                boolean met = switch (trigger.operator()) {
-                    case "gte" -> value >= trigger.threshold();
-                    case "lte" -> value <= trigger.threshold();
-                    case "gt" -> value > trigger.threshold();
-                    case "lt" -> value < trigger.threshold();
-                    default -> false;
-                };
-                if (met) firedEventIds.add(trigger.eventId());
-            });
-        }
-        return firedEventIds;
+        return triggers.stream()
+                .filter(t -> {
+                    Optional<NpcRelationshipEdge> edge = graph.getEdge(t.npcA(), t.npcB());
+                    if (edge.isEmpty()) return false;
+                    double value = switch (t.axis()) {
+                        case "tension" -> edge.get().tension();
+                        case "respect" -> edge.get().respect();
+                        case "familiarity" -> edge.get().familiarity();
+                        default -> 0;
+                    };
+                    return switch (t.operator()) {
+                        case "gte" -> value >= t.threshold();
+                        case "lte" -> value <= t.threshold();
+                        case "gt" -> value > t.threshold();
+                        case "lt" -> value < t.threshold();
+                        default -> false;
+                    };
+                })
+                .map(CrossNpcTrigger::eventId)
+                .collect(Collectors.toList());
     }
 }

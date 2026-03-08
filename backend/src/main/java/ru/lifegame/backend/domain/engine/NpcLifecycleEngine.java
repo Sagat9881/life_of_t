@@ -16,23 +16,26 @@ public class NpcLifecycleEngine {
         this.brain = brain;
     }
 
-    public List<NpcActionResult> hourlyTick(int currentHour, Map<String, Object> gameContext) {
-        List<NpcActionResult> results = new ArrayList<>();
+    public List<NpcAction> hourlyTick(int currentHour, Map<String, Object> context) {
+        List<NpcAction> actions = new ArrayList<>();
         for (NpcInstance npc : registry.all()) {
             var scheduled = npc.getScheduledActivity(currentHour);
             if (scheduled.isPresent()) {
                 npc.setCurrentActivity(scheduled.get().activity());
                 npc.setCurrentLocation(scheduled.get().location());
-                npc.setCurrentAnimation(scheduled.get().animation());
+                actions.add(new NpcAction(npc.spec().id(), scheduled.get().activity(),
+                        scheduled.get().location(), scheduled.get().animation(), "schedule"));
             } else {
-                Optional<EvaluatedAction> best = brain.evaluate(npc, gameContext);
-                best.ifPresent(action -> {
+                var best = brain.evaluateBest(npc, context);
+                if (best.isPresent()) {
+                    EvaluatedAction action = best.get();
                     npc.setCurrentActivity(action.actionId());
-                    results.add(new NpcActionResult(npc.spec().id(), action.actionId(), action.score()));
-                });
+                    actions.add(new NpcAction(npc.spec().id(), action.actionId(),
+                            npc.currentLocation(), null, "utility_ai"));
+                }
             }
         }
-        return results;
+        return actions;
     }
 
     public void dailyTick() {
@@ -41,5 +44,6 @@ public class NpcLifecycleEngine {
         }
     }
 
-    public record NpcActionResult(String npcId, String actionId, double score) {}
+    public record NpcAction(String npcId, String activity, String location,
+                            String animation, String source) {}
 }
