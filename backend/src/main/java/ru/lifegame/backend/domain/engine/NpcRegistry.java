@@ -15,10 +15,8 @@ public class NpcRegistry {
 
     public NpcRegistry(List<NpcSpec> specs) {
         this.relationshipGraph = new NpcRelationshipGraph();
-        if (specs != null) {
-            for (NpcSpec spec : specs) {
-                instances.put(spec.id(), NpcInstance.fromSpec(spec));
-            }
+        for (NpcSpec spec : specs) {
+            instances.put(spec.id(), NpcInstance.fromSpec(spec));
         }
     }
 
@@ -26,19 +24,20 @@ public class NpcRegistry {
         return Optional.ofNullable(instances.get(npcId));
     }
 
-    public NpcInstance getOrThrow(String npcId) {
-        return Optional.ofNullable(instances.get(npcId))
-                .orElseThrow(() -> new IllegalArgumentException("NPC not found: " + npcId));
-    }
-
-    public List<NpcInstance> all() {
-        return List.copyOf(instances.values());
-    }
-
-    public List<NpcInstance> byCategory(String category) {
+    public List<NpcInstance> allNamed() {
         return instances.values().stream()
-                .filter(i -> i.spec().category().equals(category))
+                .filter(i -> "named".equals(i.spec().type()))
                 .collect(Collectors.toList());
+    }
+
+    public List<NpcInstance> allFiller() {
+        return instances.values().stream()
+                .filter(i -> "filler".equals(i.spec().type()))
+                .collect(Collectors.toList());
+    }
+
+    public Collection<NpcInstance> all() {
+        return Collections.unmodifiableCollection(instances.values());
     }
 
     public NpcRelationshipGraph relationshipGraph() {

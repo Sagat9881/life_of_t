@@ -16,37 +16,30 @@ public class NpcLifecycleEngine {
         this.brain = brain;
     }
 
-    public List<NpcAction> hourlyTick(int currentHour, Map<String, Object> gameContext) {
-        List<NpcAction> actions = new ArrayList<>();
+    public List<NpcActionResult> hourlyTick(int currentHour, Map<String, Object> gameContext) {
+        List<NpcActionResult> results = new ArrayList<>();
         for (NpcInstance npc : registry.all()) {
-            var scheduleSlot = npc.spec().schedule().stream()
-                    .filter(s -> currentHour >= s.startHour() && currentHour < s.endHour())
-                    .findFirst();
-
-            if (scheduleSlot.isPresent()) {
-                var slot = scheduleSlot.get();
-                npc.setCurrentActivity(slot.activity());
-                npc.setCurrentLocation(slot.location());
-                npc.setCurrentAnimation(slot.animation());
-                actions.add(new NpcAction(npc.spec().id(), slot.activity(), slot.location(), slot.animation(), false));
+            var scheduled = npc.getScheduledActivity(currentHour);
+            if (scheduled.isPresent()) {
+                npc.setCurrentActivity(scheduled.get().activity());
+                npc.setCurrentLocation(scheduled.get().location());
+                npc.setCurrentAnimation(scheduled.get().animation());
+            } else {
+                Optional<EvaluatedAction> best = brain.evaluate(npc, gameContext);
+                best.ifPresent(action -> {
+                    npc.setCurrentActivity(action.actionId());
+                    results.add(new NpcActionResult(npc.spec().id(), action.actionId(), action.score()));
+                });
             }
         }
-        return actions;
+        return results;
     }
 
-    public List<NpcAction> dailyTick(Map<String, Object> gameContext) {
-        List<NpcAction> initiatedActions = new ArrayList<>();
+    public void dailyTick() {
         for (NpcInstance npc : registry.all()) {
             npc.mood().dailyDecay();
-            if ("named".equals(npc.spec().type())) {
-                Optional<EvaluatedAction> best = brain.evaluateBest(npc, gameContext);
-                best.ifPresent(a -> initiatedActions.add(
-                        new NpcAction(npc.spec().id(), a.actionId(), "", "", true)
-                ));
-            }
         }
-        return initiatedActions;
     }
 
-    public record NpcAction(String npcId, String activity, String location, String animation, boolean initiated) {}
+    public record NpcActionResult(String npcId, String actionId, double score) {}
 }

@@ -35,26 +35,24 @@ public class NarrativeContentLoader {
         eventSpecs = loadSpecs(basePath + "/events", eventParser::parse);
     }
 
-    @FunctionalInterface
-    interface XmlParser<T> {
-        T parse(InputStream is) throws Exception;
-    }
-
-    private <T> List<T> loadSpecs(String dir, XmlParser<T> parser) {
+    private <T> List<T> loadSpecs(String dir, java.util.function.Function<InputStream, T> parser) {
         List<T> results = new ArrayList<>();
         try {
-            Path dirPath = Paths.get(ClassLoader.getSystemResource(dir).toURI());
-            try (Stream<Path> files = Files.list(dirPath)) {
-                files.filter(p -> p.toString().endsWith(".xml")).forEach(p -> {
-                    try (InputStream is = Files.newInputStream(p)) {
-                        results.add(parser.parse(is));
-                    } catch (Exception e) {
-                        throw new RuntimeException("Failed to parse: " + p, e);
-                    }
-                });
+            var resource = getClass().getClassLoader().getResource(dir);
+            if (resource == null) return results;
+            Path path = Paths.get(resource.toURI());
+            try (Stream<Path> files = Files.list(path)) {
+                files.filter(f -> f.toString().endsWith(".xml"))
+                     .forEach(f -> {
+                         try (InputStream is = Files.newInputStream(f)) {
+                             results.add(parser.apply(is));
+                         } catch (Exception e) {
+                             System.err.println("Failed to parse: " + f + " - " + e.getMessage());
+                         }
+                     });
             }
         } catch (Exception e) {
-            // Directory not found - no specs of this type
+            System.err.println("Failed to load specs from: " + dir + " - " + e.getMessage());
         }
         return results;
     }
