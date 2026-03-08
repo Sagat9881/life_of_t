@@ -7,10 +7,7 @@ import ru.lifegame.backend.domain.engine.spec.NpcSpec;
 import ru.lifegame.backend.domain.engine.spec.EventSpec;
 import ru.lifegame.backend.domain.engine.spec.QuestSpec;
 
-import org.w3c.dom.Document;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,38 +19,33 @@ public class NarrativeContentLoader {
     private final EventSpecParser eventParser = new EventSpecParser();
     private final QuestSpecParser questParser = new QuestSpecParser();
 
-    private List<NpcSpec> npcSpecs = new ArrayList<>();
-    private List<EventSpec> eventSpecs = new ArrayList<>();
-    private List<QuestSpec> questSpecs = new ArrayList<>();
+    private List<NpcSpec> npcSpecs = List.of();
+    private List<EventSpec> eventSpecs = List.of();
+    private List<QuestSpec> questSpecs = List.of();
 
-    public void loadFromClasspath(String basePath) {
-        npcSpecs = loadAndParse(basePath + "/npc-behavior", npcParser::parse);
-        eventSpecs = loadAndParse(basePath + "/events", eventParser::parse);
-        questSpecs = loadAndParse(basePath + "/quests", questParser::parse);
+    public void loadFromDirectory(String basePath) {
+        npcSpecs = loadXmlFiles(basePath + "/npc-behavior", npcParser::parse);
+        eventSpecs = loadXmlFiles(basePath + "/events", eventParser::parse);
+        questSpecs = loadXmlFiles(basePath + "/quests", questParser::parse);
     }
 
-    private <T> List<T> loadAndParse(String dirPath, java.util.function.Function<Document, T> parser) {
-        List<T> results = new ArrayList<>();
-        try {
-            Path dir = Paths.get(ClassLoader.getSystemResource(dirPath).toURI());
-            try (Stream<Path> files = Files.list(dir)) {
-                files.filter(f -> f.toString().endsWith(".xml")).forEach(file -> {
-                    try (InputStream is = Files.newInputStream(file)) {
-                        DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                        Document doc = db.parse(is);
-                        results.add(parser.apply(doc));
-                    } catch (Exception e) {
-                        System.err.println("Failed to parse: " + file + " - " + e.getMessage());
-                    }
-                });
-            }
-        } catch (Exception e) {
-            System.err.println("Failed to load directory: " + dirPath + " - " + e.getMessage());
+    private <T> List<T> loadXmlFiles(String dirPath, java.util.function.Function<InputStream, T> parser) {
+        Path dir = Paths.get(dirPath);
+        if (!Files.isDirectory(dir)) return List.of();
+        try (Stream<Path> paths = Files.list(dir)) {
+            return paths
+                    .filter(p -> p.toString().endsWith(".xml"))
+                    .map(p -> {
+                        try { return parser.apply(Files.newInputStream(p)); }
+                        catch (IOException e) { throw new UncheckedIOException(e); }
+                    })
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
-        return results;
     }
 
-    public List<NpcSpec> getNpcSpecs() { return npcSpecs; }
-    public List<EventSpec> getEventSpecs() { return eventSpecs; }
-    public List<QuestSpec> getQuestSpecs() { return questSpecs; }
+    public List<NpcSpec> npcSpecs() { return npcSpecs; }
+    public List<EventSpec> eventSpecs() { return eventSpecs; }
+    public List<QuestSpec> questSpecs() { return questSpecs; }
 }

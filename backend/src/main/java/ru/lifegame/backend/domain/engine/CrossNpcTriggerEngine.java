@@ -3,53 +3,52 @@ package ru.lifegame.backend.domain.engine;
 import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
 import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
 import ru.lifegame.backend.domain.npc.graph.NpcRelationshipEdge;
-import ru.lifegame.backend.domain.npc.graph.CrossNpcConditionSpec;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class CrossNpcTriggerEngine {
 
-    private final NpcRegistry registry;
     private final List<CrossNpcTrigger> triggers;
 
-    public CrossNpcTriggerEngine(NpcRegistry registry, List<CrossNpcTrigger> triggers) {
-        this.registry = registry;
+    public CrossNpcTriggerEngine(List<CrossNpcTrigger> triggers) {
         this.triggers = triggers != null ? triggers : List.of();
     }
 
-    public record CrossNpcTrigger(String id, String npcA, String npcB, List<CrossNpcConditionSpec> conditions, String eventId) {}
+    public record CrossNpcTrigger(
+            String id,
+            String npcA,
+            String npcB,
+            String axis,
+            String operator,
+            double threshold,
+            String eventId
+    ) {}
 
-    public List<String> evaluate(Map<String, Object> gameContext) {
-        NpcRelationshipGraph graph = registry.relationshipGraph();
+    public List<String> evaluate(NpcRegistry registry) {
         List<String> firedEventIds = new ArrayList<>();
+        NpcRelationshipGraph graph = registry.relationshipGraph();
 
         for (CrossNpcTrigger trigger : triggers) {
             Optional<NpcRelationshipEdge> edge = graph.getEdge(trigger.npcA(), trigger.npcB());
             if (edge.isEmpty()) continue;
 
-            boolean allMet = trigger.conditions().stream().allMatch(cond -> {
-                double actual = switch (cond.axis()) {
-                    case "tension" -> edge.get().tension();
-                    case "respect" -> edge.get().respect();
-                    case "familiarity" -> edge.get().familiarity();
-                    default -> 0;
-                };
-                double expected = cond.threshold();
-                return switch (cond.operator()) {
-                    case "gte" -> actual >= expected;
-                    case "lte" -> actual <= expected;
-                    case "gt" -> actual > expected;
-                    case "lt" -> actual < expected;
-                    default -> false;
-                };
-            });
+            double val = switch (trigger.axis()) {
+                case "tension" -> edge.get().tension();
+                case "respect" -> edge.get().respect();
+                case "familiarity" -> edge.get().familiarity();
+                default -> 0;
+            };
 
-            if (allMet) {
-                firedEventIds.add(trigger.eventId());
-            }
+            boolean met = switch (trigger.operator()) {
+                case "gte" -> val >= trigger.threshold();
+                case "lte" -> val <= trigger.threshold();
+                case "gt" -> val > trigger.threshold();
+                case "lt" -> val < trigger.threshold();
+                default -> false;
+            };
+
+            if (met) firedEventIds.add(trigger.eventId());
         }
-
         return firedEventIds;
     }
 }

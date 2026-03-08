@@ -16,33 +16,28 @@ public class NpcLifecycleEngine {
         this.brain = brain;
     }
 
-    public void hourlyTick(int currentHour, Map<String, Object> gameContext) {
+    public List<NpcAction> hourlyTick(int currentHour, Map<String, Object> context) {
+        List<NpcAction> actions = new ArrayList<>();
         for (NpcInstance npc : registry.all()) {
-            // Update schedule-based activity
-            npc.spec().schedule().stream()
-                    .filter(slot -> currentHour >= slot.startHour() && currentHour < slot.endHour())
-                    .findFirst()
-                    .ifPresent(slot -> npc.setCurrentActivity(slot.activity(), slot.location(), slot.animation()));
-
-            // For named NPCs, run utility brain to check for mood-override actions
-            if ("named".equals(npc.spec().type())) {
-                Optional<ScoredResult> best = brain.evaluate(npc, gameContext);
-                best.ifPresent(result -> {
-                    if (result.score() > 0.7) {
-                        npc.setCurrentActivity(result.actionId(), "dynamic", "dynamic");
-                    }
-                });
+            var scheduled = npc.getScheduledActivity(currentHour);
+            if (scheduled.isPresent()) {
+                actions.add(new NpcAction(npc.id(), scheduled.get().activity(),
+                        scheduled.get().location(), scheduled.get().animation(), "schedule"));
+            } else {
+                Optional<ScoredResult> best = brain.evaluate(npc, context);
+                best.ifPresent(r -> actions.add(new NpcAction(
+                        npc.id(), r.actionId(), null, null, "utility")));
             }
         }
+        return actions;
     }
 
-    public void dailyTick(Map<String, Object> gameContext) {
+    public void dailyTick(Map<String, Object> context) {
         for (NpcInstance npc : registry.all()) {
-            npc.mood().dailyDecay();
+            NpcInstance updated = npc.dailyMoodDecay();
+            registry.update(npc.id(), updated);
         }
     }
 
-    public NpcRegistry getRegistry() {
-        return registry;
-    }
+    public record NpcAction(String npcId, String activity, String location, String animation, String source) {}
 }
