@@ -1,6 +1,5 @@
 package ru.lifegame.backend.domain.npc.runtime;
 
-
 import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
 import ru.lifegame.backend.domain.npc.spec.NpcSpec;
 
