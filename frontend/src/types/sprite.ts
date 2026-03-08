@@ -7,8 +7,8 @@
 
 /** Condition for row selection in grid layouts */
 export interface AtlasCondition {
-  readonly type: string;   // e.g. "time_of_day"
-  readonly value: string;  // e.g. "morning"
+  readonly type: string;
+  readonly value: string;
 }
 
 /** Row definition in a grid animation */
@@ -17,7 +17,6 @@ export interface AtlasRowDef {
   readonly condition: AtlasCondition;
   readonly fps: number;
   readonly loop: boolean;
-  /** Overlay-mode fields */
   readonly tint?: string;
   readonly opacity?: number;
 }
@@ -26,15 +25,12 @@ export interface AtlasRowDef {
 export interface AtlasAnimationEntry {
   readonly file: string;
   readonly layout: 'strip' | 'grid';
-  /** "sprite" (default) or "overlay" */
   readonly renderMode?: 'sprite' | 'overlay';
   readonly columns: number;
   readonly frameWidth: number;
   readonly frameHeight: number;
-  // strip fields
   readonly fps?: number;
   readonly loop?: boolean;
-  // grid fields
   readonly rows?: readonly AtlasRowDef[];
   readonly defaultRow?: number;
 }
@@ -43,13 +39,12 @@ export interface AtlasAnimationEntry {
 export interface AtlasConfig {
   readonly configVersion: string;
   readonly revision: string;
-  /** Entity name (was 'character' in v1.0) */
   readonly entity: string;
-  /** Backward compat: old configs used 'character' */
   readonly character?: string;
   /**
-   * Display scale multiplier applied by frontend.
-   * Characters ~3.0, locations ~1.0. Default 1.0.
+   * Display scale from atlas config.
+   * DEPRECATED for sizing — kept for backward compat.
+   * Use sceneRelativeHeight for actual sizing.
    */
   readonly displayScale?: number;
   readonly animations: Record<string, AtlasAnimationEntry>;
@@ -70,9 +65,8 @@ export interface SpriteAnimation {
   readonly renderMode: 'sprite' | 'overlay';
   readonly totalRows: number;
   readonly currentRow: number;
-  /** Display scale from atlas config (default 1.0) */
+  /** @deprecated Use sceneRelativeHeight instead */
   readonly displayScale: number;
-  /** Overlay fields (only for renderMode === 'overlay') */
   readonly tint?: string;
   readonly opacity?: number;
 }
@@ -83,15 +77,19 @@ export interface SpriteAnimatorProps {
   readonly entityName: string;
   readonly animation: string;
   /**
-   * Optional scale multiplier ON TOP of displayScale from atlas config.
-   * Final CSS size = frameWidth * displayScale * scale.
-   * Default: 1.0 (use displayScale as-is).
+   * Optional multiplier ON TOP of relative sizing.
+   * Default: 1.0 (use relative size as-is).
    */
   readonly scale?: number;
+  /**
+   * Fraction of SCENE_HEIGHT this sprite should occupy (0..1).
+   * e.g. 0.40 = 40% of viewport height.
+   * If omitted, sprite renders at native frame size (1:1 in scene).
+   */
+  readonly sceneRelativeHeight?: number;
   readonly playing?: boolean;
   readonly className?: string;
   readonly onComplete?: () => void;
-  /** Current time-of-day condition for grid row selection */
   readonly condition?: string;
 }
 

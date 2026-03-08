@@ -1,29 +1,32 @@
 /**
  * PixelScene — container for pixel-art game scenes.
  *
- * Renders at a native pixel resolution (e.g. 640×480) and auto-scales
- * the entire scene to fit the parent container. All children are rendered
- * inside the native-resolution viewport, so coordinates/sizes stay in
- * "native pixels" and get uniformly upscaled by CSS transform.
+ * Renders at native scene resolution (SCENE_WIDTH × SCENE_HEIGHT) and
+ * auto-scales the entire scene to fit the parent container via CSS transform.
  *
- * Default resolution is 640×480 (4:3) which provides enough space for
- * HD pixel art assets (128×192 characters, 640×480 locations).
+ * ALL children are rendered inside the native-resolution viewport.
+ * Coordinates and sizes stay in "scene-logical pixels" and get
+ * uniformly upscaled by a single CSS scale() transform.
+ *
+ * The background (location) fills this viewport exactly.
+ * Characters, furniture — all sized relative to this viewport.
  */
 import { type ReactNode, memo, useRef, useState, useEffect, useCallback } from 'react';
+import { SCENE_WIDTH, SCENE_HEIGHT } from '@/utils/sceneConstants';
 import './PixelScene.css';
 
 export interface PixelSceneProps {
-  /** Scene width in logical pixels (native resolution) */
+  /** Override scene width (default: SCENE_WIDTH=640) */
   readonly width?: number;
-  /** Scene height in logical pixels (native resolution) */
+  /** Override scene height (default: SCENE_HEIGHT=480) */
   readonly height?: number;
   readonly className?: string;
   readonly children?: ReactNode;
 }
 
 export const PixelScene = memo(function PixelScene({
-  width = 640,
-  height = 480,
+  width = SCENE_WIDTH,
+  height = SCENE_HEIGHT,
   className,
   children,
 }: PixelSceneProps) {
@@ -35,7 +38,6 @@ export const PixelScene = memo(function PixelScene({
     if (!el) return;
     const parentW = el.clientWidth;
     const parentH = el.clientHeight;
-    // Fit inside parent while preserving aspect ratio
     const scaleX = parentW / width;
     const scaleY = parentH / height;
     setScale(Math.min(scaleX, scaleY));

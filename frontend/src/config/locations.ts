@@ -1,23 +1,24 @@
 /**
  * Location configuration — maps location IDs to their visual layout.
- * Defines background asset, furniture placements, and character spawn points.
  *
  * ── COORDINATE SYSTEM ──
- * All coordinates are in PERCENTAGE (0-100) relative to the scene viewport.
+ * All x/y coordinates are PERCENTAGE (0-100) relative to the scene viewport.
  *
- * ── SCALE SYSTEM ──
- * Character/furniture sizing is driven by `displayScale` in sprite-atlas.json:
- *   - Characters: displayScale=3.0 (32px frame → 96px CSS in native scene)
- *   - Pets: displayScale=2.0
- *   - Furniture: displayScale=2.0
- *   - Locations: displayScale=1.0
+ * ── RELATIVE SCALING SYSTEM ──
+ * All sprite sizing is relative to the scene background (640×480 viewport).
  *
- * The `scale` field here is an OPTIONAL MULTIPLIER on top of displayScale.
- *   Final CSS size = frameWidth × displayScale × scale
- *   scale=1.0 (default) = use atlas displayScale as-is.
- *   scale=1.5 = 50% bigger than atlas default.
+ * The system works automatically:
+ * 1. Background (location) fills the entire 640×480 viewport at 1:1.
+ * 2. Each entity's atlas is loaded, its frameHeight read.
+ * 3. sceneRelativeHeight = frameHeight / 480.
+ *    e.g. character 192px frame → 192/480 = 0.40 → 40% of viewport height.
+ * 4. The `scale` field below is a MULTIPLIER on top of that.
+ *    scale=1.0 → native proportions (pixel-perfect in scene).
+ *    scale=0.7 → 70% of natural size (e.g. for distant objects).
+ *    scale=1.3 → 130% of natural size (e.g. for foreground emphasis).
  *
- * PixelScene renders at native resolution (480×270) and auto-upscales.
+ * This eliminates ALL displayScale/hardcoded-pixel-size issues.
+ * If you change a sprite's canvas size, it automatically adjusts.
  */
 
 export interface FurniturePlacement {
@@ -26,7 +27,7 @@ export interface FurniturePlacement {
   readonly animation: string;
   readonly x: number;
   readonly y: number;
-  /** Optional multiplier on top of displayScale from atlas. Default 1.0 */
+  /** Multiplier on top of relative sizing. Default 1.0 = native proportions */
   readonly scale: number;
   readonly zOrder: number;
   readonly actionCode?: string;
@@ -39,7 +40,7 @@ export interface CharacterSlot {
   readonly defaultAnimation: string;
   readonly x: number;
   readonly y: number;
-  /** Optional multiplier on top of displayScale from atlas. Default 1.0 */
+  /** Multiplier on top of relative sizing. Default 1.0 = native proportions */
   readonly scale: number;
   readonly zOrder: number;
 }

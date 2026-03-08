@@ -1,24 +1,28 @@
 /**
  * SpriteAnimator — renders an animated pixel-art sprite from atlas.
  *
+ * ── RELATIVE SCALING SYSTEM ──
+ * All sizes are computed relative to the scene viewport (640×480).
+ *
+ * The parent (LocationRenderer) passes `sceneRelativeHeight` — a fraction
+ * of SCENE_HEIGHT that this sprite should occupy. SpriteAnimator converts
+ * that into concrete CSS pixel dimensions within the scene-logical space.
+ *
+ * displayScale from sprite-atlas.json is IGNORED for sizing.
+ * The optional `scale` prop is a multiplier ON TOP of the relative size.
+ *
  * Supports:
  * - strip layout: single-row horizontal atlas (background-position X)
- * - grid layout: multi-row atlas (background-position X + Y) with condition-based row selection
- * - overlay renderMode: renders atlas image as an overlay with mix-blend-mode
- *   (NOT a plain colored div — uses the actual generated atlas PNG)
- *
- * Scale logic:
- *   CSS size = frameWidth × displayScale × scale
- *   - displayScale comes from sprite-atlas.json (characters=3, locations=1)
- *   - scale is an optional multiplier from the parent (default 1.0)
+ * - grid layout: multi-row atlas with condition-based row selection
+ * - overlay renderMode: atlas image with mix-blend-mode
  */
 import { type CSSProperties, memo, useMemo } from 'react';
 import type { SpriteAnimatorProps } from '@/types/sprite';
 import { useSpriteAnimation } from '@/hooks/useSpriteAnimation';
 import type { UseSpriteAnimationOptions } from '@/hooks/useSpriteAnimation';
+import { SCENE_HEIGHT } from '@/utils/sceneConstants';
 import './SpriteAnimator.css';
 
-/** Default optional multiplier (no extra scaling beyond displayScale) */
 const DEFAULT_SCALE = 1;
 
 export const SpriteAnimator = memo(function SpriteAnimator({
@@ -26,6 +30,7 @@ export const SpriteAnimator = memo(function SpriteAnimator({
   entityName,
   animation,
   scale = DEFAULT_SCALE,
+  sceneRelativeHeight,
   playing = true,
   className,
   onComplete,
@@ -59,24 +64,29 @@ export const SpriteAnimator = memo(function SpriteAnimator({
     return (
       <div
         className={`sprite-animator sprite-animator--loading ${className ?? ''}`}
-        style={{
-          width: 32 * (scale > 1 ? scale : 3),
-          height: 48 * (scale > 1 ? scale : 3),
-        }}
+        style={{ width: 64, height: 96 }}
       />
     );
   }
 
-  // Effective scale = displayScale from config × optional parent multiplier
-  const effectiveScale = anim.displayScale * scale;
+  // ── RELATIVE SCALE COMPUTATION ──
+  // If sceneRelativeHeight is provided, use it to determine display size.
+  // Otherwise, fall back to native frame size (1:1 pixel mapping in scene).
+  let displayWidth: number;
+  let displayHeight: number;
 
-  // Overlay renderMode — render the actual atlas sprite with blend mode.
-  // The generator creates a real PNG atlas (e.g. light_overlay_atlas.png)
-  // with one row per time-of-day. We show the correct row via Y offset,
-  // and apply mix-blend-mode + opacity from the config.
+  if (sceneRelativeHeight !== undefined && sceneRelativeHeight > 0) {
+    displayHeight = SCENE_HEIGHT * sceneRelativeHeight * scale;
+    const aspectRatio = anim.frameWidth / anim.frameHeight;
+    displayWidth = displayHeight * aspectRatio;
+  } else {
+    // Fallback: render at native frame size × scale (1:1 in scene space)
+    displayWidth = anim.frameWidth * scale;
+    displayHeight = anim.frameHeight * scale;
+  }
+
+  // Overlay renderMode — render atlas sprite with blend mode
   if (anim.renderMode === 'overlay') {
-    // For overlays: columns=1, so X is always 0.
-    // Y offset selects the current row (time-of-day variant).
     const bgOffsetY = -(anim.currentRow * anim.frameHeight);
     const totalHeight = anim.totalRows * anim.frameHeight;
 
@@ -105,16 +115,13 @@ export const SpriteAnimator = memo(function SpriteAnimator({
   }
 
   // Sprite renderMode (default)
-  const displayWidth = anim.frameWidth * effectiveScale;
-  const displayHeight = anim.frameHeight * effectiveScale;
-
-  // Background-size: full atlas dimensions scaled
+  // Scale atlas background proportionally
+  const scaleX = displayWidth / anim.frameWidth;
+  const scaleY = displayHeight / anim.frameHeight;
   const bgWidth = anim.frameCount * displayWidth;
   const bgHeight = anim.totalRows * displayHeight;
 
-  // X offset: frame column
   const bgOffsetX = -(currentFrame * displayWidth);
-  // Y offset: row (for grid layouts; 0 for strips)
   const bgOffsetY = -(anim.currentRow * displayHeight);
 
   const style: CSSProperties = {
