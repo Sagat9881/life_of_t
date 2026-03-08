@@ -12,15 +12,9 @@ public class InMemorySessionRepository implements SessionRepository {
     private final ConcurrentHashMap<String, String> userIdIndex = new ConcurrentHashMap<>();
 
     @Override
-    public GameSession save(GameSession session) {
+    public void save(GameSession session) {
         sessions.put(session.sessionId(), session);
         userIdIndex.put(String.valueOf(session.telegramUserId()), session.sessionId());
-        return session;
-    }
-
-    @Override
-    public Optional<GameSession> findById(String sessionId) {
-        return Optional.ofNullable(sessions.get(sessionId));
     }
 
     @Override
@@ -31,10 +25,7 @@ public class InMemorySessionRepository implements SessionRepository {
     }
 
     @Override
-    public void delete(String sessionId) {
-        GameSession removed = sessions.remove(sessionId);
-        if (removed != null) {
-            userIdIndex.remove(String.valueOf(removed.telegramUserId()));
-        }
+    public boolean exists(String telegramUserId) {
+        return userIdIndex.containsKey(telegramUserId);
     }
 }
