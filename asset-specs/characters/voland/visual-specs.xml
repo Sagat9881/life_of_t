@@ -3,229 +3,708 @@
     <meta>
         <entity-type>characters</entity-type>
         <entity-name>voland</entity-name>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
     </meta>
-    <!-- Voland: French Bulldog, ~11 years old, blind since 2020. Lives in Tanya's parents' cottage.
-         Canvas: 20x16 (small stocky dog). French bulldog proportions: wide head, flat face,
-         short legs, barrel chest, bat ears. Typical fawn/brindle color.
-         Color: #C8A878 (fawn), #8B6914 (brindle marks), #F5DEB3 (lighter patches).
-         Blind: cloudy/pale eyes. Moves carefully but knows the layout. -->
+    <!-- ============================================================
+         Voland — French Bulldog, ~11 years old, blind since 2020
+         Canvas: 32×24 pixels | 10 layers | 11 animations
+         Lives at Tanya's parents' cottage. Witness to Tanya + Alexander's
+         love story since 2015. Blind: cataracts, cloudy milky eyes.
+         Moves slowly, bumps into things, but knows his paths by memory.
+
+         Color palette (fawn/cream Frenchie):
+           #D4A574 — base fawn coat
+           #B8956A — coat shadow / underside
+           #E8C098 — highlight / coat sheen
+           #F0D5B0 — lightest cream belly / face markings
+           #A07848 — deep shadow / wrinkle folds
+           #8B6440 — darkest shadow
+           #C0C0D0 — eye iris (cloudy/milky — blind cataract)
+           #9090A8 — eye pupil (hazy, diffuse — not dark)
+           #D8D8E8 — eye sclera visible patch (milky white)
+           #442211 — nose leather (dark)
+           #553322 — nose detail
+           #DDAAAA — ear inner (pink-beige)
+           #664422 — paw pads
+           #8B9090 — secondary cataract tint (grey-blue)
+    ============================================================ -->
+
     <layers>
-        <!-- z=0: paws — wide stumpy bulldog paws -->
-        <layer id="paws" type="base" z-order="0" width="20" height="16">
+
+        <!-- ── z=0: paws ── wide stumpy bulldog paws; slow and deliberate placement -->
+        <layer id="paws" type="base" z-order="0" width="32" height="24">
             <pixel-data>
-                <!-- front left paw: wide, fawn -->
-                <rect x="2" y="13" w="3" h="2" color="#C8A878"/>
-                <hline x="2" y="14" len="3" color="#A88858"/>
-                <!-- front right paw -->
-                <rect x="7" y="13" w="3" h="2" color="#C8A878"/>
-                <hline x="7" y="14" len="3" color="#A88858"/>
-                <!-- rear left paw: stubby -->
-                <rect x="12" y="13" w="3" h="2" color="#C8A878"/>
-                <hline x="12" y="14" len="3" color="#A88858"/>
-                <!-- rear right paw -->
-                <rect x="17" y="13" w="3" h="2" color="#C8A878"/>
-                <hline x="17" y="14" len="3" color="#A88858"/>
-                <!-- paw pads: dark -->
-                <pixel x="3" y="14" color="#664422"/>
-                <pixel x="8" y="14" color="#664422"/>
-                <pixel x="13" y="14" color="#664422"/>
-                <pixel x="18" y="14" color="#664422"/>
+                <!-- front-left paw: wide (3px), short bulldog paws -->
+                <rect x="3"  y="21" w="3" h="2" color="#D4A574"/>
+                <hline x="3"  y="22" len="3" color="#E8C098"/>
+                <hline x="3"  y="21" len="3" color="#B8956A"/>
+                <!-- front-right paw -->
+                <rect x="9"  y="21" w="3" h="2" color="#D4A574"/>
+                <hline x="9"  y="22" len="3" color="#E8C098"/>
+                <hline x="9"  y="21" len="3" color="#B8956A"/>
+                <!-- hind-left paw: same width, Frenchie rear paws not much bigger -->
+                <rect x="18" y="21" w="3" h="2" color="#D4A574"/>
+                <hline x="18" y="22" len="3" color="#E8C098"/>
+                <hline x="18" y="21" len="3" color="#B8956A"/>
+                <!-- hind-right paw -->
+                <rect x="24" y="21" w="3" h="2" color="#D4A574"/>
+                <hline x="24" y="22" len="3" color="#E8C098"/>
+                <hline x="24" y="21" len="3" color="#B8956A"/>
+                <!-- paw pads: dark brown -->
+                <pixel x="4"  y="22" color="#664422"/>
+                <pixel x="10" y="22" color="#664422"/>
+                <pixel x="19" y="22" color="#664422"/>
+                <pixel x="25" y="22" color="#664422"/>
+                <!-- toe separation hints -->
+                <pixel x="3"  y="23" color="#8B6440"/>
+                <pixel x="5"  y="23" color="#8B6440"/>
+                <pixel x="9"  y="23" color="#8B6440"/>
+                <pixel x="11" y="23" color="#8B6440"/>
             </pixel-data>
         </layer>
-        <!-- z=1: legs — very short, stocky bulldog legs -->
-        <layer id="legs" type="base" z-order="1" width="20" height="16">
+
+        <!-- ── z=1: hind_legs ── very short, stocky rear legs, low to ground -->
+        <layer id="hind_legs" type="base" z-order="1" width="32" height="24">
             <pixel-data>
-                <!-- front left: very short 2px -->
-                <rect x="2" y="10" w="3" h="3" color="#C8A878"/>
-                <!-- front right -->
-                <rect x="7" y="10" w="3" h="3" color="#C8A878"/>
-                <!-- rear left -->
-                <rect x="12" y="10" w="3" h="3" color="#C8A878"/>
-                <!-- rear right -->
-                <rect x="17" y="10" w="3" h="3" color="#C8A878"/>
-                <!-- brindle markings on legs -->
-                <pixel x="3" y="11" color="#8B6914"/>
-                <pixel x="8" y="11" color="#8B6914"/>
-                <pixel x="13" y="11" color="#8B6914"/>
-                <pixel x="18" y="11" color="#8B6914"/>
+                <!-- hind-left leg: only 3px tall (very short!) -->
+                <rect x="17" y="14" w="3" h="7" color="#D4A574"/>
+                <hline x="17" y="15" len="3" color="#E8C098"/>
+                <hline x="17" y="18" len="3" color="#B8956A"/>
+                <!-- wrinkle fold on hind leg (aged skin) -->
+                <hline x="17" y="17" len="3" color="#A07848"/>
+                <!-- hind-right leg -->
+                <rect x="24" y="14" w="3" h="7" color="#D4A574"/>
+                <hline x="24" y="15" len="3" color="#E8C098"/>
+                <hline x="24" y="18" len="3" color="#B8956A"/>
+                <hline x="24" y="17" len="3" color="#A07848"/>
+                <!-- muscle mass definition (Frenchie muscle despite age) -->
+                <pixel x="19" y="16" color="#B8956A"/>
+                <pixel x="26" y="16" color="#B8956A"/>
             </pixel-data>
         </layer>
-        <!-- z=2: body — wide barrel bulldog body, low to ground -->
-        <layer id="body" type="base" z-order="2" width="20" height="16">
+
+        <!-- ── z=2: front_legs ── very short straight forelegs -->
+        <layer id="front_legs" type="base" z-order="2" width="32" height="24">
             <pixel-data>
-                <!-- very wide squat body -->
-                <rect x="2" y="7" w="14" h="5" color="#C8A878"/>
-                <!-- back brindle stripe -->
-                <hline x="3" y="7" len="12" color="#8B6914"/>
-                <!-- side brindle marks (tiger pattern) -->
-                <pixel x="3" y="8" color="#8B6914"/>
-                <pixel x="3" y="9" color="#8B6914"/>
-                <pixel x="6" y="8" color="#8B6914"/>
-                <pixel x="9" y="9" color="#8B6914"/>
-                <pixel x="12" y="8" color="#8B6914"/>
-                <pixel x="14" y="9" color="#8B6914"/>
-                <!-- belly low, wide -->
-                <hline x="3" y="11" len="12" color="#B89868"/>
+                <!-- front-left leg: 3px wide, 7px tall (very compact) -->
+                <rect x="3" y="13" w="3" h="8" color="#D4A574"/>
+                <hline x="3" y="14" len="3" color="#E8C098"/>
+                <hline x="3" y="17" len="3" color="#B8956A"/>
+                <!-- wrinkle at "wrist" (old dog skin) -->
+                <hline x="3" y="19" len="3" color="#A07848"/>
+                <!-- front-right leg -->
+                <rect x="9" y="13" w="3" h="8" color="#D4A574"/>
+                <hline x="9" y="14" len="3" color="#E8C098"/>
+                <hline x="9" y="17" len="3" color="#B8956A"/>
+                <hline x="9" y="19" len="3" color="#A07848"/>
+                <!-- chest muscle bulge between front legs (barrel chest) -->
+                <rect x="6" y="14" w="3" h="4" color="#D4A574"/>
+                <hline x="6" y="15" len="3" color="#E8C098"/>
             </pixel-data>
         </layer>
-        <!-- z=3: chest_markings — wide white/cream chest bib (French bulldog typical) -->
-        <layer id="chest_markings" type="overlay" z-order="3" width="20" height="16">
+
+        <!-- ── z=3: body ── wide barrel-chested Frenchie body, low-slung -->
+        <layer id="body" type="base" z-order="3" width="32" height="24">
             <pixel-data>
-                <!-- cream chest bib -->
-                <rect x="3" y="8" w="6" h="4" color="#F5DEB3"/>
-                <!-- bib top edge -->
-                <hline x="4" y="8" len="4" color="#FFFFFF"/>
-                <!-- wrinkle folds on chest skin -->
-                <pixel x="4" y="10" color="#D4B896"/>
-                <pixel x="5" y="10" color="#D4B896"/>
-                <pixel x="6" y="10" color="#D4B896"/>
+                <!-- very wide body: 22px wide, 7px tall (barrel!) -->
+                <rect x="2" y="9" w="22" h="7" color="#D4A574"/>
+                <!-- back line sheen (coat highlight) -->
+                <hline x="3"  y="9"  len="20" color="#E8C098"/>
+                <hline x="4"  y="10" len="18" color="#E8C098"/>
+                <!-- spine groove (Frenchie has visible spinal furrow) -->
+                <hline x="11" y="9"  len="2"  color="#B8956A"/>
+                <hline x="11" y="10" len="2"  color="#B8956A"/>
+                <!-- rib shadow (lower flank) -->
+                <hline x="3"  y="14" len="20" color="#A07848"/>
+                <!-- coat texture (alternating fur direction) -->
+                <pixel x="4"  y="11" color="#E8C098"/>
+                <pixel x="7"  y="11" color="#E8C098"/>
+                <pixel x="10" y="11" color="#E8C098"/>
+                <pixel x="13" y="11" color="#E8C098"/>
+                <pixel x="16" y="11" color="#E8C098"/>
+                <pixel x="19" y="11" color="#E8C098"/>
+                <pixel x="5"  y="12" color="#B8956A"/>
+                <pixel x="8"  y="12" color="#B8956A"/>
+                <pixel x="11" y="12" color="#B8956A"/>
+                <pixel x="14" y="12" color="#B8956A"/>
+                <pixel x="17" y="12" color="#B8956A"/>
+                <!-- rump rounded: rear of body -->
+                <rect x="22" y="8" w="3" h="6" color="#D4A574"/>
+                <pixel x="24" y="8"  color="#B8956A"/>
+                <pixel x="24" y="9"  color="#B8956A"/>
             </pixel-data>
         </layer>
-        <!-- z=4: tail — vestigial bulldog tail, barely visible, short nub -->
-        <layer id="tail" type="base" z-order="4" width="20" height="16">
+
+        <!-- ── z=4: belly ── cream white belly, loose fold (aged) -->
+        <layer id="belly" type="base" z-order="4" width="32" height="24">
             <pixel-data>
-                <!-- tiny nub tail above rear end -->
-                <pixel x="15" y="8" color="#C8A878"/>
-                <pixel x="16" y="7" color="#C8A878"/>
-                <pixel x="15" y="7" color="#A88858"/>
+                <!-- lighter cream belly -->
+                <rect x="5" y="14" w="14" h="3" color="#F0D5B0"/>
+                <!-- belly fur texture -->
+                <hline x="6"  y="14" len="12" color="#E8C098"/>
+                <hline x="7"  y="15" len="10" color="#F0D5B0"/>
+                <hline x="6"  y="16" len="12" color="#E8C098"/>
+                <!-- belly loose fold (age-related skin looseness) -->
+                <hline x="5"  y="16" len="14" color="#B8956A"/>
+                <!-- deep belly shadow (barrel chest casts shadow under) -->
+                <hline x="4"  y="17" len="16" color="#A07848"/>
+                <!-- cream chest bib area -->
+                <rect x="4" y="11" w="6" h="4" color="#F0D5B0"/>
+                <hline x="5" y="11" len="4" color="#FFFFFF"/>
+                <!-- bib wrinkle -->
+                <pixel x="5" y="13" color="#B8956A"/>
+                <pixel x="6" y="13" color="#B8956A"/>
+                <pixel x="7" y="13" color="#B8956A"/>
             </pixel-data>
         </layer>
-        <!-- z=5: head — distinctive large flat wide bulldog head with jowls -->
-        <layer id="head" type="base" z-order="5" width="20" height="16">
+
+        <!-- ── z=5: tail ── vestigial French bulldog screw-tail nub (very short!) -->
+        <layer id="tail" type="base" z-order="5" width="32" height="24">
             <pixel-data>
-                <!-- very wide head: 10px wide, 8px tall -->
-                <rect x="0" y="1" w="11" h="8" color="#C8A878"/>
-                <!-- skull slightly darker for roundness -->
-                <hline x="1" y="1" len="9" color="#D4B890"/>
-                <!-- wrinkled forehead (bulldog) -->
-                <hline x="2" y="3" len="7" color="#B89870"/>
-                <hline x="2" y="4" len="7" color="#C8A878"/>
-                <!-- jowl folds at sides of muzzle -->
-                <pixel x="0" y="5" color="#AA8858"/>
-                <pixel x="0" y="6" color="#AA8858"/>
-                <pixel x="10" y="5" color="#AA8858"/>
-                <pixel x="10" y="6" color="#AA8858"/>
-                <!-- underbite chin protrudes -->
-                <rect x="2" y="8" w="7" h="2" color="#C8A878"/>
+                <!-- screw tail nub: 3-pixel corkscrew shape above rump -->
+                <pixel x="22" y="11" color="#D4A574"/>
+                <pixel x="23" y="10" color="#D4A574"/>
+                <pixel x="24" y="9"  color="#D4A574"/>
+                <pixel x="24" y="8"  color="#E8C098"/>
+                <!-- screw turn back -->
+                <pixel x="23" y="8"  color="#D4A574"/>
+                <pixel x="22" y="9"  color="#B8956A"/>
+                <pixel x="22" y="10" color="#B8956A"/>
+                <!-- tail base shadow (where nub meets rump) -->
+                <pixel x="21" y="11" color="#A07848"/>
+                <pixel x="21" y="10" color="#8B6440"/>
+                <!-- tail top highlight (fawn coat sheen on nub) -->
+                <pixel x="23" y="9"  color="#E8C098"/>
             </pixel-data>
         </layer>
-        <!-- z=6: ears — large bat ears (French bulldog signature, upright) -->
-        <layer id="ears" type="base" z-order="6" width="20" height="16">
+
+        <!-- ── z=6: neck ── short thick bulldog neck; heavy wrinkle skin folds -->
+        <layer id="neck" type="base" z-order="6" width="32" height="24">
             <pixel-data>
-                <!-- left bat ear: wide-based, pointed top -->
-                <rect x="0" y="0" w="3" h="3" color="#C8A878"/>
-                <pixel x="1" y="0" color="#D4B890"/>
-                <!-- left ear inner: darker pink -->
+                <!-- very short thick neck base: 7px wide, 5px tall (barrel neck!) -->
+                <rect x="3" y="6" w="7" h="4" color="#D4A574"/>
+                <!-- neck top highlight (coat sheen) -->
+                <hline x="4" y="6" len="5" color="#E8C098"/>
+                <!-- wrinkle fold #1 (Frenchie deep neck fold) -->
+                <hline x="3" y="7" len="7" color="#A07848"/>
+                <!-- wrinkle fold #2 (second fold below) -->
+                <hline x="4" y="8" len="5" color="#B8956A"/>
+                <!-- side neck shadow (jowl meets neck) -->
+                <pixel x="2"  y="7" color="#8B6440"/>
+                <pixel x="2"  y="8" color="#8B6440"/>
+                <pixel x="10" y="7" color="#8B6440"/>
+                <pixel x="10" y="8" color="#8B6440"/>
+                <!-- dewlap / throat loose fold -->
+                <rect x="4" y="8" w="4" h="2" color="#D4A574"/>
+                <hline x="5" y="9" len="2" color="#A07848"/>
+                <!-- neck-chest transition shadow -->
+                <hline x="3" y="10" len="7" color="#B8956A"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ── z=7: head ── massive wide flat bulldog head, deep wrinkles -->
+        <layer id="head" type="base" z-order="7" width="32" height="24">
+            <pixel-data>
+                <!-- skull: 12px wide (very wide!), 8px tall (squarish) -->
+                <rect x="0" y="1" w="12" h="8" color="#D4A574"/>
+                <!-- skull top highlight -->
+                <hline x="1" y="1" len="10" color="#E8C098"/>
+                <hline x="2" y="2" len="8"  color="#E8C098"/>
+                <!-- wrinkled forehead: 3 horizontal wrinkle lines -->
+                <hline x="2" y="3" len="8" color="#A07848"/>
+                <hline x="3" y="4" len="6" color="#B8956A"/>
+                <hline x="2" y="5" len="8" color="#A07848"/>
+                <!-- compressed flat nose area (brachycephalic) -->
+                <rect x="2" y="5" w="8" h="4" color="#D4A574"/>
+                <!-- jowl folds — deep shadow at sides of face -->
+                <pixel x="0" y="5" color="#8B6440"/>
+                <pixel x="0" y="6" color="#8B6440"/>
+                <pixel x="0" y="7" color="#A07848"/>
+                <pixel x="11" y="5" color="#8B6440"/>
+                <pixel x="11" y="6" color="#8B6440"/>
+                <pixel x="11" y="7" color="#A07848"/>
+                <!-- underbite jowl protrudes lower jaw -->
+                <rect x="2" y="8" w="8" h="2" color="#D4A574"/>
+                <hline x="3" y="9" len="6" color="#E8C098"/>
+                <!-- cheek roundness shading -->
+                <pixel x="1" y="4" color="#B8956A"/>
+                <pixel x="1" y="5" color="#B8956A"/>
+                <pixel x="10" y="4" color="#B8956A"/>
+                <pixel x="10" y="5" color="#B8956A"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ── z=8: ears ── large BAT ears — French bulldog signature -->
+        <layer id="ears" type="base" z-order="8" width="32" height="24">
+            <pixel-data>
+                <!-- left bat ear: very wide base (3px), tall (4px), upright -->
+                <rect x="0" y="0" w="4" h="4" color="#D4A574"/>
+                <pixel x="1" y="0" color="#E8C098"/>
+                <pixel x="2" y="0" color="#E8C098"/>
+                <!-- ear inner: pink (bat ear seen from front) -->
                 <pixel x="1" y="1" color="#DDAAAA"/>
+                <pixel x="2" y="1" color="#DDAAAA"/>
                 <pixel x="1" y="2" color="#DDAAAA"/>
-                <!-- right bat ear -->
-                <rect x="8" y="0" w="3" h="3" color="#C8A878"/>
-                <pixel x="9" y="0" color="#D4B890"/>
-                <!-- right ear inner -->
-                <pixel x="9" y="1" color="#DDAAAA"/>
-                <pixel x="9" y="2" color="#DDAAAA"/>
+                <pixel x="2" y="2" color="#DDAAAA"/>
+                <!-- ear edge shadow -->
+                <pixel x="0" y="1" color="#B8956A"/>
+                <pixel x="3" y="1" color="#B8956A"/>
+                <!-- right bat ear (symmetric) -->
+                <rect x="8" y="0" w="4" h="4" color="#D4A574"/>
+                <pixel x="9" y="0" color="#E8C098"/>
+                <pixel x="10" y="0" color="#E8C098"/>
+                <pixel x="9" y="1"  color="#DDAAAA"/>
+                <pixel x="10" y="1" color="#DDAAAA"/>
+                <pixel x="9" y="2"  color="#DDAAAA"/>
+                <pixel x="10" y="2" color="#DDAAAA"/>
+                <pixel x="8" y="1"  color="#B8956A"/>
+                <pixel x="11" y="1" color="#B8956A"/>
+                <!-- ear base attachment to head -->
+                <hline x="0" y="4" len="4" color="#A07848"/>
+                <hline x="8" y="4" len="4" color="#A07848"/>
             </pixel-data>
         </layer>
-        <!-- z=7: face_details — CLOUDY/PALE eyes (blind!), wide flat nose, wrinkles -->
-        <layer id="face_details" type="overlay" z-order="7" width="20" height="16">
+
+        <!-- ── z=9: face_details ── MILKY BLIND EYES, flat wide nose, deep wrinkles -->
+        <layer id="face_details" type="overlay" z-order="9" width="32" height="24">
             <pixel-data>
-                <!-- left eye: CLOUDY PALE BLUE-WHITE (blind cataract) -->
-                <pixel x="2" y="3" color="#AABBCC"/>
-                <pixel x="3" y="2" color="#CCDDE0"/>
-                <pixel x="4" y="2" color="#CCDDE0"/>
-                <pixel x="3" y="3" color="#AABBCC"/>
-                <!-- cloudy pupil (not dark, reflecting blindness) -->
-                <pixel x="4" y="3" color="#8899AA"/>
-                <!-- right eye: same cloudy -->
-                <pixel x="6" y="3" color="#AABBCC"/>
-                <pixel x="7" y="2" color="#CCDDE0"/>
-                <pixel x="8" y="2" color="#CCDDE0"/>
-                <pixel x="7" y="3" color="#AABBCC"/>
-                <pixel x="8" y="3" color="#8899AA"/>
-                <!-- no bright eye shine (blind eyes are milky) -->
-                <!-- flat wide nose: bulldog nose, almost at face level -->
-                <rect x="3" y="5" w="5" h="2" color="#553322"/>
-                <!-- wide nostrils -->
-                <pixel x="3" y="6" color="#442211"/>
-                <pixel x="4" y="6" color="#442211"/>
-                <pixel x="6" y="6" color="#442211"/>
-                <pixel x="7" y="6" color="#442211"/>
-                <!-- underbite: bottom lip visible -->
-                <hline x="2" y="8" len="7" color="#AA8858"/>
-                <hline x="3" y="9" len="5" color="#C8A878"/>
-                <!-- wrinkle lines on muzzle (bulldog face folds) -->
-                <pixel x="2" y="5" color="#AA8858"/>
-                <pixel x="2" y="4" color="#AA8858"/>
-                <pixel x="9" y="5" color="#AA8858"/>
-                <pixel x="9" y="4" color="#AA8858"/>
+                <!-- LEFT EYE: CLOUDY / MILKY — cataracts since 2020 (blind)
+                     No bright iris, no sharp pupil — all diffuse and grey-white -->
+                <!-- eye socket (wide round Frenchie eye) -->
+                <rect x="2" y="3" w="3" h="3" color="#D8D8E8"/>
+                <!-- cloudy iris: pale blue-grey film over everything -->
+                <pixel x="2" y="3" color="#C0C0D0"/>
+                <pixel x="3" y="2" color="#D8D8E8"/>
+                <pixel x="4" y="2" color="#D8D8E8"/>
+                <pixel x="3" y="3" color="#C0C0D0"/>
+                <pixel x="4" y="3" color="#C0C0D0"/>
+                <pixel x="2" y="4" color="#C0C0D0"/>
+                <pixel x="3" y="4" color="#8B9090"/>
+                <pixel x="4" y="4" color="#9090A8"/>
+                <!-- diffuse hazy pupil: grey, not black (cataract) -->
+                <pixel x="3" y="3" color="#9090A8"/>
+                <!-- NO bright eye shine — blind eyes don't reflect sharply -->
+                <!-- eyelid wrinkle (aged, droopy eyelid) -->
+                <pixel x="2" y="2" color="#A07848"/>
+                <pixel x="5" y="2" color="#A07848"/>
+                <!-- RIGHT EYE: same milky cataract -->
+                <rect x="7" y="3" w="3" h="3" color="#D8D8E8"/>
+                <pixel x="7"  y="3" color="#C0C0D0"/>
+                <pixel x="8"  y="2" color="#D8D8E8"/>
+                <pixel x="9"  y="2" color="#D8D8E8"/>
+                <pixel x="8"  y="3" color="#C0C0D0"/>
+                <pixel x="9"  y="3" color="#C0C0D0"/>
+                <pixel x="7"  y="4" color="#C0C0D0"/>
+                <pixel x="8"  y="4" color="#8B9090"/>
+                <pixel x="9"  y="4" color="#9090A8"/>
+                <pixel x="8"  y="3" color="#9090A8"/>
+                <!-- eyelid wrinkle -->
+                <pixel x="7"  y="2" color="#A07848"/>
+                <pixel x="10" y="2" color="#A07848"/>
+                <!-- NOSE: wide flat bulldog nose, dark leather -->
+                <rect x="3" y="6" w="6" h="2" color="#442211"/>
+                <hline x="4" y="6" len="4" color="#553322"/>
+                <!-- wide paired nostrils (stenotic nares — common in Frenchies) -->
+                <pixel x="3" y="7" color="#331100"/>
+                <pixel x="4" y="7" color="#331100"/>
+                <pixel x="6" y="7" color="#331100"/>
+                <pixel x="7" y="7" color="#331100"/>
+                <!-- nasal fold shadow above nose -->
+                <hline x="3" y="5" len="6" color="#8B6440"/>
+                <!-- MOUTH: underbite, lower lip slightly visible -->
+                <hline x="3" y="8" len="6" color="#A07848"/>
+                <hline x="4" y="9" len="4" color="#D4A574"/>
+                <!-- chin jowl dimple -->
+                <pixel x="5" y="9" color="#B8956A"/>
+                <!-- WRINKLES ON MUZZLE: horizontal skin folds -->
+                <pixel x="2" y="6" color="#8B6440"/>
+                <pixel x="2" y="5" color="#A07848"/>
+                <pixel x="10" y="6" color="#8B6440"/>
+                <pixel x="10" y="5" color="#A07848"/>
             </pixel-data>
         </layer>
+
     </layers>
+
     <animations>
-        <!-- idle_morning: slow careful wake-up, sniffs to orient himself -->
-        <animation name="idle_morning" frames="4" fps="3" loop="true" frame-width="20" frame-height="16">
+
+        <!-- ══════════════════════════════════════════════════════
+             idle_morning — slow careful waking routine.
+             Voland relies on smell to orient himself after sleep.
+             Nose works methodically before any movement.
+             12 frames @ 3fps = 4 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="idle_morning" frames="12" fps="3" loop="true" frame-width="32" frame-height="24">
             <condition type="time_of_day" value="morning"/>
-            <frame index="0" layer-offsets=""/>
-            <!-- sniff: nose lowers slightly -->
-            <frame index="1" layer-offsets="head:0,1; ears:0,1; face_details:0,1"/>
-            <!-- smell checking direction -->
-            <frame index="2" layer-offsets="head:-1,1; ears:-1,1; face_details:-1,1"/>
-            <!-- settle: position confirmed, sits still -->
-            <frame index="3" layer-offsets=""/>
+            <!-- f0: just woken, completely still — milky eyes open -->
+            <frame index="0"  layer-offsets=""/>
+            <!-- f1: nose drops down — morning orientation sniff -->
+            <frame index="1"  layer-offsets="head:0,1; ears:0,1; face_details:0,2"/>
+            <!-- f2: sniff left — finding familiar morning scent -->
+            <frame index="2"  layer-offsets="head:-1,1; ears:-1,1; face_details:-1,2"/>
+            <!-- f3: sniff right — cross-referencing -->
+            <frame index="3"  layer-offsets="head:1,1; ears:1,1; face_details:1,2"/>
+            <!-- f4: center sniff — confirming location -->
+            <frame index="4"  layer-offsets="head:0,1; ears:0,1; face_details:0,2"/>
+            <!-- f5: identity established — slight body settling -->
+            <frame index="5"  layer-offsets=""/>
+            <!-- f6: breathing inhale — preparing to stand -->
+            <frame index="6"  layer-offsets="body:0,-1; belly:0,-1"/>
+            <!-- f7: exhale, settle back — not quite ready yet (old dog) -->
+            <frame index="7"  layer-offsets="body:0,1; belly:0,1"/>
+            <!-- f8: neck stretch — slow head rise -->
+            <frame index="8"  layer-offsets="neck:0,-1; head:0,-1; ears:0,-1; face_details:0,-1"/>
+            <!-- f9: hold — listening to household sounds to confirm time of day -->
+            <frame index="9"  layer-offsets="neck:0,-1; head:0,-1; ears:0,-1; face_details:0,-1"/>
+            <!-- f10: final orientation sniff — ready -->
+            <frame index="10" layer-offsets="head:0,1; face_details:0,2"/>
+            <!-- f11: settled — day mode begins -->
+            <frame index="11" layer-offsets=""/>
         </animation>
-        <!-- idle_day: calm standing, nose constantly active, occasional head tilt -->
-        <animation name="idle_day" frames="4" fps="3" loop="true" frame-width="20" frame-height="16">
+
+        <!-- ══════════════════════════════════════════════════════
+             idle_day — slow calm standing; nose constantly twitching.
+             Head tilts to listen. Old dog dignity.
+             12 frames @ 3fps = 4 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="idle_day" frames="12" fps="3" loop="true" frame-width="32" frame-height="24">
             <condition type="time_of_day" value="day"/>
-            <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="head:0,1; face_details:0,1"/>
-            <frame index="2" layer-offsets="head:1,0; ears:1,0; face_details:1,0"/>
-            <frame index="3" layer-offsets=""/>
+            <!-- f0: neutral standing -->
+            <frame index="0"  layer-offsets=""/>
+            <!-- f1: nose twitch — constant sensory monitoring -->
+            <frame index="1"  layer-offsets="face_details:0,1"/>
+            <!-- f2: head tilt left — ear angle for better hearing (compensates for no sight) -->
+            <frame index="2"  layer-offsets="head:-1,0; ears:-1,-1; face_details:-1,0"/>
+            <!-- f3: hold tilt — processing sound -->
+            <frame index="3"  layer-offsets="head:-1,0; ears:-1,-1; face_details:-1,0"/>
+            <!-- f4: return to center, belly breathing -->
+            <frame index="4"  layer-offsets="belly:0,1"/>
+            <!-- f5: exhale -->
+            <frame index="5"  layer-offsets="belly:0,0"/>
+            <!-- f6: head tilt right — panoramic sound scan -->
+            <frame index="6"  layer-offsets="head:1,0; ears:1,-1; face_details:1,0"/>
+            <!-- f7: nose drops to ground level — smell-check floor -->
+            <frame index="7"  layer-offsets="head:1,1; ears:1,0; face_details:1,2"/>
+            <!-- f8: brief bump contact — head touches wall/furniture edge gently -->
+            <frame index="8"  layer-offsets="head:2,1; ears:2,0; face_details:2,2; neck:1,0"/>
+            <!-- f9: recoil from bump (gentle, knows it by now) -->
+            <frame index="9"  layer-offsets="head:0,0; ears:0,0; face_details:0,0; neck:0,0"/>
+            <!-- f10: nose up — re-orient via smell -->
+            <frame index="10" layer-offsets="head:0,1; face_details:0,2"/>
+            <!-- f11: neutral confirmed, calm again -->
+            <frame index="11" layer-offsets=""/>
         </animation>
-        <!-- idle_evening: relaxed, listening to familiar voices, tail nub wags -->
-        <animation name="idle_evening" frames="4" fps="3" loop="true" frame-width="20" frame-height="16">
+
+        <!-- ══════════════════════════════════════════════════════
+             idle_evening — relaxed listening to familiar voices.
+             Tail nub wiggles when Tanya's parents speak.
+             12 frames @ 3fps = 4 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="idle_evening" frames="12" fps="3" loop="true" frame-width="32" frame-height="24">
             <condition type="time_of_day" value="evening"/>
-            <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="tail:0,-1"/>
-            <frame index="2" layer-offsets="tail:-1,-1; head:0,1; face_details:0,1"/>
-            <frame index="3" layer-offsets="tail:1,0"/>
+            <!-- f0: neutral, slightly lower posture — tired old dog evening -->
+            <frame index="0"  layer-offsets="body:0,1; belly:0,1"/>
+            <!-- f1: familiar voice heard — tail nub wiggles right -->
+            <frame index="1"  layer-offsets="body:0,1; belly:0,1; tail:1,-1"/>
+            <!-- f2: tail nub left -->
+            <frame index="2"  layer-offsets="body:0,1; belly:0,1; tail:-1,-1"/>
+            <!-- f3: tail neutral, head raises toward sound source -->
+            <frame index="3"  layer-offsets="body:0,1; belly:0,1; head:0,-1; ears:0,-1; face_details:0,-1"/>
+            <!-- f4: nose twitch — identifying person by smell -->
+            <frame index="4"  layer-offsets="body:0,1; belly:0,1; head:0,0; face_details:0,1"/>
+            <!-- f5: confirmed! It's family — body warms, slight weight shift -->
+            <frame index="5"  layer-offsets="body:0,1; belly:0,1; front_legs:-1,0"/>
+            <!-- f6: tail wags more enthusiastically — nub rapid right -->
+            <frame index="6"  layer-offsets="body:0,1; belly:0,1; tail:2,-1"/>
+            <!-- f7: tail rapid left -->
+            <frame index="7"  layer-offsets="body:0,1; belly:0,1; tail:-2,-1"/>
+            <!-- f8: slow blink equivalent (head drops, then rises = dog's calm blink) -->
+            <frame index="8"  layer-offsets="body:0,1; belly:0,1; head:0,1; face_details:0,2"/>
+            <!-- f9: head rises again — still content -->
+            <frame index="9"  layer-offsets="body:0,1; belly:0,1; head:0,0; face_details:0,0"/>
+            <!-- f10: breathing in — evening settles -->
+            <frame index="10" layer-offsets="body:0,0; belly:0,0"/>
+            <!-- f11: exhale, fully at ease -->
+            <frame index="11" layer-offsets="body:0,1; belly:0,1"/>
         </animation>
-        <!-- idle_night: old dog sleeping soundly, occasional snore twitch -->
-        <animation name="idle_night" frames="4" fps="2" loop="true" frame-width="20" frame-height="16">
+
+        <!-- ══════════════════════════════════════════════════════
+             idle_night — old dog sleeping; soft snore breath cycles.
+             Completely at rest, occasional snore-twitch.
+             12 frames @ 2fps = 6 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="idle_night" frames="12" fps="2" loop="true" frame-width="32" frame-height="24">
             <condition type="time_of_day" value="night"/>
-            <frame index="0" layer-offsets="head:1,3; ears:1,2; face_details:1,3; legs:0,1; paws:0,1"/>
-            <frame index="1" layer-offsets="head:1,3; ears:1,2; face_details:1,3; legs:0,1; paws:0,1"/>
-            <frame index="2" layer-offsets="head:1,3; ears:1,2; face_details:1,3; body:0,1; chest_markings:0,1; legs:0,1; paws:0,1"/>
-            <frame index="3" layer-offsets="head:1,3; ears:1,2; face_details:1,4; legs:0,1; paws:0,1"/>
+            <!-- f0: fully laid down, head on side — old man sleeping -->
+            <frame index="0"  layer-offsets="front_legs:2,3; hind_legs:2,2; paws:3,3; body:0,2; belly:0,3; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:2,2"/>
+            <!-- f1: slow breath in (belly barely rises) -->
+            <frame index="1"  layer-offsets="front_legs:2,3; hind_legs:2,2; paws:3,3; body:0,1; belly:0,2; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:2,2"/>
+            <!-- f2: slow breath out -->
+            <frame index="2"  layer-offsets="front_legs:2,3; hind_legs:2,2; paws:3,3; body:0,2; belly:0,3; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:2,2"/>
+            <!-- f3: snore twitch — nose/face twitches slightly -->
+            <frame index="3"  layer-offsets="front_legs:2,3; hind_legs:2,2; paws:3,3; body:0,2; belly:0,3; neck:1,3; head:2,3; ears:2,3; face_details:2,4; tail:2,2"/>
+            <!-- f4: back to steady breathing -->
+            <frame index="4"  layer-offsets="front_legs:2,3; hind_legs:2,2; paws:3,3; body:0,1; belly:0,2; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:2,2"/>
+            <!-- f5: out -->
+            <frame index="5"  layer-offsets="front_legs:2,3; hind_legs:2,2; paws:3,3; body:0,2; belly:0,3; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:2,2"/>
+            <!-- f6: ear fold adjusts (reflex, no awareness) -->
+            <frame index="6"  layer-offsets="front_legs:2,3; hind_legs:2,2; paws:3,3; body:0,2; belly:0,3; neck:1,3; head:2,3; ears:1,3; face_details:2,3; tail:2,2"/>
+            <!-- f7: deep breath in -->
+            <frame index="7"  layer-offsets="front_legs:2,3; hind_legs:2,2; paws:3,3; body:0,0; belly:0,1; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:2,2"/>
+            <!-- f8: deep breath out — loud snore possible -->
+            <frame index="8"  layer-offsets="front_legs:2,3; hind_legs:2,2; paws:3,3; body:0,2; belly:0,3; neck:1,3; head:2,4; ears:2,4; face_details:2,4; tail:2,2"/>
+            <!-- f9: leg twitch in sleep dream -->
+            <frame index="9"  layer-offsets="front_legs:2,3; hind_legs:2,2; paws:2,3; body:0,2; belly:0,3; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:2,2"/>
+            <!-- f10: back to steady -->
+            <frame index="10" layer-offsets="front_legs:2,3; hind_legs:2,2; paws:3,3; body:0,1; belly:0,2; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:2,2"/>
+            <!-- f11: deepest sleep of the night -->
+            <frame index="11" layer-offsets="front_legs:2,3; hind_legs:2,2; paws:3,3; body:0,2; belly:0,3; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:2,2"/>
         </animation>
-        <!-- walk: careful slow shuffle, relies on memory of layout -->
-        <animation name="walk" frames="6" fps="5" loop="true" frame-width="20" frame-height="16">
-            <frame index="0" layer-offsets=""/>
-            <!-- head sweeps low before each step (sniffing path) -->
-            <frame index="1" layer-offsets="head:0,1; face_details:0,1; paws:-1,-1; legs:-1,0"/>
-            <frame index="2" layer-offsets="body:-1,0; chest_markings:-1,0"/>
-            <frame index="3" layer-offsets="head:0,1; face_details:0,1; paws:1,-1; legs:1,0"/>
-            <frame index="4" layer-offsets="body:1,0; chest_markings:1,0"/>
-            <frame index="5" layer-offsets=""/>
+
+        <!-- ══════════════════════════════════════════════════════
+             walk_blind — BLIND WALK: unsteady gait with wobble offsets.
+             Head sweeps low before each step (sniffing path).
+             Slight lateral drift — bumps are expected and absorbed.
+             12 frames @ 5fps = 2.4 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="walk_blind" frames="12" fps="5" loop="true" frame-width="32" frame-height="24">
+            <!-- BLIND GAIT characteristics:
+                 - Head sweeps low before weight-bearing steps (nose leads)
+                 - Slight wobble on dx offsets (±1 lateral drift)
+                 - Slower cadence than normal walk
+                 - Front paws test ground before full placement -->
+            <!-- f0: nose sweeps left before first step — sniff confirm path -->
+            <frame index="0"  layer-offsets="head:-1,1; ears:-1,1; face_details:-1,2; neck:0,1"/>
+            <!-- f1: left-front tentative placement (tap before load) -->
+            <frame index="1"  layer-offsets="head:-1,0; ears:-1,0; face_details:-1,1; front_legs:-1,0; paws:-1,1"/>
+            <!-- f2: weight shifts forward, body follows — slight rightward wobble -->
+            <frame index="2"  layer-offsets="head:0,0; front_legs:-1,0; paws:-1,0; body:-1,0; belly:-1,0; neck:1,0"/>
+            <!-- f3: right-front sweeps low to check ground ahead -->
+            <frame index="3"  layer-offsets="head:0,1; face_details:0,2; front_legs:1,0; paws:0,1; neck:0,1"/>
+            <!-- f4: right-front placed — leftward wobble (overcompensation) -->
+            <frame index="4"  layer-offsets="head:-1,0; face_details:-1,1; front_legs:1,0; paws:1,0; body:1,0; belly:1,0"/>
+            <!-- f5: hind legs shuffle forward — short steps (don't trip on unfamiliar) -->
+            <frame index="5"  layer-offsets="hind_legs:0,0; paws:0,0; body:0,0; belly:0,0"/>
+            <!-- f6: nose drops to ground — smell-verify position mid-stride -->
+            <frame index="6"  layer-offsets="head:0,2; ears:0,1; face_details:0,3; neck:0,1"/>
+            <!-- f7: confirmed — continues, slight right drift -->
+            <frame index="7"  layer-offsets="head:1,1; ears:1,0; face_details:1,2; front_legs:-1,0; paws:-1,0; neck:0,0"/>
+            <!-- f8: second left-front placement with tiny wobble -->
+            <frame index="8"  layer-offsets="head:0,0; front_legs:-1,0; paws:-1,1; body:-1,0; belly:-1,0; neck:-1,0"/>
+            <!-- f9: body sways right momentarily — gravity-balance compensation -->
+            <frame index="9"  layer-offsets="head:1,0; body:1,0; belly:1,0; hind_legs:0,0; neck:1,0; face_details:1,0"/>
+            <!-- f10: front right re-placement, head still monitoring scent trail -->
+            <frame index="10" layer-offsets="head:0,1; face_details:0,2; front_legs:1,0; paws:1,0; body:0,0; belly:0,0"/>
+            <!-- f11: return to neutral walking position — completes one gait cycle -->
+            <frame index="11" layer-offsets="head:0,0; face_details:0,1; neck:0,0"/>
         </animation>
-        <!-- sniff: unique — extended nose-led exploration, bumping into things gently -->
-        <animation name="sniff" frames="6" fps="5" loop="false" frame-width="20" frame-height="16">
-            <condition type="trigger" value="new_smell"/>
-            <!-- frame 0: nose drops -->
-            <frame index="0" layer-offsets="head:0,1; ears:0,1; face_details:0,2"/>
-            <!-- frame 1: sniff left -->
-            <frame index="1" layer-offsets="head:-2,2; ears:-2,2; face_details:-2,3"/>
-            <!-- frame 2: sniff centre -->
-            <frame index="2" layer-offsets="head:0,2; ears:0,2; face_details:0,3"/>
-            <!-- frame 3: sniff right -->
-            <frame index="3" layer-offsets="head:2,2; ears:2,2; face_details:2,3"/>
-            <!-- frame 4: nose bump (found something!) -->
-            <frame index="4" layer-offsets="head:3,2; ears:3,2; face_details:3,3; body:1,0"/>
-            <!-- frame 5: satisfied, head raises slightly -->
-            <frame index="5" layer-offsets="head:0,1; ears:0,1; face_details:0,1"/>
+
+        <!-- ══════════════════════════════════════════════════════
+             bump_furniture — walks into object, reacts, redirects.
+             Gentle bump, brief pause, back up, new direction via smell.
+             12 frames @ 5fps = 2.4 seconds (one-shot)
+        ══════════════════════════════════════════════════════ -->
+        <animation name="bump_furniture" frames="12" fps="5" loop="false" frame-width="32" frame-height="24">
+            <condition type="trigger" value="obstacle_contact"/>
+            <!-- f0: walking normally — unaware of obstacle -->
+            <frame index="0"  layer-offsets="head:0,1; face_details:0,2; neck:0,0"/>
+            <!-- f1: contact! Nose hits obstacle — head stops suddenly -->
+            <frame index="1"  layer-offsets="head:-1,1; face_details:-2,2; neck:-1,0; front_legs:0,0; paws:0,0"/>
+            <!-- f2: body lurches forward slightly (momentum) — bump force -->
+            <frame index="2"  layer-offsets="head:-1,1; face_details:-3,2; neck:-1,0; body:-1,0; belly:-1,0"/>
+            <!-- f3: recoil — head backs off sharply -->
+            <frame index="3"  layer-offsets="head:1,0; face_details:1,1; neck:1,0; body:0,0"/>
+            <!-- f4: full stop — standing still, reassessing via smell -->
+            <frame index="4"  layer-offsets="head:0,1; face_details:0,2; neck:0,1"/>
+            <!-- f5: nose works intensively — what is this? Left sniff -->
+            <frame index="5"  layer-offsets="head:-2,1; ears:-2,0; face_details:-2,2; neck:-1,0"/>
+            <!-- f6: right sniff — mapping the obstacle -->
+            <frame index="6"  layer-offsets="head:2,1; ears:2,0; face_details:2,2; neck:1,0"/>
+            <!-- f7: up sniff — checking height -->
+            <frame index="7"  layer-offsets="head:0,0; ears:0,-1; face_details:0,0; neck:0,-1"/>
+            <!-- f8: "ah yes, the chair leg" — familiar, identified via memory -->
+            <frame index="8"  layer-offsets="head:0,1; ears:0,1; face_details:0,2; neck:0,1"/>
+            <!-- f9: begins backing up — small reverse steps -->
+            <frame index="9"  layer-offsets="front_legs:1,0; paws:1,0; body:1,0; belly:1,0; head:1,1; face_details:1,2"/>
+            <!-- f10: full back, angling for new path (leftward redirect) -->
+            <frame index="10" layer-offsets="front_legs:2,0; paws:2,0; body:2,0; belly:2,0; head:0,1; face_details:0,2; hind_legs:1,0"/>
+            <!-- f11: new trajectory confirmed by smell, begins walk again -->
+            <frame index="11" layer-offsets="head:-1,1; face_details:-1,2; neck:-1,0"/>
         </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             sniff_navigate — extended nose-led exploration of space.
+             Voland's primary navigation method: sniff-grid the room.
+             12 frames @ 4fps = 3 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="sniff_navigate" frames="12" fps="4" loop="true" frame-width="32" frame-height="24">
+            <condition type="state" value="navigating"/>
+            <!-- f0: head level — baseline orientation -->
+            <frame index="0"  layer-offsets=""/>
+            <!-- f1: nose drops to floor — low-zone smell map -->
+            <frame index="1"  layer-offsets="head:0,2; ears:0,1; face_details:0,3; neck:0,1"/>
+            <!-- f2: sniff sweep left along floor -->
+            <frame index="2"  layer-offsets="head:-2,2; ears:-2,1; face_details:-2,3; neck:-1,1"/>
+            <!-- f3: sniff center floor -->
+            <frame index="3"  layer-offsets="head:0,2; ears:0,1; face_details:0,3; neck:0,1"/>
+            <!-- f4: sniff right floor -->
+            <frame index="4"  layer-offsets="head:2,2; ears:2,1; face_details:2,3; neck:1,1"/>
+            <!-- f5: head rises — mid-zone smell check -->
+            <frame index="5"  layer-offsets="head:0,1; ears:0,0; face_details:0,2; neck:0,0"/>
+            <!-- f6: sniff left mid-zone -->
+            <frame index="6"  layer-offsets="head:-2,0; ears:-2,-1; face_details:-2,1; neck:-1,0"/>
+            <!-- f7: sniff center mid -->
+            <frame index="7"  layer-offsets="head:0,0; ears:0,-1; face_details:0,1"/>
+            <!-- f8: high zone sniff — nose lifted (checking air currents) -->
+            <frame index="8"  layer-offsets="head:0,-1; ears:0,-2; face_details:0,-1; neck:0,-1"/>
+            <!-- f9: smell analysis pause — processing all data -->
+            <frame index="9"  layer-offsets="head:0,-1; ears:0,-2; face_details:0,-1; neck:0,-1"/>
+            <!-- f10: direction confirmed — head points toward destination -->
+            <frame index="10" layer-offsets="head:-1,0; ears:-1,-1; face_details:-1,0; neck:-1,0"/>
+            <!-- f11: first step toward goal — nose leads -->
+            <frame index="11" layer-offsets="head:-1,1; face_details:-1,2; neck:-1,0; front_legs:-1,0; paws:-1,0"/>
+        </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             eat — careful deliberate eating; nose confirms bowl location
+             before each bite. Old dog eating slowly.
+             12 frames @ 4fps = 3 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="eat" frames="12" fps="4" loop="true" frame-width="32" frame-height="24">
+            <condition type="trigger" value="food_present"/>
+            <!-- f0: smell detects food — head raises in recognition -->
+            <frame index="0"  layer-offsets="head:0,-1; ears:0,-1; face_details:0,-1"/>
+            <!-- f1: locate bowl by smell — nose sweeps down and forward -->
+            <frame index="1"  layer-offsets="head:0,1; ears:0,0; face_details:0,2; neck:0,1"/>
+            <!-- f2: nose makes contact with bowl edge (confirm location) -->
+            <frame index="2"  layer-offsets="head:0,2; ears:0,1; face_details:0,3; neck:0,2; front_legs:0,0"/>
+            <!-- f3: first bite — slow deliberate -->
+            <frame index="3"  layer-offsets="head:0,3; ears:0,2; face_details:0,4; neck:0,2"/>
+            <!-- f4: chew — head rises slightly -->
+            <frame index="4"  layer-offsets="head:0,2; ears:0,1; face_details:0,3; neck:0,1"/>
+            <!-- f5: swallow — head lifts -->
+            <frame index="5"  layer-offsets="head:0,1; ears:0,0; face_details:0,1; neck:0,0"/>
+            <!-- f6: re-locate bowl nose-first (blind, must always re-confirm) -->
+            <frame index="6"  layer-offsets="head:0,2; ears:0,1; face_details:0,3; neck:0,1"/>
+            <!-- f7: second bite -->
+            <frame index="7"  layer-offsets="head:0,3; ears:0,2; face_details:0,4; neck:0,2"/>
+            <!-- f8: chew -->
+            <frame index="8"  layer-offsets="head:0,2; ears:0,1; face_details:0,3; neck:0,1"/>
+            <!-- f9: swallow -->
+            <frame index="9"  layer-offsets="head:0,1; ears:0,0; face_details:0,1; neck:0,0"/>
+            <!-- f10: bowl check — is it empty? Sniff test -->
+            <frame index="10" layer-offsets="head:0,2; ears:0,1; face_details:0,2; neck:0,1"/>
+            <!-- f11: satisfied sniff, head raises — meal complete -->
+            <frame index="11" layer-offsets="head:0,0; ears:0,0; face_details:0,0; neck:0,0"/>
+        </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             sleep — full curled old dog sleep; heavy, deep, snoring.
+             12 frames @ 2fps = 6 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="sleep" frames="12" fps="2" loop="true" frame-width="32" frame-height="24">
+            <condition type="state" value="sleeping"/>
+            <!-- f0: settling — turns in circle first (vestigial instinct), then drops -->
+            <frame index="0"  layer-offsets="body:0,1; belly:0,2; front_legs:2,2; hind_legs:1,2; paws:2,3; neck:1,2; head:2,2; ears:2,2; face_details:2,2; tail:1,2"/>
+            <!-- f1: fully down — all weight settled -->
+            <frame index="1"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:1,2; paws:2,3; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:1,3"/>
+            <!-- f2: slow heavy breath in — old dog breathes deeply -->
+            <frame index="2"  layer-offsets="body:0,1; belly:0,2; front_legs:2,3; hind_legs:1,2; paws:2,3; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:1,3"/>
+            <!-- f3: slow exhale — possibly audible snore -->
+            <frame index="3"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:1,2; paws:2,3; neck:1,3; head:2,4; ears:2,4; face_details:2,4; tail:1,3"/>
+            <!-- f4: deeper breath -->
+            <frame index="4"  layer-offsets="body:0,0; belly:0,1; front_legs:2,3; hind_legs:1,2; paws:2,3; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:1,3"/>
+            <!-- f5: deep snore exhale -->
+            <frame index="5"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:1,2; paws:2,3; neck:1,3; head:2,4; ears:2,4; face_details:2,4; tail:1,3"/>
+            <!-- f6: peaceful, no movement -->
+            <frame index="6"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:1,2; paws:2,3; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:1,3"/>
+            <!-- f7: paw twitch — old memory from sighted days -->
+            <frame index="7"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:1,2; paws:1,3; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:1,3"/>
+            <!-- f8: steady breath -->
+            <frame index="8"  layer-offsets="body:0,1; belly:0,2; front_legs:2,3; hind_legs:1,2; paws:2,3; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:1,3"/>
+            <!-- f9: exhale -->
+            <frame index="9"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:1,2; paws:2,3; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:1,3"/>
+            <!-- f10: ear reflex (sound in night) -->
+            <frame index="10" layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:1,2; paws:2,3; neck:1,3; head:2,3; ears:1,3; face_details:2,3; tail:1,3"/>
+            <!-- f11: deepest old-dog sleep — 11 years of faithful living -->
+            <frame index="11" layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:1,2; paws:2,3; neck:1,3; head:2,3; ears:2,3; face_details:2,3; tail:1,3"/>
+        </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             memory_path — Voland walks his known route flawlessly.
+             He has memorized 3-4 specific paths in the cottage.
+             On these paths, he moves with surprising confidence.
+             12 frames @ 6fps = 2 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="memory_path" frames="12" fps="6" loop="true" frame-width="32" frame-height="24">
+            <condition type="state" value="on_known_path"/>
+            <!-- ON HIS KNOWN PATH: no wobble, no sniff-pauses.
+                 Head stays level. Gait is steady and purposeful.
+                 This is where the old blind dog shows his dignity. -->
+            <!-- f0: confident stride — head level, no floor-sniff needed -->
+            <frame index="0"  layer-offsets="front_legs:-1,0; paws:-1,0; hind_legs:1,0"/>
+            <!-- f1: smooth weight transfer — no wobble dx offset -->
+            <frame index="1"  layer-offsets="front_legs:-1,0; paws:-1,0; body:-1,0; belly:-1,0"/>
+            <!-- f2: passing phase — smooth, dignified -->
+            <frame index="2"  layer-offsets="body:-1,0; belly:-1,0; neck:-1,0; head:-1,0; face_details:-1,0"/>
+            <!-- f3: opposite diagonal — equally confident -->
+            <frame index="3"  layer-offsets="front_legs:1,0; paws:1,0; hind_legs:-1,0"/>
+            <!-- f4: right side supports — no hesitation -->
+            <frame index="4"  layer-offsets="front_legs:1,0; paws:1,0; body:1,0; belly:1,0"/>
+            <!-- f5: passing phase right — tail nub wags (happy on known path) -->
+            <frame index="5"  layer-offsets="body:1,0; belly:1,0; neck:1,0; head:1,0; face_details:1,0; tail:0,-1"/>
+            <!-- f6: left-front second stride — picking up pace slightly -->
+            <frame index="6"  layer-offsets="front_legs:-1,0; paws:-1,-1; hind_legs:1,0"/>
+            <!-- f7: body glides — memory is perfect here -->
+            <frame index="7"  layer-offsets="front_legs:-1,0; paws:-1,-1; body:-1,0; head:-1,0; face_details:-1,0"/>
+            <!-- f8: brief lift — slight bounce (confident energy!) -->
+            <frame index="8"  layer-offsets="body:0,-1; belly:0,-1; paws:0,-1; tail:0,-1"/>
+            <!-- f9: right-front lands — knows exactly where to place it -->
+            <frame index="9"  layer-offsets="front_legs:1,0; paws:1,-1; hind_legs:-1,0"/>
+            <!-- f10: momentum carries cleanly — tail still wagging nub -->
+            <frame index="10" layer-offsets="front_legs:1,0; paws:1,-1; body:1,0; tail:1,-1"/>
+            <!-- f11: return — completed one loop of memory path with dignity -->
+            <frame index="11" layer-offsets=""/>
+        </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             happy_greet — Tanya or her parents come home.
+             Voland KNOWS their smell from the door and wags entire body.
+             Old dog pure joy — he can't see them but knows they're here.
+             12 frames @ 5fps = 2.4 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="happy_greet" frames="12" fps="5" loop="true" frame-width="32" frame-height="24">
+            <condition type="trigger" value="familiar_person_arrives"/>
+            <!-- f0: sniff detects familiar person at door — RECOGNITION! -->
+            <frame index="0"  layer-offsets="head:0,-1; ears:0,-2; face_details:0,-1; neck:0,-1"/>
+            <!-- f1: entire rear end begins wagging — whole back-half sways right -->
+            <frame index="1"  layer-offsets="head:0,-1; ears:0,-2; face_details:0,-1; neck:0,-1; hind_legs:1,0; body:1,0; belly:1,0; tail:2,-1"/>
+            <!-- f2: rear sways left — Frenchie full-body wag -->
+            <frame index="2"  layer-offsets="head:0,-1; ears:0,-2; face_details:0,-1; neck:0,-1; hind_legs:-1,0; body:-1,0; belly:-1,0; tail:-2,-1"/>
+            <!-- f3: right again — building excitement -->
+            <frame index="3"  layer-offsets="head:0,-1; ears:0,-2; face_details:0,-1; neck:0,-1; hind_legs:1,0; body:1,0; belly:1,0; tail:2,-1"/>
+            <!-- f4: trots toward voice/smell — front legs shuffle-trot forward -->
+            <frame index="4"  layer-offsets="head:-1,-1; ears:-1,-2; face_details:-1,-1; neck:-1,-1; front_legs:-1,0; paws:-1,0; body:0,0; belly:0,0"/>
+            <!-- f5: nose connects with person's hand/leg — maximum joy moment -->
+            <frame index="5"  layer-offsets="head:-2,0; ears:-2,-1; face_details:-2,1; neck:-2,0; front_legs:-1,0; paws:-1,0"/>
+            <!-- f6: push into their leg — full body contact greeting -->
+            <frame index="6"  layer-offsets="head:-2,0; ears:-2,-1; face_details:-2,0; neck:-2,0; body:-1,0; belly:-1,0; hind_legs:-1,0; tail:-1,-2"/>
+            <!-- f7: rear sways right in joy -->
+            <frame index="7"  layer-offsets="head:-1,0; ears:-1,-1; face_details:-1,0; neck:-1,0; body:0,0; belly:0,0; hind_legs:1,0; tail:2,-2"/>
+            <!-- f8: circles to get more smell — rear swings around -->
+            <frame index="8"  layer-offsets="head:0,0; ears:0,-1; face_details:0,0; hind_legs:2,0; body:1,0; belly:1,0; tail:3,-1"/>
+            <!-- f9: sniff complete circuit — checks another side -->
+            <frame index="9"  layer-offsets="head:1,0; ears:1,-1; face_details:1,0; neck:1,0; hind_legs:1,0; tail:2,-1"/>
+            <!-- f10: sits down beside person — done greeting, now just happy proximity -->
+            <frame index="10" layer-offsets="head:0,0; ears:0,-1; face_details:0,0; hind_legs:0,2; paws:0,1; body:0,1; belly:0,2; tail:1,2"/>
+            <!-- f11: completely still beside beloved human — pure contentment -->
+            <frame index="11" layer-offsets="head:0,0; ears:0,-1; face_details:0,0; hind_legs:0,2; paws:0,1; body:0,1; belly:0,2; tail:1,2"/>
+        </animation>
+
     </animations>
+
     <naming>
         <output-dir>characters/voland</output-dir>
     </naming>
+
 </asset-spec>

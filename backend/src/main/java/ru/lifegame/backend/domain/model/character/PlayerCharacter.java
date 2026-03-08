@@ -135,4 +135,15 @@ public class PlayerCharacter {
                 List.of("laptop", "smartphone")
         );
     }
+
+    public void changeJobSatisfaction(int delta) {
+        this.job = job.changeSatisfaction(delta);
+    }
+
+    public void changeJobBurnoutRisk(int delta) {
+        this.job = job.changeBurnoutRisk(delta);
+    }
+
+
+
 }

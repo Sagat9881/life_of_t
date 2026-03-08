@@ -2,19 +2,19 @@
 <!--
   ANIMATION SYSTEM PROMPT - ROOT
   Корневой системный контекст для анимаций в игре Life of Tatyana
-  
+
   Структура:
   /animation/
     - ANIMATION_SYSTEM.xml (этот файл - корневой)
     - characters/ (анимации персонажей: Tatyana, Sam, Husband, Father, Garfield)
     - objects/ (анимации объектов: bed, computer, phone, mirror)
     - ui-effects/ (анимации UI: particles, notifications, transitions)
-  
-  Версия: 1.0
-  Последнее обновление: 2026-03-01
+
+  Версия: 2.0
+  Последнее обновление: 2026-03-08
 -->
 
-<animation-system version="1.0" project="life-of-t">
+<animation-system version="2.0" project="life-of-t">
 
   <meta>
     <description>Корневая спецификация системы анимаций</description>
@@ -37,8 +37,12 @@
   <technical-constraints>
     <frame-rate target="60fps" min="30fps" reason="Плавность на всех устройствах" />
     <sprite-sheet-size max="2048x2048" reason="Поддержка старых GPU" />
-    <individual-sprite-size max="256x256" recommended="64x64 - 128x128" />
-    <max-animation-frames recommended="20-30" max="50" reason="Баланс плавности и размера файла" />
+    <individual-sprite-size max="256x384" recommended="128x192 (characters), 128x128 (furniture), 640x480 (locations)" />
+    <max-animation-frames
+      min="12"
+      recommended="16-18"
+      max="50"
+      reason="Высокая плавность для HD pixel art при сохранении размера atlas < 2048px" />
     <format primary="WebP" fallback="PNG" reason="Оптимальное сжатие с прозрачностью" />
     <compression quality="85-90%" reason="Баланс качества и размера" />
   </technical-constraints>
@@ -66,7 +70,7 @@
           /characters/
             /tatyana/ - см. ./characters/tatyana.xml
             /sam/ - см. ./characters/sam.xml
-            /husband/ - см. ./characters/husband.xml  
+            /husband/ - см. ./characters/husband.xml
           /objects/
             /interactive/ - см. ./objects/interactive.xml
           /ui/
@@ -158,7 +162,7 @@
     </frame-consistency>
 
     <animation-smoothness>
-      <rule>Минимум 6 кадров для плавной loop анимации</rule>
+      <rule>Минимум 12 кадров для плавной loop анимации (16-18 рекомендуется)</rule>
       <rule>Ease-in/ease-out для начала/конца цикла</rule>
       <rule>Промежуточные кадры для критических движений</rule>
     </animation-smoothness>

@@ -47,4 +47,11 @@ public class ApplicationConfig {
                                                                GameStateViewMapper mapper) {
         return new ChooseEventOptionService(repo,  mapper);
     }
+
+    @Bean
+    public EndDayUseCase endDayUseCase(SessionRepository sessionRepository,
+                                        GameStateViewMapper mapper) {
+        return new EndDayService(sessionRepository, mapper);
+    }
+
 }

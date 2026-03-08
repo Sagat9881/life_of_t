@@ -55,4 +55,8 @@ public class DomainConfig {
     public EndingEvaluator endingEvaluator() { 
         return new EndingEvaluator(); 
     }
+
+    @Bean
+    public HouseholdAction householdAction() { return new HouseholdAction(); }
+
 }

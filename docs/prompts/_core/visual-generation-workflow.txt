@@ -2,10 +2,10 @@
 <visual-generation-workflow>
     <meta>
         <name>Visual Generation Workflow</name>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
         <purpose>Основной workflow генерации визуальных элементов игры Life of T</purpose>
         <scope>Применяется ко всем типам визуальных ассетов</scope>
-        <last-updated>2026-03-01</last-updated>
+        <last-updated>2026-03-08</last-updated>
     </meta>
 
     <core-principles>
@@ -59,28 +59,52 @@
             <title>Требования к анимациям</title>
             <description>Все анимации должны быть плавными и детальными</description>
             <requirements>
-                <requirement type="critical">Минимум кадров: 20</requirement>
-                <requirement type="recommended">Рекомендуемое количество: 20-25</requirement>
+                <requirement type="critical">Минимум кадров: 12</requirement>
+                <requirement type="recommended">Рекомендуемое количество: 16-18</requirement>
                 <requirement type="optional">Максимум кадров: 30 (для сложных анимаций)</requirement>
-                <requirement type="critical">Формат атласа: sprite sheet (сетка)</requirement>
+                <requirement type="critical">Формат атласа: sprite sheet (horizontal strip или grid)</requirement>
                 <requirement type="critical">Тайминги: указываются для каждой анимации</requirement>
             </requirements>
         </principle>
 
-        <principle id="no-pixel-art">
-            <title>Не пиксельная графика</title>
-            <description>Визуал в стиле современной 2D иллюстрации, НЕ pixel art</description>
+        <principle id="pixel-art-style">
+            <title>Pixel Art HD</title>
+            <description>Высокодетализированная пиксельная графика, генерируемая процедурно через PixelRect/PixelLine/PixelDot</description>
+
+            <required>
+                <item>Чёткие пиксельные границы, без anti-aliasing</item>
+                <item>Ограниченная палитра: 16-32 цвета на спрайт (из DESIGN_SYSTEM)</item>
+                <item>Единый источник света (верхний левый угол)</item>
+                <item>Изометрический угол 2:1 для локаций и объектов</item>
+                <item>image-rendering: pixelated в CSS</item>
+            </required>
+
             <forbidden>
-                <item>Пиксельная графика (pixel art)</item>
-                <item>Видимая сетка пикселей</item>
-                <item>Ретро 8-bit/16-bit стиль</item>
+                <item>Anti-aliasing или blur эффекты</item>
+                <item>Rotation/scaling в runtime (искажает пиксели)</item>
+                <item>GIF-анимации</item>
+                <item>Градиенты (использовать дизеринг)</item>
+                <item>Sprite atlas больше 2048px по любой стороне</item>
             </forbidden>
-            <recommended>
-                <item>Векторная или растровая иллюстрация высокого разрешения</item>
-                <item>Мягкие линии и градиенты</item>
-                <item>Современный инди-стиль (Gris, Celeste, Spiritfarer)</item>
-                <item>Выразительные персонажи с деталями</item>
-            </recommended>
+
+            <proportions>
+                <entity type="characters">
+                    <canvas-size>128×192 (высокодетализированный, ×4 от базового 32×48)</canvas-size>
+                    <alternative>64×96 для питомцев/NPC</alternative>
+                </entity>
+                <entity type="furniture">
+                    <canvas-size>Индивидуально ×4: от 64×80 (phone) до 256×192 (bed)</canvas-size>
+                </entity>
+                <entity type="locations">
+                    <canvas-size>640×480 (×2 от базового 320×240)</canvas-size>
+                </entity>
+            </proportions>
+
+            <quality-guidelines>
+                <item>Выразительность через позы и силуэты, не мелкие детали</item>
+                <item>Высокий контраст для читаемости на мобильных</item>
+                <item>Стабильный центр масс в анимациях (не прыгает между кадрами)</item>
+            </quality-guidelines>
         </principle>
     </core-principles>
 
@@ -196,7 +220,7 @@
         <reference>
             <from>Все анимации</from>
             <to>_core/visual-generation-workflow.xml</to>
-            <reason>Следуют правилу 20-25 кадров</reason>
+            <reason>Следуют правилу 12-18 кадров</reason>
         </reference>
     </cross-references>
 

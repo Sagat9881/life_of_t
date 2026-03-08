@@ -3,174 +3,763 @@
     <meta>
         <entity-type>characters</entity-type>
         <entity-name>aijan</entity-name>
-        <version>1.0.1</version>
+        <version>2.0.0</version>
     </meta>
-    <!-- Aijan: wildcat-colored tabby, grey-brown with dark brown/black stripes.
-         Canvas: 20x16. Loves humans and dogs, hates other cats. Lives in Alexander's room.
-         Base: #8B7355 (grey-brown), stripes: #3D2B1F (dark), belly: #C4A882. -->
+    <!-- ============================================================
+         Aijan — Forest Wildcat Tabby Cat
+         Canvas: 32×24 pixels | 10 layers | 13 animations
+         Lives in Alexander's room. Loves ALL humans, hates ALL cats.
+         Terrified of Garfield (screams when he appears). Pushes hand
+         away when done with pets. Bites as warning. Purrs on bed.
+
+         Color palette (grey-brown wildcat tabby):
+           #6B5B4B — base coat (grey-brown, wild)
+           #8B7B6B — lighter coat / highlight areas
+           #3A3028 — dark tabby stripes (dorsal, flanks, legs, tail)
+           #4A4038 — mid-dark stripe / contour lines
+           #C8B89A — belly / inner limb lighter fur
+           #A89878 — muzzle / chin buff
+           #2A2018 — deepest shadow
+           #D4B060 — amber-green eye iris base
+           #E8CC40 — eye iris highlight (bright wild stare)
+           #1A1208 — pupil (vertical slit)
+           #FFFFFF — eye shine
+           #CC8866 — nose leather (pinkish-brown)
+           #FFAAAA — ear inner (pale pink)
+           #DDDDDD — whisker white
+    ============================================================ -->
+
     <layers>
-        <!-- z=0: paws -->
-        <layer id="paws" type="base" z-order="0" width="20" height="16">
+
+        <!-- ── z=0: paws ── compact wildcat paws, slightly large for hunting -->
+        <layer id="paws" type="base" z-order="0" width="32" height="24">
             <pixel-data>
-                <!-- all paws: tawny grey-brown -->
-                <rect x="3" y="13" w="2" h="2" color="#8B7355"/>
-                <hline x="3" y="14" len="2" color="#6B5335"/>
-                <rect x="7" y="13" w="2" h="2" color="#8B7355"/>
-                <hline x="7" y="14" len="2" color="#6B5335"/>
-                <rect x="11" y="13" w="2" h="2" color="#8B7355"/>
-                <hline x="11" y="14" len="2" color="#6B5335"/>
-                <rect x="15" y="13" w="2" h="2" color="#8B7355"/>
-                <hline x="15" y="14" len="2" color="#6B5335"/>
-                <!-- paw pads darker -->
-                <pixel x="4" y="14" color="#4A3520"/>
-                <pixel x="8" y="14" color="#4A3520"/>
-                <pixel x="12" y="14" color="#4A3520"/>
-                <pixel x="16" y="14" color="#4A3520"/>
+                <!-- front-left paw: 3px wide -->
+                <rect x="3"  y="20" w="3" h="3" color="#6B5B4B"/>
+                <hline x="3"  y="21" len="3" color="#8B7B6B"/>
+                <hline x="3"  y="22" len="3" color="#4A4038"/>
+                <!-- front-right paw -->
+                <rect x="9"  y="20" w="3" h="3" color="#6B5B4B"/>
+                <hline x="9"  y="21" len="3" color="#8B7B6B"/>
+                <hline x="9"  y="22" len="3" color="#4A4038"/>
+                <!-- hind-left paw: slightly larger (wildcat hind paws bigger) -->
+                <rect x="18" y="20" w="3" h="3" color="#6B5B4B"/>
+                <hline x="18" y="21" len="3" color="#8B7B6B"/>
+                <hline x="18" y="22" len="3" color="#4A4038"/>
+                <!-- hind-right paw -->
+                <rect x="24" y="20" w="3" h="3" color="#6B5B4B"/>
+                <hline x="24" y="21" len="3" color="#8B7B6B"/>
+                <hline x="24" y="22" len="3" color="#4A4038"/>
+                <!-- paw pads: dark brown -->
+                <pixel x="4"  y="22" color="#2A2018"/>
+                <pixel x="10" y="22" color="#2A2018"/>
+                <pixel x="19" y="22" color="#2A2018"/>
+                <pixel x="25" y="22" color="#2A2018"/>
+                <!-- claw tips (partially retracted in neutral) -->
+                <pixel x="3"  y="23" color="#3A3028"/>
+                <pixel x="5"  y="23" color="#3A3028"/>
+                <pixel x="9"  y="23" color="#3A3028"/>
+                <pixel x="11" y="23" color="#3A3028"/>
             </pixel-data>
         </layer>
-        <!-- z=1: legs -->
-        <layer id="legs" type="base" z-order="1" width="20" height="16">
+
+        <!-- ── z=1: hind_legs ── powerful hind legs (spring-loaded wildcat) -->
+        <layer id="hind_legs" type="base" z-order="1" width="32" height="24">
             <pixel-data>
-                <rect x="3" y="9" w="2" h="4" color="#8B7355"/>
-                <rect x="7" y="9" w="2" h="4" color="#8B7355"/>
-                <rect x="11" y="9" w="2" h="4" color="#8B7355"/>
-                <rect x="15" y="9" w="2" h="4" color="#8B7355"/>
-                <!-- stripe on each leg -->
-                <hline x="3" y="11" len="2" color="#3D2B1F"/>
-                <hline x="7" y="11" len="2" color="#3D2B1F"/>
-                <hline x="11" y="11" len="2" color="#3D2B1F"/>
-                <hline x="15" y="11" len="2" color="#3D2B1F"/>
+                <!-- hind-left leg: angled, muscular -->
+                <rect x="17" y="12" w="3" h="8" color="#6B5B4B"/>
+                <hline x="17" y="13" len="3" color="#8B7B6B"/>
+                <hline x="17" y="16" len="3" color="#4A4038"/>
+                <!-- tabby stripe bands on hind leg -->
+                <hline x="17" y="14" len="3" color="#3A3028"/>
+                <hline x="17" y="17" len="3" color="#3A3028"/>
+                <hline x="17" y="19" len="3" color="#3A3028"/>
+                <!-- stifle (knee) definition -->
+                <pixel x="19" y="15" color="#2A2018"/>
+                <!-- hind-right leg -->
+                <rect x="24" y="12" w="3" h="8" color="#6B5B4B"/>
+                <hline x="24" y="13" len="3" color="#8B7B6B"/>
+                <hline x="24" y="16" len="3" color="#4A4038"/>
+                <!-- tabby bands -->
+                <hline x="24" y="14" len="3" color="#3A3028"/>
+                <hline x="24" y="17" len="3" color="#3A3028"/>
+                <hline x="24" y="19" len="3" color="#3A3028"/>
+                <pixel x="26" y="15" color="#2A2018"/>
             </pixel-data>
         </layer>
-        <!-- z=2: tail -->
-        <layer id="tail" type="base" z-order="2" width="20" height="16">
+
+        <!-- ── z=2: front_legs ── shorter front legs, tabby striped -->
+        <layer id="front_legs" type="base" z-order="2" width="32" height="24">
             <pixel-data>
-                <!-- tail sweeps right from body -->
-                <pixel x="16" y="12" color="#8B7355"/>
-                <pixel x="17" y="11" color="#8B7355"/>
-                <pixel x="18" y="10" color="#8B7355"/>
-                <pixel x="19" y="9" color="#8B7355"/>
-                <pixel x="19" y="8" color="#8B7355"/>
-                <!-- tail stripes -->
-                <pixel x="17" y="11" color="#3D2B1F"/>
-                <pixel x="19" y="9" color="#3D2B1F"/>
-                <!-- tail tip lighter -->
-                <pixel x="19" y="8" color="#C4A882"/>
+                <!-- front-left -->
+                <rect x="3" y="13" w="3" h="7" color="#6B5B4B"/>
+                <hline x="3" y="14" len="3" color="#8B7B6B"/>
+                <!-- tabby stripes on front leg -->
+                <hline x="3" y="15" len="3" color="#3A3028"/>
+                <hline x="3" y="17" len="3" color="#3A3028"/>
+                <hline x="3" y="19" len="3" color="#3A3028"/>
+                <!-- elbow angle -->
+                <pixel x="2" y="15" color="#4A4038"/>
+                <!-- front-right -->
+                <rect x="9" y="13" w="3" h="7" color="#6B5B4B"/>
+                <hline x="9" y="14" len="3" color="#8B7B6B"/>
+                <hline x="9" y="15" len="3" color="#3A3028"/>
+                <hline x="9" y="17" len="3" color="#3A3028"/>
+                <hline x="9" y="19" len="3" color="#3A3028"/>
+                <pixel x="8" y="15" color="#4A4038"/>
             </pixel-data>
         </layer>
-        <!-- z=3: body -->
-        <layer id="body" type="base" z-order="3" width="20" height="16">
+
+        <!-- ── z=3: body ── lithe but solid wildcat body, prominent dorsal stripe -->
+        <layer id="body" type="base" z-order="3" width="32" height="24">
             <pixel-data>
-                <!-- main body oval -->
-                <rect x="2" y="6" w="14" h="7" color="#8B7355"/>
-                <!-- belly lighter -->
-                <rect x="5" y="8" w="8" h="4" color="#C4A882"/>
-                <!-- dorsal stripes -->
-                <hline x="2" y="6" len="14" color="#3D2B1F"/>
-                <hline x="3" y="8" len="3" color="#3D2B1F"/>
-                <hline x="10" y="8" len="3" color="#3D2B1F"/>
-                <hline x="3" y="10" len="3" color="#3D2B1F"/>
-                <hline x="10" y="10" len="3" color="#3D2B1F"/>
-                <!-- shoulder spots -->
-                <pixel x="4" y="7" color="#3D2B1F"/>
-                <pixel x="12" y="7" color="#3D2B1F"/>
+                <!-- main body: 20px wide, 7px tall -->
+                <rect x="3" y="9" w="20" h="7" color="#6B5B4B"/>
+                <!-- dorsal (spine) stripe: dark, bold — tabby M pattern continues -->
+                <hline x="4"  y="9"  len="18" color="#3A3028"/>
+                <hline x="5"  y="10" len="16" color="#3A3028"/>
+                <!-- side highlight: lighter band along upper flank -->
+                <hline x="5"  y="11" len="16" color="#8B7B6B"/>
+                <!-- flank stripes (vertical tabby bars) -->
+                <pixel x="5"  y="12" color="#3A3028"/>
+                <pixel x="5"  y="13" color="#3A3028"/>
+                <pixel x="8"  y="12" color="#3A3028"/>
+                <pixel x="8"  y="13" color="#3A3028"/>
+                <pixel x="8"  y="14" color="#3A3028"/>
+                <pixel x="12" y="12" color="#3A3028"/>
+                <pixel x="12" y="13" color="#3A3028"/>
+                <pixel x="12" y="14" color="#3A3028"/>
+                <pixel x="16" y="12" color="#3A3028"/>
+                <pixel x="16" y="13" color="#3A3028"/>
+                <!-- lower flank shadow -->
+                <hline x="4"  y="15" len="18" color="#4A4038"/>
+                <!-- shoulder hump (cats arch while hissing — also natural shoulder) -->
+                <rect x="3" y="7" w="6" h="3" color="#6B5B4B"/>
+                <hline x="4" y="7" len="4" color="#3A3028"/>
             </pixel-data>
         </layer>
-        <!-- z=4: head -->
-        <layer id="head" type="base" z-order="4" width="20" height="16">
+
+        <!-- ── z=4: belly ── lighter underbelly, classic tabby spotted belly -->
+        <layer id="belly" type="base" z-order="4" width="32" height="24">
             <pixel-data>
-                <!-- head shape -->
-                <rect x="1" y="2" w="8" h="6" color="#8B7355"/>
-                <!-- forehead stripe -->
-                <hline x="2" y="2" len="6" color="#3D2B1F"/>
-                <pixel x="4" y="3" color="#3D2B1F"/>
-                <!-- cheeks lighter -->
-                <rect x="2" y="5" w="2" h="2" color="#C4A882"/>
-                <rect x="5" y="5" w="2" h="2" color="#C4A882"/>
-                <!-- nose -->
-                <pixel x="4" y="6" color="#D4756B"/>
-                <!-- mouth -->
-                <pixel x="3" y="7" color="#3D2B1F"/>
-                <pixel x="5" y="7" color="#3D2B1F"/>
+                <!-- belly lighter zone -->
+                <rect x="6" y="14" w="12" h="3" color="#C8B89A"/>
+                <!-- belly fur texture (alternating) -->
+                <hline x="7"  y="14" len="10" color="#A89878"/>
+                <hline x="8"  y="15" len="8"  color="#C8B89A"/>
+                <hline x="7"  y="16" len="10" color="#A89878"/>
+                <!-- tabby belly spots / streaks -->
+                <pixel x="7"  y="15" color="#4A4038"/>
+                <pixel x="10" y="14" color="#4A4038"/>
+                <pixel x="13" y="15" color="#4A4038"/>
+                <pixel x="9"  y="16" color="#3A3028"/>
+                <pixel x="12" y="16" color="#3A3028"/>
+                <!-- belly shadow edge -->
+                <hline x="6"  y="17" len="12" color="#4A4038"/>
+                <!-- chest/breast lighter area -->
+                <rect x="5"  y="11" w="5" h="4" color="#A89878"/>
+                <hline x="6"  y="11" len="3" color="#C8B89A"/>
             </pixel-data>
         </layer>
-        <!-- z=5: eyes -->
-        <layer id="eyes" type="detail" z-order="5" width="20" height="16">
+
+        <!-- ── z=5: tail ── long ringed tabby tail, held up (confident) or low (hiss) -->
+        <layer id="tail" type="base" z-order="5" width="32" height="24">
             <pixel-data>
-                <!-- left eye: green (she's a tabby) -->
-                <pixel x="2" y="4" color="#4A7C59"/>
-                <pixel x="3" y="4" color="#2D5E3A"/>
-                <!-- right eye -->
-                <pixel x="6" y="4" color="#4A7C59"/>
-                <pixel x="7" y="4" color="#2D5E3A"/>
-                <!-- pupils -->
-                <pixel x="3" y="4" color="#1A1A1A"/>
-                <pixel x="7" y="4" color="#1A1A1A"/>
-                <!-- eye shine -->
-                <pixel x="2" y="3" color="#FFFFFF"/>
-                <pixel x="6" y="3" color="#FFFFFF"/>
+                <!-- tail base from rump, curves up and back -->
+                <pixel x="22" y="13" color="#6B5B4B"/>
+                <pixel x="23" y="12" color="#6B5B4B"/>
+                <pixel x="24" y="11" color="#6B5B4B"/>
+                <pixel x="25" y="10" color="#6B5B4B"/>
+                <pixel x="26" y="9"  color="#6B5B4B"/>
+                <pixel x="27" y="8"  color="#6B5B4B"/>
+                <pixel x="28" y="7"  color="#6B5B4B"/>
+                <pixel x="29" y="7"  color="#6B5B4B"/>
+                <pixel x="30" y="8"  color="#6B5B4B"/>
+                <pixel x="31" y="8"  color="#6B5B4B"/>
+                <!-- tail rings: alternating dark stripes (tabby ring tail) -->
+                <pixel x="23" y="12" color="#3A3028"/>
+                <pixel x="25" y="10" color="#3A3028"/>
+                <pixel x="27" y="8"  color="#3A3028"/>
+                <pixel x="29" y="7"  color="#3A3028"/>
+                <pixel x="31" y="8"  color="#3A3028"/>
+                <!-- tail tip: dark (wildcat marking) -->
+                <pixel x="30" y="7"  color="#2A2018"/>
+                <pixel x="31" y="7"  color="#2A2018"/>
+                <!-- tail underside lighter -->
+                <pixel x="23" y="13" color="#8B7B6B"/>
+                <pixel x="24" y="12" color="#8B7B6B"/>
+                <pixel x="25" y="11" color="#8B7B6B"/>
             </pixel-data>
         </layer>
-        <!-- z=6: ears -->
-        <layer id="ears" type="detail" z-order="6" width="20" height="16">
+
+        <!-- ── z=6: neck ── thick-furred wildcat neck, ruff stands when threatened -->
+        <layer id="neck" type="base" z-order="6" width="32" height="24">
             <pixel-data>
-                <!-- left ear -->
-                <pixel x="1" y="1" color="#8B7355"/>
-                <pixel x="2" y="0" color="#8B7355"/>
-                <pixel x="3" y="1" color="#8B7355"/>
-                <!-- left ear inner -->
-                <pixel x="2" y="1" color="#D4756B"/>
+                <!-- neck base -->
+                <rect x="4" y="6" w="4" h="4" color="#6B5B4B"/>
+                <!-- neck dorsal stripe continues -->
+                <hline x="4" y="6" len="4" color="#3A3028"/>
+                <!-- ruff fur (side neck fur puff) -->
+                <pixel x="3" y="7"  color="#8B7B6B"/>
+                <pixel x="3" y="8"  color="#6B5B4B"/>
+                <pixel x="8" y="7"  color="#8B7B6B"/>
+                <pixel x="8" y="8"  color="#6B5B4B"/>
+                <!-- throat lighter -->
+                <hline x="5" y="9" len="2" color="#A89878"/>
+                <!-- neck-body join -->
+                <hline x="4" y="9" len="4" color="#4A4038"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ── z=7: head ── sharp wedge-shaped wildcat head, prominent M forehead -->
+        <layer id="head" type="base" z-order="7" width="32" height="24">
+            <pixel-data>
+                <!-- skull: 10px wide, 7px tall (wedge-shaped, widest at cheeks) -->
+                <rect x="1" y="1" w="10" h="7" color="#6B5B4B"/>
+                <!-- head sheen: highlight on crown -->
+                <hline x="2" y="1" len="8" color="#8B7B6B"/>
+                <!-- tabby M mark on forehead: 5 dark lines -->
+                <pixel x="2" y="2" color="#3A3028"/>
+                <pixel x="3" y="1" color="#3A3028"/>
+                <pixel x="4" y="2" color="#3A3028"/>
+                <pixel x="5" y="1" color="#3A3028"/>
+                <pixel x="6" y="2" color="#3A3028"/>
+                <pixel x="7" y="1" color="#3A3028"/>
+                <pixel x="8" y="2" color="#3A3028"/>
+                <!-- head side tabby lines (cheek stripes) -->
+                <pixel x="1" y="4" color="#3A3028"/>
+                <pixel x="1" y="5" color="#3A3028"/>
+                <pixel x="1" y="6" color="#4A4038"/>
+                <pixel x="10" y="4" color="#3A3028"/>
+                <pixel x="10" y="5" color="#3A3028"/>
+                <pixel x="10" y="6" color="#4A4038"/>
+                <!-- muzzle: short and rounded (not as long as GSD) -->
+                <rect x="2" y="5" w="7" h="3" color="#A89878"/>
+                <hline x="3" y="5" len="5" color="#8B7B6B"/>
+                <!-- chin: lighter -->
+                <hline x="3" y="7" len="5" color="#C8B89A"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ── z=8: ears ── large pointed ears with dark tips (wildcat signature) -->
+        <layer id="ears" type="base" z-order="8" width="32" height="24">
+            <pixel-data>
+                <!-- left ear: pointed, 3px wide base, narrows to point -->
+                <rect x="2" y="0" w="3" h="3" color="#6B5B4B"/>
+                <pixel x="3" y="0" color="#8B7B6B"/>
+                <!-- dark ear tip (wildcat marking) -->
+                <pixel x="2" y="0" color="#2A2018"/>
+                <pixel x="4" y="0" color="#2A2018"/>
+                <!-- ear inner: soft pink -->
+                <pixel x="3" y="1" color="#FFAAAA"/>
+                <pixel x="3" y="2" color="#FFAAAA"/>
                 <!-- right ear -->
-                <pixel x="6" y="1" color="#8B7355"/>
-                <pixel x="7" y="0" color="#8B7355"/>
-                <pixel x="8" y="1" color="#8B7355"/>
-                <!-- right ear inner -->
-                <pixel x="7" y="1" color="#D4756B"/>
+                <rect x="8" y="0" w="3" h="3" color="#6B5B4B"/>
+                <pixel x="9" y="0" color="#8B7B6B"/>
+                <pixel x="8" y="0" color="#2A2018"/>
+                <pixel x="10" y="0" color="#2A2018"/>
+                <pixel x="9" y="1" color="#FFAAAA"/>
+                <pixel x="9" y="2" color="#FFAAAA"/>
+                <!-- ear base connection -->
+                <hline x="2" y="3" len="3" color="#4A4038"/>
+                <hline x="8" y="3" len="3" color="#4A4038"/>
             </pixel-data>
         </layer>
-        <!-- z=7: whiskers -->
-        <layer id="whiskers" type="detail" z-order="7" width="20" height="16">
+
+        <!-- ── z=9: face_details ── wild staring eyes, pink nose, bold whiskers -->
+        <layer id="face_details" type="overlay" z-order="9" width="32" height="24">
             <pixel-data>
-                <!-- left whiskers -->
-                <pixel x="0" y="5" color="#C4A882"/>
-                <pixel x="1" y="6" color="#C4A882"/>
-                <!-- right whiskers -->
-                <pixel x="8" y="5" color="#C4A882"/>
-                <pixel x="9" y="6" color="#C4A882"/>
+                <!-- LEFT EYE: large, wild, amber-green — intense and alert -->
+                <!-- outer iris ring -->
+                <pixel x="3" y="3" color="#D4B060"/>
+                <pixel x="4" y="2" color="#E8CC40"/>
+                <pixel x="5" y="2" color="#E8CC40"/>
+                <pixel x="6" y="2" color="#D4B060"/>
+                <pixel x="3" y="4" color="#D4B060"/>
+                <pixel x="4" y="3" color="#E8CC40"/>
+                <pixel x="5" y="3" color="#D4B060"/>
+                <pixel x="6" y="3" color="#D4B060"/>
+                <!-- pupil: vertical slit (cat) -->
+                <pixel x="5" y="2" color="#1A1208"/>
+                <pixel x="5" y="3" color="#1A1208"/>
+                <pixel x="5" y="4" color="#1A1208"/>
+                <!-- eye shine: bright spark -->
+                <pixel x="4" y="2" color="#FFFFFF"/>
+                <!-- RIGHT EYE -->
+                <pixel x="7"  y="3" color="#D4B060"/>
+                <pixel x="8"  y="2" color="#E8CC40"/>
+                <pixel x="9"  y="2" color="#E8CC40"/>
+                <pixel x="10" y="2" color="#D4B060"/>
+                <pixel x="7"  y="4" color="#D4B060"/>
+                <pixel x="8"  y="3" color="#E8CC40"/>
+                <pixel x="9"  y="3" color="#D4B060"/>
+                <pixel x="10" y="3" color="#D4B060"/>
+                <pixel x="9"  y="2" color="#1A1208"/>
+                <pixel x="9"  y="3" color="#1A1208"/>
+                <pixel x="9"  y="4" color="#1A1208"/>
+                <pixel x="8"  y="2" color="#FFFFFF"/>
+                <!-- NOSE: small pinkish-brown, widened at base -->
+                <rect x="4" y="5" w="3" h="2" color="#CC8866"/>
+                <hline x="4" y="5" len="3" color="#E8A888"/>
+                <!-- nostril detail -->
+                <pixel x="4" y="6" color="#AA6644"/>
+                <pixel x="6" y="6" color="#AA6644"/>
+                <!-- nose bridge tabby lines -->
+                <pixel x="4" y="4" color="#4A4038"/>
+                <pixel x="6" y="4" color="#4A4038"/>
+                <!-- MOUTH: neutral (fine line) -->
+                <pixel x="5" y="7" color="#4A4038"/>
+                <pixel x="6" y="7" color="#4A4038"/>
+                <!-- WHISKERS: long, prominent wildcat-style (5 per side) -->
+                <hline x="0"  y="4" len="3" color="#DDDDDD"/>
+                <hline x="0"  y="5" len="4" color="#FFFFFF"/>
+                <hline x="0"  y="6" len="3" color="#DDDDDD"/>
+                <hline x="0"  y="7" len="2" color="#CCCCCC"/>
+                <hline x="11" y="4" len="3" color="#DDDDDD"/>
+                <hline x="11" y="5" len="4" color="#FFFFFF"/>
+                <hline x="11" y="6" len="3" color="#DDDDDD"/>
+                <hline x="11" y="7" len="2" color="#CCCCCC"/>
             </pixel-data>
         </layer>
+
     </layers>
+
     <animations>
-        <!-- idle: blink cycle -->
-        <animation name="idle" frames="2" fps="2" loop="true" frame-width="20" frame-height="16">
-            <frame index="0" layer-offsets="">
-                <!-- normal eyes -->
-            </frame>
-            <frame index="1" layer-offsets="">
-                <!-- blink: closed — rendered via eye layer override at generation time -->
-            </frame>
+
+        <!-- ══════════════════════════════════════════════════════
+             idle_morning — dramatic full-body wake-up arch (wildcat style).
+             Spine elongates, butt raises, then full shake of coat.
+             12 frames @ 4fps = 3 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="idle_morning" frames="12" fps="4" loop="true" frame-width="32" frame-height="24">
+            <condition type="time_of_day" value="morning"/>
+            <!-- f0: neutral standing -->
+            <frame index="0"  layer-offsets=""/>
+            <!-- f1: spine begins to arch upward at center -->
+            <frame index="1"  layer-offsets="body:0,-1; belly:0,-1; neck:0,-1"/>
+            <!-- f2: front half descends into bow (front bow stretch) -->
+            <frame index="2"  layer-offsets="front_legs:-1,1; paws:-1,1; neck:0,1; head:0,1; ears:0,1; face_details:0,1; body:0,0; tail:0,-2"/>
+            <!-- f3: full front stretch hold — chest near ground, hindquarters elevated -->
+            <frame index="3"  layer-offsets="front_legs:-2,2; paws:-2,2; neck:0,2; head:0,2; ears:0,2; face_details:0,2; body:0,-1; belly:0,-1; tail:0,-3"/>
+            <!-- f4: rise from bow, head lifts, yawn begins -->
+            <frame index="4"  layer-offsets="front_legs:-1,1; paws:-1,1; neck:0,0; head:0,0; face_details:0,0; tail:0,-2"/>
+            <!-- f5: fully upright, mouth opens for yawn (face_details shifts) -->
+            <frame index="5"  layer-offsets="neck:0,-1; head:0,-1; ears:0,-1; face_details:0,-2; tail:1,-1"/>
+            <!-- f6: yawn peak — mouth fully open, eyes squeeze shut -->
+            <frame index="6"  layer-offsets="neck:0,-1; head:0,-1; ears:0,-1; face_details:0,1; tail:1,0"/>
+            <!-- f7: yawn closes, head returns to level -->
+            <frame index="7"  layer-offsets="neck:0,0; head:0,0; ears:0,0; face_details:0,0; tail:0,0"/>
+            <!-- f8: rear stretch — hind legs push back, spine long -->
+            <frame index="8"  layer-offsets="hind_legs:2,0; paws:2,0; tail:1,-1; body:0,0"/>
+            <!-- f9: hold rear stretch -->
+            <frame index="9"  layer-offsets="hind_legs:2,0; paws:2,0; tail:1,-1"/>
+            <!-- f10: full-body shake — all layers jitter -->
+            <frame index="10" layer-offsets="body:-1,0; belly:-1,0; tail:1,0; neck:1,0; head:1,0; face_details:1,0"/>
+            <!-- f11: settle, ready to face the day -->
+            <frame index="11" layer-offsets=""/>
         </animation>
-        <!-- walk: alternating leg pairs -->
-        <animation name="walk" frames="2" fps="6" loop="true" frame-width="20" frame-height="16">
-            <frame index="0" layer-offsets="legs:-1,0; paws:-1,0"/>
-            <frame index="1" layer-offsets="legs:1,0; paws:1,0"/>
+
+        <!-- ══════════════════════════════════════════════════════
+             idle_day — territorial surveillance; slow prowl stance.
+             Head scans wide, ears tracking independently.
+             12 frames @ 5fps = 2.4 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="idle_day" frames="12" fps="5" loop="true" frame-width="32" frame-height="24">
+            <condition type="time_of_day" value="day"/>
+            <!-- f0: neutral -->
+            <frame index="0"  layer-offsets=""/>
+            <!-- f1: right scan -->
+            <frame index="1"  layer-offsets="head:1,0; ears:2,0; face_details:1,0"/>
+            <!-- f2: full right — ears independently forward -->
+            <frame index="2"  layer-offsets="head:2,0; ears:3,-1; face_details:2,0"/>
+            <!-- f3: center pause -->
+            <frame index="3"  layer-offsets=""/>
+            <!-- f4: belly breathe in -->
+            <frame index="4"  layer-offsets="belly:0,1"/>
+            <!-- f5: breathe out -->
+            <frame index="5"  layer-offsets="belly:0,-1"/>
+            <!-- f6: left scan -->
+            <frame index="6"  layer-offsets="head:-1,0; ears:-2,0; face_details:-1,0"/>
+            <!-- f7: full left — narrowed pupils (bright room) -->
+            <frame index="7"  layer-offsets="head:-2,0; ears:-3,-1; face_details:-2,0"/>
+            <!-- f8: detect movement — freeze, crouch micro-drop -->
+            <frame index="8"  layer-offsets="head:-2,1; ears:-3,0; face_details:-2,1; body:0,1; belly:0,1"/>
+            <!-- f9: identify (false alarm) — relax body -->
+            <frame index="9"  layer-offsets="head:-1,0; ears:-1,0; face_details:-1,0"/>
+            <!-- f10: return center -->
+            <frame index="10" layer-offsets="head:0,0; ears:0,0; face_details:0,0"/>
+            <!-- f11: neutral settle -->
+            <frame index="11" layer-offsets=""/>
         </animation>
-        <!-- sit: legs tucked, tail wraps around -->
-        <animation name="sit" frames="1" fps="1" loop="true" frame-width="20" frame-height="16">
-            <frame index="0" layer-offsets="legs:0,2; paws:0,2; tail:-2,1"/>
+
+        <!-- ══════════════════════════════════════════════════════
+             idle_evening — relaxed in Alexander's room, content.
+             Slow tail flicks, soft blinking.
+             12 frames @ 3fps = 4 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="idle_evening" frames="12" fps="3" loop="true" frame-width="32" frame-height="24">
+            <condition type="time_of_day" value="evening"/>
+            <!-- f0: relaxed stance, slightly lower body -->
+            <frame index="0"  layer-offsets="body:0,1; belly:0,1"/>
+            <!-- f1: tail flick right (content idle) -->
+            <frame index="1"  layer-offsets="body:0,1; belly:0,1; tail:2,-1"/>
+            <!-- f2: tail flick left -->
+            <frame index="2"  layer-offsets="body:0,1; belly:0,1; tail:-2,-1"/>
+            <!-- f3: tail neutral, slow blink -->
+            <frame index="3"  layer-offsets="body:0,1; belly:0,1; face_details:0,1"/>
+            <!-- f4: blink hold -->
+            <frame index="4"  layer-offsets="body:0,1; belly:0,1; face_details:0,2"/>
+            <!-- f5: eyes reopen -->
+            <frame index="5"  layer-offsets="body:0,1; belly:0,1; face_details:0,1"/>
+            <!-- f6: head turns toward Alexander (beloved human nearby) -->
+            <frame index="6"  layer-offsets="body:0,1; belly:0,1; head:1,0; ears:1,0; face_details:1,1"/>
+            <!-- f7: hold — watching human fondly -->
+            <frame index="7"  layer-offsets="body:0,1; belly:0,1; head:1,0; ears:1,0; face_details:1,1"/>
+            <!-- f8: head returns, tail resumes gentle sway -->
+            <frame index="8"  layer-offsets="body:0,1; belly:0,1; tail:1,-1"/>
+            <!-- f9: weight shift — shoulder dip -->
+            <frame index="9"  layer-offsets="body:0,1; belly:0,1; front_legs:-1,0"/>
+            <!-- f10: second slow blink -->
+            <frame index="10" layer-offsets="body:0,1; belly:0,1; face_details:0,2"/>
+            <!-- f11: settle back, fully at ease -->
+            <frame index="11" layer-offsets="body:0,1; belly:0,1"/>
         </animation>
-        <!-- hiss: ears flat, eyes narrowed, mouth open — triggered by other cats nearby -->
-        <animation name="hiss" frames="1" fps="4" loop="false" frame-width="20" frame-height="16">
-            <condition type="trigger" value="cat_nearby"/>
-            <frame index="0" layer-offsets="ears:0,1; eyes:0,0; head:0,0"/>
+
+        <!-- ══════════════════════════════════════════════════════
+             idle_night — sleeping on Alexander's bed / desk.
+             Deep purring sleep, slow breathing.
+             12 frames @ 2fps = 6 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="idle_night" frames="12" fps="2" loop="true" frame-width="32" frame-height="24">
+            <condition type="time_of_day" value="night"/>
+            <!-- All layers shifted into loaf/sleeping position -->
+            <!-- f0: loaf pose — all legs tucked, head down -->
+            <frame index="0"  layer-offsets="front_legs:0,3; hind_legs:0,2; paws:0,3; body:0,2; belly:0,3; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:2,3"/>
+            <!-- f1: purr breath in -->
+            <frame index="1"  layer-offsets="front_legs:0,3; hind_legs:0,2; paws:0,3; body:0,1; belly:0,2; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:2,3"/>
+            <!-- f2: purr breath out -->
+            <frame index="2"  layer-offsets="front_legs:0,3; hind_legs:0,2; paws:0,3; body:0,2; belly:0,3; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:2,3"/>
+            <!-- f3: deeper breath in -->
+            <frame index="3"  layer-offsets="front_legs:0,3; hind_legs:0,2; paws:0,3; body:0,1; belly:0,2; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:2,3"/>
+            <!-- f4: out — cat fully relaxed -->
+            <frame index="4"  layer-offsets="front_legs:0,3; hind_legs:0,2; paws:0,3; body:0,2; belly:0,3; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:2,3"/>
+            <!-- f5: ear flick — distant sound (cat house sounds) -->
+            <frame index="5"  layer-offsets="front_legs:0,3; hind_legs:0,2; paws:0,3; body:0,2; belly:0,3; neck:0,2; head:1,2; ears:0,2; face_details:1,2; tail:2,3"/>
+            <!-- f6: back to sleep -->
+            <frame index="6"  layer-offsets="front_legs:0,3; hind_legs:0,2; paws:0,3; body:0,2; belly:0,3; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:2,3"/>
+            <!-- f7: breath in -->
+            <frame index="7"  layer-offsets="front_legs:0,3; hind_legs:0,2; paws:0,3; body:0,1; belly:0,2; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:2,3"/>
+            <!-- f8: breath out -->
+            <frame index="8"  layer-offsets="front_legs:0,3; hind_legs:0,2; paws:0,3; body:0,2; belly:0,3; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:2,3"/>
+            <!-- f9: tail curls tighter around body -->
+            <frame index="9"  layer-offsets="front_legs:0,3; hind_legs:0,2; paws:0,3; body:0,2; belly:0,3; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:1,3"/>
+            <!-- f10: breath in -->
+            <frame index="10" layer-offsets="front_legs:0,3; hind_legs:0,2; paws:0,3; body:0,1; belly:0,2; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:1,3"/>
+            <!-- f11: deepest sleep, tail fully curled -->
+            <frame index="11" layer-offsets="front_legs:0,3; hind_legs:0,2; paws:0,3; body:0,2; belly:0,3; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:1,3"/>
         </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             walk — heavy-footed wildcat prowl; deliberate, ground-covering.
+             4-phase gait across 12 frames.
+             12 frames @ 8fps = 1.5 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="walk" frames="12" fps="8" loop="true" frame-width="32" frame-height="24">
+            <!-- Full 4-phase cat walk gait cycle (1=contact, 2=support, 3=lift, 4=swing) -->
+            <!-- f0: left-front contact, right-hind contact -->
+            <frame index="0"  layer-offsets="front_legs:-1,0; paws:-1,0; hind_legs:1,0"/>
+            <!-- f1: left-front supports, body shifts left -->
+            <frame index="1"  layer-offsets="front_legs:-1,0; paws:-1,0; body:-1,0; belly:-1,0"/>
+            <!-- f2: passing phase, body at natural height -->
+            <frame index="2"  layer-offsets="body:-1,0; belly:-1,0; neck:-1,0; head:-1,0; face_details:-1,0; tail:0,-1"/>
+            <!-- f3: right-front contact, left-hind contact -->
+            <frame index="3"  layer-offsets="front_legs:1,0; paws:1,0; hind_legs:-1,0"/>
+            <!-- f4: right-front supports, body shifts right -->
+            <frame index="4"  layer-offsets="front_legs:1,0; paws:1,0; body:1,0; belly:1,0"/>
+            <!-- f5: passing phase, head bobs slightly with weight -->
+            <frame index="5"  layer-offsets="body:1,0; belly:1,0; neck:1,0; head:1,0; face_details:1,0; tail:1,-1"/>
+            <!-- f6: second stride, left-front — cat extends rear leg further (stalking) -->
+            <frame index="6"  layer-offsets="front_legs:-1,0; paws:-1,-1; hind_legs:2,0"/>
+            <!-- f7: mid-stride body elongation -->
+            <frame index="7"  layer-offsets="front_legs:-1,0; paws:-1,-1; body:-1,0; belly:-1,0; neck:-1,0"/>
+            <!-- f8: slight suspension — belly rises (cat's loose-coupled gait) -->
+            <frame index="8"  layer-offsets="body:0,-1; belly:0,-1; paws:0,-1; tail:0,-2"/>
+            <!-- f9: right-front lands, propels -->
+            <frame index="9"  layer-offsets="front_legs:1,0; paws:1,-1; hind_legs:-2,0"/>
+            <!-- f10: body drives forward, tail counterbalances -->
+            <frame index="10" layer-offsets="front_legs:1,0; paws:1,-1; body:1,0; tail:-1,-1"/>
+            <!-- f11: return to neutral -->
+            <frame index="11" layer-offsets=""/>
+        </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             hiss_at_cats — DRAMATIC arching hiss. Other cat enters room.
+             Spine arches high, fur puffs, open-mouth scream-hiss.
+             12 frames @ 6fps = 2 seconds (one-shot)
+        ══════════════════════════════════════════════════════ -->
+        <animation name="hiss_at_cats" frames="12" fps="6" loop="false" frame-width="32" frame-height="24">
+            <condition type="trigger" value="other_cat_nearby"/>
+            <!-- f0: neutral — spots intruder, eyes go wide -->
+            <frame index="0"  layer-offsets=""/>
+            <!-- f1: pupils dilate, ears begin to flatten -->
+            <frame index="1"  layer-offsets="ears:0,1; face_details:0,0"/>
+            <!-- f2: spine begins to arch sharply upward -->
+            <frame index="2"  layer-offsets="body:0,-2; belly:0,-2; ears:0,2; neck:0,-1"/>
+            <!-- f3: full Halloween cat arch — maximum spine curve -->
+            <frame index="3"  layer-offsets="body:0,-3; belly:0,-3; neck:0,-2; head:0,-2; ears:1,2; face_details:0,-2; tail:2,-4"/>
+            <!-- f4: ears fully flat, teeth baring — face_details drops to show open mouth -->
+            <frame index="4"  layer-offsets="body:0,-3; belly:0,-3; neck:0,-2; head:0,-2; ears:1,3; face_details:0,-1; tail:2,-4"/>
+            <!-- f5: HISS — maximum expression, all fur puffed -->
+            <frame index="5"  layer-offsets="body:0,-3; belly:0,-3; neck:0,-3; head:0,-3; ears:1,3; face_details:0,-2; tail:3,-5; front_legs:-1,-1; hind_legs:1,-1"/>
+            <!-- f6: hold hiss posture — body vibrating with tension -->
+            <frame index="6"  layer-offsets="body:0,-3; belly:0,-3; neck:0,-3; head:0,-3; ears:1,3; face_details:0,-2; tail:3,-5; front_legs:-1,-1; hind_legs:1,-1"/>
+            <!-- f7: second hiss — face opens again -->
+            <frame index="7"  layer-offsets="body:0,-3; belly:0,-3; neck:0,-2; head:0,-2; ears:1,3; face_details:0,-1; tail:3,-5"/>
+            <!-- f8: begins to lower if intruder backing off, or sideways step -->
+            <frame index="8"  layer-offsets="body:0,-2; belly:0,-2; neck:0,-2; head:0,-2; ears:0,2; face_details:0,-1; tail:2,-3"/>
+            <!-- f9: slow de-escalation, spine still arched somewhat -->
+            <frame index="9"  layer-offsets="body:0,-1; belly:0,-1; neck:0,-1; head:0,-1; ears:0,1; face_details:0,0; tail:1,-2"/>
+            <!-- f10: almost normal but ears still back, watching -->
+            <frame index="10" layer-offsets="body:0,0; belly:0,0; ears:0,1; face_details:0,0; tail:0,-1"/>
+            <!-- f11: intruder gone — stiff, suspicious stance, victory claim -->
+            <frame index="11" layer-offsets="neck:0,-1; head:0,-1; ears:0,-1; face_details:0,-1; tail:0,-1"/>
+        </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             love_humans — maximum affection mode; headbutting, rubbing,
+             chirping — happens when human enters room.
+             12 frames @ 5fps = 2.4 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="love_humans" frames="12" fps="5" loop="true" frame-width="32" frame-height="24">
+            <condition type="trigger" value="human_enters"/>
+            <!-- f0: spots human — head snaps up, tail rises immediately -->
+            <frame index="0"  layer-offsets="head:0,-1; ears:0,-2; face_details:0,-1; tail:0,-3"/>
+            <!-- f1: trot toward — body shifts forward, tail fully up -->
+            <frame index="1"  layer-offsets="head:-1,-1; ears:-1,-2; face_details:-1,-1; body:-1,0; front_legs:-1,0; paws:-1,0; tail:-1,-3"/>
+            <!-- f2: head bunts against human leg (head presses into offset position) -->
+            <frame index="2"  layer-offsets="head:-2,1; ears:-2,0; face_details:-2,1; neck:-1,0; tail:0,-4"/>
+            <!-- f3: rub cheek — face_details sweeps (scent marking) -->
+            <frame index="3"  layer-offsets="head:-2,1; neck:-1,0; ears:-2,0; face_details:-3,1; tail:0,-4"/>
+            <!-- f4: rub other cheek — reverse direction -->
+            <frame index="4"  layer-offsets="head:-2,1; neck:-1,0; ears:-2,0; face_details:-1,1; tail:0,-4"/>
+            <!-- f5: body rub — entire body curves against leg -->
+            <frame index="5"  layer-offsets="head:-1,0; neck:-1,0; body:-1,0; belly:-1,0; front_legs:-1,0; paws:-1,0; tail:0,-3"/>
+            <!-- f6: purring clearly — body vibrates, eyes half closed -->
+            <frame index="6"  layer-offsets="head:-1,0; face_details:-1,1; body:-1,0; belly:-1,0; tail:0,-3"/>
+            <!-- f7: circles back for another rub -->
+            <frame index="7"  layer-offsets="head:0,0; body:0,0; belly:0,0; tail:0,-3"/>
+            <!-- f8: second headbutt pass -->
+            <frame index="8"  layer-offsets="head:-1,0; ears:-1,-1; face_details:-1,0; neck:-1,0; tail:0,-4"/>
+            <!-- f9: bunt center -->
+            <frame index="9"  layer-offsets="head:-2,1; face_details:-2,1; neck:-1,0; tail:0,-4"/>
+            <!-- f10: look up at human face — chin raised -->
+            <frame index="10" layer-offsets="head:-1,-2; ears:-1,-3; face_details:-1,-3; neck:-1,-1; tail:0,-3"/>
+            <!-- f11: hold eye contact — purring loudly -->
+            <frame index="11" layer-offsets="head:-1,-1; ears:-1,-2; face_details:-1,-2; neck:-1,0; tail:0,-3"/>
+        </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             push_hand_away — "enough pets" move; lifts paw, gently
+             but firmly pushes hand, then reasserts personal space.
+             12 frames @ 4fps = 3 seconds (one-shot)
+        ══════════════════════════════════════════════════════ -->
+        <animation name="push_hand_away" frames="12" fps="4" loop="false" frame-width="32" frame-height="24">
+            <condition type="trigger" value="over_petted"/>
+            <!-- f0: receiving pets — body slightly pressed, content -->
+            <frame index="0"  layer-offsets="head:0,1; face_details:0,1; body:0,1"/>
+            <!-- f1: ears flatten slightly — first "I'm getting tired" signal -->
+            <frame index="1"  layer-offsets="head:0,1; face_details:0,1; body:0,1; ears:0,2"/>
+            <!-- f2: tail begins to flick — annoyance rising -->
+            <frame index="2"  layer-offsets="head:0,1; face_details:0,1; body:0,1; ears:0,2; tail:-2,-1"/>
+            <!-- f3: tail lash — impatience clear -->
+            <frame index="3"  layer-offsets="head:0,1; face_details:0,1; body:0,1; ears:0,2; tail:2,-1"/>
+            <!-- f4: front paw lifts toward hand (the push) -->
+            <frame index="4"  layer-offsets="head:0,1; face_details:0,1; body:0,1; ears:0,2; front_legs:-1,-2; paws:-1,-3"/>
+            <!-- f5: paw presses against hand — full extension -->
+            <frame index="5"  layer-offsets="head:0,1; face_details:0,1; body:0,1; ears:0,1; front_legs:-2,-2; paws:-3,-3"/>
+            <!-- f6: hold — firm but not aggressive (polite, for now) -->
+            <frame index="6"  layer-offsets="head:0,1; face_details:0,1; body:0,1; ears:0,1; front_legs:-2,-2; paws:-3,-3"/>
+            <!-- f7: paw retracts — signal given -->
+            <frame index="7"  layer-offsets="head:0,1; face_details:0,1; body:0,1; front_legs:-1,-1; paws:-1,-1"/>
+            <!-- f8: head turns away (don't look at human) — final warning -->
+            <frame index="8"  layer-offsets="head:1,0; ears:1,0; face_details:1,0; body:0,1"/>
+            <!-- f9: body shifts slightly away — creating space -->
+            <frame index="9"  layer-offsets="head:1,0; ears:1,0; face_details:1,0; body:1,0; belly:1,0; front_legs:1,0; hind_legs:1,0; paws:1,0"/>
+            <!-- f10: tail curls around self — "I'm done" posture -->
+            <frame index="10" layer-offsets="head:1,0; ears:1,0; face_details:1,0; body:1,0; belly:1,0; tail:-1,1"/>
+            <!-- f11: settled in personal space — neutral but closed off -->
+            <frame index="11" layer-offsets="head:1,0; ears:1,0; face_details:1,0; body:1,0; belly:1,0; tail:0,1"/>
+        </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             bite_warning — escalated warning; if hand push ignored.
+             Quick nip, then immediate release and hiss-face.
+             12 frames @ 8fps = 1.5 seconds (one-shot)
+        ══════════════════════════════════════════════════════ -->
+        <animation name="bite_warning" frames="12" fps="8" loop="false" frame-width="32" frame-height="24">
+            <condition type="trigger" value="boundary_violated"/>
+            <!-- f0: ears pin back hard — final warning expression -->
+            <frame index="0"  layer-offsets="ears:0,2; face_details:0,0"/>
+            <!-- f1: head lowers — coiling to strike -->
+            <frame index="1"  layer-offsets="head:0,1; ears:0,3; face_details:0,1; neck:0,1"/>
+            <!-- f2: strike — head lunges forward fast -->
+            <frame index="2"  layer-offsets="head:-3,1; ears:-3,3; face_details:-4,1; neck:-2,0"/>
+            <!-- f3: bite contact hold -->
+            <frame index="3"  layer-offsets="head:-3,1; ears:-3,3; face_details:-4,1; neck:-2,0"/>
+            <!-- f4: immediate release — head snaps back -->
+            <frame index="4"  layer-offsets="head:-1,0; ears:-1,2; face_details:-1,0; neck:-1,0"/>
+            <!-- f5: full recoil — head back to position -->
+            <frame index="5"  layer-offsets=""/>
+            <!-- f6: post-bite hiss expression — open mouth, teeth showing -->
+            <frame index="6"  layer-offsets="head:0,-1; ears:0,2; face_details:0,-1; neck:0,-1"/>
+            <!-- f7: back arch begins — reestablish dominance -->
+            <frame index="7"  layer-offsets="body:0,-1; belly:0,-1; head:0,-1; ears:0,2; face_details:0,-1; tail:1,-2"/>
+            <!-- f8: full arch + hiss combo -->
+            <frame index="8"  layer-offsets="body:0,-2; belly:0,-2; head:0,-2; ears:0,2; face_details:0,-2; tail:2,-3"/>
+            <!-- f9: hold threat display -->
+            <frame index="9"  layer-offsets="body:0,-2; belly:0,-2; head:0,-2; ears:0,2; face_details:0,-2; tail:2,-3"/>
+            <!-- f10: human backs off — de-escalation begins -->
+            <frame index="10" layer-offsets="body:0,-1; belly:0,-1; head:0,-1; ears:0,1; face_details:0,-1; tail:1,-1"/>
+            <!-- f11: neutral — lesson delivered, Aijan satisfied -->
+            <frame index="11" layer-offsets="tail:0,-1; face_details:0,0"/>
+        </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             eat — enthusiastic eating; wildcat-fast, possessive gulping.
+             12 frames @ 6fps = 2 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="eat" frames="12" fps="6" loop="true" frame-width="32" frame-height="24">
+            <condition type="trigger" value="food_present"/>
+            <!-- f0: approach bowl quickly — head dips -->
+            <frame index="0"  layer-offsets="head:0,2; ears:0,1; face_details:0,3; neck:0,1"/>
+            <!-- f1: bite — fast -->
+            <frame index="1"  layer-offsets="head:0,3; ears:0,2; face_details:0,4; neck:0,2"/>
+            <!-- f2: chew — rapid jaw work -->
+            <frame index="2"  layer-offsets="head:0,2; ears:0,1; face_details:0,3; neck:0,1"/>
+            <!-- f3: gulp — head rises slightly, throat visible -->
+            <frame index="3"  layer-offsets="head:0,1; ears:0,0; face_details:0,2; neck:0,0"/>
+            <!-- f4: second bite immediately -->
+            <frame index="4"  layer-offsets="head:0,3; ears:0,2; face_details:0,4; neck:0,2"/>
+            <!-- f5: chew + sideways glance (territorial — making sure no other cat approaches) -->
+            <frame index="5"  layer-offsets="head:1,2; ears:1,1; face_details:1,3; neck:0,1"/>
+            <!-- f6: back to bowl — fast gulp -->
+            <frame index="6"  layer-offsets="head:0,3; ears:0,2; face_details:0,4; neck:0,2"/>
+            <!-- f7: chew -->
+            <frame index="7"  layer-offsets="head:0,2; ears:0,1; face_details:0,3; neck:0,1"/>
+            <!-- f8: mid-meal pause — licks lips (face_details adjustment) -->
+            <frame index="8"  layer-offsets="head:0,1; ears:0,0; face_details:0,2; neck:0,0"/>
+            <!-- f9: bite again -->
+            <frame index="9"  layer-offsets="head:0,3; ears:0,2; face_details:0,4; neck:0,2"/>
+            <!-- f10: chew -->
+            <frame index="10" layer-offsets="head:0,2; ears:0,1; face_details:0,3; neck:0,1"/>
+            <!-- f11: bowl lick — last remnants -->
+            <frame index="11" layer-offsets="head:0,3; ears:0,2; face_details:0,5; neck:0,2"/>
+        </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             sleep — deeply curled sleep on Alexander's bed.
+             Tight ball, tail over nose, full relaxation.
+             12 frames @ 2fps = 6 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="sleep" frames="12" fps="2" loop="true" frame-width="32" frame-height="24">
+            <condition type="state" value="sleeping"/>
+            <!-- f0: curling up — settling into position -->
+            <frame index="0"  layer-offsets="body:0,1; belly:0,2; front_legs:2,2; hind_legs:2,1; paws:3,2; neck:1,2; head:3,2; ears:3,2; face_details:3,2; tail:3,1"/>
+            <!-- f1: fully curled — tight ball, tail curled over nose -->
+            <frame index="1"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:1,3; head:3,2; ears:3,2; face_details:3,2; tail:0,2"/>
+            <!-- f2: purr breath in -->
+            <frame index="2"  layer-offsets="body:0,1; belly:0,2; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:1,3; head:3,2; ears:3,2; face_details:3,2; tail:0,2"/>
+            <!-- f3: purr breath out -->
+            <frame index="3"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:1,3; head:3,2; ears:3,2; face_details:3,2; tail:0,2"/>
+            <!-- f4: deep breath -->
+            <frame index="4"  layer-offsets="body:0,1; belly:0,2; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:1,3; head:3,2; ears:3,2; face_details:3,2; tail:0,2"/>
+            <!-- f5: out -->
+            <frame index="5"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:1,3; head:3,2; ears:3,2; face_details:3,2; tail:0,2"/>
+            <!-- f6: paw twitch (dreaming of chasing another cat and winning) -->
+            <frame index="6"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:2,2; paws:2,3; neck:1,3; head:3,2; ears:3,2; face_details:3,2; tail:0,2"/>
+            <!-- f7: settled deeper -->
+            <frame index="7"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:1,3; head:3,2; ears:3,2; face_details:3,2; tail:0,2"/>
+            <!-- f8: breath in -->
+            <frame index="8"  layer-offsets="body:0,1; belly:0,2; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:1,3; head:3,2; ears:3,2; face_details:3,2; tail:0,2"/>
+            <!-- f9: out -->
+            <frame index="9"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:1,3; head:3,2; ears:3,2; face_details:3,2; tail:0,2"/>
+            <!-- f10: ear flick (reflex even in deep sleep) -->
+            <frame index="10" layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:1,3; head:3,2; ears:2,2; face_details:3,2; tail:0,2"/>
+            <!-- f11: deepest sleep -->
+            <frame index="11" layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:1,3; head:3,2; ears:3,2; face_details:3,2; tail:0,2"/>
+        </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             flee_garfield — pure terror response. Garfield appears
+             and Aijan lets out an "истошный вопль" and FLEES.
+             One-shot panic animation.
+             12 frames @ 10fps = 1.2 seconds
+        ══════════════════════════════════════════════════════ -->
+        <animation name="flee_garfield" frames="12" fps="10" loop="false" frame-width="32" frame-height="24">
+            <condition type="trigger" value="garfield_appears"/>
+            <!-- f0: Garfield appears — eyes go WIDE (pupils huge) -->
+            <frame index="0"  layer-offsets="face_details:0,-1; ears:0,-1"/>
+            <!-- f1: scream reaction — mouth opens max, ears flatten in terror -->
+            <frame index="1"  layer-offsets="head:0,-1; face_details:0,-2; ears:0,2; neck:0,-1"/>
+            <!-- f2: full terror scream — body raises in shocked arch -->
+            <frame index="2"  layer-offsets="head:0,-1; face_details:0,-2; ears:1,2; neck:0,-1; body:0,-2; belly:0,-2; tail:2,-3"/>
+            <!-- f3: FLEE begins — first sprint leap (right side, massive displacement) -->
+            <frame index="3"  layer-offsets="head:3,-2; face_details:3,-2; ears:4,-1; neck:2,-1; body:3,-1; belly:3,-1; front_legs:3,-2; paws:4,-2; hind_legs:2,0; tail:1,-3"/>
+            <!-- f4: mid-air sprint — body stretched horizontal -->
+            <frame index="4"  layer-offsets="head:5,-1; face_details:5,-1; ears:6,-1; neck:4,-1; body:5,0; belly:5,0; front_legs:5,-2; paws:6,-2; hind_legs:4,-1; tail:2,-2"/>
+            <!-- f5: lands and immediately bounds again -->
+            <frame index="5"  layer-offsets="head:5,0; face_details:5,0; ears:6,0; neck:4,0; body:5,0; belly:5,1; front_legs:4,1; paws:5,1; hind_legs:5,0; tail:2,-1"/>
+            <!-- f6: second bound — maximum speed -->
+            <frame index="6"  layer-offsets="head:7,-1; face_details:7,-1; ears:8,-1; neck:6,-1; body:7,0; belly:7,0; front_legs:6,-1; paws:7,-1; hind_legs:6,0; tail:3,-2"/>
+            <!-- f7: skid around corner — body tilts -->
+            <frame index="7"  layer-offsets="head:7,0; face_details:7,0; ears:7,1; neck:6,0; body:7,1; belly:7,1; front_legs:6,1; paws:7,1; hind_legs:6,0; tail:1,-1"/>
+            <!-- f8: full run off screen — all offsets pushed far right -->
+            <frame index="8"  layer-offsets="head:9,0; face_details:9,0; ears:10,0; neck:8,0; body:9,0; belly:9,0; front_legs:8,0; paws:9,0; hind_legs:8,0; tail:4,-1"/>
+            <!-- f9: gone — all layers fully off canvas (hiding) -->
+            <frame index="9"  layer-offsets="head:12,0; face_details:12,0; ears:13,0; neck:11,0; body:12,0; belly:12,0; front_legs:11,0; paws:12,0; hind_legs:11,0; tail:6,0; paws:12,0"/>
+            <!-- f10: reappears peeking from safe spot (head only) — ears flat, terrified -->
+            <frame index="10" layer-offsets="head:10,3; face_details:10,3; ears:10,4; neck:12,3; body:12,3; belly:12,3; front_legs:12,3; hind_legs:12,3; paws:12,3; tail:10,3"/>
+            <!-- f11: freeze in hiding — absolute terror still visible -->
+            <frame index="11" layer-offsets="head:10,3; face_details:10,3; ears:10,4; neck:12,3; body:12,3; belly:12,3; front_legs:12,3; hind_legs:12,3; paws:12,3; tail:10,3"/>
+        </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             purr_on_bed — Aijan's happy place: on Alexander's bed,
+             next to human, kneading and purring at maximum volume.
+             12 frames @ 3fps = 4 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="purr_on_bed" frames="12" fps="3" loop="true" frame-width="32" frame-height="24">
+            <condition type="state" value="on_bed_with_human"/>
+            <!-- f0: lying on side, fully relaxed, eyes half closed -->
+            <frame index="0"  layer-offsets="body:0,1; belly:0,2; front_legs:2,1; hind_legs:1,1; paws:2,2; neck:0,1; head:1,1; ears:1,1; face_details:1,2; tail:2,1"/>
+            <!-- f1: kneading begins — front left paw lifts and presses -->
+            <frame index="1"  layer-offsets="body:0,1; belly:0,2; front_legs:2,1; hind_legs:1,1; paws:1,2; neck:0,1; head:1,1; ears:1,1; face_details:1,2; tail:2,1"/>
+            <!-- f2: kneading — front right paw lifts -->
+            <frame index="2"  layer-offsets="body:0,1; belly:0,2; front_legs:3,1; hind_legs:1,1; paws:3,2; neck:0,1; head:1,1; ears:1,1; face_details:1,2; tail:2,1"/>
+            <!-- f3: alternating knead — left again -->
+            <frame index="3"  layer-offsets="body:0,1; belly:0,2; front_legs:2,1; hind_legs:1,1; paws:1,2; neck:0,1; head:1,1; ears:1,1; face_details:1,2; tail:2,1"/>
+            <!-- f4: purr visible — body micro-vibration -->
+            <frame index="4"  layer-offsets="body:1,1; belly:1,2; front_legs:3,1; hind_legs:2,1; paws:2,2; neck:1,1; head:2,1; ears:2,1; face_details:2,2; tail:3,1"/>
+            <!-- f5: vibration other side -->
+            <frame index="5"  layer-offsets="body:-1,1; belly:-1,2; front_legs:1,1; hind_legs:0,1; paws:2,2; neck:-1,1; head:0,1; ears:0,1; face_details:0,2; tail:1,1"/>
+            <!-- f6: slow blink — utterly trusting -->
+            <frame index="6"  layer-offsets="body:0,1; belly:0,2; front_legs:2,1; hind_legs:1,1; paws:2,2; neck:0,1; head:1,1; ears:1,1; face_details:1,3; tail:2,1"/>
+            <!-- f7: blink hold (briefly closed) -->
+            <frame index="7"  layer-offsets="body:0,1; belly:0,2; front_legs:2,1; hind_legs:1,1; paws:2,2; neck:0,1; head:1,1; ears:1,1; face_details:1,4; tail:2,1"/>
+            <!-- f8: eyes reopen — sleepy love -->
+            <frame index="8"  layer-offsets="body:0,1; belly:0,2; front_legs:2,1; hind_legs:1,1; paws:2,2; neck:0,1; head:1,1; ears:1,1; face_details:1,3; tail:2,1"/>
+            <!-- f9: knead resumes -->
+            <frame index="9"  layer-offsets="body:0,1; belly:0,2; front_legs:2,1; hind_legs:1,1; paws:1,2; neck:0,1; head:1,1; ears:1,1; face_details:1,2; tail:2,1"/>
+            <!-- f10: deeper settle — fully horizontal, max purr -->
+            <frame index="10" layer-offsets="body:0,2; belly:0,3; front_legs:2,2; hind_legs:1,2; paws:2,3; neck:0,2; head:1,2; ears:1,2; face_details:1,3; tail:2,2"/>
+            <!-- f11: absolute bliss — perfect stillness between kneads -->
+            <frame index="11" layer-offsets="body:0,1; belly:0,2; front_legs:2,1; hind_legs:1,1; paws:2,2; neck:0,1; head:1,1; ears:1,1; face_details:1,2; tail:2,1"/>
+        </animation>
+
     </animations>
-    <audio>
-        <sound id="hiss" file="sfx/characters/aijan_hiss.wav" trigger="hiss_anim_start"/>
-        <sound id="purr" file="sfx/characters/aijan_purr.wav" trigger="sit_anim_loop"/>
-        <sound id="meow" file="sfx/characters/aijan_meow.wav" trigger="on_interact"/>
-    </audio>
+
     <naming>
         <output-dir>characters/aijan</output-dir>
     </naming>
+
 </asset-spec>

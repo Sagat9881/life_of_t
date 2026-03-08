@@ -1,226 +1,725 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================
+  Life of T — Cirilla  |  v2.0.0 Visual Spec
+  ============================================================
+  Calico/tortoiseshell cat. Daughter of tricolor Alisa.
+  Self-sufficient: plays alone, runs, jumps, meows.
+  Loves muselet (champagne wire cage). First to befriend Garfield.
+  Palette:
+    #D2691E  — orange fur base (tabby patches)
+    #A0501A  — orange shadow
+    #E8943A  — orange highlight
+    #B85C14  — orange mid-shadow
+    #1A1A1A  — black fur patches (base)
+    #0A0A0A  — black deep shadow
+    #2E2E2E  — black highlight
+    #F0F0F0  — white fur patches (base)
+    #FFFFFF  — white highlight
+    #D0D0D0  — white shadow
+    #B0B0B0  — white deep shadow
+    #22AA44  — iris green
+    #44CC66  — iris highlight
+    #000000  — pupil
+    #FFFFFF  — eye shine
+    #FF8899  — nose / paw pad pink
+    #CC6677  — nose shadow
+    #C8C8C8  — muselet wire silver (in play_muselet animation comment)
+  Canvas: 32×24 pixels
+  ============================================================
+-->
 <asset-spec>
-    <meta>
-        <entity-type>characters</entity-type>
-        <entity-name>cirilla</entity-name>
-        <version>1.0.0</version>
-    </meta>
-    <!-- Cirilla: self-sufficient cat, daughter of tricolor Alisa.
-         Canvas: 20x16. Tricolor (calico): white base #F5F5F5, orange patches #E07820,
-         black patches #1A1A1A. First to befriend Garfield; plays alone with muselet. -->
-    <layers>
-        <!-- z=0: paws -->
-        <layer id="paws" type="base" z-order="0" width="20" height="16">
-            <pixel-data>
-                <!-- front left paw: white -->
-                <rect x="3" y="13" w="2" h="2" color="#F5F5F5"/>
-                <hline x="3" y="14" len="2" color="#DDDDDD"/>
-                <!-- front right paw: orange patch -->
-                <rect x="7" y="13" w="2" h="2" color="#E07820"/>
-                <hline x="7" y="14" len="2" color="#C06010"/>
-                <!-- rear left paw: white -->
-                <rect x="11" y="13" w="2" h="2" color="#F5F5F5"/>
-                <hline x="11" y="14" len="2" color="#DDDDDD"/>
-                <!-- rear right paw: black patch -->
-                <rect x="15" y="13" w="2" h="2" color="#1A1A1A"/>
-                <hline x="15" y="14" len="2" color="#111111"/>
-                <!-- paw pads -->
-                <pixel x="4" y="14" color="#FFAAAA"/>
-                <pixel x="8" y="14" color="#CC8800"/>
-                <pixel x="12" y="14" color="#FFAAAA"/>
-                <pixel x="16" y="14" color="#333333"/>
-            </pixel-data>
-        </layer>
-        <!-- z=1: legs -->
-        <layer id="legs" type="base" z-order="1" width="20" height="16">
-            <pixel-data>
-                <!-- front left leg: white -->
-                <rect x="3" y="9" w="2" h="4" color="#F5F5F5"/>
-                <!-- front right leg: orange -->
-                <rect x="7" y="9" w="2" h="4" color="#E07820"/>
-                <!-- rear left leg: white -->
-                <rect x="11" y="9" w="2" h="4" color="#F5F5F5"/>
-                <!-- rear right leg: black -->
-                <rect x="15" y="9" w="2" h="4" color="#1A1A1A"/>
-                <!-- leg tops -->
-                <hline x="3" y="9" len="2" color="#CCCCCC"/>
-                <hline x="7" y="9" len="2" color="#C06010"/>
-                <hline x="11" y="9" len="2" color="#CCCCCC"/>
-                <hline x="15" y="9" len="2" color="#333333"/>
-            </pixel-data>
-        </layer>
-        <!-- z=2: body/torso — tricolor patchwork body -->
-        <layer id="body" type="base" z-order="2" width="20" height="16">
-            <pixel-data>
-                <!-- main body rectangle -->
-                <rect x="3" y="6" w="12" h="5" color="#F5F5F5"/>
-                <!-- large orange patch on left side -->
-                <rect x="3" y="6" w="5" h="4" color="#E07820"/>
-                <!-- black patch on right -->
-                <rect x="10" y="7" w="4" h="3" color="#1A1A1A"/>
-                <!-- white centre strip remains -->
-                <rect x="7" y="6" w="3" h="5" color="#F5F5F5"/>
-                <!-- top highlight -->
-                <hline x="4" y="6" len="10" color="#F8F8F8"/>
-                <!-- belly underside -->
-                <hline x="4" y="10" len="10" color="#EEEEEE"/>
-            </pixel-data>
-        </layer>
-        <!-- z=3: belly_pattern — white belly with small orange dots (calico trait) -->
-        <layer id="belly_pattern" type="overlay" z-order="3" width="20" height="16">
-            <pixel-data>
-                <!-- white belly -->
-                <rect x="6" y="8" w="6" h="3" color="#FFFFFF"/>
-                <!-- small orange calico spot -->
-                <pixel x="8" y="9" color="#E07820"/>
-                <pixel x="9" y="9" color="#E07820"/>
-                <!-- small black calico spot -->
-                <pixel x="7" y="9" color="#1A1A1A"/>
-            </pixel-data>
-        </layer>
-        <!-- z=4: tail — tricolor tail, mostly white with orange tip -->
-        <layer id="tail" type="base" z-order="4" width="20" height="16">
-            <pixel-data>
-                <pixel x="15" y="9" color="#F5F5F5"/>
-                <pixel x="16" y="8" color="#F5F5F5"/>
-                <pixel x="17" y="7" color="#E07820"/>
-                <pixel x="18" y="6" color="#E07820"/>
-                <pixel x="18" y="5" color="#E07820"/>
-                <pixel x="17" y="4" color="#1A1A1A"/>
-                <pixel x="18" y="4" color="#1A1A1A"/>
-                <pixel x="19" y="5" color="#E07820"/>
-                <!-- tail underside -->
-                <pixel x="16" y="9" color="#DDDDDD"/>
-                <pixel x="17" y="8" color="#C06010"/>
-            </pixel-data>
-        </layer>
-        <!-- z=5: head — tricolor head: white face, orange forehead, black ear patch -->
-        <layer id="head" type="base" z-order="5" width="20" height="16">
-            <pixel-data>
-                <!-- main head: white base -->
-                <rect x="2" y="2" w="8" h="6" color="#F5F5F5"/>
-                <!-- orange forehead patch -->
-                <rect x="3" y="2" w="4" h="3" color="#E07820"/>
-                <!-- black patch over right side of head -->
-                <rect x="7" y="2" w="3" h="3" color="#1A1A1A"/>
-                <!-- cheeks white -->
-                <pixel x="2" y="5" color="#FFFFFF"/>
-                <pixel x="9" y="5" color="#FFFFFF"/>
-                <!-- chin -->
-                <hline x="3" y="7" len="5" color="#EEEEEE"/>
-            </pixel-data>
-        </layer>
-        <!-- z=6: ears — left ear orange, right ear black (matches head patches) -->
-        <layer id="ears" type="base" z-order="6" width="20" height="16">
-            <pixel-data>
-                <!-- left ear: orange -->
-                <pixel x="2" y="1" color="#E07820"/>
-                <pixel x="3" y="0" color="#E07820"/>
-                <pixel x="3" y="1" color="#E07820"/>
-                <pixel x="3" y="0" color="#FFB347"/>
-                <!-- left inner -->
-                <pixel x="3" y="1" color="#FFB6C1"/>
-                <!-- right ear: black -->
-                <pixel x="8" y="1" color="#1A1A1A"/>
-                <pixel x="7" y="0" color="#1A1A1A"/>
-                <pixel x="7" y="1" color="#1A1A1A"/>
-                <!-- right inner pink -->
-                <pixel x="7" y="1" color="#AA4455"/>
-            </pixel-data>
-        </layer>
-        <!-- z=7: face_details — bright curious eyes, pink nose, whiskers -->
-        <layer id="face_details" type="overlay" z-order="7" width="20" height="16">
-            <pixel-data>
-                <!-- left eye: amber/gold (bright and curious) -->
-                <pixel x="4" y="4" color="#DAA520"/>
-                <pixel x="5" y="3" color="#FFD700"/>
-                <pixel x="5" y="4" color="#FFD700"/>
-                <pixel x="4" y="3" color="#DAA520"/>
-                <pixel x="5" y="4" color="#111111"/>
-                <!-- right eye -->
-                <pixel x="7" y="4" color="#DAA520"/>
-                <pixel x="8" y="3" color="#FFD700"/>
-                <pixel x="8" y="4" color="#FFD700"/>
-                <pixel x="7" y="3" color="#DAA520"/>
-                <pixel x="8" y="4" color="#111111"/>
-                <!-- eye shine -->
-                <pixel x="4" y="3" color="#FFFFFF"/>
-                <pixel x="7" y="3" color="#FFFFFF"/>
-                <!-- nose: small orange-pink -->
-                <pixel x="5" y="5" color="#FF9966"/>
-                <pixel x="6" y="5" color="#FF9966"/>
-                <pixel x="6" y="6" color="#CC6633"/>
-                <!-- mouth -->
-                <pixel x="5" y="6" color="#884422"/>
-                <pixel x="7" y="6" color="#884422"/>
-                <!-- whiskers -->
-                <hline x="0" y="5" len="3" color="#FFFFFF"/>
-                <hline x="0" y="6" len="2" color="#CCCCCC"/>
-                <hline x="9" y="5" len="3" color="#FFFFFF"/>
-                <hline x="9" y="6" len="2" color="#CCCCCC"/>
-            </pixel-data>
-        </layer>
-    </layers>
-    <animations>
-        <!-- idle_morning: yawning and stretching, self-reliant wake-up -->
-        <animation name="idle_morning" frames="4" fps="4" loop="true" frame-width="20" frame-height="16">
-            <condition type="time_of_day" value="morning"/>
-            <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="head:0,-1; ears:0,-1; face_details:0,-1; body:0,1"/>
-            <frame index="2" layer-offsets="head:0,-1; ears:0,-2; face_details:0,-1"/>
-            <frame index="3" layer-offsets=""/>
-        </animation>
-        <!-- idle_day: active and alert, looking around playfully -->
-        <animation name="idle_day" frames="4" fps="5" loop="true" frame-width="20" frame-height="16">
-            <condition type="time_of_day" value="day"/>
-            <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="head:-1,-1; ears:-1,-1; face_details:-1,-1"/>
-            <frame index="2" layer-offsets="head:0,-1; ears:0,-1; face_details:0,-1"/>
-            <frame index="3" layer-offsets="head:1,0; ears:1,0; face_details:1,0"/>
-        </animation>
-        <!-- idle_evening: relaxed, content, tail curled -->
-        <animation name="idle_evening" frames="4" fps="3" loop="true" frame-width="20" frame-height="16">
-            <condition type="time_of_day" value="evening"/>
-            <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="tail:0,1"/>
-            <frame index="2" layer-offsets="head:0,1; face_details:0,1; tail:1,0"/>
-            <frame index="3" layer-offsets="tail:0,1"/>
-        </animation>
-        <!-- idle_night: sleeping curled up -->
-        <animation name="idle_night" frames="4" fps="2" loop="true" frame-width="20" frame-height="16">
-            <condition type="time_of_day" value="night"/>
-            <frame index="0" layer-offsets="head:0,2; ears:0,2; face_details:0,2; tail:-1,1"/>
-            <frame index="1" layer-offsets="head:0,2; ears:0,2; face_details:0,2; tail:-1,1"/>
-            <frame index="2" layer-offsets="head:0,2; ears:0,2; face_details:0,2; body:0,1; belly_pattern:0,1; tail:-1,1"/>
-            <frame index="3" layer-offsets="head:0,2; ears:0,2; face_details:0,2; tail:-1,1"/>
-        </animation>
-        <!-- walk: lively quick-stepping walk -->
-        <animation name="walk" frames="6" fps="8" loop="true" frame-width="20" frame-height="16">
-            <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="paws:-1,-1; legs:-1,0"/>
-            <frame index="2" layer-offsets="body:-1,0; belly_pattern:-1,0"/>
-            <frame index="3" layer-offsets="paws:1,-1; legs:1,0"/>
-            <frame index="4" layer-offsets="tail:0,-1; body:1,0; belly_pattern:1,0"/>
-            <frame index="5" layer-offsets=""/>
-        </animation>
-        <!-- play_muselet: unique animation — batting the champagne wire cage along the floor -->
-        <animation name="play_muselet" frames="6" fps="6" loop="false" frame-width="20" frame-height="16">
-            <condition type="trigger" value="toy_nearby"/>
-            <!-- frame 0: spots the muselet, crouching low -->
-            <frame index="0" layer-offsets="body:0,1; belly_pattern:0,1; head:0,1; face_details:0,1"/>
-            <!-- frame 1: butt wiggle prep (shift left) -->
-            <frame index="1" layer-offsets="body:-1,1; belly_pattern:-1,1; tail:0,-1"/>
-            <!-- frame 2: pounce (paws extend forward) -->
-            <frame index="2" layer-offsets="paws:-2,-1; legs:-1,0; body:-1,0"/>
-            <!-- frame 3: batting with front paw -->
-            <frame index="3" layer-offsets="paws:-3,-2; face_details:0,-1"/>
-            <!-- frame 4: chases the rolling muselet -->
-            <frame index="4" layer-offsets="paws:-1,-1; body:-1,0; belly_pattern:-1,0"/>
-            <!-- frame 5: reset, looking pleased -->
-            <frame index="5" layer-offsets=""/>
-        </animation>
-    </animations>
-    <naming>
-        <output-dir>characters/cirilla</output-dir>
-    </naming>
+  <meta>
+    <entity-type>characters</entity-type>
+    <entity-name>cirilla</entity-name>
+    <version>2.0.0</version>
+  </meta>
+
+  <!-- ===================== LAYERS ===================== -->
+  <layers>
+
+    <!-- ── z=0  PAWS ─────────────────────────────────── -->
+    <!-- Calico paws: front-left orange, front-right white, both rears black patch mix -->
+    <layer id="paws" type="base" z-order="0" width="32" height="24">
+      <pixel-data>
+        <!-- Front-left paw (orange) -->
+        <rect x="5"  y="18" w="3" h="3" color="#D2691E"/>
+        <hline x="5"  y="18" len="3" color="#E8943A"/><!-- highlight -->
+        <hline x="5"  y="20" len="3" color="#A0501A"/><!-- shadow -->
+        <pixel x="6"  y="20" color="#FFBBCC"/><!-- pad -->
+        <!-- toe lines orange paw -->
+        <pixel x="5"  y="19" color="#A0501A"/>
+        <pixel x="7"  y="19" color="#A0501A"/>
+
+        <!-- Front-right paw (white patch) -->
+        <rect x="11" y="18" w="3" h="3" color="#F0F0F0"/>
+        <hline x="11" y="18" len="3" color="#FFFFFF"/>
+        <hline x="11" y="20" len="3" color="#D0D0D0"/>
+        <pixel x="12" y="20" color="#FFBBCC"/>
+        <pixel x="11" y="19" color="#D0D0D0"/>
+        <pixel x="13" y="19" color="#D0D0D0"/>
+
+        <!-- Hind-left paw (black patch) -->
+        <rect x="17" y="18" w="3" h="3" color="#1A1A1A"/>
+        <hline x="17" y="18" len="3" color="#2E2E2E"/>
+        <hline x="17" y="20" len="3" color="#0A0A0A"/>
+        <pixel x="18" y="20" color="#221122"/>
+        <pixel x="17" y="19" color="#0A0A0A"/>
+        <pixel x="19" y="19" color="#0A0A0A"/>
+
+        <!-- Hind-right paw (orange/white mix) -->
+        <rect x="23" y="18" w="3" h="3" color="#D2691E"/>
+        <hline x="23" y="18" len="2" color="#F0F0F0"/><!-- white half -->
+        <hline x="23" y="20" len="3" color="#A0501A"/>
+        <pixel x="23" y="19" color="#F0F0F0"/>
+        <pixel x="24" y="20" color="#FFBBCC"/>
+        <pixel x="25" y="18" color="#E8943A"/>
+        <pixel x="25" y="19" color="#A0501A"/>
+      </pixel-data>
+    </layer>
+
+    <!-- ── z=1  HIND LEGS ───────────────────────────── -->
+    <layer id="hind_legs" type="base" z-order="1" width="32" height="24">
+      <pixel-data>
+        <!-- Hind-left leg (black patch) -->
+        <rect x="17" y="11" w="3" h="7" color="#1A1A1A"/>
+        <hline x="17" y="11" len="3" color="#2E2E2E"/>
+        <hline x="17" y="15" len="3" color="#0A0A0A"/>
+        <pixel x="19" y="13" color="#2E2E2E"/>
+        <pixel x="19" y="14" color="#2E2E2E"/>
+        <pixel x="16" y="16" color="#1A1A1A"/>
+        <pixel x="16" y="17" color="#0A0A0A"/>
+
+        <!-- Hind-right leg (orange/tortie) -->
+        <rect x="23" y="11" w="3" h="7" color="#D2691E"/>
+        <hline x="23" y="11" len="3" color="#E8943A"/>
+        <hline x="23" y="15" len="3" color="#A0501A"/>
+        <pixel x="25" y="13" color="#E8943A"/>
+        <pixel x="25" y="14" color="#B85C14"/>
+        <!-- orange fur stripes on leg -->
+        <pixel x="23" y="13" color="#A0501A"/>
+        <pixel x="23" y="14" color="#B85C14"/>
+        <pixel x="22" y="16" color="#D2691E"/>
+        <pixel x="22" y="17" color="#A0501A"/>
+      </pixel-data>
+    </layer>
+
+    <!-- ── z=2  FRONT LEGS ──────────────────────────── -->
+    <layer id="front_legs" type="base" z-order="2" width="32" height="24">
+      <pixel-data>
+        <!-- Front-left leg (orange) -->
+        <rect x="5"  y="11" w="3" h="7" color="#D2691E"/>
+        <hline x="5"  y="11" len="3" color="#E8943A"/>
+        <hline x="5"  y="16" len="3" color="#A0501A"/>
+        <pixel x="7"  y="13" color="#E8943A"/>
+        <pixel x="7"  y="14" color="#B85C14"/>
+        <pixel x="5"  y="13" color="#A0501A"/>
+        <pixel x="5"  y="14" color="#B85C14"/>
+        <pixel x="4"  y="13" color="#0A0A0A"/><!-- elbow shadow -->
+        <pixel x="4"  y="14" color="#1A1A1A"/>
+
+        <!-- Front-right leg (white with small black patch at top) -->
+        <rect x="11" y="11" w="3" h="7" color="#F0F0F0"/>
+        <hline x="11" y="11" len="3" color="#1A1A1A"/><!-- black patch at shoulder -->
+        <hline x="11" y="12" len="2" color="#2E2E2E"/>
+        <hline x="11" y="16" len="3" color="#D0D0D0"/>
+        <pixel x="13" y="13" color="#F0F0F0"/>
+        <pixel x="13" y="14" color="#D0D0D0"/>
+        <pixel x="10" y="13" color="#0A0A0A"/>
+        <pixel x="10" y="14" color="#1A1A1A"/>
+      </pixel-data>
+    </layer>
+
+    <!-- ── z=3  BODY ─────────────────────────────────── -->
+    <!-- Calico body: orange, black, and white large patches -->
+    <layer id="body" type="base" z-order="3" width="32" height="24">
+      <pixel-data>
+        <!-- Main body shape -->
+        <rect x="4"  y="8"  w="22" h="9" color="#D2691E"/><!-- orange base -->
+        <!-- Black saddle patch (back/top portion) -->
+        <rect x="8"  y="8"  w="8"  h="4" color="#1A1A1A"/>
+        <hline x="8"  y="8"  len="8" color="#2E2E2E"/><!-- black patch highlight -->
+        <hline x="8"  y="11" len="8" color="#0A0A0A"/><!-- black patch shadow -->
+        <!-- White belly-side patch (right flank) -->
+        <rect x="16" y="10" w="6"  h="5" color="#F0F0F0"/>
+        <hline x="16" y="10" len="6" color="#FFFFFF"/>
+        <hline x="16" y="14" len="6" color="#D0D0D0"/>
+        <!-- Orange top highlight / dorsal ridge -->
+        <hline x="4"  y="8"  len="4" color="#E8943A"/>
+        <hline x="17" y="8"  len="9" color="#E8943A"/>
+        <!-- Fur texture on orange areas -->
+        <hline x="5"  y="12" len="3" color="#B85C14"/>
+        <hline x="21" y="9"  len="4" color="#B85C14"/>
+        <!-- Flank shadow edges -->
+        <pixel x="4"  y="9"  color="#A0501A"/>
+        <pixel x="4"  y="10" color="#A0501A"/>
+        <pixel x="25" y="9"  color="#D0D0D0"/>
+        <pixel x="25" y="10" color="#D0D0D0"/>
+        <!-- Hip highlight -->
+        <pixel x="22" y="8"  color="#E8943A"/>
+        <pixel x="23" y="8"  color="#E8943A"/>
+        <!-- Shoulder -->
+        <pixel x="6"  y="8"  color="#E8943A"/>
+        <pixel x="7"  y="7"  color="#D2691E"/>
+      </pixel-data>
+    </layer>
+
+    <!-- ── z=4  BELLY ────────────────────────────────── -->
+    <!-- Calico belly: mostly white with orange fringe -->
+    <layer id="belly" type="overlay" z-order="4" width="32" height="24">
+      <pixel-data>
+        <!-- White belly underside -->
+        <rect x="7"  y="13" w="10" h="4" color="#F0F0F0"/>
+        <hline x="7"  y="13" len="10" color="#FFFFFF"/><!-- highlight line -->
+        <hline x="7"  y="16" len="10" color="#D0D0D0"/><!-- shadow line -->
+        <!-- orange fringe at belly edge left -->
+        <hline x="5"  y="14" len="3" color="#E8943A"/>
+        <hline x="5"  y="15" len="2" color="#D2691E"/>
+        <!-- orange fringe right -->
+        <hline x="17" y="14" len="3" color="#E8943A"/>
+        <hline x="17" y="15" len="2" color="#D2691E"/>
+        <!-- belly centre highlight -->
+        <hline x="9"  y="14" len="6" color="#FFFFFF"/>
+        <!-- soft shadow at belly bottom -->
+        <hline x="8"  y="16" len="8" color="#B0B0B0"/>
+        <!-- chin white -->
+        <hline x="8"  y="9"  len="3" color="#F0F0F0"/>
+        <pixel x="9"  y="8"  color="#FFFFFF"/>
+      </pixel-data>
+    </layer>
+
+    <!-- ── z=5  TAIL ──────────────────────────────────── -->
+    <!-- Bushy tortoiseshell tail: orange base with black patches, held high when playing -->
+    <layer id="tail" type="base" z-order="5" width="32" height="24">
+      <pixel-data>
+        <!-- Tail base exit (right side of body) -->
+        <pixel x="25" y="12" color="#D2691E"/>
+        <pixel x="26" y="11" color="#D2691E"/>
+        <pixel x="27" y="10" color="#1A1A1A"/><!-- black patch on tail -->
+        <pixel x="28" y="9"  color="#1A1A1A"/>
+        <pixel x="29" y="8"  color="#D2691E"/>
+        <pixel x="30" y="7"  color="#D2691E"/>
+        <pixel x="30" y="6"  color="#F0F0F0"/><!-- white tip area -->
+        <pixel x="29" y="5"  color="#F0F0F0"/>
+        <!-- Tail shading -->
+        <pixel x="26" y="10" color="#A0501A"/>
+        <pixel x="28" y="8"  color="#0A0A0A"/>
+        <pixel x="30" y="5"  color="#FFFFFF"/>
+        <!-- Tail width (bushy) -->
+        <pixel x="27" y="11" color="#E8943A"/>
+        <pixel x="29" y="9"  color="#2E2E2E"/>
+        <pixel x="31" y="6"  color="#D0D0D0"/>
+        <pixel x="31" y="7"  color="#D2691E"/>
+        <!-- Black patch ring on tail -->
+        <pixel x="27" y="9"  color="#1A1A1A"/>
+        <pixel x="28" y="10" color="#1A1A1A"/>
+        <!-- Orange mid-tail highlight -->
+        <pixel x="29" y="7"  color="#E8943A"/>
+        <pixel x="30" y="8"  color="#B85C14"/>
+      </pixel-data>
+    </layer>
+
+    <!-- ── z=6  NECK ──────────────────────────────────── -->
+    <!-- White-fronted neck with orange sides — calico pattern -->
+    <layer id="neck" type="base" z-order="6" width="32" height="24">
+      <pixel-data>
+        <!-- Neck column -->
+        <rect x="7"  y="5"  w="5"  h="4" color="#D2691E"/>
+        <!-- White throat bib -->
+        <rect x="8"  y="6"  w="3"  h="3" color="#F0F0F0"/>
+        <hline x="8"  y="6"  len="3" color="#FFFFFF"/>
+        <hline x="8"  y="8"  len="3" color="#D0D0D0"/>
+        <!-- Orange neck sides -->
+        <pixel x="7"  y="6"  color="#A0501A"/>
+        <pixel x="7"  y="7"  color="#A0501A"/>
+        <pixel x="11" y="6"  color="#A0501A"/>
+        <pixel x="11" y="7"  color="#A0501A"/>
+        <!-- nape shadow -->
+        <hline x="8"  y="5"  len="3" color="#E8943A"/><!-- nape highlight -->
+        <!-- collar area -->
+        <pixel x="8"  y="4"  color="#D2691E"/>
+        <pixel x="9"  y="4"  color="#E8943A"/>
+        <pixel x="10" y="4"  color="#D2691E"/>
+      </pixel-data>
+    </layer>
+
+    <!-- ── z=7  HEAD ──────────────────────────────────── -->
+    <!-- Calico head: orange with black cap, white muzzle -->
+    <layer id="head" type="base" z-order="7" width="32" height="24">
+      <pixel-data>
+        <!-- Skull base (orange) -->
+        <rect x="4"  y="0"  w="11" h="7" color="#D2691E"/>
+        <!-- Black cap on top of head -->
+        <rect x="5"  y="0"  w="7"  h="3" color="#1A1A1A"/>
+        <hline x="5"  y="0"  len="7" color="#2E2E2E"/><!-- cap highlight -->
+        <hline x="5"  y="2"  len="7" color="#0A0A0A"/><!-- cap shadow -->
+        <!-- White muzzle -->
+        <rect x="6"  y="4"  w="7"  h="3" color="#F0F0F0"/>
+        <hline x="6"  y="4"  len="7" color="#FFFFFF"/>
+        <hline x="6"  y="6"  len="7" color="#D0D0D0"/>
+        <!-- Orange cheeks -->
+        <pixel x="4"  y="3"  color="#D2691E"/>
+        <pixel x="4"  y="4"  color="#D2691E"/>
+        <pixel x="4"  y="5"  color="#A0501A"/>
+        <pixel x="14" y="3"  color="#D2691E"/>
+        <pixel x="14" y="4"  color="#D2691E"/>
+        <pixel x="14" y="5"  color="#A0501A"/>
+        <!-- Orange temple patch -->
+        <pixel x="5"  y="3"  color="#E8943A"/>
+        <pixel x="13" y="3"  color="#E8943A"/>
+        <!-- Forehead highlight on black cap -->
+        <pixel x="8"  y="0"  color="#3A3A3A"/>
+        <pixel x="9"  y="0"  color="#3A3A3A"/>
+        <!-- Jaw line -->
+        <pixel x="5"  y="6"  color="#E8943A"/>
+        <pixel x="13" y="6"  color="#B85C14"/>
+      </pixel-data>
+    </layer>
+
+    <!-- ── z=8  EARS ──────────────────────────────────── -->
+    <!-- Pointed ears: orange outside, black patch on left ear -->
+    <layer id="ears" type="base" z-order="8" width="32" height="24">
+      <pixel-data>
+        <!-- Left ear outer (black patch) -->
+        <pixel x="5"  y="0"  color="#1A1A1A"/>
+        <pixel x="4"  y="1"  color="#1A1A1A"/>
+        <pixel x="5"  y="1"  color="#0A0A0A"/>
+        <pixel x="6"  y="2"  color="#1A1A1A"/>
+        <!-- Left ear inner (pink) -->
+        <pixel x="5"  y="2"  color="#FF8899"/>
+        <pixel x="5"  y="3"  color="#CC6677"/>
+        <!-- Left ear tip highlight -->
+        <pixel x="4"  y="0"  color="#2E2E2E"/>
+
+        <!-- Right ear outer (orange) -->
+        <pixel x="13" y="0"  color="#D2691E"/>
+        <pixel x="14" y="1"  color="#D2691E"/>
+        <pixel x="13" y="1"  color="#A0501A"/>
+        <pixel x="12" y="2"  color="#D2691E"/>
+        <!-- Right ear inner (pink) -->
+        <pixel x="13" y="2"  color="#FF8899"/>
+        <pixel x="13" y="3"  color="#CC6677"/>
+        <!-- Right ear tip highlight -->
+        <pixel x="14" y="0"  color="#E8943A"/>
+
+        <!-- Ear tufts (inner fur) -->
+        <pixel x="6"  y="1"  color="#2E2E2E"/>
+        <pixel x="12" y="1"  color="#E8943A"/>
+      </pixel-data>
+    </layer>
+
+    <!-- ── z=9  FACE DETAILS ─────────────────────────── -->
+    <!-- Green eyes (calico cats often have amber/green), pink nose, whiskers -->
+    <layer id="face_details" type="overlay" z-order="9" width="32" height="24">
+      <pixel-data>
+        <!-- Left eye (on orange cheek, vivid green) -->
+        <pixel x="6"  y="3"  color="#22AA44"/><!-- iris outer -->
+        <pixel x="7"  y="3"  color="#44CC66"/><!-- iris highlight -->
+        <pixel x="6"  y="4"  color="#44CC66"/>
+        <pixel x="7"  y="4"  color="#000000"/><!-- pupil -->
+        <pixel x="6"  y="2"  color="#FFFFFF"/><!-- shine -->
+        <pixel x="5"  y="3"  color="#115522"/><!-- eye rim -->
+
+        <!-- Right eye (on white muzzle side) -->
+        <pixel x="10" y="3"  color="#22AA44"/>
+        <pixel x="11" y="3"  color="#44CC66"/>
+        <pixel x="10" y="4"  color="#44CC66"/>
+        <pixel x="11" y="4"  color="#000000"/>
+        <pixel x="10" y="2"  color="#FFFFFF"/>
+        <pixel x="12" y="3"  color="#115522"/>
+
+        <!-- Nose (pink, on white muzzle) -->
+        <pixel x="8"  y="5"  color="#FF8899"/>
+        <pixel x="9"  y="5"  color="#FF8899"/>
+        <pixel x="9"  y="6"  color="#CC6677"/>
+
+        <!-- Mouth -->
+        <pixel x="8"  y="7"  color="#A06040"/>
+        <pixel x="10" y="7"  color="#A06040"/>
+
+        <!-- Whiskers (against black cap and white muzzle — prominent) -->
+        <hline x="0"  y="5"  len="5" color="#FFFFFF"/>
+        <hline x="0"  y="6"  len="4" color="#EEEEEE"/>
+        <hline x="14" y="5"  len="5" color="#FFFFFF"/>
+        <hline x="14" y="6"  len="4" color="#EEEEEE"/>
+        <!-- Upper whisker tilt -->
+        <pixel x="1"  y="4"  color="#FFFFFF"/>
+        <pixel x="15" y="4"  color="#FFFFFF"/>
+      </pixel-data>
+    </layer>
+
+  </layers>
+
+  <!-- ===================== ANIMATIONS ===================== -->
+  <animations>
+
+    <!-- ════════════════════════════════════════════════
+         1. IDLE_MORNING — stretching, curious, upbeat
+         Cirilla is active even in the morning. Tail up, alert.
+         12 frames @ 4fps
+         ════════════════════════════════════════════════ -->
+    <animation name="idle_morning" frames="12" fps="4" loop="true" frame-width="32" frame-height="24">
+      <condition type="time_of_day" value="morning"/>
+      <!-- Frame 0: alert upright — default pose, tail raised -->
+      <frame index="0"  layer-offsets="tail:0,-2"/>
+      <!-- Frame 1: head tilts right (curious morning look) -->
+      <frame index="1"  layer-offsets="head:1,0; ears:1,0; face_details:1,0; neck:1,0; tail:0,-2"/>
+      <!-- Frame 2: hold tilt, tail sways left -->
+      <frame index="2"  layer-offsets="head:1,0; ears:1,0; face_details:1,0; neck:1,0; tail:-1,-2"/>
+      <!-- Frame 3: head returns, quick ear flick (hearing sounds) -->
+      <frame index="3"  layer-offsets="ears:0,-1; tail:0,-2"/>
+      <!-- Frame 4: ears up, head lifts — sees something interesting -->
+      <frame index="4"  layer-offsets="head:0,-1; ears:0,-2; face_details:0,-1; neck:0,-1; tail:1,-3"/>
+      <!-- Frame 5: weight shift forward — about to investigate -->
+      <frame index="5"  layer-offsets="body:-1,0; belly:-1,0; head:-1,-1; ears:-1,-2; face_details:-1,-1; neck:-1,-1; tail:1,-3"/>
+      <!-- Frame 6: blink (bright morning light) -->
+      <frame index="6"  layer-offsets="face_details:0,1; tail:0,-2"/>
+      <!-- Frame 7: eyes reopen — scanning -->
+      <frame index="7"  layer-offsets="head:0,0; ears:0,-1; face_details:0,0; tail:0,-2"/>
+      <!-- Frame 8: tail swishes right enthusiastically -->
+      <frame index="8"  layer-offsets="tail:2,-2"/>
+      <!-- Frame 9: tail left -->
+      <frame index="9"  layer-offsets="tail:-2,-1"/>
+      <!-- Frame 10: settle back to neutral, tail up -->
+      <frame index="10" layer-offsets="tail:0,-2"/>
+      <!-- Frame 11: tiny body wobble (morning energy) -->
+      <frame index="11" layer-offsets="body:0,-1; belly:0,-1; tail:0,-3; head:0,-1; ears:0,-1; face_details:0,-1; neck:0,-1"/>
+    </animation>
+
+    <!-- ════════════════════════════════════════════════
+         2. IDLE_DAY — self-entertaining, looking around
+         During the day Cirilla amuses herself. Random head
+         movements, occasional chirp (face details shift).
+         12 frames @ 5fps
+         ════════════════════════════════════════════════ -->
+    <animation name="idle_day" frames="12" fps="5" loop="true" frame-width="32" frame-height="24">
+      <condition type="time_of_day" value="day"/>
+      <!-- Frame 0: sitting alert — default -->
+      <frame index="0"  layer-offsets=""/>
+      <!-- Frame 1: head turns left -->
+      <frame index="1"  layer-offsets="head:-1,0; ears:-1,0; face_details:-1,0"/>
+      <!-- Frame 2: head far left — chirp at bird (face_details down = mouth open) -->
+      <frame index="2"  layer-offsets="head:-2,0; ears:-2,-1; face_details:-2,1"/>
+      <!-- Frame 3: head returns, tail flick -->
+      <frame index="3"  layer-offsets="tail:2,0"/>
+      <!-- Frame 4: tail other side -->
+      <frame index="4"  layer-offsets="tail:-2,0"/>
+      <!-- Frame 5: scratches ear with hind leg — ear/head combo -->
+      <frame index="5"  layer-offsets="head:1,-1; ears:1,-2; face_details:1,-1; hind_legs:-1,-2"/>
+      <!-- Frame 6: scratching peak -->
+      <frame index="6"  layer-offsets="head:1,-1; ears:1,-2; face_details:1,-1; hind_legs:-2,-3"/>
+      <!-- Frame 7: done scratching, shake head -->
+      <frame index="7"  layer-offsets="head:-1,0; ears:-1,0; face_details:-1,0"/>
+      <!-- Frame 8: looks up at ceiling (something interesting above) -->
+      <frame index="8"  layer-offsets="head:0,-2; ears:0,-3; face_details:0,-2; neck:0,-1"/>
+      <!-- Frame 9: still looking up, tail up -->
+      <frame index="9"  layer-offsets="head:0,-2; ears:0,-3; face_details:0,-2; neck:0,-1; tail:0,-2"/>
+      <!-- Frame 10: looks back forward -->
+      <frame index="10" layer-offsets=""/>
+      <!-- Frame 11: brief sit-settle (weight shift) -->
+      <frame index="11" layer-offsets="body:0,1; belly:0,1; front_legs:0,1; paws:0,1"/>
+    </animation>
+
+    <!-- ════════════════════════════════════════════════
+         3. IDLE_EVENING — grooming + drowsy
+         Licking paw, washing face, then getting drowsy.
+         12 frames @ 4fps
+         ════════════════════════════════════════════════ -->
+    <animation name="idle_evening" frames="12" fps="4" loop="true" frame-width="32" frame-height="24">
+      <condition type="time_of_day" value="evening"/>
+      <!-- Frame 0: sitting, lifts front-left paw to lick -->
+      <frame index="0"  layer-offsets="front_legs:-1,-2; paws:-1,-3"/>
+      <!-- Frame 1: paw licking — head dips to paw -->
+      <frame index="1"  layer-offsets="front_legs:-1,-2; paws:-1,-3; head:-1,1; ears:-1,1; face_details:-1,1; neck:-1,1"/>
+      <!-- Frame 2: wash stroke — paw sweeps up face -->
+      <frame index="2"  layer-offsets="front_legs:-1,-3; paws:-1,-4; head:-1,0; ears:-1,0; face_details:-1,0; neck:-1,0"/>
+      <!-- Frame 3: another lick -->
+      <frame index="3"  layer-offsets="front_legs:-1,-2; paws:-1,-3; head:-1,1; ears:-1,1; face_details:-1,1; neck:-1,1"/>
+      <!-- Frame 4: paw wash over ear -->
+      <frame index="4"  layer-offsets="front_legs:-1,-4; paws:-1,-5; ears:-1,-2; face_details:-1,0"/>
+      <!-- Frame 5: paw down, pause — slightly drowsy -->
+      <frame index="5"  layer-offsets="front_legs:0,0; paws:0,0; face_details:0,1"/>
+      <!-- Frame 6: slow blink (very drowsy) -->
+      <frame index="6"  layer-offsets="face_details:0,2"/>
+      <!-- Frame 7: second slow blink -->
+      <frame index="7"  layer-offsets="face_details:0,2; head:0,1; ears:0,1"/>
+      <!-- Frame 8: eyes reopen a bit — hasn't given up yet -->
+      <frame index="8"  layer-offsets="face_details:0,1; head:0,1; ears:0,1"/>
+      <!-- Frame 9: tail tucks around body — cat-loaf begins -->
+      <frame index="9"  layer-offsets="front_legs:0,1; paws:0,2; tail:3,1"/>
+      <!-- Frame 10: fully loafed, eyes drooping -->
+      <frame index="10" layer-offsets="front_legs:0,2; paws:0,3; tail:4,1; face_details:0,2; head:0,1; ears:0,1"/>
+      <!-- Frame 11: settled loaf, tail wrapped tight -->
+      <frame index="11" layer-offsets="front_legs:0,2; paws:0,3; tail:4,2; face_details:0,1"/>
+    </animation>
+
+    <!-- ════════════════════════════════════════════════
+         4. IDLE_NIGHT — sleeping, occasional dream twitch
+         Deep sleep. Curled. Breathing.
+         12 frames @ 2fps
+         ════════════════════════════════════════════════ -->
+    <animation name="idle_night" frames="12" fps="2" loop="true" frame-width="32" frame-height="24">
+      <condition type="time_of_day" value="night"/>
+      <!-- Frame 0: fully asleep curled — all layers settled -->
+      <frame index="0"  layer-offsets="head:0,3; ears:0,3; face_details:0,3; neck:0,2; body:0,2; belly:0,2; front_legs:2,2; hind_legs:-2,2; paws:0,2; tail:-3,1"/>
+      <!-- Frame 1: sleep inhale -->
+      <frame index="1"  layer-offsets="head:0,3; ears:0,3; face_details:0,3; neck:0,2; body:0,1; belly:0,1; front_legs:2,2; hind_legs:-2,2; paws:0,2; tail:-3,1"/>
+      <!-- Frame 2: hold inhale -->
+      <frame index="2"  layer-offsets="head:0,3; ears:0,3; face_details:0,3; neck:0,2; body:0,1; belly:0,1; front_legs:2,2; hind_legs:-2,2; paws:0,2; tail:-3,1"/>
+      <!-- Frame 3: exhale -->
+      <frame index="3"  layer-offsets="head:0,3; ears:0,3; face_details:0,3; neck:0,2; body:0,2; belly:0,2; front_legs:2,2; hind_legs:-2,2; paws:0,2; tail:-3,1"/>
+      <!-- Frame 4: dream twitch — paw flicker -->
+      <frame index="4"  layer-offsets="head:0,3; ears:0,3; face_details:0,3; neck:0,2; body:0,2; belly:0,2; front_legs:2,1; hind_legs:-2,2; paws:1,1; tail:-3,1"/>
+      <!-- Frame 5: settled -->
+      <frame index="5"  layer-offsets="head:0,3; ears:0,3; face_details:0,3; neck:0,2; body:0,2; belly:0,2; front_legs:2,2; hind_legs:-2,2; paws:0,2; tail:-3,1"/>
+      <!-- Frame 6: second breath inhale -->
+      <frame index="6"  layer-offsets="head:0,3; ears:0,3; face_details:0,3; neck:0,2; body:0,1; belly:0,1; front_legs:2,2; hind_legs:-2,2; paws:0,2; tail:-3,1"/>
+      <!-- Frame 7: hold -->
+      <frame index="7"  layer-offsets="head:0,3; ears:0,3; face_details:0,3; neck:0,2; body:0,1; belly:0,1; front_legs:2,2; hind_legs:-2,2; paws:0,2; tail:-3,1"/>
+      <!-- Frame 8: exhale -->
+      <frame index="8"  layer-offsets="head:0,3; ears:0,3; face_details:0,3; neck:0,2; body:0,2; belly:0,2; front_legs:2,2; hind_legs:-2,2; paws:0,2; tail:-3,1"/>
+      <!-- Frame 9: ears twitch (hearing something) -->
+      <frame index="9"  layer-offsets="head:0,3; ears:0,2; face_details:0,3; neck:0,2; body:0,2; belly:0,2; front_legs:2,2; hind_legs:-2,2; paws:0,2; tail:-3,1"/>
+      <!-- Frame 10: ears settle -->
+      <frame index="10" layer-offsets="head:0,3; ears:0,3; face_details:0,3; neck:0,2; body:0,2; belly:0,2; front_legs:2,2; hind_legs:-2,2; paws:0,2; tail:-3,1"/>
+      <!-- Frame 11: deep sleep — all back to curl -->
+      <frame index="11" layer-offsets="head:0,3; ears:0,3; face_details:0,3; neck:0,2; body:0,2; belly:0,2; front_legs:2,2; hind_legs:-2,2; paws:0,2; tail:-3,1"/>
+    </animation>
+
+    <!-- ════════════════════════════════════════════════
+         5. WALK — light prancing walk, tail up
+         Self-assured calico gait.
+         Full 4-phase × 3 cycles = 12 frames @ 9fps
+         ════════════════════════════════════════════════ -->
+    <animation name="walk" frames="12" fps="9" loop="true" frame-width="32" frame-height="24">
+      <!-- Frame 0 [Contact A]: LF/RR down — tail up characteristic of Cirilla -->
+      <frame index="0"  layer-offsets="front_legs:-1,0; paws:-1,0; hind_legs:1,0; tail:0,-2; head:0,-1; neck:0,-1; ears:0,-1; face_details:0,-1"/>
+      <!-- Frame 1 [Passing A]: LF rising, body shifts left -->
+      <frame index="1"  layer-offsets="front_legs:-2,-1; paws:-2,-1; body:-1,0; belly:-1,0; tail:0,-2; head:-1,-1; neck:-1,-1; ears:-1,-1; face_details:-1,-1"/>
+      <!-- Frame 2 [Lift A]: LF up, RR pushes off -->
+      <frame index="2"  layer-offsets="front_legs:-2,-2; paws:-2,-2; hind_legs:1,-1; body:-1,0; belly:-1,0; tail:-1,-3; head:-1,-1; neck:-1,-1; ears:-1,-2; face_details:-1,-1"/>
+      <!-- Frame 3 [Swing A]: LF forward swing -->
+      <frame index="3"  layer-offsets="front_legs:-1,-1; paws:-1,-1; tail:0,-2; head:0,-1; neck:0,-1; ears:0,-1; face_details:0,-1"/>
+      <!-- Frame 4 [Contact B]: RF/LR down -->
+      <frame index="4"  layer-offsets="front_legs:1,0; paws:1,0; hind_legs:-1,0; tail:0,-2; head:0,-1; neck:0,-1; ears:0,-1; face_details:0,-1"/>
+      <!-- Frame 5 [Passing B]: RF rising -->
+      <frame index="5"  layer-offsets="front_legs:2,-1; paws:2,-1; body:1,0; belly:1,0; tail:0,-2; head:1,-1; neck:1,-1; ears:1,-1; face_details:1,-1"/>
+      <!-- Frame 6 [Lift B]: RF up -->
+      <frame index="6"  layer-offsets="front_legs:2,-2; paws:2,-2; hind_legs:-1,-1; body:1,0; belly:1,0; tail:1,-3; head:1,-1; neck:1,-1; ears:1,-2; face_details:1,-1"/>
+      <!-- Frame 7 [Swing B]: RF forward -->
+      <frame index="7"  layer-offsets="front_legs:1,-1; paws:1,-1; tail:0,-2; head:0,-1; neck:0,-1; ears:0,-1; face_details:0,-1"/>
+      <!-- Frame 8 [Contact A2] -->
+      <frame index="8"  layer-offsets="front_legs:-1,0; paws:-1,0; hind_legs:1,0; tail:0,-2; head:0,-1; neck:0,-1; ears:0,-1; face_details:0,-1"/>
+      <!-- Frame 9 [Passing A2] -->
+      <frame index="9"  layer-offsets="front_legs:-2,-1; paws:-2,-1; body:-1,0; belly:-1,0; tail:-1,-2; head:-1,-1; neck:-1,-1; ears:-1,-1; face_details:-1,-1"/>
+      <!-- Frame 10 [Contact B2] -->
+      <frame index="10" layer-offsets="front_legs:1,0; paws:1,0; hind_legs:-1,0; tail:0,-2; head:0,-1; neck:0,-1; ears:0,-1; face_details:0,-1"/>
+      <!-- Frame 11 [Passing B2 — loop prep] -->
+      <frame index="11" layer-offsets="front_legs:2,-1; paws:2,-1; body:1,0; belly:1,0; tail:1,-2; head:1,-1; neck:1,-1; ears:1,-1; face_details:1,-1"/>
+    </animation>
+
+    <!-- ════════════════════════════════════════════════
+         6. PLAY_MUSELET — batting and chasing the muselet
+         Signature Cirilla animation: batting the wire cage,
+         watching it roll, chasing, batting again.
+         12 frames @ 8fps
+         ════════════════════════════════════════════════ -->
+    <animation name="play_muselet" frames="12" fps="8" loop="true" frame-width="32" frame-height="24">
+      <condition type="trigger" value="muselet"/>
+      <!-- Frame 0: sitting, spots muselet — leans forward with interest -->
+      <frame index="0"  layer-offsets="head:0,-1; ears:0,-1; face_details:0,-1; body:-1,0; belly:-1,0; neck:-1,-1"/>
+      <!-- Frame 1: creeps forward in stalk -->
+      <frame index="1"  layer-offsets="head:-1,0; ears:-1,-1; face_details:-1,0; body:-1,1; belly:-1,1; neck:-1,0; front_legs:-1,0; paws:-1,0"/>
+      <!-- Frame 2: raises paw — about to bat -->
+      <frame index="2"  layer-offsets="head:-1,-1; ears:-1,-2; face_details:-1,-1; front_legs:-2,-3; paws:-2,-4; neck:-1,-1"/>
+      <!-- Frame 3: BAT — paw swings down at muselet -->
+      <frame index="3"  layer-offsets="head:-2,0; ears:-2,-1; face_details:-2,0; front_legs:-3,1; paws:-3,2; neck:-2,0"/>
+      <!-- Frame 4: watches muselet roll right — tracks with head -->
+      <frame index="4"  layer-offsets="head:1,0; ears:1,0; face_details:1,0; neck:0,0"/>
+      <!-- Frame 5: muselet still rolling — Cirilla tenses to pounce -->
+      <frame index="5"  layer-offsets="head:2,-1; ears:2,-1; face_details:2,-1; body:-1,1; belly:-1,1; neck:1,-1"/>
+      <!-- Frame 6: RUN after muselet — body forward -->
+      <frame index="6"  layer-offsets="body:-2,0; belly:-2,0; front_legs:-3,-1; paws:-3,0; hind_legs:1,-1; tail:2,-2; head:-2,-1; neck:-2,-1; ears:-2,-2; face_details:-2,-1"/>
+      <!-- Frame 7: catches up — stops, paw on muselet -->
+      <frame index="7"  layer-offsets="body:-3,0; belly:-3,0; front_legs:-2,0; paws:-2,1; hind_legs:0,0; tail:1,-1; head:-3,0; neck:-3,0; ears:-3,0; face_details:-3,0"/>
+      <!-- Frame 8: sniffs it — head down to floor -->
+      <frame index="8"  layer-offsets="head:-3,2; ears:-3,2; face_details:-3,2; neck:-3,1; front_legs:-2,1; paws:-2,1; body:-3,0; belly:-3,0"/>
+      <!-- Frame 9: bats again from this position -->
+      <frame index="9"  layer-offsets="head:-3,1; ears:-3,0; face_details:-3,1; neck:-3,1; front_legs:-4,-1; paws:-4,1; body:-3,0; belly:-3,0"/>
+      <!-- Frame 10: muselet goes other way — Cirilla whips around (tail lash) -->
+      <frame index="10" layer-offsets="head:-2,0; ears:-2,0; face_details:-2,0; tail:-3,-1; body:-2,0; belly:-2,0"/>
+      <!-- Frame 11: resets to sitting position — watches muselet, ready to bat again -->
+      <frame index="11" layer-offsets="head:0,-1; ears:0,-1; face_details:0,-1; tail:0,-2"/>
+    </animation>
+
+    <!-- ════════════════════════════════════════════════
+         7. JUMP — high jump (onto shelf, table, etc.)
+         Cirilla loves to jump. Crouch → launch → peak → land.
+         12 frames @ 9fps
+         ════════════════════════════════════════════════ -->
+    <animation name="jump" frames="12" fps="9" loop="false" frame-width="32" frame-height="24">
+      <condition type="trigger" value="jump_up"/>
+      <!-- Frame 0: crouch gather — body compressed -->
+      <frame index="0"  layer-offsets="body:0,2; belly:0,2; front_legs:0,1; hind_legs:0,1; paws:0,2; head:0,1; neck:0,1; ears:0,1; face_details:0,1; tail:0,0"/>
+      <!-- Frame 1: crouch deeper — maximum spring loading -->
+      <frame index="1"  layer-offsets="body:0,3; belly:0,3; front_legs:0,2; hind_legs:0,2; paws:0,3; head:0,2; neck:0,2; ears:0,2; face_details:0,2; tail:0,0"/>
+      <!-- Frame 2: LAUNCH — hind legs kick, body flies up -->
+      <frame index="2"  layer-offsets="body:0,-1; belly:0,-1; front_legs:0,-2; hind_legs:2,-1; paws:0,-2; head:0,-2; neck:0,-2; ears:0,-3; face_details:0,-2; tail:1,-1"/>
+      <!-- Frame 3: rising fast — all up -->
+      <frame index="3"  layer-offsets="body:0,-3; belly:0,-3; front_legs:0,-3; hind_legs:2,-2; paws:0,-4; head:0,-4; neck:0,-4; ears:0,-5; face_details:0,-4; tail:1,-2"/>
+      <!-- Frame 4: peak — fully extended body -->
+      <frame index="4"  layer-offsets="body:0,-5; belly:0,-5; front_legs:-1,-4; hind_legs:2,-4; paws:-1,-5; head:0,-6; neck:0,-5; ears:0,-7; face_details:0,-6; tail:1,-3"/>
+      <!-- Frame 5: tuck — body folds for landing prep -->
+      <frame index="5"  layer-offsets="body:0,-4; belly:0,-4; front_legs:1,-3; hind_legs:-1,-3; paws:0,-3; head:0,-5; neck:0,-4; ears:0,-5; face_details:0,-5; tail:-1,-2"/>
+      <!-- Frame 6: descend — front legs extend down toward surface -->
+      <frame index="6"  layer-offsets="body:0,-3; belly:0,-3; front_legs:-1,-1; hind_legs:-1,-2; paws:-1,-1; head:0,-3; neck:0,-3; ears:0,-3; face_details:0,-3; tail:-2,-1"/>
+      <!-- Frame 7: front paws touch down -->
+      <frame index="7"  layer-offsets="body:0,-2; belly:0,-2; front_legs:-1,0; hind_legs:0,-1; paws:-1,0; head:0,-2; neck:0,-2; ears:0,-2; face_details:0,-2; tail:-2,0"/>
+      <!-- Frame 8: landing compress — body absorbs shock -->
+      <frame index="8"  layer-offsets="body:0,1; belly:0,1; front_legs:0,1; hind_legs:0,0; paws:0,1; head:0,0; neck:0,0; ears:0,0; face_details:0,0; tail:0,0"/>
+      <!-- Frame 9: rebound up slightly -->
+      <frame index="9"  layer-offsets="body:0,0; belly:0,0; head:0,-1; ears:0,-1; face_details:0,-1; tail:0,-1"/>
+      <!-- Frame 10: settle — tail lifts with satisfaction -->
+      <frame index="10" layer-offsets="tail:0,-2; head:0,0"/>
+      <!-- Frame 11: landed — alert upright, surveys new vantage point -->
+      <frame index="11" layer-offsets="tail:0,-2; head:0,-1; ears:0,-1; face_details:0,-1"/>
+    </animation>
+
+    <!-- ════════════════════════════════════════════════
+         8. EAT — eating from bowl
+         12 frames @ 7fps
+         ════════════════════════════════════════════════ -->
+    <animation name="eat" frames="12" fps="7" loop="true" frame-width="32" frame-height="24">
+      <condition type="trigger" value="food_bowl"/>
+      <!-- Frame 0: approach, head starts to lower -->
+      <frame index="0"  layer-offsets="head:0,1; ears:0,1; face_details:0,1; neck:0,1"/>
+      <!-- Frame 1: head at bowl level -->
+      <frame index="1"  layer-offsets="head:0,3; ears:0,3; face_details:0,3; neck:0,2; front_legs:0,1; paws:0,1"/>
+      <!-- Frame 2: bite — head bobs up -->
+      <frame index="2"  layer-offsets="head:0,2; ears:0,2; face_details:0,2; neck:0,2; front_legs:0,1; paws:0,1"/>
+      <!-- Frame 3: dip back -->
+      <frame index="3"  layer-offsets="head:0,3; ears:0,3; face_details:0,3; neck:0,2; front_legs:0,1; paws:0,1"/>
+      <!-- Frame 4: munch -->
+      <frame index="4"  layer-offsets="head:0,2; ears:0,2; face_details:0,1; neck:0,2; front_legs:0,1; paws:0,1"/>
+      <!-- Frame 5: dip -->
+      <frame index="5"  layer-offsets="head:0,3; ears:0,3; face_details:0,3; neck:0,2; front_legs:0,1; paws:0,1"/>
+      <!-- Frame 6: pause — ear flick (alert) -->
+      <frame index="6"  layer-offsets="head:0,2; ears:0,1; face_details:0,2; neck:0,2; front_legs:0,1; paws:0,1"/>
+      <!-- Frame 7: back to eating -->
+      <frame index="7"  layer-offsets="head:0,3; ears:0,3; face_details:0,3; neck:0,2; front_legs:0,1; paws:0,1"/>
+      <!-- Frame 8: bite -->
+      <frame index="8"  layer-offsets="head:0,2; ears:0,2; face_details:0,2; neck:0,2; front_legs:0,1; paws:0,1"/>
+      <!-- Frame 9: dip -->
+      <frame index="9"  layer-offsets="head:0,3; ears:0,3; face_details:0,3; neck:0,2; front_legs:0,1; paws:0,1"/>
+      <!-- Frame 10: lick — head tilts right -->
+      <frame index="10" layer-offsets="head:1,2; ears:1,2; face_details:1,2; neck:1,2; front_legs:0,1; paws:0,1"/>
+      <!-- Frame 11: head lifts — satisfied -->
+      <frame index="11" layer-offsets=""/>
+    </animation>
+
+    <!-- ════════════════════════════════════════════════
+         9. SLEEP — curled sleep (not as deep as idle_night)
+         Daytime nap, more restless.
+         12 frames @ 3fps
+         ════════════════════════════════════════════════ -->
+    <animation name="sleep" frames="12" fps="3" loop="true" frame-width="32" frame-height="24">
+      <condition type="trigger" value="nap"/>
+      <!-- Frame 0: curling down — tail begins to wrap -->
+      <frame index="0"  layer-offsets="head:0,2; ears:0,2; face_details:0,2; neck:0,1; body:0,1; belly:0,1; front_legs:1,2; tail:2,0"/>
+      <!-- Frame 1: fully curled, tail around nose -->
+      <frame index="1"  layer-offsets="head:0,2; ears:0,2; face_details:0,2; neck:0,1; body:0,2; belly:0,2; front_legs:2,2; hind_legs:-1,1; paws:1,2; tail:3,1"/>
+      <!-- Frame 2: settled — slow inhale -->
+      <frame index="2"  layer-offsets="head:0,2; ears:0,2; face_details:0,2; neck:0,1; body:0,1; belly:0,1; front_legs:2,2; hind_legs:-1,1; paws:1,2; tail:3,1"/>
+      <!-- Frame 3: exhale — body sinks -->
+      <frame index="3"  layer-offsets="head:0,2; ears:0,2; face_details:0,2; neck:0,1; body:0,2; belly:0,2; front_legs:2,2; hind_legs:-1,1; paws:1,2; tail:3,1"/>
+      <!-- Frame 4: twitch — brief leg kick in dream -->
+      <frame index="4"  layer-offsets="head:0,2; ears:0,2; face_details:0,2; neck:0,1; body:0,2; belly:0,2; front_legs:1,1; hind_legs:-2,0; paws:0,1; tail:3,1"/>
+      <!-- Frame 5: settle again -->
+      <frame index="5"  layer-offsets="head:0,2; ears:0,2; face_details:0,2; neck:0,1; body:0,2; belly:0,2; front_legs:2,2; hind_legs:-1,1; paws:1,2; tail:3,1"/>
+      <!-- Frame 6: inhale -->
+      <frame index="6"  layer-offsets="head:0,2; ears:0,2; face_details:0,2; neck:0,1; body:0,1; belly:0,1; front_legs:2,2; hind_legs:-1,1; paws:1,2; tail:3,1"/>
+      <!-- Frame 7: exhale -->
+      <frame index="7"  layer-offsets="head:0,2; ears:0,2; face_details:0,2; neck:0,1; body:0,2; belly:0,2; front_legs:2,2; hind_legs:-1,1; paws:1,2; tail:3,1"/>
+      <!-- Frame 8: ear flick (light sleeper) -->
+      <frame index="8"  layer-offsets="head:0,2; ears:0,1; face_details:0,2; neck:0,1; body:0,2; belly:0,2; front_legs:2,2; hind_legs:-1,1; paws:1,2; tail:3,1"/>
+      <!-- Frame 9: settle -->
+      <frame index="9"  layer-offsets="head:0,2; ears:0,2; face_details:0,2; neck:0,1; body:0,2; belly:0,2; front_legs:2,2; hind_legs:-1,1; paws:1,2; tail:3,1"/>
+      <!-- Frame 10: deep breath -->
+      <frame index="10" layer-offsets="head:0,2; ears:0,2; face_details:0,2; neck:0,1; body:0,1; belly:0,1; front_legs:2,2; hind_legs:-1,1; paws:1,2; tail:3,1"/>
+      <!-- Frame 11: back to rest -->
+      <frame index="11" layer-offsets="head:0,2; ears:0,2; face_details:0,2; neck:0,1; body:0,2; belly:0,2; front_legs:2,2; hind_legs:-1,1; paws:1,2; tail:3,1"/>
+    </animation>
+
+    <!-- ════════════════════════════════════════════════
+         10. SELF_ENTERTAIN — playing with tail / batting at air
+         Cirilla's signature self-sufficient play. Grabs own tail,
+         rolls, bats at nothing, meows at herself.
+         12 frames @ 8fps
+         ════════════════════════════════════════════════ -->
+    <animation name="self_entertain" frames="12" fps="8" loop="true" frame-width="32" frame-height="24">
+      <condition type="trigger" value="bored"/>
+      <!-- Frame 0: sitting, spots own tail — eyes widen -->
+      <frame index="0"  layer-offsets="face_details:0,-1; head:0,-1; ears:0,-2"/>
+      <!-- Frame 1: begins to turn to watch tail -->
+      <frame index="1"  layer-offsets="head:2,0; ears:2,0; face_details:2,0; neck:1,0; tail:1,-1"/>
+      <!-- Frame 2: chasing tail — body rotates (offset whole body) -->
+      <frame index="2"  layer-offsets="head:3,0; ears:3,0; face_details:3,0; neck:2,0; front_legs:1,0; paws:1,0; tail:2,-1"/>
+      <!-- Frame 3: pounce at tail — body twists -->
+      <frame index="3"  layer-offsets="body:1,1; belly:1,1; head:2,1; ears:2,0; face_details:2,1; front_legs:2,1; paws:2,2; hind_legs:-1,0; tail:3,0"/>
+      <!-- Frame 4: catches tail! holds paw on it -->
+      <frame index="4"  layer-offsets="body:1,0; belly:1,0; head:3,0; ears:3,0; face_details:3,-1; front_legs:3,1; paws:4,1; tail:4,0"/>
+      <!-- Frame 5: bites tail — head down, tail curled under -->
+      <frame index="5"  layer-offsets="body:1,0; belly:1,0; head:3,2; ears:3,2; face_details:3,2; front_legs:3,1; paws:4,1; tail:4,0"/>
+      <!-- Frame 6: lets go — surprise "ow!" expression (face_details down = funny face) -->
+      <frame index="6"  layer-offsets="head:2,-1; ears:2,-2; face_details:2,1; tail:2,-2"/>
+      <!-- Frame 7: bats at empty air (why not) — paw swings left -->
+      <frame index="7"  layer-offsets="front_legs:-3,-3; paws:-3,-3; head:-1,0; ears:-1,-1; face_details:-1,0"/>
+      <!-- Frame 8: other paw swings right -->
+      <frame index="8"  layer-offsets="front_legs:2,-3; paws:2,-3; head:1,0; ears:1,-1; face_details:1,0"/>
+      <!-- Frame 9: chirp — opens mouth at nothing -->
+      <frame index="9"  layer-offsets="face_details:0,1; head:0,-1; ears:0,-1"/>
+      <!-- Frame 10: satisfied look around — checks if anyone watched -->
+      <frame index="10" layer-offsets="head:2,0; ears:2,0; face_details:2,0; tail:0,-1"/>
+      <!-- Frame 11: returns to forward sit — unbothered, perfectly normal -->
+      <frame index="11" layer-offsets=""/>
+    </animation>
+
+    <!-- ════════════════════════════════════════════════
+         11. CURIOUS_EXPLORE — investigating something new
+         Slow careful approach, nose forward, ears forward.
+         12 frames @ 5fps
+         ════════════════════════════════════════════════ -->
+    <animation name="curious_explore" frames="12" fps="5" loop="false" frame-width="32" frame-height="24">
+      <condition type="trigger" value="new_object"/>
+      <!-- Frame 0: notices object — ears and eyes forward -->
+      <frame index="0"  layer-offsets="head:0,-1; ears:0,-2; face_details:0,-1; tail:0,-1"/>
+      <!-- Frame 1: slow step forward — weight shifts, very careful -->
+      <frame index="1"  layer-offsets="body:-1,0; belly:-1,0; head:-1,-1; ears:-1,-2; face_details:-1,-1; neck:-1,-1; front_legs:-1,0; paws:-1,0; tail:0,-1"/>
+      <!-- Frame 2: another step — crouching lower (defensive curiosity) -->
+      <frame index="2"  layer-offsets="body:-2,1; belly:-2,1; head:-2,0; ears:-2,-1; face_details:-2,0; neck:-2,0; front_legs:-2,0; paws:-2,1; tail:0,0"/>
+      <!-- Frame 3: stops — nose extended forward maximum -->
+      <frame index="3"  layer-offsets="body:-3,1; belly:-3,1; head:-4,0; ears:-4,-1; face_details:-4,0; neck:-3,0; front_legs:-2,0; paws:-2,1; tail:0,0"/>
+      <!-- Frame 4: sniff — head bobs slightly -->
+      <frame index="4"  layer-offsets="body:-3,1; belly:-3,1; head:-4,1; ears:-4,0; face_details:-4,1; neck:-3,1; front_legs:-2,0; paws:-2,1; tail:0,0"/>
+      <!-- Frame 5: sniff again (second inhale) -->
+      <frame index="5"  layer-offsets="body:-3,1; belly:-3,1; head:-4,0; ears:-4,-1; face_details:-4,0; neck:-3,0; front_legs:-2,0; paws:-2,1; tail:0,0"/>
+      <!-- Frame 6: one more step closer — bolder now -->
+      <frame index="6"  layer-offsets="body:-4,0; belly:-4,0; head:-5,-1; ears:-5,-2; face_details:-5,-1; neck:-4,-1; front_legs:-3,0; paws:-3,0; tail:0,-1"/>
+      <!-- Frame 7: paw touch — very gently pats object -->
+      <frame index="7"  layer-offsets="body:-4,0; belly:-4,0; head:-5,0; ears:-5,-1; face_details:-5,0; neck:-4,0; front_legs:-5,-2; paws:-5,-1; tail:0,-1"/>
+      <!-- Frame 8: jumps back slightly — object moved! -->
+      <frame index="8"  layer-offsets="body:-2,-1; belly:-2,-1; head:-2,-2; ears:-2,-3; face_details:-2,-2; neck:-2,-2; front_legs:-1,-1; paws:-1,-1; tail:-1,-2"/>
+      <!-- Frame 9: sits up, stares from safe distance -->
+      <frame index="9"  layer-offsets="body:-3,0; belly:-3,0; head:-3,-1; ears:-3,-2; face_details:-3,-1; neck:-3,-1; tail:0,-2"/>
+      <!-- Frame 10: approaches again — curiosity wins over fear -->
+      <frame index="10" layer-offsets="body:-4,0; belly:-4,0; head:-4,-1; ears:-4,-1; face_details:-4,-1; neck:-4,-1; front_legs:-3,0; paws:-3,0; tail:0,-1"/>
+      <!-- Frame 11: happily sniffing, tail up — satisfied investigation -->
+      <frame index="11" layer-offsets="body:-4,0; belly:-4,0; head:-4,0; ears:-4,-1; face_details:-4,0; neck:-4,0; front_legs:-3,0; paws:-3,0; tail:0,-2"/>
+    </animation>
+
+  </animations>
+
+  <naming>
+    <output-dir>characters/cirilla</output-dir>
+  </naming>
 </asset-spec>

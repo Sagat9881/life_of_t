@@ -1,32 +1,40 @@
 package ru.lifegame.backend.infrastructure.persistence;
 
-import org.springframework.stereotype.Component;
 import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.domain.model.session.GameSession;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
 public class InMemorySessionRepository implements SessionRepository {
-    private final Map<String, GameSession> sessions = new ConcurrentHashMap<>();
+
+    private final ConcurrentHashMap<String, GameSession> sessions = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, String> userIdIndex = new ConcurrentHashMap<>();
+
+    @Override
+    public GameSession save(GameSession session) {
+        sessions.put(session.sessionId(), session);
+        userIdIndex.put(String.valueOf(session.telegramUserId()), session.sessionId());
+        return session;
+    }
+
+    @Override
+    public Optional<GameSession> findById(String sessionId) {
+        return Optional.ofNullable(sessions.get(sessionId));
+    }
 
     @Override
     public Optional<GameSession> findByTelegramUserId(String telegramUserId) {
-        return sessions.values().stream()
-                .filter(s -> telegramUserId.equals(s.telegramUserId()))
-                .findFirst();
+        String sessionId = userIdIndex.get(telegramUserId);
+        if (sessionId == null) return Optional.empty();
+        return Optional.ofNullable(sessions.get(sessionId));
     }
 
     @Override
-    public void save(GameSession session) {
-        sessions.put(session.sessionId(), session);
-    }
-
-    @Override
-    public boolean exists(String telegramUserId) {
-        return sessions.values().stream()
-                .anyMatch(s -> telegramUserId.equals(s.telegramUserId()));
+    public void delete(String sessionId) {
+        GameSession removed = sessions.remove(sessionId);
+        if (removed != null) {
+            userIdIndex.remove(String.valueOf(removed.telegramUserId()));
+        }
     }
 }

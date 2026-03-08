@@ -3,235 +3,681 @@
     <meta>
         <entity-type>characters</entity-type>
         <entity-name>persi</entity-name>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
     </meta>
-    <!-- Persi (Persefona): Full black German Shepherd, large, extremely wise.
-         Canvas: 32x24 (large dog). Found on highway at night, August 2025.
-         Color: #0D0D0D (deep black), #1A1A1A (highlight coat), #333333 (fur depth).
-         Adopted Duke as her puppy. Lives in Alexander's room. -->
+    <!-- ============================================================
+         Persi (Persefona) — Full Black German Shepherd
+         Canvas: 32×24 pixels | 10 layers | 11 animations
+         Found on highway at night (August 2025, 22:00). Extremely wise,
+         calm, maternal. Adopted Duke. Lives in Alexander's room.
+
+         Color palette (all-black coat with sheen):
+           #1A1A1A — base coat (deep black)
+           #2A2A2A — coat highlight / sheen on back
+           #0A0A0A — deep shadow / underside
+           #333333 — fur texture accent
+           #111111 — mid-shadow
+           #CC9900 — amber/gold eyes (wise, ancient)
+           #DDAA00 — eye iris highlight
+           #FFFFFF — eye shine
+           #080808 — nose / claw tips
+           #331122 — ear inner (barely visible on black dog)
+    ============================================================ -->
+
     <layers>
-        <!-- z=0: paws — large strong paws -->
+
+        <!-- ── z=0: paws ── large, strong GSD paws, slightly splayed -->
         <layer id="paws" type="base" z-order="0" width="32" height="24">
             <pixel-data>
-                <!-- front left paw: 3px wide, strong -->
-                <rect x="4" y="20" w="3" h="3" color="#0D0D0D"/>
-                <hline x="4" y="22" len="3" color="#1A1A1A"/>
-                <!-- front right paw -->
-                <rect x="10" y="20" w="3" h="3" color="#0D0D0D"/>
-                <hline x="10" y="22" len="3" color="#1A1A1A"/>
-                <!-- rear left paw: larger, angled -->
-                <rect x="18" y="20" w="4" h="3" color="#0D0D0D"/>
-                <hline x="18" y="22" len="4" color="#1A1A1A"/>
-                <!-- rear right paw -->
-                <rect x="25" y="20" w="4" h="3" color="#0D0D0D"/>
-                <hline x="25" y="22" len="4" color="#1A1A1A"/>
-                <!-- claw hints -->
-                <pixel x="5" y="23" color="#222222"/>
-                <pixel x="11" y="23" color="#222222"/>
-                <pixel x="19" y="23" color="#222222"/>
-                <pixel x="26" y="23" color="#222222"/>
+                <!-- front-left paw: 3px wide, ground contact -->
+                <rect x="3"  y="21" w="3" h="2" color="#1A1A1A"/>
+                <hline x="3"  y="22" len="3" color="#2A2A2A"/>
+                <hline x="3"  y="21" len="3" color="#111111"/>
+                <!-- front-right paw -->
+                <rect x="9"  y="21" w="3" h="2" color="#1A1A1A"/>
+                <hline x="9"  y="22" len="3" color="#2A2A2A"/>
+                <hline x="9"  y="21" len="3" color="#111111"/>
+                <!-- hind-left paw: wider, angled (shepherd rear stance) -->
+                <rect x="18" y="21" w="4" h="2" color="#1A1A1A"/>
+                <hline x="18" y="22" len="4" color="#2A2A2A"/>
+                <hline x="18" y="21" len="4" color="#111111"/>
+                <!-- hind-right paw -->
+                <rect x="25" y="21" w="4" h="2" color="#1A1A1A"/>
+                <hline x="25" y="22" len="4" color="#2A2A2A"/>
+                <hline x="25" y="21" len="4" color="#111111"/>
+                <!-- claw hints — tiny shadow pixels below paws -->
+                <pixel x="4"  y="23" color="#0A0A0A"/>
+                <pixel x="6"  y="23" color="#0A0A0A"/>
+                <pixel x="10" y="23" color="#0A0A0A"/>
+                <pixel x="12" y="23" color="#0A0A0A"/>
+                <pixel x="19" y="23" color="#0A0A0A"/>
+                <pixel x="22" y="23" color="#0A0A0A"/>
+                <pixel x="26" y="23" color="#0A0A0A"/>
+                <pixel x="29" y="23" color="#0A0A0A"/>
             </pixel-data>
         </layer>
-        <!-- z=1: legs — powerful shepherd legs -->
-        <layer id="legs" type="base" z-order="1" width="32" height="24">
+
+        <!-- ── z=1: hind_legs ── angled-back shepherd hind legs, powerful -->
+        <layer id="hind_legs" type="base" z-order="1" width="32" height="24">
             <pixel-data>
-                <!-- front left: angled forward (shepherd stance) -->
-                <rect x="4" y="13" w="3" h="7" color="#0D0D0D"/>
-                <!-- front right -->
-                <rect x="10" y="13" w="3" h="7" color="#0D0D0D"/>
-                <!-- rear left: angled rearward (characteristic shepherd) -->
-                <rect x="18" y="13" w="3" h="7" color="#0D0D0D"/>
-                <!-- rear right -->
-                <rect x="25" y="13" w="3" h="7" color="#0D0D0D"/>
-                <!-- leg highlight (black coat sheen) -->
-                <hline x="4" y="14" len="3" color="#1A1A1A"/>
-                <hline x="10" y="14" len="3" color="#1A1A1A"/>
-                <hline x="18" y="14" len="3" color="#1A1A1A"/>
-                <hline x="25" y="14" len="3" color="#1A1A1A"/>
+                <!-- hind-left leg: angled rearward (characteristic GSD angulation) -->
+                <rect x="17" y="13" w="3" h="8" color="#1A1A1A"/>
+                <hline x="17" y="14" len="3" color="#2A2A2A"/>
+                <hline x="17" y="17" len="3" color="#111111"/>
+                <pixel x="16" y="15" color="#1A1A1A"/>
+                <pixel x="16" y="16" color="#1A1A1A"/>
+                <!-- stifle (knee) definition -->
+                <rect x="19" y="16" w="2" h="3" color="#0A0A0A"/>
+                <!-- hind-right leg -->
+                <rect x="24" y="13" w="3" h="8" color="#1A1A1A"/>
+                <hline x="24" y="14" len="3" color="#2A2A2A"/>
+                <hline x="24" y="17" len="3" color="#111111"/>
+                <pixel x="23" y="15" color="#1A1A1A"/>
+                <pixel x="23" y="16" color="#1A1A1A"/>
+                <!-- stifle definition -->
+                <rect x="26" y="16" w="2" h="3" color="#0A0A0A"/>
+                <!-- hock (ankle) definition — prominent on shepherd -->
+                <hline x="17" y="19" len="3" color="#333333"/>
+                <hline x="24" y="19" len="3" color="#333333"/>
             </pixel-data>
         </layer>
-        <!-- z=2: body — large strong shepherd body, slightly angled up toward shoulders -->
-        <layer id="body" type="base" z-order="2" width="32" height="24">
+
+        <!-- ── z=2: front_legs ── upright, straight shepherd forelegs -->
+        <layer id="front_legs" type="base" z-order="2" width="32" height="24">
             <pixel-data>
-                <!-- main body: 20px wide, 8px tall, angled — back rises toward head -->
-                <rect x="4" y="8" w="20" h="8" color="#0D0D0D"/>
-                <!-- back rises on left (head-side): shoulder hump -->
-                <rect x="4" y="6" w="6" h="3" color="#0D0D0D"/>
-                <!-- coat sheen on back -->
-                <hline x="5" y="8" len="18" color="#1A1A1A"/>
-                <hline x="6" y="9" len="16" color="#111111"/>
-                <!-- flank muscle definition -->
-                <hline x="5" y="14" len="18" color="#080808"/>
+                <!-- front-left leg: straight, 3px wide -->
+                <rect x="3" y="12" w="3" h="9" color="#1A1A1A"/>
+                <hline x="3" y="13" len="3" color="#2A2A2A"/>
+                <hline x="3" y="15" len="3" color="#111111"/>
+                <hline x="3" y="18" len="3" color="#2A2A2A"/>
+                <!-- elbow point definition -->
+                <pixel x="2" y="14" color="#333333"/>
+                <!-- front-right leg -->
+                <rect x="9" y="12" w="3" h="9" color="#1A1A1A"/>
+                <hline x="9" y="13" len="3" color="#2A2A2A"/>
+                <hline x="9" y="15" len="3" color="#111111"/>
+                <hline x="9" y="18" len="3" color="#2A2A2A"/>
+                <!-- elbow -->
+                <pixel x="8" y="14" color="#333333"/>
+                <!-- pastern (lower leg joint) — subtle angle -->
+                <pixel x="3"  y="20" color="#333333"/>
+                <pixel x="4"  y="20" color="#333333"/>
+                <pixel x="9"  y="20" color="#333333"/>
+                <pixel x="10" y="20" color="#333333"/>
             </pixel-data>
         </layer>
-        <!-- z=3: chest_markings — black shepherd has no tan, but subtle undercoat on chest -->
-        <layer id="chest_markings" type="overlay" z-order="3" width="32" height="24">
+
+        <!-- ── z=3: body ── large shepherd body, slope from withers to croup -->
+        <layer id="body" type="base" z-order="3" width="32" height="24">
             <pixel-data>
-                <!-- black shepherd: subtle dark grey chest fur texture -->
-                <rect x="5" y="10" w="8" h="5" color="#1A1A1A"/>
-                <!-- mane-like thicker fur at chest -->
-                <hline x="5" y="10" len="8" color="#222222"/>
-                <hline x="6" y="11" len="6" color="#1A1A1A"/>
-                <!-- subtle undercoat hue -->
-                <pixel x="6" y="12" color="#2A2A2A"/>
-                <pixel x="7" y="12" color="#2A2A2A"/>
-                <pixel x="8" y="12" color="#2A2A2A"/>
-                <pixel x="9" y="12" color="#2A2A2A"/>
+                <!-- main barrel: 20px wide, 8px tall -->
+                <rect x="3" y="9" w="22" h="8" color="#1A1A1A"/>
+                <!-- shoulder hump (withers): GSD back rises toward head -->
+                <rect x="3" y="6" w="7" h="4" color="#1A1A1A"/>
+                <!-- topline sheen: light catches the sleek black back -->
+                <hline x="4"  y="9"  len="20" color="#2A2A2A"/>
+                <hline x="5"  y="10" len="18" color="#2A2A2A"/>
+                <hline x="6"  y="11" len="16" color="#111111"/>
+                <!-- withers sheen -->
+                <hline x="4"  y="6"  len="5"  color="#2A2A2A"/>
+                <!-- rib cage shadow (lower flank) -->
+                <hline x="4"  y="15" len="20" color="#0A0A0A"/>
+                <!-- croup (rump) rounds slightly downward -->
+                <rect x="22" y="8" w="4" h="6" color="#1A1A1A"/>
+                <pixel x="25" y="8" color="#0A0A0A"/>
+                <pixel x="25" y="9" color="#0A0A0A"/>
+                <!-- coat texture lines -->
+                <hline x="7"  y="12" len="14" color="#333333"/>
+                <pixel x="5"  y="13" color="#333333"/>
+                <pixel x="20" y="13" color="#333333"/>
             </pixel-data>
         </layer>
-        <!-- z=4: tail — large bushy shepherd tail, held proudly or low (wise calm) -->
-        <layer id="tail" type="base" z-order="4" width="32" height="24">
+
+        <!-- ── z=4: belly ── understated dark belly, slight fur fringe -->
+        <layer id="belly" type="base" z-order="4" width="32" height="24">
             <pixel-data>
-                <!-- tail base at rear, curves down gently (calm dog) -->
-                <pixel x="24" y="14" color="#0D0D0D"/>
-                <pixel x="25" y="13" color="#0D0D0D"/>
-                <!-- thick tail, 2px wide -->
-                <pixel x="26" y="12" color="#0D0D0D"/>
-                <pixel x="27" y="11" color="#0D0D0D"/>
-                <pixel x="28" y="10" color="#0D0D0D"/>
-                <pixel x="29" y="10" color="#1A1A1A"/>
-                <pixel x="29" y="9" color="#0D0D0D"/>
-                <pixel x="30" y="9" color="#1A1A1A"/>
-                <!-- bushy tip -->
-                <pixel x="30" y="8" color="#1A1A1A"/>
-                <pixel x="31" y="8" color="#333333"/>
-                <pixel x="31" y="9" color="#222222"/>
-                <!-- tail underside -->
-                <pixel x="25" y="14" color="#1A1A1A"/>
-                <pixel x="26" y="13" color="#1A1A1A"/>
-                <pixel x="27" y="12" color="#1A1A1A"/>
+                <!-- belly strip: slightly lighter than deepest shadow -->
+                <rect x="6" y="15" w="14" h="3" color="#111111"/>
+                <!-- belly fur texture: alternating pixel rows -->
+                <hline x="7"  y="15" len="12" color="#1A1A1A"/>
+                <hline x="8"  y="16" len="10" color="#0A0A0A"/>
+                <hline x="7"  y="17" len="12" color="#1A1A1A"/>
+                <!-- lower belly shadow -->
+                <hline x="6"  y="17" len="14" color="#0A0A0A"/>
+                <!-- chest fur fringe (mane area) -->
+                <pixel x="5"  y="13" color="#2A2A2A"/>
+                <pixel x="6"  y="14" color="#2A2A2A"/>
+                <pixel x="7"  y="13" color="#333333"/>
+                <pixel x="8"  y="14" color="#333333"/>
+                <pixel x="9"  y="13" color="#2A2A2A"/>
+                <!-- underline contour -->
+                <hline x="5"  y="18" len="16" color="#0A0A0A"/>
             </pixel-data>
         </layer>
-        <!-- z=5: head — noble large German Shepherd head, alert and wise -->
-        <layer id="head" type="base" z-order="5" width="32" height="24">
+
+        <!-- ── z=5: tail ── large bushy shepherd tail, calm low carry -->
+        <layer id="tail" type="base" z-order="5" width="32" height="24">
             <pixel-data>
-                <!-- head: 10px wide, 9px tall -->
-                <rect x="1" y="1" w="10" h="9" color="#0D0D0D"/>
-                <!-- muzzle protrudes slightly (shepherd profile) -->
-                <rect x="0" y="5" w="4" h="4" color="#0D0D0D"/>
+                <!-- tail base at croup, curves gently downward then up (sabre tail) -->
+                <pixel x="25" y="12" color="#1A1A1A"/>
+                <pixel x="26" y="11" color="#1A1A1A"/>
+                <pixel x="27" y="10" color="#1A1A1A"/>
+                <pixel x="28" y="9"  color="#1A1A1A"/>
+                <pixel x="29" y="9"  color="#1A1A1A"/>
+                <pixel x="30" y="10" color="#1A1A1A"/>
+                <pixel x="31" y="10" color="#1A1A1A"/>
+                <!-- tail thickness: 2px wide sections -->
+                <pixel x="26" y="12" color="#1A1A1A"/>
+                <pixel x="27" y="11" color="#2A2A2A"/>
+                <pixel x="28" y="10" color="#2A2A2A"/>
+                <pixel x="29" y="10" color="#2A2A2A"/>
+                <pixel x="30" y="11" color="#1A1A1A"/>
+                <pixel x="31" y="11" color="#2A2A2A"/>
+                <!-- bushy tip — wider, fluffy feathering -->
+                <pixel x="30" y="8"  color="#2A2A2A"/>
+                <pixel x="31" y="8"  color="#333333"/>
+                <pixel x="31" y="9"  color="#333333"/>
+                <pixel x="30" y="7"  color="#333333"/>
+                <pixel x="31" y="7"  color="#2A2A2A"/>
+                <!-- tail underside shadow -->
+                <pixel x="26" y="13" color="#0A0A0A"/>
+                <pixel x="27" y="12" color="#0A0A0A"/>
+                <pixel x="28" y="11" color="#0A0A0A"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ── z=6: neck ── powerful arched neck, mane-like thick fur -->
+        <layer id="neck" type="base" z-order="6" width="32" height="24">
+            <pixel-data>
+                <!-- neck column connecting head to withers -->
+                <rect x="4" y="5" w="5" h="5" color="#1A1A1A"/>
+                <!-- neck arch (dorsal crest) -->
+                <hline x="4" y="5" len="5" color="#2A2A2A"/>
+                <!-- mane / ruff fur — thicker coat at neck -->
+                <pixel x="3"  y="6"  color="#2A2A2A"/>
+                <pixel x="3"  y="7"  color="#333333"/>
+                <pixel x="3"  y="8"  color="#2A2A2A"/>
+                <pixel x="9"  y="6"  color="#333333"/>
+                <pixel x="9"  y="7"  color="#2A2A2A"/>
+                <!-- dewlap / throat shadow -->
+                <hline x="5" y="9" len="3" color="#0A0A0A"/>
+                <!-- collar region transition to body -->
+                <hline x="4" y="10" len="5" color="#111111"/>
+                <!-- neck side highlight -->
+                <pixel x="5" y="6" color="#333333"/>
+                <pixel x="6" y="6" color="#333333"/>
+                <pixel x="7" y="6" color="#333333"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ── z=7: head ── noble large GSD head, long muzzle, alert -->
+        <layer id="head" type="base" z-order="7" width="32" height="24">
+            <pixel-data>
+                <!-- skull: 10px wide, 7px tall -->
+                <rect x="1" y="1" w="10" h="7" color="#1A1A1A"/>
                 <!-- crown sheen -->
-                <hline x="2" y="1" len="8" color="#1A1A1A"/>
-                <!-- cheek fur thickness -->
-                <pixel x="1" y="5" color="#1A1A1A"/>
-                <pixel x="1" y="6" color="#1A1A1A"/>
-                <pixel x="10" y="5" color="#1A1A1A"/>
-                <pixel x="10" y="6" color="#1A1A1A"/>
-                <!-- neck connection -->
-                <hline x="2" y="9" len="8" color="#111111"/>
+                <hline x="2" y="1" len="8" color="#2A2A2A"/>
+                <hline x="3" y="2" len="6" color="#333333"/>
+                <!-- long shepherd muzzle protrudes forward -->
+                <rect x="0" y="5" w="5" h="4" color="#1A1A1A"/>
+                <hline x="0" y="5" len="5" color="#2A2A2A"/>
+                <!-- stop (brow definition) -->
+                <hline x="4" y="4" len="3" color="#0A0A0A"/>
+                <!-- cheek fur puff -->
+                <pixel x="1"  y="4" color="#2A2A2A"/>
+                <pixel x="1"  y="5" color="#2A2A2A"/>
+                <pixel x="1"  y="6" color="#333333"/>
+                <pixel x="11" y="4" color="#2A2A2A"/>
+                <pixel x="11" y="5" color="#2A2A2A"/>
+                <!-- jaw line -->
+                <hline x="1" y="8" len="4" color="#0A0A0A"/>
+                <!-- neck join -->
+                <hline x="2" y="7" len="8" color="#111111"/>
             </pixel-data>
         </layer>
-        <!-- z=6: ears — large upright alert shepherd ears -->
-        <layer id="ears" type="base" z-order="6" width="32" height="24">
+
+        <!-- ── z=8: ears ── large upright alert triangular ears, GSD signature -->
+        <layer id="ears" type="base" z-order="8" width="32" height="24">
             <pixel-data>
-                <!-- left ear: large, 3px wide, tall -->
-                <rect x="1" y="0" w="3" h="3" color="#0D0D0D"/>
-                <pixel x="2" y="0" color="#1A1A1A"/>
-                <!-- ear inner: dark pink-grey (barely visible on black dog) -->
-                <pixel x="2" y="1" color="#331122"/>
+                <!-- left ear: 3px wide, 4px tall, erect -->
+                <rect x="2" y="0" w="3" h="3" color="#1A1A1A"/>
+                <!-- ear edge highlight (black coat sheen) -->
+                <pixel x="2" y="0" color="#2A2A2A"/>
+                <pixel x="4" y="0" color="#2A2A2A"/>
+                <!-- ear inner: very dark pinkish (barely visible black dog) -->
+                <pixel x="3" y="1" color="#331122"/>
+                <pixel x="3" y="2" color="#2A1020"/>
                 <!-- right ear -->
-                <rect x="7" y="0" w="3" h="3" color="#0D0D0D"/>
-                <pixel x="8" y="0" color="#1A1A1A"/>
-                <pixel x="8" y="1" color="#331122"/>
+                <rect x="8" y="0" w="3" h="3" color="#1A1A1A"/>
+                <pixel x="8" y="0" color="#2A2A2A"/>
+                <pixel x="10" y="0" color="#2A2A2A"/>
+                <pixel x="9" y="1" color="#331122"/>
+                <pixel x="9" y="2" color="#2A1020"/>
+                <!-- ear base widening -->
+                <hline x="2" y="3" len="3" color="#0A0A0A"/>
+                <hline x="8" y="3" len="3" color="#0A0A0A"/>
             </pixel-data>
         </layer>
-        <!-- z=7: face_details — wise amber/gold eyes, black nose, strong muzzle -->
-        <layer id="face_details" type="overlay" z-order="7" width="32" height="24">
+
+        <!-- ── z=9: face_details ── amber eyes (wise, deep), large nose, brow dots -->
+        <layer id="face_details" type="overlay" z-order="9" width="32" height="24">
             <pixel-data>
-                <!-- left eye: deep amber-gold (wise, calm) -->
+                <!-- LEFT EYE: almond-shaped, deep amber/gold — ancient wisdom -->
+                <!-- iris outer ring -->
                 <pixel x="3" y="3" color="#AA7700"/>
                 <pixel x="4" y="2" color="#CC9900"/>
-                <pixel x="5" y="2" color="#CC9900"/>
+                <pixel x="5" y="2" color="#DDAA00"/>
+                <pixel x="6" y="2" color="#CC9900"/>
+                <pixel x="3" y="4" color="#AA7700"/>
                 <pixel x="4" y="3" color="#CC9900"/>
-                <pixel x="5" y="3" color="#111111"/>
-                <!-- right eye -->
-                <pixel x="7" y="3" color="#AA7700"/>
-                <pixel x="8" y="2" color="#CC9900"/>
-                <pixel x="9" y="2" color="#CC9900"/>
-                <pixel x="8" y="3" color="#CC9900"/>
-                <pixel x="9" y="3" color="#111111"/>
-                <!-- eye shine: small but present -->
+                <pixel x="5" y="3" color="#CC9900"/>
+                <pixel x="6" y="3" color="#AA7700"/>
+                <!-- pupil: large (dim highway night) -->
+                <pixel x="5" y="3" color="#080808"/>
+                <!-- eye shine: small, precise -->
                 <pixel x="4" y="2" color="#FFFFFF"/>
-                <pixel x="8" y="2" color="#FFFFFF"/>
-                <!-- nose: large black shepherd nose -->
-                <rect x="1" y="6" w="3" h="2" color="#0A0A0A"/>
+                <!-- RIGHT EYE -->
+                <pixel x="7"  y="3" color="#AA7700"/>
+                <pixel x="8"  y="2" color="#CC9900"/>
+                <pixel x="9"  y="2" color="#DDAA00"/>
+                <pixel x="10" y="2" color="#CC9900"/>
+                <pixel x="7"  y="4" color="#AA7700"/>
+                <pixel x="8"  y="3" color="#CC9900"/>
+                <pixel x="9"  y="3" color="#CC9900"/>
+                <pixel x="10" y="3" color="#AA7700"/>
+                <pixel x="9"  y="3" color="#080808"/>
+                <pixel x="8"  y="2" color="#FFFFFF"/>
+                <!-- NOSE: large black shepherd nose -->
+                <rect x="1" y="6" w="3" h="2" color="#080808"/>
                 <hline x="1" y="6" len="3" color="#333333"/>
-                <!-- nostril detail -->
-                <pixel x="1" y="7" color="#111111"/>
-                <pixel x="3" y="7" color="#111111"/>
-                <!-- mouth: firm shepherd lip line -->
-                <hline x="1" y="8" len="4" color="#080808"/>
-                <!-- wise expression: no whiskers on dog -->
-                <!-- eyebrow dots (shepherd expression markers) -->
-                <pixel x="4" y="1" color="#333333"/>
-                <pixel x="8" y="1" color="#333333"/>
+                <!-- nostril divot -->
+                <pixel x="1" y="7" color="#050505"/>
+                <pixel x="3" y="7" color="#050505"/>
+                <!-- MOUTH: firm shepherd lip line -->
+                <hline x="0" y="8" len="5" color="#0A0A0A"/>
+                <pixel x="2" y="9" color="#111111"/>
+                <!-- BROW DOTS: GSD supraorbital markings (very subtle on black) -->
+                <pixel x="4"  y="1" color="#333333"/>
+                <pixel x="5"  y="1" color="#2A2A2A"/>
+                <pixel x="9"  y="1" color="#333333"/>
+                <pixel x="10" y="1" color="#2A2A2A"/>
             </pixel-data>
         </layer>
+
     </layers>
+
     <animations>
-        <!-- idle_morning: calm waking stretch, noble and deliberate -->
-        <animation name="idle_morning" frames="4" fps="3" loop="true" frame-width="32" frame-height="24">
+
+        <!-- ══════════════════════════════════════════════════════
+             idle_morning — dignified slow waking stretch.
+             Persi rises methodically; no rushing, ever.
+             12 frames @ 3fps = 4 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="idle_morning" frames="12" fps="3" loop="true" frame-width="32" frame-height="24">
             <condition type="time_of_day" value="morning"/>
-            <frame index="0" layer-offsets=""/>
-            <!-- front stretch: lean forward -->
-            <frame index="1" layer-offsets="head:-1,0; ears:-1,0; face_details:-1,0; paws:-2,0"/>
-            <!-- rear stretch: hindquarters extend -->
-            <frame index="2" layer-offsets="tail:2,1"/>
-            <!-- return and shake -->
-            <frame index="3" layer-offsets=""/>
+            <!-- f0: neutral standing position -->
+            <frame index="0"  layer-offsets=""/>
+            <!-- f1: head lifts, ears prick fully alert -->
+            <frame index="1"  layer-offsets="head:0,-1; ears:0,-1; face_details:0,-1"/>
+            <!-- f2: front legs shift forward — front stretch begins -->
+            <frame index="2"  layer-offsets="head:-1,-1; ears:-1,-1; face_details:-1,-1; front_legs:-2,0; paws:-2,1"/>
+            <!-- f3: full front bow stretch — chest near ground, tail rises -->
+            <frame index="3"  layer-offsets="head:-1,1; ears:-1,1; face_details:-1,1; front_legs:-2,1; paws:-2,2; neck:0,1; tail:0,-2"/>
+            <!-- f4: hold bow stretch — classic shepherd playbow shape -->
+            <frame index="4"  layer-offsets="head:-1,1; ears:-1,1; face_details:-1,1; front_legs:-2,1; paws:-2,2; neck:0,1; tail:0,-2"/>
+            <!-- f5: slowly rise from bow, head comes back up -->
+            <frame index="5"  layer-offsets="head:-1,0; ears:-1,0; face_details:-1,0; front_legs:-1,0; paws:-1,1; neck:0,1"/>
+            <!-- f6: body realigns, weight shifts to rear — hindquarter stretch begins -->
+            <frame index="6"  layer-offsets="head:0,0; front_legs:0,0; body:0,0; hind_legs:1,0; paws:1,1"/>
+            <!-- f7: full rear stretch — hind legs extended back, spine long -->
+            <frame index="7"  layer-offsets="hind_legs:2,0; paws:2,1; tail:1,-1; body:0,-1"/>
+            <!-- f8: hold rear stretch -->
+            <frame index="8"  layer-offsets="hind_legs:2,0; paws:2,1; tail:1,-1"/>
+            <!-- f9: body shake — all layers jitter slightly (coat settling) -->
+            <frame index="9"  layer-offsets="body:1,0; belly:1,0; tail:-1,0; neck:1,0"/>
+            <!-- f10: second shake -->
+            <frame index="10" layer-offsets="body:-1,0; belly:-1,0; tail:1,0; neck:-1,0"/>
+            <!-- f11: settle — return to neutral, fully awake -->
+            <frame index="11" layer-offsets=""/>
         </animation>
-        <!-- idle_day: alert sentinel, scanning, head high -->
-        <animation name="idle_day" frames="4" fps="4" loop="true" frame-width="32" frame-height="24">
+
+        <!-- ══════════════════════════════════════════════════════
+             idle_day — alert guardian scan; slow deliberate head sweeps.
+             12 frames @ 4fps = 3 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="idle_day" frames="12" fps="4" loop="true" frame-width="32" frame-height="24">
             <condition type="time_of_day" value="day"/>
-            <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="head:0,-1; ears:0,-1; face_details:0,-1"/>
-            <frame index="2" layer-offsets="head:-2,0; ears:-2,0; face_details:-2,0"/>
-            <frame index="3" layer-offsets="head:2,0; ears:2,0; face_details:2,0"/>
+            <!-- f0: forward gaze, neutral -->
+            <frame index="0"  layer-offsets=""/>
+            <!-- f1: slow turn right — scanning -->
+            <frame index="1"  layer-offsets="head:1,0; ears:1,0; face_details:1,0"/>
+            <!-- f2: further right scan -->
+            <frame index="2"  layer-offsets="head:2,0; ears:2,0; face_details:2,0"/>
+            <!-- f3: head lifts slightly at far right — something noted? -->
+            <frame index="3"  layer-offsets="head:2,-1; ears:2,-1; face_details:2,-1"/>
+            <!-- f4: neutral again, brief pause -->
+            <frame index="4"  layer-offsets=""/>
+            <!-- f5: weight shift — belly slightly lowers (breathing) -->
+            <frame index="5"  layer-offsets="belly:0,1"/>
+            <!-- f6: slow turn left -->
+            <frame index="6"  layer-offsets="head:-1,0; ears:-1,0; face_details:-1,0"/>
+            <!-- f7: further left, ears tilt to listen -->
+            <frame index="7"  layer-offsets="head:-2,0; ears:-2,-1; face_details:-2,0"/>
+            <!-- f8: head drops slightly — listening low frequency sound -->
+            <frame index="8"  layer-offsets="head:-2,1; ears:-2,0; face_details:-2,1"/>
+            <!-- f9: return forward -->
+            <frame index="9"  layer-offsets="head:-1,0; ears:-1,0; face_details:-1,0"/>
+            <!-- f10: neutral, exhale — belly rises back -->
+            <frame index="10" layer-offsets="belly:0,-1"/>
+            <!-- f11: neutral rest frame -->
+            <frame index="11" layer-offsets=""/>
         </animation>
-        <!-- idle_evening: relaxed guardian, eyes half closed, tail at rest -->
-        <animation name="idle_evening" frames="4" fps="3" loop="true" frame-width="32" frame-height="24">
+
+        <!-- ══════════════════════════════════════════════════════
+             idle_evening — relaxed settled guardian; slow blinks, tail sways.
+             12 frames @ 3fps = 4 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="idle_evening" frames="12" fps="3" loop="true" frame-width="32" frame-height="24">
             <condition type="time_of_day" value="evening"/>
-            <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="tail:0,1"/>
-            <frame index="2" layer-offsets="head:0,1; face_details:0,1; body:0,1; chest_markings:0,1"/>
-            <frame index="3" layer-offsets="tail:1,1"/>
+            <!-- f0: neutral, slightly lowered posture from day tiredness -->
+            <frame index="0"  layer-offsets="body:0,1; belly:0,1; neck:0,1"/>
+            <!-- f1: tail lifts and sways right (content) -->
+            <frame index="1"  layer-offsets="body:0,1; belly:0,1; neck:0,1; tail:1,-1"/>
+            <!-- f2: tail returns center — slow blink (head dips slightly) -->
+            <frame index="2"  layer-offsets="body:0,1; belly:0,1; neck:0,1; tail:0,0; head:0,1; face_details:0,1"/>
+            <!-- f3: blink hold — eyes momentarily shut (face_details lowers) -->
+            <frame index="3"  layer-offsets="body:0,1; belly:0,1; neck:0,1; head:0,1; face_details:0,2"/>
+            <!-- f4: eyes reopen (blink complete) -->
+            <frame index="4"  layer-offsets="body:0,1; belly:0,1; neck:0,1; head:0,1; face_details:0,1"/>
+            <!-- f5: tail sways left -->
+            <frame index="5"  layer-offsets="body:0,1; belly:0,1; neck:0,1; tail:-1,-1"/>
+            <!-- f6: head turns slightly toward room (monitoring household) -->
+            <frame index="6"  layer-offsets="body:0,1; belly:0,1; neck:0,1; head:1,1; ears:1,0; face_details:1,1"/>
+            <!-- f7: weight shift — shoulder dip left -->
+            <frame index="7"  layer-offsets="body:0,1; belly:0,1; neck:0,1; front_legs:-1,0"/>
+            <!-- f8: tail neutral, yawn stretch of neck -->
+            <frame index="8"  layer-offsets="body:0,1; belly:0,1; neck:0,-1; head:0,0; face_details:0,0"/>
+            <!-- f9: settle back, slower breathing -->
+            <frame index="9"  layer-offsets="body:0,1; belly:0,2; neck:0,1"/>
+            <!-- f10: second slow blink -->
+            <frame index="10" layer-offsets="body:0,1; belly:0,1; neck:0,1; head:0,1; face_details:0,2"/>
+            <!-- f11: full rest, exhale -->
+            <frame index="11" layer-offsets="body:0,1; belly:0,1; neck:0,1"/>
         </animation>
-        <!-- idle_night: lying down alert — shepherd never fully disengages -->
-        <animation name="idle_night" frames="4" fps="2" loop="true" frame-width="32" frame-height="24">
+
+        <!-- ══════════════════════════════════════════════════════
+             idle_night — lying down but never fully off-guard.
+             Half-sphinx position, eyes still tracking.
+             12 frames @ 2fps = 6 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="idle_night" frames="12" fps="2" loop="true" frame-width="32" frame-height="24">
             <condition type="time_of_day" value="night"/>
-            <frame index="0" layer-offsets="head:0,3; ears:0,3; face_details:0,3; legs:0,2; paws:0,2; tail:4,3"/>
-            <frame index="1" layer-offsets="head:0,3; ears:0,3; face_details:0,3; legs:0,2; paws:0,2; tail:4,3"/>
-            <frame index="2" layer-offsets="head:0,3; ears:0,3; face_details:0,3; body:0,1; chest_markings:0,1; legs:0,2; paws:0,2; tail:4,3"/>
-            <frame index="3" layer-offsets="head:0,3; ears:0,3; face_details:0,3; legs:0,2; paws:0,2; tail:4,3"/>
+            <!-- f0: lying sphinx — all layers shifted down into rest pose -->
+            <frame index="0"  layer-offsets="front_legs:0,4; paws:0,3; hind_legs:0,3; body:0,2; belly:0,4; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:4,3"/>
+            <!-- f1: same rest, tiny breathing rise -->
+            <frame index="1"  layer-offsets="front_legs:0,4; paws:0,3; hind_legs:0,3; body:0,2; belly:0,3; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:4,3"/>
+            <!-- f2: exhale — belly falls again -->
+            <frame index="2"  layer-offsets="front_legs:0,4; paws:0,3; hind_legs:0,3; body:0,2; belly:0,4; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:4,3"/>
+            <!-- f3: ear twitch left — sound registered -->
+            <frame index="3"  layer-offsets="front_legs:0,4; paws:0,3; hind_legs:0,3; body:0,2; belly:0,4; neck:0,2; head:1,2; ears:0,2; face_details:1,2; tail:4,3"/>
+            <!-- f4: head lifts fractionally — checking -->
+            <frame index="4"  layer-offsets="front_legs:0,4; paws:0,3; hind_legs:0,3; body:0,2; belly:0,4; neck:0,1; head:1,1; ears:1,1; face_details:1,1; tail:4,3"/>
+            <!-- f5: sound identified as safe — head returns -->
+            <frame index="5"  layer-offsets="front_legs:0,4; paws:0,3; hind_legs:0,3; body:0,2; belly:0,3; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:4,3"/>
+            <!-- f6: breathing rise -->
+            <frame index="6"  layer-offsets="front_legs:0,4; paws:0,3; hind_legs:0,3; body:0,1; belly:0,3; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:4,3"/>
+            <!-- f7: breathing fall -->
+            <frame index="7"  layer-offsets="front_legs:0,4; paws:0,3; hind_legs:0,3; body:0,2; belly:0,4; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:4,3"/>
+            <!-- f8: slow blink in dark (eyes almost close) -->
+            <frame index="8"  layer-offsets="front_legs:0,4; paws:0,3; hind_legs:0,3; body:0,2; belly:0,4; neck:0,2; head:1,2; ears:1,2; face_details:1,3; tail:4,3"/>
+            <!-- f9: eyes reopen — still vigilant -->
+            <frame index="9"  layer-offsets="front_legs:0,4; paws:0,3; hind_legs:0,3; body:0,2; belly:0,4; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:4,3"/>
+            <!-- f10: tail curl tightens (comfort shift) -->
+            <frame index="10" layer-offsets="front_legs:0,4; paws:0,3; hind_legs:0,3; body:0,2; belly:0,4; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:3,3"/>
+            <!-- f11: fully settled, deepest rest -->
+            <frame index="11" layer-offsets="front_legs:0,4; paws:0,3; hind_legs:0,3; body:0,2; belly:0,4; neck:0,2; head:1,2; ears:1,2; face_details:1,2; tail:4,3"/>
         </animation>
-        <!-- walk: measured stately shepherd pace -->
-        <animation name="walk" frames="8" fps="8" loop="true" frame-width="32" frame-height="24">
-            <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="paws:-2,-2; legs:-1,0"/>
-            <frame index="2" layer-offsets="paws:-2,-2; legs:-1,0; body:-1,0"/>
-            <frame index="3" layer-offsets="body:-1,0"/>
-            <frame index="4" layer-offsets="paws:2,-2; legs:1,0"/>
-            <frame index="5" layer-offsets="paws:2,-2; legs:1,0; body:1,0"/>
-            <frame index="6" layer-offsets="body:1,0; tail:-1,0"/>
-            <frame index="7" layer-offsets=""/>
+
+        <!-- ══════════════════════════════════════════════════════
+             walk — stately measured shepherd trot; 4-phase gait cycle.
+             Phase: contact → passing → lift → swing (per leg pair).
+             12 frames @ 10fps = 1.2s per loop (brisk dignified walk)
+        ══════════════════════════════════════════════════════ -->
+        <animation name="walk" frames="12" fps="10" loop="true" frame-width="32" frame-height="24">
+            <!-- PHASE 1 (f0-f2): Left foreleg contact, right hind contact -->
+            <!-- f0: left-front strikes, right-hind pushes off — weight transfers left -->
+            <frame index="0"  layer-offsets="front_legs:-1,0; paws:-1,0; hind_legs:1,0"/>
+            <!-- f1: left-front supports, right-hind lifts — body advances -->
+            <frame index="1"  layer-offsets="front_legs:-1,0; paws:-1,0; body:-1,0; belly:-1,0"/>
+            <!-- f2: passing — diagonal pair mid-swing, body at lowest -->
+            <frame index="2"  layer-offsets="body:-1,1; belly:-1,1; neck:-1,0; head:-1,0; ears:-1,0; face_details:-1,0"/>
+            <!-- PHASE 2 (f3-f5): Right foreleg contact, left hind contact -->
+            <!-- f3: right-front strikes, left-hind pushes off -->
+            <frame index="3"  layer-offsets="front_legs:1,0; paws:1,0; hind_legs:-1,0"/>
+            <!-- f4: right-front supports, left-hind lifts -->
+            <frame index="4"  layer-offsets="front_legs:1,0; paws:1,0; body:1,0; belly:1,0"/>
+            <!-- f5: passing — body at lowest, tail counterbalances -->
+            <frame index="5"  layer-offsets="body:1,1; belly:1,1; neck:1,0; head:1,0; ears:1,0; face_details:1,0; tail:-1,0"/>
+            <!-- PHASE 3 (f6-f8): Left foreleg contact again — second stride -->
+            <!-- f6: left-front contact, opposite diagonal lifts -->
+            <frame index="6"  layer-offsets="front_legs:-1,0; paws:-1,-1; hind_legs:1,0"/>
+            <!-- f7: body propelled forward, head nods slightly (gait) -->
+            <frame index="7"  layer-offsets="front_legs:-1,0; paws:-1,-1; body:-1,0; head:-1,1; face_details:-1,1"/>
+            <!-- f8: suspension moment — all legs briefly converge -->
+            <frame index="8"  layer-offsets="body:0,-1; belly:0,-1; neck:0,-1; head:0,-1; face_details:0,-1"/>
+            <!-- PHASE 4 (f9-f11): Right foreleg final contact, return to start -->
+            <!-- f9: right-front contact, hind diagonal completes -->
+            <frame index="9"  layer-offsets="front_legs:1,0; paws:1,-1; hind_legs:-1,0"/>
+            <!-- f10: body glides forward, tail lifts (proud carry) -->
+            <frame index="10" layer-offsets="front_legs:1,0; paws:1,-1; body:1,0; tail:0,-1"/>
+            <!-- f11: return to neutral, gait cycle completes -->
+            <frame index="11" layer-offsets=""/>
         </animation>
-        <!-- nurture: unique — nuzzling and watching over Duke -->
-        <animation name="nurture" frames="6" fps="4" loop="false" frame-width="32" frame-height="24">
+
+        <!-- ══════════════════════════════════════════════════════
+             guard_watch — sentinel pose; slow systematic scan.
+             Persi on alert, silent, absolutely still between sweeps.
+             12 frames @ 3fps = 4 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="guard_watch" frames="12" fps="3" loop="true" frame-width="32" frame-height="24">
+            <condition type="state" value="guarding"/>
+            <!-- f0: high alert posture — head raised, ears fully forward -->
+            <frame index="0"  layer-offsets="head:0,-1; ears:0,-1; face_details:0,-1; neck:0,-1"/>
+            <!-- f1: dead-still hold (2 frames of absolute stillness) -->
+            <frame index="1"  layer-offsets="head:0,-1; ears:0,-1; face_details:0,-1; neck:0,-1"/>
+            <!-- f2: slow right-sweep begins -->
+            <frame index="2"  layer-offsets="head:1,-1; ears:1,-1; face_details:1,-1; neck:0,-1"/>
+            <!-- f3: full right position — ears slightly asymmetric (tracking sound) -->
+            <frame index="3"  layer-offsets="head:2,-1; ears:3,-1; face_details:2,-1; neck:0,-1"/>
+            <!-- f4: hold right — processing threat assessment -->
+            <frame index="4"  layer-offsets="head:2,-1; ears:3,-1; face_details:2,-1; neck:0,-1"/>
+            <!-- f5: return to center — threat dismissed -->
+            <frame index="5"  layer-offsets="head:1,-1; ears:1,-1; face_details:1,-1; neck:0,-1"/>
+            <!-- f6: center pause — breathing barely visible -->
+            <frame index="6"  layer-offsets="head:0,-1; ears:0,-1; face_details:0,-1; neck:0,-1; belly:0,1"/>
+            <!-- f7: slow left-sweep -->
+            <frame index="7"  layer-offsets="head:-1,-1; ears:-1,-1; face_details:-1,-1; neck:0,-1; belly:0,0"/>
+            <!-- f8: full left — weight shifts slightly -->
+            <frame index="8"  layer-offsets="head:-2,-1; ears:-3,-1; face_details:-2,-1; neck:0,-1; front_legs:-1,0"/>
+            <!-- f9: hold left — deeper listening -->
+            <frame index="9"  layer-offsets="head:-2,-1; ears:-3,-1; face_details:-2,-1; neck:0,-1"/>
+            <!-- f10: return to center -->
+            <frame index="10" layer-offsets="head:-1,-1; ears:-1,-1; face_details:-1,-1; neck:0,-1"/>
+            <!-- f11: back to forward guard — cycle repeats -->
+            <frame index="11" layer-offsets="head:0,-1; ears:0,-1; face_details:0,-1; neck:0,-1"/>
+        </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             nurture_duke — maternal sequence; nuzzle, lick, protect Duke.
+             Triggered when Duke is nearby. One-shot then loop.
+             12 frames @ 4fps = 3 seconds
+        ══════════════════════════════════════════════════════ -->
+        <animation name="nurture_duke" frames="12" fps="4" loop="false" frame-width="32" frame-height="24">
             <condition type="trigger" value="duke_nearby"/>
-            <!-- frame 0: spots Duke, head turns and lowers -->
-            <frame index="0" layer-offsets="head:2,1; ears:2,1; face_details:2,1"/>
-            <!-- frame 1: bends head down to nuzzle -->
-            <frame index="1" layer-offsets="head:3,3; ears:3,2; face_details:3,3"/>
-            <!-- frame 2: nuzzle contact (head fully lowered) -->
-            <frame index="2" layer-offsets="head:4,4; ears:4,3; face_details:4,4"/>
-            <!-- frame 3: hold, gentle lick motion -->
-            <frame index="3" layer-offsets="head:4,4; ears:4,3; face_details:4,5"/>
-            <!-- frame 4: lift head, survey protectively -->
-            <frame index="4" layer-offsets="head:2,1; ears:2,1; face_details:2,1"/>
-            <!-- frame 5: return to guard stance -->
-            <frame index="5" layer-offsets=""/>
+            <!-- f0: Persi spots Duke — head turns, ears forward, interested -->
+            <frame index="0"  layer-offsets="head:2,0; ears:2,-1; face_details:2,0"/>
+            <!-- f1: head lowers — approaching Duke's level -->
+            <frame index="1"  layer-offsets="head:2,1; ears:2,0; face_details:2,1; neck:0,1"/>
+            <!-- f2: bends toward Duke — neck extends, front legs shift -->
+            <frame index="2"  layer-offsets="head:3,2; ears:3,1; face_details:3,2; neck:1,1; front_legs:1,0"/>
+            <!-- f3: nuzzle contact — head fully down at Duke level -->
+            <frame index="3"  layer-offsets="head:3,3; ears:3,2; face_details:3,3; neck:1,2; front_legs:1,0"/>
+            <!-- f4: licking motion — face_details shifts as tongue extends -->
+            <frame index="4"  layer-offsets="head:3,3; ears:3,2; face_details:3,4; neck:1,2; front_legs:1,0"/>
+            <!-- f5: hold — gentle lick, slow and deliberate -->
+            <frame index="5"  layer-offsets="head:3,3; ears:3,2; face_details:3,3; neck:1,2; front_legs:1,0"/>
+            <!-- f6: second lick cycle -->
+            <frame index="6"  layer-offsets="head:3,3; ears:3,2; face_details:3,4; neck:1,2; front_legs:1,0"/>
+            <!-- f7: head rises — surveying surroundings for threats -->
+            <frame index="7"  layer-offsets="head:2,1; ears:2,0; face_details:2,1; neck:0,1"/>
+            <!-- f8: protective arc — body half turns to shelter Duke -->
+            <frame index="8"  layer-offsets="head:1,0; ears:1,-1; face_details:1,0; body:1,0; tail:-1,-1"/>
+            <!-- f9: full guard position over Duke — tall, watchful -->
+            <frame index="9"  layer-offsets="head:0,-1; ears:0,-2; face_details:0,-1; neck:0,-1; tail:-1,-2"/>
+            <!-- f10: hold guard — maternal stillness -->
+            <frame index="10" layer-offsets="head:0,-1; ears:0,-2; face_details:0,-1; neck:0,-1; tail:-1,-2"/>
+            <!-- f11: settle — Duke secure, Persi relaxes slightly -->
+            <frame index="11" layer-offsets="head:0,0; ears:0,-1; face_details:0,0; neck:0,0; tail:0,-1"/>
         </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             eat — deliberate, unhurried eating; GSD eats with dignity.
+             12 frames @ 5fps = 2.4 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="eat" frames="12" fps="5" loop="true" frame-width="32" frame-height="24">
+            <condition type="trigger" value="food_present"/>
+            <!-- f0: approach bowl — head lowers to food level -->
+            <frame index="0"  layer-offsets="head:0,2; ears:0,1; face_details:0,2; neck:0,1"/>
+            <!-- f1: first bite — head dips further -->
+            <frame index="1"  layer-offsets="head:0,3; ears:0,2; face_details:0,4; neck:0,2; front_legs:0,0"/>
+            <!-- f2: chew — head rises slightly, jaw works -->
+            <frame index="2"  layer-offsets="head:0,2; ears:0,1; face_details:0,3; neck:0,1"/>
+            <!-- f3: swallow — head lifts fully -->
+            <frame index="3"  layer-offsets="head:0,1; ears:0,0; face_details:0,1; neck:0,0"/>
+            <!-- f4: brief pause — sniff for next bite -->
+            <frame index="4"  layer-offsets="head:0,2; ears:0,1; face_details:0,2; neck:0,1"/>
+            <!-- f5: second bite dip -->
+            <frame index="5"  layer-offsets="head:0,3; ears:0,2; face_details:0,4; neck:0,2"/>
+            <!-- f6: chew cycle -->
+            <frame index="6"  layer-offsets="head:0,2; ears:0,1; face_details:0,3; neck:0,1"/>
+            <!-- f7: swallow, lift -->
+            <frame index="7"  layer-offsets="head:0,1; ears:0,0; face_details:0,1; neck:0,0"/>
+            <!-- f8: weight shift — stance settles lower (deep eater) -->
+            <frame index="8"  layer-offsets="head:0,2; ears:0,1; face_details:0,2; neck:0,1; body:0,1; belly:0,1"/>
+            <!-- f9: bite -->
+            <frame index="9"  layer-offsets="head:0,3; ears:0,2; face_details:0,4; neck:0,2; body:0,1; belly:0,1"/>
+            <!-- f10: chew, body at rest -->
+            <frame index="10" layer-offsets="head:0,2; ears:0,1; face_details:0,3; neck:0,1; body:0,1; belly:0,1"/>
+            <!-- f11: swallow, brief lift — bowl now empty? Sniff check -->
+            <frame index="11" layer-offsets="head:0,1; ears:0,0; face_details:0,1; neck:0,0; body:0,0; belly:0,0"/>
+        </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             sleep — full rest; Persi curls tightly on side.
+             Breathing cycle clearly visible. 12 frames @ 2fps = 6s loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="sleep" frames="12" fps="2" loop="true" frame-width="32" frame-height="24">
+            <condition type="state" value="sleeping"/>
+            <!-- f0: settling down — lowering body -->
+            <frame index="0"  layer-offsets="body:0,1; belly:0,1; front_legs:2,2; hind_legs:2,1; paws:3,2; neck:0,2; head:3,3; ears:3,3; face_details:3,3; tail:3,2"/>
+            <!-- f1: lying down — full side rest position -->
+            <frame index="1"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:0,3; head:4,3; ears:4,3; face_details:4,3; tail:4,3"/>
+            <!-- f2: first breath cycle — belly expands -->
+            <frame index="2"  layer-offsets="body:0,2; belly:0,2; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:0,3; head:4,3; ears:4,3; face_details:4,3; tail:4,3"/>
+            <!-- f3: exhale — belly contracts -->
+            <frame index="3"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:0,3; head:4,3; ears:4,3; face_details:4,3; tail:4,3"/>
+            <!-- f4: deep breath -->
+            <frame index="4"  layer-offsets="body:0,1; belly:0,2; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:0,3; head:4,3; ears:4,3; face_details:4,3; tail:4,3"/>
+            <!-- f5: exhale -->
+            <frame index="5"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:0,3; head:4,3; ears:4,3; face_details:4,3; tail:4,3"/>
+            <!-- f6: twitch of ear (dream?) -->
+            <frame index="6"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:0,3; head:4,3; ears:3,3; face_details:4,3; tail:4,3"/>
+            <!-- f7: resume deep breathing -->
+            <frame index="7"  layer-offsets="body:0,2; belly:0,2; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:0,3; head:4,3; ears:4,3; face_details:4,3; tail:4,3"/>
+            <!-- f8: exhale -->
+            <frame index="8"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:0,3; head:4,3; ears:4,3; face_details:4,3; tail:4,3"/>
+            <!-- f9: paw twitch (running in dream) -->
+            <frame index="9"  layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:2,2; paws:2,3; neck:0,3; head:4,3; ears:4,3; face_details:4,3; tail:4,3"/>
+            <!-- f10: slow exhale, fully relaxed -->
+            <frame index="10" layer-offsets="body:0,2; belly:0,3; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:0,3; head:4,3; ears:4,3; face_details:4,3; tail:4,3"/>
+            <!-- f11: deepest sleep phase -->
+            <frame index="11" layer-offsets="body:0,2; belly:0,4; front_legs:2,3; hind_legs:2,2; paws:3,3; neck:0,3; head:4,3; ears:4,3; face_details:4,3; tail:4,3"/>
+        </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             wise_sit — iconic GSD sit: bolt upright, patient, regal.
+             Persi sits and simply WATCHES with total calm authority.
+             12 frames @ 2fps = 6 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="wise_sit" frames="12" fps="2" loop="true" frame-width="32" frame-height="24">
+            <condition type="state" value="sitting"/>
+            <!-- f0: lowering into sit — hind legs fold, haunches drop -->
+            <frame index="0"  layer-offsets="hind_legs:0,2; body:0,1; tail:2,2"/>
+            <!-- f1: full sit achieved — tall and straight -->
+            <frame index="1"  layer-offsets="hind_legs:0,3; body:0,2; belly:0,2; tail:3,3; neck:0,-1; head:0,-1; ears:0,-2; face_details:0,-1"/>
+            <!-- f2: hold sit — first still moment, surveying -->
+            <frame index="2"  layer-offsets="hind_legs:0,3; body:0,2; belly:0,2; tail:3,3; neck:0,-1; head:0,-1; ears:0,-2; face_details:0,-1"/>
+            <!-- f3: slow head turn right (watching) -->
+            <frame index="3"  layer-offsets="hind_legs:0,3; body:0,2; belly:0,2; tail:3,3; neck:0,-1; head:1,-1; ears:1,-2; face_details:1,-1"/>
+            <!-- f4: full right scan -->
+            <frame index="4"  layer-offsets="hind_legs:0,3; body:0,2; belly:0,2; tail:3,3; neck:0,-1; head:2,-1; ears:2,-2; face_details:2,-1"/>
+            <!-- f5: return center — all is well -->
+            <frame index="5"  layer-offsets="hind_legs:0,3; body:0,2; belly:0,2; tail:3,3; neck:0,-1; head:0,-1; ears:0,-2; face_details:0,-1"/>
+            <!-- f6: slow blink — trust established -->
+            <frame index="6"  layer-offsets="hind_legs:0,3; body:0,2; belly:0,2; tail:3,3; neck:0,-1; head:0,-1; ears:0,-2; face_details:0,0"/>
+            <!-- f7: eyes reopen — still on duty -->
+            <frame index="7"  layer-offsets="hind_legs:0,3; body:0,2; belly:0,2; tail:3,3; neck:0,-1; head:0,-1; ears:0,-2; face_details:0,-1"/>
+            <!-- f8: slow head turn left -->
+            <frame index="8"  layer-offsets="hind_legs:0,3; body:0,2; belly:0,2; tail:3,3; neck:0,-1; head:-2,-1; ears:-2,-2; face_details:-2,-1"/>
+            <!-- f9: breathing rise (inhale belly) -->
+            <frame index="9"  layer-offsets="hind_legs:0,3; body:0,1; belly:0,1; tail:3,3; neck:0,-1; head:0,-1; ears:0,-2; face_details:0,-1"/>
+            <!-- f10: exhale -->
+            <frame index="10" layer-offsets="hind_legs:0,3; body:0,2; belly:0,2; tail:3,3; neck:0,-1; head:0,-1; ears:0,-2; face_details:0,-1"/>
+            <!-- f11: perfectly still — embodiment of wisdom -->
+            <frame index="11" layer-offsets="hind_legs:0,3; body:0,2; belly:0,2; tail:3,3; neck:0,-1; head:0,-1; ears:0,-2; face_details:0,-1"/>
+        </animation>
+
+        <!-- ══════════════════════════════════════════════════════
+             highway_walk — memory of first meeting; walking by traffic
+             at night toward Alexander. Purposeful, unafraid, certain.
+             12 frames @ 8fps = 1.5 seconds loop
+        ══════════════════════════════════════════════════════ -->
+        <animation name="highway_walk" frames="12" fps="8" loop="true" frame-width="32" frame-height="24">
+            <condition type="trigger" value="highway_flashback"/>
+            <!-- Same 4-phase gait as walk but:
+                 - head is held HIGH (confident, approaching)
+                 - tail is UP (dominant-friendly, not afraid of cars)
+                 - slightly larger body offsets (larger determined stride) -->
+            <!-- f0: left-front contact — confident stride -->
+            <frame index="0"  layer-offsets="front_legs:-2,0; paws:-2,0; hind_legs:1,0; head:0,-1; ears:0,-2; face_details:0,-1; tail:0,-2"/>
+            <!-- f1: advance, body shifts forward -->
+            <frame index="1"  layer-offsets="front_legs:-2,0; paws:-2,0; body:-1,0; belly:-1,0; head:0,-1; ears:0,-2; face_details:0,-1; tail:0,-2"/>
+            <!-- f2: passing phase, head tilts toward light source (car headlights) -->
+            <frame index="2"  layer-offsets="body:-1,0; belly:-1,0; neck:-1,0; head:-1,-1; ears:-1,-2; face_details:-1,-1; tail:0,-2"/>
+            <!-- f3: right-front contact, diagonal completes -->
+            <frame index="3"  layer-offsets="front_legs:2,0; paws:2,0; hind_legs:-1,0; head:0,-1; ears:0,-2; face_details:0,-1; tail:0,-2"/>
+            <!-- f4: body forward, right side -->
+            <frame index="4"  layer-offsets="front_legs:2,0; paws:2,0; body:1,0; belly:1,0; head:0,-1; ears:0,-2; face_details:0,-1; tail:0,-2"/>
+            <!-- f5: passing phase, tail swings with momentum -->
+            <frame index="5"  layer-offsets="body:1,0; belly:1,0; neck:1,0; head:1,-1; ears:1,-2; face_details:1,-1; tail:-1,-1"/>
+            <!-- f6: second stride left-front — longer step (fast walk) -->
+            <frame index="6"  layer-offsets="front_legs:-2,0; paws:-2,-1; hind_legs:1,0; head:0,-1; ears:0,-2; face_details:0,-1; tail:0,-2"/>
+            <!-- f7: body propelled, head nods slightly with gait -->
+            <frame index="7"  layer-offsets="front_legs:-2,0; paws:-2,-1; body:-1,0; head:-1,-1; face_details:-1,-1; tail:0,-2"/>
+            <!-- f8: brief suspension — galloping edge (purposeful trot) -->
+            <frame index="8"  layer-offsets="body:0,-1; belly:0,-1; neck:0,-1; head:0,-2; ears:0,-3; face_details:0,-2; tail:0,-3; paws:0,-1"/>
+            <!-- f9: right-front contact, landing -->
+            <frame index="9"  layer-offsets="front_legs:2,0; paws:2,-1; hind_legs:-1,0; head:0,-1; ears:0,-2; face_details:0,-1; tail:0,-2"/>
+            <!-- f10: momentum carries body, tail high and proud -->
+            <frame index="10" layer-offsets="front_legs:2,0; paws:2,-1; body:1,0; tail:-1,-2; head:0,-1; face_details:0,-1"/>
+            <!-- f11: return to neutral — 3km stride continues toward Alexander -->
+            <frame index="11" layer-offsets="head:0,-1; ears:0,-1; face_details:0,-1; tail:0,-2"/>
+        </animation>
+
     </animations>
+
     <naming>
         <output-dir>characters/persi</output-dir>
     </naming>
+
 </asset-spec>

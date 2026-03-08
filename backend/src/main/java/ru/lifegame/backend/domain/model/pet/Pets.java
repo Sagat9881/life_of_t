@@ -17,7 +17,9 @@ public class Pets {
     }
 
     public void applyDailyDecay() {
-        pets.values().forEach(Pet::applyDailyDecay);
+        for (Map.Entry<String, Pet> entry : new HashMap<>(pets).entrySet()) {
+            pets.put(entry.getKey(), entry.getValue().applyDailyDecay());
+        }
     }
 
     public boolean hasDeadPet() {
@@ -45,22 +47,14 @@ public class Pets {
     public static Pets initial() {
         return new Pets(Map.of(
             "barsik", new Pet(
-                "barsik",
-                "Барсик",
-                PetType.CAT,
-                GameBalance.PET_INITIAL_SATIETY,
-                GameBalance.PET_INITIAL_ATTENTION,
-                GameBalance.PET_INITIAL_HEALTH,
-                GameBalance.PET_INITIAL_MOOD
+                "barsik", "\u0411\u0430\u0440\u0441\u0438\u043a", PetType.CAT,
+                GameBalance.PET_INITIAL_SATIETY, GameBalance.PET_INITIAL_ATTENTION,
+                GameBalance.PET_INITIAL_HEALTH, GameBalance.PET_INITIAL_MOOD
             ),
             "sam", new Pet(
-                "sam",
-                "Сэм",
-                PetType.DOG,
-                GameBalance.PET_SAM_INITIAL_SATIETY,
-                GameBalance.PET_SAM_INITIAL_ATTENTION,
-                GameBalance.PET_SAM_INITIAL_HEALTH,
-                GameBalance.PET_SAM_INITIAL_MOOD
+                "sam", "\u0421\u044d\u043c", PetType.DOG,
+                GameBalance.PET_SAM_INITIAL_SATIETY, GameBalance.PET_SAM_INITIAL_ATTENTION,
+                GameBalance.PET_SAM_INITIAL_HEALTH, GameBalance.PET_SAM_INITIAL_MOOD
             )
         ));
     }

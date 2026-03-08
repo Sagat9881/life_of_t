@@ -1,377 +1,138 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <character-visual-specifications>
     <meta>
-        <name>Character Visual Specifications</name>
-        <version>1.0.0</version>
-        <purpose>Подробные визуальные спецификации всех персонажей игры Life of T</purpose>
-        <last-updated>2026-03-01</last-updated>
+        <name>Character Visual Specifications Template</name>
+        <version>2.0.0</version>
+        <purpose>Универсальный шаблон для спецификации визуала персонажей</purpose>
+        <last-updated>2026-03-08</last-updated>
     </meta>
 
     <visual-style>
-        <overall>
-            <description>Мягкий современный 2D стиль, вдохновлённый инди-играми (Gris, Spiritfarer, Celeste)</description>
-            <characteristics>
-                <item>Реалистичные пропорции с лёгкой стилизацией</item>
-                <item>Выразительные лица и позы</item>
-                <item>Детализированная одежда и аксессуары</item>
-                <item>Тёплая уютная цветовая палитра</item>
-                <item>Мягкие тени и свет</item>
-            </characteristics>
-        </overall>
+        <overall-style>Pixel Art HD - высокодетализированная пиксельная графика</overall-style>
+        <inspiration>Punch Club, Stardew Valley - современный pixel art с выразительными персонажами</inspiration>
+        <technical-approach>Процедурная генерация через PixelRect/PixelLine/PixelDot из XML-спецификаций</technical-approach>
 
-        <color-palette>
-            <primary>
-                <color name="Warm Beige" hex="#F5E6D3" usage="Кожа, нейтральные фоны"/>
-                <color name="Rose Pink" hex="#FFB6C1" usage="Акценты, романтика, UI"/>
-                <color name="Mint Green" hex="#B5EAD7" usage="Свежесть, природа, позитив"/>
-                <color name="Soft Yellow" hex="#FFF4B8" usage="Тепло, свет, радость"/>
-                <color name="Lavender" hex="#E0BBE4" usage="Спокойствие, мечты"/>
-            </primary>
-
-            <secondary>
-                <color name="Deep Brown" hex="#6B4423" usage="Волосы, детали"/>
-                <color name="Charcoal" hex="#4A5859" usage="Одежда, контуры"/>
-                <color name="Cream White" hex="#FFF9E9" usage="Высветления, блики"/>
-                <color name="Muted Gray" hex="#A8B2B7" usage="Тени, фон"/>
-            </secondary>
-        </color-palette>
+        <key-traits>
+            <trait>Выразительные позы и силуэты</trait>
+            <trait>Читаемые эмоции через позу тела и голову</trait>
+            <trait>Чёткие пиксельные границы без anti-aliasing</trait>
+            <trait>Ограниченная палитра 16-32 цвета</trait>
+            <trait>Стилизованные пропорции (semi-chibi для pixel art холста)</trait>
+        </key-traits>
     </visual-style>
 
-    <characters>
-        <character id="tanya">
-            <name>Татьяна (Таня)</name>
-            <role>Главная героиня, играбельный персонаж</role>
-            
-            <physical-description>
-                <age>~30 лет</age>
-                <height>165 см (средний рост)</height>
-                <build>Стройная, женственная фигура</build>
-                <skin-tone>#F5D5B8 (тёплый бежевый)</skin-tone>
-                
-                <hair>
-                    <color>#8B1A1A (burgundy/красно-винный)</color>
-                    <style>Средней длины, волнистые, часто распущенные или в небрежном пучке</style>
-                    <details>Естественный блеск, лёгкие волны, живые пряди</details>
-                </hair>
+    <canvas-specifications>
+        <base-resolution>128×192 пикселей (высокодетализированный холст)</base-resolution>
+        <display-scale>2.0 (итоговый CSS-размер: 256×384px)</display-scale>
+        <proportions-guide>
+            <segment name="head">24×28px (~15% высоты)</segment>
+            <segment name="neck">8×12px</segment>
+            <segment name="torso">32×48px</segment>
+            <segment name="pelvis">24×20px</segment>
+            <segment name="legs-total">~80px (~42% высоты)</segment>
+        </proportions-guide>
+        <rationale>Холст 128×192 даёт в 4 раза больше площади чем 32×48 для детализации суставов и плавных анимаций</rationale>
+    </canvas-specifications>
 
-                <eyes>
-                    <color>#6B8E23 (зелёный с оливковым оттенком)</color>
-                    <shape>Выразительные, миндалевидные</shape>
-                    <details>Длинные ресницы, чуть приподнятые внешние уголки</details>
-                </eyes>
+    <lighting-and-shading>
+        <light-source>Верхний левый угол (консистентно для всех ассетов)</light-source>
+        <shading-technique>Дизеринг вместо градиентов</shading-technique>
+        <shadow-color>Затемнение базового цвета на 20-30%, не чёрный</shadow-color>
+    </lighting-and-shading>
 
-                <face>
-                    <shape>Овальное лицо с мягкими чертами</shape>
-                    <features>
-                        <feature>Аккуратный нос</feature>
-                        <feature>Полные губы натурального розового оттенка</feature>
-                        <feature>Высокие скулы</feature>
-                        <feature>Мягкая линия подбородка</feature>
-                    </features>
-                </face>
-            </physical-description>
+    <layer-structure>
+        <description>Сегментированная анатомия для анимаций</description>
+        <layers z-order="bottom-to-top">
+            <layer id="slippers" name="Тапочки" z="1" />
+            <layer id="foot_left" name="Стопа левая" z="2" />
+            <layer id="foot_right" name="Стопа правая" z="3" />
+            <layer id="shin_left" name="Голень левая" z="4" />
+            <layer id="shin_right" name="Голень правая" z="5" />
+            <layer id="knee_left" name="Колено левое" z="6" />
+            <layer id="knee_right" name="Колено правое" z="7" />
+            <layer id="thigh_left" name="Бедро левое" z="8" />
+            <layer id="thigh_right" name="Бедро правое" z="9" />
+            <layer id="pelvis" name="Таз" z="10" />
+            <layer id="torso" name="Торс" z="11" />
+            <layer id="necklace" name="Ожерелье" z="12" />
+            <layer id="upper_arm_left" name="Плечо левое" z="13" />
+            <layer id="upper_arm_right" name="Плечо правое" z="14" />
+            <layer id="forearm_left" name="Предплечье левое" z="15" />
+            <layer id="forearm_right" name="Предплечье правое" z="16" />
+            <layer id="hand_left" name="Кисть левая" z="17" />
+            <layer id="hand_right" name="Кисть правая" z="18" />
+            <layer id="neck" name="Шея" z="19" />
+            <layer id="head" name="Голова" z="20" />
+            <layer id="hair_back" name="Волосы (задний план)" z="21" />
+            <layer id="hair_front" name="Волосы (передний план)" z="22" />
+        </layers>
+    </layer-structure>
 
-            <wardrobe>
-                <style>Casual-comfortable, домашний стиль с элементами женственности</style>
-                
-                <outfit id="home-work">
-                    <name>Домашняя работа</name>
-                    <pieces>
-                        <item>Уютный свитер или кардиган (бежевый, розовый, мятный)</item>
-                        <item>Удобные джинсы или мягкие брюки</item>
-                        <item>Домашние тапочки или носки</item>
-                    </pieces>
-                </outfit>
+    <animation-requirements>
+        <frames min="12" recommended="16-18" max="30" />
+        <fps default="4" range="3-8" />
+        <format>Horizontal strip sprite atlas</format>
+        <atlas-max-width>2048px</atlas-max-width>
+        <note>16 кадров × 128px = 2048px (лимит)</note>
+    </animation-requirements>
 
-                <outfit id="date">
-                    <name>Свидание</name>
-                    <pieces>
-                        <item>Женственное платье или блузка с юбкой</item>
-                        <item>Лёгкий макияж</item>
-                        <item>Аккуратная укладка волос</item>
-                    </pieces>
-                </outfit>
+    <color-palette>
+        <description>Тёплая приглушённая палитра</description>
+        <primary-colors>
+            <color hex="#F5D5B8" name="Кожа (тёплый бежевый)" />
+            <color hex="#8B1A1A" name="Волосы (burgundy)" />
+            <color hex="#6B8E23" name="Глаза (зелёный с оливковым)" />
+        </primary-colors>
+        <clothing-colors>
+            <color hex="#FFB6C1" name="Розовый (пастельный)" />
+            <color hex="#F5E6D3" name="Бежевый (светлый)" />
+            <color hex="#B5EAD7" name="Мятный" />
+            <color hex="#A8B2B7" name="Серый (нейтральный)" />
+        </clothing-colors>
+        <shading-rules>
+            <rule>Использовать дизеринг для мягких переходов</rule>
+            <rule>Тени = базовый цвет с понижением яркости на 20-30%</rule>
+            <rule>Не использовать чистый чёрный (#000000) для теней</rule>
+        </shading-rules>
+    </color-palette>
 
-                <outfit id="casual">
-                    <name>Повседневная</name>
-                    <pieces>
-                        <item>Футболка или рубашка</item>
-                        <item>Джинсы или леггинсы</item>
-                        <item>Кроссовки или балетки</item>
-                    </pieces>
-                </outfit>
+    <physical-proportions>
+        <style>Semi-chibi (стилизованные для pixel art)</style>
+        <head-to-body-ratio>1:5 (голова составляет ~20% от роста, вместо реалистичных 1:7.5)</head-to-body-ratio>
+        <features>
+            <feature>Большая выразительная голова</feature>
+            <feature>Средней длины ноги (~40% роста)</feature>
+            <feature>Компактный торс</feature>
+            <feature>Читаемые руки с видимыми кистями</feature>
+        </features>
+    </physical-proportions>
 
-                <accessories>
-                    <item>Тонкая цепочка с кулоном (подарок мужа)</item>
-                    <item>Наушники (для работы под музыку)</item>
-                    <item>Чашка кофе/чая (часто в руках)</item>
-                    <item>Ноутбук или планшет (рабочий инструмент)</item>
-                </accessories>
-            </wardrobe>
-
-            <emotional-states>
-                <state name="neutral">
-                    <description>Спокойное, нейтральное выражение</description>
-                    <face>Расслабленные черты, лёгкая задумчивость</face>
-                </state>
-
-                <state name="happy">
-                    <description>Радость, счастье</description>
-                    <face>Широкая улыбка, блеск в глазах, приподнятые брови</face>
-                </state>
-
-                <state name="sad">
-                    <description>Грусть, расстройство</description>
-                    <face>Опущенные уголки губ, печальный взгляд, влажные глаза</face>
-                </state>
-
-                <state name="stressed">
-                    <description>Стресс, усталость</description>
-                    <face>Нахмуренные брови, напряжённая челюсть, тени под глазами</face>
-                </state>
-
-                <state name="angry">
-                    <description>Злость, раздражение</description>
-                    <face>Сжатые губы, сдвинутые брови, резкий взгляд</face>
-                </state>
-
-                <state name="surprised">
-                    <description>Удивление</description>
-                    <face>Широко открытые глаза, приоткрытый рот, приподнятые брови</face>
-                </state>
-
-                <state name="loving">
-                    <description>Любовь, нежность</description>
-                    <face>Мягкая улыбка, тёплый взгляд, расслабленные черты</face>
-                </state>
-
-                <state name="tired">
-                    <description>Усталость, изнеможение</description>
-                    <face>Полуприкрытые глаза, бледность, вялая поза</face>
-                </state>
-            </emotional-states>
-
-            <animations>
-                <animation name="idle">
-                    <frames>24</frames>
-                    <description>Спокойное стояние с лёгким дыханием</description>
-                    <timing>2fps (медленная, расслабленная)</timing>
-                </animation>
-
-                <animation name="walk">
-                    <frames>24</frames>
-                    <description>Естественная походка</description>
-                    <timing>12fps (средний темп)</timing>
-                </animation>
-
-                <animation name="sit_work">
-                    <frames>20</frames>
-                    <description>Сидение за компьютером, печать</description>
-                    <timing>8fps (рабочий ритм)</timing>
-                </animation>
-
-                <animation name="drink">
-                    <frames>22</frames>
-                    <description>Пьёт кофе/чай</description>
-                    <timing>10fps</timing>
-                </animation>
-
-                <animation name="pet_stroke">
-                    <frames>25</frames>
-                    <description>Гладит питомца</description>
-                    <timing>12fps (нежно)</timing>
-                </animation>
-
-                <animation name="phone_talk">
-                    <frames>23</frames>
-                    <description>Разговор по телефону</description>
-                    <timing>8fps</timing>
-                </animation>
-
-                <animation name="hug">
-                    <frames>20</frames>
-                    <description>Обнимает мужа</description>
-                    <timing>10fps (медленно, нежно)</timing>
-                </animation>
-
-                <animation name="stretch">
-                    <frames>24</frames>
-                    <description>Потягивается после работы</description>
-                    <timing>8fps</timing>
-                </animation>
-            </animations>
-
-            <personality-in-visual>
-                <trait>Выразительная мимика - эмоции читаются на лице</trait>
-                <trait>Естественные позы - не идеально ровная осанка, живая пластика</trait>
-                <trait>Часто задумчивое выражение - творческая натура</trait>
-                <trait>Теплота в глазах - доброта и эмпатия</trait>
-            </personality-in-visual>
-        </character>
-
-        <character id="husband_sam">
-            <name>Муж (Сэм/Александр)</name>
-            <role>NPC, любящий партнёр</role>
-            
-            <physical-description>
-                <age>~30-32 года</age>
-                <height>178 см (среднего роста, чуть выше Тани)</height>
-                <build>Спортивное телосложение, подтянутый</build>
-                <skin-tone>#F0D5A8 (светлый бежевый с тёплым подтоном)</skin-tone>
-
-                <reference-photos>
-                    <photo id="ref1" file="file:247">Стоит на улице, рюкзак, наушники</photo>
-                    <photo id="ref2" file="file:248">Селфи с другом в кафе</photo>
-                    <photo id="ref3" file="file:249">У воды, вид сбоку</photo>
-                    <photo id="ref4" file="file:250">Селфи крупным планом</photo>
-                    <photo id="ref5" file="file:251">Задумчивый взгляд</photo>
-                    <photo id="ref6" file="file:252">Портрет в синем пиджаке</photo>
-                </reference-photos>
-
-                <hair>
-                    <color>#3D2817 (тёмно-коричневый)</color>
-                    <style>Средней длины, слегка волнистые, зачёсаны назад или набок</style>
-                    <details>Естественная текстура, небольшой объём</details>
-                </hair>
-
-                <facial-hair>
-                    <type>Лёгкая щетина или короткая борода</type>
-                    <style>Ухоженная, подчёркивает линию челюсти</style>
-                </facial-hair>
-
-                <eyes>
-                    <color>#6B4423 (карие)</color>
-                    <shape>Выразительные, слегка прищуренные при улыбке</shape>
-                    <details>Тёплый взгляд, добрые глаза</details>
-                </eyes>
-
-                <face>
-                    <shape>Овальное с выраженной линией челюсти</shape>
-                    <features>
-                        <feature>Прямой нос средней величины</feature>
-                        <feature>Широкая искренняя улыбка</feature>
-                        <feature>Слегка выступающие скулы</feature>
-                        <feature>Аккуратные брови</feature>
-                    </features>
-                </face>
-            </physical-description>
-
-            <wardrobe>
-                <style>Casual smart, современный городской стиль</style>
-
-                <outfit id="home-casual">
-                    <name>Дома</name>
-                    <pieces>
-                        <item>Футболка или лонгслив</item>
-                        <item>Удобные джинсы или спортивные брюки</item>
-                        <item>Носки</item>
-                    </pieces>
-                </outfit>
-
-                <outfit id="work">
-                    <name>На работе</name>
-                    <pieces>
-                        <item>Рубашка (синяя, серая, белая)</item>
-                        <item>Джинсы или чиносы</item>
-                        <item>Пиджак (опционально)</item>
-                    </pieces>
-                </outfit>
-
-                <outfit id="outdoor">
-                    <name>На улице</name>
-                    <pieces>
-                        <item>Куртка или толстовка</item>
-                        <item>Рюкзак</item>
-                        <item>Кроссовки</item>
-                        <item>Наушники на шее</item>
-                    </pieces>
-                </outfit>
-
-                <accessories>
-                    <item>Рюкзак (городской, тёмно-синий или серый)</item>
-                    <item>Наушники (красные, как на фото)</item>
-                    <item>Часы (простые, современные)</item>
-                    <item>Смартфон</item>
-                </accessories>
-            </wardrobe>
-
-            <emotional-states>
-                <state name="neutral">
-                    <description>Спокойное выражение</description>
-                    <face>Расслабленные черты, лёгкая полуулыбка</face>
-                </state>
-
-                <state name="happy">
-                    <description>Радость, веселье</description>
-                    <face>Широкая улыбка, слегка прищуренные глаза, смеющийся вид</face>
-                </state>
-
-                <state name="loving">
-                    <description>Любовь, нежность к Тане</description>
-                    <face>Мягкая улыбка, тёплый взгляд, расслабленные черты</face>
-                </state>
-
-                <state name="concerned">
-                    <description>Беспокойство, забота</description>
-                    <face>Слегка нахмуренные брови, серьёзный взгляд</face>
-                </state>
-
-                <state name="tired">
-                    <description>Усталость после работы</description>
-                    <face>Полуприкрытые глаза, расслабленная поза</face>
-                </state>
-
-                <state name="playful">
-                    <description>Игривость, шутка</description>
-                    <face>Озорная улыбка, хитрый взгляд, приподнятая бровь</face>
-                </state>
-            </emotional-states>
-
-            <animations>
-                <animation name="idle">
-                    <frames>22</frames>
-                    <description>Спокойное стояние, руки в карманах или скрещены</description>
-                    <timing>2fps</timing>
-                </animation>
-
-                <animation name="walk">
-                    <frames>24</frames>
-                    <description>Уверенная походка</description>
-                    <timing>12fps</timing>
-                </animation>
-
-                <animation name="hug_tanya">
-                    <frames>20</frames>
-                    <description>Обнимает Таню</description>
-                    <timing>10fps (медленно, нежно)</timing>
-                </animation>
-
-                <animation name="typing">
-                    <frames>20</frames>
-                    <description>Работает за компьютером</description>
-                    <timing>8fps</timing>
-                </animation>
-
-                <animation name="phone">
-                    <frames>22</frames>
-                    <description>Смотрит в телефон, скроллит</description>
-                    <timing>8fps</timing>
-                </animation>
-
-                <animation name="wave">
-                    <frames>18</frames>
-                    <description>Машет рукой (привет/пока)</description>
-                    <timing>10fps</timing>
-                </animation>
-            </animations>
-
-            <personality-in-visual>
-                <trait>Открытая поза - доступный, не закрытый</trait>
-                <trait>Искренняя улыбка - добрый, позитивный</trait>
-                <trait>Спокойные движения - уравновешенный характер</trait>
-                <trait>Взгляд на Таню полон любви - преданный партнёр</trait>
-            </personality-in-visual>
-        </character>
-    </characters>
+    <xml-spec-example>
+        <description>Пример структуры visual-specs.xml для персонажа</description>
+        <template><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<asset-specification entity-type="character" entity-name="tanya">
+    <canvas width="128" height="192"/>
+    <layers>
+        <layer id="head" z-order="20">
+            <pixel-data>
+                <!-- PixelRect/PixelDot coordinates -->
+            </pixel-data>
+        </layer>
+        <!-- ... остальные 21 слой -->
+    </layers>
+    <animations>
+        <animation name="idle" frames="16" fps="4" loop="true" frame-width="128" frame-height="192">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="torso:0,-1; head:0,-1"/>
+            <!-- ... все 16 кадров -->
+        </animation>
+        <animation name="walk" frames="16" fps="6" loop="true" frame-width="128" frame-height="192">
+            <!-- ... -->
+        </animation>
+    </animations>
+</asset-specification>
+        ]]></template>
+    </xml-spec-example>
 
 </character-visual-specifications>

@@ -2,19 +2,15 @@ package ru.lifegame.backend.infrastructure.web.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import ru.lifegame.backend.application.command.ChooseConflictTacticCommand;
-import ru.lifegame.backend.application.command.ChooseEventOptionCommand;
-import ru.lifegame.backend.application.command.ExecuteActionCommand;
-import ru.lifegame.backend.application.command.StartSessionCommand;
+import ru.lifegame.backend.application.command.*;
 import ru.lifegame.backend.application.port.in.*;
 import ru.lifegame.backend.application.query.GetStateQuery;
 import ru.lifegame.backend.application.view.GameStateView;
 import ru.lifegame.backend.domain.exception.SessionNotFoundException;
-import ru.lifegame.backend.infrastructure.web.dto.ChooseConflictTacticRequestDto;
-import ru.lifegame.backend.infrastructure.web.dto.ChooseEventOptionRequestDto;
-import ru.lifegame.backend.infrastructure.web.dto.ExecuteActionRequestDto;
-import ru.lifegame.backend.infrastructure.web.dto.StartSessionRequestDto;
+import ru.lifegame.backend.infrastructure.web.dto.*;
 
 @RestController
 public class GameControllerImpl implements GameController {
@@ -85,4 +81,13 @@ public class GameControllerImpl implements GameController {
         GameStateView view = chooseEventOption.execute(command);
         return ResponseEntity.ok(view);
     }
+
+    private EndDayUseCase endDayUseCase; // TODO: add to constructor
+
+    @PostMapping("/session/end-day")
+    @Override
+    public GameStateView endDay(@RequestBody EndDayRequestDto request) {
+        return endDayUseCase.endDay(new EndDayCommand(request.telegramUserId()));
+    }
+
 }
