@@ -10,38 +10,44 @@ import java.util.stream.Collectors;
 public class NarrativeEventEngine {
 
     private final List<EventSpec> eventSpecs;
-    private final Set<String> firedEventIds = new HashSet<>();
+    private final Set<String> firedOneTimeEvents = new HashSet<>();
 
     public NarrativeEventEngine(List<EventSpec> eventSpecs) {
-        this.eventSpecs = eventSpecs != null ? eventSpecs : List.of();
+        this.eventSpecs = eventSpecs;
     }
 
     public List<FiredEvent> evaluate(Map<String, Object> context) {
-        List<FiredEvent> result = new ArrayList<>();
-        for (EventSpec spec : eventSpecs) {
-            if (firedEventIds.contains(spec.id()) && !spec.repeatable()) continue;
-            if (allConditionsMet(spec.conditions(), context)) {
-                firedEventIds.add(spec.id());
-                result.add(new FiredEvent(spec, spec.effects()));
-            }
-        }
-        return result;
+        return eventSpecs.stream()
+                .filter(spec -> !spec.oneTime() || !firedOneTimeEvents.contains(spec.id()))
+                .filter(spec -> allConditionsMet(spec.conditions(), context))
+                .map(spec -> {
+                    if (spec.oneTime()) firedOneTimeEvents.add(spec.id());
+                    return new FiredEvent(spec, resolveEffects(spec, context));
+                })
+                .collect(Collectors.toList());
     }
 
     public record FiredEvent(EventSpec spec, List<EffectSpec> effects) {}
 
-    private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> ctx) {
-        if (conditions == null || conditions.isEmpty()) return true;
-        return conditions.stream().allMatch(c -> evaluateCondition(c, ctx));
+    private List<EffectSpec> resolveEffects(EventSpec spec, Map<String, Object> context) {
+        if (spec.effects() == null) return List.of();
+        return spec.effects().stream()
+                .filter(e -> e.conditions() == null || allConditionsMet(e.conditions(), context))
+                .collect(Collectors.toList());
     }
 
-    private boolean evaluateCondition(ConditionSpec c, Map<String, Object> ctx) {
-        Object val = ctx.get(c.target());
-        if (val == null) return false;
-        if (val instanceof Number num) {
+    private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> context) {
+        if (conditions == null || conditions.isEmpty()) return true;
+        return conditions.stream().allMatch(c -> evaluateCondition(c, context));
+    }
+
+    private boolean evaluateCondition(ConditionSpec condition, Map<String, Object> context) {
+        Object value = context.get(condition.target());
+        if (value == null) return false;
+        if (value instanceof Number num) {
             double v = num.doubleValue();
-            double threshold = Double.parseDouble(c.value());
-            return switch (c.operator()) {
+            double threshold = Double.parseDouble(condition.value());
+            return switch (condition.operator()) {
                 case "gte" -> v >= threshold;
                 case "lte" -> v <= threshold;
                 case "gt" -> v > threshold;
@@ -50,6 +56,6 @@ public class NarrativeEventEngine {
                 default -> false;
             };
         }
-        return val.toString().equals(c.value());
+        return value.toString().equals(condition.value());
     }
 }

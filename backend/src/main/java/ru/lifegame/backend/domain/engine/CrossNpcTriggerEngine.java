@@ -3,47 +3,55 @@ package ru.lifegame.backend.domain.engine;
 import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
 import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
 import ru.lifegame.backend.domain.npc.graph.NpcRelationshipEdge;
+import ru.lifegame.backend.domain.npc.graph.CrossNpcConditionSpec;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CrossNpcTriggerEngine {
+
+    public record CrossNpcTrigger(
+            String id,
+            String npcA,
+            String npcB,
+            List<CrossNpcConditionSpec> conditions,
+            String eventId
+    ) {}
 
     private final List<CrossNpcTrigger> triggers;
 
     public CrossNpcTriggerEngine(List<CrossNpcTrigger> triggers) {
-        this.triggers = triggers != null ? triggers : List.of();
+        this.triggers = triggers;
     }
 
-    public record CrossNpcTrigger(
-        String id,
-        String npcA,
-        String npcB,
-        String axis,
-        String operator,
-        double threshold,
-        String eventId
-    ) {}
-
-    public List<String> evaluate(NpcRegistry registry) {
-        List<String> triggeredEvents = new ArrayList<>();
-        NpcRelationshipGraph graph = registry.relationshipGraph();
+    public List<String> evaluate(NpcRegistry registry, NpcRelationshipGraph graph, Map<String, Object> context) {
+        List<String> firedEvents = new ArrayList<>();
         for (CrossNpcTrigger trigger : triggers) {
-            Optional<NpcRelationshipEdge> edge = graph.getEdge(trigger.npcA(), trigger.npcB());
-            if (edge.isEmpty()) continue;
-            double val = switch (trigger.axis()) {
-                case "tension" -> edge.get().tension();
-                case "respect" -> edge.get().respect();
-                case "familiarity" -> edge.get().familiarity();
-                default -> 0;
-            };
-            boolean met = switch (trigger.operator()) {
-                case "gte" -> val >= trigger.threshold();
-                case "lte" -> val <= trigger.threshold();
-                case "gt" -> val > trigger.threshold();
-                default -> false;
-            };
-            if (met) triggeredEvents.add(trigger.eventId());
+            NpcRelationshipEdge edge = graph.getEdge(trigger.npcA(), trigger.npcB());
+            if (edge == null) continue;
+            boolean allMet = trigger.conditions().stream().allMatch(c -> evaluateCondition(c, edge, registry, context));
+            if (allMet) firedEvents.add(trigger.eventId());
         }
-        return triggeredEvents;
+        return firedEvents;
+    }
+
+    private boolean evaluateCondition(CrossNpcConditionSpec c, NpcRelationshipEdge edge, NpcRegistry registry, Map<String, Object> context) {
+        double value = switch (c.target()) {
+            case "respect" -> edge.respect();
+            case "tension" -> edge.tension();
+            case "familiarity" -> edge.familiarity();
+            default -> {
+                NpcInstance npc = registry.get(c.target());
+                yield npc != null ? npc.mood().getAxis(c.axis()) : 0;
+            }
+        };
+        double threshold = c.value();
+        return switch (c.operator()) {
+            case "gte" -> value >= threshold;
+            case "lte" -> value <= threshold;
+            case "gt" -> value > threshold;
+            case "lt" -> value < threshold;
+            default -> false;
+        };
     }
 }

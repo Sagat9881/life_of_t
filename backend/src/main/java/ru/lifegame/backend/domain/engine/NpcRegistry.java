@@ -11,32 +11,36 @@ import java.util.stream.Collectors;
 public class NpcRegistry {
 
     private final Map<String, NpcInstance> instances = new LinkedHashMap<>();
-    private final NpcRelationshipGraph relationshipGraph = new NpcRelationshipGraph();
+    private final NpcRelationshipGraph relationshipGraph;
 
-    public void loadFromSpecs(List<NpcSpec> specs) {
+    public NpcRegistry(List<NpcSpec> specs, NpcRelationshipGraph relationshipGraph) {
+        this.relationshipGraph = relationshipGraph;
         for (NpcSpec spec : specs) {
             instances.put(spec.id(), NpcInstance.fromSpec(spec));
         }
     }
 
-    public Optional<NpcInstance> get(String npcId) {
-        return Optional.ofNullable(instances.get(npcId));
+    public NpcInstance get(String npcId) {
+        return instances.get(npcId);
     }
 
-    public NpcInstance getOrThrow(String npcId) {
-        return Optional.ofNullable(instances.get(npcId))
-            .orElseThrow(() -> new IllegalArgumentException("NPC not found: " + npcId));
+    public Collection<NpcInstance> allNamed() {
+        return instances.values().stream()
+                .filter(npc -> "named".equals(npc.spec().type()))
+                .collect(Collectors.toList());
+    }
+
+    public Collection<NpcInstance> allFiller() {
+        return instances.values().stream()
+                .filter(npc -> "filler".equals(npc.spec().type()))
+                .collect(Collectors.toList());
     }
 
     public Collection<NpcInstance> all() {
         return Collections.unmodifiableCollection(instances.values());
     }
 
-    public List<NpcInstance> allNamed() {
-        return instances.values().stream()
-            .filter(n -> "named".equals(n.spec().type()))
-            .collect(Collectors.toList());
+    public NpcRelationshipGraph relationshipGraph() {
+        return relationshipGraph;
     }
-
-    public NpcRelationshipGraph relationshipGraph() { return relationshipGraph; }
 }

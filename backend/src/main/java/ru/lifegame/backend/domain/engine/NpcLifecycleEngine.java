@@ -16,30 +16,31 @@ public class NpcLifecycleEngine {
         this.brain = brain;
     }
 
-    public List<NpcActionResult> hourlyTick(int currentHour, Map<String, Object> context) {
-        List<NpcActionResult> results = new ArrayList<>();
+    public List<NpcAction> hourlyTick(int currentHour, Map<String, Object> context) {
+        List<NpcAction> actions = new ArrayList<>();
         for (NpcInstance npc : registry.all()) {
             var scheduled = npc.getScheduledActivity(currentHour);
-            if (scheduled.isPresent()) {
-                npc.setCurrentActivity(scheduled.get().activity());
-                npc.setCurrentLocation(scheduled.get().location());
-                results.add(new NpcActionResult(npc.spec().id(), scheduled.get().activity(), scheduled.get().location(), "schedule"));
+            if (scheduled != null) {
+                npc.setCurrentActivity(scheduled.activity());
+                npc.setCurrentLocation(scheduled.location());
+                npc.setCurrentAnimation(scheduled.animation());
+                actions.add(new NpcAction(npc.spec().id(), scheduled.activity(), scheduled.location(), scheduled.animation(), "schedule"));
             } else {
-                var best = brain.evaluate(npc, context);
-                if (best.isPresent()) {
-                    EvaluatedAction action = best.get();
-                    results.add(new NpcActionResult(npc.spec().id(), action.actionId(), null, "utility"));
-                }
+                Optional<EvaluatedAction> best = brain.evaluate(npc, context);
+                best.ifPresent(action -> {
+                    npc.setCurrentActivity(action.actionId());
+                    actions.add(new NpcAction(npc.spec().id(), action.actionId(), npc.currentLocation(), null, "utility_ai"));
+                });
             }
         }
-        return results;
+        return actions;
     }
 
-    public void dailyTick() {
+    public void dailyTick(Map<String, Object> context) {
         for (NpcInstance npc : registry.all()) {
             npc.mood().dailyDecay();
         }
     }
 
-    public record NpcActionResult(String npcId, String activity, String location, String source) {}
+    public record NpcAction(String npcId, String activity, String location, String animation, String source) {}
 }

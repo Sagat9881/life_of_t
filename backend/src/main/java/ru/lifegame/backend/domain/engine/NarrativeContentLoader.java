@@ -7,13 +7,11 @@ import ru.lifegame.backend.domain.engine.spec.NpcSpec;
 import ru.lifegame.backend.domain.engine.spec.QuestSpec;
 import ru.lifegame.backend.domain.engine.spec.EventSpec;
 
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.w3c.dom.Document;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
+import java.nio.file.*;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class NarrativeContentLoader {
 
@@ -25,27 +23,29 @@ public class NarrativeContentLoader {
     private List<QuestSpec> questSpecs = new ArrayList<>();
     private List<EventSpec> eventSpecs = new ArrayList<>();
 
-    public void loadAll() {
-        npcSpecs = loadFromPattern("classpath*:narrative/npc-behavior/*.xml", npcParser::parse);
-        questSpecs = loadFromPattern("classpath*:narrative/quests/*.xml", questParser::parse);
-        eventSpecs = loadFromPattern("classpath*:narrative/events/*.xml", eventParser::parse);
+    public void loadFromDirectory(String basePath) {
+        npcSpecs = loadSpecs(basePath + "/npc-behavior", npcParser::parse);
+        questSpecs = loadSpecs(basePath + "/quests", questParser::parse);
+        eventSpecs = loadSpecs(basePath + "/events", eventParser::parse);
     }
 
-    private <T> List<T> loadFromPattern(String pattern, java.util.function.Function<Document, T> parser) {
+    private <T> List<T> loadSpecs(String dirPath, java.util.function.Function<InputStream, T> parser) {
         List<T> results = new ArrayList<>();
         try {
-            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = resolver.getResources(pattern);
-            for (Resource resource : resources) {
-                try (InputStream is = resource.getInputStream()) {
-                    Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
-                    results.add(parser.apply(doc));
-                } catch (Exception e) {
-                    System.err.println("Failed to parse: " + resource.getFilename() + " - " + e.getMessage());
-                }
+            Path dir = Paths.get(dirPath);
+            if (!Files.exists(dir)) return results;
+            try (Stream<Path> files = Files.list(dir)) {
+                files.filter(f -> f.toString().endsWith(".xml"))
+                     .forEach(f -> {
+                         try (InputStream is = Files.newInputStream(f)) {
+                             results.add(parser.apply(is));
+                         } catch (Exception e) {
+                             System.err.println("Failed to parse: " + f + " - " + e.getMessage());
+                         }
+                     });
             }
         } catch (Exception e) {
-            System.err.println("Failed to scan pattern: " + pattern + " - " + e.getMessage());
+            System.err.println("Failed to scan directory: " + dirPath + " - " + e.getMessage());
         }
         return results;
     }
