@@ -29,7 +29,7 @@ public class NpcInstance {
 
     public static NpcInstance createNamed(NpcSpec spec) {
         NpcMood mood = NpcMood.fromSpec(spec.moodInitial());
-        NpcMemory memory = new NpcMemory(spec.memoryShortTermSize());
+        NpcMemory memory = new NpcMemory(spec.shortTermSize());
         NpcSchedule schedule = buildSchedule(spec);
         return new NpcInstance(spec, mood, memory, schedule);
     }
@@ -51,8 +51,8 @@ public class NpcInstance {
     private static NpcSchedule buildSchedule(NpcSpec spec) {
         var slots = spec.schedule().stream()
                 .map(s -> new NpcSchedule.ScheduleSlot(
-                        s.startHour(), s.endHour(),
-                        s.activityId(), s.locationId(), s.animationKey()))
+                        s.start(), s.end(),
+                        s.activity(), s.location(), s.animation()))
                 .collect(Collectors.toList());
         return new NpcSchedule(slots);
     }

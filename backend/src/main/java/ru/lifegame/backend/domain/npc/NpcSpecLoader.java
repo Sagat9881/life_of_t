@@ -1,9 +1,12 @@
 package ru.lifegame.backend.domain.npc;
 
 import ru.lifegame.backend.domain.npc.spec.NpcSpec;
-import ru.lifegame.backend.domain.npc.spec.ScheduleSlot;
-import ru.lifegame.backend.domain.npc.spec.ScoredAction;
-import ru.lifegame.backend.domain.npc.spec.ConditionSpec;
+import ru.lifegame.backend.domain.npc.spec.NpcSpec.ScheduleSlot;
+import ru.lifegame.backend.domain.npc.spec.NpcSpec.ActionSpec;
+import ru.lifegame.backend.domain.npc.spec.NpcSpec.ConditionSpec;
+import ru.lifegame.backend.domain.npc.spec.NpcSpec.OptionSpec;
+import ru.lifegame.backend.domain.npc.spec.NpcSpec.ReactionSpec;
+import ru.lifegame.backend.domain.npc.spec.NpcSpec.EffectSpec;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -96,7 +99,7 @@ public class NpcSpecLoader {
             }
         }
 
-        List<ScoredAction> actions = new ArrayList<>();
+        List<ActionSpec> actions = new ArrayList<>();
         NodeList actionNodes = root.getElementsByTagName("action");
         for (int i = 0; i < actionNodes.getLength(); i++) {
             Element actionEl = (Element) actionNodes.item(i);
@@ -108,41 +111,13 @@ public class NpcSpecLoader {
             String eventType = getAttributeOrDefault(actionEl, "event-type", "NPC_INITIATED");
 
             List<ConditionSpec> conditions = parseConditions(actionEl);
+            List<OptionSpec> options = parseOptions(actionEl);
 
-            List<ScoredAction.ActionOption> options = new ArrayList<>();
-            NodeList optionNodes = actionEl.getElementsByTagName("option");
-            for (int j = 0; j < optionNodes.getLength(); j++) {
-                Element optEl = (Element) optionNodes.item(j);
-                int energyDelta = parseIntAttr(optEl, "energy", 0);
-                int stressDelta = parseIntAttr(optEl, "stress", 0);
-                int moodDelta = parseIntAttr(optEl, "mood", 0);
-                int moneyDelta = parseIntAttr(optEl, "money", 0);
-                String relTarget = optEl.getAttribute("relationship-target");
-                int relDelta = parseIntAttr(optEl, "relationship-delta", 0);
-
-                options.add(new ScoredAction.ActionOption(
-                        optEl.getAttribute("id"),
-                        optEl.getAttribute("text"),
-                        optEl.getAttribute("result"),
-                        energyDelta, stressDelta, moodDelta, moneyDelta,
-                        relTarget, relDelta
-                ));
-            }
-
-            actions.add(new ScoredAction(actionId, baseScore, eventType, conditions, options));
+            actions.add(new ActionSpec(actionId, baseScore, eventType, conditions, options));
         }
 
-        List<String> questLines = new ArrayList<>();
-        NodeList qlNodes = root.getElementsByTagName("quest-lines");
-        if (qlNodes.getLength() > 0) {
-            String raw = qlNodes.item(0).getTextContent().trim();
-            if (!raw.isEmpty()) {
-                questLines = Arrays.stream(raw.split(","))
-                        .map(String::trim)
-                        .filter(s -> !s.isEmpty())
-                        .toList();
-            }
-        }
+        List<ReactionSpec> reactions = parseReactions(root);
+        List<String> questLines = parseQuestLines(root);
 
         return new NpcSpec(
                 id, type, category, displayName,
@@ -150,6 +125,7 @@ public class NpcSpecLoader {
                 memoryEnabled, shortTermSize,
                 List.copyOf(scheduleSlots),
                 List.copyOf(actions),
+                List.copyOf(reactions),
                 List.copyOf(questLines)
         );
     }
@@ -165,14 +141,74 @@ public class NpcSpecLoader {
                     getAttributeOrDefault(condEl, "axis",
                             getAttributeOrDefault(condEl, "target", "")),
                     getAttributeOrDefault(condEl, "operator", "gte"),
-                    getAttributeOrDefault(condEl, "value", "0"),
-                    getAttributeOrDefault(condEl, "check", ""),
-                    getAttributeOrDefault(condEl, "npc", ""),
-                    getAttributeOrDefault(condEl, "action", ""),
-                    getAttributeOrDefault(condEl, "min-count", "0")
+                    getAttributeOrDefault(condEl, "value", "0")
             ));
         }
         return conditions;
+    }
+
+    private List<OptionSpec> parseOptions(Element parent) {
+        List<OptionSpec> options = new ArrayList<>();
+        NodeList optionNodes = parent.getElementsByTagName("option");
+        for (int j = 0; j < optionNodes.getLength(); j++) {
+            Element optEl = (Element) optionNodes.item(j);
+            options.add(new OptionSpec(
+                    optEl.getAttribute("id"),
+                    optEl.getAttribute("text"),
+                    optEl.getAttribute("result"),
+                    parseIntAttr(optEl, "energy", 0),
+                    parseIntAttr(optEl, "stress", 0),
+                    parseIntAttr(optEl, "mood", 0),
+                    parseIntAttr(optEl, "money", 0),
+                    optEl.getAttribute("relationship-target"),
+                    parseIntAttr(optEl, "relationship-delta", 0)
+            ));
+        }
+        return options;
+    }
+
+    private List<ReactionSpec> parseReactions(Element root) {
+        List<ReactionSpec> reactions = new ArrayList<>();
+        NodeList nodes = root.getElementsByTagName("reaction");
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Element el = (Element) nodes.item(i);
+            reactions.add(new ReactionSpec(
+                    el.getAttribute("id"),
+                    getAttributeOrDefault(el, "pattern-type", ""),
+                    parseIntAttr(el, "threshold", 0),
+                    getTextContent(el, "dialogue", ""),
+                    parseEffects(el)
+            ));
+        }
+        return reactions;
+    }
+
+    private List<EffectSpec> parseEffects(Element parent) {
+        List<EffectSpec> effects = new ArrayList<>();
+        NodeList nodes = parent.getElementsByTagName("effect");
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Element el = (Element) nodes.item(i);
+            effects.add(new EffectSpec(
+                    el.getAttribute("target"),
+                    el.getAttribute("stat"),
+                    parseIntAttr(el, "delta", 0)
+            ));
+        }
+        return effects;
+    }
+
+    private List<String> parseQuestLines(Element root) {
+        NodeList qlNodes = root.getElementsByTagName("quest-lines");
+        if (qlNodes.getLength() > 0) {
+            String raw = qlNodes.item(0).getTextContent().trim();
+            if (!raw.isEmpty()) {
+                return Arrays.stream(raw.split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .toList();
+            }
+        }
+        return List.of();
     }
 
     private String getTextContent(Element root, String tagName, String defaultValue) {

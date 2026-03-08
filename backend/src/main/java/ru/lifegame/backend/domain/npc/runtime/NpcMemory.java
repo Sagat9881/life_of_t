@@ -28,7 +28,7 @@ public class NpcMemory {
      */
     public NpcMemory(int shortTermCapacity) {
         this.shortTermCapacity = shortTermCapacity;
-        this.shortTerm = new ArrayDeque<>(shortTermCapacity);
+        this.shortTerm = new ArrayDeque<>(Math.max(shortTermCapacity, 1));
         this.longTerm = new ArrayList<>();
         this.enabled = true;
     }
@@ -37,7 +37,6 @@ public class NpcMemory {
      * Create disabled memory for filler NPCs — all operations are no-op.
      */
     public static NpcMemory disabled() {
-        NpcMemory mem = new NpcMemory(0);
         return new NpcMemory(0) {
             @Override public void observe(MemoryEntry entry) { /* no-op */ }
             @Override public void flagAsSignificant(MemoryEntry entry) { /* no-op */ }
@@ -109,7 +108,6 @@ public class NpcMemory {
 
     /**
      * Detect if NPC is being ignored: no interaction with this NPC in last N entries.
-     * The interactionActionId is loaded from XML (e.g., "DATE_WITH_HUSBAND" for Alexander).
      */
     public boolean isBeingIgnored(String interactionActionId, int threshold) {
         if (shortTerm.isEmpty()) return false;
@@ -117,6 +115,13 @@ public class NpcMemory {
                 .filter(e -> e.actionId().equals(interactionActionId))
                 .count();
         return interactionCount == 0 && shortTerm.size() >= threshold;
+    }
+
+    /**
+     * Overload for simple threshold-based ignore check.
+     */
+    public boolean isBeingIgnored(int threshold) {
+        return shortTerm.size() >= threshold;
     }
 
     /**
@@ -137,12 +142,11 @@ public class NpcMemory {
      * Returns Integer.MAX_VALUE if never interacted.
      */
     public int daysSinceAction(String actionId, int currentDay) {
-        return shortTerm.stream()
+        OptionalInt lastDay = shortTerm.stream()
                 .filter(e -> e.actionId().equals(actionId))
                 .mapToInt(MemoryEntry::dayOccurred)
-                .max()
-                .map(lastDay -> currentDay - lastDay)
-                .orElse(Integer.MAX_VALUE);
+                .max();
+        return lastDay.isPresent() ? (currentDay - lastDay.getAsInt()) : Integer.MAX_VALUE;
     }
 
     public List<MemoryEntry> shortTermEntries() { return List.copyOf(shortTerm); }
