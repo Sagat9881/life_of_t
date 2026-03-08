@@ -1,160 +1,279 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<asset-spec>
+<asset-spec extends="abstract/environments/outdoor_area@1.0" version="2.0.0">
     <meta>
         <entity-type>locations</entity-type>
         <entity-name>night_highway</entity-name>
-        <version>1.0.0</version>
-        <description>Rural night highway where Alexander found Persi (black German Shepherd) in August 2025 at 22:00. Dark asphalt, forest on both sides, minimal lighting. Atmospheric, tense, lonely.</description>
+        <version>2.0.0</version>
+        <canvas width="640" height="480" displayScale="1.0"/>
+        <description>
+            Rural night highway where Alexander found Persi (black German Shepherd)
+            in August 2025 at 22:00. Dark asphalt, forest on both sides, minimal lighting.
+            Atmospheric, tense, lonely. Canvas ×2: 320×240 → 640×480.
+        </description>
     </meta>
+
+    <color-palette>
+        <color name="$sky_dark" value="#080C18"/>
+        <color name="$road_main" value="#1A1A1E"/>
+        <color name="$road_line1" value="#1E1E22"/>
+        <color name="$road_line2" value="#1C1C20"/>
+        <color name="$road_patch" value="#222226"/>
+        <color name="$road_edge" value="#2A2A2E"/>
+        <color name="$marking_bright" value="#E0E0D8"/>
+        <color name="$marking_mid" value="#C8C8C0"/>
+        <color name="$marking_fade" value="#909090"/>
+        <color name="$forest_dark" value="#0C1A0C"/>
+        <color name="$forest_trunk" value="#0A1208"/>
+        <color name="$forest_canopy" value="#0E1A0E"/>
+        <color name="$forest_mid" value="#101E10"/>
+        <color name="$star_bright" value="#E8E8FF"/>
+        <color name="$star_dim" value="#D0D8F0"/>
+        <color name="$star_faint" value="#C8D0E8"/>
+        <color name="$moon_color" value="#E8E0C0"/>
+        <color name="$moon_glow" value="#EEE8CC"/>
+        <color name="$light_post" value="#404050"/>
+        <color name="$light_head" value="#505060"/>
+        <color name="$light_glow" value="#FFD06020"/>
+        <color name="$fog_tint" value="#18202820"/>
+    </color-palette>
+
+    <layer-overrides>
+        <layer id="ground" replace="true" type="background" z-order="0" width="640" height="480">
+            <pixel-data>
+                <!-- Road surface -->
+                <rect x="60" y="160" w="520" h="320" color="$road_main"/>
+                <!-- Asphalt texture lines -->
+                <hline x="60" y="200" len="520" color="$road_line1"/>
+                <hline x="60" y="240" len="520" color="$road_line2"/>
+                <hline x="60" y="280" len="520" color="$road_line1"/>
+                <hline x="60" y="320" len="520" color="$road_line2"/>
+                <hline x="60" y="360" len="520" color="$road_line1"/>
+                <hline x="60" y="400" len="520" color="$road_line2"/>
+                <hline x="60" y="440" len="520" color="$road_line1"/>
+                <!-- Road patches -->
+                <rect x="120" y="320" w="40" h="16" color="$road_patch"/>
+                <rect x="360" y="260" w="60" h="12" color="$road_patch"/>
+                <rect x="440" y="380" w="32" h="10" color="$road_patch"/>
+                <rect x="200" y="420" w="50" h="14" color="$road_patch"/>
+                <!-- Road edges -->
+                <hline x="60" y="164" len="520" color="$road_edge"/>
+                <hline x="60" y="476" len="520" color="$road_edge"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="sky" replace="true" type="background" z-order="-1" width="640" height="480">
+            <pixel-data>
+                <rect x="0" y="0" w="640" h="168" color="$sky_dark"/>
+            </pixel-data>
+        </layer>
+    </layer-overrides>
+
     <layers>
-        <layer id="road" type="background" z-order="0" width="320" height="240">
+        <!-- z=1: Road markings -->
+        <layer id="road_markings" type="midground" z-order="1" width="640" height="480">
             <pixel-data>
-                <rect x="30"  y="80"  w="260" h="160" color="#1A1A1E"/>
-                <hline x="30"  y="100" len="260" color="#1E1E22"/>
-                <hline x="30"  y="120" len="260" color="#1C1C20"/>
-                <hline x="30"  y="140" len="260" color="#1E1E22"/>
-                <hline x="30"  y="160" len="260" color="#1C1C20"/>
-                <hline x="30"  y="180" len="260" color="#1E1E22"/>
-                <hline x="30"  y="200" len="260" color="#1C1C20"/>
-                <hline x="30"  y="220" len="260" color="#1E1E22"/>
-                <rect x="60"  y="160" w="20" h="8"  color="#222226"/>
-                <rect x="180" y="130" w="30" h="6"  color="#222226"/>
-                <rect x="220" y="190" w="16" h="5"  color="#222226"/>
-                <hline x="30"  y="82"  len="260" color="#2A2A2E"/>
-                <hline x="30"  y="238" len="260" color="#2A2A2E"/>
+                <!-- Center dashed line (perspective) -->
+                <rect x="304" y="444" w="32" h="16" color="$marking_bright"/>
+                <rect x="304" y="412" w="28" h="16" color="#D8D8D0"/>
+                <rect x="306" y="380" w="28" h="16" color="#D0D0C8"/>
+                <rect x="308" y="348" w="24" h="14" color="$marking_mid"/>
+                <rect x="312" y="320" w="20" h="12" color="#C0C0B8"/>
+                <rect x="314" y="296" w="16" h="10" color="#B8B8B0"/>
+                <rect x="316" y="276" w="16" h="10" color="#B0B0A8"/>
+                <rect x="316" y="256" w="12" h="8" color="#A0A0A0"/>
+                <rect x="318" y="240" w="8" h="8" color="$marking_fade"/>
+                <rect x="318" y="224" w="8" h="6" color="#808080"/>
+                <rect x="320" y="212" w="8" h="6" color="#707070"/>
+                <rect x="320" y="200" w="4" h="6" color="#606060"/>
+                <!-- Shoulder lines (perspective fading) -->
+                <rect x="104" y="400" w="8" h="80" color="#C0C0B860"/>
+                <rect x="96" y="320" w="6" h="60" color="#B0B0A840"/>
+                <rect x="92" y="260" w="4" h="48" color="#A0A09830"/>
+                <rect x="528" y="400" w="8" h="80" color="#C0C0B860"/>
+                <rect x="538" y="320" w="6" h="60" color="#B0B0A840"/>
+                <rect x="544" y="260" w="4" h="48" color="#A0A09830"/>
             </pixel-data>
         </layer>
-        <layer id="road_markings" type="midground" z-order="1" width="320" height="240">
+
+        <!-- z=2: Forest left -->
+        <layer id="forest_left" type="midground" z-order="2" width="640" height="480">
             <pixel-data>
-                <rect x="152" y="222" w="16" h="8"  color="#E0E0D8"/>
-                <rect x="152" y="206" w="14" h="8"  color="#D8D8D0"/>
-                <rect x="153" y="190" w="14" h="8"  color="#D0D0C8"/>
-                <rect x="154" y="174" w="12" h="7"  color="#C8C8C0"/>
-                <rect x="156" y="160" w="10" h="6"  color="#C0C0B8"/>
-                <rect x="157" y="148" w="8"  h="5"  color="#B8B8B0"/>
-                <rect x="158" y="138" w="8"  h="5"  color="#B0B0A8"/>
-                <rect x="158" y="128" w="6"  h="4"  color="#A0A0A0"/>
-                <rect x="159" y="120" w="4"  h="4"  color="#909090"/>
-                <rect x="159" y="112" w="4"  h="3"  color="#808080"/>
-                <rect x="160" y="106" w="4"  h="3"  color="#707070"/>
-                <rect x="160" y="100" w="2"  h="3"  color="#606060"/>
-                <rect x="52"  y="200" w="4"  h="40" color="#C0C0B860"/>
-                <rect x="48"  y="160" w="3"  h="30" color="#B0B0A840"/>
-                <rect x="46"  y="130" w="2"  h="24" color="#A0A09830"/>
-                <rect x="264" y="200" w="4"  h="40" color="#C0C0B860"/>
-                <rect x="269" y="160" w="3"  h="30" color="#B0B0A840"/>
-                <rect x="272" y="130" w="2"  h="24" color="#A0A09830"/>
+                <rect x="0" y="280" w="84" h="200" color="$forest_dark"/>
+                <!-- Tree trunks -->
+                <rect x="4" y="160" w="16" h="124" color="$forest_trunk"/>
+                <rect x="28" y="136" w="16" h="148" color="$forest_trunk"/>
+                <rect x="52" y="152" w="12" h="132" color="$forest_trunk"/>
+                <rect x="72" y="168" w="12" h="116" color="$forest_trunk"/>
+                <!-- Tree canopy mass -->
+                <rect x="0" y="84" w="76" h="96" color="$forest_canopy"/>
+                <rect x="8" y="68" w="60" h="32" color="#0C1808"/>
+                <rect x="16" y="56" w="44" h="24" color="#0E1C0A"/>
+                <rect x="0" y="100" w="84" h="80" color="$forest_mid"/>
+                <rect x="0" y="80" w="88" h="16" color="#141E12"/>
+                <!-- Undergrowth -->
+                <rect x="0" y="288" w="40" h="16" color="#0C180A"/>
+                <rect x="36" y="296" w="32" h="12" color="#0C180A"/>
+                <rect x="60" y="288" w="24" h="16" color="#0C180A"/>
             </pixel-data>
         </layer>
-        <layer id="forest_left" type="midground" z-order="2" width="320" height="240">
+
+        <!-- z=3: Forest right -->
+        <layer id="forest_right" type="midground" z-order="3" width="640" height="480">
             <pixel-data>
-                <rect x="0" y="140" w="42" h="100" color="#0C1A0C"/>
-                <rect x="2"  y="80" w="8"  h="62"  color="#0A1208"/>
-                <rect x="14" y="68" w="8"  h="74"  color="#0A1208"/>
-                <rect x="26" y="76" w="6"  h="66"  color="#0A1208"/>
-                <rect x="36" y="84" w="6"  h="58"  color="#0A1208"/>
-                <rect x="0"  y="42" w="38" h="48"  color="#0E1A0E"/>
-                <rect x="4"  y="34" w="30" h="16"  color="#0C1808"/>
-                <rect x="8"  y="28" w="22" h="12"  color="#0E1C0A"/>
-                <rect x="0"  y="50" w="42" h="40"  color="#101E10"/>
-                <rect x="0"  y="40" w="44" h="8"   color="#141E12"/>
-                <rect x="0"  y="144" w="20" h="8"  color="#0C180A"/>
-                <rect x="18" y="148" w="16" h="6"  color="#0C180A"/>
-                <rect x="30" y="144" w="12" h="8"  color="#0C180A"/>
+                <rect x="556" y="280" w="84" h="200" color="$forest_dark"/>
+                <!-- Tree trunks -->
+                <rect x="620" y="160" w="16" h="124" color="$forest_trunk"/>
+                <rect x="596" y="136" w="16" h="148" color="$forest_trunk"/>
+                <rect x="572" y="152" w="12" h="132" color="$forest_trunk"/>
+                <rect x="552" y="168" w="12" h="116" color="$forest_trunk"/>
+                <!-- Tree canopy mass -->
+                <rect x="556" y="84" w="84" h="96" color="$forest_canopy"/>
+                <rect x="568" y="68" w="72" h="32" color="#0C1808"/>
+                <rect x="576" y="56" w="56" h="24" color="#0E1C0A"/>
+                <rect x="552" y="100" w="88" h="80" color="$forest_mid"/>
+                <rect x="552" y="80" w="88" h="16" color="#141E12"/>
+                <!-- Undergrowth -->
+                <rect x="600" y="288" w="40" h="16" color="#0C180A"/>
+                <rect x="564" y="296" w="32" h="12" color="#0C180A"/>
+                <rect x="540" y="288" w="28" h="16" color="#0C180A"/>
             </pixel-data>
         </layer>
-        <layer id="forest_right" type="midground" z-order="3" width="320" height="240">
+
+        <!-- z=4: Stars -->
+        <layer id="stars" type="background" z-order="4" width="640" height="480">
             <pixel-data>
-                <rect x="278" y="140" w="42" h="100" color="#0C1A0C"/>
-                <rect x="310" y="80" w="8"  h="62"  color="#0A1208"/>
-                <rect x="298" y="68" w="8"  h="74"  color="#0A1208"/>
-                <rect x="286" y="76" w="6"  h="66"  color="#0A1208"/>
-                <rect x="276" y="84" w="6"  h="58"  color="#0A1208"/>
-                <rect x="278" y="42" w="42" h="48"  color="#0E1A0E"/>
-                <rect x="284" y="34" w="36" h="16"  color="#0C1808"/>
-                <rect x="288" y="28" w="28" h="12"  color="#0E1C0A"/>
-                <rect x="276" y="50" w="44" h="40"  color="#101E10"/>
-                <rect x="276" y="40" w="44" h="8"   color="#141E12"/>
-                <rect x="300" y="144" w="20" h="8"  color="#0C180A"/>
-                <rect x="282" y="148" w="16" h="6"  color="#0C180A"/>
-                <rect x="270" y="144" w="14" h="8"  color="#0C180A"/>
+                <pixel x="16" y="12" color="$star_bright"/>
+                <pixel x="44" y="24" color="$star_dim"/>
+                <pixel x="70" y="8" color="$star_bright"/>
+                <pixel x="96" y="36" color="$star_faint"/>
+                <pixel x="124" y="16" color="#E0E8FF"/>
+                <pixel x="150" y="44" color="$star_dim"/>
+                <pixel x="176" y="12" color="$star_bright"/>
+                <pixel x="204" y="28" color="$star_dim"/>
+                <pixel x="230" y="8" color="#E8F0FF"/>
+                <pixel x="256" y="40" color="$star_faint"/>
+                <pixel x="284" y="20" color="$star_bright"/>
+                <pixel x="310" y="4" color="#F0F0FF"/>
+                <pixel x="336" y="32" color="#D8E0F8"/>
+                <pixel x="362" y="12" color="$star_bright"/>
+                <pixel x="390" y="44" color="$star_faint"/>
+                <pixel x="416" y="16" color="#E0E8FF"/>
+                <pixel x="444" y="28" color="$star_dim"/>
+                <pixel x="470" y="8" color="$star_bright"/>
+                <pixel x="496" y="36" color="$star_faint"/>
+                <pixel x="524" y="20" color="#E8F0FF"/>
+                <pixel x="550" y="12" color="$star_bright"/>
+                <pixel x="576" y="40" color="$star_dim"/>
+                <pixel x="604" y="16" color="#E0E8FF"/>
+                <pixel x="630" y="28" color="$star_dim"/>
+                <!-- Bright stars (2×2) -->
+                <rect x="104" y="20" w="4" h="4" color="#FFFFFF"/>
+                <rect x="240" y="32" w="4" h="4" color="#FFFFFF"/>
+                <rect x="400" y="8" w="4" h="4" color="#FFFFFF"/>
+                <rect x="536" y="24" w="4" h="4" color="#FFFFFF"/>
+                <!-- Extra dim stars -->
+                <pixel x="30" y="50" color="#A0A8C0"/>
+                <pixel x="140" y="55" color="#A0A8C0"/>
+                <pixel x="270" y="48" color="#A0A8C0"/>
+                <pixel x="370" y="58" color="#A0A8C0"/>
+                <pixel x="490" y="52" color="#A0A8C0"/>
+                <pixel x="590" y="46" color="#A0A8C0"/>
             </pixel-data>
         </layer>
-        <layer id="stars" type="background" z-order="4" width="320" height="240">
+
+        <!-- z=5: Moon -->
+        <layer id="moon" type="midground" z-order="5" width="640" height="480">
             <pixel-data>
-                <rect x="0" y="0" w="320" h="84" color="#080C18"/>
-                <pixel x="8"   y="6"  color="#E8E8FF"/>
-                <pixel x="22"  y="12" color="#D0D8F0"/>
-                <pixel x="35"  y="4"  color="#E8E8FF"/>
-                <pixel x="48"  y="18" color="#C8D0E8"/>
-                <pixel x="62"  y="8"  color="#E0E8FF"/>
-                <pixel x="75"  y="22" color="#D0D8F0"/>
-                <pixel x="88"  y="6"  color="#E8E8FF"/>
-                <pixel x="102" y="14" color="#D0D8F0"/>
-                <pixel x="115" y="4"  color="#E8F0FF"/>
-                <pixel x="128" y="20" color="#C8D0E8"/>
-                <pixel x="142" y="10" color="#E8E8FF"/>
-                <pixel x="155" y="2"  color="#F0F0FF"/>
-                <pixel x="168" y="16" color="#D8E0F8"/>
-                <pixel x="181" y="6"  color="#E8E8FF"/>
-                <pixel x="195" y="22" color="#C8D0E8"/>
-                <pixel x="208" y="8"  color="#E0E8FF"/>
-                <pixel x="222" y="14" color="#D0D8F0"/>
-                <pixel x="235" y="4"  color="#E8E8FF"/>
-                <pixel x="248" y="18" color="#C8D0E8"/>
-                <pixel x="262" y="10" color="#E8F0FF"/>
-                <pixel x="275" y="6"  color="#E8E8FF"/>
-                <pixel x="288" y="20" color="#D0D8F0"/>
-                <pixel x="302" y="8"  color="#E0E8FF"/>
-                <pixel x="315" y="14" color="#D0D8F0"/>
-                <rect x="52"  y="10" w="2" h="2" color="#FFFFFF"/>
-                <rect x="120" y="16" w="2" h="2" color="#FFFFFF"/>
-                <rect x="200" y="4"  w="2" h="2" color="#FFFFFF"/>
-                <rect x="268" y="12" w="2" h="2" color="#FFFFFF"/>
+                <!-- Crescent moon -->
+                <rect x="468" y="36" w="36" h="36" color="$moon_color"/>
+                <rect x="472" y="32" w="28" h="44" color="$moon_glow"/>
+                <rect x="480" y="32" w="28" h="44" color="$sky_dark"/>
+                <!-- Moon halo -->
+                <rect x="456" y="24" w="60" h="60" color="#E8E0C010"/>
+                <!-- Moonlight on road -->
+                <rect x="200" y="176" w="240" h="8" color="#2A2830"/>
+                <rect x="160" y="192" w="320" h="6" color="#2A2830"/>
+                <rect x="120" y="220" w="400" h="6" color="#282630"/>
             </pixel-data>
         </layer>
-        <layer id="moon" type="midground" z-order="5" width="320" height="240">
+
+        <!-- z=6: Street light -->
+        <layer id="street_light" type="foreground" z-order="6" width="640" height="480">
             <pixel-data>
-                <rect x="234" y="18" w="18" h="18" color="#E8E0C0"/>
-                <rect x="236" y="16" w="14" h="22" color="#EEE8CC"/>
-                <rect x="240" y="16" w="14" h="22" color="#080C18"/>
-                <rect x="228" y="12" w="30" h="30" color="#E8E0C010"/>
-                <rect x="100" y="88"  w="120" h="4"  color="#2A2830"/>
-                <rect x="80"  y="96"  w="160" h="3"  color="#2A2830"/>
-                <rect x="60"  y="110" w="200" h="3"  color="#282630"/>
+                <!-- Pole -->
+                <rect x="314" y="184" w="4" h="44" color="$light_post"/>
+                <!-- Lamp head -->
+                <rect x="308" y="176" w="16" h="12" color="$light_head"/>
+                <!-- Light cone -->
+                <rect x="296" y="164" w="40" h="28" color="$light_glow"/>
+                <rect x="290" y="160" w="52" h="36" color="#FFD06010"/>
+                <rect x="284" y="156" w="64" h="44" color="#FFD06008"/>
+                <!-- Shadow on ground from light -->
+                <rect x="300" y="228" w="32" h="12" color="#40381808"/>
+                <rect x="292" y="240" w="48" h="16" color="#40381806"/>
+                <rect x="284" y="256" w="64" h="20" color="#40381804"/>
             </pixel-data>
         </layer>
-        <layer id="street_light" type="foreground" z-order="6" width="320" height="240">
+
+        <!-- z=7: Fog + atmosphere -->
+        <layer id="atmosphere" type="overlay" z-order="7" width="640" height="480">
             <pixel-data>
-                <rect x="157" y="92" w="2"  h="22"  color="#404050"/>
-                <rect x="154" y="88" w="8"  h="6"   color="#505060"/>
-                <rect x="148" y="82" w="20" h="14"  color="#FFD06020"/>
-                <rect x="145" y="80" w="26" h="18"  color="#FFD06010"/>
-                <rect x="142" y="78" w="32" h="22"  color="#FFD06008"/>
-                <rect x="150" y="114" w="16" h="6"  color="#40381808"/>
-                <rect x="146" y="120" w="24" h="8"  color="#40381806"/>
-                <rect x="142" y="128" w="32" h="10" color="#40381804"/>
-            </pixel-data>
-        </layer>
-        <layer id="atmosphere" type="overlay" z-order="7" width="320" height="240">
-            <pixel-data>
-                <rect x="0"   y="0"   w="30"  h="240" color="#04080408"/>
-                <rect x="290" y="0"   w="30"  h="240" color="#04080408"/>
-                <rect x="0"   y="0"   w="320" h="20"  color="#04080408"/>
-                <rect x="30"  y="80"  w="260" h="30"  color="#00000818"/>
-                <rect x="30"  y="108" w="260" h="4"   color="#18202820"/>
-                <rect x="30"  y="122" w="260" h="3"   color="#18202818"/>
-                <rect x="30"  y="138" w="260" h="4"   color="#10181818"/>
-                <rect x="0"   y="0"   w="320" h="240" color="#08101808"/>
-                <rect x="0"   y="0"   w="30"  h="240" color="#00000040"/>
-                <rect x="290" y="0"   w="30"  h="240" color="#00000040"/>
+                <!-- Edge vignette -->
+                <rect x="0" y="0" w="60" h="480" color="#04080408"/>
+                <rect x="580" y="0" w="60" h="480" color="#04080408"/>
+                <rect x="0" y="0" w="640" h="40" color="#04080408"/>
+                <!-- Heat haze / road fog bands -->
+                <rect x="60" y="160" w="520" h="60" color="#00000818"/>
+                <rect x="60" y="216" w="520" h="8" color="$fog_tint"/>
+                <rect x="60" y="244" w="520" h="6" color="#18202818"/>
+                <rect x="60" y="276" w="520" h="8" color="#10181818"/>
+                <!-- Global dark overlay -->
+                <rect x="0" y="0" w="640" h="480" color="#08101808"/>
+                <!-- Deep edge darkness -->
+                <rect x="0" y="0" w="60" h="480" color="#00000040"/>
+                <rect x="580" y="0" w="60" h="480" color="#00000040"/>
             </pixel-data>
             <conditions>
-                <condition id="persi_found"><override layer-ref="forest_left" highlight="#40C04020" at-x="20" at-y="130"/></condition>
-                <condition id="atmosphere_heavy_fog"><override layer-ref="atmosphere" tint="#1A2030" opacity="0.40"/></condition>
-                <condition id="atmosphere_clear"><override layer-ref="atmosphere" tint="#080C18" opacity="0.15"/></condition>
+                <condition id="persi_found">
+                    <override layer-ref="forest_left" highlight="#40C04020" at-x="40" at-y="260"/>
+                </condition>
+                <condition id="atmosphere_heavy_fog">
+                    <override layer-ref="atmosphere" tint="#1A2030" opacity="0.40"/>
+                </condition>
+                <condition id="atmosphere_clear">
+                    <override layer-ref="atmosphere" tint="#080C18" opacity="0.15"/>
+                </condition>
+                <condition id="headlights_approaching">
+                    <override layer-ref="road_markings" glow="#FFFFE020" radius="80"/>
+                </condition>
             </conditions>
         </layer>
+
+        <!-- z=8: Headlight glow (animated) -->
+        <layer id="headlight_glow" type="animated-overlay" z-order="8" width="640" height="480">
+            <pixel-data>
+                <rect x="280" y="170" w="80" h="40" color="#FFFFF008"/>
+            </pixel-data>
+        </layer>
     </layers>
+
+    <animations>
+        <animation name="idle" frames="12" fps="2" loop="true"
+                   frame-width="640" frame-height="480">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="headlight_glow:0,1"/>
+            <frame index="2" layer-offsets=""/>
+            <frame index="3" layer-offsets="headlight_glow:0,-1"/>
+            <frame index="4" layer-offsets="atmosphere:0,0"/>
+            <frame index="5" layer-offsets="headlight_glow:1,0"/>
+            <frame index="6" layer-offsets=""/>
+            <frame index="7" layer-offsets="headlight_glow:-1,1"/>
+            <frame index="8" layer-offsets="atmosphere:0,0"/>
+            <frame index="9" layer-offsets=""/>
+            <frame index="10" layer-offsets="headlight_glow:0,1"/>
+            <frame index="11" layer-offsets=""/>
+        </animation>
+    </animations>
+
     <naming><output-dir>locations/night_highway</output-dir></naming>
 </asset-spec>
