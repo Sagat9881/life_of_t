@@ -17,6 +17,7 @@ import java.util.List;
  * @param width      override width (0 = inherit from parent)
  * @param height     override height (0 = inherit from parent)
  * @param pixelData  pixel data for this override
+ * @param follows    nullable parent layer id for animation offset inheritance
  * @param conditions condition overrides
  */
 public record LayerOverride(
@@ -27,6 +28,7 @@ public record LayerOverride(
         int width,
         int height,
         PixelData pixelData,
+        String follows,
         List<LayerCondition> conditions
 ) {
     public LayerOverride {
@@ -35,5 +37,12 @@ public record LayerOverride(
         }
         if (pixelData == null) pixelData = PixelData.EMPTY;
         if (conditions == null) conditions = List.of();
+    }
+
+    /** Backward-compatible constructor without follows. */
+    public LayerOverride(String id, boolean replace, String type, int zOrder,
+                         int width, int height, PixelData pixelData,
+                         List<LayerCondition> conditions) {
+        this(id, replace, type, zOrder, width, height, pixelData, null, conditions);
     }
 }

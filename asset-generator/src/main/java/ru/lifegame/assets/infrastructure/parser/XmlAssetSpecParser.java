@@ -207,12 +207,16 @@ public class XmlAssetSpecParser {
             int zOrder = intAttr(el, "z-order", -1);
             int width = intAttr(el, "width", 0);
             int height = intAttr(el, "height", 0);
+            String follows = el.hasAttribute("follows")
+                    ? el.getAttribute("follows") : null;
             List<LayerCondition> conditions = parseLayerConditions(el);
 
-            overrides.add(new LayerOverride(id, replace, type, zOrder, width, height, pixelData, conditions));
+            overrides.add(new LayerOverride(id, replace, type, zOrder, width, height,
+                    pixelData, follows, conditions));
         }
         return overrides;
     }
+
 
     private List<AnimationSpec> parseAnimationsExtra(Element root) {
         List<AnimationSpec> animations = new ArrayList<>();
@@ -255,12 +259,16 @@ public class XmlAssetSpecParser {
             int height = intAttr(el, "height", 0);
 
             PixelData pixelData = parsePixelData(el);
+            String follows = el.hasAttribute("follows")
+                    ? el.getAttribute("follows") : null;
             List<LayerCondition> conditions = parseLayerConditions(el);
 
-            layers.add(new AssetLayer(id, type, "", zOrder, width, height, pixelData, conditions));
+            layers.add(new AssetLayer(id, type, "", zOrder, width, height,
+                    pixelData, follows, conditions));
         }
         return layers;
     }
+
 
     private List<LayerCondition> parseLayerConditions(Element layerEl) {
         List<LayerCondition> conditions = new ArrayList<>();

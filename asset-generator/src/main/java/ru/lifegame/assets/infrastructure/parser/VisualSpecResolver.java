@@ -76,14 +76,6 @@ public class VisualSpecResolver {
         });
     }
 
-    /**
-     * Merges parent layers with child overrides.
-     * - LayerOverride with replace=true fully replaces the parent layer
-     * - LayerOverride with replace=false merges pixel data (child appended after parent)
-     * - ownLayers are added if not already present
-     * - colorOverrides remap $variable references in pixel-data colors
-     * - colorRemaps do direct hex-to-hex replacement
-     */
     public List<AssetLayer> mergeLayers(
             List<AssetLayer> parentLayers,
             List<LayerOverride> overrides,
@@ -112,20 +104,27 @@ public class VisualSpecResolver {
                 int height = override.height() > 0
                         ? override.height()
                         : (original != null ? original.height() : 0);
+                // Resolve follows: child override wins if present, else inherit from parent
+                String follows = override.follows() != null
+                        ? override.follows()
+                        : (original != null ? original.follows() : null);
                 List<LayerCondition> conditions = override.conditions().isEmpty()
                         ? (original != null ? original.conditions() : List.of())
                         : override.conditions();
 
                 layerMap.put(override.id(), new AssetLayer(
                         override.id(), type, "", zOrder,
-                        width, height, override.pixelData(), conditions));
+                        width, height, override.pixelData(), follows, conditions));
             } else if (layerMap.containsKey(override.id())) {
                 AssetLayer original = layerMap.get(override.id());
                 PixelData merged = mergePixelData(original.pixelData(), override.pixelData());
+                // Preserve follows from override if set, else keep original
+                String follows = override.follows() != null
+                        ? override.follows() : original.follows();
                 layerMap.put(override.id(), new AssetLayer(
                         original.id(), original.type(), original.description(),
                         original.zOrder(), original.width(), original.height(),
-                        merged, original.conditions()));
+                        merged, follows, original.conditions()));
             }
         }
 
@@ -143,11 +142,12 @@ public class VisualSpecResolver {
             result.add(new AssetLayer(
                     layer.id(), layer.type(), layer.description(),
                     layer.zOrder(), layer.width(), layer.height(),
-                    remapped, layer.conditions()));
+                    remapped, layer.follows(), layer.conditions()));
         }
 
         return result;
     }
+
 
     /**
      * Merges parent animations with child extra animations.

@@ -4,9 +4,7 @@ import ru.lifegame.assets.domain.model.asset.*;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Universal pixel-art renderer. Knows nothing about specific game entities.
@@ -14,9 +12,6 @@ import java.util.List;
  */
 public final class UniversalPixelRenderer {
 
-    /**
-     * Renders a single static layer from its pixel-data.
-     */
     public BufferedImage renderLayer(AssetLayer layer, int defaultWidth, int defaultHeight) {
         int w = layer.width() > 0 ? layer.width() : defaultWidth;
         int h = layer.height() > 0 ? layer.height() : defaultHeight;
@@ -25,9 +20,6 @@ public final class UniversalPixelRenderer {
         return canvas.toImage();
     }
 
-    /**
-     * Renders all layers composited into a single image, sorted by z-order.
-     */
     public BufferedImage renderComposite(List<AssetLayer> layers, int width, int height) {
         PixelCanvas canvas = new PixelCanvas(width, height);
         layers.stream()
@@ -36,9 +28,6 @@ public final class UniversalPixelRenderer {
         return canvas.toImage();
     }
 
-    /**
-     * Renders animation frames by compositing all layers with per-frame offsets.
-     */
     public List<BufferedImage> renderAnimationFrames(
             List<AssetLayer> layers,
             AnimationSpec animSpec) {
@@ -55,10 +44,27 @@ public final class UniversalPixelRenderer {
             PixelCanvas canvas = new PixelCanvas(fw, fh);
             FrameOffset offset = findFrameOffset(animSpec.frameOffsets(), i);
 
+            // Build mutable offset map for follows resolution
+            Map<String, int[]> resolvedOffsets = new HashMap<>();
+            if (offset != null) {
+                resolvedOffsets.putAll(offset.layerOffsets());
+            }
+
+            // Resolve follows: inherit parent layer offsets for child layers
             for (AssetLayer layer : sorted) {
-                int[] layerOffset = offset != null
-                        ? offset.getOffset(layer.id())
-                        : new int[]{0, 0};
+                if (layer.follows() != null
+                        && !resolvedOffsets.containsKey(layer.id())) {
+                    int[] parentOffset = resolvedOffsets.get(layer.follows());
+                    if (parentOffset != null) {
+                        resolvedOffsets.put(layer.id(),
+                                new int[]{parentOffset[0], parentOffset[1]});
+                    }
+                }
+            }
+
+            for (AssetLayer layer : sorted) {
+                int[] layerOffset = resolvedOffsets.getOrDefault(
+                        layer.id(), new int[]{0, 0});
                 drawPixelData(canvas, layer.pixelData(), layerOffset[0], layerOffset[1]);
             }
             frames.add(canvas.toImage());

@@ -15,6 +15,7 @@ import java.util.List;
  * @param width       layer canvas width in pixels (0 = use spec default)
  * @param height      layer canvas height in pixels (0 = use spec default)
  * @param pixelData   drawing primitives for this layer
+ * @param follows     nullable parent layer id — this layer inherits animation offsets from parent
  * @param conditions  condition overrides for this layer (e.g. time-of-day tint/opacity)
  */
 public record AssetLayer(
@@ -25,6 +26,7 @@ public record AssetLayer(
         int width,
         int height,
         PixelData pixelData,
+        String follows,
         List<LayerCondition> conditions
 ) {
     public AssetLayer {
@@ -42,15 +44,21 @@ public record AssetLayer(
                 : List.of();
     }
 
-    /** Backward-compatible constructor without conditions. */
+    /** Backward-compatible constructor without follows and conditions. */
     public AssetLayer(String id, String type, String description, int zOrder,
                       int width, int height, PixelData pixelData) {
-        this(id, type, description, zOrder, width, height, pixelData, List.of());
+        this(id, type, description, zOrder, width, height, pixelData, null, List.of());
+    }
+
+    /** Backward-compatible constructor without follows but with conditions. */
+    public AssetLayer(String id, String type, String description, int zOrder,
+                      int width, int height, PixelData pixelData, List<LayerCondition> conditions) {
+        this(id, type, description, zOrder, width, height, pixelData, null, conditions);
     }
 
     /** Backward-compatible constructor for layers without pixel data. */
     public AssetLayer(String id, String type, String description, int zOrder) {
-        this(id, type, description, zOrder, 0, 0, PixelData.EMPTY, List.of());
+        this(id, type, description, zOrder, 0, 0, PixelData.EMPTY, null, List.of());
     }
 
     /** Whether this layer has condition overrides (e.g. ambient_light with time-of-day). */
