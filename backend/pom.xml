@@ -58,7 +58,7 @@
             <resource>
                 <directory>src/main/resources</directory>
             </resource>
-            <!-- Narrative XML specs (npc-behavior, events, quests) -->
+            <!-- Narrative XML specs (npc-behavior, events, quests, player-actions) -->
             <resource>
                 <directory>${project.basedir}/../narrative</directory>
                 <targetPath>narrative</targetPath>
