@@ -10,33 +10,36 @@ import java.util.stream.Collectors;
 public class NarrativeEventEngine {
 
     private final List<EventSpec> eventSpecs;
-    private final Set<String> firedOnceIds = new HashSet<>();
+    private final Set<String> firedOnceEvents = new HashSet<>();
 
     public NarrativeEventEngine(List<EventSpec> eventSpecs) {
         this.eventSpecs = eventSpecs;
     }
 
     public List<FiredEvent> evaluate(Map<String, Object> context) {
-        return eventSpecs.stream()
-                .filter(e -> !e.once() || !firedOnceIds.contains(e.id()))
-                .filter(e -> allConditionsMet(e.conditions(), context))
-                .map(e -> {
-                    if (e.once()) firedOnceIds.add(e.id());
-                    return new FiredEvent(e, resolveEffects(e, context));
-                })
-                .collect(Collectors.toList());
+        List<FiredEvent> result = new ArrayList<>();
+        for (EventSpec spec : eventSpecs) {
+            if (spec.once() && firedOnceEvents.contains(spec.id())) continue;
+            if (allConditionsMet(spec.conditions(), context)) {
+                result.add(new FiredEvent(spec, resolveEffects(spec, context)));
+                if (spec.once()) firedOnceEvents.add(spec.id());
+            }
+        }
+        return result;
     }
 
     public record FiredEvent(EventSpec spec, List<EffectSpec> effects) {}
 
     private List<EffectSpec> resolveEffects(EventSpec spec, Map<String, Object> context) {
-        if (spec.effects() == null) return List.of();
         return spec.effects();
     }
 
     private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> context) {
         if (conditions == null || conditions.isEmpty()) return true;
-        return conditions.stream().allMatch(c -> evaluateCondition(c, context));
+        for (ConditionSpec c : conditions) {
+            if (!evaluateCondition(c, context)) return false;
+        }
+        return true;
     }
 
     private boolean evaluateCondition(ConditionSpec c, Map<String, Object> context) {

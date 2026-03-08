@@ -6,27 +6,38 @@ import ru.lifegame.backend.domain.engine.spec.NpcSpec;
 import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NpcRegistry {
 
     private final Map<String, NpcInstance> instances = new LinkedHashMap<>();
-    private final NpcRelationshipGraph relationshipGraph = new NpcRelationshipGraph();
+    private final NpcRelationshipGraph relationshipGraph;
 
-    public void registerFromSpec(NpcSpec spec) {
-        NpcInstance instance = NpcInstance.fromSpec(spec);
-        instances.put(spec.id(), instance);
+    public NpcRegistry(List<NpcSpec> specs) {
+        this.relationshipGraph = new NpcRelationshipGraph();
+        for (NpcSpec spec : specs) {
+            instances.put(spec.id(), NpcInstance.fromSpec(spec));
+        }
     }
 
     public Optional<NpcInstance> get(String npcId) {
         return Optional.ofNullable(instances.get(npcId));
     }
 
-    public Collection<NpcInstance> all() {
+    public Collection<NpcInstance> allNpcs() {
         return Collections.unmodifiableCollection(instances.values());
     }
 
-    public void update(String npcId, NpcInstance updated) {
-        instances.put(npcId, updated);
+    public List<NpcInstance> namedNpcs() {
+        return instances.values().stream()
+            .filter(n -> "named".equals(n.spec().type()))
+            .collect(Collectors.toList());
+    }
+
+    public List<NpcInstance> fillerNpcs() {
+        return instances.values().stream()
+            .filter(n -> "filler".equals(n.spec().type()))
+            .collect(Collectors.toList());
     }
 
     public NpcRelationshipGraph relationshipGraph() {

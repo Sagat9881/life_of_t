@@ -15,40 +15,38 @@ public class CrossNpcTriggerEngine {
     }
 
     public record CrossNpcTrigger(
-            String id,
-            String npcA,
-            String npcB,
-            String axis,
-            String operator,
-            double threshold,
-            String eventId
+        String id,
+        String npcA,
+        String npcB,
+        String axis,
+        String operator,
+        double threshold,
+        String eventId
     ) {}
 
     public List<String> evaluate(NpcRegistry registry) {
-        List<String> firedEventIds = new ArrayList<>();
+        List<String> triggeredEvents = new ArrayList<>();
         NpcRelationshipGraph graph = registry.relationshipGraph();
 
         for (CrossNpcTrigger trigger : triggers) {
             Optional<NpcRelationshipEdge> edge = graph.getEdge(trigger.npcA(), trigger.npcB());
-            if (edge.isEmpty()) continue;
-
-            double val = switch (trigger.axis()) {
-                case "tension" -> edge.get().tension();
-                case "respect" -> edge.get().respect();
-                case "familiarity" -> edge.get().familiarity();
-                default -> 0;
-            };
-
-            boolean met = switch (trigger.operator()) {
-                case "gte" -> val >= trigger.threshold();
-                case "lte" -> val <= trigger.threshold();
-                case "gt" -> val > trigger.threshold();
-                case "lt" -> val < trigger.threshold();
-                default -> false;
-            };
-
-            if (met) firedEventIds.add(trigger.eventId());
+            edge.ifPresent(e -> {
+                double val = switch (trigger.axis()) {
+                    case "tension" -> e.tension();
+                    case "respect" -> e.respect();
+                    case "familiarity" -> e.familiarity();
+                    default -> 0;
+                };
+                boolean met = switch (trigger.operator()) {
+                    case "gte" -> val >= trigger.threshold();
+                    case "lte" -> val <= trigger.threshold();
+                    case "gt" -> val > trigger.threshold();
+                    case "lt" -> val < trigger.threshold();
+                    default -> false;
+                };
+                if (met) triggeredEvents.add(trigger.eventId());
+            });
         }
-        return firedEventIds;
+        return triggeredEvents;
     }
 }

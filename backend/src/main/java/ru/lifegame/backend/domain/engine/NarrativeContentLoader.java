@@ -19,33 +19,41 @@ public class NarrativeContentLoader {
     private final EventSpecParser eventParser = new EventSpecParser();
     private final QuestSpecParser questParser = new QuestSpecParser();
 
-    private List<NpcSpec> npcSpecs = List.of();
-    private List<EventSpec> eventSpecs = List.of();
-    private List<QuestSpec> questSpecs = List.of();
+    private List<NpcSpec> npcSpecs = new ArrayList<>();
+    private List<EventSpec> eventSpecs = new ArrayList<>();
+    private List<QuestSpec> questSpecs = new ArrayList<>();
 
     public void loadFromDirectory(String basePath) {
-        npcSpecs = loadXmlFiles(basePath + "/npc-behavior", npcParser::parse);
-        eventSpecs = loadXmlFiles(basePath + "/events", eventParser::parse);
-        questSpecs = loadXmlFiles(basePath + "/quests", questParser::parse);
+        npcSpecs = loadSpecs(basePath + "/npc-behavior", npcParser::parse);
+        eventSpecs = loadSpecs(basePath + "/events", eventParser::parse);
+        questSpecs = loadSpecs(basePath + "/quests", questParser::parse);
     }
 
-    private <T> List<T> loadXmlFiles(String dirPath, java.util.function.Function<InputStream, T> parser) {
+    private <T> List<T> loadSpecs(String dirPath, SpecParser<T> parser) {
+        List<T> results = new ArrayList<>();
         Path dir = Paths.get(dirPath);
-        if (!Files.isDirectory(dir)) return List.of();
-        try (Stream<Path> paths = Files.list(dir)) {
-            return paths
-                    .filter(p -> p.toString().endsWith(".xml"))
-                    .map(p -> {
-                        try { return parser.apply(Files.newInputStream(p)); }
-                        catch (IOException e) { throw new UncheckedIOException(e); }
-                    })
-                    .collect(Collectors.toList());
+        if (!Files.exists(dir)) return results;
+        try (Stream<Path> files = Files.list(dir)) {
+            files.filter(p -> p.toString().endsWith(".xml"))
+                 .forEach(p -> {
+                     try {
+                         results.add(parser.parse(p));
+                     } catch (Exception e) {
+                         System.err.println("Failed to parse: " + p + " - " + e.getMessage());
+                     }
+                 });
         } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            System.err.println("Failed to scan directory: " + dirPath + " - " + e.getMessage());
         }
+        return results;
     }
 
-    public List<NpcSpec> npcSpecs() { return npcSpecs; }
-    public List<EventSpec> eventSpecs() { return eventSpecs; }
-    public List<QuestSpec> questSpecs() { return questSpecs; }
+    @FunctionalInterface
+    interface SpecParser<T> {
+        T parse(Path path) throws Exception;
+    }
+
+    public List<NpcSpec> npcSpecs() { return Collections.unmodifiableList(npcSpecs); }
+    public List<EventSpec> eventSpecs() { return Collections.unmodifiableList(eventSpecs); }
+    public List<QuestSpec> questSpecs() { return Collections.unmodifiableList(questSpecs); }
 }
