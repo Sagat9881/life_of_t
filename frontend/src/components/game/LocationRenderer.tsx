@@ -1,52 +1,37 @@
 /**
- * LocationRenderer — renders a complete game location with pixel-art sprites.
+ * LocationRenderer — compositing layer approach.
  *
- * ── RELATIVE SCALING ──
- * The background uses SpriteAnimator for animated backgrounds when available,
- * falling back to static composite PNG.
+ * Layer 0: Background — static composite PNG from location asset (fills scene)
+ * Layer 1: Ambient — CSS time-of-day color overlay
+ * Layer 2: Furniture — scaled composite PNGs positioned in scene
+ * Layer 3: Characters — SpriteAnimator with atlas animations
+ *
+ * NO atlas loading for background or furniture.
+ * Furniture uses pre-rendered composite PNGs scaled to scene.
  */
 import { memo, useCallback, useEffect, useState } from 'react';
 import { PixelScene } from '@/components/shared/PixelScene/PixelScene';
 import { SpriteAnimator } from '@/components/shared/SpriteAnimator/SpriteAnimator';
-import {
-  getCompositeUrl,
-  loadAtlasConfig,
-  listOverlayAnimations,
-} from '@/services/assetService';
+import { getCompositeUrl, loadAtlasConfig } from '@/services/assetService';
 import { SCENE_HEIGHT } from '@/utils/sceneConstants';
 import type { LocationConfig, FurniturePlacement } from '@/config/locations';
 import type { AtlasConfig } from '@/types/sprite';
 import './LocationRenderer.css';
 
-const AMBIENT_FALLBACK: Record<string, { color: string; opacity: number }> = {
-  morning: { color: '#E8F4FF', opacity: 0.10 },
-  day:     { color: '#FFF8E8', opacity: 0.0 },
-  evening: { color: '#FFB060', opacity: 0.15 },
-  night:   { color: '#1A1830', opacity: 0.45 },
+/* ── Time-of-day ambient overlays ── */
+const AMBIENT: Record<string, { color: string; opacity: number; blend: string }> = {
+  morning: { color: '#FFE8C0', opacity: 0.08, blend: 'multiply' },
+  day:     { color: '#FFFFF0', opacity: 0.0,  blend: 'normal' },
+  evening: { color: '#FF8040', opacity: 0.18, blend: 'multiply' },
+  night:   { color: '#101830', opacity: 0.50, blend: 'multiply' },
 };
 
-const TIME_SLOT_TO_CONDITION: Record<string, string> = {
+const TIME_MAP: Record<string, string> = {
   MORNING: 'morning', DAY: 'day', EVENING: 'evening', NIGHT: 'night',
   morning: 'morning', day: 'day', evening: 'evening', night: 'night',
 };
 
-const FURNITURE_FALLBACK_REL_HEIGHT = 0.40;
-
 const atlasCache = new Map<string, AtlasConfig>();
-
-function getRelativeHeight(
-  atlasConfig: AtlasConfig | undefined,
-  animationName: string
-): number | undefined {
-  if (!atlasConfig) return undefined;
-  const entry = atlasConfig.animations[animationName];
-  if (!entry) {
-    const first = Object.values(atlasConfig.animations)[0];
-    if (!first) return undefined;
-    return first.frameHeight / SCENE_HEIGHT;
-  }
-  return entry.frameHeight / SCENE_HEIGHT;
-}
 
 export interface LocationRendererProps {
   readonly config: LocationConfig;
@@ -63,157 +48,68 @@ export const LocationRenderer = memo(function LocationRenderer({
   characterAnimations,
   timeOfDay = 'day',
 }: LocationRendererProps) {
+  const condition = TIME_MAP[timeOfDay] ?? 'day';
+  const ambient = AMBIENT[condition] ?? AMBIENT['day']!;
 
   const handleFurnitureClick = useCallback(
-    (furniture: FurniturePlacement) => {
-      if (furniture.actionCode && onObjectClick) {
-        onObjectClick(furniture.id, furniture.actionCode);
-      }
+    (f: FurniturePlacement) => {
+      if (f.actionCode && onObjectClick) onObjectClick(f.id, f.actionCode);
     },
     [onObjectClick]
   );
 
-  const condition = TIME_SLOT_TO_CONDITION[timeOfDay] ?? 'day';
-
-  // ── Load location atlas to check for background animation ──
-  const [overlayNames, setOverlayNames] = useState<string[]>([]);
-  const [bgAnimAvailable, setBgAnimAvailable] = useState(false);
-  const [atlasLoaded, setAtlasLoaded] = useState(false);
+  /* ── Load character atlas configs for relative height ── */
+  const [charAtlases, setCharAtlases] = useState<Record<string, AtlasConfig>>({});
 
   useEffect(() => {
     let cancelled = false;
-    loadAtlasConfig('locations', config.locationAsset)
-      .then((ac) => {
-        if (cancelled) return;
-        atlasCache.set(`locations/${config.locationAsset}`, ac);
-        setOverlayNames(listOverlayAnimations(ac));
-        // Check if the background animation exists in the atlas
-        const bgAnim = config.backgroundAnimation || 'idle';
-        const hasAnim = Boolean(ac.animations[bgAnim]);
-        setBgAnimAvailable(hasAnim);
-        setAtlasLoaded(true);
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setOverlayNames([]);
-          setBgAnimAvailable(false);
-          setAtlasLoaded(true);
-        }
-      });
-    return () => { cancelled = true; };
-  }, [config.locationAsset, config.backgroundAnimation]);
-
-  // ── Load furniture atlas configs ──
-  const [furnitureAtlases, setFurnitureAtlases] = useState<Record<string, AtlasConfig>>({});
-
-  useEffect(() => {
-    let cancelled = false;
-    const loadAll = async () => {
+    const load = async () => {
       const result: Record<string, AtlasConfig> = {};
       await Promise.allSettled(
-        config.furniture.map(async (item) => {
-          const key = `furniture/${item.entityName}`;
-          if (atlasCache.has(key)) {
-            result[item.entityName] = atlasCache.get(key)!;
-            return;
-          }
+        config.characters.map(async (c) => {
+          const key = `characters/${c.entityName}`;
+          if (atlasCache.has(key)) { result[c.entityName] = atlasCache.get(key)!; return; }
           try {
-            const ac = await loadAtlasConfig('furniture', item.entityName);
+            const ac = await loadAtlasConfig('characters', c.entityName);
             atlasCache.set(key, ac);
-            result[item.entityName] = ac;
-          } catch { /* furniture without atlas renders at fallback size */ }
+            result[c.entityName] = ac;
+          } catch { /* no atlas — render at native size */ }
         })
       );
-      if (!cancelled) setFurnitureAtlases(result);
+      if (!cancelled) setCharAtlases(result);
     };
-    void loadAll();
-    return () => { cancelled = true; };
-  }, [config.furniture]);
-
-  // ── Load character atlas configs ──
-  const [characterAtlases, setCharacterAtlases] = useState<Record<string, AtlasConfig>>({});
-
-  useEffect(() => {
-    let cancelled = false;
-    const loadAll = async () => {
-      const result: Record<string, AtlasConfig> = {};
-      await Promise.allSettled(
-        config.characters.map(async (char) => {
-          const key = `characters/${char.entityName}`;
-          if (atlasCache.has(key)) {
-            result[char.entityName] = atlasCache.get(key)!;
-            return;
-          }
-          try {
-            const ac = await loadAtlasConfig('characters', char.entityName);
-            atlasCache.set(key, ac);
-            result[char.entityName] = ac;
-          } catch { /* character without atlas renders at fallback size */ }
-        })
-      );
-      if (!cancelled) setCharacterAtlases(result);
-    };
-    void loadAll();
+    void load();
     return () => { cancelled = true; };
   }, [config.characters]);
 
-  const useFallbackAmbient = atlasLoaded && overlayNames.length === 0;
-  const fallbackAmbient = AMBIENT_FALLBACK[condition] ?? AMBIENT_FALLBACK['day']!;
-
   return (
     <PixelScene className="location-renderer">
-      {/* Background — animated SpriteAnimator when atlas available, else static */}
+
+      {/* ═══ LAYER 0: Background composite ═══ */}
       <div className="pixel-scene__layer" style={{ zIndex: 0 }}>
-        {bgAnimAvailable ? (
-          <SpriteAnimator
-            entityType="locations"
-            entityName={config.locationAsset}
-            animation={config.backgroundAnimation || 'idle'}
-            condition={condition}
-            className="location-renderer__bg-anim"
-          />
-        ) : (
-          <img
-            className="location-renderer__bg"
-            src={getCompositeUrl('locations', config.locationAsset)}
-            alt={config.name}
-            draggable={false}
-          />
-        )}
+        <img
+          className="location-renderer__bg"
+          src={getCompositeUrl('locations', config.locationAsset)}
+          alt={config.name}
+          draggable={false}
+        />
       </div>
 
-      {/* Overlay animations */}
-      {overlayNames.map((overlayName) => (
+      {/* ═══ LAYER 1: Ambient time-of-day overlay ═══ */}
+      {ambient.opacity > 0 && (
         <div
-          key={overlayName}
-          className="pixel-scene__layer location-renderer__overlay-anim"
-          style={{ zIndex: 5 }}
-        >
-          <SpriteAnimator
-            entityType="locations"
-            entityName={config.locationAsset}
-            animation={overlayName}
-            condition={condition}
-            className="location-renderer__overlay-sprite"
-          />
-        </div>
-      ))}
-
-      {/* Fallback ambient */}
-      {useFallbackAmbient && fallbackAmbient.opacity > 0 && (
-        <div
-          className="pixel-scene__layer location-renderer__ambient"
+          className="pixel-scene__layer"
           style={{
             zIndex: 5,
-            backgroundColor: fallbackAmbient.color,
-            opacity: fallbackAmbient.opacity,
+            backgroundColor: ambient.color,
+            opacity: ambient.opacity,
+            mixBlendMode: ambient.blend as React.CSSProperties['mixBlendMode'],
             pointerEvents: 'none',
-            mixBlendMode: 'multiply',
           }}
         />
       )}
 
-      {/* Furniture */}
+      {/* ═══ LAYER 2: Furniture composites ═══ */}
       <div
         className="pixel-scene__layer pixel-scene__layer--interactive"
         style={{ zIndex: 10 }}
@@ -221,8 +117,7 @@ export const LocationRenderer = memo(function LocationRenderer({
         {config.furniture.map((item) => {
           const isClickable = Boolean(item.actionCode);
           const isSelected = selectedObjectId === item.id;
-          const furnitureAtlas = furnitureAtlases[item.entityName];
-          const relHeight = getRelativeHeight(furnitureAtlas, item.animation) ?? FURNITURE_FALLBACK_REL_HEIGHT;
+          const compositeUrl = getCompositeUrl('furniture', item.entityName);
 
           return (
             <div
@@ -239,29 +134,32 @@ export const LocationRenderer = memo(function LocationRenderer({
               }}
               onClick={isClickable ? () => handleFurnitureClick(item) : undefined}
             >
-              <SpriteAnimator
-                entityType="furniture"
-                entityName={item.entityName}
-                animation={item.animation}
-                scale={item.scale}
-                sceneRelativeHeight={relHeight}
-                condition={condition}
+              <img
+                className="location-renderer__furniture"
+                src={compositeUrl}
+                alt={item.label ?? item.entityName}
+                draggable={false}
+                style={{
+                  height: `${SCENE_HEIGHT * (item.sceneHeight ?? 0.30) * (item.scale ?? 1)}px`,
+                  width: 'auto',
+                  imageRendering: 'pixelated',
+                }}
               />
-              {item.label ? (
+              {item.label && (
                 <span className="pixel-scene__label">{item.label}</span>
-              ) : null}
+              )}
             </div>
           );
         })}
       </div>
 
-      {/* Characters */}
+      {/* ═══ LAYER 3: Characters (animated sprites) ═══ */}
       <div className="pixel-scene__layer" style={{ zIndex: 50 }}>
         {config.characters.map((char) => {
-          const anim =
-            characterAnimations?.[char.entityName] ?? char.defaultAnimation;
-          const charAtlas = characterAtlases[char.entityName];
-          const relHeight = getRelativeHeight(charAtlas, anim);
+          const anim = characterAnimations?.[char.entityName] ?? char.defaultAnimation;
+          const ca = charAtlases[char.entityName];
+          const entry = ca?.animations[anim];
+          const relH = entry ? (entry.frameHeight / SCENE_HEIGHT) : undefined;
 
           return (
             <div
@@ -278,7 +176,7 @@ export const LocationRenderer = memo(function LocationRenderer({
                 entityName={char.entityName}
                 animation={anim}
                 scale={char.scale}
-                sceneRelativeHeight={relHeight}
+                sceneRelativeHeight={relH}
                 condition={condition}
               />
             </div>

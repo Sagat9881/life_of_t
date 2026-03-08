@@ -1,32 +1,24 @@
+/* LocationRenderer — compositing layer styles */
+
 .location-renderer {
   position: relative;
   width: 100%;
   height: 100%;
 }
 
+/* Background: fills entire scene viewport */
 .location-renderer__bg {
   display: block;
   width: 100%;
   height: 100%;
   image-rendering: pixelated;
+  image-rendering: crisp-edges;
   object-fit: fill;
 }
 
-.location-renderer__bg-anim {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-.location-renderer__overlay-anim {
-  pointer-events: none;
-}
-
-.location-renderer__overlay-sprite {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-.location-renderer__ambient {
-  width: 100%;
-  height: 100%;
+/* Furniture composites: pixel-perfect scaling */
+.location-renderer__furniture {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
