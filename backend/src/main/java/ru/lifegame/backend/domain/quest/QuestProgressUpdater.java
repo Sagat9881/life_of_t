@@ -1,7 +1,6 @@
 package ru.lifegame.backend.domain.quest;
 
 import ru.lifegame.backend.domain.model.session.GameSessionContext;
-import ru.lifegame.backend.domain.model.relationship.NpcCode;
 
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class QuestProgressUpdater {
             forceComplete(log, "quest_self_care", 2);
         }
 
-        var husband = context.relationships().get(NpcCode.HUSBAND);
+        var husband = context.relationships().get("HUSBAND");
         if (husband != null && husband.closeness() >= 80 && husband.romance() >= 70) {
             forceComplete(log, "quest_family_harmony", 2);
         }

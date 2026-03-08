@@ -4,7 +4,6 @@ import ru.lifegame.backend.domain.balance.GameBalance;
 import ru.lifegame.backend.domain.conflict.tactics.ConflictTactic;
 import ru.lifegame.backend.domain.conflict.tactics.TacticEffects;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
-import ru.lifegame.backend.domain.model.relationship.NpcCode;
 import ru.lifegame.backend.domain.model.relationship.Relationship;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.model.stats.StatChanges;
@@ -94,7 +93,7 @@ public class Conflict {
     }
 
     private void resolvePlayerDefeat(Relationships relationships) {
-        Optional<NpcCode> opp = type.opponent();
+        Optional<String> opp = type.opponent();
         if (opp.isPresent()) {
             Relationship rel = relationships.get(opp.get());
             if (rel != null && rel.trust() < GameBalance.TRUST_CRITICAL_FOR_BREAK) {

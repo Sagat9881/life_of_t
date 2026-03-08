@@ -11,20 +11,12 @@ import ru.lifegame.backend.domain.event.domain.ConflictTacticAppliedEvent;
 import ru.lifegame.backend.domain.event.domain.ConflictTriggeredEvent;
 import ru.lifegame.backend.domain.event.domain.RelationshipBrokenEvent;
 import ru.lifegame.backend.domain.exception.InvalidGameStateException;
-import ru.lifegame.backend.domain.model.relationship.NpcCode;
 
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Domain service responsible for managing conflicts within a game session.
- * Handles conflict lifecycle: creation, escalation, tactics, and resolution.
- */
 public class ConflictManager {
 
-    /**
-     * Start a new conflict if one of this type doesn't already exist.
-     */
     public Conflict startConflict(
             ConflictType type,
             GameSessionContext context,
@@ -47,9 +39,6 @@ public class ConflictManager {
         return conflict;
     }
 
-    /**
-     * Avoid a brewing conflict before it escalates.
-     */
     public void avoidConflict(
             String conflictId,
             GameSessionContext context,
@@ -69,9 +58,6 @@ public class ConflictManager {
         );
     }
 
-    /**
-     * Apply a tactic to the active (unresolved) conflict.
-     */
     public TacticEffects applyTactic(
             ConflictTactic tactic,
             GameSessionContext context,
@@ -85,13 +71,12 @@ public class ConflictManager {
             context.relationships()
         );
         
-        // Apply effects to game state
         if (effects.statChanges() != null) {
             context.player().applyStatChanges(effects.statChanges());
         }
         if (effects.relationshipChanges() != null) {
             context.relationships().applyChanges(
-                effects.relationshipChanges().npcCode(),
+                effects.relationshipChanges().npcId(),
                 effects.relationshipChanges()
             );
         }
@@ -100,7 +85,6 @@ public class ConflictManager {
             new ConflictTacticAppliedEvent(context.sessionId(), conflict.id(), tactic.code())
         );
 
-        // Handle resolution if conflict is now resolved
         if (conflict.isResolved()) {
             handleConflictResolution(conflict, context, eventPublisher);
         }
@@ -120,10 +104,10 @@ public class ConflictManager {
         );
         
         if (res.relationshipBreak() && conflict.type().opponent().isPresent()) {
-            NpcCode npc = conflict.type().opponent().get();
+            String npc = conflict.type().opponent().get();
             context.relationships().breakRelationship(npc);
             eventPublisher.publish(
-                new RelationshipBrokenEvent(context.sessionId(), npc.name())
+                new RelationshipBrokenEvent(context.sessionId(), npc)
             );
         }
     }

@@ -20,10 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Root aggregate for game session.
- * Contains all game state and orchestrates domain operations.
- */
 public class GameSession {
     private final String sessionId;
     private final String telegramUserId;
@@ -51,7 +47,6 @@ public class GameSession {
         this.domainEvents = new ArrayList<>();
     }
 
-    // === Factory method ===
     public static GameSession createNew(String telegramUserId) {
         String sessionId = UUID.randomUUID().toString();
         PlayerCharacter player = PlayerCharacter.initial();
@@ -62,52 +57,18 @@ public class GameSession {
         return new GameSession(sessionId, telegramUserId, player, relationships, pets, questLog, time);
     }
 
-    // === Accessors ===
-    public String sessionId() {
-        return sessionId;
-    }
+    public String sessionId() { return sessionId; }
+    public String telegramUserId() { return telegramUserId; }
+    public PlayerCharacter player() { return context.player(); }
+    public Relationships relationships() { return context.relationships(); }
+    public Pets pets() { return context.pets(); }
+    public QuestLog questLog() { return context.questLog(); }
+    public GameTime time() { return context.time(); }
+    public List<Conflict> activeConflicts() { return context.activeConflicts(); }
+    public List<GameEvent> events() { return context.events(); }
+    public Ending ending() { return ending; }
+    public GameSessionContext context() { return context; }
 
-    public String telegramUserId() {
-        return telegramUserId;
-    }
-
-    public PlayerCharacter player() {
-        return context.player();
-    }
-
-    public Relationships relationships() {
-        return context.relationships();
-    }
-
-    public Pets pets() {
-        return context.pets();
-    }
-
-    public QuestLog questLog() {
-        return context.questLog();
-    }
-
-    public GameTime time() {
-        return context.time();
-    }
-
-    public List<Conflict> activeConflicts() {
-        return context.activeConflicts();
-    }
-
-    public List<GameEvent> events() {
-        return context.events();
-    }
-
-    public Ending ending() {
-        return ending;
-    }
-
-    public GameSessionContext context() {
-        return context;
-    }
-
-    // === Actions ===
     public ActionResult executeAction(GameAction actionType) {
         ActionExecutor executor = new ActionExecutor();
         ActionResult result = executor.execute(actionType, context, eventPublisher);
@@ -115,14 +76,12 @@ public class GameSession {
         return result;
     }
 
-    // === Day Management ===
     public void endDay() {
         DayEndProcessor processor = new DayEndProcessor();
         processor.processEndOfDay(context, eventPublisher);
         eventPublisher.publish(new DayEndedEvent(sessionId, time().day()));
     }
 
-    // === Conflict Management ===
     public Conflict startConflict(ru.lifegame.backend.domain.conflict.core.ConflictType conflictType) {
         ConflictManager manager = new ConflictManager();
         return manager.startConflict(conflictType, context, eventPublisher);
@@ -138,7 +97,6 @@ public class GameSession {
         manager.applyTactic(tactic, context, eventPublisher);
     }
 
-    // === Event Management ===
     public Optional<GameEvent> currentEvent() {
         return events().stream()
                 .filter(e -> e.isTriggered() && !e.isResolved())
@@ -171,26 +129,19 @@ public class GameSession {
 
         EventResult result = event.applyOption(optionId);
 
-        // Apply event effects
         if (result.statChanges() != null) {
             player().applyStatChanges(result.statChanges());
         }
         if (result.relationshipChanges() != null && !result.relationshipChanges().isEmpty()) {
-            result.relationshipChanges().forEach((npcName, delta) -> {
-                // Find NPC by name and apply changes
-                relationships().all().forEach((npc, rel) -> {
-                    if (npc.name().equals(npcName)) {
-                        relationships().applyChanges(npc,
-                                new ru.lifegame.backend.domain.model.relationship.RelationshipChanges(
-                                        npc, delta, 0, 0, 0
-                                ));
-                    }
-                });
+            result.relationshipChanges().forEach((npcId, delta) -> {
+                relationships().applyChanges(npcId,
+                        new ru.lifegame.backend.domain.model.relationship.RelationshipChanges(
+                                npcId, delta, 0, 0, 0
+                        ));
             });
         }
     }
 
-    // === Game Over ===
     public void checkGameOver() {
         GameOverChecker checker = new GameOverChecker();
         Optional<GameOverReason> gameOverEnding = checker.check(player(),relationships(),pets());
@@ -208,7 +159,6 @@ public class GameSession {
         return ending != null;
     }
 
-    // === Event Sourcing ===
     public List<DomainEvent> drainDomainEvents() {
         List<DomainEvent> events = new ArrayList<>(eventPublisher.drainEvents());
         domainEvents.addAll(events);

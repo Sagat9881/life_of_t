@@ -4,7 +4,6 @@ import ru.lifegame.backend.domain.balance.GameBalance;
 import ru.lifegame.backend.domain.conflict.core.Conflict;
 import ru.lifegame.backend.domain.conflict.core.CspChanges;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
-import ru.lifegame.backend.domain.model.relationship.NpcCode;
 import ru.lifegame.backend.domain.model.relationship.RelationshipChanges;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.model.stats.StatChanges;
@@ -19,7 +18,7 @@ public enum SkillBasedConflictTactics implements ConflictTactic {
         @Override
         public TacticEffects calculateEffects(PlayerCharacter player, Conflict conflict, Relationships relationships) {
             CspChanges csp = new CspChanges(GameBalance.LISTEN_PLAYER_CSP, GameBalance.LISTEN_OPPONENT_CSP);
-            NpcCode npc = conflict.type().opponent().orElse(null);
+            String npc = conflict.type().opponent().orElse(null);
             RelationshipChanges rel = npc != null
                     ? new RelationshipChanges(npc, GameBalance.LISTEN_CLOSENESS, GameBalance.LISTEN_TRUST, 0, 0) : null;
             return new TacticEffects(csp, StatChanges.none(), rel, true, defaultReactionText());
@@ -44,7 +43,7 @@ public enum SkillBasedConflictTactics implements ConflictTactic {
         @Override
         public TacticEffects calculateEffects(PlayerCharacter player, Conflict conflict, Relationships relationships) {
             CspChanges csp = new CspChanges(GameBalance.LOGICAL_PLAYER_CSP, GameBalance.LOGICAL_OPPONENT_CSP);
-            NpcCode npc = conflict.type().opponent().orElse(null);
+            String npc = conflict.type().opponent().orElse(null);
             RelationshipChanges rel = npc != null
                     ? new RelationshipChanges(npc, 0, GameBalance.LOGICAL_TRUST, 0, 0) : null;
             return new TacticEffects(csp, StatChanges.none(), rel, true, defaultReactionText());
@@ -56,7 +55,7 @@ public enum SkillBasedConflictTactics implements ConflictTactic {
         @Override
         public TacticEffects calculateEffects(PlayerCharacter player, Conflict conflict, Relationships relationships) {
             CspChanges csp = new CspChanges(GameBalance.EMOTIONAL_PLAYER_CSP, GameBalance.EMOTIONAL_OPPONENT_CSP);
-            NpcCode npc = conflict.type().opponent().orElse(null);
+            String npc = conflict.type().opponent().orElse(null);
             RelationshipChanges rel = npc != null
                     ? new RelationshipChanges(npc, GameBalance.EMOTIONAL_CLOSENESS, 0, 0, GameBalance.EMOTIONAL_ROMANCE) : null;
             return new TacticEffects(csp, StatChanges.none(), rel, true, defaultReactionText());
@@ -69,7 +68,7 @@ public enum SkillBasedConflictTactics implements ConflictTactic {
         public TacticEffects calculateEffects(PlayerCharacter player, Conflict conflict, Relationships relationships) {
             CspChanges csp = new CspChanges(GameBalance.BOUNDARIES_PLAYER_CSP, GameBalance.BOUNDARIES_OPPONENT_CSP);
             StatChanges stat = new StatChanges(0, 0, 0, 0, 0, GameBalance.BOUNDARIES_SELF_ESTEEM);
-            NpcCode npc = conflict.type().opponent().orElse(null);
+            String npc = conflict.type().opponent().orElse(null);
             RelationshipChanges rel = npc != null
                     ? new RelationshipChanges(npc, 0, GameBalance.BOUNDARIES_TRUST, 0, 0) : null;
             return new TacticEffects(csp, stat, rel, true, defaultReactionText());
