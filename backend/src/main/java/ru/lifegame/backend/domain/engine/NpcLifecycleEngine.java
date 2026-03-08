@@ -4,7 +4,8 @@ import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
 import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain;
 import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain.EvaluatedAction;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NpcLifecycleEngine {
 
@@ -16,34 +17,23 @@ public class NpcLifecycleEngine {
         this.brain = brain;
     }
 
-    public List<NpcAction> hourlyTick(int currentHour, Map<String, Object> context) {
-        List<NpcAction> actions = new ArrayList<>();
+    public List<NpcEvent> hourlyTick(int currentHour) {
+        List<NpcEvent> events = new ArrayList<>();
         for (NpcInstance npc : registry.all()) {
-            var scheduleSlot = npc.spec().schedule().stream()
-                    .filter(s -> currentHour >= s.startHour() && currentHour < s.endHour())
-                    .findFirst();
-            if (scheduleSlot.isPresent()) {
-                var slot = scheduleSlot.get();
-                npc.setCurrentActivity(slot.activity());
-                npc.setCurrentLocation(slot.location());
-                npc.setCurrentAnimation(slot.animation());
-                actions.add(new NpcAction(npc.spec().id(), slot.activity(), slot.location(), slot.animation(), "schedule"));
-            } else {
-                Optional<EvaluatedAction> best = brain.evaluate(npc, context);
-                best.ifPresent(a -> {
-                    npc.setCurrentActivity(a.actionId());
-                    actions.add(new NpcAction(npc.spec().id(), a.actionId(), npc.currentLocation(), "idle", "utility_ai"));
-                });
+            npc.updateScheduleActivity(currentHour);
+            EvaluatedAction best = brain.evaluate(npc);
+            if (best != null && best.score() > 0.5) {
+                events.add(new NpcEvent(npc.spec().id(), best.actionId(), best.score()));
             }
         }
-        return actions;
+        return events;
     }
 
-    public void dailyTick(Map<String, Object> context) {
+    public void dailyTick() {
         for (NpcInstance npc : registry.all()) {
             npc.mood().dailyDecay();
         }
     }
 
-    public record NpcAction(String npcId, String activity, String location, String animation, String source) {}
+    public record NpcEvent(String npcId, String actionId, double score) {}
 }

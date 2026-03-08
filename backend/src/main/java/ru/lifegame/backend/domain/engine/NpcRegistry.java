@@ -13,10 +13,11 @@ public class NpcRegistry {
     private final Map<String, NpcInstance> instances = new LinkedHashMap<>();
     private final NpcRelationshipGraph relationshipGraph;
 
-    public NpcRegistry(List<NpcSpec> specs) {
+    public NpcRegistry(List<NpcSpec> specs, NpcUtilityBrain brain) {
         this.relationshipGraph = new NpcRelationshipGraph();
         for (NpcSpec spec : specs) {
-            instances.put(spec.id(), NpcInstance.fromSpec(spec));
+            NpcInstance instance = NpcInstance.fromSpec(spec);
+            instances.put(spec.id(), instance);
         }
     }
 
@@ -24,22 +25,21 @@ public class NpcRegistry {
         return Optional.ofNullable(instances.get(npcId));
     }
 
-    public NpcInstance getOrThrow(String npcId) {
-        return Optional.ofNullable(instances.get(npcId))
-                .orElseThrow(() -> new IllegalArgumentException("NPC not found: " + npcId));
-    }
-
-    public Collection<NpcInstance> all() {
-        return Collections.unmodifiableCollection(instances.values());
-    }
-
-    public List<NpcInstance> byType(String type) {
+    public List<NpcInstance> allNamed() {
         return instances.values().stream()
-                .filter(i -> i.spec().type().equals(type))
+                .filter(i -> "named".equals(i.spec().type()))
                 .collect(Collectors.toList());
+    }
+
+    public List<NpcInstance> all() {
+        return new ArrayList<>(instances.values());
     }
 
     public NpcRelationshipGraph relationshipGraph() {
         return relationshipGraph;
+    }
+
+    public int size() {
+        return instances.size();
     }
 }

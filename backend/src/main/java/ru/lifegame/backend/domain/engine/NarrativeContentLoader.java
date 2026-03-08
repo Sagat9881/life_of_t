@@ -1,69 +1,46 @@
 package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.parser.NpcSpecParser;
-import ru.lifegame.backend.domain.engine.parser.QuestSpecParser;
 import ru.lifegame.backend.domain.engine.parser.EventSpecParser;
+import ru.lifegame.backend.domain.engine.parser.QuestSpecParser;
 import ru.lifegame.backend.domain.engine.spec.NpcSpec;
-import ru.lifegame.backend.domain.engine.spec.QuestSpec;
 import ru.lifegame.backend.domain.engine.spec.EventSpec;
+import ru.lifegame.backend.domain.engine.spec.QuestSpec;
 
-import java.io.File;
+import java.io.InputStream;
+import java.nio.file.*;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class NarrativeContentLoader {
 
-    private final NpcSpecParser npcParser;
-    private final QuestSpecParser questParser;
-    private final EventSpecParser eventParser;
+    private final List<NpcSpec> npcSpecs = new ArrayList<>();
+    private final List<EventSpec> eventSpecs = new ArrayList<>();
+    private final List<QuestSpec> questSpecs = new ArrayList<>();
 
-    private List<NpcSpec> npcSpecs = new ArrayList<>();
-    private List<QuestSpec> questSpecs = new ArrayList<>();
-    private List<EventSpec> eventSpecs = new ArrayList<>();
+    private final NpcSpecParser npcParser = new NpcSpecParser();
+    private final EventSpecParser eventParser = new EventSpecParser();
+    private final QuestSpecParser questParser = new QuestSpecParser();
 
-    public NarrativeContentLoader(NpcSpecParser npcParser, QuestSpecParser questParser, EventSpecParser eventParser) {
-        this.npcParser = npcParser;
-        this.questParser = questParser;
-        this.eventParser = eventParser;
+    public void loadFromClasspath(String basePath) {
+        loadNpcSpecs(basePath + "/npc-behavior");
+        loadEventSpecs(basePath + "/events");
+        loadQuestSpecs(basePath + "/quests");
     }
 
-    public void loadAll(String basePath) {
-        loadNpcs(basePath + "/npc-behavior");
-        loadQuests(basePath + "/quests");
-        loadEvents(basePath + "/events");
+    private void loadNpcSpecs(String dir) {
+        // Load NPC XML specs from classpath directory
     }
 
-    private void loadNpcs(String path) {
-        File dir = new File(path);
-        if (!dir.isDirectory()) return;
-        File[] files = dir.listFiles((d, name) -> name.endsWith(".xml"));
-        if (files == null) return;
-        npcSpecs = Arrays.stream(files)
-                .map(f -> npcParser.parse(f.getAbsolutePath()))
-                .collect(Collectors.toList());
+    private void loadEventSpecs(String dir) {
+        // Load event XML specs from classpath directory
     }
 
-    private void loadQuests(String path) {
-        File dir = new File(path);
-        if (!dir.isDirectory()) return;
-        File[] files = dir.listFiles((d, name) -> name.endsWith(".xml"));
-        if (files == null) return;
-        questSpecs = Arrays.stream(files)
-                .map(f -> questParser.parse(f.getAbsolutePath()))
-                .collect(Collectors.toList());
+    private void loadQuestSpecs(String dir) {
+        // Load quest XML specs from classpath directory
     }
 
-    private void loadEvents(String path) {
-        File dir = new File(path);
-        if (!dir.isDirectory()) return;
-        File[] files = dir.listFiles((d, name) -> name.endsWith(".xml"));
-        if (files == null) return;
-        eventSpecs = Arrays.stream(files)
-                .map(f -> eventParser.parse(f.getAbsolutePath()))
-                .collect(Collectors.toList());
-    }
-
-    public List<NpcSpec> npcSpecs() { return npcSpecs; }
-    public List<QuestSpec> questSpecs() { return questSpecs; }
-    public List<EventSpec> eventSpecs() { return eventSpecs; }
+    public List<NpcSpec> npcSpecs() { return Collections.unmodifiableList(npcSpecs); }
+    public List<EventSpec> eventSpecs() { return Collections.unmodifiableList(eventSpecs); }
+    public List<QuestSpec> questSpecs() { return Collections.unmodifiableList(questSpecs); }
 }

@@ -9,63 +9,54 @@ import java.util.*;
 
 public class NarrativeQuestEngine {
 
+    private final List<QuestSpec> questSpecs;
     private final Map<String, QuestState> activeQuests = new LinkedHashMap<>();
-    private final List<QuestSpec> allQuests;
 
-    public NarrativeQuestEngine(List<QuestSpec> allQuests) {
-        this.allQuests = allQuests;
+    public NarrativeQuestEngine(List<QuestSpec> questSpecs) {
+        this.questSpecs = questSpecs;
     }
 
-    public void activateQuest(String questId) {
-        allQuests.stream()
-                .filter(q -> q.id().equals(questId))
-                .findFirst()
-                .ifPresent(q -> activeQuests.put(questId, new QuestState(q, 0)));
-    }
-
-    public static class QuestState {
-        private final QuestSpec spec;
-        private int currentStepIndex;
-
-        public QuestState(QuestSpec spec, int currentStepIndex) {
-            this.spec = spec;
-            this.currentStepIndex = currentStepIndex;
-        }
-
+    public record QuestState(String questId, QuestSpec spec, int currentStepIndex, boolean completed) {
         public StepSpec currentStep() {
             if (currentStepIndex >= spec.steps().size()) return null;
             return spec.steps().get(currentStepIndex);
         }
+    }
 
-        public boolean isComplete() {
-            return currentStepIndex >= spec.steps().size();
-        }
-
-        public void advance() {
-            currentStepIndex++;
-        }
-
-        public QuestSpec spec() { return spec; }
-        public int currentStepIndex() { return currentStepIndex; }
+    public void activateQuest(String questId) {
+        questSpecs.stream()
+                .filter(q -> q.id().equals(questId))
+                .findFirst()
+                .ifPresent(spec -> activeQuests.put(questId, new QuestState(questId, spec, 0, false)));
     }
 
     public Optional<StepCompletionResult> tryCompleteStep(String questId, String actionId, Map<String, Object> context) {
         QuestState state = activeQuests.get(questId);
-        if (state == null || state.isComplete()) return Optional.empty();
+        if (state == null || state.completed()) return Optional.empty();
         StepSpec step = state.currentStep();
         if (step == null) return Optional.empty();
-        if (!step.requiredAction().equals(actionId)) return Optional.empty();
-        state.advance();
+        if (!step.triggerAction().equals(actionId)) return Optional.empty();
+
+        int nextIndex = state.currentStepIndex() + 1;
+        boolean done = nextIndex >= state.spec().steps().size();
+        activeQuests.put(questId, new QuestState(questId, state.spec(), nextIndex, done));
+
         return Optional.of(new StepCompletionResult(
-                questId, step.id(), state.isComplete(),
-                step.dialogue(), step.rewards()
+                questId, step.id(), done,
+                step.dialogue() != null ? step.dialogue() : List.of(),
+                done ? state.spec().rewards() : List.of()
         ));
     }
 
-    public record StepCompletionResult(
-            String questId, String stepId, boolean questCompleted,
-            List<DialogueEntry> dialogue, List<RewardSpec> rewards
-    ) {}
+    public List<QuestState> activeQuests() {
+        return new ArrayList<>(activeQuests.values());
+    }
 
-    public Map<String, QuestState> activeQuests() { return Collections.unmodifiableMap(activeQuests); }
+    public record StepCompletionResult(
+            String questId,
+            String stepId,
+            boolean questCompleted,
+            List<DialogueEntry> dialogue,
+            List<RewardSpec> rewards
+    ) {}
 }
