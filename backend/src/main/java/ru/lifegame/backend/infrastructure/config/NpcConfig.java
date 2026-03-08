@@ -2,24 +2,27 @@ package ru.lifegame.backend.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.lifegame.backend.domain.npc.engine.ConditionEvaluator;
-import ru.lifegame.backend.domain.npc.engine.NpcLifecycleEngine;
-import ru.lifegame.backend.domain.npc.engine.NpcRegistry;
-import ru.lifegame.backend.domain.npc.engine.NpcUtilityBrain;
-import ru.lifegame.backend.domain.npc.graph.CrossNpcTriggerEngine;
-import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
+import ru.lifegame.backend.domain.npc.engine.*;
+import ru.lifegame.backend.domain.npc.graph.*;
 import ru.lifegame.backend.infrastructure.narrative.NarrativeContentLoader;
 
 /**
  * Spring configuration for NPC engine beans.
- * All concrete NPC data comes from XML — this config only wires abstract engine components.
+ * All NPC content is loaded from XML — no hardcoded NPC names here.
  */
 @Configuration
 public class NpcConfig {
 
     @Bean
     public NarrativeContentLoader narrativeContentLoader() {
-        return new NarrativeContentLoader();
+        NarrativeContentLoader loader = new NarrativeContentLoader();
+        loader.loadFromClasspath("narrative");
+        return loader;
+    }
+
+    @Bean
+    public NpcRegistry npcRegistry(NarrativeContentLoader loader) {
+        return NpcRegistry.fromSpecs(loader.getNpcSpecs());
     }
 
     @Bean
@@ -28,20 +31,13 @@ public class NpcConfig {
     }
 
     @Bean
-    public NpcUtilityBrain npcUtilityBrain(ConditionEvaluator conditionEvaluator) {
-        return new NpcUtilityBrain(conditionEvaluator);
-    }
-
-    @Bean
-    public NpcRegistry npcRegistry(NarrativeContentLoader loader) {
-        var specs = loader.loadAllNpcSpecsFromDirectory("narrative/npc-behavior");
-        return NpcRegistry.fromSpecs(specs);
+    public NpcUtilityBrain npcUtilityBrain(ConditionEvaluator evaluator) {
+        return new NpcUtilityBrain(evaluator);
     }
 
     @Bean
     public NpcRelationshipGraph npcRelationshipGraph(NarrativeContentLoader loader) {
-        var edges = loader.loadRelationshipEdges("narrative/npc-relationships.xml");
-        return NpcRelationshipGraph.fromEdges(edges);
+        return NpcRelationshipGraph.fromEdges(loader.getRelationshipEdges());
     }
 
     @Bean
@@ -53,7 +49,7 @@ public class NpcConfig {
     public NpcLifecycleEngine npcLifecycleEngine(
             NpcRegistry registry,
             NpcUtilityBrain brain,
-            CrossNpcTriggerEngine crossNpcTriggerEngine) {
-        return new NpcLifecycleEngine(registry, brain, crossNpcTriggerEngine);
+            CrossNpcTriggerEngine crossNpcTrigger) {
+        return new NpcLifecycleEngine(registry, brain, crossNpcTrigger);
     }
 }

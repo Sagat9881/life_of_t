@@ -1,8 +1,10 @@
 package ru.lifegame.backend.application.view;
 
+import java.util.Map;
+
 /**
- * DTO representing a single NPC's current state for the frontend.
- * Contains everything the renderer needs to display an NPC.
+ * DTO representing current NPC state for frontend rendering.
+ * Contains everything the client needs to display and animate an NPC.
  */
 public record NpcActivityView(
     String npcId,
@@ -10,9 +12,8 @@ public record NpcActivityView(
     String category,
     String currentActivity,
     String currentLocation,
-    String animationKey,
-    int happiness,
-    int energy,
+    String animation,
+    Map<String, Integer> mood,
     boolean isAvailableForInteraction
 ) {
 }
