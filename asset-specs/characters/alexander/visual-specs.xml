@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Life of T — Alexander Visual Spec v3.0.0
+    Life of T — Alexander Visual Spec v3.1.0
     Extends: abstract/entities/human@1.0
     Canvas: 128×192 | displayScale: 1.5
     Character: Alexander — 30yo, IT engineer, short dark-brown hair, hazel eyes,
                navy polo shirt, dark jeans, sneakers, smart watch.
-               Calm, logical, supportive. Partner of Tanya.
 -->
-<asset-spec extends="abstract/entities/human@1.0" version="3.0.0">
+<asset-spec extends="abstract/entities/human@1.0" version="3.1.0">
     <meta>
         <entity-type>characters</entity-type>
         <entity-name>alexander</entity-name>
-        <version>3.0.0</version>
+        <version>3.1.0</version>
         <display-scale>1.5</display-scale>
     </meta>
 
@@ -22,129 +21,112 @@
         <color name="$hair_base" value="#3A2818"/>
         <color name="$hair_shadow" value="#281810"/>
         <color name="$hair_highlight" value="#4A3828"/>
-        <color name="$clothing_primary" value="#283848"/><!-- navy polo -->
+        <color name="$clothing_primary" value="#283848"/>
         <color name="$clothing_primary_shadow" value="#182838"/>
         <color name="$clothing_primary_highlight" value="#384858"/>
-        <color name="$clothing_secondary" value="#283848"/><!-- same for polo collar -->
+        <color name="$clothing_secondary" value="#283848"/>
         <color name="$clothing_secondary_shadow" value="#182838"/>
         <color name="$clothing_secondary_highlight" value="#405060"/>
-        <color name="$pants_base" value="#303848"/><!-- dark jeans -->
+        <color name="$pants_base" value="#303848"/>
         <color name="$pants_shadow" value="#202830"/>
         <color name="$pants_highlight" value="#404858"/>
-        <color name="$shoe_base" value="#404040"/><!-- dark sneakers -->
+        <color name="$shoe_base" value="#404040"/>
         <color name="$shoe_shadow" value="#282828"/>
         <color name="$shoe_highlight" value="#585858"/>
-        <color name="$eye_color" value="#6B8E23"/><!-- hazel-olive -->
+        <color name="$eye_color" value="#6B8E23"/>
         <color name="$eye_highlight" value="#8AAE43"/>
         <color name="$lip_color" value="#C08070"/>
         <color name="$brow_color" value="#3A2818"/>
-        <color name="$accessory_base" value="#303030"/><!-- smart watch -->
-        <color name="$accessory_highlight" value="#50A0F0"/><!-- watch screen -->
+        <color name="$accessory_base" value="#303030"/>
+        <color name="$accessory_highlight" value="#50A0F0"/>
     </color-palette>
 
     <layer-overrides>
-        <!-- === FACE === -->
         <layer id="face" replace="true">
             <pixel-data>
-                <!-- LEFT EYE -->
-                <rect x="42" y="30" w="16" h="10" color="#FFFFFF"/>
-                <rect x="44" y="28" w="12" h="13" color="$eye_color"/>
-                <rect x="46" y="30" w="9" h="9" color="#7A9E33"/>
-                <rect x="47" y="31" w="6" h="6" color="$eye_highlight"/>
-                <rect x="49" y="32" w="3" h="4" color="#101010"/>
-                <rect x="45" y="28" w="3" h="3" color="#FFFFFF"/>
-                <hline x="42" y="27" len="16" color="$skin_shadow"/>
-                <hline x="42" y="39" len="16" color="$skin_shadow"/>
-                <!-- RIGHT EYE -->
-                <rect x="70" y="30" w="16" h="10" color="#FFFFFF"/>
-                <rect x="72" y="28" w="12" h="13" color="$eye_color"/>
-                <rect x="74" y="30" w="9" h="9" color="#7A9E33"/>
-                <rect x="75" y="31" w="6" h="6" color="$eye_highlight"/>
-                <rect x="77" y="32" w="3" h="4" color="#101010"/>
-                <rect x="73" y="28" w="3" h="3" color="#FFFFFF"/>
-                <hline x="70" y="27" len="16" color="$skin_shadow"/>
-                <hline x="70" y="39" len="16" color="$skin_shadow"/>
-                <!-- EYEBROWS — thicker, straight, dark brown -->
-                <rect x="42" y="23" w="16" h="3" color="$brow_color"/>
-                <rect x="70" y="23" w="16" h="3" color="$brow_color"/>
-                <!-- NOSE — slightly wider, masculine -->
-                <rect x="58" y="38" w="6" h="5" color="$skin_shadow"/>
-                <hline x="54" y="44" len="14" color="#D09060"/>
-                <rect x="54" y="45" w="4" h="2" color="#B07050"/>
-                <rect x="64" y="45" w="4" h="2" color="#B07050"/>
-                <!-- LIPS — thinner, neutral -->
-                <hline x="54" y="48" len="16" color="#A87060"/>
-                <rect x="56" y="48" w="12" h="2" color="$lip_color"/>
-                <hline x="54" y="50" len="16" color="#D09080"/>
-                <!-- STUBBLE — subtle 5 o'clock shadow -->
-                <rect x="38" y="44" w="8" h="6" color="#D09060"/><!-- left jaw -->
-                <rect x="82" y="44" w="8" h="6" color="#D09060"/><!-- right jaw -->
-                <rect x="54" y="50" w="16" h="4" color="#D09060"/><!-- chin -->
+                <rect x="44" y="28" w="14" h="10" color="#FFFFFF"/>
+                <rect x="46" y="26" w="10" h="13" color="$eye_color"/>
+                <rect x="48" y="28" w="7" h="8" color="#7A9E33"/>
+                <rect x="49" y="29" w="5" h="5" color="$eye_highlight"/>
+                <rect x="50" y="30" w="3" h="4" color="#101010"/>
+                <rect x="47" y="26" w="3" h="3" color="#FFFFFF"/>
+                <hline x="44" y="25" len="14" color="$skin_shadow"/>
+                <hline x="44" y="37" len="14" color="$skin_shadow"/>
+                <rect x="70" y="28" w="14" h="10" color="#FFFFFF"/>
+                <rect x="72" y="26" w="10" h="13" color="$eye_color"/>
+                <rect x="74" y="28" w="7" h="8" color="#7A9E33"/>
+                <rect x="75" y="29" w="5" h="5" color="$eye_highlight"/>
+                <rect x="76" y="30" w="3" h="4" color="#101010"/>
+                <rect x="73" y="26" w="3" h="3" color="#FFFFFF"/>
+                <hline x="70" y="25" len="14" color="$skin_shadow"/>
+                <hline x="70" y="37" len="14" color="$skin_shadow"/>
+                <rect x="44" y="22" w="14" h="3" color="$brow_color"/>
+                <rect x="70" y="22" w="14" h="3" color="$brow_color"/>
+                <rect x="60" y="36" w="6" h="5" color="$skin_shadow"/>
+                <hline x="56" y="42" len="14" color="#D09060"/>
+                <rect x="56" y="43" w="4" h="2" color="#B07050"/>
+                <rect x="66" y="43" w="4" h="2" color="#B07050"/>
+                <hline x="56" y="46" len="14" color="#A87060"/>
+                <rect x="58" y="46" w="10" h="2" color="$lip_color"/>
+                <hline x="56" y="48" len="14" color="#D09080"/>
+                <rect x="38" y="42" w="8" h="6" color="#D09060"/>
+                <rect x="82" y="42" w="8" h="6" color="#D09060"/>
+                <rect x="56" y="48" w="14" h="4" color="#D09060"/>
             </pixel-data>
         </layer>
 
-        <!-- === HAIR — short, dark brown, neat === -->
         <layer id="hair_front" replace="true">
             <pixel-data>
-                <rect x="36" y="10" w="56" h="12" color="$hair_base"/>
-                <hline x="40" y="10" len="48" color="$hair_highlight"/>
-                <rect x="36" y="14" w="8" h="8" color="$hair_shadow"/><!-- L temple -->
-                <rect x="84" y="14" w="8" h="8" color="$hair_shadow"/><!-- R temple -->
-                <hline x="42" y="11" len="40" color="#4A3828"/>
-                <!-- Short sides -->
-                <rect x="32" y="18" w="6" h="10" color="$hair_shadow"/>
-                <rect x="90" y="18" w="6" h="10" color="$hair_shadow"/>
+                <rect x="36" y="6" w="56" h="12" color="$hair_base"/>
+                <hline x="40" y="6" len="48" color="$hair_highlight"/>
+                <rect x="36" y="12" w="8" h="8" color="$hair_shadow"/>
+                <rect x="84" y="12" w="8" h="8" color="$hair_shadow"/>
+                <hline x="42" y="7" len="40" color="#4A3828"/>
+                <rect x="32" y="16" w="6" h="10" color="$hair_shadow"/>
+                <rect x="90" y="16" w="6" h="10" color="$hair_shadow"/>
             </pixel-data>
         </layer>
 
         <layer id="hair_back" replace="true">
             <pixel-data>
-                <!-- Minimal back hair — short cut -->
-                <rect x="34" y="16" w="4" h="8" color="$hair_shadow"/>
-                <rect x="90" y="16" w="4" h="8" color="$hair_shadow"/>
+                <rect x="34" y="14" w="4" h="8" color="$hair_shadow"/>
+                <rect x="90" y="14" w="4" h="8" color="$hair_shadow"/>
             </pixel-data>
         </layer>
 
-        <!-- === ACCESSORY — smart watch === -->
         <layer id="accessory" follows="hand_left" replace="true">
             <pixel-data>
                 <rect x="16" y="116" w="10" h="6" color="$accessory_base"/>
                 <rect x="18" y="117" w="6" h="4" color="$accessory_highlight"/>
-                <rect x="16" y="114" w="10" h="2" color="#404040"/><!-- strap upper -->
-                <rect x="16" y="122" w="10" h="2" color="#404040"/><!-- strap lower -->
+                <rect x="16" y="114" w="10" h="2" color="#404040"/>
+                <rect x="16" y="122" w="10" h="2" color="#404040"/>
             </pixel-data>
         </layer>
 
-        <!-- === TORSO — navy polo === -->
         <layer id="torso" replace="true">
             <pixel-data>
-                <rect x="26" y="64" w="76" h="40" color="$clothing_primary"/>
-                <rect x="48" y="64" w="32" h="40" color="$clothing_primary_highlight"/><!-- center -->
-                <rect x="26" y="64" w="10" h="40" color="$clothing_primary_shadow"/><!-- L shadow -->
-                <rect x="92" y="64" w="10" h="40" color="$clothing_primary_shadow"/><!-- R shadow -->
-                <!-- Polo collar -->
-                <rect x="44" y="60" w="40" h="6" color="$clothing_secondary_highlight"/>
-                <hline x="46" y="60" len="36" color="#506070"/><!-- collar top -->
-                <!-- Polo placket -->
+                <rect x="32" y="64" w="64" h="40" color="$clothing_primary"/>
+                <rect x="50" y="64" w="28" h="40" color="$clothing_primary_highlight"/>
+                <rect x="32" y="64" w="10" h="40" color="$clothing_primary_shadow"/>
+                <rect x="86" y="64" w="10" h="40" color="$clothing_primary_shadow"/>
+                <rect x="46" y="60" w="36" h="6" color="$clothing_secondary_highlight"/>
+                <hline x="48" y="60" len="32" color="#506070"/>
                 <rect x="62" y="64" w="4" h="16" color="$clothing_primary_shadow"/>
-                <rect x="62" y="68" w="2" h="2" color="#606060"/><!-- button 1 -->
-                <rect x="62" y="74" w="2" h="2" color="#606060"/><!-- button 2 -->
-                <!-- Bottom hem -->
-                <hline x="28" y="103" len="72" color="$clothing_primary_shadow"/>
+                <rect x="62" y="68" w="2" h="2" color="#606060"/>
+                <rect x="62" y="74" w="2" h="2" color="#606060"/>
+                <hline x="34" y="103" len="60" color="$clothing_primary_shadow"/>
             </pixel-data>
         </layer>
 
-        <!-- === PELVIS — dark jeans === -->
         <layer id="pelvis" replace="true">
             <pixel-data>
-                <rect x="28" y="104" w="72" h="8" color="$pants_base"/>
-                <hline x="28" y="104" len="72" color="$pants_shadow"/>
-                <rect x="48" y="105" w="32" h="6" color="$pants_highlight"/>
-                <rect x="28" y="105" w="8" h="6" color="$pants_shadow"/>
-                <rect x="92" y="105" w="8" h="6" color="$pants_shadow"/>
-                <!-- Belt -->
-                <rect x="30" y="104" w="68" h="3" color="#282020"/>
-                <rect x="62" y="104" w="4" h="3" color="#808080"/><!-- buckle -->
+                <rect x="36" y="104" w="56" h="10" color="$pants_base"/>
+                <hline x="36" y="104" len="56" color="$pants_shadow"/>
+                <rect x="52" y="105" w="24" h="8" color="$pants_highlight"/>
+                <rect x="36" y="105" w="8" h="8" color="$pants_shadow"/>
+                <rect x="84" y="105" w="8" h="8" color="$pants_shadow"/>
+                <rect x="38" y="104" w="52" h="3" color="#282020"/>
+                <rect x="62" y="104" w="4" h="3" color="#808080"/>
             </pixel-data>
         </layer>
     </layer-overrides>

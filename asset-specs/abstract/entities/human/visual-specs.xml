@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Life of T — Abstract Human Visual Spec v1.1
+    Canvas: 128×192 (front-facing pixel-art character)
+    22 layers with FULL pixel-data using $-variable colors.
+    Concrete specs override colors via <color-palette> and can replace
+    individual layers via <layer-overrides>.
+-->
 <asset-spec abstract="true" version="1.0">
     <meta>
         <entity-type>entities</entity-type>
@@ -6,52 +13,247 @@
         <version>1.0</version>
         <canvas width="128" height="192" displayScale="1.5"/>
         <description>
-            Abstract human template (22 layers, 5 animations).
-            Canvas: 128×192px (64×96 body in 50×50 grid, ×2 upscale).
-            All concrete human specs extend this.
+            Abstract human template v1.1 — 22 layers with pixel data, 5 animations.
+            Canvas: 128×192px. All concrete human specs extend this.
         </description>
     </meta>
 
+    <color-palette>
+        <color name="$skin_base" value="#F0C098"/>
+        <color name="$skin_shadow" value="#D8A078"/>
+        <color name="$skin_highlight" value="#F8D0B0"/>
+        <color name="$clothing_primary" value="#6090C0"/>
+        <color name="$clothing_primary_shadow" value="#4070A0"/>
+        <color name="$clothing_primary_highlight" value="#80B0E0"/>
+        <color name="$clothing_secondary" value="#4070A0"/>
+        <color name="$clothing_secondary_shadow" value="#305880"/>
+        <color name="$clothing_secondary_highlight" value="#6090C0"/>
+        <color name="$pants_base" value="#404860"/>
+        <color name="$pants_shadow" value="#303848"/>
+        <color name="$pants_highlight" value="#506078"/>
+        <color name="$shoe_base" value="#504030"/>
+        <color name="$shoe_shadow" value="#382818"/>
+        <color name="$shoe_highlight" value="#685040"/>
+        <color name="$hair_base" value="#3A2818"/>
+        <color name="$hair_shadow" value="#281810"/>
+        <color name="$hair_highlight" value="#4A3828"/>
+        <color name="$eye_color" value="#4488AA"/>
+        <color name="$eye_highlight" value="#66AACC"/>
+        <color name="$lip_color" value="#D08878"/>
+        <color name="$brow_color" value="#3A2818"/>
+    </color-palette>
+
     <layers>
-        <!-- Z=0-2: Lower body -->
-        <layer id="foot_right" type="base" z-order="0" width="128" height="192"/>
-        <layer id="shin_right" type="base" z-order="1" width="128" height="192"/>
-        <layer id="thigh_right" type="base" z-order="2" width="128" height="192"/>
+        <layer id="foot_right" type="base" z-order="0" width="128" height="192">
+            <pixel-data>
+                <rect x="68" y="174" w="30" h="12" color="$shoe_base"/>
+                <rect x="96" y="176" w="6" h="6" color="$shoe_base"/>
+                <hline x="68" y="174" len="30" color="$shoe_highlight"/>
+                <hline x="66" y="185" len="34" color="$shoe_shadow"/>
+                <rect x="70" y="178" w="24" h="4" color="$shoe_shadow"/>
+            </pixel-data>
+        </layer>
 
-        <!-- Z=3: Pelvis/hip core -->
-        <layer id="pelvis" type="base" z-order="3" width="128" height="192"/>
+        <layer id="shin_right" type="base" z-order="1" width="128" height="192">
+            <pixel-data>
+                <rect x="72" y="144" w="18" h="32" color="$pants_base"/>
+                <rect x="78" y="144" w="6" h="32" color="$pants_highlight"/>
+                <rect x="72" y="144" w="4" h="32" color="$pants_shadow"/>
+                <hline x="72" y="144" len="18" color="$pants_shadow"/>
+            </pixel-data>
+        </layer>
 
-        <!-- Z=4-6: Left leg in front of pelvis -->
-        <layer id="thigh_left" type="base" z-order="4" width="128" height="192"/>
-        <layer id="shin_left" type="base" z-order="5" width="128" height="192"/>
-        <layer id="foot_left" type="base" z-order="6" width="128" height="192"/>
+        <layer id="thigh_right" type="base" z-order="2" width="128" height="192">
+            <pixel-data>
+                <rect x="68" y="112" w="24" h="34" color="$pants_base"/>
+                <rect x="76" y="112" w="8" h="34" color="$pants_highlight"/>
+                <rect x="68" y="112" w="4" h="34" color="$pants_shadow"/>
+                <hline x="68" y="112" len="24" color="$pants_shadow"/>
+            </pixel-data>
+        </layer>
 
-        <!-- Z=7: Torso -->
-        <layer id="torso" type="base" z-order="7" width="128" height="192"/>
+        <layer id="pelvis" type="base" z-order="3" width="128" height="192">
+            <pixel-data>
+                <rect x="36" y="104" w="56" h="10" color="$pants_base"/>
+                <hline x="36" y="104" len="56" color="$pants_shadow"/>
+                <rect x="52" y="105" w="24" h="8" color="$pants_highlight"/>
+                <rect x="36" y="105" w="8" h="8" color="$pants_shadow"/>
+                <rect x="84" y="105" w="8" h="8" color="$pants_shadow"/>
+            </pixel-data>
+        </layer>
 
-        <!-- Z=8-9: Right arm behind torso -->
-        <layer id="upper_arm_right" type="base" z-order="8" width="128" height="192"/>
-        <layer id="forearm_right" type="base" z-order="9" width="128" height="192"/>
-        <layer id="hand_right" type="base" z-order="10" width="128" height="192"/>
+        <layer id="thigh_left" type="base" z-order="4" width="128" height="192">
+            <pixel-data>
+                <rect x="36" y="112" w="24" h="34" color="$pants_base"/>
+                <rect x="44" y="112" w="8" h="34" color="$pants_highlight"/>
+                <rect x="56" y="112" w="4" h="34" color="$pants_shadow"/>
+                <hline x="36" y="112" len="24" color="$pants_shadow"/>
+            </pixel-data>
+        </layer>
 
-        <!-- Z=11-13: Left arm in front -->
-        <layer id="upper_arm_left" type="base" z-order="11" width="128" height="192"/>
-        <layer id="forearm_left" type="base" z-order="12" width="128" height="192"/>
-        <layer id="hand_left" type="base" z-order="13" width="128" height="192"/>
+        <layer id="shin_left" type="base" z-order="5" width="128" height="192">
+            <pixel-data>
+                <rect x="38" y="144" w="18" h="32" color="$pants_base"/>
+                <rect x="44" y="144" w="6" h="32" color="$pants_highlight"/>
+                <rect x="52" y="144" w="4" h="32" color="$pants_shadow"/>
+                <hline x="38" y="144" len="18" color="$pants_shadow"/>
+            </pixel-data>
+        </layer>
 
-        <!-- Z=14-16: Head stack -->
-        <layer id="neck" type="base" z-order="14" width="128" height="192"/>
-        <layer id="head" type="base" z-order="15" width="128" height="192"/>
-        <layer id="face" type="base" z-order="16" width="128" height="192"/>
+        <layer id="foot_left" type="base" z-order="6" width="128" height="192">
+            <pixel-data>
+                <rect x="30" y="174" w="30" h="12" color="$shoe_base"/>
+                <rect x="26" y="176" w="6" h="6" color="$shoe_base"/>
+                <hline x="30" y="174" len="30" color="$shoe_highlight"/>
+                <hline x="28" y="185" len="34" color="$shoe_shadow"/>
+                <rect x="34" y="178" w="24" h="4" color="$shoe_shadow"/>
+            </pixel-data>
+        </layer>
 
-        <!-- Z=17-19: Hair & accessories -->
-        <layer id="hair_back" type="overlay" z-order="17" width="128" height="192"/>
-        <layer id="hair_front" type="overlay" z-order="18" width="128" height="192"/>
+        <layer id="torso" type="base" z-order="7" width="128" height="192">
+            <pixel-data>
+                <rect x="32" y="64" w="64" h="40" color="$clothing_primary"/>
+                <rect x="50" y="64" w="28" h="40" color="$clothing_primary_highlight"/>
+                <rect x="32" y="64" w="10" h="40" color="$clothing_primary_shadow"/>
+                <rect x="86" y="64" w="10" h="40" color="$clothing_primary_shadow"/>
+                <hline x="34" y="64" len="60" color="$clothing_primary_highlight"/>
+                <hline x="34" y="103" len="60" color="$clothing_primary_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="upper_arm_right" type="base" z-order="8" width="128" height="192">
+            <pixel-data>
+                <rect x="96" y="66" w="14" h="26" color="$clothing_secondary"/>
+                <rect x="100" y="66" w="6" h="26" color="$clothing_secondary_highlight"/>
+                <rect x="96" y="66" w="4" h="26" color="$clothing_secondary_shadow"/>
+                <hline x="96" y="66" len="14" color="$clothing_secondary_highlight"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="forearm_right" type="base" z-order="9" width="128" height="192">
+            <pixel-data>
+                <rect x="98" y="92" w="12" h="24" color="$skin_base"/>
+                <rect x="102" y="92" w="4" h="24" color="$skin_highlight"/>
+                <rect x="98" y="92" w="3" h="24" color="$skin_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="hand_right" type="base" z-order="10" width="128" height="192">
+            <pixel-data>
+                <rect x="98" y="116" w="12" h="10" color="$skin_base"/>
+                <rect x="100" y="118" w="8" h="6" color="$skin_highlight"/>
+                <hline x="98" y="125" len="12" color="$skin_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="upper_arm_left" type="base" z-order="11" width="128" height="192">
+            <pixel-data>
+                <rect x="18" y="66" w="14" h="26" color="$clothing_secondary"/>
+                <rect x="22" y="66" w="6" h="26" color="$clothing_secondary_highlight"/>
+                <rect x="28" y="66" w="4" h="26" color="$clothing_secondary_shadow"/>
+                <hline x="18" y="66" len="14" color="$clothing_secondary_highlight"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="forearm_left" type="base" z-order="12" width="128" height="192">
+            <pixel-data>
+                <rect x="18" y="92" w="12" h="24" color="$skin_base"/>
+                <rect x="22" y="92" w="4" h="24" color="$skin_highlight"/>
+                <rect x="27" y="92" w="3" h="24" color="$skin_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="hand_left" type="base" z-order="13" width="128" height="192">
+            <pixel-data>
+                <rect x="18" y="116" w="12" h="10" color="$skin_base"/>
+                <rect x="20" y="118" w="8" h="6" color="$skin_highlight"/>
+                <hline x="18" y="125" len="12" color="$skin_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="neck" type="base" z-order="14" width="128" height="192">
+            <pixel-data>
+                <rect x="52" y="52" w="24" h="14" color="$skin_base"/>
+                <rect x="58" y="52" w="12" h="14" color="$skin_highlight"/>
+                <rect x="52" y="52" w="4" h="14" color="$skin_shadow"/>
+                <rect x="72" y="52" w="4" h="14" color="$skin_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="head" type="base" z-order="15" width="128" height="192">
+            <pixel-data>
+                <rect x="38" y="10" w="52" h="44" color="$skin_base"/>
+                <rect x="44" y="10" w="40" h="12" color="$skin_highlight"/>
+                <rect x="38" y="20" w="6" h="28" color="$skin_shadow"/>
+                <rect x="84" y="20" w="6" h="28" color="$skin_shadow"/>
+                <rect x="40" y="46" w="48" h="6" color="$skin_base"/>
+                <rect x="44" y="50" w="40" h="4" color="$skin_base"/>
+                <rect x="50" y="52" w="28" h="3" color="$skin_shadow"/>
+                <rect x="34" y="26" w="6" h="14" color="$skin_base"/>
+                <rect x="34" y="28" w="4" h="10" color="$skin_shadow"/>
+                <rect x="88" y="26" w="6" h="14" color="$skin_base"/>
+                <rect x="90" y="28" w="4" h="10" color="$skin_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="face" type="base" z-order="16" width="128" height="192">
+            <pixel-data>
+                <rect x="44" y="28" w="14" h="10" color="#FFFFFF"/>
+                <rect x="46" y="26" w="10" h="13" color="$eye_color"/>
+                <rect x="48" y="28" w="7" h="8" color="$eye_highlight"/>
+                <rect x="50" y="30" w="3" h="4" color="#101010"/>
+                <rect x="47" y="26" w="3" h="3" color="#FFFFFF"/>
+                <hline x="44" y="25" len="14" color="$skin_shadow"/>
+                <hline x="44" y="37" len="14" color="$skin_shadow"/>
+                <rect x="70" y="28" w="14" h="10" color="#FFFFFF"/>
+                <rect x="72" y="26" w="10" h="13" color="$eye_color"/>
+                <rect x="74" y="28" w="7" h="8" color="$eye_highlight"/>
+                <rect x="76" y="30" w="3" h="4" color="#101010"/>
+                <rect x="73" y="26" w="3" h="3" color="#FFFFFF"/>
+                <hline x="70" y="25" len="14" color="$skin_shadow"/>
+                <hline x="70" y="37" len="14" color="$skin_shadow"/>
+                <rect x="44" y="22" w="14" h="2" color="$brow_color"/>
+                <rect x="70" y="22" w="14" h="2" color="$brow_color"/>
+                <rect x="60" y="36" w="4" h="4" color="$skin_shadow"/>
+                <hline x="57" y="42" len="10" color="$skin_shadow"/>
+                <hline x="55" y="46" len="14" color="$lip_color"/>
+                <rect x="57" y="46" w="10" h="2" color="$lip_color"/>
+                <hline x="55" y="48" len="14" color="$skin_highlight"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="hair_back" type="overlay" z-order="17" width="128" height="192">
+            <pixel-data>
+                <rect x="34" y="50" w="8" h="14" color="$hair_shadow"/>
+                <rect x="86" y="50" w="8" h="14" color="$hair_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="hair_front" type="overlay" z-order="18" width="128" height="192">
+            <pixel-data>
+                <rect x="36" y="6" w="56" h="14" color="$hair_base"/>
+                <hline x="40" y="6" len="48" color="$hair_highlight"/>
+                <rect x="34" y="14" w="8" h="16" color="$hair_shadow"/>
+                <rect x="86" y="14" w="8" h="16" color="$hair_shadow"/>
+            </pixel-data>
+        </layer>
+
         <layer id="accessory" type="overlay" z-order="19" width="128" height="192"/>
 
-        <!-- Z=20-21: Effects -->
-        <layer id="shadow" type="effect" z-order="20" width="128" height="192"/>
-        <layer id="highlight" type="effect" z-order="21" width="128" height="192"/>
+        <layer id="shadow" type="effect" z-order="20" width="128" height="192">
+            <pixel-data>
+                <rect x="26" y="184" w="76" h="4" color="#00000040"/>
+                <rect x="32" y="186" w="64" h="4" color="#00000030"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="highlight" type="effect" z-order="21" width="128" height="192">
+            <pixel-data>
+                <vline x="38" y="12" len="40" color="#FFFFFF18"/>
+                <vline x="18" y="68" len="56" color="#FFFFFF18"/>
+                <vline x="36" y="114" len="60" color="#FFFFFF18"/>
+            </pixel-data>
+        </layer>
 
         <!-- Layer 'accessory' in concrete specs SHOULD use follows="neck" for necklaces/collars -->
         <!-- Layer 'accessory' SHOULD use follows="head" for headbands/hats -->
@@ -59,112 +261,59 @@
         <!-- Layer 'bracelet_*' SHOULD use follows="hand_left" / follows="hand_right" -->
     </layers>
 
-    <color-palette>
-        <primary>
-            <color hex="#FFE0BD"/>
-            <color hex="#FFA07A"/>
-            <color hex="#8B4513"/>
-            <color hex="#2F4F4F"/>
-            <color hex="#FFFFFF"/>
-        </primary>
-        <secondary>
-            <color hex="#FFD700"/>
-            <color hex="#FF6347"/>
-            <color hex="#4682B4"/>
-            <color hex="#32CD32"/>
-            <color hex="#DDA0DD"/>
-        </secondary>
-    </color-palette>
-
     <animations>
-        <!--
-            IDLE: 16 frames @ 6fps = 2.67s loop
-            Breathing cycle with visible blink.
-
-            BODY COHERENCE RULE: pelvis, torso, neck, head, face, hair_back,
-            hair_front, upper_arm_right, upper_arm_left ALWAYS move together.
-            This prevents any gaps between body parts.
-
-            Breathing: 2px amplitude (frames 0-7 inhale up, 8-15 exhale down)
-            Blink: 3-frame sequence at frames 5-6 and 12-13 (face shifts down 2px)
-        -->
         <animation name="idle" frames="16" fps="6" loop="true"
                    frame-width="128" frame-height="192">
-            <!-- Inhale phase: upper body rises 1px then 2px -->
             <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1; accessory:0,-1"/>
-            <frame index="2" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; accessory:0,-2"/>
-            <frame index="3" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; accessory:0,-2"/>
-            <frame index="4" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1; accessory:0,-1"/>
-            <!-- Blink 1: face drops 2px relative to head (eyes close) -->
+            <frame index="1" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1; forearm_right:0,-1; forearm_left:0,-1; hand_right:0,-1; hand_left:0,-1; accessory:0,-1"/>
+            <frame index="2" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; forearm_right:0,-2; forearm_left:0,-2; hand_right:0,-2; hand_left:0,-2; accessory:0,-2"/>
+            <frame index="3" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; forearm_right:0,-2; forearm_left:0,-2; hand_right:0,-2; hand_left:0,-2; accessory:0,-2"/>
+            <frame index="4" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1; forearm_right:0,-1; forearm_left:0,-1; hand_right:0,-1; hand_left:0,-1; accessory:0,-1"/>
             <frame index="5" layer-offsets="face:0,2"/>
             <frame index="6" layer-offsets="face:0,2"/>
             <frame index="7" layer-offsets=""/>
-            <!-- Exhale phase: upper body drops 1px then 2px -->
-            <frame index="8" layer-offsets="pelvis:0,1; torso:0,1; neck:0,1; head:0,1; face:0,1; hair_back:0,1; hair_front:0,1; upper_arm_right:0,1; upper_arm_left:0,1; accessory:0,1"/>
-            <frame index="9" layer-offsets="pelvis:0,2; torso:0,2; neck:0,2; head:0,2; face:0,2; hair_back:0,2; hair_front:0,2; upper_arm_right:0,2; upper_arm_left:0,2; accessory:0,2"/>
-            <frame index="10" layer-offsets="pelvis:0,2; torso:0,2; neck:0,2; head:0,2; face:0,2; hair_back:0,2; hair_front:0,2; upper_arm_right:0,2; upper_arm_left:0,2; accessory:0,2"/>
-            <frame index="11" layer-offsets="pelvis:0,1; torso:0,1; neck:0,1; head:0,1; face:0,1; hair_back:0,1; hair_front:0,1; upper_arm_right:0,1; upper_arm_left:0,1; accessory:0,1"/>
-            <!-- Blink 2: face drops 2px (eyes close) -->
+            <frame index="8" layer-offsets="pelvis:0,1; torso:0,1; neck:0,1; head:0,1; face:0,1; hair_back:0,1; hair_front:0,1; upper_arm_right:0,1; upper_arm_left:0,1; forearm_right:0,1; forearm_left:0,1; hand_right:0,1; hand_left:0,1; accessory:0,1"/>
+            <frame index="9" layer-offsets="pelvis:0,2; torso:0,2; neck:0,2; head:0,2; face:0,2; hair_back:0,2; hair_front:0,2; upper_arm_right:0,2; upper_arm_left:0,2; forearm_right:0,2; forearm_left:0,2; hand_right:0,2; hand_left:0,2; accessory:0,2"/>
+            <frame index="10" layer-offsets="pelvis:0,2; torso:0,2; neck:0,2; head:0,2; face:0,2; hair_back:0,2; hair_front:0,2; upper_arm_right:0,2; upper_arm_left:0,2; forearm_right:0,2; forearm_left:0,2; hand_right:0,2; hand_left:0,2; accessory:0,2"/>
+            <frame index="11" layer-offsets="pelvis:0,1; torso:0,1; neck:0,1; head:0,1; face:0,1; hair_back:0,1; hair_front:0,1; upper_arm_right:0,1; upper_arm_left:0,1; forearm_right:0,1; forearm_left:0,1; hand_right:0,1; hand_left:0,1; accessory:0,1"/>
             <frame index="12" layer-offsets="face:0,2"/>
             <frame index="13" layer-offsets="face:0,2"/>
             <frame index="14" layer-offsets=""/>
             <frame index="15" layer-offsets=""/>
         </animation>
 
-        <!--
-            WALK: 8 frames @ 8fps = 1s loop
-            Legs alternate stepping, upper body bobs slightly.
-            Arms swing opposite to legs for natural gait.
-        -->
         <animation name="walk" frames="8" fps="8" loop="true"
                    frame-width="128" frame-height="192">
-            <!-- Contact pose: right foot forward -->
             <frame index="0" layer-offsets=""/>
-            <!-- Right leg lifts, body rises, left arm swings forward -->
-            <frame index="1" layer-offsets="foot_right:0,-4; shin_right:0,-2; thigh_right:0,-1; pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_left:0,-1; forearm_left:0,-2; upper_arm_right:0,1; accessory:0,-1"/>
-            <!-- Right leg passes -->
-            <frame index="2" layer-offsets="foot_right:0,-2; shin_right:0,-1; upper_arm_left:0,-1; upper_arm_right:0,1"/>
-            <!-- Right foot lands, head nods -->
+            <frame index="1" layer-offsets="foot_right:0,-4; shin_right:0,-2; thigh_right:0,-1; pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_left:0,-1; forearm_left:0,-2; hand_left:0,-2; upper_arm_right:0,1; forearm_right:0,1; hand_right:0,1; accessory:0,-1"/>
+            <frame index="2" layer-offsets="foot_right:0,-2; shin_right:0,-1; upper_arm_left:0,-1; forearm_left:0,-1; hand_left:0,-1; upper_arm_right:0,1; forearm_right:0,1; hand_right:0,1"/>
             <frame index="3" layer-offsets="neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; accessory:0,-1"/>
-            <!-- Contact pose: left foot forward -->
             <frame index="4" layer-offsets=""/>
-            <!-- Left leg lifts, body rises, right arm swings forward -->
-            <frame index="5" layer-offsets="foot_left:0,-4; shin_left:0,-2; thigh_left:0,-1; pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; forearm_right:0,-2; upper_arm_left:0,1; accessory:0,-1"/>
-            <!-- Left leg passes -->
-            <frame index="6" layer-offsets="foot_left:0,-2; shin_left:0,-1; upper_arm_right:0,-1; upper_arm_left:0,1"/>
-            <!-- Left foot lands, head nods -->
+            <frame index="5" layer-offsets="foot_left:0,-4; shin_left:0,-2; thigh_left:0,-1; pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; forearm_right:0,-2; hand_right:0,-2; upper_arm_left:0,1; forearm_left:0,1; hand_left:0,1; accessory:0,-1"/>
+            <frame index="6" layer-offsets="foot_left:0,-2; shin_left:0,-1; upper_arm_right:0,-1; forearm_right:0,-1; hand_right:0,-1; upper_arm_left:0,1; forearm_left:0,1; hand_left:0,1"/>
             <frame index="7" layer-offsets="neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; accessory:0,-1"/>
         </animation>
 
-        <!--
-            SLEEP: 16 frames @ 4fps = 4s loop (slow breathing)
-            Very gentle movement, all parts coherent.
-        -->
         <animation name="sleep" frames="16" fps="4" loop="true"
                    frame-width="128" frame-height="192">
             <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1; accessory:0,-1"/>
-            <frame index="2" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1; accessory:0,-1"/>
-            <frame index="3" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; accessory:0,-2"/>
-            <frame index="4" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; accessory:0,-2"/>
-            <frame index="5" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; accessory:0,-2"/>
-            <frame index="6" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; accessory:0,-2"/>
-            <frame index="7" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1; accessory:0,-1"/>
+            <frame index="1" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1; forearm_right:0,-1; forearm_left:0,-1; hand_right:0,-1; hand_left:0,-1; accessory:0,-1"/>
+            <frame index="2" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1; forearm_right:0,-1; forearm_left:0,-1; hand_right:0,-1; hand_left:0,-1; accessory:0,-1"/>
+            <frame index="3" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; forearm_right:0,-2; forearm_left:0,-2; hand_right:0,-2; hand_left:0,-2; accessory:0,-2"/>
+            <frame index="4" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; forearm_right:0,-2; forearm_left:0,-2; hand_right:0,-2; hand_left:0,-2; accessory:0,-2"/>
+            <frame index="5" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; forearm_right:0,-2; forearm_left:0,-2; hand_right:0,-2; hand_left:0,-2; accessory:0,-2"/>
+            <frame index="6" layer-offsets="pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; upper_arm_right:0,-2; upper_arm_left:0,-2; forearm_right:0,-2; forearm_left:0,-2; hand_right:0,-2; hand_left:0,-2; accessory:0,-2"/>
+            <frame index="7" layer-offsets="pelvis:0,-1; torso:0,-1; neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; upper_arm_right:0,-1; upper_arm_left:0,-1; forearm_right:0,-1; forearm_left:0,-1; hand_right:0,-1; hand_left:0,-1; accessory:0,-1"/>
             <frame index="8" layer-offsets=""/>
             <frame index="9" layer-offsets=""/>
-            <frame index="10" layer-offsets="pelvis:0,1; torso:0,1; neck:0,1; head:0,1; face:0,1; hair_back:0,1; hair_front:0,1; upper_arm_right:0,1; upper_arm_left:0,1; accessory:0,1"/>
-            <frame index="11" layer-offsets="pelvis:0,1; torso:0,1; neck:0,1; head:0,1; face:0,1; hair_back:0,1; hair_front:0,1; upper_arm_right:0,1; upper_arm_left:0,1; accessory:0,1"/>
+            <frame index="10" layer-offsets="pelvis:0,1; torso:0,1; neck:0,1; head:0,1; face:0,1; hair_back:0,1; hair_front:0,1; upper_arm_right:0,1; upper_arm_left:0,1; forearm_right:0,1; forearm_left:0,1; hand_right:0,1; hand_left:0,1; accessory:0,1"/>
+            <frame index="11" layer-offsets="pelvis:0,1; torso:0,1; neck:0,1; head:0,1; face:0,1; hair_back:0,1; hair_front:0,1; upper_arm_right:0,1; upper_arm_left:0,1; forearm_right:0,1; forearm_left:0,1; hand_right:0,1; hand_left:0,1; accessory:0,1"/>
             <frame index="12" layer-offsets=""/>
             <frame index="13" layer-offsets=""/>
             <frame index="14" layer-offsets=""/>
             <frame index="15" layer-offsets=""/>
         </animation>
 
-        <!--
-            WORK: 12 frames @ 6fps = 2s loop (typing motion)
-            Hands alternate tapping, slight head nod.
-        -->
         <animation name="work" frames="12" fps="6" loop="true"
                    frame-width="128" frame-height="192">
             <frame index="0" layer-offsets=""/>
@@ -178,21 +327,16 @@
             <frame index="8" layer-offsets="forearm_left:0,-1; hand_left:0,-2"/>
             <frame index="9" layer-offsets="forearm_right:0,-1; hand_right:0,-2"/>
             <frame index="10" layer-offsets=""/>
-            <!-- Head nod -->
             <frame index="11" layer-offsets="neck:0,-1; head:0,-1; face:0,-1; hair_back:0,-1; hair_front:0,-1; accessory:0,-1"/>
         </animation>
 
-        <!--
-            EXERCISE: 8 frames @ 10fps = 0.8s loop (jumping jacks)
-            Full body moves coherently — no detachment.
-        -->
         <animation name="exercise" frames="8" fps="10" loop="true"
                    frame-width="128" frame-height="192">
             <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="upper_arm_left:0,-2; upper_arm_right:0,-2; forearm_left:0,-2; forearm_right:0,-2; thigh_left:-2,0; thigh_right:2,0; pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; accessory:0,-2"/>
+            <frame index="1" layer-offsets="upper_arm_left:0,-2; upper_arm_right:0,-2; forearm_left:0,-2; forearm_right:0,-2; hand_left:0,-2; hand_right:0,-2; thigh_left:-2,0; thigh_right:2,0; pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; accessory:0,-2"/>
             <frame index="2" layer-offsets="upper_arm_left:0,-4; upper_arm_right:0,-4; forearm_left:0,-4; forearm_right:0,-4; hand_left:0,-4; hand_right:0,-4; thigh_left:-4,0; thigh_right:4,0; shin_left:-2,0; shin_right:2,0; pelvis:0,-4; torso:0,-4; neck:0,-4; head:0,-4; face:0,-4; hair_back:0,-4; hair_front:0,-4; accessory:0,-4"/>
             <frame index="3" layer-offsets="upper_arm_left:0,-4; upper_arm_right:0,-4; forearm_left:0,-4; forearm_right:0,-4; hand_left:0,-4; hand_right:0,-4; thigh_left:-4,0; thigh_right:4,0; shin_left:-2,0; shin_right:2,0; pelvis:0,-4; torso:0,-4; neck:0,-4; head:0,-4; face:0,-4; hair_back:0,-4; hair_front:0,-4; accessory:0,-4"/>
-            <frame index="4" layer-offsets="upper_arm_left:0,-2; upper_arm_right:0,-2; forearm_left:0,-2; forearm_right:0,-2; thigh_left:-2,0; thigh_right:2,0; pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; accessory:0,-2"/>
+            <frame index="4" layer-offsets="upper_arm_left:0,-2; upper_arm_right:0,-2; forearm_left:0,-2; forearm_right:0,-2; hand_left:0,-2; hand_right:0,-2; thigh_left:-2,0; thigh_right:2,0; pelvis:0,-2; torso:0,-2; neck:0,-2; head:0,-2; face:0,-2; hair_back:0,-2; hair_front:0,-2; accessory:0,-2"/>
             <frame index="5" layer-offsets=""/>
             <frame index="6" layer-offsets=""/>
             <frame index="7" layer-offsets=""/>

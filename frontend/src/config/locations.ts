@@ -6,19 +6,7 @@
  *
  * ── RELATIVE SCALING SYSTEM ──
  * All sprite sizing is relative to the scene background (640×480 viewport).
- *
- * The system works automatically:
- * 1. Background (location) fills the entire 640×480 viewport at 1:1.
- * 2. Each entity's atlas is loaded, its frameHeight read.
- * 3. sceneRelativeHeight = frameHeight / 480.
- *    e.g. character 192px frame → 192/480 = 0.40 → 40% of viewport height.
- * 4. The `scale` field below is a MULTIPLIER on top of that.
- *    scale=1.0 → native proportions (pixel-perfect in scene).
- *    scale=0.7 → 70% of natural size (e.g. for distant objects).
- *    scale=1.3 → 130% of natural size (e.g. for foreground emphasis).
- *
- * This eliminates ALL displayScale/hardcoded-pixel-size issues.
- * If you change a sprite's canvas size, it automatically adjusts.
+ * scale field is a MULTIPLIER on top of frameHeight/480 relative sizing.
  */
 
 export interface FurniturePlacement {
@@ -27,7 +15,6 @@ export interface FurniturePlacement {
   readonly animation: string;
   readonly x: number;
   readonly y: number;
-  /** Multiplier on top of relative sizing. Default 1.0 = native proportions */
   readonly scale: number;
   readonly zOrder: number;
   readonly actionCode?: string;
@@ -40,7 +27,6 @@ export interface CharacterSlot {
   readonly defaultAnimation: string;
   readonly x: number;
   readonly y: number;
-  /** Multiplier on top of relative sizing. Default 1.0 = native proportions */
   readonly scale: number;
   readonly zOrder: number;
 }
@@ -65,9 +51,9 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         id: 'bed',
         entityName: 'bed',
         animation: 'idle',
-        x: 8,
-        y: 60,
-        scale: 1,
+        x: 4,
+        y: 52,
+        scale: 1.8,
         zOrder: 10,
         actionCode: 'REST_AT_HOME',
         label: 'Кровать',
@@ -76,9 +62,9 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         id: 'computer',
         entityName: 'computer',
         animation: 'idle',
-        x: 52,
-        y: 55,
-        scale: 1,
+        x: 48,
+        y: 48,
+        scale: 1.6,
         zOrder: 10,
         actionCode: 'WORK_ON_PROJECT',
         label: 'Компьютер',
@@ -88,8 +74,8 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         entityName: 'phone',
         animation: 'idle',
         x: 22,
-        y: 80,
-        scale: 1,
+        y: 78,
+        scale: 1.6,
         zOrder: 15,
         actionCode: 'CALL_HUSBAND',
         label: 'Телефон',
@@ -99,8 +85,8 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         entityName: 'mirror',
         animation: 'idle',
         x: 75,
-        y: 60,
-        scale: 1,
+        y: 52,
+        scale: 1.6,
         zOrder: 10,
         actionCode: 'BEAUTY_ROUTINE',
         label: 'Зеркало',
@@ -110,8 +96,8 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         entityName: 'cat_tree',
         animation: 'idle',
         x: 90,
-        y: 55,
-        scale: 1,
+        y: 48,
+        scale: 1.6,
         zOrder: 8,
       },
     ],
@@ -121,7 +107,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         entityName: 'tanya',
         defaultAnimation: 'idle',
         x: 30,
-        y: 88,
+        y: 50,
         scale: 1,
         zOrder: 50,
       },
@@ -130,7 +116,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         entityName: 'alexander',
         defaultAnimation: 'idle',
         x: 55,
-        y: 88,
+        y: 50,
         scale: 1,
         zOrder: 48,
       },
@@ -147,9 +133,9 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         id: 'stove',
         entityName: 'stove',
         animation: 'idle',
-        x: 25,
-        y: 55,
-        scale: 1,
+        x: 20,
+        y: 48,
+        scale: 1.6,
         zOrder: 10,
         actionCode: 'COOK_FOOD',
         label: 'Плита',
@@ -159,8 +145,8 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         entityName: 'fridge',
         animation: 'idle',
         x: 75,
-        y: 50,
-        scale: 1,
+        y: 42,
+        scale: 1.6,
         zOrder: 10,
         actionCode: 'EAT_FOOD',
         label: 'Холодильник',
@@ -170,8 +156,8 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         entityName: 'pet_bowl',
         animation: 'idle',
         x: 50,
-        y: 80,
-        scale: 1,
+        y: 78,
+        scale: 1.6,
         zOrder: 15,
         actionCode: 'FEED_PETS',
         label: 'Миски',
@@ -181,8 +167,8 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         entityName: 'dining_table',
         animation: 'idle',
         x: 50,
-        y: 60,
-        scale: 1,
+        y: 55,
+        scale: 1.6,
         zOrder: 12,
       },
     ],
@@ -192,7 +178,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         entityName: 'tanya',
         defaultAnimation: 'idle',
         x: 45,
-        y: 88,
+        y: 50,
         scale: 1,
         zOrder: 50,
       },
@@ -209,9 +195,9 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         id: 'dog_house',
         entityName: 'dog_house',
         animation: 'idle',
-        x: 20,
-        y: 70,
-        scale: 1,
+        x: 15,
+        y: 55,
+        scale: 1.6,
         zOrder: 10,
         actionCode: 'WALK_DOG',
         label: 'Будка Сэма',
@@ -220,9 +206,9 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         id: 'hammock',
         entityName: 'hammock',
         animation: 'idle',
-        x: 70,
-        y: 55,
-        scale: 1,
+        x: 65,
+        y: 48,
+        scale: 1.6,
         zOrder: 10,
         actionCode: 'REST_AT_HOME',
         label: 'Гамак',
@@ -231,9 +217,9 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         id: 'campfire',
         entityName: 'campfire',
         animation: 'burning',
-        x: 50,
-        y: 80,
-        scale: 1,
+        x: 45,
+        y: 75,
+        scale: 1.6,
         zOrder: 15,
       },
     ],
@@ -243,7 +229,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         entityName: 'tanya',
         defaultAnimation: 'idle',
         x: 50,
-        y: 88,
+        y: 50,
         scale: 1,
         zOrder: 50,
       },
@@ -252,7 +238,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         entityName: 'sam',
         defaultAnimation: 'idle',
         x: 30,
-        y: 90,
+        y: 60,
         scale: 1,
         zOrder: 45,
       },
@@ -269,9 +255,9 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         id: 'fireplace',
         entityName: 'fireplace',
         animation: 'burning',
-        x: 30,
-        y: 55,
-        scale: 1,
+        x: 25,
+        y: 48,
+        scale: 1.6,
         zOrder: 10,
       },
       {
@@ -279,8 +265,8 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         entityName: 'dining_table',
         animation: 'idle',
         x: 60,
-        y: 60,
-        scale: 1,
+        y: 55,
+        scale: 1.6,
         zOrder: 12,
       },
     ],
@@ -290,7 +276,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         entityName: 'tanya',
         defaultAnimation: 'idle',
         x: 40,
-        y: 88,
+        y: 50,
         scale: 1,
         zOrder: 50,
       },
@@ -299,7 +285,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         entityName: 'alexander',
         defaultAnimation: 'idle',
         x: 60,
-        y: 88,
+        y: 50,
         scale: 1,
         zOrder: 48,
       },
@@ -316,18 +302,18 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         id: 'tent',
         entityName: 'tent',
         animation: 'idle',
-        x: 25,
-        y: 55,
-        scale: 1,
+        x: 20,
+        y: 48,
+        scale: 1.6,
         zOrder: 10,
       },
       {
         id: 'campfire',
         entityName: 'campfire',
         animation: 'burning',
-        x: 55,
-        y: 75,
-        scale: 1,
+        x: 50,
+        y: 70,
+        scale: 1.6,
         zOrder: 15,
       },
     ],
@@ -337,7 +323,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         entityName: 'tanya',
         defaultAnimation: 'idle',
         x: 50,
-        y: 88,
+        y: 50,
         scale: 1,
         zOrder: 50,
       },

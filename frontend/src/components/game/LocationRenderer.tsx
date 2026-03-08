@@ -2,19 +2,8 @@
  * LocationRenderer — renders a complete game location with pixel-art sprites.
  *
  * ── RELATIVE SCALING ──
- * The background (location) fills the entire PixelScene viewport (640×480).
- * All other entities (furniture, characters) are sized as a FRACTION of
- * the viewport height, computed from their atlas frameHeight.
- *
- * This guarantees correct proportions regardless of canvas sizes:
- * - Character 128×192: sceneRelativeHeight = 192/480 = 0.40 (40% of scene)
- * - Cat 128×96: sceneRelativeHeight = 96/480 = 0.20 (20% of scene)
- * - Bed 256×192: sceneRelativeHeight = 192/480 = 0.40
- * - Phone 64×80: sceneRelativeHeight = 80/480 = 0.167
- *
- * The `scale` field in LocationConfig is a multiplier on TOP of the
- * relative height. scale=1.0 means "render at native proportions".
- * scale=0.8 means "80% of the natural size".
+ * The background uses SpriteAnimator for animated backgrounds when available,
+ * falling back to static composite PNG.
  */
 import { memo, useCallback, useEffect, useState } from 'react';
 import { PixelScene } from '@/components/shared/PixelScene/PixelScene';
@@ -41,18 +30,10 @@ const TIME_SLOT_TO_CONDITION: Record<string, string> = {
   morning: 'morning', day: 'day', evening: 'evening', night: 'night',
 };
 
-/** Fallback sceneRelativeHeight for furniture when atlas can't be loaded.
- * Most furniture has 192px height canvas → 192/480 = 0.40 */
 const FURNITURE_FALLBACK_REL_HEIGHT = 0.40;
 
-/** Cache of loaded atlas configs for computing relative heights */
 const atlasCache = new Map<string, AtlasConfig>();
 
-/**
- * Compute sceneRelativeHeight for an entity from its atlas config.
- * Returns frameHeight / SCENE_HEIGHT — so the sprite occupies
- * exactly its native pixel height within the 640×480 scene.
- */
 function getRelativeHeight(
   atlasConfig: AtlasConfig | undefined,
   animationName: string
@@ -94,8 +75,9 @@ export const LocationRenderer = memo(function LocationRenderer({
 
   const condition = TIME_SLOT_TO_CONDITION[timeOfDay] ?? 'day';
 
-  // ── Load location overlay atlas ──
+  // ── Load location atlas to check for background animation ──
   const [overlayNames, setOverlayNames] = useState<string[]>([]);
+  const [bgAnimAvailable, setBgAnimAvailable] = useState(false);
   const [atlasLoaded, setAtlasLoaded] = useState(false);
 
   useEffect(() => {
@@ -105,18 +87,23 @@ export const LocationRenderer = memo(function LocationRenderer({
         if (cancelled) return;
         atlasCache.set(`locations/${config.locationAsset}`, ac);
         setOverlayNames(listOverlayAnimations(ac));
+        // Check if the background animation exists in the atlas
+        const bgAnim = config.backgroundAnimation || 'idle';
+        const hasAnim = Boolean(ac.animations[bgAnim]);
+        setBgAnimAvailable(hasAnim);
         setAtlasLoaded(true);
       })
       .catch(() => {
         if (!cancelled) {
           setOverlayNames([]);
+          setBgAnimAvailable(false);
           setAtlasLoaded(true);
         }
       });
     return () => { cancelled = true; };
-  }, [config.locationAsset]);
+  }, [config.locationAsset, config.backgroundAnimation]);
 
-  // ── Load furniture atlas configs for relative sizing ──
+  // ── Load furniture atlas configs ──
   const [furnitureAtlases, setFurnitureAtlases] = useState<Record<string, AtlasConfig>>({});
 
   useEffect(() => {
@@ -143,7 +130,7 @@ export const LocationRenderer = memo(function LocationRenderer({
     return () => { cancelled = true; };
   }, [config.furniture]);
 
-  // ── Load character atlas configs for relative sizing ──
+  // ── Load character atlas configs ──
   const [characterAtlases, setCharacterAtlases] = useState<Record<string, AtlasConfig>>({});
 
   useEffect(() => {
@@ -175,14 +162,24 @@ export const LocationRenderer = memo(function LocationRenderer({
 
   return (
     <PixelScene className="location-renderer">
-      {/* Background — fills entire viewport (640×480) */}
+      {/* Background — animated SpriteAnimator when atlas available, else static */}
       <div className="pixel-scene__layer" style={{ zIndex: 0 }}>
-        <img
-          className="location-renderer__bg"
-          src={getCompositeUrl('locations', config.locationAsset)}
-          alt={config.name}
-          draggable={false}
-        />
+        {bgAnimAvailable ? (
+          <SpriteAnimator
+            entityType="locations"
+            entityName={config.locationAsset}
+            animation={config.backgroundAnimation || 'idle'}
+            condition={condition}
+            className="location-renderer__bg-anim"
+          />
+        ) : (
+          <img
+            className="location-renderer__bg"
+            src={getCompositeUrl('locations', config.locationAsset)}
+            alt={config.name}
+            draggable={false}
+          />
+        )}
       </div>
 
       {/* Overlay animations */}
@@ -216,7 +213,7 @@ export const LocationRenderer = memo(function LocationRenderer({
         />
       )}
 
-      {/* Furniture — sized relative to scene viewport */}
+      {/* Furniture */}
       <div
         className="pixel-scene__layer pixel-scene__layer--interactive"
         style={{ zIndex: 10 }}
@@ -258,7 +255,7 @@ export const LocationRenderer = memo(function LocationRenderer({
         })}
       </div>
 
-      {/* Characters — sized relative to scene viewport */}
+      {/* Characters */}
       <div className="pixel-scene__layer" style={{ zIndex: 50 }}>
         {config.characters.map((char) => {
           const anim =
