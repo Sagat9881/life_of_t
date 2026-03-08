@@ -1,6 +1,6 @@
-package ru.lifegame.backend.domain.npc;
+package ru.lifegame.backend.domain.npc.runtime;
 
-import ru.lifegame.backend.domain.npc.spec.ConditionSpec;
+import ru.lifegame.backend.domain.npc.NpcRelationshipGraph;
 
 import java.util.*;
 

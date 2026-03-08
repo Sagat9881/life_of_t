@@ -1,10 +1,10 @@
-package ru.lifegame.backend.domain.engine.runtime;
+package ru.lifegame.backend.domain.npc;
 
-import ru.lifegame.backend.domain.engine.spec.NpcSpec;
-import ru.lifegame.backend.domain.npc.NpcMood;
+import ru.lifegame.backend.domain.npc.spec.NpcSpec;
+import ru.lifegame.backend.domain.npc.runtime.NpcInstance;
+import ru.lifegame.backend.domain.npc.runtime.NpcMood;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -76,7 +76,7 @@ public class NpcUtilityBrain {
         if (!npc.spec().memoryEnabled()) return false;
         return switch (cond.target()) {
             case "work_obsession" -> npc.memory().detectPattern("GO_TO_WORK", 3);
-            case "being_ignored" -> npc.memory().isBeingIgnored(3);
+            case "being_ignored" -> npc.memory().isBeingIgnored( "DATE_WITH_HUSBAND",3);
             default -> false;
         };
     }

@@ -50,6 +50,7 @@ public class VisualSpecResolver {
                     : versionStr;
         }
 
+        String finalRequiredMajor = requiredMajor;
         return cache.computeIfAbsent(path, key -> {
             Path specFile = specsRoot.resolve(key).resolve("visual-specs.xml");
             if (!Files.exists(specFile)) {
@@ -59,14 +60,14 @@ public class VisualSpecResolver {
             log.info("Loading abstract spec: {}", specFile);
             AssetSpec parentSpec = parser.parse(specFile);
 
-            if (requiredMajor != null) {
+            if (finalRequiredMajor != null) {
                 String parentVersion = parentSpec.version();
                 String parentMajor = parentVersion.contains(".")
                         ? parentVersion.substring(0, parentVersion.indexOf('.'))
                         : parentVersion;
-                if (!parentMajor.equals(requiredMajor)) {
+                if (!parentMajor.equals(finalRequiredMajor)) {
                     throw new XmlParseException(
-                            "Version mismatch: child requires major " + requiredMajor
+                            "Version mismatch: child requires major " + finalRequiredMajor
                                     + " but parent " + key + " is version " + parentVersion);
                 }
             }

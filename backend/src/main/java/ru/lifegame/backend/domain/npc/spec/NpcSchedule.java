@@ -1,4 +1,4 @@
-package ru.lifegame.backend.domain.npc;
+package ru.lifegame.backend.domain.npc.spec;
 
 import java.util.List;
 import java.util.Optional;

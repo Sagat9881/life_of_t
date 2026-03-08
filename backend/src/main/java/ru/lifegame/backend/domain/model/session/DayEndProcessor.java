@@ -7,14 +7,11 @@ import ru.lifegame.backend.domain.ending.EndingEvaluator;
 import ru.lifegame.backend.domain.event.domain.ConflictTriggeredEvent;
 import ru.lifegame.backend.domain.event.domain.DayEndedEvent;
 import ru.lifegame.backend.domain.event.domain.EndingAchievedEvent;
-import ru.lifegame.backend.domain.event.domain.EventTriggeredEvent;
 import ru.lifegame.backend.domain.event.domain.GameOverEvent;
-import ru.lifegame.backend.domain.event.game.GameEvent;
-import ru.lifegame.backend.domain.engine.NpcLifecycleEngine;
+import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Domain service responsible for end-of-day processing.

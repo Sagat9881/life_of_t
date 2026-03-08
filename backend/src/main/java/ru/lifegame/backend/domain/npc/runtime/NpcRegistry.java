@@ -1,9 +1,8 @@
-package ru.lifegame.backend.domain.engine;
+package ru.lifegame.backend.domain.npc.runtime;
 
-import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
-import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain;
-import ru.lifegame.backend.domain.engine.spec.NpcSpec;
-import ru.lifegame.backend.domain.npc.NpcRelationshipGraph;
+
+import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
+import ru.lifegame.backend.domain.npc.spec.NpcSpec;
 
 import java.util.*;
 import java.util.stream.Collectors;

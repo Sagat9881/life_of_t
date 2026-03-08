@@ -1,6 +1,5 @@
-package ru.lifegame.backend.infrastructure.narrative;
+package ru.lifegame.backend.domain.npc;
 
-import ru.lifegame.backend.domain.npc.spec.NpcSpec;
 import ru.lifegame.backend.domain.npc.spec.ScheduleSlot;
 import ru.lifegame.backend.domain.npc.spec.ScoredAction;
 import ru.lifegame.backend.domain.npc.spec.ConditionSpec;

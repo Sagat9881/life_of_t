@@ -1,8 +1,8 @@
 package ru.lifegame.backend.domain.engine;
 
+
+import ru.lifegame.backend.domain.engine.spec.ConditionSpec;
 import ru.lifegame.backend.domain.engine.spec.EventSpec;
-import ru.lifegame.backend.domain.engine.spec.EventSpec.ConditionSpec;
-import ru.lifegame.backend.domain.engine.spec.EventSpec.EffectSpec;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,15 +24,15 @@ public class NarrativeEventEngine {
 
     public record FiredEvent(
             EventSpec spec,
-            List<EffectSpec> appliedEffects
+            List<EventSpec.EffectSpec> appliedEffects
     ) {}
 
-    private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> context) {
+    private boolean allConditionsMet(List<EventSpec.ConditionSpec> conditions, Map<String, Object> context) {
         if (conditions == null || conditions.isEmpty()) return true;
         return conditions.stream().allMatch(c -> evaluateCondition(c, context));
     }
 
-    private boolean evaluateCondition(ConditionSpec condition, Map<String, Object> context) {
+    private boolean evaluateCondition(EventSpec.ConditionSpec condition, Map<String, Object> context) {
         Object value = context.get(condition.target());
         if (value == null) return false;
         if (value instanceof Number num) {

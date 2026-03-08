@@ -1,4 +1,4 @@
-package com.life_of_t.application.view;
+package ru.lifegame.backend.application.view;
 
 import java.util.List;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package ru.lifegame.backend.domain.engine;
+package ru.lifegame.backend.domain.npc.runtime;
 
 public record NpcInitiatedEvent(
     String npcId,

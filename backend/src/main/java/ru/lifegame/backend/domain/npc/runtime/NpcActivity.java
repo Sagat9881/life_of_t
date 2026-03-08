@@ -1,4 +1,4 @@
-package ru.lifegame.backend.domain.npc;
+package ru.lifegame.backend.domain.npc.runtime;
 
 /**
  * Current physical activity of an NPC.

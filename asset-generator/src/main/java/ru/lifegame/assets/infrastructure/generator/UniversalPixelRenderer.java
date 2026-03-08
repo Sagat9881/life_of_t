@@ -79,7 +79,7 @@ public final class UniversalPixelRenderer {
 
         for (PixelRect rect : data.rects()) {
             canvas.fillRect(rect.x() + dx, rect.y() + dy,
-                    rect.width(), rect.height(), parseColor(rect.color()));
+                    rect.w(), rect.h(), parseColor(rect.color()));
         }
         for (PixelLine line : data.lines()) {
             if (line.direction() == PixelLine.Direction.HORIZONTAL) {

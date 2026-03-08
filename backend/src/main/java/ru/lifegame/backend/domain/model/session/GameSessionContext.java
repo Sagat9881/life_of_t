@@ -9,7 +9,7 @@ import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.pet.Pets;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.quest.QuestLog;
-import ru.lifegame.backend.domain.engine.NpcRegistry;
+import ru.lifegame.backend.domain.npc.runtime.NpcRegistry;
 
 import java.util.List;
 

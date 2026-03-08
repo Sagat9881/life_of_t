@@ -1,9 +1,12 @@
 package ru.lifegame.backend.domain.engine.parser;
 
-import ru.lifegame.backend.domain.engine.spec.NpcSpec;
-import ru.lifegame.backend.domain.engine.spec.NpcSpec.*;
+import ru.lifegame.backend.domain.npc.spec.ConditionSpec;
+import ru.lifegame.backend.domain.npc.spec.NpcSpec;
+import ru.lifegame.backend.domain.npc.spec.NpcSpec.ReactionSpec;
 
 import org.w3c.dom.*;
+import ru.lifegame.backend.domain.npc.spec.ScheduleSlot;
+
 import javax.xml.parsers.*;
 import java.io.File;
 import java.util.*;
@@ -25,8 +28,8 @@ public class NpcSpecParser {
         int shortTermSize = parseIntAttribute(root, "memory", "short-term-size", 10);
 
         List<ScheduleSlot> schedule = parseSchedule(root);
-        List<ActionSpec> actions = parseActions(root);
-        List<ReactionSpec> reactions = parseReactions(root);
+        List<NpcSpec.ActionSpec> actions = parseActions(root);
+        List<NpcSpec.MoodOverrideAction> reactions = parseReactions(root);
         List<String> questLines = parseQuestLines(root);
 
         return new NpcSpec(id, type, category, displayName, personality, moodInitial,
@@ -52,8 +55,8 @@ public class NpcSpecParser {
         return slots;
     }
 
-    private List<ActionSpec> parseActions(Element root) {
-        List<ActionSpec> actions = new ArrayList<>();
+    private List<NpcSpec.ActionSpec> parseActions(Element root) {
+        List<NpcSpec.ActionSpec> actions = new ArrayList<>();
         NodeList nodes = root.getElementsByTagName("action");
         for (int i = 0; i < nodes.getLength(); i++) {
             Element el = (Element) nodes.item(i);
@@ -63,14 +66,14 @@ public class NpcSpecParser {
                 double baseScore = Double.parseDouble(el.getAttribute("base-score"));
                 String eventType = el.getAttribute("event-type");
                 List<ConditionSpec> conditions = parseConditions(el);
-                List<OptionSpec> options = parseOptions(el);
-                actions.add(new ActionSpec(actionId, baseScore, eventType, conditions, options));
+                List<NpcSpec.OptionSpec> options = parseOptions(el);
+                actions.add(new NpcSpec.ActionSpec(actionId, baseScore, eventType, conditions, options));
             }
         }
         return actions;
     }
 
-    private List<ReactionSpec> parseReactions(Element root) {
+    private List<NpcSpec.ReactionSpec> parseReactions(Element root) {
         List<ReactionSpec> reactions = new ArrayList<>();
         NodeList nodes = root.getElementsByTagName("reaction");
         for (int i = 0; i < nodes.getLength(); i++) {
@@ -101,12 +104,12 @@ public class NpcSpecParser {
         return conditions;
     }
 
-    private List<OptionSpec> parseOptions(Element parent) {
-        List<OptionSpec> options = new ArrayList<>();
+    private List<NpcSpec.OptionSpec> parseOptions(Element parent) {
+        List<NpcSpec.OptionSpec> options = new ArrayList<>();
         NodeList nodes = parent.getElementsByTagName("option");
         for (int i = 0; i < nodes.getLength(); i++) {
             Element el = (Element) nodes.item(i);
-            options.add(new OptionSpec(
+            options.add(new NpcSpec.OptionSpec(
                 el.getAttribute("id"),
                 el.getAttribute("text"),
                 el.getAttribute("result"),
@@ -121,12 +124,12 @@ public class NpcSpecParser {
         return options;
     }
 
-    private List<EffectSpec> parseEffects(Element parent) {
-        List<EffectSpec> effects = new ArrayList<>();
+    private List<NpcSpec.EffectSpec> parseEffects(Element parent) {
+        List<NpcSpec.EffectSpec> effects = new ArrayList<>();
         NodeList nodes = parent.getElementsByTagName("effect");
         for (int i = 0; i < nodes.getLength(); i++) {
             Element el = (Element) nodes.item(i);
-            effects.add(new EffectSpec(el.getAttribute("target"), el.getAttribute("stat"), parseIntAttr(el, "delta", 0)));
+            effects.add(new NpcSpec.EffectSpec(el.getAttribute("target"), el.getAttribute("stat"), parseIntAttr(el, "delta", 0)));
         }
         return effects;
     }

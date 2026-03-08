@@ -1,5 +1,6 @@
-package ru.lifegame.backend.domain.npc;
+package ru.lifegame.backend.domain.npc.runtime;
 
+import ru.lifegame.backend.domain.npc.spec.NpcSchedule;
 import ru.lifegame.backend.domain.npc.spec.NpcSpec;
 
 import java.util.stream.Collectors;
@@ -48,7 +49,7 @@ public class NpcInstance {
     }
 
     private static NpcSchedule buildSchedule(NpcSpec spec) {
-        var slots = spec.scheduleSlots().stream()
+        var slots = spec.schedule().stream()
                 .map(s -> new NpcSchedule.ScheduleSlot(
                         s.startHour(), s.endHour(),
                         s.activityId(), s.locationId(), s.animationKey()))
