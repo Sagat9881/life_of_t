@@ -3,198 +3,222 @@
     <meta>
         <entity-type>ui</entity-type>
         <entity-name>transitions</entity-name>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
         <description>
-            Переходы между экранами и локациями.
-            Обеспечивают плавность UX при смене сцен.
-            Типы: fade, slide, iris, dissolve, time-skip.
+            Переходы между экранами и локациями (HD).
+            Canvas ×2: 640×480 viewport.
+            Типы: fade, slide, iris, dissolve, time-skip,
+            pixelate-dissolve.
         </description>
     </meta>
 
     <layers>
-        <!-- === FADE BLACK — чёрный экран для fade-in/fade-out === -->
-        <layer id="fade-black" type="overlay" z-order="9999" width="320" height="240">
+        <!-- === FADE BLACK — 640×480 === -->
+        <layer id="fade-black" type="overlay" z-order="9999" width="640" height="480">
             <pixel-data>
-                <rect x="0" y="0" w="320" h="240" color="#000000"/>
+                <rect x="0" y="0" w="640" h="480" color="#000000"/>
             </pixel-data>
         </layer>
 
-        <!-- === FADE WHITE — белая вспышка === -->
-        <layer id="fade-white" type="overlay" z-order="9999" width="320" height="240">
+        <!-- === FADE WHITE — 640×480 === -->
+        <layer id="fade-white" type="overlay" z-order="9999" width="640" height="480">
             <pixel-data>
-                <rect x="0" y="0" w="320" h="240" color="#FFFFFF"/>
+                <rect x="0" y="0" w="640" h="480" color="#FFFFFF"/>
             </pixel-data>
         </layer>
 
-        <!-- === IRIS — круговая маска (описание для рендера) === -->
-        <layer id="iris-mask" type="overlay" z-order="9999" width="320" height="240">
+        <!-- === IRIS MASK — 640×480 === -->
+        <layer id="iris-mask" type="overlay" z-order="9999" width="640" height="480">
             <pixel-data>
-                <!-- Чёрный фон с круговым вырезом по центру -->
-                <rect x="0" y="0" w="320" h="240" color="#000000"/>
+                <rect x="0" y="0" w="640" h="480" color="#000000"/>
             </pixel-data>
         </layer>
 
-        <!-- === SLIDE OVERLAY — новая сцена въезжает === -->
-        <layer id="slide-edge" type="overlay" z-order="9998" width="4" height="240">
+        <!-- === SLIDE EDGE — тень на границе === -->
+        <layer id="slide-edge" type="overlay" z-order="9998" width="8" height="480">
             <pixel-data>
-                <!-- Тонкая тень на границе слайда -->
-                <rect x="0" y="0" w="1" h="240" color="#00000040"/>
-                <rect x="1" y="0" w="1" h="240" color="#00000020"/>
-                <rect x="2" y="0" w="1" h="240" color="#00000010"/>
-                <rect x="3" y="0" w="1" h="240" color="#00000008"/>
+                <rect x="0" y="0" w="1" h="480" color="#00000050"/>
+                <rect x="1" y="0" w="1" h="480" color="#00000038"/>
+                <rect x="2" y="0" w="1" h="480" color="#00000025"/>
+                <rect x="3" y="0" w="1" h="480" color="#00000018"/>
+                <rect x="4" y="0" w="1" h="480" color="#00000010"/>
+                <rect x="5" y="0" w="1" h="480" color="#00000008"/>
+                <rect x="6" y="0" w="1" h="480" color="#00000004"/>
+                <rect x="7" y="0" w="1" h="480" color="#00000002"/>
             </pixel-data>
         </layer>
 
-        <!-- === TIME-SKIP — пиксельные часы === -->
-        <layer id="clock-icon" type="animated-overlay" z-order="9990" width="24" height="24">
+        <!-- === PIXELATE OVERLAY === -->
+        <layer id="pixelate-overlay" type="overlay" z-order="9997" width="640" height="480">
+            <pixel-data>
+                <!-- Шахматный паттерн 8×8 для dissolve -->
+                <rect x="0" y="0" w="8" h="8" color="#000000"/>
+                <rect x="16" y="0" w="8" h="8" color="#000000"/>
+                <rect x="8" y="8" w="8" h="8" color="#000000"/>
+                <rect x="0" y="16" w="8" h="8" color="#000000"/>
+            </pixel-data>
+        </layer>
+
+        <!-- === TIME-SKIP CLOCK — 48×48 === -->
+        <layer id="clock-icon" type="animated-overlay" z-order="9990" width="48" height="48">
             <pixel-data>
                 <!-- Корпус часов -->
-                <rect x="4" y="2" w="16" h="20" color="#F0EDE8"/>
-                <rect x="2" y="4" w="20" h="16" color="#F0EDE8"/>
-                <pixel x="3" y="3" color="#F0EDE8"/>
-                <pixel x="20" y="3" color="#F0EDE8"/>
-                <pixel x="3" y="20" color="#F0EDE8"/>
-                <pixel x="20" y="20" color="#F0EDE8"/>
+                <rect x="8" y="4" w="32" h="40" color="#F0EDE8"/>
+                <rect x="4" y="8" w="40" h="32" color="#F0EDE8"/>
+                <rect x="6" y="6" w="36" h="36" color="#F0EDE8"/>
                 <!-- Циферблат -->
-                <rect x="6" y="4" w="12" h="16" color="#FFFFFF"/>
-                <rect x="4" y="6" w="16" h="12" color="#FFFFFF"/>
-                <pixel x="5" y="5" color="#FFFFFF"/>
-                <pixel x="18" y="5" color="#FFFFFF"/>
-                <pixel x="5" y="18" color="#FFFFFF"/>
-                <pixel x="18" y="18" color="#FFFFFF"/>
+                <rect x="10" y="8" w="28" h="32" color="#FFFFFF"/>
+                <rect x="8" y="10" w="32" h="28" color="#FFFFFF"/>
+                <rect x="9" y="9" w="30" h="30" color="#FFFFFF"/>
                 <!-- Центр -->
-                <pixel x="12" y="12" color="#2A2A2A"/>
+                <rect x="23" y="23" w="2" h="2" color="#2A2A2A"/>
                 <!-- Метки 12/3/6/9 -->
-                <pixel x="12" y="5" color="#808080"/>
-                <pixel x="18" y="12" color="#808080"/>
-                <pixel x="12" y="18" color="#808080"/>
-                <pixel x="6" y="12" color="#808080"/>
-                <!-- Стрелка часовая -->
-                <pixel x="12" y="9" color="#2A2A2A"/>
-                <pixel x="12" y="10" color="#2A2A2A"/>
-                <pixel x="12" y="11" color="#2A2A2A"/>
-                <!-- Стрелка минутная -->
-                <pixel x="13" y="12" color="#FF6B9D"/>
-                <pixel x="14" y="12" color="#FF6B9D"/>
-                <pixel x="15" y="12" color="#FF6B9D"/>
-                <pixel x="16" y="11" color="#FF6B9D"/>
+                <rect x="23" y="10" w="2" h="3" color="#808080"/>
+                <rect x="35" y="23" w="3" h="2" color="#808080"/>
+                <rect x="23" y="35" w="2" h="3" color="#808080"/>
+                <rect x="10" y="23" w="3" h="2" color="#808080"/>
+                <!-- Мелкие метки -->
+                <pixel x="30" y="12" color="#C0C0C0"/>
+                <pixel x="35" y="17" color="#C0C0C0"/>
+                <pixel x="35" y="30" color="#C0C0C0"/>
+                <pixel x="30" y="35" color="#C0C0C0"/>
+                <pixel x="17" y="35" color="#C0C0C0"/>
+                <pixel x="12" y="30" color="#C0C0C0"/>
+                <pixel x="12" y="17" color="#C0C0C0"/>
+                <pixel x="17" y="12" color="#C0C0C0"/>
+                <!-- Стрелка часовая (вверх) -->
+                <rect x="23" y="15" w="2" h="8" color="#2A2A2A"/>
+                <pixel x="23" y="14" color="#3A3A3A"/>
+                <pixel x="24" y="14" color="#3A3A3A"/>
+                <!-- Стрелка минутная (вправо) -->
+                <rect x="25" y="23" w="8" h="2" color="#FF6B9D"/>
+                <pixel x="33" y="22" color="#FF6B9D"/>
+                <pixel x="33" y="25" color="#FF6B9D"/>
+                <!-- Блик на стекле -->
+                <rect x="14" y="12" w="4" h="2" color="#F8F8FF"/>
+                <rect x="12" y="14" w="2" h="4" color="#F8F8FF"/>
             </pixel-data>
         </layer>
     </layers>
 
     <animations>
-        <!-- Fade to black -->
-        <animation name="fade-to-black" frames="6" fps="8" loop="false"
-                   frame-width="320" frame-height="240">
-            <description>
-                Плавное затемнение экрана. Используется при
-                переходе между локациями (дом → кухня,
-                дом → дача).
-                Easing: ease-in для плавности.
-            </description>
+        <!-- Fade to black: 10 кадров -->
+        <animation name="fade-to-black" frames="10" fps="8" loop="false"
+                   frame-width="640" frame-height="480">
             <frame index="0" layer-offsets="fade-black:0,0" alpha="0.0"/>
-            <frame index="1" layer-offsets="fade-black:0,0" alpha="0.15"/>
-            <frame index="2" layer-offsets="fade-black:0,0" alpha="0.35"/>
-            <frame index="3" layer-offsets="fade-black:0,0" alpha="0.6"/>
-            <frame index="4" layer-offsets="fade-black:0,0" alpha="0.85"/>
-            <frame index="5" layer-offsets="fade-black:0,0" alpha="1.0"/>
-        </animation>
-
-        <!-- Fade from black -->
-        <animation name="fade-from-black" frames="6" fps="8" loop="false"
-                   frame-width="320" frame-height="240">
-            <description>
-                Плавное появление из чёрного. Вторая часть
-                перехода после загрузки новой сцены.
-                Easing: ease-out.
-            </description>
-            <frame index="0" layer-offsets="fade-black:0,0" alpha="1.0"/>
-            <frame index="1" layer-offsets="fade-black:0,0" alpha="0.85"/>
-            <frame index="2" layer-offsets="fade-black:0,0" alpha="0.6"/>
+            <frame index="1" layer-offsets="fade-black:0,0" alpha="0.08"/>
+            <frame index="2" layer-offsets="fade-black:0,0" alpha="0.2"/>
             <frame index="3" layer-offsets="fade-black:0,0" alpha="0.35"/>
-            <frame index="4" layer-offsets="fade-black:0,0" alpha="0.15"/>
-            <frame index="5" layer-offsets="fade-black:0,0" alpha="0.0"/>
+            <frame index="4" layer-offsets="fade-black:0,0" alpha="0.5"/>
+            <frame index="5" layer-offsets="fade-black:0,0" alpha="0.65"/>
+            <frame index="6" layer-offsets="fade-black:0,0" alpha="0.78"/>
+            <frame index="7" layer-offsets="fade-black:0,0" alpha="0.88"/>
+            <frame index="8" layer-offsets="fade-black:0,0" alpha="0.96"/>
+            <frame index="9" layer-offsets="fade-black:0,0" alpha="1.0"/>
         </animation>
 
-        <!-- White flash (dream/memory) -->
-        <animation name="flash-white" frames="4" fps="6" loop="false"
-                   frame-width="320" frame-height="240">
-            <description>
-                Белая вспышка — переход к воспоминанию/мечте.
-                Быстрая вспышка и плавное угасание.
-            </description>
+        <!-- Fade from black: 10 кадров -->
+        <animation name="fade-from-black" frames="10" fps="8" loop="false"
+                   frame-width="640" frame-height="480">
+            <frame index="0" layer-offsets="fade-black:0,0" alpha="1.0"/>
+            <frame index="1" layer-offsets="fade-black:0,0" alpha="0.96"/>
+            <frame index="2" layer-offsets="fade-black:0,0" alpha="0.88"/>
+            <frame index="3" layer-offsets="fade-black:0,0" alpha="0.78"/>
+            <frame index="4" layer-offsets="fade-black:0,0" alpha="0.65"/>
+            <frame index="5" layer-offsets="fade-black:0,0" alpha="0.5"/>
+            <frame index="6" layer-offsets="fade-black:0,0" alpha="0.35"/>
+            <frame index="7" layer-offsets="fade-black:0,0" alpha="0.2"/>
+            <frame index="8" layer-offsets="fade-black:0,0" alpha="0.08"/>
+            <frame index="9" layer-offsets="fade-black:0,0" alpha="0.0"/>
+        </animation>
+
+        <!-- White flash: 8 кадров -->
+        <animation name="flash-white" frames="8" fps="6" loop="false"
+                   frame-width="640" frame-height="480">
             <frame index="0" layer-offsets="fade-white:0,0" alpha="0.0"/>
-            <frame index="1" layer-offsets="fade-white:0,0" alpha="1.0"/>
-            <frame index="2" layer-offsets="fade-white:0,0" alpha="0.5"/>
-            <frame index="3" layer-offsets="fade-white:0,0" alpha="0.0"/>
+            <frame index="1" layer-offsets="fade-white:0,0" alpha="0.5"/>
+            <frame index="2" layer-offsets="fade-white:0,0" alpha="1.0"/>
+            <frame index="3" layer-offsets="fade-white:0,0" alpha="0.85"/>
+            <frame index="4" layer-offsets="fade-white:0,0" alpha="0.6"/>
+            <frame index="5" layer-offsets="fade-white:0,0" alpha="0.35"/>
+            <frame index="6" layer-offsets="fade-white:0,0" alpha="0.15"/>
+            <frame index="7" layer-offsets="fade-white:0,0" alpha="0.0"/>
         </animation>
 
-        <!-- Iris close (круговое закрытие) -->
-        <animation name="iris-close" frames="6" fps="8" loop="false"
-                   frame-width="320" frame-height="240">
-            <description>
-                Классический круговой переход: чёрный круг
-                сужается к центру персонажа.
-                Реализация: iris-mask со свойством clip-radius,
-                уменьшающимся каждый кадр.
-            </description>
-            <frame index="0" layer-offsets="iris-mask:0,0" clip-radius="180"/>
-            <frame index="1" layer-offsets="iris-mask:0,0" clip-radius="140"/>
-            <frame index="2" layer-offsets="iris-mask:0,0" clip-radius="100"/>
-            <frame index="3" layer-offsets="iris-mask:0,0" clip-radius="60"/>
-            <frame index="4" layer-offsets="iris-mask:0,0" clip-radius="20"/>
-            <frame index="5" layer-offsets="iris-mask:0,0" clip-radius="0"/>
+        <!-- Iris close: 10 кадров -->
+        <animation name="iris-close" frames="10" fps="8" loop="false"
+                   frame-width="640" frame-height="480">
+            <frame index="0" layer-offsets="iris-mask:0,0" clip-radius="360"/>
+            <frame index="1" layer-offsets="iris-mask:0,0" clip-radius="320"/>
+            <frame index="2" layer-offsets="iris-mask:0,0" clip-radius="270"/>
+            <frame index="3" layer-offsets="iris-mask:0,0" clip-radius="220"/>
+            <frame index="4" layer-offsets="iris-mask:0,0" clip-radius="170"/>
+            <frame index="5" layer-offsets="iris-mask:0,0" clip-radius="120"/>
+            <frame index="6" layer-offsets="iris-mask:0,0" clip-radius="80"/>
+            <frame index="7" layer-offsets="iris-mask:0,0" clip-radius="40"/>
+            <frame index="8" layer-offsets="iris-mask:0,0" clip-radius="12"/>
+            <frame index="9" layer-offsets="iris-mask:0,0" clip-radius="0"/>
         </animation>
 
-        <!-- Iris open -->
-        <animation name="iris-open" frames="6" fps="8" loop="false"
-                   frame-width="320" frame-height="240">
-            <description>
-                Обратный iris: круг расширяется от центра.
-            </description>
+        <!-- Iris open: 10 кадров -->
+        <animation name="iris-open" frames="10" fps="8" loop="false"
+                   frame-width="640" frame-height="480">
             <frame index="0" layer-offsets="iris-mask:0,0" clip-radius="0"/>
-            <frame index="1" layer-offsets="iris-mask:0,0" clip-radius="20"/>
-            <frame index="2" layer-offsets="iris-mask:0,0" clip-radius="60"/>
-            <frame index="3" layer-offsets="iris-mask:0,0" clip-radius="100"/>
-            <frame index="4" layer-offsets="iris-mask:0,0" clip-radius="140"/>
-            <frame index="5" layer-offsets="iris-mask:0,0" clip-radius="180"/>
+            <frame index="1" layer-offsets="iris-mask:0,0" clip-radius="12"/>
+            <frame index="2" layer-offsets="iris-mask:0,0" clip-radius="40"/>
+            <frame index="3" layer-offsets="iris-mask:0,0" clip-radius="80"/>
+            <frame index="4" layer-offsets="iris-mask:0,0" clip-radius="120"/>
+            <frame index="5" layer-offsets="iris-mask:0,0" clip-radius="170"/>
+            <frame index="6" layer-offsets="iris-mask:0,0" clip-radius="220"/>
+            <frame index="7" layer-offsets="iris-mask:0,0" clip-radius="270"/>
+            <frame index="8" layer-offsets="iris-mask:0,0" clip-radius="320"/>
+            <frame index="9" layer-offsets="iris-mask:0,0" clip-radius="360"/>
         </animation>
 
-        <!-- Slide left (location change) -->
-        <animation name="slide-left" frames="6" fps="10" loop="false"
-                   frame-width="320" frame-height="240">
-            <description>
-                Новая локация въезжает справа налево,
-                старая уезжает влево. На границе — тонкая
-                тень (slide-edge). Easing: ease-in-out.
-            </description>
-            <frame index="0" layer-offsets="slide-edge:320,0"/>
-            <frame index="1" layer-offsets="slide-edge:256,0"/>
-            <frame index="2" layer-offsets="slide-edge:160,0"/>
-            <frame index="3" layer-offsets="slide-edge:80,0"/>
-            <frame index="4" layer-offsets="slide-edge:16,0"/>
-            <frame index="5" layer-offsets="slide-edge:0,0"/>
+        <!-- Slide left: 10 кадров -->
+        <animation name="slide-left" frames="10" fps="10" loop="false"
+                   frame-width="640" frame-height="480">
+            <frame index="0" layer-offsets="slide-edge:640,0"/>
+            <frame index="1" layer-offsets="slide-edge:576,0"/>
+            <frame index="2" layer-offsets="slide-edge:480,0"/>
+            <frame index="3" layer-offsets="slide-edge:360,0"/>
+            <frame index="4" layer-offsets="slide-edge:240,0"/>
+            <frame index="5" layer-offsets="slide-edge:150,0"/>
+            <frame index="6" layer-offsets="slide-edge:80,0"/>
+            <frame index="7" layer-offsets="slide-edge:32,0"/>
+            <frame index="8" layer-offsets="slide-edge:8,0"/>
+            <frame index="9" layer-offsets="slide-edge:0,0"/>
         </animation>
 
-        <!-- Time skip (clock spins) -->
-        <animation name="time-skip" frames="8" fps="6" loop="false"
-                   frame-width="24" frame-height="24"
+        <!-- Pixelate dissolve: 8 кадров -->
+        <animation name="pixelate-dissolve" frames="8" fps="6" loop="false"
+                   frame-width="640" frame-height="480">
+            <frame index="0" layer-offsets="pixelate-overlay:0,0" alpha="0.0"/>
+            <frame index="1" layer-offsets="pixelate-overlay:0,0" alpha="0.15"/>
+            <frame index="2" layer-offsets="pixelate-overlay:4,4" alpha="0.3"/>
+            <frame index="3" layer-offsets="pixelate-overlay:0,0" alpha="0.5"/>
+            <frame index="4" layer-offsets="pixelate-overlay:4,4" alpha="0.7"/>
+            <frame index="5" layer-offsets="pixelate-overlay:0,0" alpha="0.85"/>
+            <frame index="6" layer-offsets="pixelate-overlay:4,4" alpha="0.95"/>
+            <frame index="7" layer-offsets="pixelate-overlay:0,0" alpha="1.0"/>
+        </animation>
+
+        <!-- Time skip: 12 кадров, часы с вращающейся стрелкой -->
+        <animation name="time-skip" frames="12" fps="6" loop="false"
+                   frame-width="48" frame-height="48"
                    spawn="center-screen">
-            <description>
-                Пиксельные часы появляются в центре,
-                минутная стрелка быстро крутится (имитация
-                через layer-offsets), затем исчезают.
-                Используется для пропуска времени
-                («несколько часов спустя»).
-            </description>
             <frame index="0" layer-offsets="clock-icon:0,0" alpha="0.0"/>
-            <frame index="1" layer-offsets="clock-icon:0,0" alpha="0.5"/>
-            <frame index="2" layer-offsets="clock-icon:0,0" alpha="1.0"/>
+            <frame index="1" layer-offsets="clock-icon:0,-2" alpha="0.3"/>
+            <frame index="2" layer-offsets="clock-icon:0,0" alpha="0.7"/>
             <frame index="3" layer-offsets="clock-icon:0,0" alpha="1.0"/>
             <frame index="4" layer-offsets="clock-icon:0,0" alpha="1.0"/>
             <frame index="5" layer-offsets="clock-icon:0,0" alpha="1.0"/>
-            <frame index="6" layer-offsets="clock-icon:0,0" alpha="0.5"/>
-            <frame index="7" layer-offsets="clock-icon:0,0" alpha="0.0"/>
+            <frame index="6" layer-offsets="clock-icon:0,0" alpha="1.0"/>
+            <frame index="7" layer-offsets="clock-icon:0,0" alpha="1.0"/>
+            <frame index="8" layer-offsets="clock-icon:0,0" alpha="1.0"/>
+            <frame index="9" layer-offsets="clock-icon:0,0" alpha="0.8"/>
+            <frame index="10" layer-offsets="clock-icon:0,-2" alpha="0.4"/>
+            <frame index="11" layer-offsets="clock-icon:0,-4" alpha="0.0"/>
         </animation>
     </animations>
 
