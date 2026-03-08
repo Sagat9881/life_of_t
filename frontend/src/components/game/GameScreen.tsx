@@ -21,8 +21,6 @@ const deriveTimeSlot = (hour: number): string => {
 
 /**
  * Maps backend behavior/activity codes to sprite animation names.
- * Backend sends things like SLEEPING, WORKING, EXERCISING, WALKING, IDLE.
- * Sprite atlases have: idle, walk, sleep, work, exercise.
  */
 const BEHAVIOR_TO_ANIMATION: Record<string, string> = {
   IDLE: 'idle',
@@ -41,6 +39,15 @@ const BEHAVIOR_TO_ANIMATION: Record<string, string> = {
   TALKING: 'idle',
   BEAUTY_ROUTINE: 'idle',
 };
+
+/** Safely read a string field from an object that may have extra backend fields. */
+function getField(obj: unknown, field: string): string | undefined {
+  if (obj != null && typeof obj === 'object' && field in (obj as object)) {
+    const val = (obj as Record<string, unknown>)[field];
+    return typeof val === 'string' ? val : undefined;
+  }
+  return undefined;
+}
 
 const mapBehaviorToAnimation = (behavior?: string, activity?: string): string => {
   if (activity) {
@@ -73,24 +80,20 @@ export function GameScreen() {
   const timeOfDay = rawTimeSlot.toLowerCase();
   const gameTime = time ?? { day: 1, hour: 7, timeSlot: 'MORNING' as const };
 
-  // Map backend NPC state to sprite animations
   const characterAnimations = useMemo(() => {
     const anims: Record<string, string> = {};
 
-    // Player character (tanya)
     if (player) {
-      const playerActivity = (player as Record<string, unknown>).currentActivity as string | undefined;
-      const playerBehavior = (player as Record<string, unknown>).currentBehavior as string | undefined;
-      anims['tanya'] = mapBehaviorToAnimation(playerBehavior, playerActivity);
+      const activity = getField(player, 'currentActivity');
+      const behavior = getField(player, 'currentBehavior');
+      anims['tanya'] = mapBehaviorToAnimation(behavior, activity);
     }
 
-    // NPCs
     if (npcs && Array.isArray(npcs)) {
       for (const npc of npcs) {
-        const n = npc as Record<string, unknown>;
-        const name = (n.name as string ?? n.entityName as string ?? '').toLowerCase();
-        const behavior = n.currentBehavior as string | undefined;
-        const activity = n.currentActivity as string | undefined;
+        const name = (npc.name ?? '').toLowerCase();
+        const behavior = getField(npc, 'currentBehavior');
+        const activity = getField(npc, 'currentActivity');
         if (name) {
           anims[name] = mapBehaviorToAnimation(behavior, activity);
         }
@@ -140,7 +143,6 @@ export function GameScreen() {
 
   return (
     <div className="gs">
-      {/* ── HEADER ── */}
       <header className="gs-header">
         <div className="gs-header__left">
           <span className="gs-header__logo">LIFE OF T</span>
@@ -153,9 +155,7 @@ export function GameScreen() {
         </div>
       </header>
 
-      {/* ── MAIN AREA ── */}
       <div className="gs-main">
-        {/* Scene */}
         <div className="gs-scene">
           <LocationRenderer
             config={locationConfig}
@@ -166,7 +166,6 @@ export function GameScreen() {
           />
         </div>
 
-        {/* Sidebar */}
         <Sidebar
           player={player}
           npcs={npcs}
@@ -174,12 +173,10 @@ export function GameScreen() {
         />
       </div>
 
-      {/* ── FOOTER ── */}
       <footer className="gs-footer">
         Кликни на персонажа для взаимодействия
       </footer>
 
-      {/* ── ACTION DIALOG ── */}
       {selectedAction ? (
         <div className="gs-dialog-overlay" onClick={handleActionCancel}>
           <div className="gs-dialog" onClick={(e) => e.stopPropagation()}>
