@@ -1,66 +1,64 @@
-package ru.lifegame.backend.application.engine;
+package ru.lifegame.backend.domain.engine;
 
-import com.sagat.life_of_t.domain.engine.runtime.NpcInstance;
-import com.sagat.life_of_t.domain.engine.runtime.NpcRelationshipGraph;
+import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
+import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
+import ru.lifegame.backend.domain.npc.graph.NpcRelationshipEdge;
+import ru.lifegame.backend.domain.engine.spec.ConditionSpec;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-/**
- * Checks cross-NPC conditions and generates events.
- * E.g., tension between two NPCs exceeds threshold → conflict event.
- * All thresholds are configurable, no hardcoded NPC names.
- */
 public class CrossNpcTriggerEngine {
-    private static final int TENSION_CONFLICT_THRESHOLD = 70;
-    private static final int JEALOUSY_LONELINESS_THRESHOLD = 60;
 
-    private final NpcRegistry registry;
+    private final List<CrossNpcTrigger> triggers;
 
-    public CrossNpcTriggerEngine(NpcRegistry registry) {
-        this.registry = registry;
+    public CrossNpcTriggerEngine(List<CrossNpcTrigger> triggers) {
+        this.triggers = triggers;
     }
 
-    public record CrossNpcEvent(String type, String npcA, String npcB, String description) {}
+    public record CrossNpcTrigger(
+            String id,
+            String npcA,
+            String npcB,
+            String axis,
+            String operator,
+            double threshold,
+            String eventId
+    ) {}
 
-    public List<CrossNpcEvent> checkTriggers() {
-        List<CrossNpcEvent> events = new ArrayList<>();
+    public record TriggeredCrossEvent(
+            String triggerId,
+            String eventId,
+            String npcA,
+            String npcB
+    ) {}
+
+    public List<TriggeredCrossEvent> evaluate(NpcRegistry registry) {
+        List<TriggeredCrossEvent> results = new ArrayList<>();
         NpcRelationshipGraph graph = registry.relationshipGraph();
 
-        List<NpcInstance> named = registry.namedNpcs();
-        for (int i = 0; i < named.size(); i++) {
-            for (int j = i + 1; j < named.size(); j++) {
-                String a = named.get(i).entityId();
-                String b = named.get(j).entityId();
-                var relation = graph.getRelation(a, b);
+        for (CrossNpcTrigger trigger : triggers) {
+            Optional<NpcRelationshipEdge> edge = graph.getEdge(trigger.npcA(), trigger.npcB());
+            if (edge.isEmpty()) continue;
 
-                if (relation.tension() >= TENSION_CONFLICT_THRESHOLD) {
-                    events.add(new CrossNpcEvent(
-                            "NPC_CONFLICT", a, b,
-                            "Tension between " + a + " and " + b + " reached critical level"
-                    ));
-                }
+            double value = switch (trigger.axis()) {
+                case "tension" -> edge.get().tension();
+                case "respect" -> edge.get().respect();
+                case "familiarity" -> edge.get().familiarity();
+                default -> 0;
+            };
 
-                if (relation.respect() < 20 && relation.familiarity() > 50) {
-                    events.add(new CrossNpcEvent(
-                            "NPC_RESENTMENT", a, b,
-                            a + " resents " + b + " despite familiarity"
-                    ));
-                }
+            boolean met = switch (trigger.operator()) {
+                case "gte" -> value >= trigger.threshold();
+                case "lte" -> value <= trigger.threshold();
+                case "gt" -> value > trigger.threshold();
+                case "lt" -> value < trigger.threshold();
+                default -> false;
+            };
+
+            if (met) {
+                results.add(new TriggeredCrossEvent(trigger.id(), trigger.eventId(), trigger.npcA(), trigger.npcB()));
             }
         }
-
-        for (NpcInstance npc : named) {
-            if (npc.mood().loneliness() >= JEALOUSY_LONELINESS_THRESHOLD && npc.hasMemory()) {
-                if (npc.memory().isBeingIgnored("INTERACT_" + npc.entityId().toUpperCase(), 3)) {
-                    events.add(new CrossNpcEvent(
-                            "NPC_JEALOUSY", npc.entityId(), "player",
-                            npc.entityId() + " feels ignored and jealous"
-                    ));
-                }
-            }
-        }
-
-        return events;
+        return results;
     }
 }

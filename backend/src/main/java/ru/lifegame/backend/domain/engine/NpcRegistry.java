@@ -1,57 +1,46 @@
-package ru.lifegame.backend.application.engine;
+package ru.lifegame.backend.domain.engine;
 
-import com.sagat.life_of_t.domain.engine.runtime.NpcInstance;
-import com.sagat.life_of_t.domain.engine.runtime.NpcRelationshipGraph;
-import com.sagat.life_of_t.domain.engine.spec.NpcSpec;
+import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
+import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain;
+import ru.lifegame.backend.domain.engine.spec.NpcSpec;
+import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Registry of all NPC instances. Loaded from XML specs at startup.
- * No hardcoded NPC IDs — the registry is purely data-driven.
- */
 public class NpcRegistry {
+
     private final Map<String, NpcInstance> instances = new LinkedHashMap<>();
     private final NpcRelationshipGraph relationshipGraph = new NpcRelationshipGraph();
 
-    public void register(NpcSpec spec) {
-        NpcInstance instance = spec.isNamed()
-                ? NpcInstance.createNamed(spec)
-                : NpcInstance.createFiller(spec);
-        instances.put(spec.entityId(), instance);
+    public void registerFromSpecs(List<NpcSpec> specs) {
+        for (NpcSpec spec : specs) {
+            NpcInstance instance = NpcInstance.fromSpec(spec);
+            instances.put(spec.id(), instance);
+        }
     }
 
-    public Optional<NpcInstance> get(String entityId) {
-        return Optional.ofNullable(instances.get(entityId));
+    public Optional<NpcInstance> get(String npcId) {
+        return Optional.ofNullable(instances.get(npcId));
     }
 
-    public Collection<NpcInstance> allNpcs() {
-        return Collections.unmodifiableCollection(instances.values());
+    public List<NpcInstance> getAll() {
+        return List.copyOf(instances.values());
     }
 
-    public List<NpcInstance> namedNpcs() {
+    public List<NpcInstance> getNamed() {
         return instances.values().stream()
-                .filter(n -> n.spec().isNamed())
-                .collect(Collectors.toUnmodifiableList());
+                .filter(i -> "named".equals(i.spec().type()))
+                .collect(Collectors.toList());
     }
 
-    public List<NpcInstance> fillerNpcs() {
+    public List<NpcInstance> getFiller() {
         return instances.values().stream()
-                .filter(n -> !n.spec().isNamed())
-                .collect(Collectors.toUnmodifiableList());
+                .filter(i -> "filler".equals(i.spec().type()))
+                .collect(Collectors.toList());
     }
 
     public NpcRelationshipGraph relationshipGraph() {
         return relationshipGraph;
-    }
-
-    public void initializeRelation(String npcA, String npcB, int respect, int tension, int familiarity) {
-        relationshipGraph.setRelation(npcA, npcB,
-                new NpcRelationshipGraph.NpcRelation(respect, tension, familiarity));
-    }
-
-    public int size() {
-        return instances.size();
     }
 }

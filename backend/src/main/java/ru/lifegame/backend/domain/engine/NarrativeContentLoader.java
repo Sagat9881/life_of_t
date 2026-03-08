@@ -1,113 +1,65 @@
-package ru.lifegame.backend.application.engine;
+package ru.lifegame.backend.domain.engine;
 
-import com.sagat.life_of_t.domain.engine.parser.EventSpecParser;
-import com.sagat.life_of_t.domain.engine.parser.NpcSpecParser;
-import com.sagat.life_of_t.domain.engine.parser.QuestSpecParser;
-import com.sagat.life_of_t.domain.engine.spec.EventSpec;
-import com.sagat.life_of_t.domain.engine.spec.NpcSpec;
-import com.sagat.life_of_t.domain.engine.spec.QuestSpec;
+import ru.lifegame.backend.domain.engine.parser.NpcSpecParser;
+import ru.lifegame.backend.domain.engine.parser.EventSpecParser;
+import ru.lifegame.backend.domain.engine.parser.QuestSpecParser;
+import ru.lifegame.backend.domain.engine.spec.NpcSpec;
+import ru.lifegame.backend.domain.engine.spec.EventSpec;
+import ru.lifegame.backend.domain.engine.spec.QuestSpec;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
-/**
- * Scans narrative/ directory and loads all XML specs into registries.
- * This is the single point of contact between filesystem and domain.
- * The engine never references specific file names or NPC IDs.
- */
 public class NarrativeContentLoader {
 
     private final NpcSpecParser npcParser = new NpcSpecParser();
     private final EventSpecParser eventParser = new EventSpecParser();
     private final QuestSpecParser questParser = new QuestSpecParser();
 
-    private final NpcRegistry npcRegistry = new NpcRegistry();
-    private final List<EventSpec> eventSpecs = new ArrayList<>();
-    private final List<QuestSpec> questSpecs = new ArrayList<>();
+    private List<NpcSpec> npcSpecs = new ArrayList<>();
+    private List<EventSpec> eventSpecs = new ArrayList<>();
+    private List<QuestSpec> questSpecs = new ArrayList<>();
 
-    public void loadFromClasspath(String basePath) {
-        loadNpcs(basePath + "/npc-behavior");
-        loadEvents(basePath + "/events");
-        loadQuests(basePath + "/quests");
-        initializeDefaultRelations();
-    }
+    public void loadFromDirectory(Path narrativeRoot) throws IOException {
+        Path npcDir = narrativeRoot.resolve("npc-behavior");
+        Path eventDir = narrativeRoot.resolve("events");
+        Path questDir = narrativeRoot.resolve("quests");
 
-    public void loadFromFilesystem(Path basePath) {
-        loadNpcsFs(basePath.resolve("npc-behavior"));
-        loadEventsFs(basePath.resolve("events"));
-        loadQuestsFs(basePath.resolve("quests"));
-        initializeDefaultRelations();
-    }
-
-    private void loadNpcs(String classpathDir) {
-        // In Spring context, this would scan classpath resources
-        // For now, provide manual loading capability
-    }
-
-    private void loadNpcsFs(Path dir) {
-        parseAllXmlInDir(dir, xml -> {
-            NpcSpec spec = npcParser.parse(xml);
-            npcRegistry.register(spec);
-        });
-    }
-
-    private void loadEvents(String classpathDir) {}
-
-    private void loadEventsFs(Path dir) {
-        parseAllXmlInDir(dir, xml -> {
-            EventSpec spec = eventParser.parse(xml);
-            eventSpecs.add(spec);
-        });
-    }
-
-    private void loadQuests(String classpathDir) {}
-
-    private void loadQuestsFs(Path dir) {
-        parseAllXmlInDir(dir, xml -> {
-            QuestSpec spec = questParser.parse(xml);
-            questSpecs.add(spec);
-        });
-    }
-
-    private void parseAllXmlInDir(Path dir, XmlConsumer consumer) {
-        if (!Files.isDirectory(dir)) return;
-        try (Stream<Path> files = Files.list(dir)) {
-            files.filter(p -> p.toString().endsWith(".xml"))
-                    .sorted()
-                    .forEach(p -> {
-                        try (InputStream is = Files.newInputStream(p)) {
-                            consumer.accept(is);
-                        } catch (Exception e) {
-                            throw new RuntimeException("Failed to parse: " + p, e);
-                        }
-                    });
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to scan directory: " + dir, e);
+        if (Files.isDirectory(npcDir)) {
+            try (Stream<Path> files = Files.list(npcDir)) {
+                files.filter(p -> p.toString().endsWith(".xml"))
+                     .forEach(p -> {
+                         try { npcSpecs.add(npcParser.parse(p)); }
+                         catch (Exception e) { System.err.println("Failed to parse NPC: " + p + " - " + e.getMessage()); }
+                     });
+            }
         }
-    }
 
-    private void initializeDefaultRelations() {
-        List<String> npcIds = npcRegistry.allNpcs().stream()
-                .filter(n -> n.spec().isNamed())
-                .map(n -> n.spec().entityId())
-                .toList();
+        if (Files.isDirectory(eventDir)) {
+            try (Stream<Path> files = Files.list(eventDir)) {
+                files.filter(p -> p.toString().endsWith(".xml"))
+                     .forEach(p -> {
+                         try { eventSpecs.add(eventParser.parse(p)); }
+                         catch (Exception e) { System.err.println("Failed to parse event: " + p + " - " + e.getMessage()); }
+                     });
+            }
+        }
 
-        for (int i = 0; i < npcIds.size(); i++) {
-            for (int j = i + 1; j < npcIds.size(); j++) {
-                npcRegistry.initializeRelation(npcIds.get(i), npcIds.get(j), 50, 0, 30);
+        if (Files.isDirectory(questDir)) {
+            try (Stream<Path> files = Files.list(questDir)) {
+                files.filter(p -> p.toString().endsWith(".xml"))
+                     .forEach(p -> {
+                         try { questSpecs.add(questParser.parse(p)); }
+                         catch (Exception e) { System.err.println("Failed to parse quest: " + p + " - " + e.getMessage()); }
+                     });
             }
         }
     }
 
-    @FunctionalInterface
-    private interface XmlConsumer {
-        void accept(InputStream xml) throws Exception;
-    }
-
-    public NpcRegistry npcRegistry() { return npcRegistry; }
-    public List<EventSpec> eventSpecs() { return Collections.unmodifiableList(eventSpecs); }
-    public List<QuestSpec> questSpecs() { return Collections.unmodifiableList(questSpecs); }
+    public List<NpcSpec> npcSpecs() { return npcSpecs; }
+    public List<EventSpec> eventSpecs() { return eventSpecs; }
+    public List<QuestSpec> questSpecs() { return questSpecs; }
 }

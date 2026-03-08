@@ -1,133 +1,89 @@
-package ru.lifegame.backend.application.engine;
+package ru.lifegame.backend.domain.engine;
 
-import com.sagat.life_of_t.domain.engine.spec.QuestSpec;
-import com.sagat.life_of_t.domain.engine.spec.QuestSpec.*;
+import ru.lifegame.backend.domain.engine.spec.QuestSpec;
+import ru.lifegame.backend.domain.engine.spec.QuestSpec.StepSpec;
+import ru.lifegame.backend.domain.engine.spec.QuestSpec.RewardSpec;
+import ru.lifegame.backend.domain.engine.spec.QuestSpec.DialogueEntry;
+import ru.lifegame.backend.domain.engine.spec.ConditionSpec;
 
 import java.util.*;
 
-/**
- * Manages quest lifecycle: activation, step progression, completion.
- * All quest content comes from XML — engine only processes abstract steps.
- */
 public class NarrativeQuestEngine {
 
-    private final List<QuestSpec> allQuests;
+    private final List<QuestSpec> questSpecs;
     private final Map<String, QuestState> activeQuests = new LinkedHashMap<>();
-    private final Set<String> completedQuestIds = new LinkedHashSet<>();
 
-    public NarrativeQuestEngine(List<QuestSpec> allQuests) {
-        this.allQuests = allQuests;
+    public NarrativeQuestEngine(List<QuestSpec> questSpecs) {
+        this.questSpecs = questSpecs;
     }
 
     public record QuestState(
             QuestSpec spec,
             int currentStepIndex,
-            Map<String, Integer> objectiveProgress
+            boolean completed
     ) {
-        public boolean isComplete() {
-            return currentStepIndex >= spec.steps().size();
-        }
-
         public StepSpec currentStep() {
-            if (isComplete()) return null;
+            if (currentStepIndex >= spec.steps().size()) return null;
             return spec.steps().get(currentStepIndex);
         }
     }
 
-    public List<QuestSpec> checkActivatable(int currentDay, Set<String> completedPrereqs) {
-        List<QuestSpec> activatable = new ArrayList<>();
-        for (QuestSpec quest : allQuests) {
-            if (activeQuests.containsKey(quest.id())) continue;
-            if (completedQuestIds.contains(quest.id())) continue;
-
-            String prereqs = quest.meta().prerequisites();
-            if (prereqs != null && !prereqs.isBlank()) {
-                boolean allMet = Arrays.stream(prereqs.split(","))
-                        .map(String::trim)
-                        .allMatch(completedPrereqs::contains);
-                if (!allMet) continue;
-            }
-            activatable.add(quest);
-        }
-        return activatable;
-    }
-
     public void activateQuest(String questId) {
-        allQuests.stream()
+        questSpecs.stream()
                 .filter(q -> q.id().equals(questId))
                 .findFirst()
-                .ifPresent(spec -> {
-                    Map<String, Integer> progress = new LinkedHashMap<>();
-                    for (ObjectiveSpec obj : spec.objectives()) {
-                        progress.put(obj.id(), 0);
-                    }
-                    activeQuests.put(questId, new QuestState(spec, 0, progress));
-                });
+                .ifPresent(spec -> activeQuests.put(questId, new QuestState(spec, 0, false)));
+    }
+
+    public List<QuestState> getActiveQuests() {
+        return List.copyOf(activeQuests.values());
+    }
+
+    public Optional<StepCompletionResult> tryCompleteStep(String questId, Map<String, Object> context) {
+        QuestState state = activeQuests.get(questId);
+        if (state == null || state.completed()) return Optional.empty();
+
+        StepSpec step = state.currentStep();
+        if (step == null) return Optional.empty();
+
+        boolean conditionsMet = step.conditions().stream()
+                .allMatch(c -> evaluateCondition(c, context));
+
+        if (!conditionsMet) return Optional.empty();
+
+        int nextIndex = state.currentStepIndex() + 1;
+        boolean isComplete = nextIndex >= state.spec().steps().size();
+        activeQuests.put(questId, new QuestState(state.spec(), nextIndex, isComplete));
+
+        return Optional.of(new StepCompletionResult(
+                questId, step.id(), isComplete,
+                step.dialogue(), step.reward()
+        ));
     }
 
     public record StepCompletionResult(
             String questId,
-            int stepOrder,
-            List<DialogueEntry> dialogues,
-            List<RewardSpec> rewards,
-            boolean questCompleted
+            String stepId,
+            boolean questCompleted,
+            DialogueEntry dialogue,
+            RewardSpec reward
     ) {}
 
-    public Optional<StepCompletionResult> advanceObjective(String objectiveId, String playerChoice) {
-        for (var entry : activeQuests.entrySet()) {
-            QuestState state = entry.getValue();
-            StepSpec currentStep = state.currentStep();
-            if (currentStep == null) continue;
-            if (!currentStep.objectiveRef().equals(objectiveId)) continue;
-
-            String objId = currentStep.objectiveRef();
-            int newProgress = state.objectiveProgress().getOrDefault(objId, 0) + 1;
-
-            ObjectiveSpec objective = state.spec().objectives().stream()
-                    .filter(o -> o.id().equals(objId))
-                    .findFirst().orElse(null);
-
-            if (objective != null && newProgress >= objective.count()) {
-                int nextStep = state.currentStepIndex() + 1;
-                boolean questDone = nextStep >= state.spec().steps().size();
-
-                List<DialogueEntry> dialogues = currentStep.dialogues();
-                if (playerChoice != null) {
-                    dialogues = dialogues.stream()
-                            .filter(d -> d.choice() == null || d.choice().equals(playerChoice))
-                            .toList();
-                }
-
-                List<RewardSpec> rewards = new ArrayList<>(currentStep.onComplete());
-                if (playerChoice != null) {
-                    rewards = rewards.stream()
-                            .filter(r -> r.condition() == null || r.condition().contains(playerChoice))
-                            .toList();
-                }
-
-                if (questDone) {
-                    rewards = new ArrayList<>(rewards);
-                    rewards.addAll(state.spec().rewards());
-                    completedQuestIds.add(entry.getKey());
-                    activeQuests.remove(entry.getKey());
-                } else {
-                    Map<String, Integer> updatedProgress = new LinkedHashMap<>(state.objectiveProgress());
-                    updatedProgress.put(objId, newProgress);
-                    activeQuests.put(entry.getKey(), new QuestState(state.spec(), nextStep, updatedProgress));
-                }
-
-                return Optional.of(new StepCompletionResult(
-                        entry.getKey(), currentStep.order(), dialogues, rewards, questDone
-                ));
-            } else {
-                Map<String, Integer> updatedProgress = new LinkedHashMap<>(state.objectiveProgress());
-                updatedProgress.put(objId, newProgress);
-                activeQuests.put(entry.getKey(), new QuestState(state.spec(), state.currentStepIndex(), updatedProgress));
-            }
+    private boolean evaluateCondition(ConditionSpec c, Map<String, Object> context) {
+        Object val = context.get(c.target());
+        if (val == null) return false;
+        if (val instanceof Number num) {
+            double v = num.doubleValue();
+            double threshold = Double.parseDouble(c.value());
+            return switch (c.operator()) {
+                case "gte" -> v >= threshold;
+                case "lte" -> v <= threshold;
+                case "gt" -> v > threshold;
+                case "lt" -> v < threshold;
+                case "eq" -> v == threshold;
+                default -> false;
+            };
         }
-        return Optional.empty();
+        return String.valueOf(val).equals(c.value());
     }
-
-    public Map<String, QuestState> activeQuests() { return Collections.unmodifiableMap(activeQuests); }
-    public Set<String> completedQuestIds() { return Collections.unmodifiableSet(completedQuestIds); }
 }

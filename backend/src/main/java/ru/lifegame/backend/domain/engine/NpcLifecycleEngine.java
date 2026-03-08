@@ -1,63 +1,42 @@
-package ru.lifegame.backend.application.engine;
+package ru.lifegame.backend.domain.engine;
 
-import com.sagat.life_of_t.domain.engine.runtime.NpcInstance;
-import com.sagat.life_of_t.domain.engine.runtime.NpcUtilityBrain;
-import com.sagat.life_of_t.domain.engine.runtime.NpcUtilityBrain.ScoredAction;
+import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
+import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain;
+import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain.EvaluatedAction;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Drives NPC activity each game hour via Utility AI.
- * No knowledge of specific NPCs — works purely through specs and runtime state.
- */
 public class NpcLifecycleEngine {
+
     private final NpcRegistry registry;
-    private final NpcUtilityBrain brain = new NpcUtilityBrain();
+    private final NpcUtilityBrain brain;
 
-    public NpcLifecycleEngine(NpcRegistry registry) {
+    public NpcLifecycleEngine(NpcRegistry registry, NpcUtilityBrain brain) {
         this.registry = registry;
+        this.brain = brain;
     }
 
-    public record NpcActivityUpdate(String entityId, String activity, String animation, String location) {}
-
-    public List<NpcActivityUpdate> hourlyTick(int hour) {
-        String timeOfDay = resolveTimeOfDay(hour);
-        List<NpcActivityUpdate> updates = new ArrayList<>();
-
-        for (NpcInstance npc : registry.allNpcs()) {
-            ScoredAction chosen = brain.evaluate(npc, timeOfDay);
-            npc.updateActivity(chosen.actionId(), chosen.location(), chosen.animation());
-            updates.add(new NpcActivityUpdate(
-                    npc.entityId(),
-                    chosen.actionId(),
-                    chosen.animation(),
-                    chosen.location()
-            ));
-        }
-        return updates;
-    }
-
-    public void dailyTick() {
-        for (NpcInstance npc : registry.allNpcs()) {
-            npc.dailyTick();
+    public void hourlyTick(int currentHour) {
+        for (NpcInstance npc : registry.getAll()) {
+            var scheduled = npc.getScheduledActivity(currentHour);
+            if (scheduled.isPresent()) {
+                npc.setCurrentActivity(scheduled.get().activity());
+                npc.setCurrentLocation(scheduled.get().location());
+                npc.setCurrentAnimation(scheduled.get().animation());
+            }
         }
     }
 
-    public void onPlayerAction(String actionId, int day, int hour) {
-        for (NpcInstance npc : registry.namedNpcs()) {
-            npc.observePlayerAction(actionId, day, hour);
+    public List<EvaluatedAction> dailyTick() {
+        List<EvaluatedAction> initiatedActions = new ArrayList<>();
+        for (NpcInstance npc : registry.getNamed()) {
+            npc.mood().dailyDecay();
+            var best = brain.evaluate(npc);
+            if (best.isPresent() && best.get().score() > 0.5) {
+                initiatedActions.add(best.get());
+            }
         }
-    }
-
-    public void onPlayerInteractsWithNpc(String npcId) {
-        registry.get(npcId).ifPresent(NpcInstance::onPlayerInteraction);
-    }
-
-    private String resolveTimeOfDay(int hour) {
-        if (hour >= 6 && hour < 12) return "morning";
-        if (hour >= 12 && hour < 18) return "day";
-        if (hour >= 18 && hour < 23) return "evening";
-        return "night";
+        return initiatedActions;
     }
 }
