@@ -115,12 +115,22 @@ public class XmlAssetSpecParser {
         NamingSpec naming = parseNaming(root, entityType, entityName);
         AssetConstraints constraints = parseConstraints(root);
 
+        // Parse $-variable color maps from child
+        Map<String, String> childColorVars = parseColorVariableMap(root);
+
         // Resolve inheritance
         AssetSpec parentSpec = resolver.loadParent(extendsRef);
 
         // Merge layers: start with parent, apply overrides
         List<AssetLayer> mergedLayers = resolver.mergeLayers(
                 parentSpec.layers(), layerOverrides, ownLayers, colorOverrides, colorRemaps);
+
+        // Resolve $-variable color references using parent + child variable maps
+        // Parent vars are already resolved in parent's own parsing (parseFlatSpec),
+        // but child's own layers and layer-overrides may still contain $-references
+        if (!childColorVars.isEmpty()) {
+            mergedLayers = VisualSpecResolver.resolveColorVariablesInLayers(mergedLayers, childColorVars);
+        }
 
         // Merge animations: parent + extra
         List<AnimationSpec> mergedAnimations = resolver.mergeAnimations(
@@ -147,6 +157,11 @@ public class XmlAssetSpecParser {
         String version = getTextContentOrDefault(meta, "version", "1.0.0");
 
         List<AssetLayer> layers = parseLayers(root);
+        // Resolve $-variable color references in pixel-data
+        Map<String, String> colorVars = parseColorVariableMap(root);
+        if (!colorVars.isEmpty()) {
+            layers = VisualSpecResolver.resolveColorVariablesInLayers(layers, colorVars);
+        }
         ColorPalette palette = parseColorPalette(root);
         List<AnimationSpec> animations = parseAnimations(root);
         List<TimeOfDayVariation> variations = parseTimeOfDayVariations(root);
@@ -173,6 +188,38 @@ public class XmlAssetSpecParser {
             }
         }
         return overrides;
+    }
+
+    /**
+     * Parses color-palette entries into a variable map for $-reference resolution.
+     * Supports both formats:
+     *   <color id="floor_base" value="#C8B090"/>   -> "$floor_base" -> "#C8B090"
+     *   <color name="$floor_tile" value="#E8E8EC"/> -> "$floor_tile" -> "#E8E8EC"
+     */
+    Map<String, String> parseColorVariableMap(Element root) {
+        Map<String, String> vars = new HashMap<>();
+        Element paletteEl = getFirstChildOrNull(root, "color-palette");
+        if (paletteEl == null) return vars;
+        NodeList colorNodes = paletteEl.getElementsByTagName("color");
+        for (int i = 0; i < colorNodes.getLength(); i++) {
+            Element el = (Element) colorNodes.item(i);
+            String value = el.getAttribute("value");
+            if (value.isBlank()) continue;
+
+            // Format 1: <color id="floor_base" value="#C8B090"/>
+            String id = el.getAttribute("id");
+            if (!id.isBlank()) {
+                vars.put("$" + id, value);
+            }
+
+            // Format 2: <color name="$floor_tile" value="#E8E8EC"/>
+            String name = el.getAttribute("name");
+            if (!name.isBlank()) {
+                if (!name.startsWith("$")) name = "$" + name;
+                vars.put(name, value);
+            }
+        }
+        return vars;
     }
 
     private List<ColorRemap> parseColorRemaps(Element root) {

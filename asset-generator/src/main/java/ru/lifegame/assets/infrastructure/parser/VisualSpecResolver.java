@@ -216,4 +216,52 @@ public class VisualSpecResolver {
         String upper = color.toUpperCase();
         return remapMap.getOrDefault(upper, color);
     }
+
+    /**
+     * Resolves $-variable color references in all layer pixel-data.
+     * Replaces occurrences of "$varName" in color fields with actual hex values.
+     *
+     * @param layers   layers with potential $-variable colors
+     * @param colorVars map of "$varName" -> "#hexValue"
+     * @return new layer list with all $-variables resolved
+     */
+    public static List<AssetLayer> resolveColorVariablesInLayers(
+            List<AssetLayer> layers, Map<String, String> colorVars) {
+        if (colorVars.isEmpty()) return layers;
+
+        List<AssetLayer> resolved = new ArrayList<>();
+        for (AssetLayer layer : layers) {
+            PixelData pd = resolveColorVarsInPixelData(layer.pixelData(), colorVars);
+            resolved.add(new AssetLayer(
+                    layer.id(), layer.type(), layer.description(),
+                    layer.zOrder(), layer.width(), layer.height(),
+                    pd, layer.follows(), layer.conditions()));
+        }
+        return resolved;
+    }
+
+    private static PixelData resolveColorVarsInPixelData(
+            PixelData data, Map<String, String> colorVars) {
+        if (data == null || data.isEmpty()) return data;
+
+        List<PixelRect> rects = data.rects().stream()
+                .map(r -> new PixelRect(r.x(), r.y(), r.w(), r.h(),
+                        resolveColorVar(r.color(), colorVars)))
+                .toList();
+        List<PixelLine> lines = data.lines().stream()
+                .map(l -> new PixelLine(l.x(), l.y(), l.length(), l.direction(),
+                        resolveColorVar(l.color(), colorVars)))
+                .toList();
+        List<PixelDot> dots = data.dots().stream()
+                .map(d -> new PixelDot(d.x(), d.y(),
+                        resolveColorVar(d.color(), colorVars)))
+                .toList();
+        return new PixelData(rects, lines, dots);
+    }
+
+    private static String resolveColorVar(String color, Map<String, String> colorVars) {
+        if (color == null || !color.startsWith("$")) return color;
+        return colorVars.getOrDefault(color, color);
+    }
+
 }
