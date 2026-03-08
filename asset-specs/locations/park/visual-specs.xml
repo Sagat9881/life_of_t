@@ -1,96 +1,269 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<asset-spec>
+<asset-spec extends="abstract/environments/outdoor_area@1.0" version="2.0.0">
     <meta>
         <entity-type>location</entity-type>
         <entity-name>park</entity-name>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
+        <canvas width="640" height="480" displayScale="1.0"/>
         <description>
-            Городской парк — для прогулок с Sam, медитации, отдыха.
-            Снижает стресс, повышает настроение.
-            Три слоя: background (небо/деревья), midground (дорожки/скамейки), foreground (кусты/цветы).
+            City park for walks with Sam, meditation, relaxation.
+            Full pixel-data rewrite (was descriptive-only in v1).
         </description>
     </meta>
 
-    <atmosphere>
-        <mood>расслабленный, свежий, природный</mood>
-        <lighting>естественный солнечный свет через кроны</lighting>
-        <colors>
-            <dominant>#90C695</dominant>
-            <accent>#FFD93D</accent>
-            <accent>#87CEEB</accent>
-            <neutral>#8B7355</neutral>
-        </colors>
-    </atmosphere>
+    <color-palette>
+        <color name="$sky" value="#87CEEB"/>
+        <color name="$sky_light" value="#A8DCEF"/>
+        <color name="$cloud" value="#FFFFFF"/>
+        <color name="$cloud_shadow" value="#E0E8F0"/>
+        <color name="$tree_trunk" value="#8B7355"/>
+        <color name="$tree_dark" value="#4A7A4A"/>
+        <color name="$tree_mid" value="#5A9A5A"/>
+        <color name="$tree_light" value="#6ABA6A"/>
+        <color name="$grass_dark" value="#70A870"/>
+        <color name="$grass_mid" value="#90C695"/>
+        <color name="$grass_light" value="#A8D8A8"/>
+        <color name="$path" value="#C8B898"/>
+        <color name="$path_edge" value="#B0A080"/>
+        <color name="$path_pebble" value="#D0C0A0"/>
+        <color name="$bench_wood" value="#A08060"/>
+        <color name="$bench_metal" value="#606060"/>
+        <color name="$lamp_post" value="#505050"/>
+        <color name="$lamp_glass" value="#FFE8A0"/>
+        <color name="$fountain_stone" value="#A0A0A0"/>
+        <color name="$fountain_water" value="#80B8D8"/>
+        <color name="$flower_red" value="#E04040"/>
+        <color name="$flower_yellow" value="#FFD93D"/>
+        <color name="$flower_purple" value="#9060C0"/>
+        <color name="$building_far" value="#C0C0C8"/>
+    </color-palette>
+
+    <layer-overrides>
+        <layer id="sky" replace="true" type="background" z-order="0" width="640" height="480">
+            <pixel-data>
+                <rect x="0" y="0" w="640" h="200" color="$sky"/>
+                <rect x="0" y="0" w="640" h="60" color="$sky_light"/>
+                <!-- Clouds -->
+                <rect x="60" y="40" w="80" h="24" color="$cloud"/>
+                <rect x="50" y="48" w="100" h="16" color="$cloud"/>
+                <rect x="70" y="56" w="60" h="12" color="$cloud_shadow"/>
+                <rect x="240" y="24" w="60" h="20" color="$cloud"/>
+                <rect x="230" y="32" w="80" h="12" color="$cloud"/>
+                <rect x="440" y="50" w="100" h="28" color="$cloud"/>
+                <rect x="430" y="60" w="120" h="16" color="$cloud"/>
+                <rect x="460" y="70" w="60" h="12" color="$cloud_shadow"/>
+                <!-- Distant buildings -->
+                <rect x="500" y="100" w="40" h="100" color="$building_far"/>
+                <rect x="544" y="120" w="30" h="80" color="#B0B0B8"/>
+                <rect x="578" y="110" w="50" h="90" color="#B8B8C0"/>
+                <!-- Building windows -->
+                <pixel x="510" y="110" color="#D0D0D8"/>
+                <pixel x="520" y="110" color="#D0D0D8"/>
+                <pixel x="510" y="120" color="#D0D0D8"/>
+                <pixel x="520" y="120" color="#D0D0D8"/>
+                <pixel x="510" y="130" color="#D0D0D8"/>
+                <pixel x="520" y="130" color="#D0D0D8"/>
+            </pixel-data>
+        </layer>
+    </layer-overrides>
 
     <layers>
-        <layer type="background" description="Небо, дальние деревья">
-            <elements>
-                <element>Голубое небо с облаками</element>
-                <element>Ряд деревьев (дальний план)</element>
-                <element>Верхушки многоэтажек вдали</element>
-            </elements>
+        <!-- z=1: Far trees -->
+        <layer id="far_trees" type="background" z-order="1" width="640" height="480">
+            <pixel-data>
+                <!-- Tree line -->
+                <rect x="0" y="140" w="480" h="60" color="$tree_dark"/>
+                <rect x="0" y="160" w="480" h="40" color="$tree_mid"/>
+                <!-- Individual canopy shapes -->
+                <rect x="20" y="120" w="60" h="40" color="$tree_dark"/>
+                <rect x="30" y="110" w="40" h="20" color="$tree_mid"/>
+                <rect x="100" y="130" w="50" h="30" color="$tree_dark"/>
+                <rect x="110" y="120" w="30" h="20" color="$tree_mid"/>
+                <rect x="180" y="110" w="70" h="50" color="$tree_dark"/>
+                <rect x="200" y="100" w="30" h="20" color="$tree_light"/>
+                <rect x="280" y="125" w="60" h="35" color="$tree_dark"/>
+                <rect x="290" y="115" w="40" h="20" color="$tree_mid"/>
+                <rect x="370" y="120" w="50" h="40" color="$tree_dark"/>
+                <rect x="380" y="110" w="30" h="20" color="$tree_light"/>
+                <!-- Trunks visible -->
+                <rect x="48" y="160" w="8" h="40" color="$tree_trunk"/>
+                <rect x="122" y="160" w="8" h="30" color="$tree_trunk"/>
+                <rect x="210" y="160" w="10" h="40" color="$tree_trunk"/>
+                <rect x="308" y="160" w="8" h="30" color="$tree_trunk"/>
+                <rect x="392" y="160" w="8" h="40" color="$tree_trunk"/>
+            </pixel-data>
         </layer>
 
-        <layer type="midground" description="Дорожки, скамейки">
-            <elements>
-                <element>Гравийная дорожка</element>
-                <element>Парковая скамейка (место для "Медитация")</element>
-                <element>Фонарный столб</element>
-                <element>Урна</element>
-                <element>Голуби (декоративные, 2-3 штуки)</element>
-            </elements>
+        <!-- z=2: Ground + path -->
+        <layer id="ground" type="midground" z-order="2" width="640" height="480">
+            <pixel-data>
+                <!-- Main grass -->
+                <rect x="0" y="200" w="640" h="280" color="$grass_mid"/>
+                <rect x="0" y="200" w="640" h="20" color="$grass_dark"/>
+                <!-- Grass texture -->
+                <hline x="20" y="240" len="100" color="$grass_light"/>
+                <hline x="200" y="300" len="80" color="$grass_light"/>
+                <hline x="400" y="260" len="120" color="$grass_light"/>
+                <hline x="100" y="380" len="90" color="$grass_light"/>
+                <hline x="500" y="360" len="60" color="$grass_dark"/>
+                <!-- Main path -->
+                <rect x="200" y="280" w="240" h="40" color="$path"/>
+                <rect x="200" y="278" w="240" h="4" color="$path_edge"/>
+                <rect x="200" y="318" w="240" h="4" color="$path_edge"/>
+                <!-- Pebbles -->
+                <pixel x="220" y="290" color="$path_pebble"/>
+                <pixel x="250" y="300" color="$path_pebble"/>
+                <pixel x="300" y="288" color="$path_pebble"/>
+                <pixel x="340" y="296" color="$path_pebble"/>
+                <pixel x="380" y="292" color="$path_pebble"/>
+                <pixel x="410" y="304" color="$path_pebble"/>
+                <!-- Side path going up -->
+                <rect x="300" y="220" w="30" h="60" color="$path"/>
+                <rect x="298" y="220" w="4" h="60" color="$path_edge"/>
+                <rect x="328" y="220" w="4" h="60" color="$path_edge"/>
+            </pixel-data>
         </layer>
 
-        <layer type="foreground" description="Ближняя растительность">
-            <elements>
-                <element>Куст сирени</element>
-                <element>Клумба с цветами</element>
-                <element>Одуванчики на газоне</element>
-            </elements>
+        <!-- z=3: Bench + lamp + fountain -->
+        <layer id="furniture" type="midground" z-order="3" width="640" height="480">
+            <pixel-data>
+                <!-- Bench -->
+                <rect x="100" y="270" w="80" h="8" color="$bench_wood"/>
+                <rect x="100" y="270" w="80" h="2" color="#B89070"/>
+                <rect x="100" y="278" w="80" h="4" color="$bench_wood"/>
+                <rect x="108" y="282" w="8" h="20" color="$bench_metal"/>
+                <rect x="164" y="282" w="8" h="20" color="$bench_metal"/>
+                <rect x="100" y="260" w="80" h="4" color="$bench_metal"/>
+                <rect x="100" y="258" w="4" h="24" color="$bench_metal"/>
+                <rect x="176" y="258" w="4" h="24" color="$bench_metal"/>
+                <!-- Lamp post -->
+                <rect x="470" y="160" w="6" h="140" color="$lamp_post"/>
+                <rect x="460" y="154" w="26" h="12" color="$lamp_post"/>
+                <rect x="464" y="148" w="18" h="8" color="$lamp_glass"/>
+                <!-- Fountain -->
+                <rect x="520" y="260" w="80" h="40" color="$fountain_stone"/>
+                <rect x="524" y="264" w="72" h="32" color="$fountain_water"/>
+                <rect x="550" y="240" w="20" h="24" color="$fountain_stone"/>
+                <rect x="556" y="232" w="8" h="12" color="#90C8E0"/>
+                <!-- Water spray dots -->
+                <pixel x="558" y="228" color="#A0D8F0"/>
+                <pixel x="554" y="224" color="#B0E0F8"/>
+                <pixel x="562" y="224" color="#B0E0F8"/>
+                <pixel x="550" y="220" color="#C0E8FF"/>
+                <pixel x="566" y="220" color="#C0E8FF"/>
+                <!-- Trash can -->
+                <rect x="448" y="290" w="16" h="20" color="#707070"/>
+                <rect x="446" y="288" w="20" h="4" color="#808080"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=4: Foreground vegetation -->
+        <layer id="foreground" type="foreground" z-order="4" width="640" height="480">
+            <pixel-data>
+                <!-- Flower bed -->
+                <rect x="20" y="340" w="120" h="40" color="$grass_dark"/>
+                <rect x="30" y="336" w="20" h="8" color="$flower_red"/>
+                <rect x="60" y="334" w="16" h="8" color="$flower_yellow"/>
+                <rect x="90" y="336" w="20" h="8" color="$flower_purple"/>
+                <rect x="120" y="334" w="16" h="8" color="$flower_red"/>
+                <!-- Lilac bush -->
+                <rect x="0" y="360" w="60" h="80" color="$tree_dark"/>
+                <rect x="10" y="350" w="40" h="20" color="#9060A0"/>
+                <rect x="4" y="360" w="52" h="10" color="#A070B0"/>
+                <!-- Dandelions -->
+                <pixel x="160" y="400" color="$flower_yellow"/>
+                <pixel x="180" y="410" color="$flower_yellow"/>
+                <pixel x="250" y="420" color="$flower_yellow"/>
+                <pixel x="320" y="390" color="$flower_yellow"/>
+                <pixel x="400" y="430" color="$flower_yellow"/>
+                <!-- Close tree -->
+                <rect x="580" y="200" w="16" h="120" color="$tree_trunk"/>
+                <rect x="550" y="120" w="80" h="100" color="$tree_dark"/>
+                <rect x="560" y="110" w="60" h="40" color="$tree_mid"/>
+                <rect x="570" y="100" w="40" h="20" color="$tree_light"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=5: Pigeons (animated) -->
+        <layer id="pigeons" type="animated" z-order="5" width="640" height="480">
+            <pixel-data>
+                <!-- Pigeon 1 -->
+                <rect x="260" y="310" w="8" h="6" color="#808088"/>
+                <rect x="258" y="308" w="4" h="4" color="#909098"/>
+                <pixel x="258" y="308" color="#E08020"/>
+                <rect x="262" y="316" w="2" h="4" color="#C08040"/>
+                <rect x="266" y="316" w="2" h="4" color="#C08040"/>
+                <!-- Pigeon 2 -->
+                <rect x="290" y="306" w="8" h="6" color="#707078"/>
+                <rect x="296" y="304" w="4" h="4" color="#808088"/>
+                <pixel x="298" y="304" color="#E08020"/>
+                <rect x="292" y="312" w="2" h="4" color="#C08040"/>
+                <rect x="296" y="312" w="2" h="4" color="#C08040"/>
+                <!-- Pigeon 3 -->
+                <rect x="240" y="318" w="8" h="6" color="#888890"/>
+                <rect x="236" y="316" w="4" h="4" color="#989898"/>
+                <pixel x="236" y="316" color="#E08020"/>
+                <rect x="242" y="324" w="2" h="4" color="#C08040"/>
+                <rect x="246" y="324" w="2" h="4" color="#C08040"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=6: Ambient light / shadow -->
+        <layer id="ambient_light" type="overlay" z-order="6" width="640" height="480">
+            <pixel-data>
+                <!-- Dappled sunlight -->
+                <rect x="40" y="250" w="60" h="40" color="#FFFDE820"/>
+                <rect x="300" y="230" w="40" h="30" color="#FFFDE820"/>
+                <rect x="500" y="300" w="50" h="40" color="#FFFDE820"/>
+                <!-- Tree shadows -->
+                <rect x="560" y="300" w="80" h="20" color="#40604020"/>
+                <rect x="90" y="300" w="40" h="20" color="#40604020"/>
+            </pixel-data>
+            <conditions>
+                <condition id="time_morning"><override layer-ref="ambient_light" tint="#E8F4FF" opacity="0.10"/></condition>
+                <condition id="time_day"><override layer-ref="ambient_light" tint="#FFF8E8" opacity="0.06"/></condition>
+                <condition id="time_evening"><override layer-ref="ambient_light" tint="#FFB060" opacity="0.20"/></condition>
+                <condition id="time_night"><override layer-ref="ambient_light" tint="#1A1830" opacity="0.50"/></condition>
+            </conditions>
         </layer>
     </layers>
 
-    <animated-details>
-        <detail id="leaves">
-            <name>Листья</name>
-            <atlas>assets/locations/park/animations/leaves-atlas.png</atlas>
-            <frames>12</frames>
-            <animation-type>Листья качаются на ветру</animation-type>
-        </detail>
-        <detail id="pigeons">
-            <name>Голуби</name>
-            <atlas>assets/locations/park/animations/pigeons-atlas.png</atlas>
-            <frames>6</frames>
-            <animation-type>Голуби клюют и ходят</animation-type>
-        </detail>
-        <detail id="fountain">
-            <name>Фонтанчик</name>
-            <atlas>assets/locations/park/animations/fountain-atlas.png</atlas>
-            <frames>8</frames>
-            <animation-type>Струя воды плещется</animation-type>
-        </detail>
-    </animated-details>
+    <animations>
+        <animation name="idle" frames="12" fps="2" loop="true"
+                   frame-width="640" frame-height="480">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="pigeons:2,0"/>
+            <frame index="2" layer-offsets="pigeons:4,0"/>
+            <frame index="3" layer-offsets="pigeons:4,-2"/>
+            <frame index="4" layer-offsets="pigeons:2,-2"/>
+            <frame index="5" layer-offsets="pigeons:0,0"/>
+            <frame index="6" layer-offsets="pigeons:-2,0"/>
+            <frame index="7" layer-offsets="pigeons:-4,0"/>
+            <frame index="8" layer-offsets="pigeons:-4,2"/>
+            <frame index="9" layer-offsets="pigeons:-2,2"/>
+            <frame index="10" layer-offsets="pigeons:0,0"/>
+            <frame index="11" layer-offsets=""/>
+        </animation>
+    </animations>
 
     <time-of-day-variations>
         <variation time="morning">
-            <lighting>Тёплый утренний свет, роса</lighting>
-            <mood>Свежесть, утренняя пробежка с Sam</mood>
+            <lighting>Warm morning light, dew on grass</lighting>
+            <mood>Fresh, morning jog with Sam</mood>
         </variation>
         <variation time="day">
-            <lighting>Яркое солнце, тени от деревьев</lighting>
-            <mood>Активность, гуляющие люди</mood>
+            <lighting>Bright sun, tree shadows</lighting>
+            <mood>Active, people walking</mood>
         </variation>
         <variation time="evening">
-            <lighting>Золотой закат, фонари зажигаются</lighting>
-            <mood>Романтика, спокойствие</mood>
+            <lighting>Golden sunset, lamps turning on</lighting>
+            <mood>Romantic, calm</mood>
         </variation>
         <variation time="night">
-            <lighting>Фонари, лунный свет</lighting>
-            <mood>Тишина, ночная прогулка</mood>
+            <lighting>Lamp posts, moonlight</lighting>
+            <mood>Quiet, night walk</mood>
         </variation>
     </time-of-day-variations>
 
-    <naming>
-        <output-dir>locations/park</output-dir>
-    </naming>
+    <naming><output-dir>locations/park</output-dir></naming>
 </asset-spec>
