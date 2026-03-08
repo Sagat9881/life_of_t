@@ -2,27 +2,28 @@ package ru.lifegame.backend.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.lifegame.backend.domain.npc.engine.*;
-import ru.lifegame.backend.domain.npc.graph.*;
+import ru.lifegame.backend.domain.npc.engine.ConditionEvaluator;
+import ru.lifegame.backend.domain.npc.engine.NpcLifecycleEngine;
+import ru.lifegame.backend.domain.npc.engine.NpcRegistry;
+import ru.lifegame.backend.domain.npc.engine.NpcUtilityBrain;
+import ru.lifegame.backend.domain.npc.graph.CrossNpcTriggerEngine;
+import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
+import ru.lifegame.backend.domain.npc.spec.NpcSpec;
+import ru.lifegame.backend.domain.npc.graph.NpcRelationshipEdge;
 import ru.lifegame.backend.infrastructure.narrative.NarrativeContentLoader;
 
+import java.util.List;
+
 /**
- * Spring configuration for NPC engine beans.
- * All NPC content is loaded from XML — no hardcoded NPC names here.
+ * Spring configuration for the data-driven NPC engine.
+ * All NPC content comes from XML — this config only wires the engine beans.
  */
 @Configuration
 public class NpcConfig {
 
     @Bean
     public NarrativeContentLoader narrativeContentLoader() {
-        NarrativeContentLoader loader = new NarrativeContentLoader();
-        loader.loadFromClasspath("narrative");
-        return loader;
-    }
-
-    @Bean
-    public NpcRegistry npcRegistry(NarrativeContentLoader loader) {
-        return NpcRegistry.fromSpecs(loader.getNpcSpecs());
+        return new NarrativeContentLoader();
     }
 
     @Bean
@@ -31,13 +32,26 @@ public class NpcConfig {
     }
 
     @Bean
-    public NpcUtilityBrain npcUtilityBrain(ConditionEvaluator evaluator) {
-        return new NpcUtilityBrain(evaluator);
+    public NpcUtilityBrain npcUtilityBrain(ConditionEvaluator conditionEvaluator) {
+        return new NpcUtilityBrain(conditionEvaluator);
+    }
+
+    @Bean
+    public NpcRegistry npcRegistry(NarrativeContentLoader loader) {
+        List<NpcSpec> specs = loader.loadAllNpcSpecsFromDirectory("narrative/npc-behavior");
+        NpcRegistry registry = new NpcRegistry();
+        registry.initializeFromSpecs(specs);
+        return registry;
     }
 
     @Bean
     public NpcRelationshipGraph npcRelationshipGraph(NarrativeContentLoader loader) {
-        return NpcRelationshipGraph.fromEdges(loader.getRelationshipEdges());
+        List<NpcRelationshipEdge> edges = loader.loadRelationshipEdges("narrative/npc-relationships.xml");
+        NpcRelationshipGraph graph = new NpcRelationshipGraph();
+        for (NpcRelationshipEdge edge : edges) {
+            graph.addEdge(edge);
+        }
+        return graph;
     }
 
     @Bean
@@ -49,7 +63,7 @@ public class NpcConfig {
     public NpcLifecycleEngine npcLifecycleEngine(
             NpcRegistry registry,
             NpcUtilityBrain brain,
-            CrossNpcTriggerEngine crossNpcTrigger) {
-        return new NpcLifecycleEngine(registry, brain, crossNpcTrigger);
+            CrossNpcTriggerEngine crossNpcTriggerEngine) {
+        return new NpcLifecycleEngine(registry, brain, crossNpcTriggerEngine);
     }
 }

@@ -3,12 +3,12 @@ package ru.lifegame.backend.application.view;
 import java.util.List;
 
 /**
- * Aggregate DTO with all NPC activities for the current game hour.
+ * Aggregate DTO: all NPC activities for the current game hour.
  * Returned by GET /npc/activities endpoint.
  */
 public record AllNpcActivitiesView(
-    int currentDay,
-    int currentHour,
-    List<NpcActivityView> npcs
+        int currentDay,
+        int currentHour,
+        List<NpcActivityView> npcs
 ) {
 }
