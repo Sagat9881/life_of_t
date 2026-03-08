@@ -1,41 +1,42 @@
 package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.spec.EventSpec;
-import ru.lifegame.backend.domain.engine.spec.ConditionSpec;
-import ru.lifegame.backend.domain.engine.spec.EffectSpec;
+import ru.lifegame.backend.domain.engine.spec.EventSpec.ConditionSpec;
+import ru.lifegame.backend.domain.engine.spec.EventSpec.EffectSpec;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NarrativeEventEngine {
 
     private final List<EventSpec> eventSpecs;
+    private final Set<String> firedEventIds = new HashSet<>();
 
     public NarrativeEventEngine(List<EventSpec> eventSpecs) {
-        this.eventSpecs = eventSpecs;
+        this.eventSpecs = eventSpecs != null ? eventSpecs : List.of();
     }
 
-    public List<FiredEvent> checkEvents(Map<String, Object> gameState) {
-        List<FiredEvent> fired = new ArrayList<>();
+    public List<FiredEvent> evaluate(Map<String, Object> context) {
+        List<FiredEvent> result = new ArrayList<>();
         for (EventSpec spec : eventSpecs) {
-            if (allConditionsMet(spec.conditions(), gameState)) {
-                fired.add(new FiredEvent(spec, spec.effects()));
+            if (firedEventIds.contains(spec.id()) && !spec.repeatable()) continue;
+            if (allConditionsMet(spec.conditions(), context)) {
+                firedEventIds.add(spec.id());
+                result.add(new FiredEvent(spec, spec.effects()));
             }
         }
-        return fired;
+        return result;
     }
 
     public record FiredEvent(EventSpec spec, List<EffectSpec> effects) {}
 
-    private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> state) {
-        if (conditions == null || conditions.isEmpty()) return false;
-        for (ConditionSpec c : conditions) {
-            if (!evaluateCondition(c, state)) return false;
-        }
-        return true;
+    private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> ctx) {
+        if (conditions == null || conditions.isEmpty()) return true;
+        return conditions.stream().allMatch(c -> evaluateCondition(c, ctx));
     }
 
-    private boolean evaluateCondition(ConditionSpec c, Map<String, Object> state) {
-        Object val = state.get(c.target());
+    private boolean evaluateCondition(ConditionSpec c, Map<String, Object> ctx) {
+        Object val = ctx.get(c.target());
         if (val == null) return false;
         if (val instanceof Number num) {
             double v = num.doubleValue();
@@ -49,6 +50,6 @@ public class NarrativeEventEngine {
                 default -> false;
             };
         }
-        return String.valueOf(val).equals(c.value());
+        return val.toString().equals(c.value());
     }
 }
