@@ -11,11 +11,14 @@ import java.util.stream.Collectors;
 public class NpcRegistry {
 
     private final Map<String, NpcInstance> instances = new LinkedHashMap<>();
-    private NpcRelationshipGraph relationshipGraph;
+    private final NpcRelationshipGraph relationshipGraph;
 
-    public void registerAll(List<NpcSpec> specs) {
-        for (NpcSpec spec : specs) {
-            instances.put(spec.id(), NpcInstance.fromSpec(spec));
+    public NpcRegistry(List<NpcSpec> specs) {
+        this.relationshipGraph = new NpcRelationshipGraph();
+        if (specs != null) {
+            for (NpcSpec spec : specs) {
+                instances.put(spec.id(), NpcInstance.fromSpec(spec));
+            }
         }
     }
 
@@ -23,22 +26,23 @@ public class NpcRegistry {
         return Optional.ofNullable(instances.get(npcId));
     }
 
-    public List<NpcInstance> allNamed() {
+    public Collection<NpcInstance> all() {
+        return Collections.unmodifiableCollection(instances.values());
+    }
+
+    public List<NpcInstance> named() {
         return instances.values().stream()
                 .filter(i -> "named".equals(i.spec().type()))
                 .collect(Collectors.toList());
     }
 
-    public List<NpcInstance> allFiller() {
+    public List<NpcInstance> filler() {
         return instances.values().stream()
                 .filter(i -> "filler".equals(i.spec().type()))
                 .collect(Collectors.toList());
     }
 
-    public Collection<NpcInstance> all() {
-        return Collections.unmodifiableCollection(instances.values());
+    public NpcRelationshipGraph relationshipGraph() {
+        return relationshipGraph;
     }
-
-    public NpcRelationshipGraph relationshipGraph() { return relationshipGraph; }
-    public void setRelationshipGraph(NpcRelationshipGraph graph) { this.relationshipGraph = graph; }
 }

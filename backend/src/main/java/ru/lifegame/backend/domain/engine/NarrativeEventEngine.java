@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public class NarrativeEventEngine {
 
     private final List<EventSpec> eventSpecs;
-    private final Set<String> firedOneTimeEvents = new HashSet<>();
+    private final Set<String> firedOnceEvents = new HashSet<>();
 
     public NarrativeEventEngine(List<EventSpec> eventSpecs) {
         this.eventSpecs = eventSpecs != null ? eventSpecs : List.of();
@@ -18,10 +18,10 @@ public class NarrativeEventEngine {
 
     public List<FiredEvent> evaluate(Map<String, Object> context) {
         return eventSpecs.stream()
-                .filter(spec -> !spec.oneTime() || !firedOneTimeEvents.contains(spec.id()))
+                .filter(spec -> !spec.once() || !firedOnceEvents.contains(spec.id()))
                 .filter(spec -> allConditionsMet(spec.conditions(), context))
                 .map(spec -> {
-                    if (spec.oneTime()) firedOneTimeEvents.add(spec.id());
+                    if (spec.once()) firedOnceEvents.add(spec.id());
                     return new FiredEvent(spec, spec.effects());
                 })
                 .collect(Collectors.toList());

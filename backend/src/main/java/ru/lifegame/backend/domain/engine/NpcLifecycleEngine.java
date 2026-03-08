@@ -2,7 +2,7 @@ package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
 import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain;
-import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain.EvaluatedAction;
+import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain.ScoredResult;
 
 import java.util.*;
 
@@ -16,21 +16,33 @@ public class NpcLifecycleEngine {
         this.brain = brain;
     }
 
-    public List<NpcEvent> hourlyTick(int currentHour, Map<String, Object> gameContext) {
-        List<NpcEvent> events = new ArrayList<>();
+    public void hourlyTick(int currentHour, Map<String, Object> gameContext) {
         for (NpcInstance npc : registry.all()) {
-            npc.updateScheduleActivity(currentHour);
-            Optional<EvaluatedAction> action = brain.evaluate(npc, gameContext);
-            action.ifPresent(a -> events.add(new NpcEvent(npc.spec().id(), a.actionId(), a.score())));
+            // Update schedule-based activity
+            npc.spec().schedule().stream()
+                    .filter(slot -> currentHour >= slot.startHour() && currentHour < slot.endHour())
+                    .findFirst()
+                    .ifPresent(slot -> npc.setCurrentActivity(slot.activity(), slot.location(), slot.animation()));
+
+            // For named NPCs, run utility brain to check for mood-override actions
+            if ("named".equals(npc.spec().type())) {
+                Optional<ScoredResult> best = brain.evaluate(npc, gameContext);
+                best.ifPresent(result -> {
+                    if (result.score() > 0.7) {
+                        npc.setCurrentActivity(result.actionId(), "dynamic", "dynamic");
+                    }
+                });
+            }
         }
-        return events;
     }
 
-    public void dailyTick() {
+    public void dailyTick(Map<String, Object> gameContext) {
         for (NpcInstance npc : registry.all()) {
             npc.mood().dailyDecay();
         }
     }
 
-    public record NpcEvent(String npcId, String actionId, double score) {}
+    public NpcRegistry getRegistry() {
+        return registry;
+    }
 }
