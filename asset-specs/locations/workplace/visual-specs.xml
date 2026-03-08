@@ -1,94 +1,247 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<asset-spec>
+<asset-spec extends="abstract/environments/indoor_room@1.0" version="2.0.0">
     <meta>
         <entity-type>location</entity-type>
         <entity-name>workplace</entity-name>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
+        <canvas width="640" height="480" displayScale="1.0"/>
         <description>
-            Офис Тани — open-space с рабочими местами.
-            Используется для карьерных квестов (work_deadline) и действия "Работать".
-            Три слоя: background (стены/окна), midground (столы/стулья), foreground (растения/кулер).
+            Tanya's office — open-space. Career quests and "Work" action.
+            Full pixel-data from descriptive v1.
         </description>
     </meta>
 
-    <atmosphere>
-        <mood>деловой, нейтральный, слегка стрессовый</mood>
-        <lighting>флуоресцентный белый свет сверху</lighting>
-        <colors>
-            <dominant>#F0F0F0</dominant>
-            <accent>#4A90D9</accent>
-            <accent>#C8A882</accent>
-            <neutral>#B0B0B0</neutral>
-        </colors>
-    </atmosphere>
+    <color-palette>
+        <color name="$wall" value="#F0F0F0"/>
+        <color name="$wall_accent" value="#4A90D9"/>
+        <color name="$floor_carpet" value="#B0A898"/>
+        <color name="$floor_pattern" value="#A89888"/>
+        <color name="$desk_top" value="#E0DCD0"/>
+        <color name="$desk_frame" value="#C0C0C0"/>
+        <color name="$desk_leg" value="#A0A0A0"/>
+        <color name="$chair_seat" value="#404040"/>
+        <color name="$chair_back" value="#484848"/>
+        <color name="$chair_leg" value="#606060"/>
+        <color name="$monitor" value="#2A2A2A"/>
+        <color name="$screen" value="#4A90D9"/>
+        <color name="$screen_text" value="#FFFFFF"/>
+        <color name="$keyboard" value="#383838"/>
+        <color name="$window_sky" value="#B0D8F0"/>
+        <color name="$window_frame" value="#D0D0D0"/>
+        <color name="$blinds" value="#E8E8E0"/>
+        <color name="$kanban" value="#FFFFFF"/>
+        <color name="$sticky_yellow" value="#FFE66D"/>
+        <color name="$sticky_pink" value="#FF6B9D"/>
+        <color name="$sticky_green" value="#6BCB77"/>
+        <color name="$clock" value="#404040"/>
+        <color name="$plant" value="#50A050"/>
+        <color name="$cooler" value="#E0E8F0"/>
+        <color name="$coffee" value="#505050"/>
+        <color name="$printer" value="#C0C0C0"/>
+        <color name="$paper" value="#F8F8F0"/>
+        <color name="$building_far" value="#C0C0C8"/>
+    </color-palette>
+
+    <layer-overrides>
+        <layer id="floor" replace="true" type="background" z-order="0" width="640" height="480">
+            <pixel-data>
+                <rect x="0" y="300" w="640" h="180" color="$floor_carpet"/>
+                <!-- Carpet tile pattern -->
+                <rect x="0" y="300" w="80" h="90" color="$floor_pattern"/>
+                <rect x="160" y="300" w="80" h="90" color="$floor_pattern"/>
+                <rect x="320" y="300" w="80" h="90" color="$floor_pattern"/>
+                <rect x="480" y="300" w="80" h="90" color="$floor_pattern"/>
+                <rect x="80" y="390" w="80" h="90" color="$floor_pattern"/>
+                <rect x="240" y="390" w="80" h="90" color="$floor_pattern"/>
+                <rect x="400" y="390" w="80" h="90" color="$floor_pattern"/>
+                <rect x="560" y="390" w="80" h="90" color="$floor_pattern"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="wall" replace="true" type="background" z-order="1" width="640" height="480">
+            <pixel-data>
+                <rect x="0" y="0" w="640" h="304" color="$wall"/>
+                <!-- Blue accent stripe -->
+                <rect x="0" y="290" w="640" h="6" color="$wall_accent"/>
+                <!-- Fluorescent ceiling lights -->
+                <rect x="80" y="0" w="160" h="6" color="#F8F8FF"/>
+                <rect x="320" y="0" w="160" h="6" color="#F8F8FF"/>
+                <rect x="540" y="0" w="80" h="6" color="#F8F8FF"/>
+            </pixel-data>
+        </layer>
+    </layer-overrides>
 
     <layers>
-        <layer type="background" description="Стены, панорамные окна с видом на город">
-            <elements>
-                <element>Светло-серая стена</element>
-                <element>Два больших окна с жалюзи</element>
-                <element>Городской пейзаж за окном (силуэты зданий)</element>
-                <element>Часы на стене</element>
-                <element>Доска с задачами (kanban board)</element>
-            </elements>
+        <!-- z=2: Windows -->
+        <layer id="windows" type="midground" z-order="2" width="640" height="480">
+            <pixel-data>
+                <!-- Window 1 -->
+                <rect x="360" y="40" w="120" h="180" color="$window_sky"/>
+                <rect x="356" y="36" w="128" h="4" color="$window_frame"/>
+                <rect x="356" y="220" w="128" h="4" color="$window_frame"/>
+                <rect x="356" y="36" w="4" h="188" color="$window_frame"/>
+                <rect x="480" y="36" w="4" h="188" color="$window_frame"/>
+                <rect x="418" y="36" w="4" h="188" color="$window_frame"/>
+                <!-- Blinds -->
+                <hline x="360" y="48" len="120" color="$blinds"/>
+                <hline x="360" y="56" len="120" color="$blinds"/>
+                <hline x="360" y="64" len="120" color="$blinds"/>
+                <!-- Buildings outside -->
+                <rect x="370" y="100" w="30" h="120" color="$building_far"/>
+                <rect x="410" y="120" w="24" h="100" color="#B0B0B8"/>
+                <rect x="450" y="90" w="26" h="130" color="#B8B8C0"/>
+                <!-- Window 2 -->
+                <rect x="510" y="40" w="110" h="180" color="$window_sky"/>
+                <rect x="506" y="36" w="118" h="4" color="$window_frame"/>
+                <rect x="506" y="220" w="118" h="4" color="$window_frame"/>
+                <rect x="506" y="36" w="4" h="188" color="$window_frame"/>
+                <rect x="620" y="36" w="4" h="188" color="$window_frame"/>
+                <hline x="510" y="48" len="110" color="$blinds"/>
+                <hline x="510" y="56" len="110" color="$blinds"/>
+                <hline x="510" y="64" len="110" color="$blinds"/>
+            </pixel-data>
         </layer>
 
-        <layer type="midground" description="Рабочие столы, стулья, техника">
-            <elements>
-                <element>Стол Тани с монитором и клавиатурой (office_desk)</element>
-                <element>Офисный стул на колёсах</element>
-                <element>Соседний стол (фон, не интерактивный)</element>
-                <element>Принтер</element>
-            </elements>
+        <!-- z=3: Kanban board + clock -->
+        <layer id="wall_items" type="midground" z-order="3" width="640" height="480">
+            <pixel-data>
+                <!-- Kanban board -->
+                <rect x="40" y="40" w="200" h="140" color="$kanban"/>
+                <rect x="36" y="36" w="208" h="4" color="#808080"/>
+                <rect x="36" y="180" w="208" h="4" color="#808080"/>
+                <rect x="36" y="36" w="4" h="148" color="#808080"/>
+                <rect x="240" y="36" w="4" h="148" color="#808080"/>
+                <!-- Column dividers -->
+                <rect x="104" y="40" w="2" h="140" color="#C0C0C0"/>
+                <rect x="172" y="40" w="2" h="140" color="#C0C0C0"/>
+                <!-- Column headers -->
+                <rect x="50" y="44" w="44" h="12" color="$wall_accent"/>
+                <rect x="114" y="44" w="48" h="12" color="#F0A030"/>
+                <rect x="182" y="44" w="48" h="12" color="#40B040"/>
+                <!-- Stickies -->
+                <rect x="50" y="64" w="40" h="28" color="$sticky_yellow"/>
+                <rect x="50" y="96" w="40" h="28" color="$sticky_pink"/>
+                <rect x="50" y="128" w="40" h="28" color="$sticky_yellow"/>
+                <rect x="114" y="64" w="44" h="28" color="$sticky_green"/>
+                <rect x="114" y="96" w="44" h="28" color="$sticky_yellow"/>
+                <rect x="182" y="64" w="44" h="28" color="$sticky_green"/>
+                <!-- Clock -->
+                <rect x="280" y="50" w="40" h="40" color="$clock"/>
+                <rect x="284" y="54" w="32" h="32" color="#F0F0F0"/>
+                <rect x="298" y="58" w="2" h="16" color="#303030"/>
+                <rect x="298" y="70" w="10" h="2" color="#303030"/>
+                <pixel x="299" y="69" color="#E04040"/>
+            </pixel-data>
         </layer>
 
-        <layer type="foreground" description="Ближние объекты, декор">
-            <elements>
-                <element>Кулер с водой</element>
-                <element>Кофемашина</element>
-                <element>Горшок с фикусом</element>
-                <element>Стопка бумаг на краю стола</element>
-            </elements>
+        <!-- z=4: Tanya's desk -->
+        <layer id="tanya_desk" type="foreground" z-order="4" width="640" height="480">
+            <pixel-data>
+                <rect x="300" y="260" w="180" h="12" color="$desk_top"/>
+                <rect x="300" y="260" w="180" h="4" color="$desk_frame"/>
+                <rect x="308" y="272" w="8" h="60" color="$desk_leg"/>
+                <rect x="464" y="272" w="8" h="60" color="$desk_leg"/>
+                <!-- Monitor -->
+                <rect x="350" y="210" w="80" h="50" color="$monitor"/>
+                <rect x="354" y="214" w="72" h="42" color="$screen"/>
+                <!-- Screen content -->
+                <rect x="358" y="218" w="28" h="6" color="$screen_text"/>
+                <rect x="390" y="218" w="18" h="6" color="#FF8A80"/>
+                <rect x="358" y="230" w="64" h="4" color="#7AB0E0"/>
+                <rect x="358" y="238" w="50" h="4" color="#7AB0E0"/>
+                <rect x="358" y="246" w="64" h="4" color="#7AB0E0"/>
+                <!-- Monitor stand -->
+                <rect x="382" y="258" w="16" h="6" color="$monitor"/>
+                <rect x="374" y="262" w="32" h="4" color="$monitor"/>
+                <!-- Keyboard -->
+                <rect x="356" y="268" w="60" h="8" color="$keyboard"/>
+                <!-- Mouse -->
+                <rect x="424" y="268" w="12" h="8" color="#404040"/>
+                <!-- Papers stack -->
+                <rect x="440" y="254" w="28" h="8" color="$paper"/>
+                <rect x="442" y="252" w="24" h="4" color="#F0F0E8"/>
+                <rect x="444" y="250" w="20" h="4" color="$paper"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=5: Neighbor desk -->
+        <layer id="neighbor_desk" type="foreground" z-order="5" width="640" height="480">
+            <pixel-data>
+                <rect x="80" y="270" w="160" h="10" color="$desk_top"/>
+                <rect x="80" y="270" w="160" h="4" color="$desk_frame"/>
+                <rect x="88" y="280" w="6" h="50" color="$desk_leg"/>
+                <rect x="226" y="280" w="6" h="50" color="$desk_leg"/>
+                <!-- Monitor (off) -->
+                <rect x="130" y="228" w="60" h="42" color="$monitor"/>
+                <rect x="134" y="232" w="52" h="34" color="#1A1A2A"/>
+                <rect x="154" y="268" w="12" h="6" color="$monitor"/>
+                <rect x="148" y="272" w="24" h="4" color="$monitor"/>
+                <!-- Printer -->
+                <rect x="200" y="250" w="36" h="24" color="$printer"/>
+                <rect x="204" y="248" w="28" h="4" color="#B0B0B0"/>
+                <rect x="208" y="260" w="20" h="4" color="#404040"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=6: Foreground items -->
+        <layer id="foreground" type="foreground" z-order="6" width="640" height="480">
+            <pixel-data>
+                <!-- Chair -->
+                <rect x="340" y="300" w="60" h="12" color="$chair_seat"/>
+                <rect x="340" y="288" w="60" h="16" color="$chair_back"/>
+                <rect x="348" y="312" w="4" h="24" color="$chair_leg"/>
+                <rect x="388" y="312" w="4" h="24" color="$chair_leg"/>
+                <rect x="344" y="334" w="52" h="4" color="$chair_leg"/>
+                <!-- Wheels -->
+                <pixel x="348" y="338" color="#505050"/>
+                <pixel x="368" y="338" color="#505050"/>
+                <pixel x="392" y="338" color="#505050"/>
+                <!-- Water cooler -->
+                <rect x="16" y="260" w="36" h="60" color="$cooler"/>
+                <rect x="20" y="240" w="28" h="24" color="#80B8D0"/>
+                <rect x="22" y="242" w="24" h="20" color="#A0D0E8"/>
+                <rect x="24" y="318" w="4" h="4" color="#C0C0C0"/>
+                <!-- Coffee machine -->
+                <rect x="560" y="260" w="40" h="40" color="$coffee"/>
+                <rect x="562" y="262" w="36" h="16" color="#606060"/>
+                <rect x="570" y="280" w="20" h="4" color="#808080"/>
+                <rect x="576" y="286" w="8" h="12" color="#FFFFFF"/>
+                <!-- Plant -->
+                <rect x="500" y="270" w="24" h="28" color="#8B6040"/>
+                <rect x="502" y="248" w="20" h="24" color="$plant"/>
+                <rect x="496" y="240" w="12" h="16" color="#48C048"/>
+                <rect x="512" y="236" w="12" h="20" color="#38B838"/>
+                <rect x="520" y="244" w="8" h="12" color="#44AA44"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=7: Screen glow overlay -->
+        <layer id="screen_glow" type="animated-overlay" z-order="7" width="640" height="480">
+            <pixel-data>
+                <rect x="130" y="228" w="60" h="42" color="#4A90D920"/>
+            </pixel-data>
         </layer>
     </layers>
 
-    <animated-details>
-        <detail id="wall-clock">
-            <name>Настенные часы</name>
-            <atlas>assets/locations/workplace/animations/wall-clock-atlas.png</atlas>
-            <frames>24</frames>
-            <animation-type>Секундная стрелка тикает</animation-type>
-        </detail>
-        <detail id="window-blinds">
-            <name>Жалюзи</name>
-            <atlas>assets/locations/workplace/animations/window-blinds-atlas.png</atlas>
-            <frames>8</frames>
-            <animation-type>Лёгкое покачивание от вентиляции</animation-type>
-        </detail>
-        <detail id="screen-glow">
-            <name>Свечение экранов</name>
-            <atlas>assets/locations/workplace/animations/screen-glow-atlas.png</atlas>
-            <frames>4</frames>
-            <animation-type>Мерцание мониторов соседних столов</animation-type>
-        </detail>
-    </animated-details>
+    <animations>
+        <animation name="idle" frames="8" fps="1" loop="true"
+                   frame-width="640" frame-height="480">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets=""/>
+            <frame index="2" layer-offsets="screen_glow:0,0"/>
+            <frame index="3" layer-offsets="screen_glow:0,0"/>
+            <frame index="4" layer-offsets=""/>
+            <frame index="5" layer-offsets=""/>
+            <frame index="6" layer-offsets="screen_glow:0,0"/>
+            <frame index="7" layer-offsets=""/>
+        </animation>
+    </animations>
 
     <time-of-day-variations>
-        <variation time="morning">
-            <lighting>Утренний свет из окон, тёплый</lighting>
-            <mood>Спокойное начало дня</mood>
-        </variation>
-        <variation time="day">
-            <lighting>Яркий дневной свет + флуоресцент</lighting>
-            <mood>Рабочая суета</mood>
-        </variation>
-        <variation time="evening">
-            <lighting>Только настольные лампы, окна тёмные</lighting>
-            <mood>Переработка, усталость</mood>
-        </variation>
+        <variation time="morning"><lighting>Warm morning from windows</lighting></variation>
+        <variation time="day"><lighting>Bright daylight + fluorescent</lighting></variation>
+        <variation time="evening"><lighting>Desk lamps only, dark windows</lighting></variation>
     </time-of-day-variations>
 
-    <naming>
-        <output-dir>locations/workplace</output-dir>
-    </naming>
+    <naming><output-dir>locations/workplace</output-dir></naming>
 </asset-spec>

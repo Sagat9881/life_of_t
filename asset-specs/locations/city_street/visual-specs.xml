@@ -1,97 +1,280 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<asset-spec>
+<asset-spec extends="abstract/environments/outdoor_area@1.0" version="2.0.0">
     <meta>
         <entity-type>location</entity-type>
         <entity-name>city_street</entity-name>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
+        <canvas width="640" height="480" displayScale="1.0"/>
         <description>
-            Городская улица — транзитная локация-хаб.
-            Из неё переходы в gym, workplace, vet_clinic, park.
-            Три слоя: background (здания), midground (тротуар/остановка), foreground (машины/столбы).
+            City street — transit hub location.
+            Full pixel-data from descriptive v1.
         </description>
     </meta>
 
-    <atmosphere>
-        <mood>городской, динамичный, повседневный</mood>
-        <lighting>зависит от времени суток</lighting>
-        <colors>
-            <dominant>#A0A0A0</dominant>
-            <accent>#FF6B9D</accent>
-            <accent>#FFE66D</accent>
-            <neutral>#707070</neutral>
-        </colors>
-    </atmosphere>
+    <color-palette>
+        <color name="$sky" value="#A0C0D8"/>
+        <color name="$building_main" value="#C8C0B0"/>
+        <color name="$building_dark" value="#A0988A"/>
+        <color name="$building_window" value="#80A0B8"/>
+        <color name="$building_window_lit" value="#FFE080"/>
+        <color name="$shop_wall" value="#E0D8C0"/>
+        <color name="$shop_sign" value="#50A050"/>
+        <color name="$vet_sign" value="#4090D0"/>
+        <color name="$sidewalk" value="#C0B8A8"/>
+        <color name="$sidewalk_edge" value="#A8A090"/>
+        <color name="$road" value="#606060"/>
+        <color name="$road_line" value="#F0E840"/>
+        <color name="$crosswalk" value="#F0F0F0"/>
+        <color name="$bus_stop" value="#808080"/>
+        <color name="$bus_glass" value="#B0D0E0"/>
+        <color name="$lamp_post" value="#505050"/>
+        <color name="$lamp_light" value="#FFE8A0"/>
+        <color name="$car_body" value="#4060A0"/>
+        <color name="$car_window" value="#80A0C0"/>
+        <color name="$trash" value="#606860"/>
+        <color name="$neon_pink" value="#FF6B9D"/>
+        <color name="$neon_yellow" value="#FFE66D"/>
+        <color name="$traffic_red" value="#E04040"/>
+        <color name="$traffic_yellow" value="#F0C040"/>
+        <color name="$traffic_green" value="#40C040"/>
+    </color-palette>
+
+    <layer-overrides>
+        <layer id="sky" replace="true" type="background" z-order="0" width="640" height="480">
+            <pixel-data>
+                <rect x="0" y="0" w="640" h="120" color="$sky"/>
+                <!-- Clouds -->
+                <rect x="80" y="20" w="60" h="16" color="#FFFFFF"/>
+                <rect x="70" y="28" w="80" h="10" color="#F0F4F8"/>
+                <rect x="300" y="30" w="50" h="14" color="#FFFFFF"/>
+                <rect x="500" y="16" w="70" h="18" color="#FFFFFF"/>
+                <rect x="490" y="26" w="90" h="10" color="#F0F4F8"/>
+            </pixel-data>
+        </layer>
+    </layer-overrides>
 
     <layers>
-        <layer type="background" description="Фасады зданий, небо">
-            <elements>
-                <element>Многоэтажка (фасад с окнами)</element>
-                <element>Магазинчик "Продукты"</element>
-                <element>Вывеска "Ветклиника" (визуальная подсказка)</element>
-                <element>Небо</element>
-            </elements>
+        <!-- z=1: Buildings -->
+        <layer id="buildings" type="background" z-order="1" width="640" height="480">
+            <pixel-data>
+                <!-- Apartment block -->
+                <rect x="0" y="40" w="160" h="200" color="$building_main"/>
+                <rect x="0" y="40" w="160" h="4" color="$building_dark"/>
+                <!-- Windows grid -->
+                <rect x="16" y="60" w="20" h="16" color="$building_window"/>
+                <rect x="48" y="60" w="20" h="16" color="$building_window"/>
+                <rect x="80" y="60" w="20" h="16" color="$building_window"/>
+                <rect x="112" y="60" w="20" h="16" color="$building_window"/>
+                <rect x="16" y="88" w="20" h="16" color="$building_window"/>
+                <rect x="48" y="88" w="20" h="16" color="$building_window"/>
+                <rect x="80" y="88" w="20" h="16" color="$building_window"/>
+                <rect x="112" y="88" w="20" h="16" color="$building_window"/>
+                <rect x="16" y="116" w="20" h="16" color="$building_window"/>
+                <rect x="48" y="116" w="20" h="16" color="$building_window"/>
+                <rect x="80" y="116" w="20" h="16" color="$building_window"/>
+                <rect x="112" y="116" w="20" h="16" color="$building_window"/>
+                <rect x="16" y="144" w="20" h="16" color="$building_window"/>
+                <rect x="48" y="144" w="20" h="16" color="$building_window"/>
+                <rect x="80" y="144" w="20" h="16" color="$building_window"/>
+                <rect x="112" y="144" w="20" h="16" color="$building_window"/>
+                <rect x="16" y="172" w="20" h="16" color="$building_window"/>
+                <rect x="48" y="172" w="20" h="16" color="$building_window"/>
+                <rect x="80" y="172" w="20" h="16" color="$building_window"/>
+                <rect x="112" y="172" w="20" h="16" color="$building_window"/>
+                <!-- Shop "Продукты" -->
+                <rect x="168" y="140" w="120" h="100" color="$shop_wall"/>
+                <rect x="168" y="140" w="120" h="4" color="$building_dark"/>
+                <rect x="176" y="148" w="40" h="12" color="$shop_sign"/>
+                <rect x="180" y="150" w="32" h="8" color="#FFFFFF"/>
+                <!-- Shop window -->
+                <rect x="176" y="168" w="100" h="60" color="#A8C8D0"/>
+                <rect x="180" y="172" w="92" h="52" color="#C0D8E0"/>
+                <!-- Shop door -->
+                <rect x="220" y="200" w="30" h="40" color="#8B6040"/>
+                <rect x="232" y="210" w="4" h="12" color="#C0A060"/>
+                <!-- Vet clinic sign -->
+                <rect x="300" y="100" w="160" h="140" color="#E8E4D8"/>
+                <rect x="300" y="100" w="160" h="4" color="$building_dark"/>
+                <rect x="320" y="108" w="120" h="16" color="$vet_sign"/>
+                <rect x="328" y="112" w="104" h="8" color="#FFFFFF"/>
+                <!-- Vet windows -->
+                <rect x="310" y="132" w="40" h="40" color="$building_window"/>
+                <rect x="400" y="132" w="40" h="40" color="$building_window"/>
+                <rect x="310" y="180" w="130" h="50" color="#B0C0C8"/>
+                <!-- Taller building -->
+                <rect x="470" y="20" w="170" h="220" color="#B8B0A0"/>
+                <rect x="480" y="40" w="20" h="16" color="$building_window"/>
+                <rect x="512" y="40" w="20" h="16" color="$building_window"/>
+                <rect x="544" y="40" w="20" h="16" color="$building_window"/>
+                <rect x="576" y="40" w="20" h="16" color="$building_window"/>
+                <rect x="608" y="40" w="20" h="16" color="$building_window"/>
+                <rect x="480" y="68" w="20" h="16" color="$building_window"/>
+                <rect x="512" y="68" w="20" h="16" color="$building_window"/>
+                <rect x="544" y="68" w="20" h="16" color="$building_window"/>
+                <rect x="576" y="68" w="20" h="16" color="$building_window"/>
+                <rect x="608" y="68" w="20" h="16" color="$building_window"/>
+                <rect x="480" y="96" w="20" h="16" color="$building_window"/>
+                <rect x="512" y="96" w="20" h="16" color="$building_window"/>
+                <rect x="544" y="96" w="20" h="16" color="$building_window"/>
+                <rect x="576" y="96" w="20" h="16" color="$building_window"/>
+                <rect x="608" y="96" w="20" h="16" color="$building_window"/>
+            </pixel-data>
         </layer>
 
-        <layer type="midground" description="Тротуар, остановка">
-            <elements>
-                <element>Асфальтовый тротуар</element>
-                <element>Автобусная остановка</element>
-                <element>Пешеходный переход</element>
-                <element>Лужа (при вечере/ночи)</element>
-            </elements>
+        <!-- z=2: Sidewalk + road -->
+        <layer id="ground" type="midground" z-order="2" width="640" height="480">
+            <pixel-data>
+                <!-- Sidewalk -->
+                <rect x="0" y="240" w="640" h="80" color="$sidewalk"/>
+                <hline x="0" y="240" len="640" color="$sidewalk_edge"/>
+                <hline x="0" y="280" len="640" color="$sidewalk_edge"/>
+                <!-- Sidewalk tiles -->
+                <rect x="80" y="240" w="2" h="80" color="$sidewalk_edge"/>
+                <rect x="160" y="240" w="2" h="80" color="$sidewalk_edge"/>
+                <rect x="240" y="240" w="2" h="80" color="$sidewalk_edge"/>
+                <rect x="320" y="240" w="2" h="80" color="$sidewalk_edge"/>
+                <rect x="400" y="240" w="2" h="80" color="$sidewalk_edge"/>
+                <rect x="480" y="240" w="2" h="80" color="$sidewalk_edge"/>
+                <rect x="560" y="240" w="2" h="80" color="$sidewalk_edge"/>
+                <!-- Road -->
+                <rect x="0" y="320" w="640" h="120" color="$road"/>
+                <!-- Center line -->
+                <rect x="0" y="376" w="40" h="4" color="$road_line"/>
+                <rect x="60" y="376" w="40" h="4" color="$road_line"/>
+                <rect x="120" y="376" w="40" h="4" color="$road_line"/>
+                <rect x="180" y="376" w="40" h="4" color="$road_line"/>
+                <rect x="240" y="376" w="40" h="4" color="$road_line"/>
+                <rect x="300" y="376" w="40" h="4" color="$road_line"/>
+                <rect x="360" y="376" w="40" h="4" color="$road_line"/>
+                <rect x="420" y="376" w="40" h="4" color="$road_line"/>
+                <rect x="480" y="376" w="40" h="4" color="$road_line"/>
+                <rect x="540" y="376" w="40" h="4" color="$road_line"/>
+                <rect x="600" y="376" w="40" h="4" color="$road_line"/>
+                <!-- Crosswalk -->
+                <rect x="200" y="320" w="80" h="120" color="$road"/>
+                <rect x="204" y="320" w="12" h="120" color="$crosswalk"/>
+                <rect x="224" y="320" w="12" h="120" color="$crosswalk"/>
+                <rect x="244" y="320" w="12" h="120" color="$crosswalk"/>
+                <rect x="264" y="320" w="12" h="120" color="$crosswalk"/>
+                <!-- Curb -->
+                <rect x="0" y="316" w="640" h="6" color="#908880"/>
+                <!-- Puddle (evening/night) -->
+                <rect x="340" y="340" w="40" h="20" color="#50607020"/>
+            </pixel-data>
         </layer>
 
-        <layer type="foreground" description="Ближний план">
-            <elements>
-                <element>Припаркованная машина</element>
-                <element>Фонарный столб</element>
-                <element>Мусорный бак</element>
-                <element>Рекламная тумба</element>
-            </elements>
+        <!-- z=3: Bus stop + traffic light -->
+        <layer id="street_furniture" type="midground" z-order="3" width="640" height="480">
+            <pixel-data>
+                <!-- Bus stop -->
+                <rect x="100" y="200" w="60" h="8" color="$bus_stop"/>
+                <rect x="104" y="208" w="4" h="52" color="$bus_stop"/>
+                <rect x="152" y="208" w="4" h="52" color="$bus_stop"/>
+                <rect x="100" y="200" w="60" h="4" color="#909090"/>
+                <!-- Glass panels -->
+                <rect x="108" y="212" w="44" h="40" color="$bus_glass"/>
+                <!-- Bus route sign -->
+                <rect x="108" y="204" w="20" h="8" color="#FFFFFF"/>
+                <!-- Traffic light -->
+                <rect x="288" y="180" w="12" h="50" color="$lamp_post"/>
+                <rect x="284" y="168" w="20" h="40" color="#303030"/>
+                <rect x="288" y="172" w="12" h="8" color="$traffic_red"/>
+                <rect x="288" y="184" w="12" h="8" color="$traffic_yellow"/>
+                <rect x="288" y="196" w="12" h="8" color="$traffic_green"/>
+                <!-- Lamp post -->
+                <rect x="440" y="140" w="6" h="120" color="$lamp_post"/>
+                <rect x="430" y="134" w="26" h="10" color="$lamp_post"/>
+                <rect x="434" y="128" w="18" h="8" color="$lamp_light"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=4: Parked car -->
+        <layer id="parked_car" type="foreground" z-order="4" width="640" height="480">
+            <pixel-data>
+                <rect x="360" y="340" w="80" h="36" color="$car_body"/>
+                <rect x="364" y="336" w="72" h="8" color="$car_body"/>
+                <rect x="368" y="332" w="48" h="8" color="$car_window"/>
+                <!-- Wheels -->
+                <rect x="368" y="372" w="16" h="12" color="#202020"/>
+                <rect x="370" y="374" w="12" h="8" color="#404040"/>
+                <rect x="416" y="372" w="16" h="12" color="#202020"/>
+                <rect x="418" y="374" w="12" h="8" color="#404040"/>
+                <!-- Headlights -->
+                <rect x="436" y="348" w="6" h="8" color="#F0E0A0"/>
+                <rect x="360" y="348" w="6" h="8" color="#E04040"/>
+                <!-- Shadow -->
+                <rect x="362" y="384" w="76" h="4" color="#40404030"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=5: Foreground items -->
+        <layer id="foreground" type="foreground" z-order="5" width="640" height="480">
+            <pixel-data>
+                <!-- Trash can -->
+                <rect x="480" y="250" w="20" h="28" color="$trash"/>
+                <rect x="478" y="248" w="24" h="4" color="#707870"/>
+                <!-- Ad column -->
+                <rect x="540" y="220" w="24" h="60" color="#E0D0B0"/>
+                <rect x="544" y="224" w="16" h="40" color="$neon_pink"/>
+                <rect x="548" y="228" w="8" h="8" color="#FFFFFF"/>
+                <rect x="546" y="240" w="12" h="4" color="#FFFFFF"/>
+                <rect x="548" y="248" w="8" h="4" color="#FFFFFF"/>
+                <!-- Neon shop sign -->
+                <rect x="176" y="136" w="56" h="12" color="$neon_yellow"/>
+                <rect x="180" y="138" w="48" h="8" color="#FFD840"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=6: Passing car (animated) -->
+        <layer id="passing_car" type="animated-overlay" z-order="6" width="640" height="480">
+            <pixel-data>
+                <rect x="-80" y="388" w="60" h="28" color="#C04040"/>
+                <rect x="-76" y="384" w="52" h="8" color="#C04040"/>
+                <rect x="-72" y="380" w="36" h="8" color="#90B0C0"/>
+                <rect x="-72" y="412" w="12" h="8" color="#202020"/>
+                <rect x="-36" y="412" w="12" h="8" color="#202020"/>
+            </pixel-data>
+        </layer>
+
+        <!-- z=7: Ambient overlay -->
+        <layer id="ambient_light" type="overlay" z-order="7" width="640" height="480">
+            <pixel-data>
+                <rect x="424" y="200" w="40" h="80" color="#FFFDE820"/>
+                <rect x="0" y="440" w="640" h="40" color="#40404020"/>
+            </pixel-data>
+            <conditions>
+                <condition id="time_morning"><override layer-ref="ambient_light" tint="#FFE0C0" opacity="0.08"/></condition>
+                <condition id="time_day"><override layer-ref="ambient_light" tint="#FFF8E8" opacity="0.05"/></condition>
+                <condition id="time_evening"><override layer-ref="ambient_light" tint="#FF8040" opacity="0.20"/></condition>
+                <condition id="time_night"><override layer-ref="ambient_light" tint="#101828" opacity="0.55"/></condition>
+            </conditions>
         </layer>
     </layers>
 
-    <animated-details>
-        <detail id="traffic-light">
-            <name>Светофор</name>
-            <atlas>assets/locations/city_street/animations/traffic-light-atlas.png</atlas>
-            <frames>6</frames>
-            <animation-type>Переключение красный-жёлтый-зелёный</animation-type>
-        </detail>
-        <detail id="passing-car">
-            <name>Проезжающая машина</name>
-            <atlas>assets/locations/city_street/animations/passing-car-atlas.png</atlas>
-            <frames>8</frames>
-            <animation-type>Машина проезжает слева направо</animation-type>
-        </detail>
-        <detail id="shop-sign">
-            <name>Неоновая вывеска</name>
-            <atlas>assets/locations/city_street/animations/shop-sign-atlas.png</atlas>
-            <frames>4</frames>
-            <animation-type>Вывеска мигает</animation-type>
-        </detail>
-    </animated-details>
+    <animations>
+        <animation name="idle" frames="12" fps="2" loop="true"
+                   frame-width="640" frame-height="480">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets=""/>
+            <frame index="2" layer-offsets=""/>
+            <frame index="3" layer-offsets="passing_car:160,0"/>
+            <frame index="4" layer-offsets="passing_car:320,0"/>
+            <frame index="5" layer-offsets="passing_car:480,0"/>
+            <frame index="6" layer-offsets="passing_car:640,0"/>
+            <frame index="7" layer-offsets="passing_car:800,0"/>
+            <frame index="8" layer-offsets=""/>
+            <frame index="9" layer-offsets=""/>
+            <frame index="10" layer-offsets=""/>
+            <frame index="11" layer-offsets=""/>
+        </animation>
+    </animations>
 
     <time-of-day-variations>
-        <variation time="morning">
-            <lighting>Мягкий утренний свет, длинные тени</lighting>
-            <mood>Город просыпается</mood>
-        </variation>
-        <variation time="day">
-            <lighting>Полуденное солнце</lighting>
-            <mood>Шумный, людный</mood>
-        </variation>
-        <variation time="evening">
-            <lighting>Закат, зажигаются фонари и вывески</lighting>
-            <mood>Вечерний город, огни</mood>
-        </variation>
-        <variation time="night">
-            <lighting>Фонари, неон, окна светятся</lighting>
-            <mood>Ночной город, тише</mood>
-        </variation>
+        <variation time="morning"><lighting>Soft morning, long shadows</lighting></variation>
+        <variation time="day"><lighting>Midday sun</lighting></variation>
+        <variation time="evening"><lighting>Sunset, lamps and signs turn on</lighting></variation>
+        <variation time="night"><lighting>Lamps, neon, lit windows</lighting></variation>
     </time-of-day-variations>
 
-    <naming>
-        <output-dir>locations/city_street</output-dir>
-    </naming>
+    <naming><output-dir>locations/city_street</output-dir></naming>
 </asset-spec>
