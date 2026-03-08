@@ -3,185 +3,263 @@
     <meta>
         <entity-type>ui</entity-type>
         <entity-name>particles</entity-name>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
         <description>
-            Система частиц для UI-эффектов.
+            Система частиц для UI-эффектов (HD).
             Сердечки — повышение отношений.
             Звёзды — получение достижений/уровней.
             Стресс — красные искры при росте стресса.
             Монеты — получение денег.
+            Энергия — зелёные искры восстановления.
+            Сон — Z-пузырьки для спящих.
             Используются как reward-only (по DESIGN_SYSTEM).
+            Canvas ×2 от v1.0, больше кадров, больше деталей.
         </description>
     </meta>
 
     <layers>
-        <!-- === СЕРДЕЧКИ (отношения) === -->
-        <layer id="heart" type="animated-overlay" z-order="100" width="8" height="8">
+        <!-- === СЕРДЕЧКИ (отношения) — 16×16 === -->
+        <layer id="heart" type="animated-overlay" z-order="100" width="16" height="16">
             <pixel-data>
-                <!-- Маленькое пиксельное сердечко 5x5 -->
-                <pixel x="1" y="1" color="#FF6B9D"/>
-                <pixel x="2" y="0" color="#FF6B9D"/>
-                <pixel x="3" y="1" color="#FF6B9D"/>
-                <pixel x="4" y="1" color="#FF6B9D"/>
-                <pixel x="5" y="0" color="#FF6B9D"/>
-                <pixel x="6" y="1" color="#FF6B9D"/>
-                <rect x="1" y="2" w="6" h="1" color="#FF6B9D"/>
-                <rect x="2" y="3" w="4" h="1" color="#FF6B9D"/>
-                <rect x="3" y="4" w="2" h="1" color="#FF6B9D"/>
+                <!-- Левая доля -->
+                <rect x="3" y="3" w="4" h="2" color="#FF6B9D"/>
+                <rect x="2" y="4" w="6" h="4" color="#FF6B9D"/>
+                <!-- Правая доля -->
+                <rect x="9" y="3" w="4" h="2" color="#FF6B9D"/>
+                <rect x="8" y="4" w="6" h="4" color="#FF6B9D"/>
+                <!-- Тело -->
+                <rect x="2" y="5" w="12" h="3" color="#FF6B9D"/>
+                <rect x="3" y="8" w="10" h="2" color="#FF6B9D"/>
+                <rect x="4" y="10" w="8" h="1" color="#FF6B9D"/>
+                <rect x="5" y="11" w="6" h="1" color="#FF6B9D"/>
+                <rect x="6" y="12" w="4" h="1" color="#FF6B9D"/>
+                <rect x="7" y="13" w="2" h="1" color="#FF6B9D"/>
+                <!-- Блик верхний -->
+                <rect x="4" y="3" w="2" h="1" color="#FFB0C8"/>
+                <pixel x="3" y="4" color="#FFB0C8"/>
+                <pixel x="4" y="4" color="#FFCCE0"/>
+                <!-- Тень нижняя -->
+                <rect x="6" y="12" w="4" h="1" color="#E8537F"/>
+                <rect x="7" y="13" w="2" h="1" color="#D94570"/>
+            </pixel-data>
+        </layer>
+
+        <!-- === ЗВЁЗДЫ (достижения/уровень) — 16×16 === -->
+        <layer id="star" type="animated-overlay" z-order="100" width="16" height="16">
+            <pixel-data>
+                <!-- Верхний луч -->
+                <rect x="7" y="0" w="2" h="2" color="#FFE66D"/>
+                <rect x="6" y="2" w="4" h="2" color="#FFE66D"/>
+                <!-- Горизонтальные лучи -->
+                <rect x="0" y="5" w="16" h="2" color="#FFE66D"/>
+                <rect x="1" y="4" w="14" h="1" color="#FFE66D"/>
+                <rect x="1" y="7" w="14" h="1" color="#FFE66D"/>
+                <!-- Центр -->
+                <rect x="5" y="4" w="6" h="4" color="#FFD740"/>
+                <!-- Нижние лучи -->
+                <rect x="2" y="8" w="4" h="2" color="#FFE66D"/>
+                <rect x="10" y="8" w="4" h="2" color="#FFE66D"/>
+                <pixel x="1" y="10" color="#FFE66D"/>
+                <pixel x="2" y="10" color="#FFE66D"/>
+                <pixel x="13" y="10" color="#FFE66D"/>
+                <pixel x="14" y="10" color="#FFE66D"/>
+                <!-- Нижний луч -->
+                <rect x="6" y="8" w="4" h="2" color="#FFE66D"/>
+                <rect x="7" y="10" w="2" h="2" color="#FFE66D"/>
                 <!-- Блик -->
-                <pixel x="2" y="1" color="#FFB0C8"/>
+                <rect x="7" y="4" w="2" h="2" color="#FFF8B0"/>
+                <pixel x="6" y="5" color="#FFF0A0"/>
+                <!-- Тень -->
+                <rect x="7" y="11" w="2" h="1" color="#E6C230"/>
             </pixel-data>
         </layer>
 
-        <!-- === ЗВЁЗДЫ (достижения/уровень) === -->
-        <layer id="star" type="animated-overlay" z-order="100" width="8" height="8">
+        <!-- === СТРЕСС (красные искры) — 12×12 === -->
+        <layer id="stress-spark" type="animated-overlay" z-order="100" width="12" height="12">
             <pixel-data>
-                <!-- Пиксельная звёздочка 5x5 -->
-                <pixel x="3" y="0" color="#FFE66D"/>
-                <pixel x="2" y="1" color="#FFE66D"/>
-                <pixel x="3" y="1" color="#FFD740"/>
-                <pixel x="4" y="1" color="#FFE66D"/>
-                <rect x="0" y="2" w="7" h="1" color="#FFE66D"/>
-                <pixel x="3" y="2" color="#FFD740"/>
-                <rect x="1" y="3" w="5" h="1" color="#FFE66D"/>
-                <pixel x="1" y="4" color="#FFE66D"/>
-                <pixel x="5" y="4" color="#FFE66D"/>
+                <rect x="4" y="0" w="2" h="2" color="#E74C3C"/>
+                <pixel x="5" y="0" color="#FF6B6B"/>
+                <rect x="8" y="2" w="2" h="2" color="#FF6B6B"/>
+                <pixel x="9" y="2" color="#FF4444"/>
+                <rect x="2" y="4" w="2" h="2" color="#E74C3C"/>
+                <pixel x="2" y="4" color="#FF8888"/>
+                <rect x="6" y="6" w="2" h="2" color="#FF4444"/>
+                <pixel x="7" y="6" color="#FF6B6B"/>
+                <rect x="10" y="8" w="2" h="2" color="#E74C3C"/>
+                <rect x="0" y="10" w="2" h="2" color="#FF6B6B"/>
+                <pixel x="0" y="10" color="#FF8888"/>
+            </pixel-data>
+        </layer>
+
+        <!-- === МОНЕТЫ (деньги) — 16×16 === -->
+        <layer id="coin" type="animated-overlay" z-order="100" width="16" height="16">
+            <pixel-data>
+                <!-- Корпус -->
+                <rect x="4" y="2" w="8" h="12" color="#FFD700"/>
+                <rect x="2" y="4" w="12" h="8" color="#FFD700"/>
+                <rect x="3" y="3" w="10" h="10" color="#FFD700"/>
+                <!-- Ободок -->
+                <rect x="5" y="1" w="6" h="1" color="#DAA520"/>
+                <rect x="5" y="14" w="6" h="1" color="#DAA520"/>
+                <rect x="1" y="5" w="1" h="6" color="#DAA520"/>
+                <rect x="14" y="5" w="1" h="6" color="#DAA520"/>
+                <!-- Символ ₽ -->
+                <rect x="6" y="5" w="1" h="6" color="#B8860B"/>
+                <rect x="7" y="5" w="3" h="1" color="#B8860B"/>
+                <rect x="10" y="6" w="1" h="2" color="#B8860B"/>
+                <rect x="7" y="7" w="3" h="1" color="#B8860B"/>
+                <rect x="5" y="8" w="4" h="1" color="#B8860B"/>
                 <!-- Блик -->
-                <pixel x="3" y="1" color="#FFF8B0"/>
+                <rect x="5" y="3" w="3" h="2" color="#FFF0A0"/>
+                <pixel x="4" y="4" color="#FFE870"/>
+                <pixel x="4" y="5" color="#FFE870"/>
+                <!-- Тень -->
+                <rect x="5" y="13" w="6" h="1" color="#C8A200"/>
+                <rect x="13" y="5" w="1" h="6" color="#C8A200"/>
             </pixel-data>
         </layer>
 
-        <!-- === СТРЕСС (красные искры) === -->
-        <layer id="stress-spark" type="animated-overlay" z-order="100" width="6" height="6">
+        <!-- === ЭНЕРГИЯ (зелёные искры) — 12×12 === -->
+        <layer id="energy-spark" type="animated-overlay" z-order="100" width="12" height="12">
             <pixel-data>
-                <pixel x="2" y="0" color="#E74C3C"/>
-                <pixel x="4" y="1" color="#FF6B6B"/>
-                <pixel x="1" y="2" color="#E74C3C"/>
-                <pixel x="3" y="3" color="#FF4444"/>
-                <pixel x="5" y="4" color="#E74C3C"/>
-                <pixel x="0" y="5" color="#FF6B6B"/>
+                <rect x="6" y="0" w="2" h="2" color="#4CAF50"/>
+                <pixel x="7" y="0" color="#66BB6A"/>
+                <rect x="2" y="2" w="2" h="2" color="#66BB6A"/>
+                <pixel x="2" y="2" color="#81C784"/>
+                <rect x="10" y="4" w="2" h="2" color="#4CAF50"/>
+                <rect x="4" y="6" w="2" h="2" color="#81C784"/>
+                <pixel x="5" y="6" color="#A5D6A7"/>
+                <rect x="8" y="8" w="2" h="2" color="#66BB6A"/>
+                <rect x="0" y="10" w="2" h="2" color="#4CAF50"/>
+                <pixel x="0" y="10" color="#81C784"/>
             </pixel-data>
         </layer>
 
-        <!-- === МОНЕТЫ (деньги) === -->
-        <layer id="coin" type="animated-overlay" z-order="100" width="8" height="8">
+        <!-- === СОН (Z-пузырьки) — 16×16 === -->
+        <layer id="sleep-z" type="animated-overlay" z-order="100" width="16" height="16">
             <pixel-data>
-                <rect x="2" y="1" w="4" h="6" color="#FFD700"/>
-                <pixel x="1" y="2" color="#FFD700"/>
-                <pixel x="1" y="5" color="#FFD700"/>
-                <pixel x="6" y="2" color="#FFD700"/>
-                <pixel x="6" y="5" color="#FFD700"/>
-                <!-- Символ ₽ внутри -->
-                <pixel x="3" y="3" color="#DAA520"/>
-                <pixel x="4" y="3" color="#DAA520"/>
-                <pixel x="3" y="4" color="#DAA520"/>
-                <!-- Блик -->
-                <pixel x="3" y="2" color="#FFF0A0"/>
-                <pixel x="2" y="2" color="#FFE870"/>
-            </pixel-data>
-        </layer>
-
-        <!-- === ЭНЕРГИЯ (зелёные искры) === -->
-        <layer id="energy-spark" type="animated-overlay" z-order="100" width="6" height="6">
-            <pixel-data>
-                <pixel x="3" y="0" color="#4CAF50"/>
-                <pixel x="1" y="1" color="#66BB6A"/>
-                <pixel x="5" y="2" color="#4CAF50"/>
-                <pixel x="2" y="3" color="#81C784"/>
-                <pixel x="4" y="4" color="#66BB6A"/>
-                <pixel x="0" y="5" color="#4CAF50"/>
+                <!-- Большая Z -->
+                <rect x="4" y="2" w="6" h="1" color="#B0C4DE"/>
+                <pixel x="9" y="3" color="#B0C4DE"/>
+                <pixel x="8" y="4" color="#B0C4DE"/>
+                <pixel x="7" y="5" color="#B0C4DE"/>
+                <pixel x="6" y="6" color="#B0C4DE"/>
+                <pixel x="5" y="7" color="#B0C4DE"/>
+                <rect x="4" y="8" w="6" h="1" color="#B0C4DE"/>
+                <!-- Средняя z -->
+                <rect x="9" y="4" w="4" h="1" color="#C8D8EC"/>
+                <pixel x="12" y="5" color="#C8D8EC"/>
+                <pixel x="11" y="6" color="#C8D8EC"/>
+                <pixel x="10" y="7" color="#C8D8EC"/>
+                <rect x="9" y="8" w="4" h="1" color="#C8D8EC"/>
+                <!-- Маленькая z -->
+                <rect x="11" y="9" w="3" h="1" color="#D8E4F0"/>
+                <pixel x="13" y="10" color="#D8E4F0"/>
+                <pixel x="12" y="11" color="#D8E4F0"/>
+                <rect x="11" y="12" w="3" h="1" color="#D8E4F0"/>
             </pixel-data>
         </layer>
     </layers>
 
     <animations>
-        <!-- Сердечки: всплывают вверх, покачиваясь, и исчезают -->
-        <animation name="hearts-float" frames="8" fps="6" loop="false"
-                   frame-width="8" frame-height="8"
+        <!-- Сердечки: 12 кадров, плавный подъём с покачиванием -->
+        <animation name="hearts-float" frames="12" fps="6" loop="false"
+                   frame-width="16" frame-height="16"
                    spawn="random-x, above-character" count="3-5">
-            <description>
-                3-5 сердечек появляются над персонажем,
-                плавно поднимаются вверх, покачиваясь
-                влево-вправо. Каждое с небольшой задержкой.
-                Последние кадры — fade (alpha уменьшается).
-            </description>
-            <frame index="0" layer-offsets="heart:0,0" alpha="1.0"/>
-            <frame index="1" layer-offsets="heart:-1,-2" alpha="1.0"/>
-            <frame index="2" layer-offsets="heart:0,-4" alpha="1.0"/>
-            <frame index="3" layer-offsets="heart:1,-6" alpha="0.9"/>
-            <frame index="4" layer-offsets="heart:0,-8" alpha="0.8"/>
-            <frame index="5" layer-offsets="heart:-1,-10" alpha="0.6"/>
-            <frame index="6" layer-offsets="heart:0,-12" alpha="0.4"/>
-            <frame index="7" layer-offsets="heart:1,-14" alpha="0.2"/>
+            <frame index="0" layer-offsets="heart:0,0" alpha="0.6"/>
+            <frame index="1" layer-offsets="heart:-1,-2" alpha="0.9"/>
+            <frame index="2" layer-offsets="heart:-2,-4" alpha="1.0"/>
+            <frame index="3" layer-offsets="heart:0,-7" alpha="1.0"/>
+            <frame index="4" layer-offsets="heart:2,-10" alpha="1.0"/>
+            <frame index="5" layer-offsets="heart:1,-13" alpha="0.95"/>
+            <frame index="6" layer-offsets="heart:-1,-16" alpha="0.9"/>
+            <frame index="7" layer-offsets="heart:-2,-19" alpha="0.8"/>
+            <frame index="8" layer-offsets="heart:0,-22" alpha="0.65"/>
+            <frame index="9" layer-offsets="heart:2,-24" alpha="0.45"/>
+            <frame index="10" layer-offsets="heart:1,-26" alpha="0.25"/>
+            <frame index="11" layer-offsets="heart:0,-28" alpha="0.1"/>
         </animation>
 
-        <!-- Звёзды: взрываются от центра наружу -->
-        <animation name="stars-burst" frames="6" fps="8" loop="false"
-                   frame-width="8" frame-height="8"
+        <!-- Звёзды: 10 кадров, burst от центра -->
+        <animation name="stars-burst" frames="10" fps="8" loop="false"
+                   frame-width="16" frame-height="16"
                    spawn="center-character" count="5-8">
-            <description>
-                5-8 звёзд разлетаются от центра персонажа
-                во все стороны. Быстрый burst,
-                затем fade. Эффект «фейерверка».
-            </description>
-            <frame index="0" layer-offsets="star:0,0" alpha="1.0"/>
-            <frame index="1" layer-offsets="star:2,-2" alpha="1.0"/>
-            <frame index="2" layer-offsets="star:4,-4" alpha="0.9"/>
-            <frame index="3" layer-offsets="star:6,-5" alpha="0.7"/>
-            <frame index="4" layer-offsets="star:7,-6" alpha="0.4"/>
-            <frame index="5" layer-offsets="star:8,-6" alpha="0.1"/>
+            <frame index="0" layer-offsets="star:0,0" alpha="0.8"/>
+            <frame index="1" layer-offsets="star:1,-1" alpha="1.0"/>
+            <frame index="2" layer-offsets="star:3,-3" alpha="1.0"/>
+            <frame index="3" layer-offsets="star:5,-5" alpha="1.0"/>
+            <frame index="4" layer-offsets="star:8,-6" alpha="0.95"/>
+            <frame index="5" layer-offsets="star:10,-7" alpha="0.85"/>
+            <frame index="6" layer-offsets="star:12,-7" alpha="0.7"/>
+            <frame index="7" layer-offsets="star:14,-6" alpha="0.5"/>
+            <frame index="8" layer-offsets="star:15,-5" alpha="0.25"/>
+            <frame index="9" layer-offsets="star:16,-4" alpha="0.05"/>
         </animation>
 
-        <!-- Стресс: искры вздрагивают вокруг головы -->
-        <animation name="stress-crackle" frames="6" fps="8" loop="false"
-                   frame-width="6" frame-height="6"
+        <!-- Стресс: 10 кадров, хаотичное дрожание -->
+        <animation name="stress-crackle" frames="10" fps="8" loop="false"
+                   frame-width="12" frame-height="12"
                    spawn="around-head" count="4-6">
-            <description>
-                4-6 красных искр появляются вокруг головы,
-                хаотично подёргиваются и исчезают.
-                Эффект «нервного потрескивания».
-            </description>
-            <frame index="0" layer-offsets="stress-spark:0,0" alpha="0.8"/>
-            <frame index="1" layer-offsets="stress-spark:1,-1" alpha="1.0"/>
+            <frame index="0" layer-offsets="stress-spark:0,0" alpha="0.5"/>
+            <frame index="1" layer-offsets="stress-spark:2,-1" alpha="0.9"/>
             <frame index="2" layer-offsets="stress-spark:-1,1" alpha="1.0"/>
-            <frame index="3" layer-offsets="stress-spark:1,0" alpha="0.8"/>
-            <frame index="4" layer-offsets="stress-spark:-1,-1" alpha="0.5"/>
-            <frame index="5" layer-offsets="stress-spark:0,0" alpha="0.2"/>
+            <frame index="3" layer-offsets="stress-spark:1,-2" alpha="1.0"/>
+            <frame index="4" layer-offsets="stress-spark:-2,0" alpha="1.0"/>
+            <frame index="5" layer-offsets="stress-spark:2,1" alpha="0.9"/>
+            <frame index="6" layer-offsets="stress-spark:-1,-1" alpha="0.8"/>
+            <frame index="7" layer-offsets="stress-spark:1,0" alpha="0.6"/>
+            <frame index="8" layer-offsets="stress-spark:0,-1" alpha="0.35"/>
+            <frame index="9" layer-offsets="stress-spark:0,0" alpha="0.1"/>
         </animation>
 
-        <!-- Монеты: подпрыгивают и разлетаются -->
-        <animation name="coins-pop" frames="8" fps="6" loop="false"
-                   frame-width="8" frame-height="8"
+        <!-- Монеты: 12 кадров, парабола с вращением -->
+        <animation name="coins-pop" frames="12" fps="6" loop="false"
+                   frame-width="16" frame-height="16"
                    spawn="above-character" count="3-5">
-            <description>
-                3-5 монет выскакивают вверх из персонажа,
-                описывают параболу и исчезают.
-                Звенящий эффект получения денег.
-            </description>
-            <frame index="0" layer-offsets="coin:0,0" alpha="1.0"/>
+            <frame index="0" layer-offsets="coin:0,0" alpha="0.8"/>
             <frame index="1" layer-offsets="coin:1,-3" alpha="1.0"/>
-            <frame index="2" layer-offsets="coin:2,-5" alpha="1.0"/>
-            <frame index="3" layer-offsets="coin:3,-6" alpha="1.0"/>
-            <frame index="4" layer-offsets="coin:3,-5" alpha="0.9"/>
-            <frame index="5" layer-offsets="coin:4,-3" alpha="0.7"/>
-            <frame index="6" layer-offsets="coin:4,-1" alpha="0.4"/>
-            <frame index="7" layer-offsets="coin:4,0" alpha="0.1"/>
+            <frame index="2" layer-offsets="coin:2,-6" alpha="1.0"/>
+            <frame index="3" layer-offsets="coin:3,-9" alpha="1.0"/>
+            <frame index="4" layer-offsets="coin:4,-11" alpha="1.0"/>
+            <frame index="5" layer-offsets="coin:5,-12" alpha="1.0"/>
+            <frame index="6" layer-offsets="coin:5,-11" alpha="0.95"/>
+            <frame index="7" layer-offsets="coin:6,-9" alpha="0.85"/>
+            <frame index="8" layer-offsets="coin:6,-6" alpha="0.7"/>
+            <frame index="9" layer-offsets="coin:7,-3" alpha="0.5"/>
+            <frame index="10" layer-offsets="coin:7,-1" alpha="0.3"/>
+            <frame index="11" layer-offsets="coin:8,0" alpha="0.1"/>
         </animation>
 
-        <!-- Энергия: искры поднимаются спиралью -->
-        <animation name="energy-rise" frames="6" fps="6" loop="false"
-                   frame-width="6" frame-height="6"
+        <!-- Энергия: 10 кадров, спиральный подъём -->
+        <animation name="energy-rise" frames="10" fps="6" loop="false"
+                   frame-width="12" frame-height="12"
                    spawn="around-character" count="4-6">
-            <description>
-                4-6 зелёных искр поднимаются вокруг персонажа
-                спиралью вверх — эффект восстановления энергии.
-            </description>
-            <frame index="0" layer-offsets="energy-spark:0,0" alpha="1.0"/>
-            <frame index="1" layer-offsets="energy-spark:2,-2" alpha="1.0"/>
-            <frame index="2" layer-offsets="energy-spark:-1,-4" alpha="0.9"/>
-            <frame index="3" layer-offsets="energy-spark:2,-6" alpha="0.7"/>
-            <frame index="4" layer-offsets="energy-spark:-1,-8" alpha="0.4"/>
-            <frame index="5" layer-offsets="energy-spark:0,-10" alpha="0.1"/>
+            <frame index="0" layer-offsets="energy-spark:0,0" alpha="0.7"/>
+            <frame index="1" layer-offsets="energy-spark:3,-2" alpha="1.0"/>
+            <frame index="2" layer-offsets="energy-spark:-1,-4" alpha="1.0"/>
+            <frame index="3" layer-offsets="energy-spark:3,-7" alpha="0.95"/>
+            <frame index="4" layer-offsets="energy-spark:-2,-9" alpha="0.85"/>
+            <frame index="5" layer-offsets="energy-spark:3,-12" alpha="0.7"/>
+            <frame index="6" layer-offsets="energy-spark:-1,-14" alpha="0.55"/>
+            <frame index="7" layer-offsets="energy-spark:2,-16" alpha="0.4"/>
+            <frame index="8" layer-offsets="energy-spark:0,-18" alpha="0.2"/>
+            <frame index="9" layer-offsets="energy-spark:1,-20" alpha="0.05"/>
+        </animation>
+
+        <!-- Сон: 10 кадров, Z-ки плывут вверх-вправо -->
+        <animation name="sleep-float" frames="10" fps="3" loop="true"
+                   frame-width="16" frame-height="16"
+                   spawn="above-character-right" count="1">
+            <frame index="0" layer-offsets="sleep-z:0,0" alpha="0.0"/>
+            <frame index="1" layer-offsets="sleep-z:1,-2" alpha="0.5"/>
+            <frame index="2" layer-offsets="sleep-z:2,-4" alpha="0.8"/>
+            <frame index="3" layer-offsets="sleep-z:3,-6" alpha="1.0"/>
+            <frame index="4" layer-offsets="sleep-z:4,-8" alpha="1.0"/>
+            <frame index="5" layer-offsets="sleep-z:5,-10" alpha="1.0"/>
+            <frame index="6" layer-offsets="sleep-z:6,-12" alpha="0.9"/>
+            <frame index="7" layer-offsets="sleep-z:7,-14" alpha="0.7"/>
+            <frame index="8" layer-offsets="sleep-z:8,-16" alpha="0.4"/>
+            <frame index="9" layer-offsets="sleep-z:9,-18" alpha="0.1"/>
         </animation>
     </animations>
 
