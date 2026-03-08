@@ -2,93 +2,96 @@ package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.spec.QuestSpec;
 import ru.lifegame.backend.domain.engine.spec.QuestSpec.StepSpec;
-import ru.lifegame.backend.domain.engine.spec.QuestSpec.DialogueEntry;
 import ru.lifegame.backend.domain.engine.spec.QuestSpec.RewardSpec;
+import ru.lifegame.backend.domain.engine.spec.QuestSpec.DialogueEntry;
+import ru.lifegame.backend.domain.engine.spec.ConditionSpec;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class NarrativeQuestEngine {
 
-    private final List<QuestSpec> questSpecs;
+    private final List<QuestSpec> allQuests;
     private final Map<String, QuestState> activeQuests = new LinkedHashMap<>();
+    private final Set<String> completedQuests = new HashSet<>();
 
-    public NarrativeQuestEngine(List<QuestSpec> questSpecs) {
-        this.questSpecs = questSpecs;
+    public NarrativeQuestEngine(List<QuestSpec> allQuests) {
+        this.allQuests = allQuests;
     }
 
-    public static class QuestState {
-        private final QuestSpec spec;
-        private int currentStepIndex;
-        private boolean completed;
-        private boolean failed;
-
-        public QuestState(QuestSpec spec) {
-            this.spec = spec;
-            this.currentStepIndex = 0;
-        }
-
+    public record QuestState(String questId, QuestSpec spec, int currentStepIndex) {
         public StepSpec currentStep() {
             if (currentStepIndex >= spec.steps().size()) return null;
             return spec.steps().get(currentStepIndex);
         }
 
-        public QuestSpec spec() { return spec; }
-        public int currentStepIndex() { return currentStepIndex; }
-        public boolean isCompleted() { return completed; }
-        public boolean isFailed() { return failed; }
+        public QuestState advance() {
+            return new QuestState(questId, spec, currentStepIndex + 1);
+        }
+
+        public boolean isComplete() {
+            return currentStepIndex >= spec.steps().size();
+        }
     }
 
-    public void checkTriggers(Map<String, Object> context) {
-        for (QuestSpec spec : questSpecs) {
-            if (activeQuests.containsKey(spec.id())) continue;
-            if (spec.triggerDay() != null) {
-                Object day = context.get("currentDay");
-                if (day instanceof Number n && n.intValue() >= spec.triggerDay()) {
-                    activeQuests.put(spec.id(), new QuestState(spec));
-                }
+    public void activateEligibleQuests(Map<String, Object> gameContext) {
+        for (QuestSpec quest : allQuests) {
+            if (activeQuests.containsKey(quest.id())) continue;
+            if (completedQuests.contains(quest.id())) continue;
+            if (allConditionsMet(quest.triggerConditions(), gameContext)) {
+                activeQuests.put(quest.id(), new QuestState(quest.id(), quest, 0));
             }
         }
     }
 
-    public List<StepCompletionResult> checkStepCompletion(Map<String, Object> context) {
+    public record StepCompletionResult(String questId, String stepId, boolean questCompleted,
+                                       DialogueEntry dialogue, RewardSpec reward) {}
+
+    public List<StepCompletionResult> checkStepCompletions(Map<String, Object> gameContext) {
         List<StepCompletionResult> results = new ArrayList<>();
-        for (QuestState state : activeQuests.values()) {
-            if (state.completed || state.failed) continue;
+        for (var entry : new ArrayList<>(activeQuests.entrySet())) {
+            QuestState state = entry.getValue();
             StepSpec step = state.currentStep();
-            if (step == null) { state.completed = true; continue; }
-            if (isStepComplete(step, context)) {
-                state.currentStepIndex++;
-                boolean questDone = state.currentStepIndex >= state.spec.steps().size();
-                if (questDone) state.completed = true;
-                results.add(new StepCompletionResult(state.spec.id(), step.id(),
-                        step.dialogue(), questDone ? state.spec.rewards() : List.of()));
+            if (step == null) continue;
+            if (allConditionsMet(step.completionConditions(), gameContext)) {
+                QuestState advanced = state.advance();
+                if (advanced.isComplete()) {
+                    activeQuests.remove(entry.getKey());
+                    completedQuests.add(entry.getKey());
+                    results.add(new StepCompletionResult(entry.getKey(), step.id(), true,
+                            step.dialogue(), state.spec().completionReward()));
+                } else {
+                    activeQuests.put(entry.getKey(), advanced);
+                    results.add(new StepCompletionResult(entry.getKey(), step.id(), false,
+                            step.dialogue(), step.reward()));
+                }
             }
         }
         return results;
     }
 
-    public record StepCompletionResult(String questId, String stepId,
-                                       List<DialogueEntry> dialogue, List<RewardSpec> rewards) {}
+    public Map<String, QuestState> activeQuests() { return Collections.unmodifiableMap(activeQuests); }
+    public Set<String> completedQuests() { return Collections.unmodifiableSet(completedQuests); }
 
-    private boolean isStepComplete(StepSpec step, Map<String, Object> context) {
-        if (step.conditions() == null) return false;
-        return step.conditions().stream().allMatch(c -> {
-            Object val = context.get(c.target());
-            if (val == null) return false;
-            if (val instanceof Number n) {
-                double actual = n.doubleValue();
-                double expected = Double.parseDouble(c.value());
-                return switch (c.operator()) {
-                    case "gte" -> actual >= expected;
-                    case "lte" -> actual <= expected;
-                    case "eq" -> actual == expected;
-                    default -> false;
-                };
-            }
-            return val.toString().equals(c.value());
-        });
+    private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> ctx) {
+        if (conditions == null || conditions.isEmpty()) return true;
+        return conditions.stream().allMatch(c -> evaluateCondition(c, ctx));
     }
 
-    public Map<String, QuestState> activeQuests() { return Collections.unmodifiableMap(activeQuests); }
+    private boolean evaluateCondition(ConditionSpec c, Map<String, Object> ctx) {
+        Object val = ctx.get(c.target());
+        if (val == null) return false;
+        if (val instanceof Number num) {
+            double actual = num.doubleValue();
+            double expected = Double.parseDouble(c.value());
+            return switch (c.operator()) {
+                case "gte" -> actual >= expected;
+                case "lte" -> actual <= expected;
+                case "gt" -> actual > expected;
+                case "lt" -> actual < expected;
+                case "eq" -> actual == expected;
+                default -> false;
+            };
+        }
+        return String.valueOf(val).equals(c.value());
+    }
 }
