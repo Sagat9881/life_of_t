@@ -1,38 +1,37 @@
 package com.sagat9881.lifeoft.application.view;
 
 /**
- * DTO for frontend: current state of a single NPC.
- * Sent via GET /npc/activities endpoint.
- * Frontend uses this to render NPC animation at correct location.
+ * DTO sent to frontend representing an NPC's current physical state.
+ * Frontend uses this to render NPC sprite at the correct location with correct animation.
  *
  * @param npcId unique NPC identifier
  * @param displayName localized name for UI
- * @param category "human" or "animal"
- * @param activityId current activity (e.g., "breakfast", "phone_scroll", "sleeping")
- * @param animation animation key for rendering (e.g., "eating", "typing", "idle")
- * @param location where the NPC is (e.g., "kitchen", "living_room", "away")
- * @param moodSummary brief mood description for UI hints (e.g., "happy", "irritated", "lonely")
- * @param isAvailable whether NPC is available for player interaction right now
+ * @param category HUMAN or ANIMAL
+ * @param currentActivity what the NPC is doing (e.g. "eating", "sleeping", "working")
+ * @param animationKey animation to play (e.g. "eating", "typing", "idle")
+ * @param locationId where the NPC is (e.g. "kitchen", "living_room", "away")
+ * @param moodSummary simplified mood for visual cues (e.g. "happy", "sad", "irritated", "neutral")
+ * @param isAvailable whether NPC can be interacted with right now
  */
 public record NpcActivityView(
         String npcId,
         String displayName,
         String category,
-        String activityId,
-        String animation,
-        String location,
+        String currentActivity,
+        String animationKey,
+        String locationId,
         String moodSummary,
         boolean isAvailable
 ) {
+
     /**
-     * Generate mood summary string from NPC mood axes.
+     * Derives a simplified mood label from dominant mood axis.
      */
-    public static String summarizeMood(double happiness, double irritability,
-                                        double loneliness, double anxiety) {
-        if (irritability > 70) return "irritated";
-        if (anxiety > 70) return "anxious";
+    public static String deriveMoodSummary(int happiness, int irritability, int loneliness, int anxiety) {
+        if (irritability > 60) return "irritated";
+        if (anxiety > 60) return "anxious";
         if (loneliness > 60) return "lonely";
-        if (happiness > 70) return "happy";
+        if (happiness > 60) return "happy";
         if (happiness < 30) return "sad";
         return "neutral";
     }

@@ -1,58 +1,59 @@
 package com.sagat9881.lifeoft.domain.npc.spec;
 
-import com.sagat9881.lifeoft.domain.npc.model.NpcSchedule;
-
 import java.util.List;
 import java.util.Map;
 
 /**
- * Immutable NPC specification loaded from XML.
- * Contains all static configuration for an NPC — no game logic.
- * The engine creates NpcInstance from this spec at session start.
+ * Immutable specification of an NPC loaded from XML.
+ * The engine never hardcodes NPC names — all content comes from specs.
  *
- * @param id unique NPC identifier (e.g., "alexander", "sam", "neighbor_cat")
- * @param type "named" (full brain) or "filler" (light brain)
- * @param category "human" or "animal"
- * @param displayName localized display name for UI
- * @param personalityTraits Map of trait name → value (0-100), e.g., patience=60, humor=45
- * @param moodInitial Map of mood axis → initial value, e.g., happiness=70, energy=80
- * @param memoryEnabled whether this NPC tracks player actions (named=true, filler=false)
- * @param shortTermSize capacity of short-term memory ring buffer
- * @param scheduleSlots daily schedule time slots from XML
- * @param actions scored actions this NPC can perform (Utility AI candidates)
+ * @param id unique identifier matching XML id attribute
+ * @param type NAMED (full brain) or FILLER (simplified brain)
+ * @param category HUMAN or ANIMAL
+ * @param displayName localized display name
+ * @param personalityTraits trait name → value (0-100)
+ * @param moodInitial axis name → initial value
+ * @param memoryEnabled whether NPC tracks player actions
+ * @param shortTermMemorySize max short-term memory entries (only if memoryEnabled)
+ * @param scheduleSlots time-based activity schedule
+ * @param actions available utility-scored actions
+ * @param questLines list of quest IDs this NPC participates in
  */
 public record NpcSpec(
         String id,
-        String type,
-        String category,
+        NpcType type,
+        NpcCategory category,
         String displayName,
-        Map<String, Double> personalityTraits,
-        Map<String, Double> moodInitial,
+        Map<String, Integer> personalityTraits,
+        Map<String, Integer> moodInitial,
         boolean memoryEnabled,
-        int shortTermSize,
-        List<NpcSchedule.ScheduleSlot> scheduleSlots,
-        List<ScoredAction> actions
+        int shortTermMemorySize,
+        List<ScheduleSlotSpec> scheduleSlots,
+        List<ScoredAction> actions,
+        List<String> questLines
 ) {
-    public NpcSpec {
-        if (id == null || id.isBlank()) throw new IllegalArgumentException("NPC id is required");
-        if (type == null) type = "filler";
-        if (category == null) category = "human";
-        if (displayName == null) displayName = id;
-        if (personalityTraits == null) personalityTraits = Map.of();
-        if (moodInitial == null) moodInitial = Map.of();
-        if (scheduleSlots == null) scheduleSlots = List.of();
-        if (actions == null) actions = List.of();
+
+    public enum NpcType {
+        NAMED, FILLER
+    }
+
+    public enum NpcCategory {
+        HUMAN, ANIMAL
     }
 
     public boolean isNamed() {
-        return "named".equals(type);
+        return type == NpcType.NAMED;
     }
 
-    public boolean isAnimal() {
-        return "animal".equals(category);
+    public boolean isFiller() {
+        return type == NpcType.FILLER;
     }
 
-    public double trait(String name) {
-        return personalityTraits.getOrDefault(name, 50.0);
+    public int personalityTrait(String name) {
+        return personalityTraits.getOrDefault(name, 50);
+    }
+
+    public int initialMood(String axis) {
+        return moodInitial.getOrDefault(axis, 50);
     }
 }
