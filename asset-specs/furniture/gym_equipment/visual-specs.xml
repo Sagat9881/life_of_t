@@ -1,90 +1,119 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<asset-spec>
+<asset-spec extends="abstract/materials/metal@1.0" version="2.0.0">
     <meta>
         <entity-type>furniture</entity-type>
         <entity-name>gym_equipment</entity-name>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
+        <canvas width="192" height="160" displayScale="1.0"/>
         <location>gym</location>
         <description>
             Беговая дорожка — интерактивный объект для действия "Тренировка".
-            Повышает здоровье, снижает стресс, расходует энергию.
-            Расположена в midground-слое gym.
+            Canvas ×4: 48×40 → 192×160.
         </description>
     </meta>
 
+    <color-palette>
+        <color name="$frame_main" value="#404040"/>
+        <color name="$frame_top" value="#505050"/>
+        <color name="$frame_dark" value="#303030"/>
+        <color name="$display_bg" value="#1A1A2E"/>
+        <color name="$display_panel" value="#0F3460"/>
+        <color name="$display_glow" value="#00FF88"/>
+        <color name="$belt_main" value="#333333"/>
+        <color name="$belt_line" value="#3A3A3A"/>
+        <color name="$rail" value="#606060"/>
+        <color name="$sweat" value="#87CEEB"/>
+    </color-palette>
+
     <layers>
-        <layer id="frame" type="base" z-order="0" width="48" height="40">
+        <layer id="frame" type="base" z-order="0" width="192" height="160">
             <pixel-data>
-                <!-- Корпус дорожки -->
-                <rect x="4" y="10" w="40" h="24" color="#404040"/>
-                <rect x="4" y="10" w="40" h="2" color="#505050"/>
-                <!-- Стойки с дисплеем -->
-                <rect x="6" y="2" w="3" h="10" color="#505050"/>
-                <rect x="39" y="2" w="3" h="10" color="#505050"/>
+                <rect x="16" y="40" w="160" h="96" color="$frame_main"/>
+                <rect x="16" y="40" w="160" h="8" color="$frame_top"/>
+                <!-- Стойки -->
+                <rect x="24" y="8" w="12" h="40" color="$frame_top"/>
+                <rect x="156" y="8" w="12" h="40" color="$frame_top"/>
                 <!-- Дисплей -->
-                <rect x="8" y="2" w="32" h="8" color="#1A1A2E"/>
-                <rect x="10" y="3" w="28" h="6" color="#0F3460"/>
+                <rect x="32" y="8" w="128" h="32" color="$display_bg"/>
+                <rect x="40" y="12" w="112" h="24" color="$display_panel"/>
+                <!-- Кнопки на панели -->
+                <rect x="44" y="32" w="8" h="4" color="#CC3333"/>
+                <rect x="56" y="32" w="8" h="4" color="#33CC33"/>
+                <rect x="68" y="32" w="8" h="4" color="#3333CC"/>
                 <!-- Полотно -->
-                <rect x="8" y="14" w="32" h="16" color="#333333"/>
-                <rect x="8" y="14" w="32" h="1" color="#444444"/>
+                <rect x="32" y="56" w="128" h="64" color="$belt_main"/>
+                <rect x="32" y="56" w="128" h="4" color="#444444"/>
                 <!-- Ножки -->
-                <rect x="6" y="34" w="4" h="6" color="#303030"/>
-                <rect x="38" y="34" w="4" h="6" color="#303030"/>
+                <rect x="24" y="136" w="16" h="24" color="$frame_dark"/>
+                <rect x="152" y="136" w="16" h="24" color="$frame_dark"/>
                 <!-- Поручни -->
-                <rect x="4" y="8" w="2" h="14" color="#606060"/>
-                <rect x="42" y="8" w="2" h="14" color="#606060"/>
+                <rect x="16" y="32" w="8" h="56" color="$rail"/>
+                <rect x="168" y="32" w="8" h="56" color="$rail"/>
+                <!-- Текстура metal grip -->
+                <hline x="16" y="40" len="8" color="#707070"/>
+                <hline x="16" y="48" len="8" color="#707070"/>
+                <hline x="168" y="40" len="8" color="#707070"/>
+                <hline x="168" y="48" len="8" color="#707070"/>
             </pixel-data>
         </layer>
 
-        <layer id="display_glow" type="animated" z-order="1" width="48" height="40">
+        <layer id="display_glow" type="animated" z-order="1" width="192" height="160">
             <pixel-data>
-                <rect x="12" y="4" w="8" h="4" color="#00FF88"/>
-                <rect x="22" y="4" w="6" h="4" color="#00FF88"/>
+                <!-- Скорость -->
+                <rect x="48" y="16" w="32" h="16" color="$display_glow"/>
+                <!-- Калории -->
+                <rect x="88" y="16" w="24" h="16" color="$display_glow"/>
+                <!-- Время -->
+                <rect x="120" y="16" w="24" h="16" color="$display_glow"/>
             </pixel-data>
         </layer>
 
-        <layer id="belt_lines" type="animated" z-order="2" width="48" height="40">
+        <layer id="belt_lines" type="animated" z-order="2" width="192" height="160">
             <pixel-data>
-                <hline x="8" y="18" len="32" color="#3A3A3A"/>
-                <hline x="8" y="22" len="32" color="#3A3A3A"/>
-                <hline x="8" y="26" len="32" color="#3A3A3A"/>
+                <rect x="32" y="72" w="128" h="2" color="$belt_line"/>
+                <rect x="32" y="88" w="128" h="2" color="$belt_line"/>
+                <rect x="32" y="104" w="128" h="2" color="$belt_line"/>
             </pixel-data>
         </layer>
 
-        <layer id="sweat_drops" type="animated-overlay" z-order="3" width="48" height="40"
+        <layer id="sweat_drops" type="animated-overlay" z-order="3" width="192" height="160"
                condition="state:active">
             <pixel-data>
-                <pixel x="20" y="0" color="#87CEEB"/>
-                <pixel x="28" y="1" color="#87CEEB"/>
-                <pixel x="24" y="-1" color="#87CEEB"/>
+                <rect x="80" y="0" w="4" h="4" color="$sweat"/>
+                <rect x="112" y="4" w="4" h="4" color="$sweat"/>
+                <rect x="96" y="0" w="4" h="4" color="$sweat"/>
             </pixel-data>
         </layer>
     </layers>
 
     <animations>
-        <animation name="idle" frames="2" fps="1" loop="true"
-                   frame-width="48" frame-height="40">
+        <animation name="idle" frames="4" fps="1" loop="true"
+                   frame-width="192" frame-height="160">
             <frame index="0" layer-offsets=""/>
             <frame index="1" layer-offsets="display_glow:0,0"/>
+            <frame index="2" layer-offsets=""/>
+            <frame index="3" layer-offsets="display_glow:0,0"/>
         </animation>
 
-        <animation name="active" frames="4" fps="4" loop="true"
-                   frame-width="48" frame-height="40"
+        <animation name="active" frames="10" fps="4" loop="true"
+                   frame-width="192" frame-height="160"
                    condition="state:active">
-            <description>
-                Полотно движется: линии сдвигаются вниз.
-                Дисплей мигает. Капли пота летят.
-            </description>
-            <frame index="0" layer-offsets="belt_lines:0,0; sweat_drops:0,0"/>
-            <frame index="1" layer-offsets="belt_lines:0,2; sweat_drops:1,-1"/>
-            <frame index="2" layer-offsets="belt_lines:0,4; sweat_drops:-1,-2"/>
-            <frame index="3" layer-offsets="belt_lines:0,6; sweat_drops:0,-3"/>
+            <frame index="0" layer-offsets="belt_lines:0,0; sweat_drops:0,0; display_glow:0,0"/>
+            <frame index="1" layer-offsets="belt_lines:0,4; sweat_drops:2,-2; display_glow:0,0"/>
+            <frame index="2" layer-offsets="belt_lines:0,8; sweat_drops:-2,-4; display_glow:0,0"/>
+            <frame index="3" layer-offsets="belt_lines:0,12; sweat_drops:0,-6; display_glow:0,0"/>
+            <frame index="4" layer-offsets="belt_lines:0,16; sweat_drops:2,-8; display_glow:0,0"/>
+            <frame index="5" layer-offsets="belt_lines:0,0; sweat_drops:-2,-10; display_glow:0,0"/>
+            <frame index="6" layer-offsets="belt_lines:0,4; sweat_drops:0,0; display_glow:0,0"/>
+            <frame index="7" layer-offsets="belt_lines:0,8; sweat_drops:2,-2; display_glow:0,0"/>
+            <frame index="8" layer-offsets="belt_lines:0,12; sweat_drops:-2,-4; display_glow:0,0"/>
+            <frame index="9" layer-offsets="belt_lines:0,16; sweat_drops:0,-6; display_glow:0,0"/>
         </animation>
     </animations>
 
     <states>
         <state name="idle" description="Дорожка выключена, дисплей в standby"/>
-        <state name="active" description="Таня бежит — полотно движется, пот летит"/>
+        <state name="active" description="Тренировка — полотно движется, пот летит"/>
     </states>
 
     <interaction>

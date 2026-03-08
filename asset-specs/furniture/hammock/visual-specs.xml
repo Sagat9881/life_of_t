@@ -1,104 +1,132 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<asset-spec>
+<asset-spec extends="abstract/materials/fabric@1.0" version="2.0.0">
     <meta>
         <entity-type>furniture</entity-type>
         <entity-name>hammock</entity-name>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
+        <canvas width="192" height="128" displayScale="1.0"/>
         <location>dacha_yard, summer_camp</location>
         <description>
             Гамак между двух столбиков/деревьев.
-            Место отдыха Тани летом. Действие «Отдохнуть» восстанавливает энергию.
+            Место отдыха Тани летом. Canvas ×4: 48×32 → 192×128.
         </description>
     </meta>
 
+    <color-palette>
+        <color name="$post_main" value="#5C3A1E"/>
+        <color name="$post_top" value="#6B4A2E"/>
+        <color name="$post_bark" value="#4A2E14"/>
+        <color name="$hook" value="#888888"/>
+        <color name="$hook_shadow" value="#777777"/>
+        <color name="$rope" value="#C8B896"/>
+        <color name="$fabric_dark" value="#6B8E6B"/>
+        <color name="$fabric_mid" value="#7A9E7A"/>
+        <color name="$fabric_main" value="#8BAE8B"/>
+        <color name="$fabric_light" value="#9BBE9B"/>
+        <color name="$fabric_highlight" value="#ABCEAB"/>
+        <color name="$fabric_bright" value="#BBDEBB"/>
+        <color name="$net_thread" value="#5A7D5A"/>
+    </color-palette>
+
     <layers>
-        <!-- z=0: левый столбик/дерево -->
-        <layer id="post-left" type="base" z-order="0" width="48" height="32">
+        <!-- z=0: левый столбик -->
+        <layer id="post-left" type="base" z-order="0" width="192" height="128">
             <pixel-data>
-                <rect x="2" y="4" w="4" h="26" color="#5C3A1E"/>
-                <hline x="2" y="4" len="4" color="#6B4A2E"/>
-                <!-- текстура коры -->
-                <pixel x="3" y="8" color="#4A2E14"/>
-                <pixel x="4" y="14" color="#4A2E14"/>
-                <pixel x="3" y="20" color="#4A2E14"/>
-                <!-- крюк -->
-                <pixel x="5" y="10" color="#888888"/>
-                <pixel x="6" y="10" color="#888888"/>
-                <pixel x="6" y="11" color="#777777"/>
+                <rect x="8" y="16" w="16" h="104" color="$post_main"/>
+                <hline x="8" y="16" len="16" color="$post_top"/>
+                <hline x="8" y="17" len="16" color="$post_top"/>
+                <!-- Текстура коры -->
+                <rect x="12" y="32" w="4" h="4" color="$post_bark"/>
+                <rect x="16" y="56" w="4" h="4" color="$post_bark"/>
+                <rect x="12" y="80" w="4" h="4" color="$post_bark"/>
+                <!-- Крюк -->
+                <rect x="20" y="40" w="4" h="4" color="$hook"/>
+                <rect x="24" y="40" w="4" h="4" color="$hook"/>
+                <rect x="24" y="44" w="4" h="4" color="$hook_shadow"/>
             </pixel-data>
         </layer>
 
         <!-- z=1: правый столбик -->
-        <layer id="post-right" type="base" z-order="1" width="48" height="32">
+        <layer id="post-right" type="base" z-order="1" width="192" height="128">
             <pixel-data>
-                <rect x="42" y="4" w="4" h="26" color="#5C3A1E"/>
-                <hline x="42" y="4" len="4" color="#6B4A2E"/>
-                <pixel x="43" y="10" color="#4A2E14"/>
-                <pixel x="44" y="18" color="#4A2E14"/>
-                <!-- крюк -->
-                <pixel x="41" y="10" color="#888888"/>
-                <pixel x="40" y="10" color="#888888"/>
-                <pixel x="40" y="11" color="#777777"/>
+                <rect x="168" y="16" w="16" h="104" color="$post_main"/>
+                <hline x="168" y="16" len="16" color="$post_top"/>
+                <hline x="168" y="17" len="16" color="$post_top"/>
+                <rect x="172" y="40" w="4" h="4" color="$post_bark"/>
+                <rect x="176" y="72" w="4" h="4" color="$post_bark"/>
+                <!-- Крюк -->
+                <rect x="164" y="40" w="4" h="4" color="$hook"/>
+                <rect x="160" y="40" w="4" h="4" color="$hook"/>
+                <rect x="160" y="44" w="4" h="4" color="$hook_shadow"/>
             </pixel-data>
         </layer>
 
-        <!-- z=2: верёвки крепления -->
-        <layer id="ropes" type="base" z-order="2" width="48" height="32">
+        <!-- z=2: верёвки -->
+        <layer id="ropes" type="base" z-order="2" width="192" height="128">
             <pixel-data>
-                <!-- левая верёвка -->
-                <pixel x="6" y="11" color="#C8B896"/>
-                <pixel x="7" y="12" color="#C8B896"/>
-                <pixel x="8" y="13" color="#C8B896"/>
-                <!-- правая верёвка -->
-                <pixel x="40" y="11" color="#C8B896"/>
-                <pixel x="39" y="12" color="#C8B896"/>
-                <pixel x="38" y="13" color="#C8B896"/>
+                <!-- Левая верёвка -->
+                <rect x="24" y="44" w="4" h="4" color="$rope"/>
+                <rect x="28" y="48" w="4" h="4" color="$rope"/>
+                <rect x="32" y="52" w="4" h="4" color="$rope"/>
+                <!-- Правая верёвка -->
+                <rect x="160" y="44" w="4" h="4" color="$rope"/>
+                <rect x="156" y="48" w="4" h="4" color="$rope"/>
+                <rect x="152" y="52" w="4" h="4" color="$rope"/>
             </pixel-data>
         </layer>
 
-        <!-- z=3: ткань гамака — анимируемый слой -->
-        <layer id="fabric" type="animated" z-order="3" width="48" height="32">
+        <!-- z=3: ткань гамака -->
+        <layer id="fabric" type="animated" z-order="3" width="192" height="128">
             <pixel-data>
-                <!-- провисающая ткань (парабола) -->
-                <hline x="9" y="14" len="30" color="#6B8E6B"/>
-                <hline x="10" y="15" len="28" color="#7A9E7A"/>
-                <hline x="11" y="16" len="26" color="#8BAE8B"/>
-                <hline x="12" y="17" len="24" color="#8BAE8B"/>
-                <hline x="13" y="18" len="22" color="#9BBE9B"/>
-                <hline x="14" y="19" len="20" color="#9BBE9B"/>
-                <hline x="16" y="20" len="16" color="#ABCEAB"/>
-                <hline x="18" y="21" len="12" color="#ABCEAB"/>
-                <hline x="20" y="22" len="8" color="#BBDEBB"/>
-                <!-- нижний край -->
-                <hline x="20" y="23" len="8" color="#6B8E6B"/>
-                <!-- сетчатая текстура -->
-                <vline x="16" y="15" len="5" color="#5A7D5A"/>
-                <vline x="24" y="15" len="7" color="#5A7D5A"/>
-                <vline x="32" y="15" len="5" color="#5A7D5A"/>
+                <!-- Провисающая ткань (парабола ×4) -->
+                <rect x="36" y="56" w="120" h="4" color="$fabric_dark"/>
+                <rect x="40" y="60" w="112" h="4" color="$fabric_mid"/>
+                <rect x="44" y="64" w="104" h="4" color="$fabric_main"/>
+                <rect x="48" y="68" w="96" h="4" color="$fabric_main"/>
+                <rect x="52" y="72" w="88" h="4" color="$fabric_light"/>
+                <rect x="56" y="76" w="80" h="4" color="$fabric_light"/>
+                <rect x="64" y="80" w="64" h="4" color="$fabric_highlight"/>
+                <rect x="72" y="84" w="48" h="4" color="$fabric_highlight"/>
+                <rect x="80" y="88" w="32" h="4" color="$fabric_bright"/>
+                <!-- Нижний край -->
+                <rect x="80" y="92" w="32" h="4" color="$fabric_dark"/>
+                <!-- Сетчатая текстура -->
+                <rect x="64" y="60" w="2" h="20" color="$net_thread"/>
+                <rect x="96" y="60" w="2" h="28" color="$net_thread"/>
+                <rect x="128" y="60" w="2" h="20" color="$net_thread"/>
+                <!-- Горизонтальные нити -->
+                <hline x="44" y="68" len="104" color="$net_thread"/>
+                <hline x="56" y="80" len="80" color="$net_thread"/>
             </pixel-data>
         </layer>
     </layers>
 
     <animations>
-        <!-- idle: пустой гамак слегка покачивается от ветра -->
-        <animation name="idle" frames="4" fps="2" loop="true"
-                   frame-width="48" frame-height="32">
+        <animation name="idle" frames="8" fps="2" loop="true"
+                   frame-width="192" frame-height="128">
             <frame index="0" layer-offsets=""/>
-            <frame index="1" layer-offsets="fabric:-1,0; ropes:-1,0"/>
-            <frame index="2" layer-offsets=""/>
-            <frame index="3" layer-offsets="fabric:1,0; ropes:1,0"/>
+            <frame index="1" layer-offsets="fabric:-2,0; ropes:-2,0"/>
+            <frame index="2" layer-offsets="fabric:-4,0; ropes:-4,0"/>
+            <frame index="3" layer-offsets="fabric:-2,0; ropes:-2,0"/>
+            <frame index="4" layer-offsets=""/>
+            <frame index="5" layer-offsets="fabric:2,0; ropes:2,0"/>
+            <frame index="6" layer-offsets="fabric:4,0; ropes:4,0"/>
+            <frame index="7" layer-offsets="fabric:2,0; ropes:2,0"/>
         </animation>
 
-        <!-- occupied: гамак с Таней — провисает и качается мягко -->
-        <animation name="occupied" frames="6" fps="2" loop="true"
-                   frame-width="48" frame-height="32"
+        <animation name="occupied" frames="10" fps="2" loop="true"
+                   frame-width="192" frame-height="128"
                    condition="state:occupied">
-            <frame index="0" layer-offsets="fabric:0,2; ropes:0,1"/>
-            <frame index="1" layer-offsets="fabric:-1,2; ropes:-1,1"/>
-            <frame index="2" layer-offsets="fabric:-1,2; ropes:-1,1"/>
-            <frame index="3" layer-offsets="fabric:0,2; ropes:0,1"/>
-            <frame index="4" layer-offsets="fabric:1,2; ropes:1,1"/>
-            <frame index="5" layer-offsets="fabric:1,2; ropes:1,1"/>
+            <frame index="0" layer-offsets="fabric:0,8; ropes:0,4"/>
+            <frame index="1" layer-offsets="fabric:-2,8; ropes:-2,4"/>
+            <frame index="2" layer-offsets="fabric:-4,8; ropes:-4,4"/>
+            <frame index="3" layer-offsets="fabric:-4,8; ropes:-4,4"/>
+            <frame index="4" layer-offsets="fabric:-2,8; ropes:-2,4"/>
+            <frame index="5" layer-offsets="fabric:0,8; ropes:0,4"/>
+            <frame index="6" layer-offsets="fabric:2,8; ropes:2,4"/>
+            <frame index="7" layer-offsets="fabric:4,8; ropes:4,4"/>
+            <frame index="8" layer-offsets="fabric:4,8; ropes:4,4"/>
+            <frame index="9" layer-offsets="fabric:2,8; ropes:2,4"/>
         </animation>
     </animations>
 
