@@ -1,66 +1,59 @@
 package ru.lifegame.backend.domain.engine.runtime;
 
 import ru.lifegame.backend.domain.engine.spec.NpcSpec;
-import ru.lifegame.backend.domain.npc.engine.NpcMood;
+import ru.lifegame.backend.domain.npc.engine.ConditionEvaluator;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NpcUtilityBrain {
 
-    public record ScoredResult(String actionId, double score, String animation, String location) {}
+    private final ConditionEvaluator conditionEvaluator;
 
-    public Optional<ScoredResult> evaluate(NpcInstance npc, Map<String, Object> context) {
-        NpcSpec spec = npc.spec();
-        NpcMood mood = npc.mood();
-        List<ScoredResult> candidates = new ArrayList<>();
+    public NpcUtilityBrain(ConditionEvaluator conditionEvaluator) {
+        this.conditionEvaluator = conditionEvaluator;
+    }
 
-        for (NpcSpec.ActionSpec action : spec.actions()) {
-            double score = action.baseScore();
-            // Mood-based scoring adjustments
-            score += mood.loneliness() * 0.01 * (action.id().contains("invite") || action.id().contains("call") ? 1.5 : 0.2);
-            score += mood.irritability() * 0.01 * (action.id().contains("criticism") ? 1.2 : -0.3);
-            score += mood.happiness() * 0.01 * (action.id().contains("movie") || action.id().contains("play") ? 1.0 : 0.1);
-            score -= mood.energy() < 30 ? 0.3 : 0;
-
-            if (allConditionsMet(action.conditions(), npc, context)) {
-                candidates.add(new ScoredResult(action.id(), score, action.animation(), action.location()));
-            }
+    public Optional<EvaluatedAction> evaluateBest(NpcInstance npc, Map<String, Object> context) {
+        if (npc.spec().actions() == null || npc.spec().actions().isEmpty()) {
+            return Optional.empty();
         }
 
-        return candidates.stream().max(Comparator.comparingDouble(ScoredResult::score));
+        Map<String, Object> enrichedContext = new HashMap<>(context);
+        enrichedContext.put("npc_happiness", npc.mood().happiness());
+        enrichedContext.put("npc_anxiety", npc.mood().anxiety());
+        enrichedContext.put("npc_loneliness", npc.mood().loneliness());
+        enrichedContext.put("npc_irritability", npc.mood().irritability());
+        enrichedContext.put("npc_energy", npc.mood().energy());
+        enrichedContext.put("npc_affection", npc.mood().affection());
+
+        return npc.spec().actions().stream()
+                .map(action -> {
+                    boolean conditionsMet = action.conditions() == null ||
+                            action.conditions().stream()
+                                .allMatch(c -> conditionEvaluator.evaluate(c, npc, enrichedContext));
+                    if (!conditionsMet) return null;
+
+                    double score = action.baseScore();
+                    // Mood-based score modifiers
+                    if (action.id().contains("invite") || action.id().contains("call")) {
+                        score += npc.mood().loneliness() * 0.01;
+                    }
+                    if (action.id().contains("concern") || action.id().contains("worry")) {
+                        score += npc.mood().anxiety() * 0.008;
+                    }
+                    if (npc.mood().irritability() > 60) {
+                        score *= 0.7;
+                    }
+
+                    NpcSpec.ActionSpec actionSpec = action;
+                    return new EvaluatedAction(action.id(), score,
+                            actionSpec.animation() != null ? actionSpec.animation() : "idle",
+                            actionSpec.location() != null ? actionSpec.location() : npc.currentLocation());
+                })
+                .filter(Objects::nonNull)
+                .max(Comparator.comparingDouble(EvaluatedAction::score));
     }
 
-    private boolean allConditionsMet(List<NpcSpec.ConditionSpec> conditions, NpcInstance npc, Map<String, Object> context) {
-        if (conditions == null || conditions.isEmpty()) return true;
-        return conditions.stream().allMatch(c -> evaluateCondition(c, npc, context));
-    }
-
-    private boolean evaluateCondition(NpcSpec.ConditionSpec c, NpcInstance npc, Map<String, Object> context) {
-        double actual = switch (c.type()) {
-            case "mood" -> switch (c.target()) {
-                case "happiness" -> npc.mood().happiness();
-                case "anxiety" -> npc.mood().anxiety();
-                case "loneliness" -> npc.mood().loneliness();
-                case "irritability" -> npc.mood().irritability();
-                case "energy" -> npc.mood().energy();
-                case "affection" -> npc.mood().affection();
-                default -> 0;
-            };
-            case "context" -> {
-                Object val = context.get(c.target());
-                yield val instanceof Number n ? n.doubleValue() : 0;
-            }
-            default -> 0;
-        };
-
-        double expected = Double.parseDouble(c.value());
-        return switch (c.operator()) {
-            case "gte" -> actual >= expected;
-            case "lte" -> actual <= expected;
-            case "gt" -> actual > expected;
-            case "lt" -> actual < expected;
-            case "eq" -> actual == expected;
-            default -> false;
-        };
-    }
+    public record EvaluatedAction(String actionId, double score, String animation, String location) {}
 }

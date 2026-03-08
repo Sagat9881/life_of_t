@@ -8,37 +8,28 @@ import java.util.*;
 
 public class CrossNpcTriggerEngine {
 
-    public record CrossNpcTrigger(String id, String npcA, String npcB,
-                                   String axis, String operator, double threshold,
-                                   String eventId) {}
+    private final NpcRegistry registry;
 
-    private final List<CrossNpcTrigger> triggers;
-
-    public CrossNpcTriggerEngine(List<CrossNpcTrigger> triggers) {
-        this.triggers = triggers != null ? triggers : List.of();
+    public CrossNpcTriggerEngine(NpcRegistry registry) {
+        this.registry = registry;
     }
 
-    public List<String> check(NpcRegistry registry) {
-        List<String> firedEvents = new ArrayList<>();
+    public List<TriggeredCrossEvent> evaluate(Map<String, Object> context) {
+        List<TriggeredCrossEvent> events = new ArrayList<>();
         NpcRelationshipGraph graph = registry.relationshipGraph();
-        for (CrossNpcTrigger trigger : triggers) {
-            Optional<NpcRelationshipEdge> edge = graph.getEdge(trigger.npcA(), trigger.npcB());
-            edge.ifPresent(e -> {
-                double val = switch (trigger.axis()) {
-                    case "tension" -> e.tension();
-                    case "respect" -> e.respect();
-                    case "familiarity" -> e.familiarity();
-                    default -> 0;
-                };
-                boolean met = switch (trigger.operator()) {
-                    case "gte" -> val >= trigger.threshold();
-                    case "lte" -> val <= trigger.threshold();
-                    case "gt" -> val > trigger.threshold();
-                    default -> false;
-                };
-                if (met) firedEvents.add(trigger.eventId());
-            });
+
+        for (NpcRelationshipEdge edge : graph.allEdges()) {
+            if (edge.tension() > 70) {
+                events.add(new TriggeredCrossEvent(
+                    edge.npcIdA() + "_" + edge.npcIdB() + "_tension",
+                    "NPC tension conflict",
+                    edge.npcIdA(), edge.npcIdB(), edge.tension()
+                ));
+            }
         }
-        return firedEvents;
+        return events;
     }
+
+    public record TriggeredCrossEvent(String eventId, String description,
+                                      String npcA, String npcB, double severity) {}
 }

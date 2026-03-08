@@ -13,48 +13,41 @@ public class NarrativeEventEngine {
     private final Set<String> firedOneTimeEvents = new HashSet<>();
 
     public NarrativeEventEngine(List<EventSpec> eventSpecs) {
-        this.eventSpecs = eventSpecs != null ? eventSpecs : List.of();
+        this.eventSpecs = eventSpecs;
     }
 
-    public record FiredEvent(String eventId, String type, String title, String description,
-                             List<EventOption> options) {}
-
-    public record EventOption(String optionId, String text, String resultText,
-                              EventSpec spec, EffectSpec effect) {}
-
-    public List<FiredEvent> checkEvents(Map<String, Object> context) {
-        List<FiredEvent> result = new ArrayList<>();
-        for (EventSpec spec : eventSpecs) {
-            if (firedOneTimeEvents.contains(spec.id())) continue;
-            if (allConditionsMet(spec.conditions(), context)) {
-                result.add(toFiredEvent(spec));
-                if ("one_time".equals(spec.type())) {
-                    firedOneTimeEvents.add(spec.id());
-                }
-            }
-        }
-        return result;
-    }
-
-    private FiredEvent toFiredEvent(EventSpec spec) {
-        List<EventOption> options = spec.options().stream()
-                .map(o -> new EventOption(o.id(), o.text(), o.resultText(), spec, o.effect()))
+    public List<FiredEvent> evaluate(Map<String, Object> context) {
+        return eventSpecs.stream()
+                .filter(spec -> !spec.oneTime() || !firedOneTimeEvents.contains(spec.id()))
+                .filter(spec -> allConditionsMet(spec.conditions(), context))
+                .map(spec -> {
+                    if (spec.oneTime()) firedOneTimeEvents.add(spec.id());
+                    return new FiredEvent(spec, resolveEffects(spec, context));
+                })
                 .collect(Collectors.toList());
-        return new FiredEvent(spec.id(), spec.type(), spec.title(), spec.description(), options);
     }
 
-    private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> ctx) {
+    public record FiredEvent(EventSpec spec, List<EffectSpec> effects) {}
+
+    private List<EffectSpec> resolveEffects(EventSpec spec, Map<String, Object> context) {
+        if (spec.effects() == null) return List.of();
+        return spec.effects().stream()
+                .filter(e -> e.conditions() == null || allConditionsMet(e.conditions(), context))
+                .collect(Collectors.toList());
+    }
+
+    private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> context) {
         if (conditions == null || conditions.isEmpty()) return true;
-        return conditions.stream().allMatch(c -> evaluateCondition(c, ctx));
+        return conditions.stream().allMatch(c -> evaluateCondition(c, context));
     }
 
-    private boolean evaluateCondition(ConditionSpec cond, Map<String, Object> ctx) {
-        Object val = ctx.get(cond.target());
-        if (val == null) return false;
-        if (val instanceof Number num) {
+    private boolean evaluateCondition(ConditionSpec condition, Map<String, Object> context) {
+        Object value = context.get(condition.target());
+        if (value == null) return false;
+        if (value instanceof Number num) {
             double v = num.doubleValue();
-            double threshold = Double.parseDouble(cond.value());
-            return switch (cond.operator()) {
+            double threshold = Double.parseDouble(condition.value());
+            return switch (condition.operator()) {
                 case "gte" -> v >= threshold;
                 case "lte" -> v <= threshold;
                 case "gt" -> v > threshold;
@@ -63,6 +56,6 @@ public class NarrativeEventEngine {
                 default -> false;
             };
         }
-        return String.valueOf(val).equals(cond.value());
+        return value.toString().equals(condition.value());
     }
 }

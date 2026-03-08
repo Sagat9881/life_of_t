@@ -8,26 +8,29 @@ import java.util.*;
 
 public class NpcLifecycleEngine {
 
+    private final NpcRegistry registry;
     private final NpcUtilityBrain brain;
 
-    public NpcLifecycleEngine(NpcUtilityBrain brain) {
+    public NpcLifecycleEngine(NpcRegistry registry, NpcUtilityBrain brain) {
+        this.registry = registry;
         this.brain = brain;
     }
 
-    public void hourlyTick(NpcRegistry registry, int currentHour) {
-        for (NpcInstance npc : registry.all()) {
-            Optional<EvaluatedAction> best = brain.evaluate(npc, currentHour);
-            best.ifPresent(action -> {
-                npc.setCurrentActivity(action.actionId());
-                npc.setCurrentAnimation(action.animation());
-                npc.setCurrentLocation(action.location());
-            });
+    public void hourlyTick(int currentHour, Map<String, Object> context) {
+        for (NpcInstance npc : registry.allInstances()) {
+            npc.updateScheduledActivity(currentHour);
+            if ("named".equals(npc.spec().type())) {
+                Optional<EvaluatedAction> action = brain.evaluateBest(npc, context);
+                action.ifPresent(a -> npc.setCurrentActivity(a.actionId(), a.animation(), a.location()));
+            }
         }
     }
 
-    public void dailyTick(NpcRegistry registry) {
-        for (NpcInstance npc : registry.all()) {
+    public void dailyTick(Map<String, Object> context) {
+        for (NpcInstance npc : registry.allInstances()) {
             npc.mood().dailyDecay();
         }
     }
+
+    public NpcRegistry registry() { return registry; }
 }

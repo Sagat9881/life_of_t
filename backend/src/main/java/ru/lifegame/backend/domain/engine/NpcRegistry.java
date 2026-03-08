@@ -24,17 +24,17 @@ public class NpcRegistry {
         return instances.get(npcId);
     }
 
-    public Collection<NpcInstance> all() {
+    public Collection<NpcInstance> allInstances() {
         return Collections.unmodifiableCollection(instances.values());
     }
 
-    public List<NpcInstance> named() {
+    public List<NpcInstance> namedInstances() {
         return instances.values().stream()
                 .filter(i -> "named".equals(i.spec().type()))
                 .collect(Collectors.toList());
     }
 
-    public List<NpcInstance> filler() {
+    public List<NpcInstance> fillerInstances() {
         return instances.values().stream()
                 .filter(i -> "filler".equals(i.spec().type()))
                 .collect(Collectors.toList());
