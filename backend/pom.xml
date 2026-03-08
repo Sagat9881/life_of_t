@@ -53,6 +53,22 @@
     </dependencies>
 
     <build>
+        <resources>
+            <!-- Default resources -->
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <!-- Narrative XML specs (npc-behavior, events, quests) -->
+            <resource>
+                <directory>${project.basedir}/../narrative</directory>
+                <targetPath>narrative</targetPath>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
             <!-- Maven Compiler Plugin -->
             <plugin>
