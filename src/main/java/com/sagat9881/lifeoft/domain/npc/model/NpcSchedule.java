@@ -1,12 +1,13 @@
 package com.sagat9881.lifeoft.domain.npc.model;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 /**
- * Data-driven NPC schedule built from XML ScheduleSlot list.
- * No hardcoded schedules — all content from spec.
- * 
- * Supports querying current activity by hour.
+ * NPC daily schedule constructed from XML-defined slots.
+ * No hardcoded schedules — all data comes from NpcSpec.
+ * Each slot defines: start hour, end hour, activity, location, animation.
  */
 public class NpcSchedule {
 
@@ -16,56 +17,56 @@ public class NpcSchedule {
         this.slots = List.copyOf(slots);
     }
 
-    /**
-     * Create schedule from XML-loaded slot list.
-     */
     public static NpcSchedule fromSlots(List<ScheduleSlot> slots) {
-        if (slots == null || slots.isEmpty()) {
-            return new NpcSchedule(List.of());
-        }
-        return new NpcSchedule(slots);
+        return new NpcSchedule(slots != null ? slots : List.of());
     }
 
     /**
-     * Get the activity for a given hour.
-     * Returns first matching slot, or empty if no slot covers this hour.
+     * Get the schedule slot active at the given hour.
      */
-    public Optional<NpcActivity> getActivityAt(int hour) {
+    public Optional<ScheduleSlot> getSlotForHour(int hour) {
         return slots.stream()
-                .filter(slot -> slot.containsHour(hour))
-                .findFirst()
-                .map(slot -> new NpcActivity(
-                        slot.activityId(),
-                        slot.animationKey(),
-                        slot.locationId(),
-                        slot.endHour() - hour
-                ));
+                .filter(s -> hour >= s.startHour() && hour < s.endHour())
+                .findFirst();
     }
 
     /**
-     * Check if NPC is available (not away/sleeping) at given hour.
+     * Is the NPC available for interaction at this hour?
+     * NPCs at 'away' or 'sleep' locations are not available.
      */
-    public boolean isAvailableAt(int hour) {
-        return slots.stream()
-                .filter(slot -> slot.containsHour(hour))
-                .findFirst()
-                .map(slot -> !"away".equals(slot.locationId())
-                        && !"sleep".equals(slot.activityId())
-                        && !"sleeping".equals(slot.activityId()))
+    public boolean isAvailable(int hour) {
+        return getSlotForHour(hour)
+                .map(s -> !"away".equals(s.location()) && !"sleeping".equals(s.animation()))
                 .orElse(true);
     }
 
     /**
-     * Get location at a given hour.
+     * Is the NPC at home at this hour?
      */
-    public Optional<String> getLocationAt(int hour) {
-        return slots.stream()
-                .filter(slot -> slot.containsHour(hour))
-                .findFirst()
-                .map(ScheduleSlot::locationId);
+    public boolean isAtHome(int hour) {
+        return getSlotForHour(hour)
+                .map(s -> !"away".equals(s.location()))
+                .orElse(true);
     }
 
     public List<ScheduleSlot> allSlots() {
-        return slots;
+        return Collections.unmodifiableList(slots);
+    }
+
+    /**
+     * A single time slot in an NPC's daily schedule.
+     * All fields come from XML specification.
+     */
+    public record ScheduleSlot(
+            int startHour,
+            int endHour,
+            String activity,
+            String location,
+            String animation
+    ) {
+        public ScheduleSlot {
+            if (startHour < 0 || startHour > 24) throw new IllegalArgumentException("Invalid start hour: " + startHour);
+            if (endHour < 0 || endHour > 24) throw new IllegalArgumentException("Invalid end hour: " + endHour);
+        }
     }
 }
