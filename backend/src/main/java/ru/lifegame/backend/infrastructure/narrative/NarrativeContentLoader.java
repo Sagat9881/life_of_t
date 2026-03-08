@@ -18,55 +18,76 @@ import java.io.InputStream;
 import java.util.*;
 
 /**
- * Loads all narrative content from XML specification files.
+ * Loads all narrative content from XML specifications.
  * Scans narrative/npc-behavior/*.xml at startup.
- * The backend knows ZERO concrete NPC names — everything comes from XML.
+ * The engine knows ZERO concrete NPC names — everything comes from XML.
  */
 @Component
 public class NarrativeContentLoader {
 
-    public List<NpcSpec> loadNpcSpecs(String resourcePath) {
-        List<NpcSpec> specs = new ArrayList<>();
-        try {
-            InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath);
-            if (is == null) return specs;
+    private final List<NpcSpec> npcSpecs = new ArrayList<>();
+    private final List<NpcRelationshipEdge> relationshipEdges = new ArrayList<>();
 
-            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc = builder.parse(is);
-            doc.getDocumentElement().normalize();
-
-            NodeList npcNodes = doc.getElementsByTagName("npc");
-            for (int i = 0; i < npcNodes.getLength(); i++) {
-                Element npcEl = (Element) npcNodes.item(i);
-                specs.add(parseNpcElement(npcEl));
+    public List<NpcSpec> loadNpcSpecs(List<String> xmlResourcePaths) {
+        npcSpecs.clear();
+        for (String path : xmlResourcePaths) {
+            try {
+                NpcSpec spec = parseNpcXml(path);
+                if (spec != null) {
+                    npcSpecs.add(spec);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to parse NPC spec: " + path, e);
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load NPC specs from: " + resourcePath, e);
         }
-        return specs;
+        return Collections.unmodifiableList(npcSpecs);
     }
 
-    private NpcSpec parseNpcElement(Element npcEl) {
-        String id = npcEl.getAttribute("id");
-        String type = npcEl.getAttribute("type");
-        String category = npcEl.getAttribute("category");
-        String displayName = getTextContent(npcEl, "display-name", id);
+    public List<NpcRelationshipEdge> loadRelationshipEdges(List<String> xmlResourcePaths) {
+        relationshipEdges.clear();
+        for (String path : xmlResourcePaths) {
+            try {
+                List<NpcRelationshipEdge> edges = parseRelationshipsXml(path);
+                relationshipEdges.addAll(edges);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to parse relationships: " + path, e);
+            }
+        }
+        return Collections.unmodifiableList(relationshipEdges);
+    }
 
-        Map<String, Integer> personality = parsePersonality(npcEl);
-        Map<String, Integer> moodInitial = parseMoodInitial(npcEl);
-        boolean memoryEnabled = parseMemoryEnabled(npcEl);
-        int shortTermSize = parseShortTermSize(npcEl);
-        List<ScheduleSlot> schedule = parseSchedule(npcEl);
-        List<ScoredAction> actions = parseActions(npcEl);
+    public List<NpcSpec> getNpcSpecs() {
+        return Collections.unmodifiableList(npcSpecs);
+    }
+
+    private NpcSpec parseNpcXml(String resourcePath) throws Exception {
+        InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath);
+        if (is == null) return null;
+
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document doc = builder.parse(is);
+        Element root = doc.getDocumentElement();
+
+        String id = root.getAttribute("id");
+        String type = root.getAttribute("type");
+        String category = root.getAttribute("category");
+        String displayName = getTextContent(root, "display-name");
+
+        Map<String, Integer> personality = parsePersonality(root);
+        Map<String, Integer> moodInitial = parseMoodInitial(root);
+        boolean memoryEnabled = parseMemoryEnabled(root);
+        int shortTermSize = parseShortTermSize(root);
+        List<ScheduleSlot> schedule = parseSchedule(root);
+        List<ScoredAction> actions = parseActions(root);
 
         return new NpcSpec(id, type, category, displayName,
                 personality, moodInitial, memoryEnabled, shortTermSize,
                 schedule, actions);
     }
 
-    private Map<String, Integer> parsePersonality(Element npcEl) {
+    private Map<String, Integer> parsePersonality(Element root) {
         Map<String, Integer> traits = new LinkedHashMap<>();
-        NodeList personalityNodes = npcEl.getElementsByTagName("personality");
+        NodeList personalityNodes = root.getElementsByTagName("personality");
         if (personalityNodes.getLength() > 0) {
             Element personalityEl = (Element) personalityNodes.item(0);
             NodeList traitNodes = personalityEl.getElementsByTagName("trait");
@@ -79,9 +100,9 @@ public class NarrativeContentLoader {
         return traits;
     }
 
-    private Map<String, Integer> parseMoodInitial(Element npcEl) {
+    private Map<String, Integer> parseMoodInitial(Element root) {
         Map<String, Integer> mood = new LinkedHashMap<>();
-        NodeList moodNodes = npcEl.getElementsByTagName("mood-initial");
+        NodeList moodNodes = root.getElementsByTagName("mood-initial");
         if (moodNodes.getLength() > 0) {
             Element moodEl = (Element) moodNodes.item(0);
             String[] axes = {"happiness", "anxiety", "loneliness", "irritability", "energy", "affection"};
@@ -95,16 +116,16 @@ public class NarrativeContentLoader {
         return mood;
     }
 
-    private boolean parseMemoryEnabled(Element npcEl) {
-        NodeList memNodes = npcEl.getElementsByTagName("memory");
+    private boolean parseMemoryEnabled(Element root) {
+        NodeList memNodes = root.getElementsByTagName("memory");
         if (memNodes.getLength() > 0) {
             return Boolean.parseBoolean(((Element) memNodes.item(0)).getAttribute("enabled"));
         }
         return false;
     }
 
-    private int parseShortTermSize(Element npcEl) {
-        NodeList memNodes = npcEl.getElementsByTagName("memory");
+    private int parseShortTermSize(Element root) {
+        NodeList memNodes = root.getElementsByTagName("memory");
         if (memNodes.getLength() > 0) {
             String size = ((Element) memNodes.item(0)).getAttribute("short-term-size");
             return size.isEmpty() ? 5 : Integer.parseInt(size);
@@ -112,9 +133,9 @@ public class NarrativeContentLoader {
         return 5;
     }
 
-    private List<ScheduleSlot> parseSchedule(Element npcEl) {
+    private List<ScheduleSlot> parseSchedule(Element root) {
         List<ScheduleSlot> slots = new ArrayList<>();
-        NodeList scheduleNodes = npcEl.getElementsByTagName("schedule");
+        NodeList scheduleNodes = root.getElementsByTagName("schedule");
         if (scheduleNodes.getLength() > 0) {
             Element scheduleEl = (Element) scheduleNodes.item(0);
             NodeList slotNodes = scheduleEl.getElementsByTagName("slot");
@@ -132,17 +153,16 @@ public class NarrativeContentLoader {
         return slots;
     }
 
-    private List<ScoredAction> parseActions(Element npcEl) {
+    private List<ScoredAction> parseActions(Element root) {
         List<ScoredAction> actions = new ArrayList<>();
-        NodeList actionsNodes = npcEl.getElementsByTagName("actions");
+        NodeList actionsNodes = root.getElementsByTagName("actions");
         if (actionsNodes.getLength() > 0) {
             Element actionsEl = (Element) actionsNodes.item(0);
             NodeList actionNodes = actionsEl.getElementsByTagName("action");
             for (int i = 0; i < actionNodes.getLength(); i++) {
                 Element actionEl = (Element) actionNodes.item(i);
                 String actionId = actionEl.getAttribute("id");
-                double baseScore = Double.parseDouble(
-                        actionEl.getAttribute("base-score").isEmpty() ? "0.5" : actionEl.getAttribute("base-score"));
+                double baseScore = Double.parseDouble(actionEl.getAttribute("base-score"));
                 String eventType = actionEl.getAttribute("event-type");
 
                 List<ConditionSpec> conditions = parseConditions(actionEl);
@@ -156,12 +176,12 @@ public class NarrativeContentLoader {
 
     private List<ConditionSpec> parseConditions(Element parent) {
         List<ConditionSpec> conditions = new ArrayList<>();
-        NodeList conditionsNodes = parent.getElementsByTagName("conditions");
-        if (conditionsNodes.getLength() > 0) {
-            Element conditionsEl = (Element) conditionsNodes.item(0);
-            NodeList condNodes = conditionsEl.getElementsByTagName("condition");
-            for (int i = 0; i < condNodes.getLength(); i++) {
-                Element cond = (Element) condNodes.item(i);
+        NodeList condNodes = parent.getElementsByTagName("conditions");
+        if (condNodes.getLength() > 0) {
+            Element condsEl = (Element) condNodes.item(0);
+            NodeList condList = condsEl.getElementsByTagName("condition");
+            for (int i = 0; i < condList.getLength(); i++) {
+                Element cond = (Element) condList.item(i);
                 conditions.add(new ConditionSpec(
                         cond.getAttribute("type"),
                         cond.getAttribute("axis").isEmpty() ? cond.getAttribute("check") : cond.getAttribute("axis"),
@@ -173,18 +193,18 @@ public class NarrativeContentLoader {
         return conditions;
     }
 
-    private List<Map<String, String>> parseOptions(Element actionEl) {
+    private List<Map<String, String>> parseOptions(Element parent) {
         List<Map<String, String>> options = new ArrayList<>();
-        NodeList optionsNodes = actionEl.getElementsByTagName("options");
-        if (optionsNodes.getLength() > 0) {
-            Element optionsEl = (Element) optionsNodes.item(0);
-            NodeList optionNodes = optionsEl.getElementsByTagName("option");
-            for (int i = 0; i < optionNodes.getLength(); i++) {
-                Element opt = (Element) optionNodes.item(i);
+        NodeList optNodes = parent.getElementsByTagName("options");
+        if (optNodes.getLength() > 0) {
+            Element optsEl = (Element) optNodes.item(0);
+            NodeList optList = optsEl.getElementsByTagName("option");
+            for (int i = 0; i < optList.getLength(); i++) {
+                Element opt = (Element) optList.item(i);
                 Map<String, String> optMap = new LinkedHashMap<>();
-                var attrs = opt.getAttributes();
-                for (int j = 0; j < attrs.getLength(); j++) {
-                    optMap.put(attrs.item(j).getNodeName(), attrs.item(j).getNodeValue());
+                for (int a = 0; a < opt.getAttributes().getLength(); a++) {
+                    optMap.put(opt.getAttributes().item(a).getNodeName(),
+                            opt.getAttributes().item(a).getNodeValue());
                 }
                 options.add(optMap);
             }
@@ -192,38 +212,32 @@ public class NarrativeContentLoader {
         return options;
     }
 
-    public List<NpcRelationshipEdge> loadRelationshipEdges(String resourcePath) {
+    private List<NpcRelationshipEdge> parseRelationshipsXml(String resourcePath) throws Exception {
         List<NpcRelationshipEdge> edges = new ArrayList<>();
-        try {
-            InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath);
-            if (is == null) return edges;
+        InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath);
+        if (is == null) return edges;
 
-            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc = builder.parse(is);
-            doc.getDocumentElement().normalize();
-
-            NodeList edgeNodes = doc.getElementsByTagName("relationship");
-            for (int i = 0; i < edgeNodes.getLength(); i++) {
-                Element edgeEl = (Element) edgeNodes.item(i);
-                edges.add(new NpcRelationshipEdge(
-                        edgeEl.getAttribute("from"),
-                        edgeEl.getAttribute("to"),
-                        Integer.parseInt(edgeEl.getAttribute("respect")),
-                        Integer.parseInt(edgeEl.getAttribute("tension")),
-                        Integer.parseInt(edgeEl.getAttribute("familiarity"))
-                ));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load relationship edges from: " + resourcePath, e);
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document doc = builder.parse(is);
+        NodeList edgeNodes = doc.getElementsByTagName("edge");
+        for (int i = 0; i < edgeNodes.getLength(); i++) {
+            Element edge = (Element) edgeNodes.item(i);
+            edges.add(new NpcRelationshipEdge(
+                    edge.getAttribute("from"),
+                    edge.getAttribute("to"),
+                    Integer.parseInt(edge.getAttribute("respect")),
+                    Integer.parseInt(edge.getAttribute("tension")),
+                    Integer.parseInt(edge.getAttribute("familiarity"))
+            ));
         }
         return edges;
     }
 
-    private String getTextContent(Element parent, String tagName, String defaultValue) {
+    private String getTextContent(Element parent, String tagName) {
         NodeList nodes = parent.getElementsByTagName(tagName);
         if (nodes.getLength() > 0) {
             return nodes.item(0).getTextContent().trim();
         }
-        return defaultValue;
+        return "";
     }
 }

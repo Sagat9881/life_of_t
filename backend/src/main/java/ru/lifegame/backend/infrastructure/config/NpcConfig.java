@@ -11,8 +11,8 @@ import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
 import ru.lifegame.backend.infrastructure.narrative.NarrativeContentLoader;
 
 /**
- * Spring configuration for the data-driven NPC engine.
- * Wires all NPC components together — no hardcoded NPC names anywhere.
+ * Spring configuration for NPC engine beans.
+ * All content comes from XML specs — no hardcoded NPC names or behaviors.
  */
 @Configuration
 public class NpcConfig {
@@ -51,8 +51,7 @@ public class NpcConfig {
     public NpcLifecycleEngine npcLifecycleEngine(
             NpcRegistry registry,
             NpcUtilityBrain brain,
-            NpcRelationshipGraph graph,
-            CrossNpcTriggerEngine crossNpcTriggerEngine) {
-        return new NpcLifecycleEngine(registry, brain, graph, crossNpcTriggerEngine);
+            NpcRelationshipGraph relationshipGraph) {
+        return new NpcLifecycleEngine(registry, brain, relationshipGraph);
     }
 }
