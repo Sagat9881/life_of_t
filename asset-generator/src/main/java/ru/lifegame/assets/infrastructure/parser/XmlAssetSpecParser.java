@@ -17,13 +17,41 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Parses unified visual-specs.xml files into AssetSpec domain objects.
+ * Supports inheritance via extends="abstract/entities/human@1.0" attribute.
+ * When extends is present, delegates to VisualSpecResolver for merging.
+ */
 public class XmlAssetSpecParser {
 
     private static final Logger log = LoggerFactory.getLogger(XmlAssetSpecParser.class);
 
+    private Path specsRoot;
+    private VisualSpecResolver resolver;
+
+    /** Default constructor for backward compatibility. No inheritance support. */
+    public XmlAssetSpecParser() {
+        this.specsRoot = null;
+        this.resolver = null;
+    }
+
+    /**
+     * Constructor with specs root for inheritance resolution.
+     * @param specsRoot path to asset-specs/ directory
+     */
+    public XmlAssetSpecParser(Path specsRoot) {
+        this.specsRoot = specsRoot;
+        this.resolver = new VisualSpecResolver(specsRoot, this);
+    }
+
     public AssetSpec parse(Path xmlFile) {
         try (InputStream is = Files.newInputStream(xmlFile)) {
-            return parseFromStream(is);
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(is);
+            doc.getDocumentElement().normalize();
+            return parseRoot(doc.getDocumentElement(), xmlFile);
         } catch (XmlParseException e) {
             throw e;
         } catch (Exception e) {
@@ -38,7 +66,7 @@ public class XmlAssetSpecParser {
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(inputStream);
             doc.getDocumentElement().normalize();
-            return parseRoot(doc.getDocumentElement());
+            return parseRoot(doc.getDocumentElement(), null);
         } catch (XmlParseException e) {
             throw e;
         } catch (Exception e) {
@@ -46,7 +74,73 @@ public class XmlAssetSpecParser {
         }
     }
 
-    private AssetSpec parseRoot(Element root) {
+    private AssetSpec parseRoot(Element root, Path sourceFile) {
+        String extendsAttr = root.getAttribute("extends");
+        boolean isAbstract = "true".equals(root.getAttribute("abstract"));
+
+        if (!extendsAttr.isBlank() && resolver != null) {
+            return parseWithInheritance(root, extendsAttr, sourceFile);
+        }
+
+        return parseFlatSpec(root);
+    }
+
+    /**
+     * Parses a spec that uses extends= inheritance.
+     * Loads the abstract parent, then applies overrides from the child.
+     */
+    private AssetSpec parseWithInheritance(Element root, String extendsRef, Path sourceFile) {
+        Element meta = getFirstChild(root, "meta");
+        String entityType = getTextContent(meta, "entity-type");
+        String entityName = getTextContent(meta, "entity-name");
+        String version = getTextContentOrDefault(meta, "version", "1.0.0");
+
+        // Parse child-specific color palette (variable overrides)
+        Map<String, String> colorOverrides = parseColorVariableOverrides(root);
+
+        // Parse color-remap entries
+        List<ColorRemap> colorRemaps = parseColorRemaps(root);
+
+        // Parse layer-overrides
+        List<LayerOverride> layerOverrides = parseLayerOverrides(root);
+
+        // Parse animations-extra (child-unique animations)
+        List<AnimationSpec> extraAnimations = parseAnimationsExtra(root);
+
+        // Parse optional full layers block (for hybrid specs)
+        List<AssetLayer> ownLayers = parseLayersOptional(root);
+
+        // Parse time-of-day, naming, constraints from child
+        List<TimeOfDayVariation> variations = parseTimeOfDayVariations(root);
+        NamingSpec naming = parseNaming(root, entityType, entityName);
+        AssetConstraints constraints = parseConstraints(root);
+
+        // Resolve inheritance
+        AssetSpec parentSpec = resolver.loadParent(extendsRef);
+
+        // Merge layers: start with parent, apply overrides
+        List<AssetLayer> mergedLayers = resolver.mergeLayers(
+                parentSpec.layers(), layerOverrides, ownLayers, colorOverrides, colorRemaps);
+
+        // Merge animations: parent + extra
+        List<AnimationSpec> mergedAnimations = resolver.mergeAnimations(
+                parentSpec.animations(), extraAnimations);
+
+        // Merge palette
+        ColorPalette mergedPalette = resolver.mergePalette(
+                parentSpec.colorPalette(), parseColorPalette(root));
+
+        log.info("Resolved inheritance for {}/{}: parent={}, layers={}, animations={}",
+                entityType, entityName, extendsRef,
+                mergedLayers.size(), mergedAnimations.size());
+
+        return new AssetSpec(entityType, entityName, version,
+                mergedLayers, mergedPalette, mergedAnimations,
+                variations, naming, constraints);
+    }
+
+    /** Parses a flat spec without inheritance (original behavior). */
+    AssetSpec parseFlatSpec(Element root) {
         Element meta = getFirstChild(root, "meta");
         String entityType = getTextContent(meta, "entity-type");
         String entityName = getTextContent(meta, "entity-name");
@@ -63,12 +157,93 @@ public class XmlAssetSpecParser {
                 layers, palette, animations, variations, naming, constraints);
     }
 
+    // ---- Inheritance-specific parsing ----
+
+    private Map<String, String> parseColorVariableOverrides(Element root) {
+        Map<String, String> overrides = new HashMap<>();
+        Element paletteEl = getFirstChildOrNull(root, "color-palette");
+        if (paletteEl == null) return overrides;
+        NodeList varNodes = paletteEl.getElementsByTagName("var");
+        for (int i = 0; i < varNodes.getLength(); i++) {
+            Element el = (Element) varNodes.item(i);
+            String name = el.getAttribute("name");
+            String value = el.getAttribute("value");
+            if (!name.isBlank() && !value.isBlank()) {
+                overrides.put(name, value);
+            }
+        }
+        return overrides;
+    }
+
+    private List<ColorRemap> parseColorRemaps(Element root) {
+        List<ColorRemap> remaps = new ArrayList<>();
+        Element overridesEl = getFirstChildOrNull(root, "layer-overrides");
+        if (overridesEl == null) return remaps;
+        NodeList remapNodes = overridesEl.getElementsByTagName("color-remap");
+        for (int i = 0; i < remapNodes.getLength(); i++) {
+            Element el = (Element) remapNodes.item(i);
+            String from = el.getAttribute("from");
+            String to = el.getAttribute("to");
+            if (!from.isBlank() && !to.isBlank()) {
+                remaps.add(new ColorRemap(from, to));
+            }
+        }
+        return remaps;
+    }
+
+    private List<LayerOverride> parseLayerOverrides(Element root) {
+        List<LayerOverride> overrides = new ArrayList<>();
+        Element overridesEl = getFirstChildOrNull(root, "layer-overrides");
+        if (overridesEl == null) return overrides;
+        NodeList layerNodes = overridesEl.getElementsByTagName("layer");
+        for (int i = 0; i < layerNodes.getLength(); i++) {
+            Element el = (Element) layerNodes.item(i);
+            String id = el.getAttribute("id");
+            boolean replace = "true".equals(el.getAttribute("replace"));
+            if (id.isBlank()) continue;
+
+            PixelData pixelData = parsePixelData(el);
+            String type = el.getAttribute("type");
+            int zOrder = intAttr(el, "z-order", -1);
+            int width = intAttr(el, "width", 0);
+            int height = intAttr(el, "height", 0);
+            List<LayerCondition> conditions = parseLayerConditions(el);
+
+            overrides.add(new LayerOverride(id, replace, type, zOrder, width, height, pixelData, conditions));
+        }
+        return overrides;
+    }
+
+    private List<AnimationSpec> parseAnimationsExtra(Element root) {
+        List<AnimationSpec> animations = new ArrayList<>();
+        Element animsEl = getFirstChildOrNull(root, "animations-extra");
+        if (animsEl == null) return animations;
+        NodeList animNodes = animsEl.getElementsByTagName("animation");
+        for (int i = 0; i < animNodes.getLength(); i++) {
+            Element el = (Element) animNodes.item(i);
+            animations.add(parseOneAnimation(el));
+        }
+        return animations;
+    }
+
+    private List<AssetLayer> parseLayersOptional(Element root) {
+        Element layersEl = getFirstChildOrNull(root, "layers");
+        if (layersEl == null) return List.of();
+        return parseLayerElements(layersEl);
+    }
+
+    // ---- Standard parsing (unchanged logic) ----
+
     private List<AssetLayer> parseLayers(Element root) {
-        List<AssetLayer> layers = new ArrayList<>();
         Element layersEl = getFirstChildOrNull(root, "layers");
         if (layersEl == null) {
             throw new XmlParseException("Missing required <layers> element");
         }
+        return parseLayerElements(layersEl);
+    }
+
+    private List<AssetLayer> parseLayerElements(Element layersEl) {
+        List<AssetLayer> layers = new ArrayList<>();
         NodeList layerNodes = layersEl.getElementsByTagName("layer");
         for (int i = 0; i < layerNodes.getLength(); i++) {
             Element el = (Element) layerNodes.item(i);
@@ -78,27 +253,15 @@ public class XmlAssetSpecParser {
             int zOrder = intAttr(el, "z-order", i);
             int width = intAttr(el, "width", 0);
             int height = intAttr(el, "height", 0);
-            String description = "";
 
             PixelData pixelData = parsePixelData(el);
             List<LayerCondition> conditions = parseLayerConditions(el);
 
-            layers.add(new AssetLayer(id, type, description, zOrder, width, height, pixelData, conditions));
+            layers.add(new AssetLayer(id, type, "", zOrder, width, height, pixelData, conditions));
         }
         return layers;
     }
 
-    /**
-     * Parses {@code <conditions>} block within a layer.
-     * Each {@code <condition>} has an id and an {@code <override>} with tint and opacity.
-     * <pre>
-     * &lt;conditions&gt;
-     *   &lt;condition id="time_morning"&gt;
-     *     &lt;override layer-ref="ambient_light" tint="#E8F4FF" opacity="0.12"/&gt;
-     *   &lt;/condition&gt;
-     * &lt;/conditions&gt;
-     * </pre>
-     */
     private List<LayerCondition> parseLayerConditions(Element layerEl) {
         List<LayerCondition> conditions = new ArrayList<>();
         Element conditionsEl = getFirstChildOrNull(layerEl, "conditions");
@@ -122,7 +285,7 @@ public class XmlAssetSpecParser {
         return conditions;
     }
 
-    private PixelData parsePixelData(Element layerEl) {
+    PixelData parsePixelData(Element layerEl) {
         Element pdEl = getFirstChildOrNull(layerEl, "pixel-data");
         if (pdEl == null) return PixelData.EMPTY;
 
@@ -164,18 +327,21 @@ public class XmlAssetSpecParser {
         NodeList animNodes = animsEl.getElementsByTagName("animation");
         for (int i = 0; i < animNodes.getLength(); i++) {
             Element el = (Element) animNodes.item(i);
-            String name = el.getAttribute("name");
-            int frames = intAttr(el, "frames", 24);
-            int fps = intAttr(el, "fps", 12);
-            boolean loop = boolAttr(el, "loop", true);
-            int frameWidth = intAttr(el, "frame-width", 128);
-            int frameHeight = intAttr(el, "frame-height", 128);
-
-            List<FrameOffset> frameOffsets = parseFrameOffsets(el);
-            animations.add(new AnimationSpec(name, frames, fps, loop,
-                    frameWidth, frameHeight, frameOffsets));
+            animations.add(parseOneAnimation(el));
         }
         return animations;
+    }
+
+    private AnimationSpec parseOneAnimation(Element el) {
+        String name = el.getAttribute("name");
+        int frames = intAttr(el, "frames", 24);
+        int fps = intAttr(el, "fps", 12);
+        boolean loop = boolAttr(el, "loop", true);
+        int frameWidth = intAttr(el, "frame-width", 128);
+        int frameHeight = intAttr(el, "frame-height", 128);
+
+        List<FrameOffset> frameOffsets = parseFrameOffsets(el);
+        return new AnimationSpec(name, frames, fps, loop, frameWidth, frameHeight, frameOffsets);
     }
 
     private List<FrameOffset> parseFrameOffsets(Element animEl) {
@@ -218,6 +384,9 @@ public class XmlAssetSpecParser {
         if (paletteEl == null) return ColorPalette.projectDefault();
         List<String> primary = parseColorList(paletteEl, "primary");
         List<String> secondary = parseColorList(paletteEl, "secondary");
+        if (primary.isEmpty() && secondary.isEmpty()) {
+            return ColorPalette.projectDefault();
+        }
         return new ColorPalette(primary, secondary);
     }
 
@@ -269,13 +438,13 @@ public class XmlAssetSpecParser {
 
     // ---- XML helpers ----
 
-    private Element getFirstChild(Element parent, String tag) {
+    Element getFirstChild(Element parent, String tag) {
         Element el = getFirstChildOrNull(parent, tag);
         if (el == null) throw new XmlParseException("Missing required element: <" + tag + ">");
         return el;
     }
 
-    private Element getFirstChildOrNull(Element parent, String tag) {
+    Element getFirstChildOrNull(Element parent, String tag) {
         NodeList nodes = parent.getElementsByTagName(tag);
         return nodes.getLength() > 0 ? (Element) nodes.item(0) : null;
     }
@@ -284,14 +453,14 @@ public class XmlAssetSpecParser {
         return getFirstChild(parent, tag).getTextContent().trim();
     }
 
-    private String getTextContentOrDefault(Element parent, String tag, String def) {
+    String getTextContentOrDefault(Element parent, String tag, String def) {
         Element el = getFirstChildOrNull(parent, tag);
         if (el == null) return def;
         String text = el.getTextContent().trim();
         return text.isEmpty() ? def : text;
     }
 
-    private int intAttr(Element el, String attr, int def) {
+    int intAttr(Element el, String attr, int def) {
         String val = el.getAttribute(attr);
         if (val.isBlank()) return def;
         try { return Integer.parseInt(val); } catch (NumberFormatException e) { return def; }
