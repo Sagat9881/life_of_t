@@ -1,863 +1,153 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Life of T — Alexander Visual Spec v2.0.0
-    Canvas: 48×64 pixels
-    12 layers: shoes(z=0) legs(z=1) hips(z=2) torso(z=3) left_arm(z=4) right_arm(z=5)
-               neck(z=6) head(z=7) face(z=8) hair(z=9) accessories(z=10) effects(z=11)
-    12 animations, minimum 12 frames each
-    Character: Alexander (Sasha) — 28yo, 190cm, Senior Java dev, dark-blond hair,
-               growing beard, blue dev shirt, jeans. Smart but lazy. Loves Tanya.
-               Came back. Now building conscious relationship.
+    Life of T — Alexander Visual Spec v3.0.0
+    Extends: abstract/entities/human@1.0
+    Canvas: 128×192 | displayScale: 1.5
+    Character: Alexander — 30yo, IT engineer, short dark-brown hair, hazel eyes,
+               navy polo shirt, dark jeans, sneakers, smart watch.
+               Calm, logical, supportive. Partner of Tanya.
 -->
-<asset-spec>
+<asset-spec extends="abstract/entities/human@1.0" version="3.0.0">
     <meta>
         <entity-type>characters</entity-type>
         <entity-name>alexander</entity-name>
-        <version>2.0.0</version>
+        <version>3.0.0</version>
+        <display-scale>1.5</display-scale>
     </meta>
 
-    <layers>
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <!-- z=0: shoes — dark sneakers/work boots                  -->
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <layer id="shoes" type="base" z-order="0" width="48" height="64">
+    <color-palette>
+        <color name="$skin_base" value="#E8B888"/>
+        <color name="$skin_shadow" value="#D09868"/>
+        <color name="$skin_highlight" value="#F0C8A0"/>
+        <color name="$hair_base" value="#3A2818"/>
+        <color name="$hair_shadow" value="#281810"/>
+        <color name="$hair_highlight" value="#4A3828"/>
+        <color name="$clothing_primary" value="#283848"/><!-- navy polo -->
+        <color name="$clothing_primary_shadow" value="#182838"/>
+        <color name="$clothing_primary_highlight" value="#384858"/>
+        <color name="$clothing_secondary" value="#283848"/><!-- same for polo collar -->
+        <color name="$clothing_secondary_shadow" value="#182838"/>
+        <color name="$clothing_secondary_highlight" value="#405060"/>
+        <color name="$pants_base" value="#303848"/><!-- dark jeans -->
+        <color name="$pants_shadow" value="#202830"/>
+        <color name="$pants_highlight" value="#404858"/>
+        <color name="$shoe_base" value="#404040"/><!-- dark sneakers -->
+        <color name="$shoe_shadow" value="#282828"/>
+        <color name="$shoe_highlight" value="#585858"/>
+        <color name="$eye_color" value="#6B8E23"/><!-- hazel-olive -->
+        <color name="$eye_highlight" value="#8AAE43"/>
+        <color name="$lip_color" value="#C08070"/>
+        <color name="$brow_color" value="#3A2818"/>
+        <color name="$accessory_base" value="#303030"/><!-- smart watch -->
+        <color name="$accessory_highlight" value="#50A0F0"/><!-- watch screen -->
+    </color-palette>
+
+    <layer-overrides>
+        <!-- === FACE === -->
+        <layer id="face" replace="true">
             <pixel-data>
-                <!-- left shoe body — larger, masculine, flat sole -->
-                <rect x="10" y="57" w="12" h="5" color="#303030"/>
-                <!-- left shoe toe cap -->
-                <rect x="9" y="58" w="2" h="3" color="#282828"/>
-                <pixel x="8" y="60" color="#282828"/>
-                <!-- left shoe sole edge highlight -->
-                <hline x="9" y="61" len="14" color="#484848"/>
-                <!-- left shoe top edge -->
-                <hline x="10" y="57" len="12" color="#404040"/>
-                <!-- left shoe lace band (white stripe) -->
-                <hline x="11" y="58" len="9" color="#909090"/>
-                <!-- left shoe tongue -->
-                <rect x="13" y="57" w="4" h="2" color="#383838"/>
-                <!-- left shoe sole underline -->
-                <hline x="9" y="62" len="14" color="#202020"/>
-                <!-- right shoe body -->
-                <rect x="26" y="57" w="12" h="5" color="#303030"/>
-                <!-- right shoe toe cap -->
-                <rect x="37" y="58" w="2" h="3" color="#282828"/>
-                <pixel x="39" y="60" color="#282828"/>
-                <!-- right shoe sole edge highlight -->
-                <hline x="25" y="61" len="14" color="#484848"/>
-                <!-- right shoe top edge -->
-                <hline x="26" y="57" len="12" color="#404040"/>
-                <!-- right shoe lace band -->
-                <hline x="28" y="58" len="9" color="#909090"/>
-                <!-- right shoe tongue -->
-                <rect x="31" y="57" w="4" h="2" color="#383838"/>
-                <!-- right shoe sole underline -->
-                <hline x="25" y="62" len="14" color="#202020"/>
+                <!-- LEFT EYE -->
+                <rect x="42" y="30" w="16" h="10" color="#FFFFFF"/>
+                <rect x="44" y="28" w="12" h="13" color="$eye_color"/>
+                <rect x="46" y="30" w="9" h="9" color="#7A9E33"/>
+                <rect x="47" y="31" w="6" h="6" color="$eye_highlight"/>
+                <rect x="49" y="32" w="3" h="4" color="#101010"/>
+                <rect x="45" y="28" w="3" h="3" color="#FFFFFF"/>
+                <hline x="42" y="27" len="16" color="$skin_shadow"/>
+                <hline x="42" y="39" len="16" color="$skin_shadow"/>
+                <!-- RIGHT EYE -->
+                <rect x="70" y="30" w="16" h="10" color="#FFFFFF"/>
+                <rect x="72" y="28" w="12" h="13" color="$eye_color"/>
+                <rect x="74" y="30" w="9" h="9" color="#7A9E33"/>
+                <rect x="75" y="31" w="6" h="6" color="$eye_highlight"/>
+                <rect x="77" y="32" w="3" h="4" color="#101010"/>
+                <rect x="73" y="28" w="3" h="3" color="#FFFFFF"/>
+                <hline x="70" y="27" len="16" color="$skin_shadow"/>
+                <hline x="70" y="39" len="16" color="$skin_shadow"/>
+                <!-- EYEBROWS — thicker, straight, dark brown -->
+                <rect x="42" y="23" w="16" h="3" color="$brow_color"/>
+                <rect x="70" y="23" w="16" h="3" color="$brow_color"/>
+                <!-- NOSE — slightly wider, masculine -->
+                <rect x="58" y="38" w="6" h="5" color="$skin_shadow"/>
+                <hline x="54" y="44" len="14" color="#D09060"/>
+                <rect x="54" y="45" w="4" h="2" color="#B07050"/>
+                <rect x="64" y="45" w="4" h="2" color="#B07050"/>
+                <!-- LIPS — thinner, neutral -->
+                <hline x="54" y="48" len="16" color="#A87060"/>
+                <rect x="56" y="48" w="12" h="2" color="$lip_color"/>
+                <hline x="54" y="50" len="16" color="#D09080"/>
+                <!-- STUBBLE — subtle 5 o'clock shadow -->
+                <rect x="38" y="44" w="8" h="6" color="#D09060"/><!-- left jaw -->
+                <rect x="82" y="44" w="8" h="6" color="#D09060"/><!-- right jaw -->
+                <rect x="54" y="50" w="16" h="4" color="#D09060"/><!-- chin -->
             </pixel-data>
         </layer>
 
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <!-- z=1: legs — dark blue jeans, straight fit, tall man   -->
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <layer id="legs" type="base" z-order="1" width="48" height="64">
+        <!-- === HAIR — short, dark brown, neat === -->
+        <layer id="hair_front" replace="true">
             <pixel-data>
-                <!-- left jean leg -->
-                <rect x="11" y="38" w="10" h="20" color="#405080"/>
-                <!-- left leg outer seam shadow -->
-                <rect x="11" y="38" w="2" h="20" color="#304070"/>
-                <!-- left leg inner seam shadow -->
-                <rect x="19" y="38" w="2" h="20" color="#304070"/>
-                <!-- left leg front highlight (center crease) -->
-                <rect x="14" y="38" w="3" h="20" color="#506090"/>
-                <!-- left knee fade shadow -->
-                <rect x="12" y="48" w="8" h="4" color="#384878"/>
-                <!-- left leg fade texture -->
-                <hline x="11" y="42" len="10" color="#485888"/>
-                <hline x="11" y="50" len="10" color="#485888"/>
-                <!-- right jean leg -->
-                <rect x="27" y="38" w="10" h="20" color="#405080"/>
-                <!-- right leg outer seam shadow -->
-                <rect x="35" y="38" w="2" h="20" color="#304070"/>
-                <!-- right leg inner seam shadow -->
-                <rect x="27" y="38" w="2" h="20" color="#304070"/>
-                <!-- right leg front highlight -->
-                <rect x="31" y="38" w="3" h="20" color="#506090"/>
-                <!-- right knee shadow -->
-                <rect x="28" y="48" w="8" h="4" color="#384878"/>
-                <!-- right leg fade texture -->
-                <hline x="27" y="42" len="10" color="#485888"/>
-                <hline x="27" y="50" len="10" color="#485888"/>
-                <!-- ankle cuff slight taper -->
-                <rect x="12" y="55" w="8" h="2" color="#384878"/>
-                <rect x="28" y="55" w="8" h="2" color="#384878"/>
+                <rect x="36" y="10" w="56" h="12" color="$hair_base"/>
+                <hline x="40" y="10" len="48" color="$hair_highlight"/>
+                <rect x="36" y="14" w="8" h="8" color="$hair_shadow"/><!-- L temple -->
+                <rect x="84" y="14" w="8" h="8" color="$hair_shadow"/><!-- R temple -->
+                <hline x="42" y="11" len="40" color="#4A3828"/>
+                <!-- Short sides -->
+                <rect x="32" y="18" w="6" h="10" color="$hair_shadow"/>
+                <rect x="90" y="18" w="6" h="10" color="$hair_shadow"/>
             </pixel-data>
         </layer>
 
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <!-- z=2: hips — jeans waistband, wide belt area            -->
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <layer id="hips" type="base" z-order="2" width="48" height="64">
+        <layer id="hair_back" replace="true">
             <pixel-data>
-                <!-- hips wide block — Alexander is broad-shouldered / tall -->
-                <rect x="10" y="32" w="28" h="8" color="#405080"/>
-                <!-- left hip curve -->
-                <rect x="9" y="34" w="2" h="6" color="#405080"/>
-                <!-- right hip curve -->
-                <rect x="37" y="34" w="2" h="6" color="#405080"/>
-                <!-- waistband top panel (slightly darker) -->
-                <hline x="10" y="32" len="28" color="#304070"/>
-                <hline x="10" y="33" len="28" color="#384878"/>
-                <!-- belt loops suggestion -->
-                <pixel x="14" y="33" color="#283860"/>
-                <pixel x="22" y="33" color="#283860"/>
-                <pixel x="33" y="33" color="#283860"/>
-                <!-- front pocket seam left -->
-                <rect x="11" y="34" w="6" h="5" color="#485888"/>
-                <!-- pocket shadow -->
-                <rect x="11" y="35" w="5" h="4" color="#384878"/>
-                <!-- front pocket seam right -->
-                <rect x="31" y="34" w="6" h="5" color="#485888"/>
-                <rect x="32" y="35" w="5" h="4" color="#384878"/>
-                <!-- fly seam center -->
-                <rect x="22" y="33" w="4" h="7" color="#384878"/>
-                <!-- hip highlight center -->
-                <rect x="19" y="34" w="10" h="5" color="#4A5A8A"/>
-                <!-- inner thigh seam -->
-                <rect x="20" y="37" w="2" h="3" color="#304070"/>
-                <rect x="26" y="37" w="2" h="3" color="#304070"/>
+                <!-- Minimal back hair — short cut -->
+                <rect x="34" y="16" w="4" h="8" color="$hair_shadow"/>
+                <rect x="90" y="16" w="4" h="8" color="$hair_shadow"/>
             </pixel-data>
         </layer>
 
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <!-- z=3: torso — blue dev t-shirt / programmer blue shirt  -->
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <layer id="torso" type="base" z-order="3" width="48" height="64">
+        <!-- === ACCESSORY — smart watch === -->
+        <layer id="accessory" replace="true">
             <pixel-data>
-                <!-- main shirt body — deep developer blue -->
-                <rect x="9" y="14" w="30" h="20" color="#4060A0"/>
-                <!-- shirt left shoulder wider -->
-                <rect x="8" y="14" w="3" h="8" color="#4060A0"/>
-                <!-- shirt right shoulder wider -->
-                <rect x="37" y="14" w="3" h="8" color="#4060A0"/>
-                <!-- shirt center chest highlight -->
-                <rect x="16" y="14" w="16" h="20" color="#5070B0"/>
-                <!-- chest highlight brighter stripe -->
-                <rect x="20" y="14" w="8" h="12" color="#6080C0"/>
-                <!-- shirt left shadow panel -->
-                <rect x="9" y="14" w="5" h="20" color="#304890"/>
-                <!-- shirt right shadow panel -->
-                <rect x="34" y="14" w="5" h="20" color="#304890"/>
-                <!-- shirt bottom hem -->
-                <hline x="9" y="33" len="30" color="#3858A0"/>
-                <!-- collar neckline -->
-                <hline x="16" y="14" len="16" color="#385898"/>
-                <rect x="19" y="14" w="10" h="2" color="#304888"/>
-                <!-- shirt fold crease left side -->
-                <rect x="11" y="20" w="2" h="10" color="#3858A0"/>
-                <!-- shirt fold crease right side -->
-                <rect x="35" y="20" w="2" h="10" color="#3858A0"/>
-                <!-- subtle logo/text area on chest (pixel-art code symbol) -->
-                <pixel x="22" y="19" color="#7090D0"/>
-                <pixel x="23" y="18" color="#7090D0"/>
-                <pixel x="24" y="18" color="#7090D0"/>
-                <pixel x="25" y="19" color="#7090D0"/>
-                <pixel x="22" y="21" color="#7090D0"/>
-                <pixel x="25" y="21" color="#7090D0"/>
-                <!-- shirt armhole seam left -->
-                <rect x="8" y="14" w="1" h="8" color="#283870"/>
-                <!-- shirt armhole seam right -->
-                <rect x="39" y="14" w="1" h="8" color="#283870"/>
+                <rect x="16" y="116" w="10" h="6" color="$accessory_base"/>
+                <rect x="18" y="117" w="6" h="4" color="$accessory_highlight"/>
+                <rect x="16" y="114" w="10" h="2" color="#404040"/><!-- strap upper -->
+                <rect x="16" y="122" w="10" h="2" color="#404040"/><!-- strap lower -->
             </pixel-data>
         </layer>
 
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <!-- z=4: left_arm — muscular, t-shirt sleeved then bare    -->
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <layer id="left_arm" type="base" z-order="4" width="48" height="64">
+        <!-- === TORSO — navy polo === -->
+        <layer id="torso" replace="true">
             <pixel-data>
-                <!-- upper arm with shirt sleeve -->
-                <rect x="4" y="14" w="6" h="8" color="#4060A0"/>
-                <!-- sleeve seam edge -->
-                <rect x="4" y="14" w="1" h="8" color="#283870"/>
-                <!-- sleeve highlight -->
-                <rect x="5" y="14" w="2" h="8" color="#5070B0"/>
-                <!-- sleeve hem (bicep line) -->
-                <hline x="4" y="22" len="6" color="#304888"/>
-                <!-- bare forearm — skin tone -->
-                <rect x="5" y="22" w="5" h="14" color="#E8B888"/>
-                <!-- forearm muscle definition highlight -->
-                <rect x="6" y="22" w="2" h="14" color="#F0C898"/>
-                <!-- forearm outer shadow -->
-                <rect x="5" y="22" w="1" h="14" color="#C89868"/>
-                <rect x="9" y="22" w="1" h="14" color="#C89868"/>
-                <!-- forearm vein hint -->
-                <hline x="5" y="28" len="5" color="#D8A878"/>
-                <!-- wrist bone shadow -->
-                <hline x="5" y="35" len="5" color="#C89868"/>
-                <!-- hand -->
-                <rect x="4" y="36" w="7" h="6" color="#E8B888"/>
-                <!-- hand highlight -->
-                <rect x="5" y="36" w="3" h="5" color="#F0C898"/>
-                <!-- knuckle shadow -->
-                <hline x="4" y="41" len="7" color="#C89868"/>
-                <!-- fingers hint -->
-                <hline x="4" y="41" len="7" color="#D8A878"/>
+                <rect x="26" y="64" w="76" h="40" color="$clothing_primary"/>
+                <rect x="48" y="64" w="32" h="40" color="$clothing_primary_highlight"/><!-- center -->
+                <rect x="26" y="64" w="10" h="40" color="$clothing_primary_shadow"/><!-- L shadow -->
+                <rect x="92" y="64" w="10" h="40" color="$clothing_primary_shadow"/><!-- R shadow -->
+                <!-- Polo collar -->
+                <rect x="44" y="60" w="40" h="6" color="$clothing_secondary_highlight"/>
+                <hline x="46" y="60" len="36" color="#506070"/><!-- collar top -->
+                <!-- Polo placket -->
+                <rect x="62" y="64" w="4" h="16" color="$clothing_primary_shadow"/>
+                <rect x="62" y="68" w="2" h="2" color="#606060"/><!-- button 1 -->
+                <rect x="62" y="74" w="2" h="2" color="#606060"/><!-- button 2 -->
+                <!-- Bottom hem -->
+                <hline x="28" y="103" len="72" color="$clothing_primary_shadow"/>
             </pixel-data>
         </layer>
 
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <!-- z=5: right_arm — mirror of left arm                    -->
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <layer id="right_arm" type="base" z-order="5" width="48" height="64">
+        <!-- === PELVIS — dark jeans === -->
+        <layer id="pelvis" replace="true">
             <pixel-data>
-                <!-- upper arm with shirt sleeve -->
-                <rect x="38" y="14" w="6" h="8" color="#4060A0"/>
-                <!-- sleeve seam edge -->
-                <rect x="43" y="14" w="1" h="8" color="#283870"/>
-                <!-- sleeve highlight -->
-                <rect x="39" y="14" w="2" h="8" color="#5070B0"/>
-                <!-- sleeve hem -->
-                <hline x="38" y="22" len="6" color="#304888"/>
-                <!-- bare forearm skin -->
-                <rect x="38" y="22" w="5" h="14" color="#E8B888"/>
-                <!-- forearm highlight -->
-                <rect x="40" y="22" w="2" h="14" color="#F0C898"/>
-                <!-- forearm shadows -->
-                <rect x="38" y="22" w="1" h="14" color="#C89868"/>
-                <rect x="42" y="22" w="1" h="14" color="#C89868"/>
-                <!-- forearm vein hint -->
-                <hline x="38" y="28" len="5" color="#D8A878"/>
-                <!-- wrist bone -->
-                <hline x="38" y="35" len="5" color="#C89868"/>
-                <!-- hand -->
-                <rect x="37" y="36" w="7" h="6" color="#E8B888"/>
-                <!-- hand highlight -->
-                <rect x="40" y="36" w="3" h="5" color="#F0C898"/>
-                <!-- knuckle shadow -->
-                <hline x="37" y="41" len="7" color="#C89868"/>
-                <!-- fingers hint -->
-                <hline x="37" y="41" len="7" color="#D8A878"/>
+                <rect x="28" y="104" w="72" h="8" color="$pants_base"/>
+                <hline x="28" y="104" len="72" color="$pants_shadow"/>
+                <rect x="48" y="105" w="32" h="6" color="$pants_highlight"/>
+                <rect x="28" y="105" w="8" h="6" color="$pants_shadow"/>
+                <rect x="92" y="105" w="8" h="6" color="$pants_shadow"/>
+                <!-- Belt -->
+                <rect x="30" y="104" w="68" h="3" color="#282020"/>
+                <rect x="62" y="104" w="4" h="3" color="#808080"/><!-- buckle -->
             </pixel-data>
         </layer>
-
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <!-- z=6: neck — thick strong neck, skin tone               -->
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <layer id="neck" type="base" z-order="6" width="48" height="64">
-            <pixel-data>
-                <!-- neck column (wider for tall man) -->
-                <rect x="19" y="8" w="10" h="8" color="#E8B888"/>
-                <!-- neck left shadow -->
-                <rect x="19" y="8" w="2" h="8" color="#C89868"/>
-                <!-- neck right shadow -->
-                <rect x="27" y="8" w="2" h="8" color="#C89868"/>
-                <!-- neck center highlight -->
-                <rect x="21" y="8" w="6" h="8" color="#F0C898"/>
-                <!-- adam's apple hint -->
-                <pixel x="23" y="11" color="#D0A070"/>
-                <pixel x="24" y="11" color="#D0A070"/>
-                <!-- collarbone shelf left -->
-                <hline x="12" y="14" len="8" color="#D8A878"/>
-                <!-- collarbone shelf right -->
-                <hline x="28" y="14" len="8" color="#D8A878"/>
-                <!-- collarbone center dip -->
-                <pixel x="23" y="14" color="#C08860"/>
-                <pixel x="24" y="14" color="#C08860"/>
-                <!-- collar shirt neckline shadow against neck -->
-                <hline x="20" y="14" len="8" color="#304888"/>
-                <!-- neck base muscle hint -->
-                <rect x="19" y="13" w="10" h="2" color="#D8A070"/>
-            </pixel-data>
-        </layer>
-
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <!-- z=7: head — square-ish masculine face, tall           -->
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <layer id="head" type="base" z-order="7" width="48" height="64">
-            <pixel-data>
-                <!-- head main block — square jaw masculine structure -->
-                <rect x="14" y="1" w="20" h="10" color="#E8B888"/>
-                <!-- top head curve -->
-                <hline x="15" y="0" len="18" color="#E8B888"/>
-                <!-- left cheek/jaw extension -->
-                <rect x="12" y="3" w="3" h="7" color="#E8B888"/>
-                <pixel x="11" y="5" color="#E8B888"/>
-                <pixel x="11" y="6" color="#E8B888"/>
-                <pixel x="11" y="7" color="#E8B888"/>
-                <!-- right cheek/jaw extension -->
-                <rect x="33" y="3" w="3" h="7" color="#E8B888"/>
-                <pixel x="36" y="5" color="#E8B888"/>
-                <pixel x="36" y="6" color="#E8B888"/>
-                <pixel x="36" y="7" color="#E8B888"/>
-                <!-- jaw is strong/square -->
-                <hline x="13" y="10" len="22" color="#D8A070"/>
-                <hline x="15" y="11" len="18" color="#D0A068"/>
-                <!-- forehead highlight -->
-                <rect x="17" y="1" w="14" h="4" color="#F0C898"/>
-                <!-- temple shadows left -->
-                <rect x="14" y="1" w="3" h="4" color="#D8A070"/>
-                <!-- temple shadows right -->
-                <rect x="31" y="1" w="3" h="4" color="#D8A070"/>
-                <!-- cheekbone highlight left -->
-                <rect x="13" y="5" w="4" h="3" color="#F0C898"/>
-                <!-- cheekbone highlight right -->
-                <rect x="31" y="5" w="4" h="3" color="#F0C898"/>
-                <!-- ear left -->
-                <rect x="11" y="4" w="2" h="5" color="#D8A070"/>
-                <pixel x="11" y="6" color="#C89060"/>
-                <!-- ear right -->
-                <rect x="35" y="4" w="2" h="5" color="#D8A070"/>
-                <pixel x="36" y="6" color="#C89060"/>
-                <!-- chin squared -->
-                <hline x="17" y="12" len="14" color="#C89868"/>
-            </pixel-data>
-        </layer>
-
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <!-- z=8: face — dark-blond brows, hazel eyes, beard        -->
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <layer id="face" type="overlay" z-order="8" width="48" height="64">
-            <pixel-data>
-                <!-- === LEFT EYE === -->
-                <!-- sclera -->
-                <rect x="15" y="4" w="7" h="4" color="#FFFFFF"/>
-                <!-- iris — dark hazel/brown -->
-                <rect x="16" y="3" w="5" h="5" color="#7B6345"/>
-                <!-- iris inner -->
-                <rect x="17" y="4" w="3" h="3" color="#8B7355"/>
-                <!-- pupil -->
-                <pixel x="18" y="5" color="#101010"/>
-                <pixel x="18" y="4" color="#101010"/>
-                <!-- eye shine -->
-                <pixel x="16" y="3" color="#FFFFFF"/>
-                <!-- eyelid shadow heavy (masculine) -->
-                <hline x="15" y="3" len="7" color="#A0784A"/>
-                <!-- under-eye slight shadow -->
-                <hline x="15" y="8" len="7" color="#D0A070"/>
-                <!-- === RIGHT EYE === -->
-                <rect x="26" y="4" w="7" h="4" color="#FFFFFF"/>
-                <rect x="27" y="3" w="5" h="5" color="#7B6345"/>
-                <rect x="28" y="4" w="3" h="3" color="#8B7355"/>
-                <pixel x="29" y="5" color="#101010"/>
-                <pixel x="29" y="4" color="#101010"/>
-                <pixel x="27" y="3" color="#FFFFFF"/>
-                <hline x="26" y="3" len="7" color="#A0784A"/>
-                <hline x="26" y="8" len="7" color="#D0A070"/>
-                <!-- === EYEBROWS (thick, dark-blond) === -->
-                <!-- left brow — full and slightly stern -->
-                <hline x="15" y="2" len="7" color="#6B5335"/>
-                <hline x="16" y="1" len="6" color="#7B6345"/>
-                <pixel x="15" y="2" color="#5B4325"/>
-                <!-- right brow -->
-                <hline x="26" y="2" len="7" color="#6B5335"/>
-                <hline x="27" y="1" len="6" color="#7B6345"/>
-                <pixel x="32" y="2" color="#5B4325"/>
-                <!-- === NOSE (prominent, masculine) === -->
-                <!-- bridge -->
-                <pixel x="23" y="5" color="#D0906A"/>
-                <pixel x="24" y="5" color="#D0906A"/>
-                <pixel x="23" y="7" color="#D0906A"/>
-                <pixel x="24" y="7" color="#C88860"/>
-                <!-- nose tip -->
-                <hline x="21" y="8" len="6" color="#D8A078"/>
-                <pixel x="20" y="9" color="#C09060"/>
-                <pixel x="27" y="9" color="#C09060"/>
-                <!-- nostrils -->
-                <pixel x="21" y="9" color="#B07850"/>
-                <pixel x="26" y="9" color="#B07850"/>
-                <!-- === BEARD (perpetually growing, 5-o'clock to short) === -->
-                <!-- upper lip mustache dark shadow -->
-                <hline x="19" y="9" len="10" color="#7B6345"/>
-                <!-- beard area coverage — jaw and chin -->
-                <rect x="13" y="10" w="22" h="4" color="#7B6345"/>
-                <!-- beard lighter upper border -->
-                <hline x="14" y="10" len="20" color="#8B7355"/>
-                <!-- beard shadow depth at chin -->
-                <hline x="15" y="13" len="18" color="#5B4325"/>
-                <!-- beard side patches (cheeks) -->
-                <rect x="13" y="7" w="3" h="4" color="#7B6345"/>
-                <rect x="32" y="7" w="3" h="4" color="#7B6345"/>
-                <!-- beard highlight (texture, lighter middle) -->
-                <rect x="19" y="11" w="10" h="2" color="#8B7355"/>
-                <!-- beard inner lighter (not yet fully grown in) -->
-                <rect x="20" y="10" w="8" h="1" color="#9B8365"/>
-                <!-- mouth barely visible through beard — thin line -->
-                <hline x="20" y="10" len="8" color="#A07850"/>
-                <pixel x="23" y="10" color="#907040"/>
-                <pixel x="24" y="10" color="#907040"/>
-            </pixel-data>
-        </layer>
-
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <!-- z=9: hair — dark-blond, medium length, slightly messy -->
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <layer id="hair" type="overlay" z-order="9" width="48" height="64">
-            <pixel-data>
-                <!-- top of head main hair mass — dark blond -->
-                <rect x="14" y="0" w="20" h="5" color="#8B7355"/>
-                <!-- hair top layer highlight -->
-                <hline x="16" y="0" len="16" color="#9B8365"/>
-                <!-- crown darker to show depth -->
-                <hline x="18" y="1" len="12" color="#7B6345"/>
-                <!-- slight part/tousle — programmer doesn't style perfectly -->
-                <hline x="17" y="0" len="8" color="#8B7355"/>
-                <!-- left side hair -->
-                <rect x="13" y="2" w="3" h="9" color="#8B7355"/>
-                <rect x="12" y="4" w="2" h="7" color="#8B7355"/>
-                <pixel x="11" y="6" color="#8B7355"/>
-                <!-- left side shadow depth -->
-                <rect x="13" y="3" w="2" h="8" color="#7B6345"/>
-                <!-- left side texture strands -->
-                <hline x="12" y="5" len="3" color="#9B8365"/>
-                <hline x="12" y="8" len="3" color="#6B5335"/>
-                <!-- right side hair -->
-                <rect x="32" y="2" w="3" h="9" color="#8B7355"/>
-                <rect x="34" y="4" w="2" h="7" color="#8B7355"/>
-                <pixel x="36" y="6" color="#8B7355"/>
-                <!-- right side shadow depth -->
-                <rect x="33" y="3" w="2" h="8" color="#7B6345"/>
-                <!-- right side texture strands -->
-                <hline x="33" y="5" len="3" color="#9B8365"/>
-                <hline x="33" y="8" len="3" color="#6B5335"/>
-                <!-- back of head hair (visible at sides) -->
-                <rect x="11" y="9" w="3" h="4" color="#7B6345"/>
-                <rect x="34" y="9" w="3" h="4" color="#7B6345"/>
-                <!-- slight forelock at front -->
-                <hline x="18" y="0" len="4" color="#7B6345"/>
-                <pixel x="19" y="1" color="#6B5335"/>
-            </pixel-data>
-        </layer>
-
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <!-- z=10: accessories — phone in pocket, watch, maybe keys -->
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <layer id="accessories" type="overlay" z-order="10" width="48" height="64">
-            <pixel-data>
-                <!-- watch on left wrist — simple dark band -->
-                <hline x="5" y="34" len="6" color="#303030"/>
-                <!-- watch face (small screen) -->
-                <rect x="6" y="33" w="4" h="2" color="#404040"/>
-                <pixel x="7" y="33" color="#6080A0"/>
-                <pixel x="8" y="33" color="#4060A0"/>
-                <!-- phone outline in right front pocket (barely visible) -->
-                <rect x="31" y="36" w="3" h="5" color="#282828"/>
-                <hline x="31" y="37" len="3" color="#383838"/>
-                <!-- keys chain hint at left hip pocket -->
-                <pixel x="12" y="34" color="#C0A030"/>
-                <pixel x="12" y="35" color="#B09020"/>
-                <!-- earbuds cable hint at collar (programmer music) -->
-                <pixel x="22" y="14" color="#303030"/>
-                <pixel x="23" y="13" color="#303030"/>
-                <pixel x="21" y="15" color="#303030"/>
-                <!-- subtle ring on right hand (later can become engagement ring) -->
-                <pixel x="39" y="40" color="#C0C0C0"/>
-            </pixel-data>
-        </layer>
-
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <!-- z=11: effects — code symbols, Zzz sleep, thought cloud -->
-        <!-- ═══════════════════════════════════════════════════════ -->
-        <layer id="effects" type="overlay" z-order="11" width="48" height="64">
-            <pixel-data>
-                <!-- All effects stored off-canvas, brought in via offsets -->
-                <!-- Code bracket effect (for work_code animation) — off at y=-10 -->
-                <pixel x="5" y="-10" color="#7090D0"/>
-                <pixel x="6" y="-9" color="#7090D0"/>
-                <pixel x="6" y="-8" color="#7090D0"/>
-                <pixel x="5" y="-7" color="#7090D0"/>
-                <!-- matching closing bracket -->
-                <pixel x="10" y="-10" color="#7090D0"/>
-                <pixel x="9" y="-9" color="#7090D0"/>
-                <pixel x="9" y="-8" color="#7090D0"/>
-                <pixel x="10" y="-7" color="#7090D0"/>
-                <!-- Zzz sleep letters (for snore) — off at x=-20 -->
-                <pixel x="-20" y="3" color="#AAAAAA"/>
-                <hline x="-20" y="3" len="3" color="#AAAAAA"/>
-                <pixel x="-18" y="4" color="#AAAAAA"/>
-                <pixel x="-20" y="5" color="#AAAAAA"/>
-                <hline x="-20" y="5" len="3" color="#AAAAAA"/>
-                <!-- ring box for proposal — off at x=-15 -->
-                <rect x="-15" y="5" w="4" h="3" color="#8B6914"/>
-                <pixel x="-13" y="4" color="#FFD700"/>
-                <pixel x="-13" y="3" color="#FFFFFF"/>
-            </pixel-data>
-        </layer>
-    </layers>
-
-    <animations>
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <!-- idle_morning: groggy, coffee-less, tall man shuffle          -->
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <animation name="idle_morning" frames="12" fps="3" loop="true" frame-width="48" frame-height="64">
-            <condition type="time_of_day" value="morning"/>
-            <!-- frame 0: heavy slump, barely awake, still in sleep mode -->
-            <frame index="0" layer-offsets="head:0,2; hair:0,2; face:0,2; neck:0,2; torso:0,2; left_arm:0,2; right_arm:0,2; hips:0,2; legs:0,1; shoes:0,1"/>
-            <!-- frame 1: even heavier — hunched more -->
-            <frame index="1" layer-offsets="head:0,3; hair:0,3; face:0,3; neck:0,3; torso:0,2; left_arm:0,2; right_arm:0,2; hips:0,2; legs:0,1; shoes:0,1"/>
-            <!-- frame 2: slow blink (face drops = eyes closed) -->
-            <frame index="2" layer-offsets="head:0,2; hair:0,2; face:0,3; neck:0,2; torso:0,2; left_arm:0,2; right_arm:0,2; hips:0,2; legs:0,1; shoes:0,1"/>
-            <!-- frame 3: slow inhale — torso rises slightly -->
-            <frame index="3" layer-offsets="head:0,1; hair:0,1; face:0,1; neck:0,1; torso:0,1; left_arm:0,1; right_arm:0,1; hips:0,2; legs:0,1; shoes:0,1"/>
-            <!-- frame 4: scratch head with right hand (morning habit) -->
-            <frame index="4" layer-offsets="head:0,1; hair:0,1; face:0,1; neck:0,1; torso:0,1; left_arm:0,2; right_arm:-2,-3; hips:0,2; legs:0,1; shoes:0,1"/>
-            <!-- frame 5: mid-scratch — right arm on head -->
-            <frame index="5" layer-offsets="head:0,1; hair:0,1; face:0,1; neck:0,1; torso:0,1; left_arm:0,2; right_arm:0,-4; hips:0,2; legs:0,1; shoes:0,1"/>
-            <!-- frame 6: hand drops, yawn begins — head back -->
-            <frame index="6" layer-offsets="head:0,0; hair:0,0; face:0,-1; neck:0,0; torso:0,1; left_arm:0,2; right_arm:0,2; hips:0,2; legs:0,1; shoes:0,1"/>
-            <!-- frame 7: yawn peak — head up, arms slightly out -->
-            <frame index="7" layer-offsets="head:0,-1; hair:0,-1; face:0,-1; neck:0,-1; torso:0,0; left_arm:-1,-1; right_arm:1,-1; hips:0,1; legs:0,0; shoes:0,0"/>
-            <!-- frame 8: yawn finishes, weight shift right -->
-            <frame index="8" layer-offsets="head:1,1; hair:1,1; face:1,1; neck:1,1; torso:1,1; hips:2,0; legs:1,0; shoes:1,0; left_arm:0,2; right_arm:0,2"/>
-            <!-- frame 9: weight center again -->
-            <frame index="9" layer-offsets="head:0,2; hair:0,2; face:0,2; neck:0,2; torso:0,2; left_arm:0,2; right_arm:0,2; hips:0,2; legs:0,1; shoes:0,1"/>
-            <!-- frame 10: brief moment of standing straight — attempting alertness -->
-            <frame index="10" layer-offsets="head:0,0; hair:0,0; face:0,0; neck:0,0; torso:0,0; left_arm:0,0; right_arm:0,0; hips:0,0; legs:0,0; shoes:0,0"/>
-            <!-- frame 11: slumps again — not quite there yet -->
-            <frame index="11" layer-offsets="head:0,2; hair:0,2; face:0,2; neck:0,2; torso:0,2; left_arm:0,2; right_arm:0,2; hips:0,2; legs:0,1; shoes:0,1"/>
-        </animation>
-
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <!-- idle_day: casual relaxed standing, programmer posture        -->
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <animation name="idle_day" frames="12" fps="3" loop="true" frame-width="48" frame-height="64">
-            <condition type="time_of_day" value="day"/>
-            <!-- frame 0: weight on right leg — typical relaxed stance -->
-            <frame index="0" layer-offsets="hips:2,0; torso:1,0; neck:1,0; head:1,0; hair:1,0; face:1,0; left_arm:0,0; right_arm:0,0; legs:1,0"/>
-            <!-- frame 1: breathing in — upper body rises -->
-            <frame index="1" layer-offsets="hips:2,0; torso:1,-1; neck:1,-1; head:1,-1; hair:1,-1; face:1,-1; left_arm:0,-1; right_arm:0,-1; legs:1,0"/>
-            <!-- frame 2: breathe out — down -->
-            <frame index="2" layer-offsets="hips:2,0; torso:1,1; neck:1,1; head:1,1; hair:1,1; face:1,1; left_arm:0,1; right_arm:0,1; legs:1,0"/>
-            <!-- frame 3: head turn slightly left (surveying room) -->
-            <frame index="3" layer-offsets="hips:2,0; torso:1,0; neck:1,0; head:-1,0; hair:-1,0; face:-1,0; legs:1,0"/>
-            <!-- frame 4: head returns center -->
-            <frame index="4" layer-offsets="hips:2,0; torso:1,0; neck:1,0; head:1,0; hair:1,0; face:1,0; legs:1,0"/>
-            <!-- frame 5: shift weight to left leg -->
-            <frame index="5" layer-offsets="hips:-2,0; torso:-1,0; neck:-1,0; head:-1,0; hair:-1,0; face:-1,0; legs:-1,0"/>
-            <!-- frame 6: left weight held -->
-            <frame index="6" layer-offsets="hips:-2,0; torso:-1,0; neck:-1,0; head:-1,0; hair:-1,0; face:-1,0; legs:-1,0"/>
-            <!-- frame 7: breathe in on left weight -->
-            <frame index="7" layer-offsets="hips:-2,0; torso:-1,-1; neck:-1,-1; head:-1,-1; hair:-1,-1; face:-1,-1; legs:-1,0; left_arm:0,-1; right_arm:0,-1"/>
-            <!-- frame 8: head scratches chin thoughtfully (right hand) -->
-            <frame index="8" layer-offsets="hips:-2,0; torso:-1,0; neck:-1,0; head:-1,0; hair:-1,0; face:-1,0; right_arm:-3,-4; legs:-1,0"/>
-            <!-- frame 9: hand drops, phone check begins (right arm reaches pocket) -->
-            <frame index="9" layer-offsets="hips:0,0; torso:0,0; neck:0,0; head:0,0; hair:0,0; face:0,0; right_arm:3,3"/>
-            <!-- frame 10: looks at phone briefly — head dips toward right -->
-            <frame index="10" layer-offsets="hips:0,0; torso:0,0; neck:0,0; head:2,1; hair:2,1; face:2,1; right_arm:3,3"/>
-            <!-- frame 11: phone pocketed, back to neutral weight right -->
-            <frame index="11" layer-offsets="hips:2,0; torso:1,0; neck:1,0; head:1,0; hair:1,0; face:1,0; legs:1,0"/>
-        </animation>
-
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <!-- idle_evening: on couch, relaxed, one arm over back          -->
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <animation name="idle_evening" frames="12" fps="2" loop="true" frame-width="48" frame-height="64">
-            <condition type="time_of_day" value="evening"/>
-            <!-- frame 0: slouched sitting position — all down and back -->
-            <frame index="0" layer-offsets="head:0,4; hair:0,4; face:0,4; neck:0,3; torso:0,4; left_arm:0,5; right_arm:4,2; hips:0,6; legs:0,6; shoes:0,7"/>
-            <!-- frame 1: slow evening breathing — torso up slightly -->
-            <frame index="1" layer-offsets="head:0,3; hair:0,3; face:0,3; neck:0,2; torso:0,3; left_arm:0,4; right_arm:4,2; hips:0,6; legs:0,6; shoes:0,7"/>
-            <!-- frame 2: breathe out — back down -->
-            <frame index="2" layer-offsets="head:0,4; hair:0,4; face:0,4; neck:0,3; torso:0,4; left_arm:0,5; right_arm:4,2; hips:0,6; legs:0,6; shoes:0,7"/>
-            <!-- frame 3: right arm spreads wider (comfortable) -->
-            <frame index="3" layer-offsets="head:0,4; hair:0,4; face:0,4; neck:0,3; torso:0,4; left_arm:0,5; right_arm:6,1; hips:0,6; legs:0,6; shoes:0,7"/>
-            <!-- frame 4: head tilts to right — comfortable leaning -->
-            <frame index="4" layer-offsets="head:2,3; hair:2,3; face:2,3; neck:1,3; torso:0,4; left_arm:0,5; right_arm:6,1; hips:0,6; legs:0,6; shoes:0,7"/>
-            <!-- frame 5: slow blink — evening relaxation -->
-            <frame index="5" layer-offsets="head:2,3; hair:2,3; face:2,4; neck:1,3; torso:0,4; left_arm:0,5; right_arm:6,1; hips:0,6; legs:0,6; shoes:0,7"/>
-            <!-- frame 6: holds comfortable pose -->
-            <frame index="6" layer-offsets="head:2,3; hair:2,3; face:2,3; neck:1,3; torso:0,4; left_arm:0,5; right_arm:6,1; hips:0,6; legs:0,6; shoes:0,7"/>
-            <!-- frame 7: deep exhale — sinks deeper into couch -->
-            <frame index="7" layer-offsets="head:2,5; hair:2,5; face:2,5; neck:1,4; torso:0,5; left_arm:0,6; right_arm:6,2; hips:0,7; legs:0,6; shoes:0,7"/>
-            <!-- frame 8: slight shift left — getting more comfortable -->
-            <frame index="8" layer-offsets="head:0,5; hair:0,5; face:0,5; neck:0,4; torso:-1,5; left_arm:-1,6; right_arm:4,2; hips:-1,7; legs:-1,6; shoes:-1,7"/>
-            <!-- frame 9: held comfortable left pose -->
-            <frame index="9" layer-offsets="head:0,5; hair:0,5; face:0,5; neck:0,4; torso:-1,5; left_arm:-1,6; right_arm:4,2; hips:-1,7; legs:-1,6; shoes:-1,7"/>
-            <!-- frame 10: inhale, rising slightly again -->
-            <frame index="10" layer-offsets="head:0,3; hair:0,3; face:0,3; neck:0,2; torso:0,3; left_arm:0,4; right_arm:4,1; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 11: back to standard slouch -->
-            <frame index="11" layer-offsets="head:0,4; hair:0,4; face:0,4; neck:0,3; torso:0,4; left_arm:0,5; right_arm:4,2; hips:0,6; legs:0,6; shoes:0,7"/>
-        </animation>
-
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <!-- idle_night: deep asleep, heavy breather                      -->
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <animation name="idle_night" frames="12" fps="2" loop="true" frame-width="48" frame-height="64">
-            <condition type="time_of_day" value="night"/>
-            <!-- Deep sleep: all layers shifted to lying position, heavier breathing -->
-            <!-- frame 0: fully asleep, deep inhale -->
-            <frame index="0" layer-offsets="head:-10,4; hair:-10,3; face:-10,4; neck:-5,3; torso:0,4; left_arm:-6,6; right_arm:6,6; hips:0,6; legs:0,6; shoes:0,7"/>
-            <!-- frame 1: deep sleep exhale — bigger movement than Tanya -->
-            <frame index="1" layer-offsets="head:-10,6; hair:-10,5; face:-10,6; neck:-5,4; torso:0,6; left_arm:-6,8; right_arm:6,8; hips:0,7; legs:0,6; shoes:0,7"/>
-            <!-- frame 2: hold exhale position -->
-            <frame index="2" layer-offsets="head:-10,6; hair:-10,5; face:-10,6; neck:-5,4; torso:0,6; left_arm:-6,8; right_arm:6,8; hips:0,7; legs:0,6; shoes:0,7"/>
-            <!-- frame 3: deep inhale again -->
-            <frame index="3" layer-offsets="head:-10,4; hair:-10,3; face:-10,4; neck:-5,2; torso:0,3; left_arm:-6,5; right_arm:6,5; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 4: held inhale -->
-            <frame index="4" layer-offsets="head:-10,4; hair:-10,3; face:-10,4; neck:-5,2; torso:0,3; left_arm:-6,5; right_arm:6,5; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 5: slow exhale -->
-            <frame index="5" layer-offsets="head:-10,5; hair:-10,4; face:-10,5; neck:-5,3; torso:0,5; left_arm:-6,7; right_arm:6,7; hips:0,6; legs:0,6; shoes:0,7"/>
-            <!-- frame 6: full exhale, maximum relaxation -->
-            <frame index="6" layer-offsets="head:-10,6; hair:-10,5; face:-10,6; neck:-5,4; torso:0,6; left_arm:-6,8; right_arm:6,8; hips:0,7; legs:0,6; shoes:0,7"/>
-            <!-- frame 7: sleep twitch — arm moves -->
-            <frame index="7" layer-offsets="head:-10,6; hair:-10,5; face:-10,6; neck:-5,4; torso:0,6; left_arm:-4,6; right_arm:8,8; hips:0,7; legs:0,6; shoes:0,7"/>
-            <!-- frame 8: settle back -->
-            <frame index="8" layer-offsets="head:-10,6; hair:-10,5; face:-10,6; neck:-5,4; torso:0,6; left_arm:-6,8; right_arm:6,8; hips:0,7; legs:0,6; shoes:0,7"/>
-            <!-- frame 9: new breath cycle -->
-            <frame index="9" layer-offsets="head:-10,4; hair:-10,3; face:-10,4; neck:-5,2; torso:0,3; left_arm:-6,5; right_arm:6,5; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 10: exhale again -->
-            <frame index="10" layer-offsets="head:-10,5; hair:-10,4; face:-10,5; neck:-5,3; torso:0,5; left_arm:-6,7; right_arm:6,7; hips:0,6; legs:0,6; shoes:0,7"/>
-            <!-- frame 11: held deep sleep -->
-            <frame index="11" layer-offsets="head:-10,6; hair:-10,5; face:-10,6; neck:-5,4; torso:0,6; left_arm:-6,8; right_arm:6,8; hips:0,7; legs:0,6; shoes:0,7"/>
-        </animation>
-
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <!-- walk: tall man stride — confident, long steps                -->
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <animation name="walk" frames="12" fps="8" loop="true" frame-width="48" frame-height="64">
-            <!-- Larger offsets than Tanya — longer legs, taller figure   -->
-            <!-- frame 0: right heel contact -->
-            <frame index="0" layer-offsets="legs:2,0; shoes:2,0; right_arm:-3,0; left_arm:3,0"/>
-            <!-- frame 1: weight loading right -->
-            <frame index="1" layer-offsets="legs:2,0; shoes:2,0; right_arm:-2,0; left_arm:2,0; torso:0,-1; neck:0,-1; head:0,-1; hair:0,-1; face:0,-1; hips:1,-1"/>
-            <!-- frame 2: body over right foot — passing phase -->
-            <frame index="2" layer-offsets="legs:1,-1; shoes:1,0; torso:0,-2; neck:0,-2; head:0,-2; hair:0,-2; face:0,-2; hips:1,-1; right_arm:0,0; left_arm:0,0"/>
-            <!-- frame 3: peak height — left foot swinging through -->
-            <frame index="3" layer-offsets="legs:0,-1; shoes:0,0; torso:0,-2; neck:0,-2; head:0,-2; hair:0,-2; face:0,-2; hips:0,-1"/>
-            <!-- frame 4: left heel contact -->
-            <frame index="4" layer-offsets="legs:-2,0; shoes:-2,0; right_arm:3,0; left_arm:-3,0"/>
-            <!-- frame 5: weight loading left -->
-            <frame index="5" layer-offsets="legs:-2,0; shoes:-2,0; right_arm:2,0; left_arm:-2,0; torso:0,-1; neck:0,-1; head:0,-1; hair:0,-1; face:0,-1; hips:-1,-1"/>
-            <!-- frame 6: body over left foot — passing phase -->
-            <frame index="6" layer-offsets="legs:-1,-1; shoes:-1,0; torso:0,-2; neck:0,-2; head:0,-2; hair:0,-2; face:0,-2; hips:-1,-1"/>
-            <!-- frame 7: peak height — right foot swinging through -->
-            <frame index="7" layer-offsets="legs:0,-1; shoes:0,0; torso:0,-2; neck:0,-2; head:0,-2; hair:0,-2; face:0,-2; hips:0,-1"/>
-            <!-- frame 8: right contact second cycle, head bob -->
-            <frame index="8" layer-offsets="legs:2,0; shoes:2,0; right_arm:-3,0; left_arm:3,0; head:0,-1; hair:0,-1; face:0,-1"/>
-            <!-- frame 9: passing right -->
-            <frame index="9" layer-offsets="legs:1,-1; shoes:1,0; torso:0,-2; neck:0,-2; head:0,-2; hair:0,-2; face:0,-2; hips:1,-1"/>
-            <!-- frame 10: left contact second cycle -->
-            <frame index="10" layer-offsets="legs:-2,0; shoes:-2,0; right_arm:3,0; left_arm:-3,0; head:0,-1; hair:0,-1; face:0,-1"/>
-            <!-- frame 11: passing left, complete cycle -->
-            <frame index="11" layer-offsets="legs:-1,-1; shoes:-1,0; torso:0,-2; neck:0,-2; head:0,-2; hair:0,-2; face:0,-2; hips:-1,-1"/>
-        </animation>
-
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <!-- work_code: deep focus coding — rapid typing, leaning in      -->
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <animation name="work_code" frames="12" fps="6" loop="true" frame-width="48" frame-height="64">
-            <condition type="state" value="coding"/>
-            <!-- frame 0: leaning forward at desk, hands on keyboard -->
-            <frame index="0" layer-offsets="torso:0,3; neck:0,3; head:2,2; hair:2,2; face:2,2; left_arm:-1,5; right_arm:1,5; hips:0,2; legs:0,1; shoes:0,1"/>
-            <!-- frame 1: rapid left-hand typing, fingers fly -->
-            <frame index="1" layer-offsets="torso:0,3; neck:0,3; head:2,2; hair:2,2; face:2,2; left_arm:-2,4; right_arm:1,5; hips:0,2; legs:0,1; shoes:0,1"/>
-            <!-- frame 2: right hand burst -->
-            <frame index="2" layer-offsets="torso:0,3; neck:0,3; head:2,2; hair:2,2; face:2,2; left_arm:-1,5; right_arm:2,4; hips:0,2; legs:0,1; shoes:0,1"/>
-            <!-- frame 3: pause — leans back slightly reading output, head rises -->
-            <frame index="3" layer-offsets="torso:0,1; neck:0,1; head:0,0; hair:0,0; face:0,0; left_arm:0,4; right_arm:0,4; hips:0,1; legs:0,1; shoes:0,1"/>
-            <!-- frame 4: nods — head bobs (understanding) -->
-            <frame index="4" layer-offsets="torso:0,1; neck:0,1; head:0,1; hair:0,1; face:0,1; left_arm:0,4; right_arm:0,4; hips:0,1; legs:0,1; shoes:0,1"/>
-            <!-- frame 5: leans back in with idea — head snaps forward -->
-            <frame index="5" layer-offsets="torso:0,3; neck:0,3; head:2,2; hair:2,2; face:2,2; left_arm:-1,4; right_arm:1,4; hips:0,2; legs:0,1; shoes:0,1"/>
-            <!-- frame 6: rapid both hands typing (flow state) — effects code brackets appear -->
-            <frame index="6" layer-offsets="torso:0,3; neck:0,3; head:2,2; hair:2,2; face:2,2; left_arm:-2,4; right_arm:2,4; hips:0,2; legs:0,1; shoes:0,1; effects:-1,14"/>
-            <!-- frame 7: peak flow, leaning very close — even more forward -->
-            <frame index="7" layer-offsets="torso:0,4; neck:0,4; head:3,3; hair:3,3; face:3,3; left_arm:-2,5; right_arm:2,5; hips:0,2; legs:0,1; shoes:0,1; effects:-1,14"/>
-            <!-- frame 8: right hand sweeps to mouse/trackpad -->
-            <frame index="8" layer-offsets="torso:0,3; neck:0,3; head:2,2; hair:2,2; face:2,2; left_arm:-1,5; right_arm:5,3; hips:0,2; legs:0,1; shoes:0,1; effects:-1,14"/>
-            <!-- frame 9: click — right hand tap -->
-            <frame index="9" layer-offsets="torso:0,3; neck:0,3; head:2,2; hair:2,2; face:2,2; left_arm:-1,5; right_arm:5,4; hips:0,2; legs:0,1; shoes:0,1; effects:-1,14"/>
-            <!-- frame 10: leaning back — done with that task, checks results -->
-            <frame index="10" layer-offsets="torso:0,1; neck:0,0; head:0,-1; hair:0,-1; face:0,-1; left_arm:0,3; right_arm:0,3; hips:0,1; legs:0,1; shoes:0,1"/>
-            <!-- frame 11: starts new typing cycle, leans in again -->
-            <frame index="11" layer-offsets="torso:0,3; neck:0,3; head:2,2; hair:2,2; face:2,2; left_arm:-1,5; right_arm:1,5; hips:0,2; legs:0,1; shoes:0,1"/>
-        </animation>
-
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <!-- sleep: deep male sleep — heavier, still                      -->
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <animation name="sleep" frames="12" fps="2" loop="true" frame-width="48" frame-height="64">
-            <condition type="state" value="sleeping"/>
-            <!-- frame 0: sleep position, slow inhale -->
-            <frame index="0" layer-offsets="head:-10,4; hair:-10,3; face:-10,4; neck:-5,3; torso:0,4; left_arm:-8,7; right_arm:8,7; hips:0,6; legs:0,6; shoes:0,7"/>
-            <!-- frame 1: rise on inhale -->
-            <frame index="1" layer-offsets="head:-10,3; hair:-10,2; face:-10,3; neck:-5,2; torso:0,3; left_arm:-8,6; right_arm:8,6; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 2: hold inhale -->
-            <frame index="2" layer-offsets="head:-10,3; hair:-10,2; face:-10,3; neck:-5,2; torso:0,3; left_arm:-8,6; right_arm:8,6; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 3: slow exhale starts -->
-            <frame index="3" layer-offsets="head:-10,4; hair:-10,3; face:-10,4; neck:-5,3; torso:0,4; left_arm:-8,7; right_arm:8,7; hips:0,6; legs:0,6; shoes:0,7"/>
-            <!-- frame 4: full exhale -->
-            <frame index="4" layer-offsets="head:-10,5; hair:-10,4; face:-10,5; neck:-5,4; torso:0,5; left_arm:-8,8; right_arm:8,8; hips:0,7; legs:0,6; shoes:0,7"/>
-            <!-- frame 5: hold exhale, maximum rest -->
-            <frame index="5" layer-offsets="head:-10,5; hair:-10,4; face:-10,5; neck:-5,4; torso:0,5; left_arm:-8,8; right_arm:8,8; hips:0,7; legs:0,6; shoes:0,7"/>
-            <!-- frame 6: next inhale -->
-            <frame index="6" layer-offsets="head:-10,3; hair:-10,2; face:-10,3; neck:-5,2; torso:0,3; left_arm:-8,6; right_arm:8,6; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 7: hold -->
-            <frame index="7" layer-offsets="head:-10,3; hair:-10,2; face:-10,3; neck:-5,2; torso:0,3; left_arm:-8,6; right_arm:8,6; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 8: exhale -->
-            <frame index="8" layer-offsets="head:-10,4; hair:-10,3; face:-10,4; neck:-5,3; torso:0,4; left_arm:-8,7; right_arm:8,7; hips:0,6; legs:0,6; shoes:0,7"/>
-            <!-- frame 9: deep exhale -->
-            <frame index="9" layer-offsets="head:-10,5; hair:-10,4; face:-10,5; neck:-5,4; torso:0,5; left_arm:-8,8; right_arm:8,8; hips:0,7; legs:0,6; shoes:0,7"/>
-            <!-- frame 10: dream twitch — leg kicks slightly -->
-            <frame index="10" layer-offsets="head:-10,5; hair:-10,4; face:-10,5; neck:-5,4; torso:0,5; left_arm:-8,8; right_arm:8,8; hips:0,7; legs:1,5; shoes:1,6"/>
-            <!-- frame 11: settle back -->
-            <frame index="11" layer-offsets="head:-10,5; hair:-10,4; face:-10,5; neck:-5,4; torso:0,5; left_arm:-8,8; right_arm:8,8; hips:0,7; legs:0,6; shoes:0,7"/>
-        </animation>
-
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <!-- snore: open-mouth snoring, head bobs with each snore sound  -->
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <animation name="snore" frames="12" fps="3" loop="true" frame-width="48" frame-height="64">
-            <condition type="state" value="snoring"/>
-            <!-- Heavy sleep with Zzz effect floating up from mouth        -->
-            <!-- frame 0: sleep exhale — flat out -->
-            <frame index="0" layer-offsets="head:-10,5; hair:-10,4; face:-10,5; neck:-5,4; torso:0,5; left_arm:-8,8; right_arm:8,8; hips:0,7; legs:0,6; shoes:0,7; effects:14,15"/>
-            <!-- frame 1: snore inhale — head bobs up slightly, jaw opens -->
-            <frame index="1" layer-offsets="head:-10,4; hair:-10,3; face:-10,3; neck:-5,3; torso:0,4; left_arm:-8,7; right_arm:8,7; hips:0,6; legs:0,6; shoes:0,7; effects:14,13"/>
-            <!-- frame 2: snore peak — vibration, whole head shakes 1px -->
-            <frame index="2" layer-offsets="head:-9,4; hair:-9,3; face:-9,3; neck:-5,3; torso:0,4; left_arm:-8,7; right_arm:8,7; hips:0,6; legs:0,6; shoes:0,7; effects:14,11"/>
-            <!-- frame 3: vibration continues other direction -->
-            <frame index="3" layer-offsets="head:-11,4; hair:-11,3; face:-11,3; neck:-5,3; torso:0,4; left_arm:-8,7; right_arm:8,7; hips:0,6; legs:0,6; shoes:0,7; effects:14,9"/>
-            <!-- frame 4: Zzz floats higher, exhale begins -->
-            <frame index="4" layer-offsets="head:-10,5; hair:-10,4; face:-10,5; neck:-5,4; torso:0,5; left_arm:-8,8; right_arm:8,8; hips:0,7; legs:0,6; shoes:0,7; effects:14,7"/>
-            <!-- frame 5: full snore exhale, Zzz high -->
-            <frame index="5" layer-offsets="head:-10,6; hair:-10,5; face:-10,6; neck:-5,5; torso:0,6; left_arm:-8,9; right_arm:8,9; hips:0,8; legs:0,6; shoes:0,7; effects:14,4"/>
-            <!-- frame 6: silence between snores — held pause -->
-            <frame index="6" layer-offsets="head:-10,6; hair:-10,5; face:-10,6; neck:-5,5; torso:0,6; left_arm:-8,9; right_arm:8,9; hips:0,8; legs:0,6; shoes:0,7"/>
-            <!-- frame 7: next snore inhale -->
-            <frame index="7" layer-offsets="head:-10,4; hair:-10,3; face:-10,3; neck:-5,3; torso:0,4; left_arm:-8,7; right_arm:8,7; hips:0,6; legs:0,6; shoes:0,7; effects:14,15"/>
-            <!-- frame 8: shake again -->
-            <frame index="8" layer-offsets="head:-9,4; hair:-9,3; face:-9,3; neck:-5,3; torso:0,4; left_arm:-8,7; right_arm:8,7; hips:0,6; legs:0,6; shoes:0,7; effects:14,13"/>
-            <!-- frame 9: other direction shake -->
-            <frame index="9" layer-offsets="head:-11,4; hair:-11,3; face:-11,3; neck:-5,3; torso:0,4; left_arm:-8,7; right_arm:8,7; hips:0,6; legs:0,6; shoes:0,7; effects:14,11"/>
-            <!-- frame 10: Zzz second float -->
-            <frame index="10" layer-offsets="head:-10,5; hair:-10,4; face:-10,5; neck:-5,4; torso:0,5; left_arm:-8,8; right_arm:8,8; hips:0,7; legs:0,6; shoes:0,7; effects:14,7"/>
-            <!-- frame 11: full exhale, silence gap -->
-            <frame index="11" layer-offsets="head:-10,6; hair:-10,5; face:-10,6; neck:-5,5; torso:0,6; left_arm:-8,9; right_arm:8,9; hips:0,8; legs:0,6; shoes:0,7; effects:14,4"/>
-        </animation>
-
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <!-- eat: sitting, using fork, relaxed eating pose                -->
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <animation name="eat" frames="12" fps="5" loop="true" frame-width="48" frame-height="64">
-            <condition type="state" value="eating"/>
-            <!-- frame 0: sitting at table, both arms resting at table height -->
-            <frame index="0" layer-offsets="torso:0,3; neck:0,3; head:0,2; hair:0,2; face:0,2; left_arm:0,5; right_arm:0,5; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 1: right hand raises fork toward mouth -->
-            <frame index="1" layer-offsets="torso:0,3; neck:0,3; head:0,2; hair:0,2; face:0,2; left_arm:0,5; right_arm:-1,2; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 2: fork at mouth — head leans slightly to meet it -->
-            <frame index="2" layer-offsets="torso:0,3; neck:0,3; head:1,1; hair:1,1; face:1,1; left_arm:0,5; right_arm:-1,1; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 3: eating — head pulls back with food -->
-            <frame index="3" layer-offsets="torso:0,3; neck:0,2; head:0,1; hair:0,1; face:0,1; left_arm:0,5; right_arm:0,2; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 4: chewing — jaw movement in face layer -->
-            <frame index="4" layer-offsets="torso:0,3; neck:0,3; head:0,2; hair:0,2; face:0,3; left_arm:0,5; right_arm:0,4; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 5: more chewing -->
-            <frame index="5" layer-offsets="torso:0,3; neck:0,3; head:0,2; hair:0,2; face:0,2; left_arm:0,5; right_arm:0,4; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 6: swallow — slight head tilt back -->
-            <frame index="6" layer-offsets="torso:0,3; neck:0,2; head:0,1; hair:0,1; face:0,1; left_arm:0,5; right_arm:0,4; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 7: fork goes back down to plate -->
-            <frame index="7" layer-offsets="torso:0,3; neck:0,3; head:0,2; hair:0,2; face:0,2; left_arm:0,5; right_arm:0,5; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 8: looks at food — head dips toward plate -->
-            <frame index="8" layer-offsets="torso:0,3; neck:0,4; head:1,3; hair:1,3; face:1,3; left_arm:0,5; right_arm:0,5; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 9: another forkful -->
-            <frame index="9" layer-offsets="torso:0,3; neck:0,3; head:0,2; hair:0,2; face:0,2; left_arm:0,5; right_arm:-1,3; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 10: fork to mouth again -->
-            <frame index="10" layer-offsets="torso:0,3; neck:0,3; head:1,1; hair:1,1; face:1,1; left_arm:0,5; right_arm:-1,1; hips:0,5; legs:0,5; shoes:0,6"/>
-            <!-- frame 11: eating and looking satisfied -->
-            <frame index="11" layer-offsets="torso:0,3; neck:0,3; head:0,2; hair:0,2; face:0,2; left_arm:0,5; right_arm:0,4; hips:0,5; legs:0,5; shoes:0,6"/>
-        </animation>
-
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <!-- talk: speaking animation — head bobs, arms gesture           -->
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <animation name="talk" frames="12" fps="6" loop="true" frame-width="48" frame-height="64">
-            <condition type="state" value="talking"/>
-            <!-- frame 0: neutral talking pose -->
-            <frame index="0" layer-offsets=""/>
-            <!-- frame 1: word emphasis — head bobs forward -->
-            <frame index="1" layer-offsets="head:1,1; hair:1,1; face:1,1; neck:1,0"/>
-            <!-- frame 2: hand gesture left arm raises -->
-            <frame index="2" layer-offsets="head:0,0; hair:0,0; face:0,0; neck:0,0; left_arm:0,-3"/>
-            <!-- frame 3: gesture expands outward -->
-            <frame index="3" layer-offsets="head:0,0; hair:0,0; face:0,0; neck:0,0; left_arm:-2,-2"/>
-            <!-- frame 4: head tilts with sentence structure -->
-            <frame index="4" layer-offsets="head:-1,0; hair:-1,0; face:-1,0; neck:-1,0; left_arm:0,-1"/>
-            <!-- frame 5: point gesture — right arm extends forward -->
-            <frame index="5" layer-offsets="head:0,0; hair:0,0; face:0,0; neck:0,0; right_arm:-3,-3; left_arm:0,0"/>
-            <!-- frame 6: pause — both arms at sides, slower words -->
-            <frame index="6" layer-offsets="head:0,1; hair:0,1; face:0,1; neck:0,0"/>
-            <!-- frame 7: new sentence — shoulders engage -->
-            <frame index="7" layer-offsets="head:0,0; hair:0,0; face:0,0; neck:0,0; torso:0,-1; left_arm:0,-1; right_arm:0,-1"/>
-            <!-- frame 8: emphatic gesture both arms spread -->
-            <frame index="8" layer-offsets="head:0,-1; hair:0,-1; face:0,-1; neck:0,-1; torso:0,-1; left_arm:-2,-3; right_arm:2,-3"/>
-            <!-- frame 9: arms down, nod -->
-            <frame index="9" layer-offsets="head:0,1; hair:0,1; face:0,1; neck:0,1; torso:0,0"/>
-            <!-- frame 10: lean in conspiratorially -->
-            <frame index="10" layer-offsets="head:2,1; hair:2,1; face:2,1; neck:1,0; torso:1,0"/>
-            <!-- frame 11: lean back, wrap up point -->
-            <frame index="11" layer-offsets="head:0,0; hair:0,0; face:0,0; neck:0,0"/>
-        </animation>
-
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <!-- conflict_stance: crossed arms, firm jaw, standing tall       -->
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <animation name="conflict_stance" frames="12" fps="4" loop="true" frame-width="48" frame-height="64">
-            <condition type="emotion" value="conflict"/>
-            <!-- frame 0: arms begin to cross, chest puffs up slightly -->
-            <frame index="0" layer-offsets="left_arm:2,0; right_arm:-2,0; torso:0,-1; neck:0,-1; head:0,-1; hair:0,-1; face:0,-1"/>
-            <!-- frame 1: fully crossed, standing tall and straight -->
-            <frame index="1" layer-offsets="left_arm:3,-1; right_arm:-3,-1; torso:0,-2; neck:0,-2; head:0,-2; hair:0,-2; face:0,-2"/>
-            <!-- frame 2: weight on one leg (right) — hip pops -->
-            <frame index="2" layer-offsets="left_arm:3,-1; right_arm:-3,-1; torso:1,-2; neck:1,-2; head:1,-2; hair:1,-2; face:1,-2; hips:2,0; legs:1,0"/>
-            <!-- frame 3: held stance, eyes staring forward -->
-            <frame index="3" layer-offsets="left_arm:3,-1; right_arm:-3,-1; torso:1,-2; neck:1,-2; head:1,-2; hair:1,-2; face:1,-2; hips:2,0; legs:1,0"/>
-            <!-- frame 4: slow exhale through nose — impatient huff -->
-            <frame index="4" layer-offsets="left_arm:3,-1; right_arm:-3,-1; torso:1,-1; neck:1,-1; head:1,-1; hair:1,-1; face:1,-1; hips:2,1; legs:1,1"/>
-            <!-- frame 5: jaw tightens — slight head jut (assertive) -->
-            <frame index="5" layer-offsets="left_arm:3,-1; right_arm:-3,-1; torso:0,-2; neck:2,-2; head:3,-2; hair:3,-2; face:3,-2; hips:2,0; legs:1,0"/>
-            <!-- frame 6: head pulls back — reconsidering / holding firm -->
-            <frame index="6" layer-offsets="left_arm:3,-1; right_arm:-3,-1; torso:0,-2; neck:0,-2; head:-1,-2; hair:-1,-2; face:-1,-2; hips:2,0; legs:1,0"/>
-            <!-- frame 7: shifts weight to other leg (left) -->
-            <frame index="7" layer-offsets="left_arm:3,-1; right_arm:-3,-1; torso:-1,-2; neck:-1,-2; head:-1,-2; hair:-1,-2; face:-1,-2; hips:-2,0; legs:-1,0"/>
-            <!-- frame 8: held on left weight -->
-            <frame index="8" layer-offsets="left_arm:3,-1; right_arm:-3,-1; torso:-1,-2; neck:-1,-2; head:-1,-2; hair:-1,-2; face:-1,-2; hips:-2,0; legs:-1,0"/>
-            <!-- frame 9: breathing in, preparing to respond -->
-            <frame index="9" layer-offsets="left_arm:3,-1; right_arm:-3,-1; torso:0,-3; neck:0,-3; head:0,-3; hair:0,-3; face:0,-3"/>
-            <!-- frame 10: uncrossing arms — about to speak gesturally -->
-            <frame index="10" layer-offsets="left_arm:1,0; right_arm:-1,0; torso:0,-2; neck:0,-2; head:0,-2; hair:0,-2; face:0,-2"/>
-            <!-- frame 11: recrosses — decided to stay firm -->
-            <frame index="11" layer-offsets="left_arm:3,-1; right_arm:-3,-1; torso:0,-2; neck:0,-2; head:0,-2; hair:0,-2; face:0,-2"/>
-        </animation>
-
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <!-- proposal: kneeling, ring box, looking up at Tanya            -->
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <animation name="proposal" frames="12" fps="4" loop="false" frame-width="48" frame-height="64">
-            <condition type="trigger" value="wedding_event"/>
-            <!-- frame 0: standing tall, looks nervous, takes breath -->
-            <frame index="0" layer-offsets=""/>
-            <!-- frame 1: moves toward Tanya — single step forward -->
-            <frame index="1" layer-offsets="legs:2,0; shoes:2,0; hips:2,0; torso:2,0; neck:2,0; head:2,0; hair:2,0; face:2,0; left_arm:2,0; right_arm:2,0"/>
-            <!-- frame 2: right hand moves to pocket (reaching for ring box) -->
-            <frame index="2" layer-offsets="right_arm:3,3; head:2,0; hair:2,0; face:2,0; neck:2,0; torso:2,0; left_arm:2,0; hips:2,0; legs:2,0; shoes:2,0"/>
-            <!-- frame 3: ring box produced — held in right hand at chest -->
-            <frame index="3" layer-offsets="right_arm:-1,-3; head:2,0; hair:2,0; face:2,0; neck:2,0; torso:2,0; left_arm:2,0; hips:2,0; legs:2,0; shoes:2,0; effects:17,9"/>
-            <!-- frame 4: begins to kneel — hips and legs drop -->
-            <frame index="4" layer-offsets="right_arm:-1,-2; head:2,-1; hair:2,-1; face:2,-1; neck:2,-1; torso:2,1; left_arm:2,2; hips:2,3; legs:2,4; shoes:2,5; effects:17,9"/>
-            <!-- frame 5: one knee down — full kneel position -->
-            <frame index="5" layer-offsets="right_arm:-1,0; head:2,-3; hair:2,-3; face:2,-3; neck:2,-2; torso:2,4; left_arm:2,6; hips:2,8; legs:2,10; shoes:2,12; effects:17,7"/>
-            <!-- frame 6: opens ring box, looks up at Tanya -->
-            <frame index="6" layer-offsets="right_arm:-2,-2; head:2,-3; hair:2,-3; face:2,-3; neck:2,-2; torso:2,4; left_arm:2,6; hips:2,8; legs:2,10; shoes:2,12; effects:20,7"/>
-            <!-- frame 7: held — waiting for answer -->
-            <frame index="7" layer-offsets="right_arm:-2,-2; head:2,-3; hair:2,-3; face:2,-3; neck:2,-2; torso:2,4; left_arm:2,6; hips:2,8; legs:2,10; shoes:2,12; effects:20,7"/>
-            <!-- frame 8: breathing — ring box trembles slightly -->
-            <frame index="8" layer-offsets="right_arm:-2,-1; head:2,-3; hair:2,-3; face:2,-3; neck:2,-2; torso:2,4; left_arm:2,6; hips:2,8; legs:2,10; shoes:2,12; effects:21,7"/>
-            <!-- frame 9: YES! — head rises with joy -->
-            <frame index="9" layer-offsets="right_arm:-2,-3; head:2,-5; hair:2,-5; face:2,-5; neck:2,-4; torso:2,2; left_arm:2,4; hips:2,8; legs:2,10; shoes:2,12; effects:20,5"/>
-            <!-- frame 10: stands — upper body rising rapidly -->
-            <frame index="10" layer-offsets="right_arm:-2,-4; head:2,-3; hair:2,-3; face:2,-3; neck:2,-2; torso:2,2; left_arm:2,3; hips:2,5; legs:2,7; shoes:2,9; effects:20,3"/>
-            <!-- frame 11: fully upright, embracing — arms forward/in -->
-            <frame index="11" layer-offsets="right_arm:-4,-1; left_arm:4,-1; head:2,-1; hair:2,-1; face:2,-1; neck:2,-1; torso:2,0; hips:2,0; legs:2,0; shoes:2,0; effects:20,0"/>
-        </animation>
-    </animations>
+    </layer-overrides>
 
     <naming>
         <output-dir>characters/alexander</output-dir>
