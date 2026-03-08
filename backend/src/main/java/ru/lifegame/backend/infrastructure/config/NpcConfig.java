@@ -2,17 +2,17 @@ package ru.lifegame.backend.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.lifegame.backend.domain.npc.engine.NpcRegistry;
-import ru.lifegame.backend.domain.npc.engine.NpcLifecycleEngine;
-import ru.lifegame.backend.domain.npc.engine.NpcUtilityBrain;
 import ru.lifegame.backend.domain.npc.engine.ConditionEvaluator;
-import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
+import ru.lifegame.backend.domain.npc.engine.NpcLifecycleEngine;
+import ru.lifegame.backend.domain.npc.engine.NpcRegistry;
+import ru.lifegame.backend.domain.npc.engine.NpcUtilityBrain;
 import ru.lifegame.backend.domain.npc.graph.CrossNpcTriggerEngine;
+import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
 import ru.lifegame.backend.infrastructure.narrative.NarrativeContentLoader;
 
 /**
- * Spring configuration for NPC engine beans.
- * All beans operate on abstractions — zero knowledge of concrete NPC names.
+ * Spring configuration for the data-driven NPC engine.
+ * Wires all NPC components together — no hardcoded NPC names anywhere.
  */
 @Configuration
 public class NpcConfig {
@@ -51,7 +51,8 @@ public class NpcConfig {
     public NpcLifecycleEngine npcLifecycleEngine(
             NpcRegistry registry,
             NpcUtilityBrain brain,
+            NpcRelationshipGraph graph,
             CrossNpcTriggerEngine crossNpcTriggerEngine) {
-        return new NpcLifecycleEngine(registry, brain, crossNpcTriggerEngine);
+        return new NpcLifecycleEngine(registry, brain, graph, crossNpcTriggerEngine);
     }
 }
