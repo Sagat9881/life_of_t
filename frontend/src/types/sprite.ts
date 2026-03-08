@@ -80,17 +80,20 @@ export interface SpriteAnimatorProps {
    * Optional multiplier ON TOP of relative sizing.
    * Default: 1.0 (use relative size as-is).
    */
-  readonly scale?: number;
+  readonly scale?: number | undefined;
   /**
    * Fraction of SCENE_HEIGHT this sprite should occupy (0..1).
    * e.g. 0.40 = 40% of viewport height.
    * If omitted, sprite renders at native frame size (1:1 in scene).
+   *
+   * Explicitly allows `undefined` for compatibility with
+   * exactOptionalPropertyTypes (TS2375).
    */
-  readonly sceneRelativeHeight?: number;
-  readonly playing?: boolean;
-  readonly className?: string;
-  readonly onComplete?: () => void;
-  readonly condition?: string;
+  readonly sceneRelativeHeight?: number | undefined;
+  readonly playing?: boolean | undefined;
+  readonly className?: string | undefined;
+  readonly onComplete?: (() => void) | undefined;
+  readonly condition?: string | undefined;
 }
 
 /** State of the sprite animation hook */
