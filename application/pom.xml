@@ -51,6 +51,23 @@
     </dependencies>
 
     <build>
+        <resources>
+            <!-- Default resources -->
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <!-- Narrative XML specs from project root narrative/ directory.
+                 Copies into classpath:narrative/ so PlayerActionSpecLoader,
+                 NpcSpecLoader, NarrativeContentLoader all find their files. -->
+            <resource>
+                <directory>${project.basedir}/../narrative</directory>
+                <targetPath>narrative</targetPath>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
             <!-- Spring Boot Maven Plugin -->
             <plugin>
