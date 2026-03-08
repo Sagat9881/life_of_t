@@ -2,30 +2,29 @@ package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.spec.QuestSpec;
 import ru.lifegame.backend.domain.engine.spec.QuestSpec.StepSpec;
-import ru.lifegame.backend.domain.engine.spec.QuestSpec.DialogueEntry;
 import ru.lifegame.backend.domain.engine.spec.QuestSpec.RewardSpec;
+import ru.lifegame.backend.domain.engine.spec.QuestSpec.DialogueEntry;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class NarrativeQuestEngine {
 
-    private final List<QuestSpec> questSpecs;
+    private final List<QuestSpec> allQuests;
     private final Map<String, QuestState> activeQuests = new LinkedHashMap<>();
 
-    public NarrativeQuestEngine(List<QuestSpec> questSpecs) {
-        this.questSpecs = questSpecs;
+    public NarrativeQuestEngine(List<QuestSpec> allQuests) {
+        this.allQuests = allQuests;
     }
 
     public static class QuestState {
         private final QuestSpec spec;
         private int currentStepIndex;
         private boolean completed;
-        private boolean failed;
 
         public QuestState(QuestSpec spec) {
             this.spec = spec;
             this.currentStepIndex = 0;
+            this.completed = false;
         }
 
         public StepSpec currentStep() {
@@ -33,14 +32,13 @@ public class NarrativeQuestEngine {
             return spec.steps().get(currentStepIndex);
         }
 
+        public boolean isCompleted() { return completed; }
         public QuestSpec spec() { return spec; }
         public int currentStepIndex() { return currentStepIndex; }
-        public boolean isCompleted() { return completed; }
-        public boolean isFailed() { return failed; }
     }
 
     public void activateQuest(String questId) {
-        questSpecs.stream()
+        allQuests.stream()
                 .filter(q -> q.id().equals(questId))
                 .findFirst()
                 .ifPresent(q -> activeQuests.put(questId, new QuestState(q)));
@@ -48,11 +46,10 @@ public class NarrativeQuestEngine {
 
     public List<String> checkAutoActivation(Map<String, Object> context, int currentDay) {
         List<String> activated = new ArrayList<>();
-        for (QuestSpec spec : questSpecs) {
-            if (activeQuests.containsKey(spec.id())) continue;
-            if (spec.triggerDay() > 0 && currentDay >= spec.triggerDay()) {
-                activeQuests.put(spec.id(), new QuestState(spec));
-                activated.add(spec.id());
+        for (QuestSpec q : allQuests) {
+            if (!activeQuests.containsKey(q.id()) && q.triggerDay() <= currentDay) {
+                activeQuests.put(q.id(), new QuestState(q));
+                activated.add(q.id());
             }
         }
         return activated;
@@ -68,7 +65,7 @@ public class NarrativeQuestEngine {
 
     public Optional<StepCompletionResult> tryCompleteStep(String questId, String actionId, Map<String, Object> context) {
         QuestState state = activeQuests.get(questId);
-        if (state == null || state.completed || state.failed) return Optional.empty();
+        if (state == null || state.isCompleted()) return Optional.empty();
 
         StepSpec step = state.currentStep();
         if (step == null) return Optional.empty();
@@ -79,9 +76,7 @@ public class NarrativeQuestEngine {
         if (questDone) state.completed = true;
 
         return Optional.of(new StepCompletionResult(
-                questId, step.id(), questDone,
-                step.dialogue() != null ? step.dialogue() : List.of(),
-                questDone && state.spec.rewards() != null ? state.spec.rewards() : List.of()
+                questId, step.id(), questDone, step.dialogue(), questDone ? state.spec.rewards() : List.of()
         ));
     }
 

@@ -20,19 +20,19 @@ public class NpcRegistry {
         }
     }
 
-    public NpcInstance get(String npcId) {
-        return instances.get(npcId);
+    public Optional<NpcInstance> get(String npcId) {
+        return Optional.ofNullable(instances.get(npcId));
     }
 
     public Collection<NpcInstance> allNamed() {
         return instances.values().stream()
-                .filter(npc -> "named".equals(npc.spec().type()))
+                .filter(i -> "named".equals(i.spec().type()))
                 .collect(Collectors.toList());
     }
 
     public Collection<NpcInstance> allFiller() {
         return instances.values().stream()
-                .filter(npc -> "filler".equals(npc.spec().type()))
+                .filter(i -> "filler".equals(i.spec().type()))
                 .collect(Collectors.toList());
     }
 

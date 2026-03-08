@@ -2,45 +2,44 @@ package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
 import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain;
-import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain.EvaluatedAction;
+import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain.ScoredResult;
 
 import java.util.*;
 
 public class NpcLifecycleEngine {
 
-    private final NpcRegistry registry;
-    private final NpcUtilityBrain brain;
+    private final NpcUtilityBrain utilityBrain;
 
-    public NpcLifecycleEngine(NpcRegistry registry, NpcUtilityBrain brain) {
-        this.registry = registry;
-        this.brain = brain;
+    public NpcLifecycleEngine(NpcRegistry registry, NpcUtilityBrain utilityBrain) {
+        this.utilityBrain = utilityBrain;
     }
 
-    public List<NpcAction> hourlyTick(int currentHour, Map<String, Object> context) {
-        List<NpcAction> actions = new ArrayList<>();
+    public record NpcActivityUpdate(String npcId, String activityId, String animation, String location) {}
+
+    public List<NpcActivityUpdate> hourlyTick(NpcRegistry registry, int currentHour, Map<String, Object> context) {
+        List<NpcActivityUpdate> updates = new ArrayList<>();
         for (NpcInstance npc : registry.all()) {
             var scheduled = npc.getScheduledActivity(currentHour);
-            if (scheduled != null) {
-                npc.setCurrentActivity(scheduled.activity());
-                npc.setCurrentLocation(scheduled.location());
-                npc.setCurrentAnimation(scheduled.animation());
-                actions.add(new NpcAction(npc.spec().id(), scheduled.activity(), scheduled.location(), scheduled.animation(), "schedule"));
+            if (scheduled.isPresent()) {
+                var slot = scheduled.get();
+                npc.setCurrentActivity(slot.activity());
+                npc.setCurrentLocation(slot.location());
+                updates.add(new NpcActivityUpdate(npc.spec().id(), slot.activity(), slot.animation(), slot.location()));
             } else {
-                Optional<EvaluatedAction> best = brain.evaluate(npc, context);
-                best.ifPresent(action -> {
-                    npc.setCurrentActivity(action.actionId());
-                    actions.add(new NpcAction(npc.spec().id(), action.actionId(), npc.currentLocation(), null, "utility_ai"));
-                });
+                var best = utilityBrain.evaluate(npc, context);
+                if (best.isPresent()) {
+                    ScoredResult result = best.get();
+                    npc.setCurrentActivity(result.actionId());
+                    updates.add(new NpcActivityUpdate(npc.spec().id(), result.actionId(), result.animation(), result.location()));
+                }
             }
         }
-        return actions;
+        return updates;
     }
 
-    public void dailyTick(Map<String, Object> context) {
+    public void dailyTick(NpcRegistry registry) {
         for (NpcInstance npc : registry.all()) {
             npc.mood().dailyDecay();
         }
     }
-
-    public record NpcAction(String npcId, String activity, String location, String animation, String source) {}
 }
