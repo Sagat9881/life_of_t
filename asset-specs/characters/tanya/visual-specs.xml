@@ -128,7 +128,7 @@
         </layer>
 
         <!-- === ACCESSORY — gold necklace + stud earrings + watch === -->
-        <layer id="accessory" replace="true">
+        <layer id="accessory" follows="neck" replace="true">
             <pixel-data>
                 <!-- Gold necklace chain across collarbone -->
                 <rect x="44" y="62" w="2" h="2" color="$accessory_gold_shadow"/>

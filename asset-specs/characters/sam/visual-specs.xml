@@ -116,7 +116,7 @@
             </pixel-data>
         </layer>
 
-        <layer id="accessory" replace="true">
+        <layer id="accessory" follows="head" replace="true">
             <pixel-data>
                 <!-- No prominent accessory, just glasses temple arms already in face layer -->
                 <!-- Glasses temple arms extending to ears -->

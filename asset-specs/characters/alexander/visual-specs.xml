@@ -106,7 +106,7 @@
         </layer>
 
         <!-- === ACCESSORY — smart watch === -->
-        <layer id="accessory" replace="true">
+        <layer id="accessory" follows="hand_left" replace="true">
             <pixel-data>
                 <rect x="16" y="116" w="10" h="6" color="$accessory_base"/>
                 <rect x="18" y="117" w="6" h="4" color="$accessory_highlight"/>
