@@ -3,167 +3,217 @@
     <meta>
         <entity-type>ui</entity-type>
         <entity-name>notifications</entity-name>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
         <description>
-            UI-уведомления: тосты, всплывающие подсказки,
-            статусные индикаторы. Появляются поверх игрового
-            экрана при изменении статов, событиях, конфликтах.
+            UI-уведомления (HD): тосты, всплывающие подсказки,
+            статусные индикаторы. Canvas ×2 от v1.0.
+            Больше кадров, больше деталей.
         </description>
     </meta>
 
     <layers>
-        <!-- === TOAST — базовый контейнер === -->
-        <layer id="toast-bg" type="base" z-order="2000" width="160" height="32">
+        <!-- === TOAST — 320×64 === -->
+        <layer id="toast-bg" type="base" z-order="2000" width="320" height="64">
             <pixel-data>
-                <!-- Фон тоста -->
-                <rect x="2" y="2" w="156" h="28" color="#FFFFFF"/>
-                <!-- Тень -->
-                <hline x="4" y="30" len="154" color="#E0E0E0"/>
-                <vline x="158" y="4" len="26" color="#E0E0E0"/>
-                <!-- Скругления (имитация) -->
-                <pixel x="2" y="2" color="#F8F8F8"/>
-                <pixel x="157" y="2" color="#F8F8F8"/>
-                <pixel x="2" y="29" color="#F8F8F8"/>
-                <pixel x="157" y="29" color="#F8F8F8"/>
+                <!-- Основной фон -->
+                <rect x="4" y="4" w="312" h="56" color="#FFFFFF"/>
+                <!-- Скругления углов -->
+                <pixel x="4" y="4" color="#FAFAFA"/>
+                <pixel x="5" y="4" color="#FCFCFC"/>
+                <pixel x="4" y="5" color="#FCFCFC"/>
+                <pixel x="315" y="4" color="#FAFAFA"/>
+                <pixel x="314" y="4" color="#FCFCFC"/>
+                <pixel x="315" y="5" color="#FCFCFC"/>
+                <pixel x="4" y="59" color="#FAFAFA"/>
+                <pixel x="5" y="59" color="#FCFCFC"/>
+                <pixel x="4" y="58" color="#FCFCFC"/>
+                <pixel x="315" y="59" color="#FAFAFA"/>
+                <pixel x="314" y="59" color="#FCFCFC"/>
+                <pixel x="315" y="58" color="#FCFCFC"/>
+                <!-- Тень нижняя -->
+                <hline x="8" y="60" len="304" color="#E8E8E8"/>
+                <hline x="6" y="61" len="308" color="#E0E0E0"/>
+                <hline x="8" y="62" len="304" color="#ECECEC"/>
+                <!-- Тень правая -->
+                <vline x="316" y="8" len="48" color="#E8E8E8"/>
+                <vline x="317" y="8" len="48" color="#E0E0E0"/>
+                <vline x="318" y="8" len="48" color="#ECECEC"/>
+                <!-- Внутренняя градиентная полоска верх -->
+                <hline x="6" y="5" len="308" color="#F8F8F8"/>
             </pixel-data>
         </layer>
 
-        <!-- Акцентная полоска слева (цвет зависит от типа) -->
-        <layer id="toast-accent-success" type="overlay" z-order="2001" width="160" height="32"
+        <!-- Акценты по типу -->
+        <layer id="toast-accent-success" type="overlay" z-order="2001" width="320" height="64"
                condition="type:success">
             <pixel-data>
-                <rect x="2" y="3" w="3" h="26" color="#4CAF50"/>
+                <rect x="4" y="6" w="6" h="52" color="#4CAF50"/>
+                <pixel x="4" y="6" color="#66BB6A"/>
+                <pixel x="4" y="57" color="#388E3C"/>
             </pixel-data>
         </layer>
 
-        <layer id="toast-accent-warning" type="overlay" z-order="2001" width="160" height="32"
+        <layer id="toast-accent-warning" type="overlay" z-order="2001" width="320" height="64"
                condition="type:warning">
             <pixel-data>
-                <rect x="2" y="3" w="3" h="26" color="#FFA726"/>
+                <rect x="4" y="6" w="6" h="52" color="#FFA726"/>
+                <pixel x="4" y="6" color="#FFB74D"/>
+                <pixel x="4" y="57" color="#F57C00"/>
             </pixel-data>
         </layer>
 
-        <layer id="toast-accent-danger" type="overlay" z-order="2001" width="160" height="32"
+        <layer id="toast-accent-danger" type="overlay" z-order="2001" width="320" height="64"
                condition="type:danger">
             <pixel-data>
-                <rect x="2" y="3" w="3" h="26" color="#E74C3C"/>
+                <rect x="4" y="6" w="6" h="52" color="#E74C3C"/>
+                <pixel x="4" y="6" color="#EF5350"/>
+                <pixel x="4" y="57" color="#C62828"/>
             </pixel-data>
         </layer>
 
-        <layer id="toast-accent-info" type="overlay" z-order="2001" width="160" height="32"
+        <layer id="toast-accent-info" type="overlay" z-order="2001" width="320" height="64"
                condition="type:info">
             <pixel-data>
-                <rect x="2" y="3" w="3" h="26" color="#4FC3F7"/>
+                <rect x="4" y="6" w="6" h="52" color="#4FC3F7"/>
+                <pixel x="4" y="6" color="#81D4FA"/>
+                <pixel x="4" y="57" color="#0288D1"/>
             </pixel-data>
         </layer>
 
-        <layer id="toast-accent-love" type="overlay" z-order="2001" width="160" height="32"
+        <layer id="toast-accent-love" type="overlay" z-order="2001" width="320" height="64"
                condition="type:love">
             <pixel-data>
-                <rect x="2" y="3" w="3" h="26" color="#FF6B9D"/>
+                <rect x="4" y="6" w="6" h="52" color="#FF6B9D"/>
+                <pixel x="4" y="6" color="#FF8FB3"/>
+                <pixel x="4" y="57" color="#E04578"/>
             </pixel-data>
         </layer>
 
-        <!-- === STAT CHANGE BUBBLE — маленький пузырёк +/-N === -->
-        <layer id="stat-bubble" type="animated-overlay" z-order="2000" width="24" height="12">
+        <layer id="toast-accent-achievement" type="overlay" z-order="2001" width="320" height="64"
+               condition="type:achievement">
             <pixel-data>
-                <rect x="2" y="1" w="20" h="10" color="#FFFFFF"/>
-                <hline x="4" y="11" len="16" color="#E0E0E0"/>
-                <pixel x="2" y="1" color="#F0F0F0"/>
-                <pixel x="21" y="1" color="#F0F0F0"/>
+                <rect x="4" y="6" w="6" h="52" color="#FFD740"/>
+                <pixel x="4" y="6" color="#FFE57F"/>
+                <pixel x="4" y="57" color="#FFC107"/>
             </pixel-data>
         </layer>
 
-        <!-- === EVENT ALERT — иконка восклицательного знака === -->
-        <layer id="event-alert" type="animated-overlay" z-order="2000" width="12" height="12">
+        <!-- === STAT CHANGE BUBBLE — 48×24 === -->
+        <layer id="stat-bubble" type="animated-overlay" z-order="2000" width="48" height="24">
+            <pixel-data>
+                <rect x="4" y="2" w="40" h="20" color="#FFFFFF"/>
+                <!-- Скругления -->
+                <pixel x="4" y="2" color="#F8F8F8"/>
+                <pixel x="43" y="2" color="#F8F8F8"/>
+                <pixel x="4" y="21" color="#F8F8F8"/>
+                <pixel x="43" y="21" color="#F8F8F8"/>
+                <!-- Тень -->
+                <hline x="8" y="22" len="32" color="#E0E0E0"/>
+                <hline x="6" y="23" len="36" color="#ECECEC"/>
+                <vline x="44" y="4" len="16" color="#E8E8E8"/>
+                <vline x="45" y="4" len="16" color="#ECECEC"/>
+            </pixel-data>
+        </layer>
+
+        <!-- === EVENT ALERT — 24×24 === -->
+        <layer id="event-alert" type="animated-overlay" z-order="2000" width="24" height="24">
             <pixel-data>
                 <!-- Круг -->
-                <rect x="2" y="1" w="8" h="10" color="#FF6B9D"/>
-                <pixel x="1" y="3" color="#FF6B9D"/>
-                <pixel x="1" y="8" color="#FF6B9D"/>
-                <pixel x="10" y="3" color="#FF6B9D"/>
-                <pixel x="10" y="8" color="#FF6B9D"/>
+                <rect x="4" y="2" w="16" h="20" color="#FF6B9D"/>
+                <rect x="2" y="4" w="20" h="16" color="#FF6B9D"/>
+                <pixel x="3" y="3" color="#FF6B9D"/>
+                <pixel x="20" y="3" color="#FF6B9D"/>
+                <pixel x="3" y="20" color="#FF6B9D"/>
+                <pixel x="20" y="20" color="#FF6B9D"/>
+                <!-- Блик -->
+                <pixel x="6" y="4" color="#FF8FB3"/>
+                <pixel x="7" y="4" color="#FF8FB3"/>
+                <pixel x="5" y="5" color="#FF8FB3"/>
                 <!-- ! -->
-                <rect x="5" y="3" w="2" h="4" color="#FFFFFF"/>
-                <rect x="5" y="8" w="2" h="1" color="#FFFFFF"/>
+                <rect x="10" y="6" w="4" h="8" color="#FFFFFF"/>
+                <rect x="10" y="16" w="4" h="2" color="#FFFFFF"/>
             </pixel-data>
         </layer>
 
-        <!-- === CONFLICT ALERT — молния === -->
-        <layer id="conflict-alert" type="animated-overlay" z-order="2000" width="12" height="14">
+        <!-- === CONFLICT ALERT — 24×28 === -->
+        <layer id="conflict-alert" type="animated-overlay" z-order="2000" width="24" height="28">
             <pixel-data>
-                <pixel x="7" y="1" color="#FFA726"/>
-                <pixel x="6" y="2" color="#FFA726"/>
-                <pixel x="5" y="3" color="#FFD740"/>
-                <rect x="4" y="4" w="4" h="1" color="#FFA726"/>
-                <pixel x="7" y="5" color="#FFA726"/>
-                <pixel x="6" y="6" color="#FFD740"/>
-                <pixel x="5" y="7" color="#FFA726"/>
-                <pixel x="4" y="8" color="#FFA726"/>
-                <pixel x="3" y="9" color="#FFD740"/>
+                <rect x="14" y="2" w="2" h="2" color="#FFA726"/>
+                <rect x="12" y="4" w="2" h="2" color="#FFA726"/>
+                <rect x="10" y="6" w="2" h="2" color="#FFD740"/>
+                <rect x="8" y="8" w="8" h="2" color="#FFA726"/>
+                <rect x="14" y="10" w="2" h="2" color="#FFA726"/>
+                <rect x="12" y="12" w="2" h="2" color="#FFD740"/>
+                <rect x="10" y="14" w="2" h="2" color="#FFA726"/>
+                <rect x="8" y="16" w="2" h="2" color="#FFA726"/>
+                <rect x="6" y="18" w="2" h="2" color="#FFD740"/>
+                <!-- Блики -->
+                <pixel x="14" y="2" color="#FFE082"/>
+                <pixel x="10" y="6" color="#FFE57F"/>
+                <pixel x="12" y="12" color="#FFE57F"/>
+                <pixel x="6" y="18" color="#FFE082"/>
             </pixel-data>
         </layer>
     </layers>
 
     <animations>
-        <!-- Toast: выезжает сверху, задерживается, уезжает -->
-        <animation name="toast-show" frames="8" fps="6" loop="false"
-                   frame-width="160" frame-height="32">
-            <description>
-                Тост появляется сверху экрана: слайд вниз (3 кадра),
-                пауза на месте (3 кадра), слайд вверх и исчезновение (2 кадра).
-                Easing: ease-out при появлении, ease-in при исчезновении.
-            </description>
-            <frame index="0" layer-offsets="toast-bg:0,-32" alpha="0.5"/>
-            <frame index="1" layer-offsets="toast-bg:0,-16" alpha="0.8"/>
-            <frame index="2" layer-offsets="toast-bg:0,0" alpha="1.0"/>
-            <frame index="3" layer-offsets="toast-bg:0,0" alpha="1.0"/>
+        <!-- Toast: 12 кадров, плавное появление/исчезновение -->
+        <animation name="toast-show" frames="12" fps="6" loop="false"
+                   frame-width="320" frame-height="64">
+            <frame index="0" layer-offsets="toast-bg:0,-64" alpha="0.0"/>
+            <frame index="1" layer-offsets="toast-bg:0,-48" alpha="0.3"/>
+            <frame index="2" layer-offsets="toast-bg:0,-24" alpha="0.6"/>
+            <frame index="3" layer-offsets="toast-bg:0,-8" alpha="0.9"/>
             <frame index="4" layer-offsets="toast-bg:0,0" alpha="1.0"/>
             <frame index="5" layer-offsets="toast-bg:0,0" alpha="1.0"/>
-            <frame index="6" layer-offsets="toast-bg:0,-16" alpha="0.6"/>
-            <frame index="7" layer-offsets="toast-bg:0,-32" alpha="0.0"/>
+            <frame index="6" layer-offsets="toast-bg:0,0" alpha="1.0"/>
+            <frame index="7" layer-offsets="toast-bg:0,0" alpha="1.0"/>
+            <frame index="8" layer-offsets="toast-bg:0,0" alpha="1.0"/>
+            <frame index="9" layer-offsets="toast-bg:0,-8" alpha="0.8"/>
+            <frame index="10" layer-offsets="toast-bg:0,-32" alpha="0.4"/>
+            <frame index="11" layer-offsets="toast-bg:0,-64" alpha="0.0"/>
         </animation>
 
-        <!-- Stat bubble: всплывает вверх от персонажа -->
-        <animation name="stat-change" frames="6" fps="4" loop="false"
-                   frame-width="24" frame-height="12"
+        <!-- Stat bubble: 10 кадров -->
+        <animation name="stat-change" frames="10" fps="4" loop="false"
+                   frame-width="48" frame-height="24"
                    spawn="above-stat-bar">
-            <description>
-                Пузырёк с +5 или -3 поднимается вверх
-                от полоски стата и растворяется.
-            </description>
-            <frame index="0" layer-offsets="stat-bubble:0,0" alpha="0.8"/>
-            <frame index="1" layer-offsets="stat-bubble:0,-3" alpha="1.0"/>
+            <frame index="0" layer-offsets="stat-bubble:0,0" alpha="0.5"/>
+            <frame index="1" layer-offsets="stat-bubble:0,-3" alpha="0.8"/>
             <frame index="2" layer-offsets="stat-bubble:0,-6" alpha="1.0"/>
-            <frame index="3" layer-offsets="stat-bubble:0,-9" alpha="0.8"/>
-            <frame index="4" layer-offsets="stat-bubble:0,-12" alpha="0.5"/>
-            <frame index="5" layer-offsets="stat-bubble:0,-14" alpha="0.0"/>
+            <frame index="3" layer-offsets="stat-bubble:0,-9" alpha="1.0"/>
+            <frame index="4" layer-offsets="stat-bubble:0,-12" alpha="1.0"/>
+            <frame index="5" layer-offsets="stat-bubble:0,-15" alpha="0.9"/>
+            <frame index="6" layer-offsets="stat-bubble:0,-18" alpha="0.75"/>
+            <frame index="7" layer-offsets="stat-bubble:0,-21" alpha="0.5"/>
+            <frame index="8" layer-offsets="stat-bubble:0,-24" alpha="0.25"/>
+            <frame index="9" layer-offsets="stat-bubble:0,-27" alpha="0.05"/>
         </animation>
 
-        <!-- Event alert: пульсирующий восклицательный знак -->
-        <animation name="event-pulse" frames="4" fps="3" loop="true"
-                   frame-width="12" frame-height="12">
-            <description>
-                Иконка пульсирует — масштабирование через
-                layer-offsets (сдвиг на ±1px имитирует «дыхание»).
-            </description>
+        <!-- Event alert: 8 кадров, пульсация -->
+        <animation name="event-pulse" frames="8" fps="3" loop="true"
+                   frame-width="24" frame-height="24">
             <frame index="0" layer-offsets="event-alert:0,0" alpha="1.0"/>
             <frame index="1" layer-offsets="event-alert:0,-1" alpha="1.0"/>
-            <frame index="2" layer-offsets="event-alert:0,0" alpha="0.9"/>
-            <frame index="3" layer-offsets="event-alert:0,0" alpha="1.0"/>
+            <frame index="2" layer-offsets="event-alert:0,-2" alpha="0.95"/>
+            <frame index="3" layer-offsets="event-alert:0,-1" alpha="1.0"/>
+            <frame index="4" layer-offsets="event-alert:0,0" alpha="1.0"/>
+            <frame index="5" layer-offsets="event-alert:0,0" alpha="0.9"/>
+            <frame index="6" layer-offsets="event-alert:0,-1" alpha="0.95"/>
+            <frame index="7" layer-offsets="event-alert:0,0" alpha="1.0"/>
         </animation>
 
-        <!-- Conflict alert: молния мерцает -->
-        <animation name="conflict-flash" frames="4" fps="4" loop="true"
-                   frame-width="12" frame-height="14">
-            <description>
-                Молния мерцает — чередование яркости
-                и лёгкий сдвиг, имитация грозового разряда.
-            </description>
+        <!-- Conflict alert: 8 кадров, мерцание -->
+        <animation name="conflict-flash" frames="8" fps="4" loop="true"
+                   frame-width="24" frame-height="28">
             <frame index="0" layer-offsets="conflict-alert:0,0" alpha="1.0"/>
-            <frame index="1" layer-offsets="conflict-alert:1,0" alpha="0.7"/>
+            <frame index="1" layer-offsets="conflict-alert:1,0" alpha="0.8"/>
             <frame index="2" layer-offsets="conflict-alert:0,0" alpha="1.0"/>
-            <frame index="3" layer-offsets="conflict-alert:-1,0" alpha="0.5"/>
+            <frame index="3" layer-offsets="conflict-alert:-1,0" alpha="0.6"/>
+            <frame index="4" layer-offsets="conflict-alert:0,0" alpha="1.0"/>
+            <frame index="5" layer-offsets="conflict-alert:2,0" alpha="0.7"/>
+            <frame index="6" layer-offsets="conflict-alert:0,0" alpha="1.0"/>
+            <frame index="7" layer-offsets="conflict-alert:-1,0" alpha="0.5"/>
         </animation>
     </animations>
 
