@@ -13,31 +13,31 @@ public class NpcRegistry {
     private final Map<String, NpcInstance> instances = new LinkedHashMap<>();
     private final NpcRelationshipGraph relationshipGraph;
 
-    public NpcRegistry(List<NpcSpec> specs, NpcRelationshipGraph relationshipGraph) {
-        this.relationshipGraph = relationshipGraph;
+    public NpcRegistry(List<NpcSpec> specs) {
+        this.relationshipGraph = new NpcRelationshipGraph();
         for (NpcSpec spec : specs) {
             instances.put(spec.id(), NpcInstance.fromSpec(spec));
         }
     }
 
-    public Optional<NpcInstance> get(String npcId) {
-        return Optional.ofNullable(instances.get(npcId));
+    public NpcInstance get(String npcId) {
+        return instances.get(npcId);
     }
 
-    public Collection<NpcInstance> allNamed() {
+    public Collection<NpcInstance> all() {
+        return Collections.unmodifiableCollection(instances.values());
+    }
+
+    public List<NpcInstance> named() {
         return instances.values().stream()
                 .filter(i -> "named".equals(i.spec().type()))
                 .collect(Collectors.toList());
     }
 
-    public Collection<NpcInstance> allFiller() {
+    public List<NpcInstance> filler() {
         return instances.values().stream()
                 .filter(i -> "filler".equals(i.spec().type()))
                 .collect(Collectors.toList());
-    }
-
-    public Collection<NpcInstance> all() {
-        return Collections.unmodifiableCollection(instances.values());
     }
 
     public NpcRelationshipGraph relationshipGraph() {
