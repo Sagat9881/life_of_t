@@ -1,52 +1,52 @@
 package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.spec.EventSpec;
-import ru.lifegame.backend.domain.engine.spec.EventSpec.*;
+import ru.lifegame.backend.domain.engine.spec.EventSpec.ConditionSpec;
+import ru.lifegame.backend.domain.engine.spec.EventSpec.EffectSpec;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NarrativeEventEngine {
 
     private final List<EventSpec> eventSpecs;
-    private final Map<String, Integer> lastFiredDay = new HashMap<>();
 
     public NarrativeEventEngine(List<EventSpec> eventSpecs) {
-        this.eventSpecs = eventSpecs;
+        this.eventSpecs = eventSpecs != null ? eventSpecs : List.of();
     }
 
-    public record FiredEvent(EventSpec spec, List<EffectSpec> appliedEffects) {}
-
-    public List<FiredEvent> checkEvents(int currentDay, Map<String, Integer> gameState) {
-        List<FiredEvent> fired = new ArrayList<>();
-        for (EventSpec es : eventSpecs) {
-            if (!es.meta().repeatable() && lastFiredDay.containsKey(es.id())) continue;
-            if (es.meta().repeatable() && lastFiredDay.containsKey(es.id())) {
-                if (currentDay - lastFiredDay.get(es.id()) < es.meta().cooldownDays()) continue;
-            }
-            if (allConditionsMet(es.triggers(), gameState)) {
-                fired.add(new FiredEvent(es, List.of()));
-                lastFiredDay.put(es.id(), currentDay);
-            }
-        }
-        fired.sort(Comparator.comparingInt(f -> -f.spec().meta().priority()));
-        return fired;
+    public List<FiredEvent> evaluate(Map<String, Object> context) {
+        return eventSpecs.stream()
+                .filter(spec -> allConditionsMet(spec.conditions(), context))
+                .map(spec -> new FiredEvent(spec, List.of()))
+                .collect(Collectors.toList());
     }
 
-    private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Integer> state) {
-        for (ConditionSpec c : conditions) {
-            Integer val = state.get(c.target());
-            if (val == null) return false;
-            int threshold = Integer.parseInt(c.value());
-            boolean met = switch (c.operator()) {
-                case "gte" -> val >= threshold;
-                case "lte" -> val <= threshold;
-                case "gt" -> val > threshold;
-                case "lt" -> val < threshold;
-                case "eq" -> val == threshold;
-                default -> true;
+    public record FiredEvent(
+            EventSpec spec,
+            List<EffectSpec> appliedEffects
+    ) {}
+
+    private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> context) {
+        if (conditions == null || conditions.isEmpty()) return true;
+        return conditions.stream().allMatch(c -> evaluateCondition(c, context));
+    }
+
+    private boolean evaluateCondition(ConditionSpec condition, Map<String, Object> context) {
+        Object value = context.get(condition.target());
+        if (value == null) return false;
+        if (value instanceof Number num) {
+            double actual = num.doubleValue();
+            double expected = Double.parseDouble(condition.value());
+            return switch (condition.operator()) {
+                case "gte" -> actual >= expected;
+                case "lte" -> actual <= expected;
+                case "gt" -> actual > expected;
+                case "lt" -> actual < expected;
+                case "eq" -> actual == expected;
+                default -> false;
             };
-            if (!met) return false;
         }
-        return true;
+        return value.toString().equals(condition.value());
     }
 }

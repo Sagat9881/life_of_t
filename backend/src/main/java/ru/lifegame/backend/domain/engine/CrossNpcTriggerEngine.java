@@ -1,46 +1,58 @@
 package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
-import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
-import ru.lifegame.backend.domain.npc.graph.NpcRelationshipEdge;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CrossNpcTriggerEngine {
 
-    public record CrossNpcTrigger(String id, String npcA, String npcB, String axis, String operator, int threshold, String eventId) {}
+    private final List<CrossNpcTrigger> triggers;
 
-    private final List<CrossNpcTrigger> triggers = new ArrayList<>();
-
-    public void registerTrigger(CrossNpcTrigger trigger) {
-        triggers.add(trigger);
+    public CrossNpcTriggerEngine(List<CrossNpcTrigger> triggers) {
+        this.triggers = triggers != null ? triggers : List.of();
     }
 
-    public List<String> checkTriggers(NpcRegistry registry) {
-        List<String> firedEventIds = new ArrayList<>();
-        NpcRelationshipGraph graph = registry.relationshipGraph();
+    public record CrossNpcTrigger(
+            String id,
+            String sourceNpcId,
+            String targetNpcId,
+            String conditionType,
+            String operator,
+            String value,
+            String effectType,
+            String effectValue
+    ) {}
 
-        for (CrossNpcTrigger t : triggers) {
-            Optional<NpcRelationshipEdge> edge = graph.getEdge(t.npcA(), t.npcB());
-            if (edge.isEmpty()) continue;
+    public record FiredTrigger(String triggerId, String sourceNpcId, String targetNpcId, String effectType, String effectValue) {}
 
-            int val = switch (t.axis()) {
-                case "tension" -> edge.get().tension();
-                case "respect" -> edge.get().respect();
-                case "familiarity" -> edge.get().familiarity();
-                default -> 0;
-            };
+    public List<FiredTrigger> evaluate(NpcRegistry registry, Map<String, Object> context) {
+        List<FiredTrigger> fired = new ArrayList<>();
+        for (CrossNpcTrigger trigger : triggers) {
+            if (checkTriggerCondition(trigger, registry, context)) {
+                fired.add(new FiredTrigger(
+                        trigger.id(), trigger.sourceNpcId(), trigger.targetNpcId(),
+                        trigger.effectType(), trigger.effectValue()));
+            }
+        }
+        return fired;
+    }
 
-            boolean met = switch (t.operator()) {
-                case "gte" -> val >= t.threshold();
-                case "lte" -> val <= t.threshold();
-                case "gt" -> val > t.threshold();
-                case "lt" -> val < t.threshold();
+    private boolean checkTriggerCondition(CrossNpcTrigger trigger, NpcRegistry registry, Map<String, Object> context) {
+        String key = trigger.conditionType() + "." + trigger.sourceNpcId();
+        Object val = context.get(key);
+        if (val == null) return false;
+        if (val instanceof Number num) {
+            double actual = num.doubleValue();
+            double expected = Double.parseDouble(trigger.value());
+            return switch (trigger.operator()) {
+                case "gte" -> actual >= expected;
+                case "lte" -> actual <= expected;
+                case "gt" -> actual > expected;
+                case "lt" -> actual < expected;
                 default -> false;
             };
-
-            if (met) firedEventIds.add(t.eventId());
         }
-        return firedEventIds;
+        return false;
     }
 }

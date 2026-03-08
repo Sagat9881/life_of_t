@@ -1,21 +1,20 @@
 package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
+import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain;
 import ru.lifegame.backend.domain.engine.spec.NpcSpec;
-import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NpcRegistry {
 
     private final Map<String, NpcInstance> instances = new LinkedHashMap<>();
     private final NpcRelationshipGraph relationshipGraph = new NpcRelationshipGraph();
 
-    public void registerAll(List<NpcSpec> specs) {
+    public void registerFromSpecs(List<NpcSpec> specs) {
         for (NpcSpec spec : specs) {
-            NpcInstance instance = spec.isNamed()
-                ? NpcInstance.createNamed(spec)
-                : NpcInstance.createFiller(spec);
+            NpcInstance instance = NpcInstance.fromSpec(spec);
             instances.put(spec.id(), instance);
         }
     }
@@ -24,16 +23,27 @@ public class NpcRegistry {
         return Optional.ofNullable(instances.get(npcId));
     }
 
-    public Collection<NpcInstance> all() {
+    public Collection<NpcInstance> getAll() {
         return Collections.unmodifiableCollection(instances.values());
     }
 
     public NpcInstance getOrThrow(String npcId) {
-        return Optional.ofNullable(instances.get(npcId))
-            .orElseThrow(() -> new IllegalArgumentException("NPC not found: " + npcId));
+        NpcInstance inst = instances.get(npcId);
+        if (inst == null) throw new IllegalArgumentException("NPC not found: " + npcId);
+        return inst;
     }
 
-    public NpcRelationshipGraph relationshipGraph() {
+    public List<NpcInstance> getByCategory(String category) {
+        return instances.values().stream()
+                .filter(i -> i.spec().category().equals(category))
+                .collect(Collectors.toList());
+    }
+
+    public NpcRelationshipGraph getRelationshipGraph() {
         return relationshipGraph;
+    }
+
+    public int size() {
+        return instances.size();
     }
 }

@@ -2,10 +2,9 @@ package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
 import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain;
-import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain.ScoredResult;
-import ru.lifegame.backend.domain.engine.spec.NpcSpec;
+import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain.ScoredCandidate;
 
-import java.util.Optional;
+import java.util.*;
 
 public class NpcLifecycleEngine {
 
@@ -17,32 +16,25 @@ public class NpcLifecycleEngine {
         this.brain = brain;
     }
 
-    public void hourlyTick(int currentHour, int currentDay) {
-        for (NpcInstance npc : registry.all()) {
-            updateScheduleActivity(npc, currentHour);
-            Optional<ScoredResult> action = brain.evaluate(npc, currentHour, currentDay);
-            action.ifPresent(a -> {
-                // NPC decided to initiate — store as pending event
+    public void hourlyTick(int currentHour, Map<String, Object> context) {
+        for (NpcInstance npc : registry.getAll()) {
+            npc.updateScheduleActivity(currentHour);
+            Optional<ScoredCandidate> best = brain.evaluate(npc, context);
+            best.ifPresent(candidate -> {
+                if (candidate.score() > 0.5) {
+                    npc.setCurrentActivity(candidate.actionId(), candidate.actionId(), "default");
+                }
             });
         }
     }
 
-    public void dailyTick(int currentDay) {
-        for (NpcInstance npc : registry.all()) {
-            npc.mood().dailyDecay();
-            if (npc.spec().memoryEnabled()) {
-                npc.memory().onDayEnd();
-            }
+    public void dailyTick(Map<String, Object> context) {
+        for (NpcInstance npc : registry.getAll()) {
+            npc.getMood().dailyDecay();
         }
     }
 
-    private void updateScheduleActivity(NpcInstance npc, int currentHour) {
-        for (NpcSpec.ScheduleSlot slot : npc.spec().schedule()) {
-            if (currentHour >= slot.start() && currentHour < slot.end()) {
-                npc.updateActivity(slot.activity(), slot.location(), slot.animation());
-                return;
-            }
-        }
-        npc.updateActivity("idle", "home", "idle");
+    public NpcRegistry getRegistry() {
+        return registry;
     }
 }
