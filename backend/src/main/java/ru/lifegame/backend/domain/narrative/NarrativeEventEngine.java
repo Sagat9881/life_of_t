@@ -1,7 +1,7 @@
 package ru.lifegame.backend.domain.narrative;
 
 
-import ru.lifegame.backend.domain.narrative.spec.EventSpec;
+import ru.lifegame.backend.domain.npc.spec.EventSpec;
 
 import java.util.*;
 import java.util.stream.Collectors;
