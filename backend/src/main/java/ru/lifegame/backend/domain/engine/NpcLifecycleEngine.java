@@ -2,47 +2,47 @@ package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
 import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain;
+import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain.ScoredResult;
 import ru.lifegame.backend.domain.engine.spec.NpcSpec;
-import ru.lifegame.backend.domain.npc.engine.NpcMood;
 
-import java.util.List;
+import java.util.Optional;
 
 public class NpcLifecycleEngine {
 
+    private final NpcRegistry registry;
     private final NpcUtilityBrain brain;
 
-    public NpcLifecycleEngine(NpcUtilityBrain brain) {
+    public NpcLifecycleEngine(NpcRegistry registry, NpcUtilityBrain brain) {
+        this.registry = registry;
         this.brain = brain;
     }
 
-    public void hourlyTick(NpcRegistry registry, int currentHour) {
-        for (var npc : registry.all()) {
-            updateActivityFromSchedule(npc, currentHour);
-            var candidate = brain.evaluate(npc);
-            candidate.ifPresent(c -> {
-                // NPC-initiated event candidate — will be processed by event engine
+    public void hourlyTick(int currentHour, int currentDay) {
+        for (NpcInstance npc : registry.all()) {
+            updateScheduleActivity(npc, currentHour);
+            Optional<ScoredResult> action = brain.evaluate(npc, currentHour, currentDay);
+            action.ifPresent(a -> {
+                // NPC decided to initiate — store as pending event
             });
         }
     }
 
-    public void dailyTick(NpcRegistry registry) {
-        for (var npc : registry.all()) {
-            NpcMood current = npc.mood();
-            NpcMood decayed = current.dailyTick();
-            npc.setMood(decayed);
+    public void dailyTick(int currentDay) {
+        for (NpcInstance npc : registry.all()) {
+            npc.mood().dailyDecay();
             if (npc.spec().memoryEnabled()) {
                 npc.memory().onDayEnd();
             }
         }
     }
 
-    private void updateActivityFromSchedule(NpcInstance npc, int currentHour) {
-        for (var slot : npc.spec().schedule()) {
+    private void updateScheduleActivity(NpcInstance npc, int currentHour) {
+        for (NpcSpec.ScheduleSlot slot : npc.spec().schedule()) {
             if (currentHour >= slot.start() && currentHour < slot.end()) {
                 npc.updateActivity(slot.activity(), slot.location(), slot.animation());
                 return;
             }
         }
-        npc.updateActivity("idle", "unknown", "idle");
+        npc.updateActivity("idle", "home", "idle");
     }
 }

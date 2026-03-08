@@ -1,7 +1,6 @@
 package ru.lifegame.backend.domain.engine.runtime;
 
 import ru.lifegame.backend.domain.engine.spec.NpcSpec;
-import ru.lifegame.backend.domain.engine.spec.ConditionSpec;
 import ru.lifegame.backend.domain.npc.engine.NpcMood;
 
 import java.util.Comparator;
@@ -10,71 +9,78 @@ import java.util.Optional;
 
 public class NpcUtilityBrain {
 
-    private final ConditionEvaluator conditionEvaluator;
+    public record ScoredResult(NpcSpec.ActionSpec action, double score) {}
 
-    public NpcUtilityBrain(ConditionEvaluator conditionEvaluator) {
-        this.conditionEvaluator = conditionEvaluator;
-    }
-
-    public record ScoredCandidate(NpcSpec.ActionSpec action, double score) {}
-
-    public Optional<ScoredCandidate> evaluate(NpcInstance npc) {
+    public Optional<ScoredResult> evaluate(NpcInstance npc, int currentHour, int currentDay) {
         return npc.spec().actions().stream()
-            .filter(a -> allConditionsMet(a.conditions(), npc))
-            .map(a -> new ScoredCandidate(a, calculateScore(a, npc)))
-            .max(Comparator.comparingDouble(ScoredCandidate::score));
+            .map(action -> new ScoredResult(action, calculateScore(action, npc, currentHour, currentDay)))
+            .filter(sr -> sr.score() > 0)
+            .max(Comparator.comparingDouble(ScoredResult::score));
     }
 
-    private boolean allConditionsMet(List<ConditionSpec> conditions, NpcInstance npc) {
-        if (conditions == null || conditions.isEmpty()) return true;
-        return conditions.stream().allMatch(c -> conditionEvaluator.evaluate(c, npc));
+    private double calculateScore(NpcSpec.ActionSpec action, NpcInstance npc, int currentHour, int currentDay) {
+        double score = action.baseScore();
+        NpcMood mood = npc.mood();
+
+        for (NpcSpec.ConditionSpec cond : action.conditions()) {
+            if (!evaluateCondition(cond, npc, currentHour, currentDay)) {
+                return 0.0;
+            }
+            score += conditionBonus(cond, mood);
+        }
+        return score;
     }
 
-    private double calculateScore(NpcSpec.ActionSpec action, NpcInstance npc) {
-        double base = action.baseScore();
-        NpcMood m = npc.mood();
-        double moodMultiplier = 1.0;
-        if (m.loneliness() > 60) moodMultiplier += 0.3;
-        if (m.irritability() > 50) moodMultiplier -= 0.2;
-        if (m.energy() < 30) moodMultiplier -= 0.3;
-        if (m.affection() > 60) moodMultiplier += 0.2;
-        return base * Math.max(0.1, moodMultiplier);
+    private boolean evaluateCondition(NpcSpec.ConditionSpec cond, NpcInstance npc, int currentHour, int currentDay) {
+        return switch (cond.type()) {
+            case "mood" -> evaluateMoodCondition(cond, npc.mood());
+            case "schedule" -> "available".equals(cond.value()) || isInSchedule(npc, currentHour);
+            case "memory" -> evaluateMemoryCondition(cond, npc);
+            case "day" -> evaluateDayCondition(cond, currentDay);
+            default -> true;
+        };
     }
 
-    public record ConditionEvaluator() {
-        public boolean evaluate(ConditionSpec spec, NpcInstance npc) {
-            return switch (spec.type()) {
-                case "mood" -> evaluateMood(spec, npc.mood());
-                case "schedule" -> true;
-                case "memory" -> evaluateMemory(spec, npc);
-                default -> true;
-            };
+    private boolean evaluateMoodCondition(NpcSpec.ConditionSpec cond, NpcMood mood) {
+        int val = mood.getAxis(cond.target());
+        int threshold = Integer.parseInt(cond.value());
+        return switch (cond.operator()) {
+            case "gte" -> val >= threshold;
+            case "lte" -> val <= threshold;
+            case "gt" -> val > threshold;
+            case "lt" -> val < threshold;
+            case "eq" -> val == threshold;
+            default -> true;
+        };
+    }
+
+    private boolean isInSchedule(NpcInstance npc, int currentHour) {
+        return npc.spec().schedule().stream()
+            .anyMatch(s -> currentHour >= s.start() && currentHour < s.end());
+    }
+
+    private boolean evaluateMemoryCondition(NpcSpec.ConditionSpec cond, NpcInstance npc) {
+        if (!npc.spec().memoryEnabled()) return false;
+        return switch (cond.target()) {
+            case "work_obsession" -> npc.memory().detectPattern("GO_TO_WORK", 3);
+            case "being_ignored" -> npc.memory().isBeingIgnored(3);
+            default -> false;
+        };
+    }
+
+    private boolean evaluateDayCondition(NpcSpec.ConditionSpec cond, int currentDay) {
+        int threshold = Integer.parseInt(cond.value());
+        return switch (cond.operator()) {
+            case "gte" -> currentDay >= threshold;
+            case "lte" -> currentDay <= threshold;
+            default -> true;
+        };
+    }
+
+    private double conditionBonus(NpcSpec.ConditionSpec cond, NpcMood mood) {
+        if ("mood".equals(cond.type())) {
+            return mood.getAxis(cond.target()) / 100.0 * 0.3;
         }
-        private boolean evaluateMood(ConditionSpec spec, NpcMood mood) {
-            int actual = switch (spec.target()) {
-                case "happiness" -> mood.happiness();
-                case "anxiety" -> mood.anxiety();
-                case "loneliness" -> mood.loneliness();
-                case "irritability" -> mood.irritability();
-                case "energy" -> mood.energy();
-                case "affection" -> mood.affection();
-                default -> 0;
-            };
-            return switch (spec.operator()) {
-                case "gte" -> actual >= spec.intValue();
-                case "lte" -> actual <= spec.intValue();
-                case "gt" -> actual > spec.intValue();
-                case "lt" -> actual < spec.intValue();
-                case "eq" -> actual == spec.intValue();
-                default -> false;
-            };
-        }
-        private boolean evaluateMemory(ConditionSpec spec, NpcInstance npc) {
-            return switch (spec.target()) {
-                case "isBeingIgnored" -> npc.memory().isBeingIgnored();
-                case "detectWorkObsession" -> npc.memory().detectWorkObsession();
-                default -> false;
-            };
-        }
+        return 0.0;
     }
 }

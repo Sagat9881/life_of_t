@@ -7,17 +7,18 @@ import java.util.List;
 public record ScoredAction(
     String actionId,
     double baseScore,
+    String eventType,
     List<ConditionSpec> conditions,
     List<ActionOption> options
 ) {
     public record ActionOption(
-        String id,
+        String optionId,
         String text,
         String resultText,
-        int energy,
-        int stress,
-        int mood,
-        int money,
+        int energyDelta,
+        int stressDelta,
+        int moodDelta,
+        int moneyDelta,
         String relationshipTarget,
         int relationshipDelta
     ) {}

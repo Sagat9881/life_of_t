@@ -4,6 +4,8 @@ import ru.lifegame.backend.domain.engine.spec.NpcSpec;
 import ru.lifegame.backend.domain.npc.engine.NpcMood;
 import ru.lifegame.backend.domain.npc.engine.NpcMemory;
 
+import java.util.Map;
+
 public class NpcInstance {
     private final NpcSpec spec;
     private NpcMood mood;
@@ -12,28 +14,25 @@ public class NpcInstance {
     private String currentLocation;
     private String currentAnimation;
 
-    public NpcInstance(NpcSpec spec, NpcMood mood, NpcMemory memory) {
+    public NpcInstance(NpcSpec spec) {
         this.spec = spec;
-        this.mood = mood;
-        this.memory = memory;
+        Map<String, Integer> mi = spec.moodInitial();
+        this.mood = new NpcMood(
+            mi.getOrDefault("happiness", 50),
+            mi.getOrDefault("anxiety", 20),
+            mi.getOrDefault("loneliness", 20),
+            mi.getOrDefault("irritability", 10),
+            mi.getOrDefault("energy", 70),
+            mi.getOrDefault("affection", 50)
+        );
+        this.memory = spec.memoryEnabled() ? new NpcMemory(spec.shortTermSize()) : new NpcMemory(0);
         this.currentActivity = "idle";
         this.currentLocation = "unknown";
         this.currentAnimation = "idle";
     }
 
-    public static NpcInstance fromSpec(NpcSpec spec) {
-        var initial = spec.moodInitial();
-        NpcMood mood = new NpcMood(
-            initial.getOrDefault("happiness", 50),
-            initial.getOrDefault("anxiety", 20),
-            initial.getOrDefault("loneliness", 20),
-            initial.getOrDefault("irritability", 10),
-            initial.getOrDefault("energy", 70),
-            initial.getOrDefault("affection", 50)
-        );
-        NpcMemory memory = spec.memoryEnabled() ? new NpcMemory(spec.shortTermSize()) : new NpcMemory(0);
-        return new NpcInstance(spec, mood, memory);
-    }
+    public static NpcInstance createNamed(NpcSpec spec) { return new NpcInstance(spec); }
+    public static NpcInstance createFiller(NpcSpec spec) { return new NpcInstance(spec); }
 
     public NpcSpec spec() { return spec; }
     public NpcMood mood() { return mood; }

@@ -2,85 +2,68 @@ package ru.lifegame.backend.domain.engine.parser;
 
 import ru.lifegame.backend.domain.engine.spec.QuestSpec;
 import ru.lifegame.backend.domain.engine.spec.QuestSpec.*;
-import ru.lifegame.backend.domain.engine.spec.ConditionSpec;
 
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
-import java.io.InputStream;
+import java.io.File;
 import java.util.*;
 
 public class QuestSpecParser {
-    public QuestSpec parse(InputStream xml) throws Exception {
-        var doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xml);
-        var root = doc.getDocumentElement();
+
+    public QuestSpec parse(File xmlFile) throws Exception {
+        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlFile);
+        Element root = doc.getDocumentElement();
+
         String id = root.getAttribute("id");
-        QuestMeta meta = parseMeta(root);
-        List<StepSpec> steps = parseSteps(root);
-        List<RewardSpec> rewards = parseRewards(root, "completion-rewards");
-        return new QuestSpec(id, meta, steps, rewards);
-    }
-
-    private QuestMeta parseMeta(Element root) {
         String title = getTextContent(root, "title");
-        String desc = getTextContent(root, "description");
-        String category = root.getAttribute("category");
-        int triggerDay = intAttr(root, "trigger-day");
-        return new QuestMeta(title, desc, category, triggerDay, List.of());
-    }
+        String description = getTextContent(root, "description");
+        String type = root.getAttribute("type");
+        int triggerDay = parseIntAttr(root, "trigger-day", 1);
+        List<String> requiredNpcs = parseRequiredNpcs(root);
 
-    private List<StepSpec> parseSteps(Element root) {
+        QuestMeta meta = new QuestMeta(title, description, type, triggerDay, requiredNpcs);
+
         List<StepSpec> steps = new ArrayList<>();
-        var nodes = root.getElementsByTagName("step");
-        for (int i = 0; i < nodes.getLength(); i++) {
-            var el = (Element) nodes.item(i);
-            List<ObjectiveSpec> objectives = parseObjectives(el);
-            List<RewardSpec> rewards = parseRewards(el, "rewards");
-            DialogueEntry dialogue = parseDialogue(el);
-            steps.add(new StepSpec(el.getAttribute("id"), el.getAttribute("type"), el.getAttribute("description"), objectives, rewards, dialogue));
-        }
-        return steps;
-    }
+        NodeList stepNodes = root.getElementsByTagName("step");
+        for (int i = 0; i < stepNodes.getLength(); i++) {
+            Element el = (Element) stepNodes.item(i);
+            String stepId = el.getAttribute("id");
+            String stepDesc = getTextContent(el, "description");
 
-    private List<ObjectiveSpec> parseObjectives(Element parent) {
-        List<ObjectiveSpec> list = new ArrayList<>();
-        var nodes = parent.getElementsByTagName("objective");
-        for (int i = 0; i < nodes.getLength(); i++) {
-            var el = (Element) nodes.item(i);
-            list.add(new ObjectiveSpec(el.getAttribute("type"), el.getAttribute("target"), intAttr(el, "count"), List.of()));
-        }
-        return list;
-    }
-
-    private List<RewardSpec> parseRewards(Element parent, String containerTag) {
-        List<RewardSpec> list = new ArrayList<>();
-        var containers = parent.getElementsByTagName(containerTag);
-        if (containers.getLength() > 0) {
-            var nodes = ((Element) containers.item(0)).getElementsByTagName("reward");
-            for (int i = 0; i < nodes.getLength(); i++) {
-                var el = (Element) nodes.item(i);
-                list.add(new RewardSpec(el.getAttribute("type"), el.getAttribute("target"), intAttr(el, "value")));
+            List<ObjectiveSpec> objectives = new ArrayList<>();
+            NodeList objNodes = el.getElementsByTagName("objective");
+            for (int j = 0; j < objNodes.getLength(); j++) {
+                Element obj = (Element) objNodes.item(j);
+                objectives.add(new ObjectiveSpec(obj.getAttribute("type"), obj.getAttribute("target"), obj.getAttribute("operator"), obj.getAttribute("value")));
             }
+
+            List<RewardSpec> rewards = new ArrayList<>();
+            NodeList rewNodes = el.getElementsByTagName("reward");
+            for (int j = 0; j < rewNodes.getLength(); j++) {
+                Element rew = (Element) rewNodes.item(j);
+                rewards.add(new RewardSpec(rew.getAttribute("type"), rew.getAttribute("target"), parseIntAttr(rew, "amount", 0)));
+            }
+
+            String dialogue = getTextContent(el, "dialogue");
+            steps.add(new StepSpec(stepId, stepDesc, objectives, rewards, dialogue));
         }
-        return list;
+
+        return new QuestSpec(id, meta, steps);
     }
 
-    private DialogueEntry parseDialogue(Element parent) {
-        var nodes = parent.getElementsByTagName("dialogue");
-        if (nodes.getLength() > 0) {
-            var el = (Element) nodes.item(0);
-            return new DialogueEntry(el.getAttribute("speaker"), el.getTextContent().trim(), List.of());
-        }
-        return null;
+    private List<String> parseRequiredNpcs(Element root) {
+        String text = getTextContent(root, "required-npcs");
+        if (text.isBlank()) return List.of();
+        return Arrays.stream(text.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
     }
 
-    private String getTextContent(Element root, String tag) {
-        var nodes = root.getElementsByTagName(tag);
+    private String getTextContent(Element root, String tagName) {
+        NodeList nodes = root.getElementsByTagName(tagName);
         return nodes.getLength() > 0 ? nodes.item(0).getTextContent().trim() : "";
     }
 
-    private int intAttr(Element el, String name) {
-        String val = el.getAttribute(name);
-        if (val == null || val.isEmpty()) return 0;
-        try { return Integer.parseInt(val); } catch (NumberFormatException e) { return 0; }
+    private int parseIntAttr(Element el, String attr, int defaultVal) {
+        String val = el.getAttribute(attr);
+        return val.isEmpty() ? defaultVal : Integer.parseInt(val);
     }
 }

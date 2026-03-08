@@ -12,8 +12,11 @@ public class NpcRegistry {
     private final NpcRelationshipGraph relationshipGraph = new NpcRelationshipGraph();
 
     public void registerAll(List<NpcSpec> specs) {
-        for (var spec : specs) {
-            instances.put(spec.id(), NpcInstance.fromSpec(spec));
+        for (NpcSpec spec : specs) {
+            NpcInstance instance = spec.isNamed()
+                ? NpcInstance.createNamed(spec)
+                : NpcInstance.createFiller(spec);
+            instances.put(spec.id(), instance);
         }
     }
 
@@ -33,6 +36,4 @@ public class NpcRegistry {
     public NpcRelationshipGraph relationshipGraph() {
         return relationshipGraph;
     }
-
-    public int size() { return instances.size(); }
 }

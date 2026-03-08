@@ -1,7 +1,6 @@
 package ru.lifegame.backend.domain.engine.spec;
 
 import java.util.List;
-import java.util.Map;
 
 public record EventSpec(
     String id,
@@ -9,7 +8,8 @@ public record EventSpec(
     List<ConditionSpec> triggers,
     List<OptionSpec> options
 ) {
-    public record EventMeta(String type, String category, int priority, boolean repeatable, int cooldownDays) {}
-    public record OptionSpec(String id, String text, String result, EffectSpec effects) {}
-    public record EffectSpec(int energy, int stress, int mood, int money, Map<String, Integer> relationships, Map<String, Integer> skills) {}
+    public record EventMeta(String title, String description, String type, int priority, boolean repeatable, int cooldownDays) {}
+    public record ConditionSpec(String type, String target, String operator, String value) {}
+    public record OptionSpec(String optionId, String text, String result, List<EffectSpec> effects) {}
+    public record EffectSpec(String target, String stat, int delta) {}
 }

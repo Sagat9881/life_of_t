@@ -8,7 +8,7 @@ public record NpcSpec(
     String type,
     String category,
     String displayName,
-    Map<String, Integer> personality,
+    Map<String, Integer> personalityTraits,
     Map<String, Integer> moodInitial,
     boolean memoryEnabled,
     int shortTermSize,
@@ -21,7 +21,9 @@ public record NpcSpec(
     public boolean isFiller() { return "filler".equals(type); }
 
     public record ScheduleSlot(int start, int end, String activity, String location, String animation) {}
-    public record ActionSpec(String id, double baseScore, String eventType, List<ConditionSpec> conditions, List<OptionSpec> options) {}
-    public record OptionSpec(String id, String text, String result, int energy, int stress, int mood, int money, String relationshipTarget, int relationshipDelta) {}
-    public record ReactionSpec(String id, String trigger, List<ConditionSpec> conditions, String dialogue, Map<String, Integer> effects) {}
+    public record ActionSpec(String actionId, double baseScore, String eventType, List<ConditionSpec> conditions, List<OptionSpec> options) {}
+    public record OptionSpec(String optionId, String text, String result, int energy, int stress, int mood, int money, String relationshipTarget, int relationshipDelta) {}
+    public record ReactionSpec(String triggerId, String patternType, int threshold, String dialogueText, List<EffectSpec> effects) {}
+    public record EffectSpec(String target, String stat, int delta) {}
+    public record ConditionSpec(String type, String target, String operator, String value) {}
 }
