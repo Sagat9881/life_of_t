@@ -9,66 +9,52 @@ import java.util.stream.Collectors;
 
 public class NarrativeEventEngine {
 
-    private final List<EventSpec> eventSpecs;
-    private final Set<String> firedOnceIds = new HashSet<>();
+    private final List<EventSpec> allEvents;
+    private final Set<String> firedEventIds = new HashSet<>();
 
-    public NarrativeEventEngine(List<EventSpec> eventSpecs) {
-        this.eventSpecs = eventSpecs;
+    public NarrativeEventEngine(List<EventSpec> events) {
+        this.allEvents = new ArrayList<>(events);
     }
 
-    public record FiredEvent(
-        String eventId,
-        String title,
-        String description,
-        List<OptionView> options
-    ) {}
+    public record FiredEvent(String eventId, String text, List<OptionResult> options) {}
+    public record OptionResult(String optionId, String text, Map<String, Integer> statChanges, String npcTarget, int relationshipDelta) {}
 
-    public record OptionView(
-        String optionId,
-        String text,
-        EventSpec spec,
-        EffectSpec effect
-    ) {}
-
-    public List<FiredEvent> evaluate(Map<String, Object> context) {
-        List<FiredEvent> result = new ArrayList<>();
-        for (EventSpec spec : eventSpecs) {
-            if (spec.fireOnce() && firedOnceIds.contains(spec.id())) continue;
-            if (allConditionsMet(spec.conditions(), context)) {
-                result.add(toFiredEvent(spec));
-                if (spec.fireOnce()) firedOnceIds.add(spec.id());
+    public Optional<FiredEvent> checkForEvent(Map<String, Object> gameContext) {
+        for (EventSpec event : allEvents) {
+            if (firedEventIds.contains(event.id())) continue;
+            if (allConditionsMet(event.conditions(), gameContext)) {
+                firedEventIds.add(event.id());
+                List<OptionResult> options = event.options().stream()
+                    .map(o -> new OptionResult(o.id(), o.text(), o.statChanges(), o.npcTarget(), o.relationshipDelta()))
+                    .collect(Collectors.toList());
+                return Optional.of(new FiredEvent(event.id(), event.text(), options));
             }
         }
-        return result;
+        return Optional.empty();
     }
 
-    private FiredEvent toFiredEvent(EventSpec spec) {
-        List<OptionView> options = spec.options().stream()
-            .map(o -> new OptionView(o.id(), o.text(), spec, o.effect()))
-            .collect(Collectors.toList());
-        return new FiredEvent(spec.id(), spec.title(), spec.description(), options);
-    }
-
-    private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> context) {
+    private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> ctx) {
         if (conditions == null || conditions.isEmpty()) return true;
-        return conditions.stream().allMatch(c -> evaluateCondition(c, context));
+        for (ConditionSpec c : conditions) {
+            if (!evaluateCondition(c, ctx)) return false;
+        }
+        return true;
     }
 
-    private boolean evaluateCondition(ConditionSpec condition, Map<String, Object> context) {
-        Object value = context.get(condition.target());
-        if (value == null) return false;
-        if (value instanceof Number num) {
+    private boolean evaluateCondition(ConditionSpec c, Map<String, Object> ctx) {
+        Object val = ctx.get(c.target());
+        if (val == null) return false;
+        if (val instanceof Number num) {
             double v = num.doubleValue();
-            double threshold = Double.parseDouble(condition.value());
-            return switch (condition.operator()) {
-                case "gte" -> v >= threshold;
-                case "lte" -> v <= threshold;
-                case "gt" -> v > threshold;
-                case "lt" -> v < threshold;
-                case "eq" -> v == threshold;
+            return switch (c.operator()) {
+                case "gte" -> v >= c.value();
+                case "lte" -> v <= c.value();
+                case "gt" -> v > c.value();
+                case "lt" -> v < c.value();
+                case "eq" -> v == c.value();
                 default -> false;
             };
         }
-        return String.valueOf(value).equals(condition.value());
+        return false;
     }
 }
