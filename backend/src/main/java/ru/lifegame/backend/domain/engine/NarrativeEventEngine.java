@@ -10,31 +10,24 @@ import java.util.stream.Collectors;
 public class NarrativeEventEngine {
 
     private final List<EventSpec> eventSpecs;
-    private final Set<String> firedOneTimeEvents = new HashSet<>();
+    private final Set<String> firedOnceEvents = new HashSet<>();
 
     public NarrativeEventEngine(List<EventSpec> eventSpecs) {
-        this.eventSpecs = eventSpecs;
+        this.eventSpecs = eventSpecs != null ? eventSpecs : List.of();
     }
 
     public List<FiredEvent> evaluate(Map<String, Object> context) {
         return eventSpecs.stream()
-                .filter(spec -> !spec.oneTime() || !firedOneTimeEvents.contains(spec.id()))
+                .filter(spec -> !spec.once() || !firedOnceEvents.contains(spec.id()))
                 .filter(spec -> allConditionsMet(spec.conditions(), context))
                 .map(spec -> {
-                    if (spec.oneTime()) firedOneTimeEvents.add(spec.id());
-                    return new FiredEvent(spec, resolveEffects(spec, context));
+                    if (spec.once()) firedOnceEvents.add(spec.id());
+                    return new FiredEvent(spec, spec.effects());
                 })
                 .collect(Collectors.toList());
     }
 
     public record FiredEvent(EventSpec spec, List<EffectSpec> effects) {}
-
-    private List<EffectSpec> resolveEffects(EventSpec spec, Map<String, Object> context) {
-        if (spec.effects() == null) return List.of();
-        return spec.effects().stream()
-                .filter(e -> e.conditions() == null || allConditionsMet(e.conditions(), context))
-                .collect(Collectors.toList());
-    }
 
     private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> context) {
         if (conditions == null || conditions.isEmpty()) return true;
@@ -45,14 +38,14 @@ public class NarrativeEventEngine {
         Object value = context.get(condition.target());
         if (value == null) return false;
         if (value instanceof Number num) {
-            double v = num.doubleValue();
-            double threshold = Double.parseDouble(condition.value());
+            double actual = num.doubleValue();
+            double expected = Double.parseDouble(condition.value());
             return switch (condition.operator()) {
-                case "gte" -> v >= threshold;
-                case "lte" -> v <= threshold;
-                case "gt" -> v > threshold;
-                case "lt" -> v < threshold;
-                case "eq" -> v == threshold;
+                case "gte" -> actual >= expected;
+                case "lte" -> actual <= expected;
+                case "gt" -> actual > expected;
+                case "lt" -> actual < expected;
+                case "eq" -> actual == expected;
                 default -> false;
             };
         }

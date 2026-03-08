@@ -16,21 +16,37 @@ public class NpcLifecycleEngine {
         this.brain = brain;
     }
 
-    public void hourlyTick(int currentHour, Map<String, Object> context) {
-        for (NpcInstance npc : registry.allInstances()) {
-            npc.updateScheduledActivity(currentHour);
-            if ("named".equals(npc.spec().type())) {
-                Optional<EvaluatedAction> action = brain.evaluateBest(npc, context);
-                action.ifPresent(a -> npc.setCurrentActivity(a.actionId(), a.animation(), a.location()));
+    public List<NpcAction> hourlyTick(int currentHour, Map<String, Object> gameContext) {
+        List<NpcAction> actions = new ArrayList<>();
+        for (NpcInstance npc : registry.all()) {
+            var scheduleSlot = npc.spec().schedule().stream()
+                    .filter(s -> currentHour >= s.startHour() && currentHour < s.endHour())
+                    .findFirst();
+
+            if (scheduleSlot.isPresent()) {
+                var slot = scheduleSlot.get();
+                npc.setCurrentActivity(slot.activity());
+                npc.setCurrentLocation(slot.location());
+                npc.setCurrentAnimation(slot.animation());
+                actions.add(new NpcAction(npc.spec().id(), slot.activity(), slot.location(), slot.animation(), false));
             }
         }
+        return actions;
     }
 
-    public void dailyTick(Map<String, Object> context) {
-        for (NpcInstance npc : registry.allInstances()) {
+    public List<NpcAction> dailyTick(Map<String, Object> gameContext) {
+        List<NpcAction> initiatedActions = new ArrayList<>();
+        for (NpcInstance npc : registry.all()) {
             npc.mood().dailyDecay();
+            if ("named".equals(npc.spec().type())) {
+                Optional<EvaluatedAction> best = brain.evaluateBest(npc, gameContext);
+                best.ifPresent(a -> initiatedActions.add(
+                        new NpcAction(npc.spec().id(), a.actionId(), "", "", true)
+                ));
+            }
         }
+        return initiatedActions;
     }
 
-    public NpcRegistry registry() { return registry; }
+    public record NpcAction(String npcId, String activity, String location, String animation, boolean initiated) {}
 }

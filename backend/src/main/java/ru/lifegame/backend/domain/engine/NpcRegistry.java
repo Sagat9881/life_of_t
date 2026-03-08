@@ -15,28 +15,29 @@ public class NpcRegistry {
 
     public NpcRegistry(List<NpcSpec> specs) {
         this.relationshipGraph = new NpcRelationshipGraph();
-        for (NpcSpec spec : specs) {
-            instances.put(spec.id(), NpcInstance.fromSpec(spec));
+        if (specs != null) {
+            for (NpcSpec spec : specs) {
+                instances.put(spec.id(), NpcInstance.fromSpec(spec));
+            }
         }
     }
 
-    public NpcInstance get(String npcId) {
-        return instances.get(npcId);
+    public Optional<NpcInstance> get(String npcId) {
+        return Optional.ofNullable(instances.get(npcId));
     }
 
-    public Collection<NpcInstance> allInstances() {
-        return Collections.unmodifiableCollection(instances.values());
+    public NpcInstance getOrThrow(String npcId) {
+        return Optional.ofNullable(instances.get(npcId))
+                .orElseThrow(() -> new IllegalArgumentException("NPC not found: " + npcId));
     }
 
-    public List<NpcInstance> namedInstances() {
+    public List<NpcInstance> all() {
+        return List.copyOf(instances.values());
+    }
+
+    public List<NpcInstance> byCategory(String category) {
         return instances.values().stream()
-                .filter(i -> "named".equals(i.spec().type()))
-                .collect(Collectors.toList());
-    }
-
-    public List<NpcInstance> fillerInstances() {
-        return instances.values().stream()
-                .filter(i -> "filler".equals(i.spec().type()))
+                .filter(i -> i.spec().category().equals(category))
                 .collect(Collectors.toList());
     }
 
