@@ -1,26 +1,23 @@
 package com.sagat9881.lifeoft.domain.npc.engine;
 
 import com.sagat9881.lifeoft.domain.npc.model.NpcInstance;
-import com.sagat9881.lifeoft.domain.npc.model.ScoredAction;
-import com.sagat9881.lifeoft.domain.npc.model.ConditionSpec;
 import com.sagat9881.lifeoft.domain.npc.model.NpcActivity;
+import com.sagat9881.lifeoft.domain.npc.spec.ScoredAction;
+import com.sagat9881.lifeoft.domain.npc.spec.ConditionSpec;
+import com.sagat9881.lifeoft.domain.model.session.GameSessionContext;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Utility AI brain for NPC decision-making.
- * Evaluates all available actions through scoring functions
- * and selects the highest-scoring action.
- * 
- * No hardcoded actions — everything comes from NpcSpec XML.
- * Uses ConditionEvaluator to check conditions against game state.
+ * Evaluates all available actions from NPC spec via scoring functions.
+ * No hardcoded NPC names or action IDs — purely data-driven from XML.
  */
 public class NpcUtilityBrain {
 
     private final ConditionEvaluator conditionEvaluator;
-    private final Random random = new Random();
-    private static final double NOISE_FACTOR = 0.1;
 
     public NpcUtilityBrain(ConditionEvaluator conditionEvaluator) {
         this.conditionEvaluator = conditionEvaluator;
@@ -28,86 +25,90 @@ public class NpcUtilityBrain {
 
     /**
      * Evaluate all scored actions for an NPC and return the best one.
-     * Returns Optional.empty() if no action passes conditions.
+     * Each action's final score = baseScore * moodMultiplier * conditionBonus.
+     * Actions whose conditions are not met are filtered out.
      */
-    public Optional<ScoredAction> evaluate(NpcInstance npc, Object gameContext) {
-        List<ScoredAction> availableActions = npc.spec().scoredActions();
+    public Optional<NpcActivity> selectBestAction(NpcInstance npc, GameSessionContext context) {
+        List<ScoredAction> availableActions = npc.spec().actions();
         if (availableActions == null || availableActions.isEmpty()) {
-            return Optional.empty();
+            return selectScheduleDefault(npc, context);
         }
 
-        List<ScoredAction> eligible = availableActions.stream()
-                .filter(action -> allConditionsMet(action.conditions(), npc, gameContext))
-                .collect(Collectors.toList());
-
-        if (eligible.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return eligible.stream()
-                .max(Comparator.comparingDouble(action -> computeScore(action, npc)));
+        return availableActions.stream()
+                .filter(action -> allConditionsMet(action.conditions(), npc, context))
+                .map(action -> new ActionScore(action, computeScore(action, npc, context)))
+                .max(Comparator.comparingDouble(ActionScore::score))
+                .filter(as -> as.score() > getScheduleThreshold(npc, context))
+                .map(as -> toActivity(as.action(), npc));
     }
 
-    /**
-     * Compute final score for an action:
-     * baseScore * moodMultipliers + small random noise for variety.
-     */
-    private double computeScore(ScoredAction action, NpcInstance npc) {
-        double score = action.baseScore();
-
-        // Apply mood-based multipliers from action spec
-        for (var moodWeight : action.moodWeights().entrySet()) {
-            String axis = moodWeight.getKey();
-            double weight = moodWeight.getValue();
-            double moodValue = npc.mood().getAxis(axis) / 100.0;
-            score += moodValue * weight;
-        }
-
-        // Apply personality trait multipliers
-        for (var traitWeight : action.personalityWeights().entrySet()) {
-            String trait = traitWeight.getKey();
-            double weight = traitWeight.getValue();
-            double traitValue = npc.spec().personalityTrait(trait) / 100.0;
-            score += traitValue * weight;
-        }
-
-        // Add small noise for non-deterministic behavior
-        score += (random.nextDouble() - 0.5) * NOISE_FACTOR;
-
-        return Math.max(0.0, score);
+    private boolean allConditionsMet(List<ConditionSpec> conditions, NpcInstance npc, GameSessionContext context) {
+        if (conditions == null || conditions.isEmpty()) return true;
+        return conditions.stream().allMatch(c -> conditionEvaluator.evaluate(c, npc, context));
     }
 
-    /**
-     * Check if all conditions of an action are met.
-     */
-    private boolean allConditionsMet(List<ConditionSpec> conditions, NpcInstance npc, Object gameContext) {
-        if (conditions == null || conditions.isEmpty()) {
-            return true;
-        }
-        return conditions.stream()
-                .allMatch(cond -> conditionEvaluator.evaluate(cond, npc, gameContext));
+    private double computeScore(ScoredAction action, NpcInstance npc, GameSessionContext context) {
+        double base = action.baseScore();
+        double moodMultiplier = computeMoodMultiplier(action, npc);
+        double memoryMultiplier = computeMemoryMultiplier(action, npc);
+        return base * moodMultiplier * memoryMultiplier;
     }
 
-    /**
-     * Select activity for NPC based on schedule + utility override.
-     * If utility brain finds a high-scoring action, it overrides schedule.
-     * Otherwise, falls back to schedule-based activity.
-     */
-    public NpcActivity selectActivity(NpcInstance npc, int currentHour, Object gameContext) {
-        // First check if any utility action scores above threshold
-        Optional<ScoredAction> utilityAction = evaluate(npc, gameContext);
-        if (utilityAction.isPresent() && utilityAction.get().baseScore() > 0.7) {
-            ScoredAction action = utilityAction.get();
-            return new NpcActivity(
-                    action.actionId(),
-                    action.animationKey(),
-                    action.locationId(),
-                    1
-            );
+    private double computeMoodMultiplier(ScoredAction action, NpcInstance npc) {
+        var mood = npc.mood();
+        double multiplier = 1.0;
+
+        // High loneliness boosts social actions
+        if (action.tags() != null && action.tags().contains("social")) {
+            multiplier += mood.loneliness() / 100.0 * 0.5;
+        }
+        // High irritability suppresses positive actions
+        if (action.tags() != null && action.tags().contains("positive")) {
+            multiplier -= mood.irritability() / 100.0 * 0.3;
+        }
+        // Low energy suppresses active actions
+        if (action.tags() != null && action.tags().contains("active")) {
+            multiplier *= Math.max(0.3, mood.energy() / 100.0);
         }
 
-        // Fall back to schedule
-        return npc.getScheduledActivity(currentHour)
-                .orElse(NpcActivity.idle(npc.spec().defaultLocation()));
+        return Math.max(0.1, multiplier);
     }
+
+    private double computeMemoryMultiplier(ScoredAction action, NpcInstance npc) {
+        if (npc.memory() == null) return 1.0;
+
+        // If NPC recently did this action, reduce score (variety)
+        long recentCount = npc.memory().shortTermEntries().stream()
+                .filter(e -> e.eventId().equals(action.actionId()))
+                .count();
+        if (recentCount > 0) {
+            return Math.max(0.3, 1.0 - recentCount * 0.2);
+        }
+        return 1.0;
+    }
+
+    private double getScheduleThreshold(NpcInstance npc, GameSessionContext context) {
+        // Only override schedule if action score exceeds threshold
+        // Extreme moods lower the threshold (easier to override)
+        double base = 0.5;
+        var mood = npc.mood();
+        if (mood.loneliness() > 70 || mood.irritability() > 70 || mood.anxiety() > 70) {
+            base = 0.3;
+        }
+        return base;
+    }
+
+    private Optional<NpcActivity> selectScheduleDefault(NpcInstance npc, GameSessionContext context) {
+        int currentHour = context.time().hour();
+        return npc.schedule().getSlotForHour(currentHour)
+                .map(slot -> new NpcActivity(slot.activity(), slot.animation(), slot.location()));
+    }
+
+    private NpcActivity toActivity(ScoredAction action, NpcInstance npc) {
+        String animation = action.animation() != null ? action.animation() : "idle";
+        String location = action.location() != null ? action.location() : npc.currentLocation();
+        return new NpcActivity(action.actionId(), animation, location);
+    }
+
+    private record ActionScore(ScoredAction action, double score) {}
 }

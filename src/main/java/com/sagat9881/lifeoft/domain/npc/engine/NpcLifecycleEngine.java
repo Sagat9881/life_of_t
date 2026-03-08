@@ -1,111 +1,118 @@
 package com.sagat9881.lifeoft.domain.npc.engine;
 
-import com.sagat9881.lifeoft.domain.npc.model.*;
+import com.sagat9881.lifeoft.domain.npc.model.NpcInstance;
+import com.sagat9881.lifeoft.domain.npc.model.NpcActivity;
+import com.sagat9881.lifeoft.domain.npc.model.NpcMood;
+import com.sagat9881.lifeoft.domain.model.session.GameSessionContext;
+import com.sagat9881.lifeoft.domain.event.game.GameEvent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
- * Manages NPC lifecycle: hourly activity updates and daily mood ticks.
- * 
- * Called by DayEndProcessor and ActionExecutor to keep NPCs alive.
- * All behavior is data-driven — engine knows no specific NPC names.
+ * Manages NPC lifecycle: hourly activity updates and daily mood/memory ticks.
+ * Delegates decision-making to NpcUtilityBrain.
+ * Produces NPC-initiated GameEvents when NPCs decide to interact with player.
  */
 public class NpcLifecycleEngine {
 
     private final NpcUtilityBrain utilityBrain;
+    private final NpcRegistry registry;
 
-    public NpcLifecycleEngine(ConditionEvaluator conditionEvaluator) {
-        this.utilityBrain = new NpcUtilityBrain(conditionEvaluator);
+    public NpcLifecycleEngine(NpcUtilityBrain utilityBrain, NpcRegistry registry) {
+        this.utilityBrain = utilityBrain;
+        this.registry = registry;
     }
 
     /**
-     * Update all NPC activities for a given hour.
-     * Called when game time advances.
+     * Called every game hour when player performs an action.
+     * Updates each NPC's current activity based on Utility AI evaluation.
+     * Returns list of NPC-initiated events (if any NPC wants to interact with player).
      */
-    public void hourlyTick(NpcRegistry registry, int currentHour, Object gameContext) {
-        for (NpcInstance npc : registry.all()) {
-            NpcActivity newActivity = utilityBrain.selectActivity(npc, currentHour, gameContext);
-            npc.setCurrentActivity(newActivity);
-        }
-    }
-
-    /**
-     * Daily tick: update mood decay, process memory patterns,
-     * generate NPC-initiated events.
-     * Called during endDay().
-     */
-    public List<NpcInitiatedEvent> dailyTick(NpcRegistry registry, Object gameContext) {
-        List<NpcInitiatedEvent> events = new ArrayList<>();
+    public List<GameEvent> hourlyTick(GameSessionContext context) {
+        List<GameEvent> npcEvents = new ArrayList<>();
 
         for (NpcInstance npc : registry.all()) {
-            // 1. Apply daily mood decay/drift toward baseline
-            npc.mood().dailyTick(npc.spec().moodDecayRates());
+            Optional<NpcActivity> bestAction = utilityBrain.selectBestAction(npc, context);
 
-            // 2. Loneliness increases if player didn't interact
-            if ("named".equals(npc.spec().type())) {
-                boolean interactedToday = npc.memory().hasInteractionToday();
-                if (!interactedToday) {
-                    npc.mood().adjustAxis("loneliness", 8.0);
-                    npc.mood().adjustAxis("affection", -3.0);
+            if (bestAction.isPresent()) {
+                NpcActivity activity = bestAction.get();
+                npc.setCurrentActivity(activity);
+                npc.setCurrentLocation(activity.location());
+
+                // If this action has event options (NPC wants to interact with player),
+                // convert to GameEvent
+                var scoredAction = findScoredAction(npc, activity.activityId());
+                if (scoredAction.isPresent() && scoredAction.get().hasOptions()) {
+                    GameEvent event = NpcInitiatedEvent.from(npc, scoredAction.get());
+                    npcEvents.add(event);
                 }
+            } else {
+                // Fall back to schedule
+                int hour = context.time().hour();
+                npc.schedule().getSlotForHour(hour).ifPresent(slot -> {
+                    npc.setCurrentActivity(new NpcActivity(slot.activity(), slot.animation(), slot.location()));
+                    npc.setCurrentLocation(slot.location());
+                });
             }
+        }
 
-            // 3. Check if NPC wants to initiate an event
-            Optional<ScoredAction> initiated = utilityBrain.evaluate(npc, gameContext);
-            if (initiated.isPresent()) {
-                ScoredAction action = initiated.get();
-                if (action.isEventInitiator()) {
-                    events.add(new NpcInitiatedEvent(
-                            npc.spec().id(),
-                            action.actionId(),
-                            action.eventType(),
-                            action.options()
+        return npcEvents;
+    }
+
+    /**
+     * Called at end of each day.
+     * Applies mood decay, cleans up memory, updates loneliness based on interactions.
+     */
+    public void dailyTick(GameSessionContext context) {
+        int currentDay = context.time().day();
+
+        for (NpcInstance npc : registry.all()) {
+            // Mood daily decay
+            NpcMood currentMood = npc.mood();
+            NpcMood decayed = applyDailyMoodDecay(currentMood, npc);
+            npc.setMood(decayed);
+
+            // Memory cleanup for named NPCs
+            if (npc.memory() != null) {
+                npc.memory().cleanupOlderThan(currentDay - 10);
+
+                // Increase loneliness if player hasn't interacted
+                if (npc.memory().isBeingIgnored(3)) {
+                    npc.setMood(npc.mood().withLoneliness(
+                            Math.min(100, npc.mood().loneliness() + 8)
                     ));
                 }
             }
         }
-
-        return events;
     }
 
-    /**
-     * Notify all NPCs that player performed an action.
-     * Updates memory and may trigger mood changes.
-     */
-    public void onPlayerAction(NpcRegistry registry, String actionId, int day, int hour) {
-        registry.observePlayerAction(actionId, day);
+    private NpcMood applyDailyMoodDecay(NpcMood mood, NpcInstance npc) {
+        // Personality traits influence decay rates
+        var traits = npc.spec().personalityTraits();
+        double patienceModifier = traits.getOrDefault("patience", 50.0) / 100.0;
+        double warmthModifier = traits.getOrDefault("warmth", 50.0) / 100.0;
 
-        // Check if any NPC has a reaction to this specific action
-        for (NpcInstance npc : registry.named()) {
-            for (var reaction : npc.spec().actionReactions()) {
-                if (reaction.triggerActionId().equals(actionId)) {
-                    applyReaction(npc, reaction);
-                }
-            }
-        }
+        return new NpcMood(
+                clamp(mood.happiness() - 3 + warmthModifier * 2),
+                clamp(mood.anxiety() - 2),
+                clamp(mood.loneliness() + 5 - warmthModifier * 3),
+                clamp(mood.irritability() - 3 * patienceModifier),
+                clamp(mood.energy() + 15), // Sleep restores energy
+                clamp(mood.affection() - 2)
+        );
     }
 
-    private void applyReaction(NpcInstance npc, NpcSpec.ActionReaction reaction) {
-        for (var moodChange : reaction.moodChanges().entrySet()) {
-            npc.mood().adjustAxis(moodChange.getKey(), moodChange.getValue());
-        }
+    private double clamp(double value) {
+        return Math.max(0, Math.min(100, value));
     }
 
-    /**
-     * Get current activity snapshots for all NPCs (for frontend rendering).
-     */
-    public List<NpcActivitySnapshot> getActivitySnapshots(NpcRegistry registry) {
-        List<NpcActivitySnapshot> snapshots = new ArrayList<>();
-        for (NpcInstance npc : registry.all()) {
-            snapshots.add(new NpcActivitySnapshot(
-                    npc.spec().id(),
-                    npc.spec().displayName(),
-                    npc.spec().category(),
-                    npc.currentActivity().activityId(),
-                    npc.currentActivity().animationKey(),
-                    npc.currentActivity().locationId()
-            ));
-        }
-        return snapshots;
+    private Optional<com.sagat9881.lifeoft.domain.npc.spec.ScoredAction> findScoredAction(
+            NpcInstance npc, String actionId) {
+        if (npc.spec().actions() == null) return Optional.empty();
+        return npc.spec().actions().stream()
+                .filter(a -> a.actionId().equals(actionId))
+                .findFirst();
     }
 }

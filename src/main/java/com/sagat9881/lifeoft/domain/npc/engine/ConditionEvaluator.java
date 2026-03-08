@@ -1,155 +1,120 @@
 package com.sagat9881.lifeoft.domain.npc.engine;
 
-import com.sagat9881.lifeoft.domain.npc.model.ConditionSpec;
 import com.sagat9881.lifeoft.domain.npc.model.NpcInstance;
+import com.sagat9881.lifeoft.domain.npc.model.NpcMood;
+import com.sagat9881.lifeoft.domain.npc.spec.ConditionSpec;
+import com.sagat9881.lifeoft.domain.model.session.GameSessionContext;
 
 /**
- * Interprets ConditionSpec against NpcInstance + game context.
- * This is the core abstraction that keeps the engine data-driven:
- * conditions are declared in XML, evaluated here generically.
- * 
- * Supports: mood, memory, schedule, stat, day, relationship conditions.
+ * Evaluates XML-defined conditions against NPC state and game context.
+ * Supports: mood, memory, schedule, stat, day, relationship condition types.
+ * No hardcoded NPC or action references — purely data-driven.
  */
 public class ConditionEvaluator {
 
-    /**
-     * Evaluate a single condition against NPC state and game context.
-     * 
-     * @param spec condition from XML
-     * @param npc the NPC being evaluated
-     * @param gameContext opaque game session context (cast internally)
-     * @return true if condition is met
-     */
-    public boolean evaluate(ConditionSpec spec, NpcInstance npc, Object gameContext) {
-        return switch (spec.type()) {
-            case "mood" -> evaluateMood(spec, npc);
-            case "memory" -> evaluateMemory(spec, npc);
-            case "schedule" -> evaluateSchedule(spec, npc, gameContext);
-            case "stat" -> evaluateStat(spec, gameContext);
-            case "day" -> evaluateDay(spec, gameContext);
-            case "relationship" -> evaluateRelationship(spec, gameContext);
-            case "always" -> true;
+    public boolean evaluate(ConditionSpec condition, NpcInstance npc, GameSessionContext context) {
+        return switch (condition.type()) {
+            case "mood" -> evaluateMood(condition, npc);
+            case "memory" -> evaluateMemory(condition, npc);
+            case "schedule" -> evaluateSchedule(condition, npc, context);
+            case "stat" -> evaluateStat(condition, context);
+            case "day" -> evaluateDay(condition, context);
+            case "relationship" -> evaluateRelationship(condition, npc, context);
+            case "time" -> evaluateTime(condition, context);
+            default -> {
+                // Unknown condition type — log warning, treat as met
+                System.err.println("Unknown condition type: " + condition.type());
+                yield true;
+            }
+        };
+    }
+
+    private boolean evaluateMood(ConditionSpec c, NpcInstance npc) {
+        double actual = getMoodAxis(npc.mood(), c.target());
+        return compareValues(actual, c.operator(), c.value());
+    }
+
+    private boolean evaluateMemory(ConditionSpec c, NpcInstance npc) {
+        if (npc.memory() == null) return false;
+        return switch (c.target()) {
+            case "is_being_ignored" -> npc.memory().isBeingIgnored(c.value().intValue());
+            case "detect_pattern" -> npc.memory().detectPattern(c.operator());
+            case "recent_interaction" -> npc.memory().hasRecentInteraction(c.operator(), c.value().intValue());
             default -> false;
         };
     }
 
-    private boolean evaluateMood(ConditionSpec spec, NpcInstance npc) {
-        double actual = npc.mood().getAxis(spec.axis());
-        double threshold = parseDouble(spec.value());
-        return compare(actual, threshold, spec.operator());
-    }
-
-    private boolean evaluateMemory(ConditionSpec spec, NpcInstance npc) {
-        if (!npc.memory().isEnabled()) return false;
-
-        return switch (spec.check()) {
-            case "isBeingIgnored" -> npc.memory().isBeingIgnored(
-                    extractDay(spec), (int) parseDouble(spec.value()));
-            case "detectObsession" -> npc.memory().detectObsession(
-                    spec.target(), (int) parseDouble(spec.value()));
-            case "hasInteractionToday" -> npc.memory().hasInteractionToday();
-            case "noInteractionToday" -> !npc.memory().hasInteractionToday();
-            default -> false;
-        };
-    }
-
-    private boolean evaluateSchedule(ConditionSpec spec, NpcInstance npc, Object gameContext) {
-        int currentHour = extractHour(gameContext);
-        return switch (spec.check()) {
-            case "available" -> npc.isAvailable(currentHour);
-            case "away" -> !npc.isAvailable(currentHour);
+    private boolean evaluateSchedule(ConditionSpec c, NpcInstance npc, GameSessionContext context) {
+        int hour = context.time().hour();
+        return switch (c.target()) {
+            case "available" -> npc.schedule().isAvailable(hour);
+            case "at_home" -> npc.schedule().isAtHome(hour);
+            case "away" -> !npc.schedule().isAtHome(hour);
             default -> true;
         };
     }
 
-    private boolean evaluateStat(ConditionSpec spec, Object gameContext) {
-        double actual = extractPlayerStat(spec.target(), gameContext);
-        double threshold = parseDouble(spec.value());
-        return compare(actual, threshold, spec.operator());
+    private boolean evaluateStat(ConditionSpec c, GameSessionContext context) {
+        double actual = switch (c.target()) {
+            case "stress" -> context.playerCharacter().stats().stress();
+            case "energy" -> context.playerCharacter().stats().energy();
+            case "mood" -> context.playerCharacter().stats().mood();
+            case "money" -> context.playerCharacter().stats().money();
+            case "self_esteem" -> context.playerCharacter().selfEsteem();
+            default -> 0;
+        };
+        return compareValues(actual, c.operator(), c.value());
     }
 
-    private boolean evaluateDay(ConditionSpec spec, Object gameContext) {
-        int currentDay = extractDay(gameContext);
-        int threshold = (int) parseDouble(spec.value());
-        return compare(currentDay, threshold, spec.operator());
+    private boolean evaluateDay(ConditionSpec c, GameSessionContext context) {
+        double actual = context.time().day();
+        return compareValues(actual, c.operator(), c.value());
     }
 
-    private boolean evaluateRelationship(ConditionSpec spec, Object gameContext) {
-        double actual = extractRelationshipValue(spec.target(), spec.axis(), gameContext);
-        double threshold = parseDouble(spec.value());
-        return compare(actual, threshold, spec.operator());
+    private boolean evaluateRelationship(ConditionSpec c, NpcInstance npc, GameSessionContext context) {
+        // target = "closeness", "trust", "romance", etc.
+        // operator = npc id to check relationship with, or comparison operator
+        // For simplicity: check player's relationship with this NPC
+        var relationships = context.playerCharacter().relationships();
+        var rel = relationships.findByNpcId(npc.spec().id());
+        if (rel.isEmpty()) return false;
+        double actual = switch (c.target()) {
+            case "closeness" -> rel.get().closeness();
+            case "trust" -> rel.get().trust();
+            case "romance" -> rel.get().romance();
+            case "stability" -> rel.get().stability();
+            default -> 0;
+        };
+        return compareValues(actual, c.operator(), c.value());
     }
 
-    private boolean compare(double actual, double threshold, String operator) {
-        return switch (operator) {
-            case "gte", ">=" -> actual >= threshold;
-            case "lte", "<=" -> actual <= threshold;
-            case "gt", ">" -> actual > threshold;
-            case "lt", "<" -> actual < threshold;
-            case "eq", "==" -> Math.abs(actual - threshold) < 0.001;
-            default -> actual >= threshold;
+    private boolean evaluateTime(ConditionSpec c, GameSessionContext context) {
+        double actual = context.time().hour();
+        return compareValues(actual, c.operator(), c.value());
+    }
+
+    private double getMoodAxis(NpcMood mood, String axis) {
+        return switch (axis) {
+            case "happiness" -> mood.happiness();
+            case "anxiety" -> mood.anxiety();
+            case "loneliness" -> mood.loneliness();
+            case "irritability" -> mood.irritability();
+            case "energy" -> mood.energy();
+            case "affection" -> mood.affection();
+            default -> 0;
         };
     }
 
-    // --- Context extraction methods ---
-    // These use reflection-free approach: gameContext is expected to be
-    // a Map<String, Object> or GameSessionContext with known accessors.
-    // In production, replace with typed interface.
-
-    private int extractHour(Object gameContext) {
-        if (gameContext instanceof java.util.Map) {
-            Object h = ((java.util.Map<?, ?>) gameContext).get("hour");
-            return h != null ? ((Number) h).intValue() : 12;
-        }
-        return 12;
-    }
-
-    private int extractDay(Object gameContext) {
-        if (gameContext instanceof java.util.Map) {
-            Object d = ((java.util.Map<?, ?>) gameContext).get("day");
-            return d != null ? ((Number) d).intValue() : 1;
-        }
-        return 1;
-    }
-
-    private double extractPlayerStat(String statName, Object gameContext) {
-        if (gameContext instanceof java.util.Map) {
-            Object stats = ((java.util.Map<?, ?>) gameContext).get("stats");
-            if (stats instanceof java.util.Map) {
-                Object val = ((java.util.Map<?, ?>) stats).get(statName);
-                return val != null ? ((Number) val).doubleValue() : 0;
-            }
-        }
-        return 0;
-    }
-
-    private double extractRelationshipValue(String npcId, String axis, Object gameContext) {
-        if (gameContext instanceof java.util.Map) {
-            Object rels = ((java.util.Map<?, ?>) gameContext).get("relationships");
-            if (rels instanceof java.util.Map) {
-                Object rel = ((java.util.Map<?, ?>) rels).get(npcId);
-                if (rel instanceof java.util.Map) {
-                    Object val = ((java.util.Map<?, ?>) rel).get(axis);
-                    return val != null ? ((Number) val).doubleValue() : 0;
-                }
-            }
-        }
-        return 0;
-    }
-
-    private double parseDouble(String value) {
-        try {
-            return Double.parseDouble(value);
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
-
-    private int extractDay(ConditionSpec spec) {
-        try {
-            return Integer.parseInt(spec.value());
-        } catch (NumberFormatException e) {
-            return 3;
-        }
+    private boolean compareValues(double actual, String operator, Double expected) {
+        if (expected == null) return true;
+        return switch (operator) {
+            case "gte", ">=" -> actual >= expected;
+            case "lte", "<=" -> actual <= expected;
+            case "gt", ">" -> actual > expected;
+            case "lt", "<" -> actual < expected;
+            case "eq", "==" -> Math.abs(actual - expected) < 0.001;
+            case "neq", "!=" -> Math.abs(actual - expected) >= 0.001;
+            default -> true;
+        };
     }
 }
