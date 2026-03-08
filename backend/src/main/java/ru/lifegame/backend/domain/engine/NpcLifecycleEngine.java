@@ -19,31 +19,31 @@ public class NpcLifecycleEngine {
     public List<NpcAction> hourlyTick(int currentHour, Map<String, Object> context) {
         List<NpcAction> actions = new ArrayList<>();
         for (NpcInstance npc : registry.all()) {
-            var scheduled = npc.getScheduledActivity(currentHour);
-            if (scheduled.isPresent()) {
-                npc.setCurrentActivity(scheduled.get().activity());
-                npc.setCurrentLocation(scheduled.get().location());
-                actions.add(new NpcAction(npc.spec().id(), scheduled.get().activity(),
-                        scheduled.get().location(), scheduled.get().animation(), "schedule"));
+            var scheduleSlot = npc.spec().schedule().stream()
+                    .filter(s -> currentHour >= s.startHour() && currentHour < s.endHour())
+                    .findFirst();
+            if (scheduleSlot.isPresent()) {
+                var slot = scheduleSlot.get();
+                npc.setCurrentActivity(slot.activity());
+                npc.setCurrentLocation(slot.location());
+                npc.setCurrentAnimation(slot.animation());
+                actions.add(new NpcAction(npc.spec().id(), slot.activity(), slot.location(), slot.animation(), "schedule"));
             } else {
-                var best = brain.evaluateBest(npc, context);
-                if (best.isPresent()) {
-                    EvaluatedAction action = best.get();
-                    npc.setCurrentActivity(action.actionId());
-                    actions.add(new NpcAction(npc.spec().id(), action.actionId(),
-                            npc.currentLocation(), null, "utility_ai"));
-                }
+                Optional<EvaluatedAction> best = brain.evaluate(npc, context);
+                best.ifPresent(a -> {
+                    npc.setCurrentActivity(a.actionId());
+                    actions.add(new NpcAction(npc.spec().id(), a.actionId(), npc.currentLocation(), "idle", "utility_ai"));
+                });
             }
         }
         return actions;
     }
 
-    public void dailyTick() {
+    public void dailyTick(Map<String, Object> context) {
         for (NpcInstance npc : registry.all()) {
             npc.mood().dailyDecay();
         }
     }
 
-    public record NpcAction(String npcId, String activity, String location,
-                            String animation, String source) {}
+    public record NpcAction(String npcId, String activity, String location, String animation, String source) {}
 }

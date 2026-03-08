@@ -8,8 +8,8 @@ import ru.lifegame.backend.domain.engine.spec.QuestSpec;
 import ru.lifegame.backend.domain.engine.spec.EventSpec;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class NarrativeContentLoader {
 
@@ -21,8 +21,7 @@ public class NarrativeContentLoader {
     private List<QuestSpec> questSpecs = new ArrayList<>();
     private List<EventSpec> eventSpecs = new ArrayList<>();
 
-    public NarrativeContentLoader(NpcSpecParser npcParser, QuestSpecParser questParser,
-                                   EventSpecParser eventParser) {
+    public NarrativeContentLoader(NpcSpecParser npcParser, QuestSpecParser questParser, EventSpecParser eventParser) {
         this.npcParser = npcParser;
         this.questParser = questParser;
         this.eventParser = eventParser;
@@ -34,34 +33,34 @@ public class NarrativeContentLoader {
         loadEvents(basePath + "/events");
     }
 
-    private void loadNpcs(String dirPath) {
-        File dir = new File(dirPath);
+    private void loadNpcs(String path) {
+        File dir = new File(path);
         if (!dir.isDirectory()) return;
         File[] files = dir.listFiles((d, name) -> name.endsWith(".xml"));
         if (files == null) return;
-        for (File file : files) {
-            npcSpecs.add(npcParser.parse(file));
-        }
+        npcSpecs = Arrays.stream(files)
+                .map(f -> npcParser.parse(f.getAbsolutePath()))
+                .collect(Collectors.toList());
     }
 
-    private void loadQuests(String dirPath) {
-        File dir = new File(dirPath);
+    private void loadQuests(String path) {
+        File dir = new File(path);
         if (!dir.isDirectory()) return;
         File[] files = dir.listFiles((d, name) -> name.endsWith(".xml"));
         if (files == null) return;
-        for (File file : files) {
-            questSpecs.add(questParser.parse(file));
-        }
+        questSpecs = Arrays.stream(files)
+                .map(f -> questParser.parse(f.getAbsolutePath()))
+                .collect(Collectors.toList());
     }
 
-    private void loadEvents(String dirPath) {
-        File dir = new File(dirPath);
+    private void loadEvents(String path) {
+        File dir = new File(path);
         if (!dir.isDirectory()) return;
         File[] files = dir.listFiles((d, name) -> name.endsWith(".xml"));
         if (files == null) return;
-        for (File file : files) {
-            eventSpecs.add(eventParser.parse(file));
-        }
+        eventSpecs = Arrays.stream(files)
+                .map(f -> eventParser.parse(f.getAbsolutePath()))
+                .collect(Collectors.toList());
     }
 
     public List<NpcSpec> npcSpecs() { return npcSpecs; }

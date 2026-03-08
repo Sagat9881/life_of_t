@@ -17,43 +17,46 @@ public class NarrativeEventEngine {
     }
 
     public List<FiredEvent> evaluate(Map<String, Object> context) {
-        return eventSpecs.stream()
-                .filter(spec -> !spec.oneTime() || !firedOneTimeEvents.contains(spec.id()))
-                .filter(spec -> allConditionsMet(spec.conditions(), context))
-                .map(spec -> {
-                    if (spec.oneTime()) firedOneTimeEvents.add(spec.id());
-                    return new FiredEvent(spec, resolveEffects(spec, context));
-                })
-                .collect(Collectors.toList());
+        List<FiredEvent> result = new ArrayList<>();
+        for (EventSpec spec : eventSpecs) {
+            if (spec.oneTime() && firedOneTimeEvents.contains(spec.id())) continue;
+            if (allConditionsMet(spec.conditions(), context)) {
+                result.add(new FiredEvent(spec, resolveEffects(spec, context)));
+                if (spec.oneTime()) firedOneTimeEvents.add(spec.id());
+            }
+        }
+        return result;
     }
 
     public record FiredEvent(EventSpec spec, List<EffectSpec> effects) {}
 
     private List<EffectSpec> resolveEffects(EventSpec spec, Map<String, Object> context) {
-        if (spec.effects() == null) return List.of();
         return spec.effects();
     }
 
     private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> context) {
         if (conditions == null || conditions.isEmpty()) return true;
-        return conditions.stream().allMatch(c -> evaluateCondition(c, context));
+        for (ConditionSpec c : conditions) {
+            if (!evaluateCondition(c, context)) return false;
+        }
+        return true;
     }
 
-    private boolean evaluateCondition(ConditionSpec condition, Map<String, Object> context) {
-        Object value = context.get(condition.target());
-        if (value == null) return false;
-        if (value instanceof Number num) {
-            double actual = num.doubleValue();
-            double expected = Double.parseDouble(condition.value());
-            return switch (condition.operator()) {
-                case "gte" -> actual >= expected;
-                case "lte" -> actual <= expected;
-                case "gt" -> actual > expected;
-                case "lt" -> actual < expected;
-                case "eq" -> actual == expected;
+    private boolean evaluateCondition(ConditionSpec c, Map<String, Object> context) {
+        Object val = context.get(c.target());
+        if (val == null) return false;
+        if (val instanceof Number num) {
+            double v = num.doubleValue();
+            double threshold = Double.parseDouble(c.value());
+            return switch (c.operator()) {
+                case "gte" -> v >= threshold;
+                case "lte" -> v <= threshold;
+                case "gt" -> v > threshold;
+                case "lt" -> v < threshold;
+                case "eq" -> v == threshold;
                 default -> false;
             };
         }
-        return value.toString().equals(condition.value());
+        return val.toString().equals(c.value());
     }
 }

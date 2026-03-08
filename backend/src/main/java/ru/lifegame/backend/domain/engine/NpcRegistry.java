@@ -33,9 +33,9 @@ public class NpcRegistry {
         return Collections.unmodifiableCollection(instances.values());
     }
 
-    public List<NpcInstance> named() {
+    public List<NpcInstance> byType(String type) {
         return instances.values().stream()
-                .filter(npc -> "named".equals(npc.spec().type()))
+                .filter(i -> i.spec().type().equals(type))
                 .collect(Collectors.toList());
     }
 
