@@ -12,7 +12,7 @@ public class NarrativeQuestEngine {
     private final Map<String, QuestState> activeQuests = new LinkedHashMap<>();
     private final Map<String, QuestState> completedQuests = new LinkedHashMap<>();
 
-    public void activateQuest(QuestSpec spec) {
+    public void startQuest(QuestSpec spec) {
         if (!activeQuests.containsKey(spec.id()) && !completedQuests.containsKey(spec.id())) {
             activeQuests.put(spec.id(), new QuestState(spec, 0));
         }
@@ -40,53 +40,32 @@ public class NarrativeQuestEngine {
         public int currentStepIndex() { return currentStepIndex; }
     }
 
-    public List<StepCompletionResult> checkProgress(Map<String, Object> context) {
-        List<StepCompletionResult> results = new ArrayList<>();
-        Iterator<Map.Entry<String, QuestState>> it = activeQuests.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<String, QuestState> entry = it.next();
-            QuestState state = entry.getValue();
-            StepSpec step = state.currentStep();
-            if (step != null && isStepComplete(step, context)) {
-                state.currentStepIndex++;
-                results.add(new StepCompletionResult(
-                        state.spec.id(), step.id(),
-                        step.dialogue(), step.rewards(),
-                        state.isComplete()));
-                if (state.isComplete()) {
-                    it.remove();
-                    completedQuests.put(entry.getKey(), state);
-                }
-            }
+    public Optional<StepCompletionResult> tryCompleteStep(String questId, String actionId, Map<String, Object> context) {
+        QuestState state = activeQuests.get(questId);
+        if (state == null || state.isComplete()) return Optional.empty();
+
+        StepSpec step = state.currentStep();
+        if (step == null) return Optional.empty();
+
+        if (!step.requiredAction().equals(actionId)) return Optional.empty();
+
+        state.currentStepIndex++;
+
+        if (state.isComplete()) {
+            activeQuests.remove(questId);
+            completedQuests.put(questId, state);
         }
-        return results;
+
+        return Optional.of(new StepCompletionResult(
+                questId, step.id(), state.isComplete(),
+                step.dialogue(), step.reward()
+        ));
     }
 
     public record StepCompletionResult(
-            String questId, String stepId,
-            List<DialogueEntry> dialogue,
-            List<RewardSpec> rewards,
-            boolean questComplete) {}
-
-    private boolean isStepComplete(StepSpec step, Map<String, Object> context) {
-        if (step.conditions() == null) return false;
-        for (var c : step.conditions()) {
-            Object val = context.get(c.target());
-            if (val == null) return false;
-            if (val instanceof Number num) {
-                double v = num.doubleValue();
-                double threshold = Double.parseDouble(c.value());
-                boolean met = switch (c.operator()) {
-                    case "gte" -> v >= threshold;
-                    case "lte" -> v <= threshold;
-                    case "eq" -> v == threshold;
-                    default -> false;
-                };
-                if (!met) return false;
-            }
-        }
-        return true;
-    }
+            String questId, String stepId, boolean questCompleted,
+            List<DialogueEntry> dialogue, RewardSpec reward
+    ) {}
 
     public Map<String, QuestState> activeQuests() { return Collections.unmodifiableMap(activeQuests); }
     public Map<String, QuestState> completedQuests() { return Collections.unmodifiableMap(completedQuests); }

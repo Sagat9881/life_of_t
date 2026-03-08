@@ -25,30 +25,29 @@ public class CrossNpcTriggerEngine {
     ) {}
 
     public List<String> evaluate(NpcRegistry registry) {
-        List<String> firedEventIds = new ArrayList<>();
         NpcRelationshipGraph graph = registry.relationshipGraph();
+        if (graph == null) return List.of();
 
+        List<String> firedEvents = new ArrayList<>();
         for (CrossNpcTrigger trigger : triggers) {
-            Optional<NpcRelationshipEdge> edge = graph.getEdge(trigger.npcA, trigger.npcB);
-            if (edge.isEmpty()) continue;
-
-            double value = switch (trigger.axis) {
-                case "tension" -> edge.get().tension();
-                case "respect" -> edge.get().respect();
-                case "familiarity" -> edge.get().familiarity();
-                default -> 0;
-            };
-
-            boolean met = switch (trigger.operator) {
-                case "gte" -> value >= trigger.threshold;
-                case "lte" -> value <= trigger.threshold;
-                case "gt" -> value > trigger.threshold;
-                case "lt" -> value < trigger.threshold;
-                default -> false;
-            };
-
-            if (met) firedEventIds.add(trigger.eventId);
+            Optional<NpcRelationshipEdge> edge = graph.getEdge(trigger.npcA(), trigger.npcB());
+            edge.ifPresent(e -> {
+                double value = switch (trigger.axis()) {
+                    case "tension" -> e.tension();
+                    case "respect" -> e.respect();
+                    case "familiarity" -> e.familiarity();
+                    default -> 0;
+                };
+                boolean met = switch (trigger.operator()) {
+                    case "gte" -> value >= trigger.threshold();
+                    case "lte" -> value <= trigger.threshold();
+                    case "gt" -> value > trigger.threshold();
+                    case "lt" -> value < trigger.threshold();
+                    default -> false;
+                };
+                if (met) firedEvents.add(trigger.eventId());
+            });
         }
-        return firedEventIds;
+        return firedEvents;
     }
 }

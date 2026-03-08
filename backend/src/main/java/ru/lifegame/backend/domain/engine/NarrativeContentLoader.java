@@ -21,36 +21,51 @@ public class NarrativeContentLoader {
     private List<QuestSpec> questSpecs = new ArrayList<>();
     private List<EventSpec> eventSpecs = new ArrayList<>();
 
-    public void loadAll(String basePath) {
+    public void loadFromDirectory(String basePath) {
         loadNpcs(basePath + "/npc-behavior");
         loadQuests(basePath + "/quests");
         loadEvents(basePath + "/events");
     }
 
-    private void loadNpcs(String dir) {
-        File[] files = new File(dir).listFiles((d, name) -> name.endsWith(".xml"));
+    private void loadNpcs(String dirPath) {
+        File dir = new File(dirPath);
+        if (!dir.isDirectory()) return;
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".xml"));
         if (files == null) return;
-        for (File f : files) {
-            try { npcSpecs.add(npcParser.parse(f)); }
-            catch (Exception e) { System.err.println("Failed to parse NPC: " + f.getName() + " - " + e.getMessage()); }
+        for (File file : files) {
+            try {
+                npcSpecs.add(npcParser.parse(file));
+            } catch (Exception e) {
+                System.err.println("Failed to parse NPC spec: " + file.getName() + " - " + e.getMessage());
+            }
         }
     }
 
-    private void loadQuests(String dir) {
-        File[] files = new File(dir).listFiles((d, name) -> name.endsWith(".xml"));
+    private void loadQuests(String dirPath) {
+        File dir = new File(dirPath);
+        if (!dir.isDirectory()) return;
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".xml"));
         if (files == null) return;
-        for (File f : files) {
-            try { questSpecs.add(questParser.parse(f)); }
-            catch (Exception e) { System.err.println("Failed to parse Quest: " + f.getName() + " - " + e.getMessage()); }
+        for (File file : files) {
+            try {
+                questSpecs.add(questParser.parse(file));
+            } catch (Exception e) {
+                System.err.println("Failed to parse quest spec: " + file.getName() + " - " + e.getMessage());
+            }
         }
     }
 
-    private void loadEvents(String dir) {
-        File[] files = new File(dir).listFiles((d, name) -> name.endsWith(".xml"));
+    private void loadEvents(String dirPath) {
+        File dir = new File(dirPath);
+        if (!dir.isDirectory()) return;
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".xml"));
         if (files == null) return;
-        for (File f : files) {
-            try { eventSpecs.add(eventParser.parse(f)); }
-            catch (Exception e) { System.err.println("Failed to parse Event: " + f.getName() + " - " + e.getMessage()); }
+        for (File file : files) {
+            try {
+                eventSpecs.add(eventParser.parse(file));
+            } catch (Exception e) {
+                System.err.println("Failed to parse event spec: " + file.getName() + " - " + e.getMessage());
+            }
         }
     }
 

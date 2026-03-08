@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class NpcRegistry {
 
     private final Map<String, NpcInstance> instances = new LinkedHashMap<>();
-    private final NpcRelationshipGraph relationshipGraph = new NpcRelationshipGraph();
+    private NpcRelationshipGraph relationshipGraph;
 
     public void registerAll(List<NpcSpec> specs) {
         for (NpcSpec spec : specs) {
@@ -29,13 +29,16 @@ public class NpcRegistry {
                 .collect(Collectors.toList());
     }
 
-    public List<NpcInstance> all() {
-        return new ArrayList<>(instances.values());
+    public List<NpcInstance> allFiller() {
+        return instances.values().stream()
+                .filter(i -> "filler".equals(i.spec().type()))
+                .collect(Collectors.toList());
     }
 
-    public NpcRelationshipGraph relationshipGraph() {
-        return relationshipGraph;
+    public Collection<NpcInstance> all() {
+        return Collections.unmodifiableCollection(instances.values());
     }
 
-    public int size() { return instances.size(); }
+    public NpcRelationshipGraph relationshipGraph() { return relationshipGraph; }
+    public void setRelationshipGraph(NpcRelationshipGraph graph) { this.relationshipGraph = graph; }
 }
