@@ -7,9 +7,9 @@ public record EventSpec(
     String id,
     EventMeta meta,
     List<ConditionSpec> triggers,
-    List<EventOption> options
+    List<OptionSpec> options
 ) {
-    public record EventMeta(String type, String title, String description, int priority, boolean repeatable) {}
-    public record EventOption(String id, String text, String resultText, List<EffectSpec> effects) {}
-    public record EffectSpec(String type, String target, int value) {}
+    public record EventMeta(String type, String category, int priority, boolean repeatable, int cooldownDays) {}
+    public record OptionSpec(String id, String text, String result, EffectSpec effects) {}
+    public record EffectSpec(int energy, int stress, int mood, int money, Map<String, Integer> relationships, Map<String, Integer> skills) {}
 }

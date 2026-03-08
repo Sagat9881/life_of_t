@@ -22,43 +22,48 @@ public class NarrativeContentLoader {
     private final List<EventSpec> eventSpecs = new ArrayList<>();
     private final List<QuestSpec> questSpecs = new ArrayList<>();
 
-    public void loadFromDirectory(Path narrativeRoot) throws Exception {
-        loadNpcs(narrativeRoot.resolve("npc-behavior"));
-        loadEvents(narrativeRoot.resolve("events"));
-        loadQuests(narrativeRoot.resolve("quests"));
+    public void loadFromClasspath(String basePath) {
+        loadNpcs(basePath + "/npc-behavior");
+        loadEvents(basePath + "/events");
+        loadQuests(basePath + "/quests");
     }
 
-    private void loadNpcs(Path dir) throws Exception {
-        if (!Files.exists(dir)) return;
-        try (Stream<Path> files = Files.list(dir)) {
-            for (Path file : files.filter(f -> f.toString().endsWith(".xml")).toList()) {
-                try (InputStream is = Files.newInputStream(file)) {
-                    npcSpecs.add(npcParser.parse(is));
-                }
+    private void loadNpcs(String path) {
+        loadXmlFiles(path, xml -> npcSpecs.add(npcParser.parse(xml)));
+    }
+
+    private void loadEvents(String path) {
+        loadXmlFiles(path, xml -> eventSpecs.add(eventParser.parse(xml)));
+    }
+
+    private void loadQuests(String path) {
+        loadXmlFiles(path, xml -> questSpecs.add(questParser.parse(xml)));
+    }
+
+    private void loadXmlFiles(String path, XmlConsumer consumer) {
+        try {
+            var classLoader = getClass().getClassLoader();
+            var resource = classLoader.getResource(path);
+            if (resource == null) return;
+            var uri = resource.toURI();
+            Path dir = Paths.get(uri);
+            try (Stream<Path> files = Files.list(dir)) {
+                files.filter(f -> f.toString().endsWith(".xml")).forEach(f -> {
+                    try (InputStream is = Files.newInputStream(f)) {
+                        consumer.accept(is);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to parse: " + f, e);
+                    }
+                });
             }
+        } catch (Exception e) {
+            // Directory not found — skip silently
         }
     }
 
-    private void loadEvents(Path dir) throws Exception {
-        if (!Files.exists(dir)) return;
-        try (Stream<Path> files = Files.list(dir)) {
-            for (Path file : files.filter(f -> f.toString().endsWith(".xml")).toList()) {
-                try (InputStream is = Files.newInputStream(file)) {
-                    eventSpecs.add(eventParser.parse(is));
-                }
-            }
-        }
-    }
-
-    private void loadQuests(Path dir) throws Exception {
-        if (!Files.exists(dir)) return;
-        try (Stream<Path> files = Files.list(dir)) {
-            for (Path file : files.filter(f -> f.toString().endsWith(".xml")).toList()) {
-                try (InputStream is = Files.newInputStream(file)) {
-                    questSpecs.add(questParser.parse(is));
-                }
-            }
-        }
+    @FunctionalInterface
+    private interface XmlConsumer {
+        void accept(InputStream xml) throws Exception;
     }
 
     public List<NpcSpec> npcSpecs() { return Collections.unmodifiableList(npcSpecs); }

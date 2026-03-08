@@ -6,7 +6,12 @@ public record ConditionSpec(
     String operator,
     String value
 ) {
-    public boolean isType(String t) {
-        return type != null && type.equalsIgnoreCase(t);
+    public int intValue() {
+        try { return Integer.parseInt(value); }
+        catch (NumberFormatException e) { return 0; }
+    }
+    public double doubleValue() {
+        try { return Double.parseDouble(value); }
+        catch (NumberFormatException e) { return 0.0; }
     }
 }

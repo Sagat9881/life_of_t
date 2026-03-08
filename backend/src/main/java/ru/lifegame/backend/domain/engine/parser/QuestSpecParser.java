@@ -10,97 +10,77 @@ import java.io.InputStream;
 import java.util.*;
 
 public class QuestSpecParser {
-
     public QuestSpec parse(InputStream xml) throws Exception {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        Document doc = factory.newDocumentBuilder().parse(xml);
-        Element root = doc.getDocumentElement();
-
+        var doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xml);
+        var root = doc.getDocumentElement();
         String id = root.getAttribute("id");
         QuestMeta meta = parseMeta(root);
         List<StepSpec> steps = parseSteps(root);
-
-        return new QuestSpec(id, meta, steps);
+        List<RewardSpec> rewards = parseRewards(root, "completion-rewards");
+        return new QuestSpec(id, meta, steps, rewards);
     }
 
     private QuestMeta parseMeta(Element root) {
         String title = getTextContent(root, "title");
-        String description = getTextContent(root, "description");
-        String category = root.hasAttribute("category") ? root.getAttribute("category") : "";
-        int triggerDay = root.hasAttribute("trigger-day") ? Integer.parseInt(root.getAttribute("trigger-day")) : 1;
-        List<ConditionSpec> prerequisites = new ArrayList<>();
-        NodeList preNodes = root.getElementsByTagName("prerequisites");
-        if (preNodes.getLength() > 0) {
-            Element preEl = (Element) preNodes.item(0);
-            NodeList condNodes = preEl.getElementsByTagName("condition");
-            for (int i = 0; i < condNodes.getLength(); i++) {
-                Element el = (Element) condNodes.item(i);
-                prerequisites.add(new ConditionSpec(el.getAttribute("type"), el.getAttribute("target"), el.getAttribute("operator"), el.getAttribute("value")));
-            }
-        }
-        return new QuestMeta(title, description, category, triggerDay, prerequisites);
+        String desc = getTextContent(root, "description");
+        String category = root.getAttribute("category");
+        int triggerDay = intAttr(root, "trigger-day");
+        return new QuestMeta(title, desc, category, triggerDay, List.of());
     }
 
     private List<StepSpec> parseSteps(Element root) {
         List<StepSpec> steps = new ArrayList<>();
-        NodeList nodes = root.getElementsByTagName("step");
+        var nodes = root.getElementsByTagName("step");
         for (int i = 0; i < nodes.getLength(); i++) {
-            Element el = (Element) nodes.item(i);
-            String sid = el.getAttribute("id");
-            String desc = getTextContent(el, "description");
+            var el = (Element) nodes.item(i);
             List<ObjectiveSpec> objectives = parseObjectives(el);
+            List<RewardSpec> rewards = parseRewards(el, "rewards");
             DialogueEntry dialogue = parseDialogue(el);
-            RewardSpec reward = parseReward(el);
-            steps.add(new StepSpec(sid, desc, objectives, dialogue, reward));
+            steps.add(new StepSpec(el.getAttribute("id"), el.getAttribute("type"), el.getAttribute("description"), objectives, rewards, dialogue));
         }
         return steps;
     }
 
-    private List<ObjectiveSpec> parseObjectives(Element stepEl) {
-        List<ObjectiveSpec> objectives = new ArrayList<>();
-        NodeList nodes = stepEl.getElementsByTagName("objective");
+    private List<ObjectiveSpec> parseObjectives(Element parent) {
+        List<ObjectiveSpec> list = new ArrayList<>();
+        var nodes = parent.getElementsByTagName("objective");
         for (int i = 0; i < nodes.getLength(); i++) {
-            Element el = (Element) nodes.item(i);
-            objectives.add(new ObjectiveSpec(
-                el.getAttribute("type"),
-                el.getAttribute("target"),
-                el.hasAttribute("count") ? Integer.parseInt(el.getAttribute("count")) : 1,
-                List.of()
-            ));
+            var el = (Element) nodes.item(i);
+            list.add(new ObjectiveSpec(el.getAttribute("type"), el.getAttribute("target"), intAttr(el, "count"), List.of()));
         }
-        return objectives;
+        return list;
     }
 
-    private DialogueEntry parseDialogue(Element stepEl) {
-        NodeList nodes = stepEl.getElementsByTagName("dialogue");
+    private List<RewardSpec> parseRewards(Element parent, String containerTag) {
+        List<RewardSpec> list = new ArrayList<>();
+        var containers = parent.getElementsByTagName(containerTag);
+        if (containers.getLength() > 0) {
+            var nodes = ((Element) containers.item(0)).getElementsByTagName("reward");
+            for (int i = 0; i < nodes.getLength(); i++) {
+                var el = (Element) nodes.item(i);
+                list.add(new RewardSpec(el.getAttribute("type"), el.getAttribute("target"), intAttr(el, "value")));
+            }
+        }
+        return list;
+    }
+
+    private DialogueEntry parseDialogue(Element parent) {
+        var nodes = parent.getElementsByTagName("dialogue");
         if (nodes.getLength() > 0) {
-            Element el = (Element) nodes.item(0);
+            var el = (Element) nodes.item(0);
             return new DialogueEntry(el.getAttribute("speaker"), el.getTextContent().trim(), List.of());
         }
-        return new DialogueEntry("", "", List.of());
+        return null;
     }
 
-    private RewardSpec parseReward(Element stepEl) {
-        NodeList nodes = stepEl.getElementsByTagName("reward");
-        if (nodes.getLength() > 0) {
-            Element el = (Element) nodes.item(0);
-            return new RewardSpec(
-                parseIntAttr(el, "energy"), parseIntAttr(el, "stress"),
-                parseIntAttr(el, "mood"), parseIntAttr(el, "money"),
-                Map.of(), Map.of()
-            );
-        }
-        return new RewardSpec(0, 0, 0, 0, Map.of(), Map.of());
-    }
-
-    private String getTextContent(Element parent, String tag) {
-        NodeList nodes = parent.getElementsByTagName(tag);
+    private String getTextContent(Element root, String tag) {
+        var nodes = root.getElementsByTagName(tag);
         return nodes.getLength() > 0 ? nodes.item(0).getTextContent().trim() : "";
     }
 
-    private int parseIntAttr(Element el, String attr) {
-        String val = el.getAttribute(attr);
+    private int intAttr(Element el, String name) {
+        String val = el.getAttribute(name);
         if (val == null || val.isEmpty()) return 0;
-        return Integer.parseInt(val);
+        try { return Integer.parseInt(val); } catch (NumberFormatException e) { return 0; }
     }
 }

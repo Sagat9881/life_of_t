@@ -16,39 +16,58 @@ public class NarrativeQuestEngine {
         this.questSpecs = questSpecs;
     }
 
-    public record QuestState(QuestSpec spec, int currentStepIndex) {
+    public record QuestState(QuestSpec spec, int currentStepIndex, Map<String, Integer> objectiveProgress) {
         public StepSpec currentStep() {
             if (currentStepIndex >= spec.steps().size()) return null;
             return spec.steps().get(currentStepIndex);
         }
-        public QuestState advance() { return new QuestState(spec, currentStepIndex + 1); }
-        public boolean isComplete() { return currentStepIndex >= spec.steps().size(); }
     }
 
-    public void checkAndActivateQuests(int currentDay, Object gameContext) {
-        for (QuestSpec spec : questSpecs) {
+    public void checkTriggers(int currentDay, Map<String, Object> context) {
+        for (var spec : questSpecs) {
             if (activeQuests.containsKey(spec.id()) || completedQuests.contains(spec.id())) continue;
-            if (currentDay >= spec.meta().triggerDay()) {
-                activeQuests.put(spec.id(), new QuestState(spec, 0));
+            if (spec.meta().triggerDay() > 0 && currentDay >= spec.meta().triggerDay()) {
+                activeQuests.put(spec.id(), new QuestState(spec, 0, new HashMap<>()));
             }
         }
     }
 
-    public record StepCompletionResult(String questId, DialogueEntry dialogue, RewardSpec reward) {}
+    public record StepCompletionResult(String questId, String stepId, boolean questCompleted, DialogueEntry dialogue, List<RewardSpec> rewards) {}
 
-    public Optional<StepCompletionResult> tryCompleteStep(String questId, Object gameContext) {
-        QuestState state = activeQuests.get(questId);
-        if (state == null || state.isComplete()) return Optional.empty();
-
-        StepSpec step = state.currentStep();
-        QuestState advanced = state.advance();
-        if (advanced.isComplete()) {
-            activeQuests.remove(questId);
-            completedQuests.add(questId);
-        } else {
-            activeQuests.put(questId, advanced);
+    public List<StepCompletionResult> updateProgress(String actionType, Map<String, Object> context) {
+        List<StepCompletionResult> results = new ArrayList<>();
+        var it = activeQuests.entrySet().iterator();
+        while (it.hasNext()) {
+            var entry = it.next();
+            var state = entry.getValue();
+            var step = state.currentStep();
+            if (step == null) continue;
+            boolean stepComplete = checkStepObjectives(step, actionType, state.objectiveProgress());
+            if (stepComplete) {
+                int nextIndex = state.currentStepIndex() + 1;
+                boolean questDone = nextIndex >= state.spec().steps().size();
+                results.add(new StepCompletionResult(entry.getKey(), step.id(), questDone, step.dialogue(), step.rewards()));
+                if (questDone) {
+                    completedQuests.add(entry.getKey());
+                    it.remove();
+                } else {
+                    activeQuests.put(entry.getKey(), new QuestState(state.spec(), nextIndex, new HashMap<>()));
+                }
+            }
         }
-        return Optional.of(new StepCompletionResult(questId, step.dialogue(), step.reward()));
+        return results;
+    }
+
+    private boolean checkStepObjectives(StepSpec step, String actionType, Map<String, Integer> progress) {
+        if (step.objectives() == null || step.objectives().isEmpty()) return false;
+        for (var obj : step.objectives()) {
+            if (obj.type().equals("action") && obj.target().equals(actionType)) {
+                int current = progress.getOrDefault(obj.target(), 0) + 1;
+                progress.put(obj.target(), current);
+                if (current < obj.count()) return false;
+            }
+        }
+        return true;
     }
 
     public Map<String, QuestState> activeQuests() { return Collections.unmodifiableMap(activeQuests); }

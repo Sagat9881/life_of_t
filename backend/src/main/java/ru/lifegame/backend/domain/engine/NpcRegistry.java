@@ -11,10 +11,9 @@ public class NpcRegistry {
     private final Map<String, NpcInstance> instances = new LinkedHashMap<>();
     private final NpcRelationshipGraph relationshipGraph = new NpcRelationshipGraph();
 
-    public void registerFromSpecs(List<NpcSpec> specs) {
-        for (NpcSpec spec : specs) {
-            NpcInstance instance = NpcInstance.fromSpec(spec);
-            instances.put(spec.id(), instance);
+    public void registerAll(List<NpcSpec> specs) {
+        for (var spec : specs) {
+            instances.put(spec.id(), NpcInstance.fromSpec(spec));
         }
     }
 

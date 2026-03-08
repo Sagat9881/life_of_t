@@ -17,26 +17,22 @@ public class NpcInstance {
         this.mood = mood;
         this.memory = memory;
         this.currentActivity = "idle";
-        this.currentLocation = "home";
+        this.currentLocation = "unknown";
         this.currentAnimation = "idle";
     }
 
-    public static NpcInstance createNamed(NpcSpec spec) {
-        NpcMood mood = NpcMood.fromInitialValues(spec.moodInitial());
-        NpcMemory memory = new NpcMemory(spec.shortTermSize());
+    public static NpcInstance fromSpec(NpcSpec spec) {
+        var initial = spec.moodInitial();
+        NpcMood mood = new NpcMood(
+            initial.getOrDefault("happiness", 50),
+            initial.getOrDefault("anxiety", 20),
+            initial.getOrDefault("loneliness", 20),
+            initial.getOrDefault("irritability", 10),
+            initial.getOrDefault("energy", 70),
+            initial.getOrDefault("affection", 50)
+        );
+        NpcMemory memory = spec.memoryEnabled() ? new NpcMemory(spec.shortTermSize()) : new NpcMemory(0);
         return new NpcInstance(spec, mood, memory);
-    }
-
-    public static NpcInstance createFiller(NpcSpec spec) {
-        NpcMood mood = NpcMood.fromInitialValues(spec.moodInitial());
-        NpcMemory memory = new NpcMemory(0);
-        return new NpcInstance(spec, mood, memory);
-    }
-
-    public void updateActivity(String activity, String location, String animation) {
-        this.currentActivity = activity;
-        this.currentLocation = location;
-        this.currentAnimation = animation;
     }
 
     public NpcSpec spec() { return spec; }
@@ -46,4 +42,10 @@ public class NpcInstance {
     public String currentActivity() { return currentActivity; }
     public String currentLocation() { return currentLocation; }
     public String currentAnimation() { return currentAnimation; }
+
+    public void updateActivity(String activity, String location, String animation) {
+        this.currentActivity = activity;
+        this.currentLocation = location;
+        this.currentAnimation = animation;
+    }
 }
