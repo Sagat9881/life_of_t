@@ -18,7 +18,9 @@ import java.util.List;
 
 /**
  * CLI entry point for asset generation.
- * Scans asset-specs/ for XML specs, generates PNGs into target/generated-assets/.
+ * Recursively scans asset-specs/ for ALL visual-specs.xml files,
+ * generating assets into target/generated-assets/.
+ * Output directory structure mirrors the input structure.
  *
  * Usage: java -cp ... ru.lifegame.assets.AssetGeneratorRunner [specsDir] [outputDir]
  */
@@ -47,7 +49,13 @@ public class AssetGeneratorRunner {
         PromptDirectoryScanner scanner = new PromptDirectoryScanner();
         List<Path> entityDirs = scanner.discoverEntities(specsDir);
 
+        if (entityDirs.isEmpty()) {
+            log.warn("No entity directories with visual-specs.xml found under {}", specsDir);
+            return;
+        }
+
         int totalFiles = 0;
+        int entityCount = 0;
         for (Path entityDir : entityDirs) {
             Path specFile = entityDir.resolve("visual-specs.xml");
             if (!Files.exists(specFile)) {
@@ -57,9 +65,12 @@ public class AssetGeneratorRunner {
             AssetSpec spec = parser.parse(specFile);
             List<Path> generated = generator.generateAsset(spec, outputDir);
             totalFiles += generated.size();
-            log.info("  {}/{}: {} files", spec.entityType(), spec.entityName(), generated.size());
+            entityCount++;
+            log.info("  [{}/{}] {}/{}: {} files",
+                    entityCount, entityDirs.size(),
+                    spec.entityType(), spec.entityName(), generated.size());
         }
 
-        log.info("Asset generation complete. Total files: {}", totalFiles);
+        log.info("Asset generation complete. Entities: {}, Total files: {}", entityCount, totalFiles);
     }
 }

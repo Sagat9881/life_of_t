@@ -7,6 +7,9 @@ import type { AtlasConfig, AtlasAnimationEntry, SpriteAnimation } from '@/types/
 
 const configCache = new Map<string, AtlasConfig>();
 
+/** Maximum recommended atlas dimension in pixels */
+const MAX_ATLAS_DIMENSION = 4096;
+
 export const getEntityBaseUrl = (entityType: string, entityName: string): string => {
   return `${ASSETS_BASE_URL}/${entityType}/${entityName}`;
 };
@@ -43,6 +46,22 @@ export const loadAtlasConfig = async (
       `Unsupported atlas config version: ${config.configVersion}. Expected 1.*`
     );
   }
+
+  // Validate atlas dimensions and warn about oversized sheets
+  Object.entries(config.animations).forEach(([name, anim]) => {
+    const sheetWidth = anim.columns * anim.frameWidth;
+    const sheetHeight = (anim.rows?.length ?? 1) * anim.frameHeight;
+    if (sheetWidth > MAX_ATLAS_DIMENSION) {
+      console.warn(
+        `[assetService] Atlas "${cacheKey}/${name}" sheet width ${sheetWidth}px exceeds ${MAX_ATLAS_DIMENSION}px limit`
+      );
+    }
+    if (sheetHeight > MAX_ATLAS_DIMENSION) {
+      console.warn(
+        `[assetService] Atlas "${cacheKey}/${name}" sheet height ${sheetHeight}px exceeds ${MAX_ATLAS_DIMENSION}px limit`
+      );
+    }
+  });
 
   configCache.set(cacheKey, config);
   return config;
