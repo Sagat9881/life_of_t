@@ -1,21 +1,34 @@
 package ru.lifegame.backend.domain.engine.runtime;
 
 import ru.lifegame.backend.domain.engine.spec.NpcSpec;
-import ru.lifegame.backend.domain.npc.engine.NpcMood;
+import ru.lifegame.backend.domain.npc.NpcMood;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class NpcUtilityBrain {
 
     public record ScoredResult(NpcSpec.ActionSpec action, double score) {}
 
+    /**
+     * ScoredCandidate used by NpcLifecycleEngine for hourly tick evaluation.
+     */
+    public record ScoredCandidate(String actionId, double score) {}
+
     public Optional<ScoredResult> evaluate(NpcInstance npc, int currentHour, int currentDay) {
         return npc.spec().actions().stream()
             .map(action -> new ScoredResult(action, calculateScore(action, npc, currentHour, currentDay)))
             .filter(sr -> sr.score() > 0)
             .max(Comparator.comparingDouble(ScoredResult::score));
+    }
+
+    public Optional<ScoredCandidate> evaluate(NpcInstance npc, Map<String, Object> context) {
+        int currentHour = context.containsKey("hour") ? (int) context.get("hour") : 12;
+        int currentDay = context.containsKey("day") ? (int) context.get("day") : 1;
+        return evaluate(npc, currentHour, currentDay)
+            .map(sr -> new ScoredCandidate(sr.action().actionId(), sr.score()));
     }
 
     private double calculateScore(NpcSpec.ActionSpec action, NpcInstance npc, int currentHour, int currentDay) {

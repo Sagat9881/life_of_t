@@ -1,8 +1,7 @@
-package ru.lifegame.backend.application.engine.runtime;
+package ru.lifegame.backend.domain.engine.runtime;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Bidirectional relationship graph between NPC pairs.

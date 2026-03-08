@@ -1,9 +1,9 @@
 package ru.lifegame.backend.infrastructure.config;
 
-import ru.lifegame.backend.domain.npc.engine.ConditionEvaluator;
-import ru.lifegame.backend.domain.npc.engine.NpcUtilityBrain;
-import ru.lifegame.backend.domain.npc.engine.NpcRegistry;
-import ru.lifegame.backend.domain.npc.engine.NpcLifecycleEngine;
+import ru.lifegame.backend.domain.engine.runtime.ConditionEvaluator;
+import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain;
+import ru.lifegame.backend.domain.engine.NpcRegistry;
+import ru.lifegame.backend.domain.engine.NpcLifecycleEngine;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,8 +17,8 @@ public class NpcConfig {
     }
 
     @Bean
-    public NpcUtilityBrain npcUtilityBrain(ConditionEvaluator conditionEvaluator) {
-        return new NpcUtilityBrain(conditionEvaluator);
+    public NpcUtilityBrain npcUtilityBrain() {
+        return new NpcUtilityBrain();
     }
 
     @Bean

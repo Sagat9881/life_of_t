@@ -4,6 +4,7 @@ import ru.lifegame.backend.domain.engine.spec.QuestSpec;
 import ru.lifegame.backend.domain.engine.spec.QuestSpec.StepSpec;
 import ru.lifegame.backend.domain.engine.spec.QuestSpec.RewardSpec;
 import ru.lifegame.backend.domain.engine.spec.QuestSpec.DialogueEntry;
+import ru.lifegame.backend.domain.engine.spec.QuestSpec.ObjectiveSpec;
 
 import java.util.*;
 
@@ -40,8 +41,8 @@ public class NarrativeQuestEngine {
         StepSpec step = state.currentStep();
         if (step == null) return Optional.empty();
 
-        boolean met = step.conditions() == null || step.conditions().stream()
-                .allMatch(c -> checkCondition(c, context));
+        boolean met = step.objectives() == null || step.objectives().stream()
+                .allMatch(c -> checkObjective(c, context));
         if (!met) return Optional.empty();
 
         int nextIndex = state.currentStepIndex() + 1;
@@ -49,9 +50,9 @@ public class NarrativeQuestEngine {
         activeQuests.put(questId, new QuestState(state.spec(), nextIndex, done));
 
         return Optional.of(new StepCompletionResult(
-                questId, step.id(), done,
-                step.dialogue() != null ? step.dialogue() : List.of(),
-                done ? state.spec().rewards() : List.of()
+                questId, step.stepId(), done,
+                List.of(),
+                done ? List.of() : List.of()
         ));
     }
 
@@ -67,7 +68,7 @@ public class NarrativeQuestEngine {
         return Collections.unmodifiableMap(activeQuests);
     }
 
-    private boolean checkCondition(QuestSpec.ConditionSpec c, Map<String, Object> context) {
+    private boolean checkObjective(ObjectiveSpec c, Map<String, Object> context) {
         Object val = context.get(c.target());
         if (val == null) return false;
         if (val instanceof Number num) {

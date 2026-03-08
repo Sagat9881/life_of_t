@@ -1,4 +1,4 @@
-package ru.lifegame.backend.application.engine.runtime;
+package ru.lifegame.backend.domain.engine.runtime;
 
 import java.util.*;
 

@@ -30,7 +30,7 @@ public class NpcLifecycleEngine {
 
     public void dailyTick(Map<String, Object> context) {
         for (NpcInstance npc : registry.getAll()) {
-            npc.getMood().dailyDecay();
+            npc.getMood().dailyTick();
         }
     }
 

@@ -1,8 +1,8 @@
 package ru.lifegame.backend.domain.engine.runtime;
 
 import ru.lifegame.backend.domain.engine.spec.NpcSpec;
-import ru.lifegame.backend.domain.npc.engine.NpcMood;
-import ru.lifegame.backend.domain.npc.engine.NpcMemory;
+import ru.lifegame.backend.domain.npc.NpcMood;
+import ru.lifegame.backend.domain.npc.NpcMemory;
 
 import java.util.Map;
 
@@ -33,18 +33,28 @@ public class NpcInstance {
 
     public static NpcInstance createNamed(NpcSpec spec) { return new NpcInstance(spec); }
     public static NpcInstance createFiller(NpcSpec spec) { return new NpcInstance(spec); }
+    public static NpcInstance fromSpec(NpcSpec spec) { return new NpcInstance(spec); }
 
     public NpcSpec spec() { return spec; }
     public NpcMood mood() { return mood; }
+    public NpcMood getMood() { return mood; }
     public void setMood(NpcMood mood) { this.mood = mood; }
     public NpcMemory memory() { return memory; }
     public String currentActivity() { return currentActivity; }
     public String currentLocation() { return currentLocation; }
     public String currentAnimation() { return currentAnimation; }
 
-    public void updateActivity(String activity, String location, String animation) {
+    public void updateScheduleActivity(int currentHour) {
+        // Schedule-based activity update
+    }
+
+    public void setCurrentActivity(String activity, String location, String animation) {
         this.currentActivity = activity;
         this.currentLocation = location;
         this.currentAnimation = animation;
+    }
+
+    public void updateActivity(String activity, String location, String animation) {
+        setCurrentActivity(activity, location, animation);
     }
 }

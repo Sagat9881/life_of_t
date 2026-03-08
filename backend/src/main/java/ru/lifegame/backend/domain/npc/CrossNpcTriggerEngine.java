@@ -1,10 +1,6 @@
 package ru.lifegame.backend.domain.npc;
 
-import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
 import ru.lifegame.backend.domain.npc.spec.ConditionSpec;
-import ru.lifegame.backend.domain.npc.engine.NpcRegistry;
-import ru.lifegame.backend.domain.npc.engine.ConditionEvaluator;
-import ru.lifegame.backend.domain.npc.graph.NpcRelationshipEdge;
 
 import java.util.*;
 
@@ -29,14 +25,9 @@ public class CrossNpcTriggerEngine {
         List<String> firedEventIds = new ArrayList<>();
         for (CrossNpcTrigger trigger : triggers) {
             boolean allMet = trigger.conditions().stream().allMatch(c -> {
-                Optional<NpcRelationshipEdge> edge = graph.getEdge(c.npcA(), c.npcB());
+                Optional<NpcRelationshipGraph.NpcEdge> edge = graph.getEdge(c.npcA(), c.npcB());
                 if (edge.isEmpty()) return false;
-                int val = switch (c.axis()) {
-                    case "tension" -> edge.get().tension();
-                    case "respect" -> edge.get().respect();
-                    case "familiarity" -> edge.get().familiarity();
-                    default -> 0;
-                };
+                int val = edge.get().getAxis(c.axis());
                 return switch (c.operator()) {
                     case "gte" -> val >= c.threshold();
                     case "lte" -> val <= c.threshold();

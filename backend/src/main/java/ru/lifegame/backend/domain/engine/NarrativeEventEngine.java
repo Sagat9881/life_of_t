@@ -17,7 +17,7 @@ public class NarrativeEventEngine {
 
     public List<FiredEvent> evaluate(Map<String, Object> context) {
         return eventSpecs.stream()
-                .filter(spec -> allConditionsMet(spec.conditions(), context))
+                .filter(spec -> allConditionsMet(spec.triggers(), context))
                 .map(spec -> new FiredEvent(spec, List.of()))
                 .collect(Collectors.toList());
     }

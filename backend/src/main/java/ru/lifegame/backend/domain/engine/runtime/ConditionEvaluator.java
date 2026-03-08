@@ -1,21 +1,21 @@
 package ru.lifegame.backend.domain.engine.runtime;
 
 import ru.lifegame.backend.domain.engine.spec.ConditionSpec;
-import ru.lifegame.backend.domain.npc.engine.NpcMood;
+import ru.lifegame.backend.domain.npc.NpcMood;
 
 public class ConditionEvaluator {
 
     public boolean evaluate(ConditionSpec condition, NpcInstance npc, Object gameContext) {
-        if (condition.isType("mood")) {
+        if (condition.type().equals("mood")) {
             return evaluateMoodCondition(condition, npc.mood());
         }
-        if (condition.isType("schedule")) {
+        if (condition.type().equals("schedule")) {
             return "available".equals(condition.value());
         }
-        if (condition.isType("memory")) {
+        if (condition.type().equals("memory")) {
             return evaluateMemoryCondition(condition, npc);
         }
-        if (condition.isType("day")) {
+        if (condition.type().equals("day")) {
             return true;
         }
         return true;
@@ -48,7 +48,7 @@ public class ConditionEvaluator {
 
     private boolean evaluateMemoryCondition(ConditionSpec condition, NpcInstance npc) {
         return switch (condition.target()) {
-            case "isBeingIgnored" -> npc.memory().isBeingIgnored();
+            case "isBeingIgnored" -> npc.memory().isBeingIgnored(3);
             case "detectWorkObsession" -> npc.memory().detectWorkObsession();
             default -> false;
         };

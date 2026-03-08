@@ -9,6 +9,7 @@ import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.pet.Pets;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.quest.QuestLog;
+import ru.lifegame.backend.domain.engine.NpcRegistry;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class GameSessionContext {
     private final List<Conflict> activeConflicts;
     private final QuestLog questLog;
     private final List<GameEvent> events;
-    private final NpcProfiles npcProfiles;
+    private final NpcRegistry npcRegistry;
     @Setter
     private Ending ending;
     @Setter
@@ -42,7 +43,7 @@ public class GameSessionContext {
             List<GameEvent> events
     ) {
         this(sessionId, player, relationships, pets, time, activeConflicts,
-             questLog, events, NpcProfiles.initial());
+             questLog, events, new NpcRegistry());
     }
 
     public GameSessionContext(
@@ -54,7 +55,7 @@ public class GameSessionContext {
             List<Conflict> activeConflicts,
             QuestLog questLog,
             List<GameEvent> events,
-            NpcProfiles npcProfiles
+            NpcRegistry npcRegistry
     ) {
         this.sessionId = sessionId;
         this.player = player;
@@ -64,10 +65,9 @@ public class GameSessionContext {
         this.activeConflicts = activeConflicts;
         this.questLog = questLog;
         this.events = events;
-        this.npcProfiles = npcProfiles;
+        this.npcRegistry = npcRegistry;
     }
 
-    // --- State access methods ---
     public String sessionId() { return sessionId; }
     public PlayerCharacter player() { return player; }
     public Relationships relationships() { return relationships; }
@@ -78,9 +78,8 @@ public class GameSessionContext {
     public List<GameEvent> events() { return events; }
     public Ending ending() { return ending; }
     public GameOverReason gameOverReason() { return gameOverReason; }
-    public NpcProfiles npcProfiles() { return npcProfiles; }
+    public NpcRegistry npcRegistry() { return npcRegistry; }
 
-    // --- State mutation methods (controlled access) ---
     public void advanceTime(int hours) {
         this.time = time.advanceHours(hours);
     }
@@ -93,7 +92,6 @@ public class GameSessionContext {
         return ending != null || gameOverReason != null;
     }
 
-    // --- Conversion to read model ---
     public GameSessionReadModel asReadModel() {
         return new GameSessionReadModel() {
             @Override public PlayerCharacter player() { return player; }
