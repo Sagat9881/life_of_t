@@ -2,9 +2,10 @@ package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.runtime.NpcInstance;
 import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain;
-import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain.EvaluatedAction;
+import ru.lifegame.backend.domain.engine.runtime.NpcUtilityBrain.ScoredResult;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NpcLifecycleEngine {
 
@@ -16,21 +17,27 @@ public class NpcLifecycleEngine {
         this.brain = brain;
     }
 
-    public void hourlyTick(int currentHour, Map<String, Object> gameContext) {
-        for (NpcInstance npc : registry.all()) {
-            Optional<EvaluatedAction> best = brain.evaluate(npc, currentHour, gameContext);
-            best.ifPresent(action -> {
-                npc.setCurrentActivity(action.actionId());
-                npc.setCurrentAnimation(action.animation());
-                npc.setCurrentLocation(action.location());
-            });
+    public void hourlyTick(int currentHour) {
+        for (NpcInstance npc : registry.allInstances()) {
+            var scheduled = npc.getScheduledActivity(currentHour);
+            if (scheduled != null) {
+                npc.setCurrentActivity(scheduled.activity());
+                npc.setCurrentLocation(scheduled.location());
+                npc.setCurrentAnimation(scheduled.animation());
+            }
         }
     }
 
-    public void dailyTick(Map<String, Object> gameContext) {
-        for (NpcInstance npc : registry.all()) {
+    public List<NpcInitiatedEvent> dailyTick(int currentDay) {
+        List<NpcInitiatedEvent> events = new ArrayList<>();
+        for (NpcInstance npc : registry.namedInstances()) {
             npc.mood().dailyDecay();
+            ScoredResult best = brain.evaluate(npc);
+            if (best != null && best.score() > 0.5) {
+                events.add(new NpcInitiatedEvent(npc.spec().id(), best.actionId(), best.score()));
+            }
         }
+        return events;
     }
 
     public NpcRegistry registry() {

@@ -1,60 +1,54 @@
 package ru.lifegame.backend.domain.engine;
 
 import ru.lifegame.backend.domain.engine.spec.EventSpec;
-import ru.lifegame.backend.domain.engine.spec.EventSpec.ConditionSpec;
-import ru.lifegame.backend.domain.engine.spec.EventSpec.EffectSpec;
+import ru.lifegame.backend.domain.engine.spec.ConditionSpec;
+import ru.lifegame.backend.domain.engine.spec.EffectSpec;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class NarrativeEventEngine {
 
-    private final List<EventSpec> allEvents;
-    private final Set<String> firedEventIds = new HashSet<>();
+    private final List<EventSpec> eventSpecs;
 
-    public NarrativeEventEngine(List<EventSpec> events) {
-        this.allEvents = new ArrayList<>(events);
+    public NarrativeEventEngine(List<EventSpec> eventSpecs) {
+        this.eventSpecs = eventSpecs;
     }
 
-    public record FiredEvent(String eventId, String text, List<OptionResult> options) {}
-    public record OptionResult(String optionId, String text, Map<String, Integer> statChanges, String npcTarget, int relationshipDelta) {}
-
-    public Optional<FiredEvent> checkForEvent(Map<String, Object> gameContext) {
-        for (EventSpec event : allEvents) {
-            if (firedEventIds.contains(event.id())) continue;
-            if (allConditionsMet(event.conditions(), gameContext)) {
-                firedEventIds.add(event.id());
-                List<OptionResult> options = event.options().stream()
-                    .map(o -> new OptionResult(o.id(), o.text(), o.statChanges(), o.npcTarget(), o.relationshipDelta()))
-                    .collect(Collectors.toList());
-                return Optional.of(new FiredEvent(event.id(), event.text(), options));
+    public List<FiredEvent> checkEvents(Map<String, Object> gameState) {
+        List<FiredEvent> fired = new ArrayList<>();
+        for (EventSpec spec : eventSpecs) {
+            if (allConditionsMet(spec.conditions(), gameState)) {
+                fired.add(new FiredEvent(spec, spec.effects()));
             }
         }
-        return Optional.empty();
+        return fired;
     }
 
-    private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> ctx) {
-        if (conditions == null || conditions.isEmpty()) return true;
+    public record FiredEvent(EventSpec spec, List<EffectSpec> effects) {}
+
+    private boolean allConditionsMet(List<ConditionSpec> conditions, Map<String, Object> state) {
+        if (conditions == null || conditions.isEmpty()) return false;
         for (ConditionSpec c : conditions) {
-            if (!evaluateCondition(c, ctx)) return false;
+            if (!evaluateCondition(c, state)) return false;
         }
         return true;
     }
 
-    private boolean evaluateCondition(ConditionSpec c, Map<String, Object> ctx) {
-        Object val = ctx.get(c.target());
+    private boolean evaluateCondition(ConditionSpec c, Map<String, Object> state) {
+        Object val = state.get(c.target());
         if (val == null) return false;
         if (val instanceof Number num) {
             double v = num.doubleValue();
+            double threshold = Double.parseDouble(c.value());
             return switch (c.operator()) {
-                case "gte" -> v >= c.value();
-                case "lte" -> v <= c.value();
-                case "gt" -> v > c.value();
-                case "lt" -> v < c.value();
-                case "eq" -> v == c.value();
+                case "gte" -> v >= threshold;
+                case "lte" -> v <= threshold;
+                case "gt" -> v > threshold;
+                case "lt" -> v < threshold;
+                case "eq" -> v == threshold;
                 default -> false;
             };
         }
-        return false;
+        return String.valueOf(val).equals(c.value());
     }
 }
