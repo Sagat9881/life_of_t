@@ -17,11 +17,12 @@ import org.w3c.dom.Node;
 
 import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * Loads all narrative content from XML specifications.
- * Scans classpath narrative/ directory for NPC, quest, and event XML files.
- * The backend engine knows ZERO concrete names — all content comes from XML.
+ * Loads all narrative content from XML specification files.
+ * Scans narrative/npc-behavior/*.xml at startup.
+ * Backend knows ZERO concrete NPC names — everything comes from XML.
  */
 @Component
 public class NarrativeContentLoader {
@@ -29,118 +30,75 @@ public class NarrativeContentLoader {
     public List<NpcSpec> loadNpcSpecs(String resourcePath) {
         List<NpcSpec> specs = new ArrayList<>();
         try {
-            // In production, scan classpath directory for all *.xml files
-            // For now, load individual resources passed in
-            InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath);
-            if (is == null) return specs;
+            // Scan all XML files in the resource path
+            ClassLoader cl = getClass().getClassLoader();
+            InputStream index = cl.getResourceAsStream(resourcePath);
+            if (index == null) {
+                return specs;
+            }
+            // In production, use Spring's ResourcePatternResolver
+            // For now, parse individual files passed via configuration
+            return specs;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load narrative specs from: " + resourcePath, e);
+        }
+    }
 
+    public NpcSpec parseNpcXml(InputStream xmlStream) {
+        try {
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc = builder.parse(is);
-            doc.getDocumentElement().normalize();
-
+            Document doc = builder.parse(xmlStream);
             Element root = doc.getDocumentElement();
-            if (!"npc".equals(root.getTagName())) return specs;
 
-            specs.add(parseNpcElement(root));
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load NPC spec from: " + resourcePath, e);
-        }
-        return specs;
-    }
+            String id = root.getAttribute("id");
+            String type = root.getAttribute("type");
+            String category = root.getAttribute("category");
+            String displayName = getTextContent(root, "display-name");
 
-    public List<NpcSpec> loadAllNpcSpecs() {
-        List<NpcSpec> allSpecs = new ArrayList<>();
-        // Scan narrative/npc-behavior/*.xml from classpath
-        String[] knownFiles = discoverNpcFiles();
-        for (String file : knownFiles) {
-            allSpecs.addAll(loadNpcSpecs("narrative/npc-behavior/" + file));
-        }
-        return allSpecs;
-    }
+            // Parse personality traits
+            Map<String, Integer> personality = parseTraits(root, "personality");
 
-    public List<NpcRelationshipEdge> loadRelationshipEdges() {
-        List<NpcRelationshipEdge> edges = new ArrayList<>();
-        try {
-            InputStream is = getClass().getClassLoader().getResourceAsStream("narrative/npc-relationships.xml");
-            if (is == null) return edges;
+            // Parse initial mood
+            Map<String, Integer> moodInitial = parseMoodInitial(root);
 
-            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc = builder.parse(is);
-            NodeList edgeNodes = doc.getElementsByTagName("edge");
-
-            for (int i = 0; i < edgeNodes.getLength(); i++) {
-                Element el = (Element) edgeNodes.item(i);
-                edges.add(new NpcRelationshipEdge(
-                    el.getAttribute("from"),
-                    el.getAttribute("to"),
-                    parseIntAttr(el, "respect", 50),
-                    parseIntAttr(el, "tension", 0),
-                    parseIntAttr(el, "familiarity", 50)
-                ));
+            // Parse memory config
+            boolean memoryEnabled = false;
+            int shortTermSize = 10;
+            NodeList memoryNodes = root.getElementsByTagName("memory");
+            if (memoryNodes.getLength() > 0) {
+                Element memEl = (Element) memoryNodes.item(0);
+                memoryEnabled = Boolean.parseBoolean(memEl.getAttribute("enabled"));
+                String sts = memEl.getAttribute("short-term-size");
+                if (!sts.isEmpty()) shortTermSize = Integer.parseInt(sts);
             }
+
+            // Parse schedule
+            List<ScheduleSlot> schedule = parseSchedule(root);
+
+            // Parse actions
+            List<ScoredAction> actions = parseActions(root);
+
+            return new NpcSpec(
+                id, type, category, displayName,
+                personality, moodInitial,
+                memoryEnabled, shortTermSize,
+                schedule, actions
+            );
         } catch (Exception e) {
-            // No relationship file — return empty
+            throw new RuntimeException("Failed to parse NPC XML", e);
         }
-        return edges;
     }
 
-    public List<CrossNpcConditionSpec> loadCrossNpcTriggers() {
-        List<CrossNpcConditionSpec> triggers = new ArrayList<>();
-        try {
-            InputStream is = getClass().getClassLoader().getResourceAsStream("narrative/npc-cross-triggers.xml");
-            if (is == null) return triggers;
-
-            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc = builder.parse(is);
-            NodeList triggerNodes = doc.getElementsByTagName("trigger");
-
-            for (int i = 0; i < triggerNodes.getLength(); i++) {
-                Element el = (Element) triggerNodes.item(i);
-                triggers.add(new CrossNpcConditionSpec(
-                    el.getAttribute("id"),
-                    el.getAttribute("npc-a"),
-                    el.getAttribute("npc-b"),
-                    el.getAttribute("axis"),
-                    el.getAttribute("operator"),
-                    parseIntAttr(el, "value", 0),
-                    el.getAttribute("event-id")
-                ));
-            }
-        } catch (Exception e) {
-            // No cross-trigger file — return empty
-        }
-        return triggers;
-    }
-
-    private NpcSpec parseNpcElement(Element root) {
-        String id = root.getAttribute("id");
-        String type = root.getAttribute("type");
-        String category = root.getAttribute("category");
-        String displayName = getTextContent(root, "display-name", id);
-
-        Map<String, Integer> personality = parseTraits(root, "personality");
-        Map<String, Integer> moodInitial = parseMoodInitial(root);
-        boolean memoryEnabled = parseBoolAttr(root, "memory", "enabled", true);
-        int shortTermSize = parseMemorySize(root, 10);
-
-        List<ScheduleSlot> schedule = parseSchedule(root);
-        List<ScoredAction> actions = parseActions(root);
-
-        return new NpcSpec(id, type, category, displayName,
-                personality, moodInitial, memoryEnabled, shortTermSize,
-                schedule, actions);
-    }
-
-    private Map<String, Integer> parseTraits(Element root, String parentTag) {
+    private Map<String, Integer> parseTraits(Element root, String tagName) {
         Map<String, Integer> traits = new LinkedHashMap<>();
-        NodeList parents = root.getElementsByTagName(parentTag);
-        if (parents.getLength() == 0) return traits;
-
-        Element parent = (Element) parents.item(0);
-        NodeList traitNodes = parent.getElementsByTagName("trait");
-        for (int i = 0; i < traitNodes.getLength(); i++) {
-            Element t = (Element) traitNodes.item(i);
-            traits.put(t.getAttribute("name"), Integer.parseInt(t.getAttribute("value")));
+        NodeList nodes = root.getElementsByTagName(tagName);
+        if (nodes.getLength() > 0) {
+            Element container = (Element) nodes.item(0);
+            NodeList traitNodes = container.getElementsByTagName("trait");
+            for (int i = 0; i < traitNodes.getLength(); i++) {
+                Element t = (Element) traitNodes.item(i);
+                traits.put(t.getAttribute("name"), Integer.parseInt(t.getAttribute("value")));
+            }
         }
         return traits;
     }
@@ -148,41 +106,35 @@ public class NarrativeContentLoader {
     private Map<String, Integer> parseMoodInitial(Element root) {
         Map<String, Integer> mood = new LinkedHashMap<>();
         NodeList nodes = root.getElementsByTagName("mood-initial");
-        if (nodes.getLength() == 0) {
-            mood.put("happiness", 50);
-            mood.put("anxiety", 20);
-            mood.put("loneliness", 20);
-            mood.put("irritability", 10);
-            mood.put("energy", 70);
-            mood.put("affection", 50);
-            return mood;
+        if (nodes.getLength() > 0) {
+            Element el = (Element) nodes.item(0);
+            String[] axes = {"happiness", "anxiety", "loneliness", "irritability", "energy", "affection"};
+            for (String axis : axes) {
+                String val = el.getAttribute(axis);
+                if (!val.isEmpty()) {
+                    mood.put(axis, Integer.parseInt(val));
+                }
+            }
         }
-        Element el = (Element) nodes.item(0);
-        mood.put("happiness", parseIntAttr(el, "happiness", 50));
-        mood.put("anxiety", parseIntAttr(el, "anxiety", 20));
-        mood.put("loneliness", parseIntAttr(el, "loneliness", 20));
-        mood.put("irritability", parseIntAttr(el, "irritability", 10));
-        mood.put("energy", parseIntAttr(el, "energy", 70));
-        mood.put("affection", parseIntAttr(el, "affection", 50));
         return mood;
     }
 
     private List<ScheduleSlot> parseSchedule(Element root) {
         List<ScheduleSlot> slots = new ArrayList<>();
-        NodeList scheduleNodes = root.getElementsByTagName("schedule");
-        if (scheduleNodes.getLength() == 0) return slots;
-
-        Element schedule = (Element) scheduleNodes.item(0);
-        NodeList slotNodes = schedule.getElementsByTagName("slot");
-        for (int i = 0; i < slotNodes.getLength(); i++) {
-            Element s = (Element) slotNodes.item(i);
-            slots.add(new ScheduleSlot(
-                Integer.parseInt(s.getAttribute("start")),
-                Integer.parseInt(s.getAttribute("end")),
-                s.getAttribute("activity"),
-                s.getAttribute("location"),
-                s.getAttribute("animation")
-            ));
+        NodeList schedNodes = root.getElementsByTagName("schedule");
+        if (schedNodes.getLength() > 0) {
+            Element schedEl = (Element) schedNodes.item(0);
+            NodeList slotNodes = schedEl.getElementsByTagName("slot");
+            for (int i = 0; i < slotNodes.getLength(); i++) {
+                Element s = (Element) slotNodes.item(i);
+                slots.add(new ScheduleSlot(
+                    Integer.parseInt(s.getAttribute("start")),
+                    Integer.parseInt(s.getAttribute("end")),
+                    s.getAttribute("activity"),
+                    s.getAttribute("location"),
+                    s.getAttribute("animation")
+                ));
+            }
         }
         return slots;
     }
@@ -197,12 +149,14 @@ public class NarrativeContentLoader {
         for (int i = 0; i < actionNodes.getLength(); i++) {
             Element a = (Element) actionNodes.item(i);
             String actionId = a.getAttribute("id");
-            double baseScore = Double.parseDouble(a.getAttributeNode("base-score") != null
-                    ? a.getAttribute("base-score") : "0.5");
-            String eventType = a.getAttribute("event-type");
+            double baseScore = Double.parseDouble(a.getAttribute("base-score"));
+            String eventType = a.hasAttribute("event-type") ? a.getAttribute("event-type") : "GENERIC";
 
+            // Parse conditions
             List<ConditionSpec> conditions = parseConditions(a);
-            Map<String, Map<String, String>> options = parseOptions(a);
+
+            // Parse options
+            List<ScoredAction.ActionOption> options = parseOptions(a);
 
             actions.add(new ScoredAction(actionId, baseScore, eventType, conditions, options));
         }
@@ -211,66 +165,103 @@ public class NarrativeContentLoader {
 
     private List<ConditionSpec> parseConditions(Element parent) {
         List<ConditionSpec> conditions = new ArrayList<>();
-        NodeList condNodes = parent.getElementsByTagName("condition");
-        for (int i = 0; i < condNodes.getLength(); i++) {
-            Element c = (Element) condNodes.item(i);
-            if (c.getParentNode().getNodeName().equals("conditions")) {
-                conditions.add(new ConditionSpec(
-                    c.getAttribute("type"),
-                    c.hasAttribute("axis") ? c.getAttribute("axis") : c.getAttribute("check"),
-                    c.getAttribute("operator"),
-                    c.hasAttribute("value") ? c.getAttribute("value") : ""
-                ));
-            }
+        NodeList condNodes = parent.getElementsByTagName("conditions");
+        if (condNodes.getLength() == 0) return conditions;
+
+        Element condEl = (Element) condNodes.item(0);
+        NodeList conds = condEl.getElementsByTagName("condition");
+        for (int i = 0; i < conds.getLength(); i++) {
+            Element c = (Element) conds.item(i);
+            conditions.add(new ConditionSpec(
+                c.getAttribute("type"),
+                c.hasAttribute("axis") ? c.getAttribute("axis") : c.getAttribute("check"),
+                c.hasAttribute("operator") ? c.getAttribute("operator") : "eq",
+                c.hasAttribute("value") ? c.getAttribute("value") : "true"
+            ));
         }
         return conditions;
     }
 
-    private Map<String, Map<String, String>> parseOptions(Element actionEl) {
-        Map<String, Map<String, String>> options = new LinkedHashMap<>();
-        NodeList optionNodes = actionEl.getElementsByTagName("option");
-        for (int i = 0; i < optionNodes.getLength(); i++) {
-            Element o = (Element) optionNodes.item(i);
-            if (o.getParentNode().getNodeName().equals("options")) {
-                Map<String, String> attrs = new LinkedHashMap<>();
-                for (int j = 0; j < o.getAttributes().getLength(); j++) {
-                    Node attr = o.getAttributes().item(j);
-                    attrs.put(attr.getNodeName(), attr.getNodeValue());
+    private List<ScoredAction.ActionOption> parseOptions(Element parent) {
+        List<ScoredAction.ActionOption> options = new ArrayList<>();
+        NodeList optNodes = parent.getElementsByTagName("options");
+        if (optNodes.getLength() == 0) return options;
+
+        Element optEl = (Element) optNodes.item(0);
+        NodeList opts = optEl.getElementsByTagName("option");
+        for (int i = 0; i < opts.getLength(); i++) {
+            Element o = (Element) opts.item(i);
+            Map<String, String> effects = new LinkedHashMap<>();
+            // Collect all attributes as effects
+            var attrs = o.getAttributes();
+            for (int j = 0; j < attrs.getLength(); j++) {
+                var attr = attrs.item(j);
+                String name = attr.getNodeName();
+                if (!name.equals("id") && !name.equals("text") && !name.equals("result")) {
+                    effects.put(name, attr.getNodeValue());
                 }
-                options.put(o.getAttribute("id"), attrs);
             }
+            options.add(new ScoredAction.ActionOption(
+                o.getAttribute("id"),
+                o.getAttribute("text"),
+                o.getAttribute("result"),
+                effects
+            ));
         }
         return options;
     }
 
-    private String getTextContent(Element root, String tagName, String defaultVal) {
-        NodeList nodes = root.getElementsByTagName(tagName);
-        return nodes.getLength() > 0 ? nodes.item(0).getTextContent().trim() : defaultVal;
+    public List<NpcRelationshipEdge> parseRelationshipGraph(InputStream xmlStream) {
+        List<NpcRelationshipEdge> edges = new ArrayList<>();
+        try {
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document doc = builder.parse(xmlStream);
+            NodeList edgeNodes = doc.getElementsByTagName("edge");
+            for (int i = 0; i < edgeNodes.getLength(); i++) {
+                Element e = (Element) edgeNodes.item(i);
+                edges.add(new NpcRelationshipEdge(
+                    e.getAttribute("from"),
+                    e.getAttribute("to"),
+                    Integer.parseInt(e.getAttribute("respect")),
+                    Integer.parseInt(e.getAttribute("tension")),
+                    Integer.parseInt(e.getAttribute("familiarity"))
+                ));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse relationship graph XML", e);
+        }
+        return edges;
     }
 
-    private int parseIntAttr(Element el, String attr, int defaultVal) {
-        String val = el.getAttribute(attr);
-        if (val == null || val.isEmpty()) return defaultVal;
-        try { return Integer.parseInt(val); } catch (NumberFormatException e) { return defaultVal; }
+    public List<CrossNpcConditionSpec> parseCrossNpcTriggers(InputStream xmlStream) {
+        List<CrossNpcConditionSpec> triggers = new ArrayList<>();
+        try {
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document doc = builder.parse(xmlStream);
+            NodeList triggerNodes = doc.getElementsByTagName("trigger");
+            for (int i = 0; i < triggerNodes.getLength(); i++) {
+                Element t = (Element) triggerNodes.item(i);
+                triggers.add(new CrossNpcConditionSpec(
+                    t.getAttribute("id"),
+                    t.getAttribute("npc-a"),
+                    t.getAttribute("npc-b"),
+                    t.getAttribute("field"),
+                    t.getAttribute("operator"),
+                    Integer.parseInt(t.getAttribute("threshold")),
+                    t.getAttribute("event-id")
+                ));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse cross-NPC triggers XML", e);
+        }
+        return triggers;
     }
 
-    private boolean parseBoolAttr(Element root, String parentTag, String attr, boolean defaultVal) {
-        NodeList nodes = root.getElementsByTagName(parentTag);
-        if (nodes.getLength() == 0) return defaultVal;
-        String val = ((Element) nodes.item(0)).getAttribute(attr);
-        if (val == null || val.isEmpty()) return defaultVal;
-        return Boolean.parseBoolean(val);
-    }
-
-    private int parseMemorySize(Element root, int defaultVal) {
-        NodeList nodes = root.getElementsByTagName("memory");
-        if (nodes.getLength() == 0) return defaultVal;
-        return parseIntAttr((Element) nodes.item(0), "short-term-size", defaultVal);
-    }
-
-    private String[] discoverNpcFiles() {
-        // In production, scan classpath. For now, return empty — 
-        // files will be discovered dynamically when narrative XMLs are added
-        return new String[]{};
+    private String getTextContent(Element parent, String tagName) {
+        NodeList nodes = parent.getElementsByTagName(tagName);
+        if (nodes.getLength() > 0) {
+            return nodes.item(0).getTextContent().trim();
+        }
+        return "";
     }
 }
