@@ -7,23 +7,30 @@ import ru.lifegame.backend.domain.ending.EndingEvaluator;
 import ru.lifegame.backend.domain.event.domain.ConflictTriggeredEvent;
 import ru.lifegame.backend.domain.event.domain.DayEndedEvent;
 import ru.lifegame.backend.domain.event.domain.EndingAchievedEvent;
+import ru.lifegame.backend.domain.event.domain.EventTriggeredEvent;
 import ru.lifegame.backend.domain.event.domain.GameOverEvent;
+import ru.lifegame.backend.domain.event.game.GameEvent;
+import ru.lifegame.backend.domain.npc.NpcBehaviorEngine;
+import ru.lifegame.backend.domain.npc.NpcProfile;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Domain service responsible for end-of-day processing.
- * Handles daily decay, conflict triggers, game over checks, and ending evaluation.
+ * Handles daily decay, NPC behavior, conflict triggers, game over checks, and ending evaluation.
  */
 public class DayEndProcessor {
     private final ConflictTriggers conflictTriggers;
     private final GameOverChecker gameOverChecker;
     private final EndingEvaluator endingEvaluator;
+    private final NpcBehaviorEngine npcBehaviorEngine;
 
     public DayEndProcessor() {
         this.conflictTriggers = new ConflictTriggers();
         this.gameOverChecker = new GameOverChecker();
         this.endingEvaluator = new EndingEvaluator();
+        this.npcBehaviorEngine = new NpcBehaviorEngine();
     }
 
     /**
@@ -32,15 +39,17 @@ public class DayEndProcessor {
     public DayEndProcessor(
             ConflictTriggers conflictTriggers,
             GameOverChecker gameOverChecker,
-            EndingEvaluator endingEvaluator
+            EndingEvaluator endingEvaluator,
+            NpcBehaviorEngine npcBehaviorEngine
     ) {
         this.conflictTriggers = conflictTriggers;
         this.gameOverChecker = gameOverChecker;
         this.endingEvaluator = endingEvaluator;
+        this.npcBehaviorEngine = npcBehaviorEngine;
     }
 
     /**
-     * Process end of day: apply decay, trigger conflicts, check game over, evaluate endings.
+     * Process end of day: apply decay, NPC behavior, trigger conflicts, check game over, evaluate endings.
      */
     public void processEndOfDay(
             GameSessionContext context,
@@ -49,17 +58,23 @@ public class DayEndProcessor {
         // 1. Apply daily decay to all entities
         applyDailyDecay(context);
 
-        // 2. Check and trigger new conflicts
+        // 2. Tick NPC moods and run behavior engine
+        processNpcBehavior(context, eventPublisher);
+
+        // 3. Check and trigger new conflicts
         triggerNewConflicts(context, eventPublisher);
 
-        // 3. Check for game over conditions
+        // 4. Check for game over conditions
         checkGameOver(context, eventPublisher);
 
-        // 4. Evaluate ending if game is finished (day limit reached)
+        // 5. Evaluate ending if game is finished (day limit reached)
         evaluateEnding(context, eventPublisher);
 
-        // 5. Publish day ended event and advance to next day
+        // 6. Publish day ended event and advance to next day
         eventPublisher.publish(new DayEndedEvent(context.sessionId(), context.time().day()));
+
+        // 7. Reset NPC daily state and advance day
+        npcBehaviorEngine.resetDaily();
         context.startNewDay();
     }
 
@@ -67,6 +82,31 @@ public class DayEndProcessor {
         context.player().applyEndOfDayDecay();
         context.relationships().applyDailyDecay(context.time().day());
         context.pets().applyDailyDecay();
+    }
+
+    /**
+     * Phase 6: NPC behavior processing.
+     * 1. Update NPC moods based on relationship state.
+     * 2. Evaluate each NPC's behavior candidates via Utility AI.
+     * 3. If an NPC wants to initiate, create a GameEvent.
+     */
+    private void processNpcBehavior(
+            GameSessionContext context,
+            DomainEventPublisher eventPublisher
+    ) {
+        context.npcProfiles().dailyTick(context.relationships(), context.time().day());
+
+        int hour = context.time().hour();
+        int day = context.time().day();
+
+        context.npcProfiles().all().forEach((code, profile) -> {
+            Optional<GameEvent> event = npcBehaviorEngine.evaluate(profile, day, hour);
+            event.ifPresent(e -> {
+                e.markTriggered();
+                context.events().add(e);
+                eventPublisher.publish(new EventTriggeredEvent(context.sessionId(), e.id()));
+            });
+        });
     }
 
     private void triggerNewConflicts(
@@ -82,7 +122,6 @@ public class DayEndProcessor {
         List<Conflict> activeConflicts = context.activeConflicts();
         
         for (Conflict newConflict : newConflicts) {
-            // Only add if no active conflict of this type exists
             boolean alreadyExists = activeConflicts.stream()
                 .anyMatch(existing -> 
                     existing.type().code().equals(newConflict.type().code()) 
@@ -118,9 +157,6 @@ public class DayEndProcessor {
             GameSessionContext context,
             DomainEventPublisher eventPublisher
     ) {
-        // Only evaluate ending if:
-        // 1. Game is not already over
-        // 2. Max days reached
         if (context.gameOverReason() == null 
             && context.time().day() >= GameBalance.MAX_GAME_DAYS) {
             

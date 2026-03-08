@@ -8,6 +8,7 @@ import ru.lifegame.backend.domain.event.game.GameEvent;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.pet.Pets;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
+import ru.lifegame.backend.domain.npc.NpcProfiles;
 import ru.lifegame.backend.domain.quest.QuestLog;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class GameSessionContext {
     private final List<Conflict> activeConflicts;
     private final QuestLog questLog;
     private final List<GameEvent> events;
+    private final NpcProfiles npcProfiles;
     @Setter
     private Ending ending;
     @Setter
@@ -40,6 +42,21 @@ public class GameSessionContext {
             QuestLog questLog,
             List<GameEvent> events
     ) {
+        this(sessionId, player, relationships, pets, time, activeConflicts,
+             questLog, events, NpcProfiles.initial());
+    }
+
+    public GameSessionContext(
+            String sessionId,
+            PlayerCharacter player,
+            Relationships relationships,
+            Pets pets,
+            GameTime time,
+            List<Conflict> activeConflicts,
+            QuestLog questLog,
+            List<GameEvent> events,
+            NpcProfiles npcProfiles
+    ) {
         this.sessionId = sessionId;
         this.player = player;
         this.relationships = relationships;
@@ -48,6 +65,7 @@ public class GameSessionContext {
         this.activeConflicts = activeConflicts;
         this.questLog = questLog;
         this.events = events;
+        this.npcProfiles = npcProfiles;
     }
 
     // --- State access methods ---
@@ -61,6 +79,7 @@ public class GameSessionContext {
     public List<GameEvent> events() { return events; }
     public Ending ending() { return ending; }
     public GameOverReason gameOverReason() { return gameOverReason; }
+    public NpcProfiles npcProfiles() { return npcProfiles; }
 
     // --- State mutation methods (controlled access) ---
     public void advanceTime(int hours) {
