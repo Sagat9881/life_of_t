@@ -4,7 +4,8 @@
  * Supports:
  * - strip layout: single-row horizontal atlas (background-position X)
  * - grid layout: multi-row atlas (background-position X + Y) with condition-based row selection
- * - overlay renderMode: renders as a colored overlay (tint + opacity + blend mode)
+ * - overlay renderMode: renders atlas image as an overlay with mix-blend-mode
+ *   (NOT a plain colored div — uses the actual generated atlas PNG)
  *
  * Scale logic:
  *   CSS size = frameWidth × displayScale × scale
@@ -69,16 +70,28 @@ export const SpriteAnimator = memo(function SpriteAnimator({
   // Effective scale = displayScale from config × optional parent multiplier
   const effectiveScale = anim.displayScale * scale;
 
-  // Overlay renderMode — render as a colored div, not a sprite sheet
+  // Overlay renderMode — render the actual atlas sprite with blend mode.
+  // The generator creates a real PNG atlas (e.g. light_overlay_atlas.png)
+  // with one row per time-of-day. We show the correct row via Y offset,
+  // and apply mix-blend-mode + opacity from the config.
   if (anim.renderMode === 'overlay') {
+    // For overlays: columns=1, so X is always 0.
+    // Y offset selects the current row (time-of-day variant).
+    const bgOffsetY = -(anim.currentRow * anim.frameHeight);
+    const totalHeight = anim.totalRows * anim.frameHeight;
+
     const style: CSSProperties = {
       width: '100%',
       height: '100%',
-      backgroundColor: anim.tint ?? '#000000',
-      opacity: anim.opacity ?? 0.1,
+      backgroundImage: `url(${anim.atlasUrl})`,
+      backgroundSize: `${anim.frameWidth}px ${totalHeight}px`,
+      backgroundPosition: `0px ${bgOffsetY}px`,
+      backgroundRepeat: 'no-repeat',
+      imageRendering: 'pixelated',
+      opacity: anim.opacity ?? 0.15,
       mixBlendMode: 'multiply',
       pointerEvents: 'none',
-      transition: 'background-color 1s ease, opacity 1s ease',
+      transition: 'background-position 0.8s ease, opacity 0.8s ease',
     };
 
     return (
