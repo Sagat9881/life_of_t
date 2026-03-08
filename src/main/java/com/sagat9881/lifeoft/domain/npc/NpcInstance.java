@@ -1,87 +1,109 @@
 package com.sagat9881.lifeoft.domain.npc;
 
+import com.sagat9881.lifeoft.domain.npc.spec.NpcSpec;
+import com.sagat9881.lifeoft.domain.npc.spec.ScheduleSlotSpec;
+
+import java.util.Optional;
+
 /**
- * A live NPC instance within a game session.
- * Combines the immutable spec (from XML) with mutable runtime state:
- * mood, memory, schedule, and current physical activity.
+ * A live NPC instance in a game session.
+ * Created from NpcSpec — the engine never knows concrete NPC identities.
  *
- * Supports both named NPCs (full brain: 6-axis mood, memory, utility AI)
- * and filler NPCs (simplified: 2-axis mood, fixed schedule, no memory).
+ * Named NPCs: full mood (6 axes) + memory + utility brain.
+ * Filler NPCs: simplified mood (2 axes) + fixed schedule, no memory.
  */
 public class NpcInstance {
 
     private final NpcSpec spec;
-    private NpcMood mood;
-    private final NpcMemory memory;
+    private final NpcMood mood;
+    private final NpcMemoryLog memory;
     private final NpcSchedule schedule;
     private NpcActivity currentActivity;
 
-    public NpcInstance(NpcSpec spec, NpcMood mood, NpcMemory memory,
-                       NpcSchedule schedule, NpcActivity currentActivity) {
+    private NpcInstance(NpcSpec spec, NpcMood mood, NpcMemoryLog memory, NpcSchedule schedule) {
         this.spec = spec;
         this.mood = mood;
         this.memory = memory;
         this.schedule = schedule;
-        this.currentActivity = currentActivity;
-    }
-
-    public NpcSpec spec() {
-        return spec;
-    }
-
-    public NpcMood mood() {
-        return mood;
-    }
-
-    public NpcMemory memory() {
-        return memory;
-    }
-
-    public NpcSchedule schedule() {
-        return schedule;
-    }
-
-    public NpcActivity currentActivity() {
-        return currentActivity;
+        this.currentActivity = NpcActivity.idle("spawn");
     }
 
     /**
-     * Create a copy with updated mood.
+     * Factory: creates NpcInstance from spec.
+     * Named → full brain. Filler → simplified brain.
      */
-    public NpcInstance withMood(NpcMood newMood) {
-        return new NpcInstance(spec, newMood, memory, schedule, currentActivity);
+    public static NpcInstance fromSpec(NpcSpec spec) {
+        NpcMood mood = NpcMood.fromSpec(spec);
+        NpcMemoryLog memory = spec.memoryEnabled()
+                ? new NpcMemoryLog(spec.shortTermMemorySize())
+                : NpcMemoryLog.disabled();
+        NpcSchedule schedule = NpcSchedule.fromSpec(spec);
+        return new NpcInstance(spec, mood, memory, schedule);
+    }
+
+    public String id() { return spec.id(); }
+    public NpcSpec spec() { return spec; }
+    public NpcMood mood() { return mood; }
+    public NpcMemoryLog memory() { return memory; }
+    public NpcSchedule schedule() { return schedule; }
+    public NpcActivity currentActivity() { return currentActivity; }
+
+    public boolean hasMemory() {
+        return memory != null && memory.isEnabled();
+    }
+
+    public boolean isNamed() {
+        return spec.isNamed();
     }
 
     /**
-     * Create a copy with updated activity.
+     * Updates NPC activity based on current hour and mood.
+     * Schedule resolves through 3 layers: base → mood → quest.
      */
-    public NpcInstance withActivity(NpcActivity newActivity) {
-        return new NpcInstance(spec, mood, memory, schedule, newActivity);
+    public void updateActivity(int currentHour) {
+        String dominantMood = mood.dominantExtreme(70);
+        Optional<ScheduleSlotSpec> slot = schedule.resolveActivity(currentHour, dominantMood);
+
+        if (slot.isPresent()) {
+            ScheduleSlotSpec s = slot.get();
+            this.currentActivity = new NpcActivity(
+                    s.activityId(), s.animationKey(), s.locationId(), s.durationHours()
+            );
+        } else {
+            this.currentActivity = NpcActivity.idle("home");
+        }
+    }
+
+    public boolean isAvailableAt(int hour) {
+        String dominantMood = mood.dominantExtreme(70);
+        return schedule.isAvailableAt(hour, dominantMood);
     }
 
     /**
-     * Check if NPC is currently available for interaction
-     * (not away, not sleeping).
+     * Records a player action in NPC memory.
      */
-    public boolean isAvailable() {
-        if (currentActivity == null) return true;
-        String loc = currentActivity.locationId();
-        String act = currentActivity.activityId();
-        return !"away".equals(loc)
-                && !"sleeping".equals(act)
-                && !"sleep".equals(act);
+    public void observeAction(String actionId, int day, int hour) {
+        if (hasMemory()) {
+            memory.recordAction(actionId, day, hour, false);
+        }
     }
 
     /**
-     * Check if NPC is at a specific location.
+     * Records a significant event in long-term memory.
      */
-    public boolean isAtLocation(String locationId) {
-        return currentActivity != null
-                && locationId.equals(currentActivity.locationId());
+    public void observeSignificantEvent(String eventId, int day, int hour) {
+        if (hasMemory()) {
+            memory.recordAction(eventId, day, hour, true);
+        }
     }
 
-    @Override
-    public String toString() {
-        return "NpcInstance{" + spec.id() + ", activity=" + currentActivity + ", mood=" + mood + "}";
+    /**
+     * Daily tick: mood decay + memory day-end.
+     */
+    public void dailyTick() {
+        mood.dailyTick();
+        if (hasMemory()) {
+            memory.onDayEnd();
+        }
     }
 }

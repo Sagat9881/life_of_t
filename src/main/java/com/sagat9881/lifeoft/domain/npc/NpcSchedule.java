@@ -1,69 +1,105 @@
 package com.sagat9881.lifeoft.domain.npc;
 
-import java.util.Collections;
+import com.sagat9881.lifeoft.domain.npc.spec.NpcSpec;
+import com.sagat9881.lifeoft.domain.npc.spec.ScheduleSlotSpec;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
- * Data-driven NPC schedule loaded from XML specification.
- * No hardcoded schedules — all time slots come from narrative XML.
- * Supports mood-based overrides (handled by NpcLifecycleEngine).
+ * NPC schedule built from XML spec.
+ * Three-layer resolution: base routine → mood override → quest/event override.
+ *
+ * No hardcoded schedules — everything loaded from ScheduleSlotSpec.
  */
 public class NpcSchedule {
 
-    private final List<NpcSpecLoader.NpcScheduleSlot> slots;
+    private final List<ScheduleSlotSpec> baseSlots;
+    private final Map<String, ScheduleSlotSpec> moodOverrides;
+    private ScheduleSlotSpec questOverride;
 
-    private NpcSchedule(List<NpcSpecLoader.NpcScheduleSlot> slots) {
-        this.slots = slots;
+    public NpcSchedule(List<ScheduleSlotSpec> baseSlots) {
+        this.baseSlots = List.copyOf(baseSlots);
+        this.moodOverrides = new HashMap<>();
+        this.questOverride = null;
+    }
+
+    public static NpcSchedule fromSpec(NpcSpec spec) {
+        return new NpcSchedule(spec.scheduleSlots());
     }
 
     /**
-     * Create schedule from XML-parsed slots.
+     * Register a mood override: when dominant mood axis hits extreme,
+     * this slot replaces the base schedule for those hours.
+     * E.g., irritability > 70 → "walk_alone" at "park" instead of "dinner" at "kitchen".
      */
-    public static NpcSchedule fromSlots(List<NpcSpecLoader.NpcScheduleSlot> slots) {
-        return new NpcSchedule(slots != null ? slots : Collections.emptyList());
+    public void registerMoodOverride(String moodAxis, ScheduleSlotSpec override) {
+        moodOverrides.put(moodAxis, override);
     }
 
     /**
-     * Get the activity for a given hour of day.
-     * Returns the first matching slot, or a default idle activity.
+     * Set a quest/event override that takes highest priority.
+     * Cleared after use.
      */
-    public NpcActivity activityAt(int hour) {
-        for (NpcSpecLoader.NpcScheduleSlot slot : slots) {
-            if (hour >= slot.startHour() && hour < slot.endHour()) {
-                return new NpcActivity(
-                        slot.activity(),
-                        slot.animation(),
-                        slot.location()
-                );
+    public void setQuestOverride(ScheduleSlotSpec override) {
+        this.questOverride = override;
+    }
+
+    public void clearQuestOverride() {
+        this.questOverride = null;
+    }
+
+    /**
+     * Resolves what the NPC should be doing at the given hour.
+     * Priority: quest override > mood override > base schedule.
+     *
+     * @param hour current game hour (0-23)
+     * @param dominantMood the dominant extreme mood axis (or null)
+     * @return resolved activity slot, or empty if NPC has no activity
+     */
+    public Optional<ScheduleSlotSpec> resolveActivity(int hour, String dominantMood) {
+        // Layer 3: quest/event override (highest priority)
+        if (questOverride != null && questOverride.coversHour(hour)) {
+            return Optional.of(questOverride);
+        }
+
+        // Layer 2: mood override
+        if (dominantMood != null && moodOverrides.containsKey(dominantMood)) {
+            ScheduleSlotSpec moodSlot = moodOverrides.get(dominantMood);
+            if (moodSlot.coversHour(hour)) {
+                return Optional.of(moodSlot);
             }
         }
-        return new NpcActivity("idle", "idle", "home");
+
+        // Layer 1: base schedule
+        return baseSlots.stream()
+                .filter(slot -> slot.coversHour(hour))
+                .findFirst();
     }
 
     /**
-     * Check if NPC is available (not away, not sleeping) at given hour.
+     * Checks if NPC is available for interaction at the given hour.
+     * NPC is available if their current activity location is NOT "away".
      */
-    public boolean isAvailableAt(int hour) {
-        NpcActivity activity = activityAt(hour);
-        return !"away".equals(activity.locationId())
-                && !"sleep".equals(activity.activityId());
+    public boolean isAvailableAt(int hour, String dominantMood) {
+        return resolveActivity(hour, dominantMood)
+                .map(slot -> !"away".equals(slot.locationId()))
+                .orElse(false);
     }
 
     /**
-     * Get the reason NPC is unavailable, or null if available.
+     * Returns the unavailable reason if NPC is not available.
      */
-    public String unavailableReasonAt(int hour) {
-        NpcActivity activity = activityAt(hour);
-        if ("away".equals(activity.locationId())) {
-            return "At " + activity.activityId();
-        }
-        if ("sleep".equals(activity.activityId())) {
-            return "Sleeping";
-        }
-        return null;
+    public String unavailableReason(int hour, String dominantMood) {
+        return resolveActivity(hour, dominantMood)
+                .filter(slot -> "away".equals(slot.locationId()))
+                .map(slot -> slot.activityId())
+                .orElse(null);
     }
 
-    public List<NpcSpecLoader.NpcScheduleSlot> slots() {
-        return Collections.unmodifiableList(slots);
+    public List<ScheduleSlotSpec> baseSlots() {
+        return baseSlots;
     }
 }
