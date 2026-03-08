@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Life of T — Abstract Stone Material Spec v1.0
+    Tile: 32×32 repeatable
+    Patterns: brick, cobblestone, slab
+    Used by: fireplace, city_street, vet_clinic walls
+-->
+<asset-spec abstract="true" version="1.0">
+    <meta>
+        <entity-type>material</entity-type>
+        <entity-name>stone</entity-name>
+        <spec-version>1.0</spec-version>
+        <canvas width="32" height="32"/>
+        <display-scale>1.0</display-scale>
+    </meta>
+
+    <color-palette>
+        <color id="base" value="#A09888" description="Stone base"/>
+        <color id="shadow" value="#787068" description="Stone shadow"/>
+        <color id="highlight" value="#C0B8A8" description="Stone highlight"/>
+        <color id="mortar" value="#D0C8B8" description="Mortar/grout"/>
+        <color id="crack" value="#585048" description="Crack color"/>
+        <color id="moss" value="#608040" description="Moss/lichen"/>
+    </color-palette>
+
+    <layers>
+        <layer id="brick_base" type="base" z-order="0" width="32" height="32">
+            <pixel-data>
+                <rect x="0" y="0" w="32" h="32" color="$mortar"/>
+                <rect x="0" y="0" w="14" h="8" color="$base"/>
+                <rect x="16" y="0" w="16" h="8" color="$base"/>
+                <rect x="0" y="10" w="8" h="8" color="$base"/>
+                <rect x="10" y="10" w="14" h="8" color="$base"/>
+                <rect x="26" y="10" w="6" h="8" color="$base"/>
+                <rect x="0" y="20" w="14" h="8" color="$base"/>
+                <rect x="16" y="20" w="16" h="8" color="$base"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="brick_detail" type="overlay" z-order="1" width="32" height="32">
+            <pixel-data>
+                <hline x="0" y="2" len="14" color="$highlight"/>
+                <hline x="16" y="2" len="16" color="$highlight"/>
+                <hline x="0" y="7" len="14" color="$shadow"/>
+                <hline x="16" y="7" len="16" color="$shadow"/>
+                <hline x="0" y="12" len="8" color="$highlight"/>
+                <hline x="10" y="12" len="14" color="$highlight"/>
+                <hline x="0" y="17" len="8" color="$shadow"/>
+                <hline x="10" y="17" len="14" color="$shadow"/>
+                <hline x="0" y="22" len="14" color="$highlight"/>
+                <hline x="16" y="22" len="16" color="$highlight"/>
+                <hline x="0" y="27" len="14" color="$shadow"/>
+                <hline x="16" y="27" len="16" color="$shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="crack_overlay" type="overlay" z-order="2" width="32" height="32">
+            <pixel-data>
+                <pixel x="6" y="4" color="$crack"/>
+                <pixel x="7" y="5" color="$crack"/>
+                <pixel x="8" y="6" color="$crack"/>
+                <pixel x="22" y="14" color="$crack"/>
+                <pixel x="23" y="15" color="$crack"/>
+                <pixel x="24" y="16" color="$crack"/>
+                <pixel x="24" y="17" color="$crack"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="moss_overlay" type="overlay" z-order="3" width="32" height="32">
+            <pixel-data>
+                <pixel x="2" y="9" color="$moss"/>
+                <pixel x="3" y="9" color="$moss"/>
+                <pixel x="28" y="19" color="$moss"/>
+                <pixel x="29" y="19" color="$moss"/>
+                <pixel x="30" y="19" color="$moss"/>
+                <pixel x="14" y="29" color="$moss"/>
+                <pixel x="15" y="29" color="$moss"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <animation name="idle" frames="1" fps="1" loop="false" frame-width="32" frame-height="32">
+            <frame index="0" layer-offsets=""/>
+        </animation>
+    </animations>
+</asset-spec>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Life of T — Abstract Fabric Material Spec v1.0
+    Tile: 32×32 repeatable
+    Patterns: weave, fold, quilted
+    Used by: bed (sheets), hammock, tent, clothing details
+-->
+<asset-spec abstract="true" version="1.0">
+    <meta>
+        <entity-type>material</entity-type>
+        <entity-name>fabric</entity-name>
+        <spec-version>1.0</spec-version>
+        <canvas width="32" height="32"/>
+        <display-scale>1.0</display-scale>
+    </meta>
+
+    <color-palette>
+        <color id="base" value="#B0A0D0" description="Fabric base color"/>
+        <color id="shadow" value="#8878A8" description="Fold shadow"/>
+        <color id="highlight" value="#D0C0E8" description="Fabric highlight"/>
+        <color id="thread" value="#9888B8" description="Thread/stitch color"/>
+        <color id="crease" value="#7868A0" description="Deep crease"/>
+        <color id="seam" value="#706898" description="Seam line"/>
+    </color-palette>
+
+    <layers>
+        <layer id="weave_base" type="base" z-order="0" width="32" height="32">
+            <pixel-data>
+                <rect x="0" y="0" w="32" h="32" color="$base"/>
+                <pixel x="0" y="0" color="$thread"/>
+                <pixel x="4" y="0" color="$thread"/>
+                <pixel x="8" y="0" color="$thread"/>
+                <pixel x="12" y="0" color="$thread"/>
+                <pixel x="16" y="0" color="$thread"/>
+                <pixel x="20" y="0" color="$thread"/>
+                <pixel x="24" y="0" color="$thread"/>
+                <pixel x="28" y="0" color="$thread"/>
+                <pixel x="2" y="4" color="$thread"/>
+                <pixel x="6" y="4" color="$thread"/>
+                <pixel x="10" y="4" color="$thread"/>
+                <pixel x="14" y="4" color="$thread"/>
+                <pixel x="18" y="4" color="$thread"/>
+                <pixel x="22" y="4" color="$thread"/>
+                <pixel x="26" y="4" color="$thread"/>
+                <pixel x="30" y="4" color="$thread"/>
+                <pixel x="0" y="8" color="$thread"/>
+                <pixel x="4" y="8" color="$thread"/>
+                <pixel x="8" y="8" color="$thread"/>
+                <pixel x="12" y="8" color="$thread"/>
+                <pixel x="16" y="8" color="$thread"/>
+                <pixel x="20" y="8" color="$thread"/>
+                <pixel x="24" y="8" color="$thread"/>
+                <pixel x="28" y="8" color="$thread"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="fold_shadows" type="overlay" z-order="1" width="32" height="32">
+            <pixel-data>
+                <rect x="0" y="10" w="32" h="4" color="$shadow"/>
+                <rect x="0" y="22" w="32" h="4" color="$shadow"/>
+                <hline x="0" y="14" len="32" color="$highlight"/>
+                <hline x="0" y="26" len="32" color="$highlight"/>
+                <rect x="8" y="0" w="4" h="32" color="$shadow"/>
+                <rect x="20" y="0" w="4" h="32" color="$shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="seam_detail" type="overlay" z-order="2" width="32" height="32">
+            <pixel-data>
+                <pixel x="0" y="16" color="$seam"/>
+                <pixel x="4" y="16" color="$seam"/>
+                <pixel x="8" y="16" color="$seam"/>
+                <pixel x="12" y="16" color="$seam"/>
+                <pixel x="16" y="16" color="$seam"/>
+                <pixel x="20" y="16" color="$seam"/>
+                <pixel x="24" y="16" color="$seam"/>
+                <pixel x="28" y="16" color="$seam"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <animation name="idle" frames="1" fps="1" loop="false" frame-width="32" frame-height="32">
+            <frame index="0" layer-offsets=""/>
+        </animation>
+
+        <animation name="wave" frames="8" fps="3" loop="true" frame-width="32" frame-height="32">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="fold_shadows:0,-1; seam_detail:0,-1"/>
+            <frame index="2" layer-offsets="fold_shadows:0,-2; seam_detail:0,-2"/>
+            <frame index="3" layer-offsets="fold_shadows:0,-1; seam_detail:0,-1"/>
+            <frame index="4" layer-offsets=""/>
+            <frame index="5" layer-offsets="fold_shadows:0,1; seam_detail:0,1"/>
+            <frame index="6" layer-offsets="fold_shadows:0,2; seam_detail:0,2"/>
+            <frame index="7" layer-offsets="fold_shadows:0,1; seam_detail:0,1"/>
+        </animation>
+    </animations>
+</asset-spec>

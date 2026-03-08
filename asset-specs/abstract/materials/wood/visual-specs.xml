@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Life of T — Abstract Wood Material Spec v1.0
+    Tile: 32×32 repeatable
+    3 texture patterns, 6 grain colors
+    Used by: bed, dining_table, office_desk, cat_tree, dog_house
+    Concrete furniture extends via color-remap or layer-overrides
+-->
+<asset-spec abstract="true" version="1.0">
+    <meta>
+        <entity-type>material</entity-type>
+        <entity-name>wood</entity-name>
+        <spec-version>1.0</spec-version>
+        <canvas width="32" height="32"/>
+        <display-scale>1.0</display-scale>
+        <description>Repeatable wood texture tile. Override grain colors for different wood types (oak, pine, dark walnut).</description>
+    </meta>
+
+    <color-palette>
+        <color id="grain_base" value="#8B6C42" description="Primary wood grain"/>
+        <color id="grain_light" value="#A0814E" description="Light grain line"/>
+        <color id="grain_dark" value="#6B4C22" description="Dark grain line"/>
+        <color id="knot" value="#5A3C18" description="Knot/ring color"/>
+        <color id="surface" value="#9C7C52" description="Surface fill"/>
+        <color id="highlight" value="#C8A870" description="Surface highlight/sheen"/>
+    </color-palette>
+
+    <layers>
+        <!-- Pattern: plank (horizontal grain) -->
+        <layer id="plank_base" type="base" z-order="0" width="32" height="32">
+            <pixel-data>
+                <rect x="0" y="0" w="32" h="32" color="$surface"/>
+                <hline x="0" y="4" len="32" color="$grain_light"/>
+                <hline x="0" y="5" len="32" color="$grain_base"/>
+                <hline x="0" y="10" len="32" color="$grain_dark"/>
+                <hline x="0" y="11" len="32" color="$grain_base"/>
+                <hline x="0" y="16" len="32" color="$grain_light"/>
+                <hline x="0" y="17" len="32" color="$grain_base"/>
+                <hline x="0" y="22" len="32" color="$grain_dark"/>
+                <hline x="0" y="23" len="32" color="$grain_base"/>
+                <hline x="0" y="28" len="32" color="$grain_light"/>
+                <hline x="0" y="29" len="32" color="$grain_base"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="plank_detail" type="overlay" z-order="1" width="32" height="32">
+            <pixel-data>
+                <rect x="12" y="8" w="6" h="6" color="$knot"/>
+                <pixel x="14" y="10" color="$grain_dark"/>
+                <hline x="8" y="14" len="14" color="$grain_dark"/>
+                <hline x="20" y="20" len="10" color="$grain_dark"/>
+                <hline x="2" y="26" len="8" color="$grain_light"/>
+                <pixel x="24" y="6" color="$highlight"/>
+                <pixel x="8" y="18" color="$highlight"/>
+                <pixel x="28" y="24" color="$highlight"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="plank_highlight" type="overlay" z-order="2" width="32" height="32">
+            <pixel-data>
+                <hline x="0" y="0" len="32" color="$highlight"/>
+                <hline x="0" y="1" len="16" color="$highlight"/>
+                <pixel x="4" y="12" color="$highlight"/>
+                <pixel x="20" y="6" color="$highlight"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Pattern: log (concentric rings) -->
+        <layer id="log_base" type="base" z-order="0" width="32" height="32">
+            <pixel-data>
+                <rect x="0" y="0" w="32" h="32" color="$grain_base"/>
+                <rect x="4" y="4" w="24" h="24" color="$grain_light"/>
+                <rect x="8" y="8" w="16" h="16" color="$grain_base"/>
+                <rect x="12" y="12" w="8" h="8" color="$grain_dark"/>
+                <rect x="14" y="14" w="4" h="4" color="$knot"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="log_rings" type="overlay" z-order="1" width="32" height="32">
+            <pixel-data>
+                <pixel x="16" y="2" color="$grain_dark"/>
+                <pixel x="16" y="6" color="$grain_dark"/>
+                <pixel x="16" y="10" color="$grain_dark"/>
+                <pixel x="16" y="20" color="$grain_dark"/>
+                <pixel x="16" y="26" color="$grain_dark"/>
+                <pixel x="16" y="30" color="$grain_dark"/>
+                <pixel x="2" y="16" color="$grain_dark"/>
+                <pixel x="6" y="16" color="$grain_dark"/>
+                <pixel x="10" y="16" color="$grain_dark"/>
+                <pixel x="20" y="16" color="$grain_dark"/>
+                <pixel x="26" y="16" color="$grain_dark"/>
+                <pixel x="30" y="16" color="$grain_dark"/>
+            </pixel-data>
+        </layer>
+
+        <!-- Pattern: polished (smooth, minimal grain) -->
+        <layer id="polished_base" type="base" z-order="0" width="32" height="32">
+            <pixel-data>
+                <rect x="0" y="0" w="32" h="32" color="$surface"/>
+                <rect x="0" y="0" w="32" h="4" color="$highlight"/>
+                <rect x="0" y="28" w="32" h="4" color="$grain_dark"/>
+                <hline x="0" y="12" len="32" color="$grain_light"/>
+                <hline x="0" y="20" len="32" color="$grain_light"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="polished_sheen" type="overlay" z-order="1" width="32" height="32">
+            <pixel-data>
+                <rect x="4" y="2" w="24" h="4" color="$highlight"/>
+                <rect x="8" y="14" w="16" h="2" color="$highlight"/>
+                <pixel x="12" y="22" color="$highlight"/>
+                <pixel x="20" y="22" color="$highlight"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <animation name="idle" frames="1" fps="1" loop="false" frame-width="32" frame-height="32">
+            <frame index="0" layer-offsets=""/>
+        </animation>
+    </animations>
+</asset-spec>

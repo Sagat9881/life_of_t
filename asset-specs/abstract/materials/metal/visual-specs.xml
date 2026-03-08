@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Life of T — Abstract Metal Material Spec v1.0
+    Tile: 32×32 repeatable
+    3 texture patterns (brushed, riveted, corrugated)
+    Used by: fridge, stove, gym_equipment, vet_table
+-->
+<asset-spec abstract="true" version="1.0">
+    <meta>
+        <entity-type>material</entity-type>
+        <entity-name>metal</entity-name>
+        <spec-version>1.0</spec-version>
+        <canvas width="32" height="32"/>
+        <display-scale>1.0</display-scale>
+        <description>Repeatable metal texture tile. Override colors for steel, iron, chrome, copper.</description>
+    </meta>
+
+    <color-palette>
+        <color id="base" value="#A8A8A8" description="Metal base"/>
+        <color id="shadow" value="#787878" description="Metal shadow"/>
+        <color id="highlight" value="#D0D0D0" description="Metal highlight/reflection"/>
+        <color id="bright" value="#E8E8E8" description="Bright specular"/>
+        <color id="edge" value="#606060" description="Edge/seam color"/>
+        <color id="rivet" value="#909090" description="Rivet/bolt color"/>
+    </color-palette>
+
+    <layers>
+        <layer id="brushed_base" type="base" z-order="0" width="32" height="32">
+            <pixel-data>
+                <rect x="0" y="0" w="32" h="32" color="$base"/>
+                <hline x="0" y="2" len="32" color="$highlight"/>
+                <hline x="0" y="3" len="18" color="$highlight"/>
+                <hline x="0" y="8" len="32" color="$shadow"/>
+                <hline x="0" y="14" len="32" color="$highlight"/>
+                <hline x="0" y="15" len="24" color="$highlight"/>
+                <hline x="0" y="20" len="32" color="$shadow"/>
+                <hline x="0" y="26" len="32" color="$highlight"/>
+                <hline x="0" y="27" len="14" color="$highlight"/>
+                <hline x="14" y="30" len="18" color="$shadow"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="brushed_reflection" type="overlay" z-order="1" width="32" height="32">
+            <pixel-data>
+                <rect x="8" y="4" w="16" h="4" color="$bright"/>
+                <rect x="4" y="16" w="12" h="4" color="$bright"/>
+                <pixel x="24" y="24" color="$bright"/>
+                <pixel x="12" y="28" color="$bright"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="riveted_base" type="base" z-order="0" width="32" height="32">
+            <pixel-data>
+                <rect x="0" y="0" w="32" h="32" color="$base"/>
+                <hline x="0" y="0" len="32" color="$edge"/>
+                <hline x="0" y="31" len="32" color="$edge"/>
+                <vline x="0" y="0" len="32" color="$edge"/>
+                <vline x="31" y="0" len="32" color="$edge"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="riveted_bolts" type="overlay" z-order="1" width="32" height="32">
+            <pixel-data>
+                <rect x="2" y="2" w="4" h="4" color="$rivet"/>
+                <pixel x="3" y="3" color="$highlight"/>
+                <rect x="26" y="2" w="4" h="4" color="$rivet"/>
+                <pixel x="27" y="3" color="$highlight"/>
+                <rect x="2" y="26" w="4" h="4" color="$rivet"/>
+                <pixel x="3" y="27" color="$highlight"/>
+                <rect x="26" y="26" w="4" h="4" color="$rivet"/>
+                <pixel x="27" y="27" color="$highlight"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="corrugated_base" type="base" z-order="0" width="32" height="32">
+            <pixel-data>
+                <rect x="0" y="0" w="32" h="32" color="$base"/>
+                <rect x="0" y="0" w="4" h="32" color="$highlight"/>
+                <rect x="4" y="0" w="4" h="32" color="$shadow"/>
+                <rect x="8" y="0" w="4" h="32" color="$highlight"/>
+                <rect x="12" y="0" w="4" h="32" color="$shadow"/>
+                <rect x="16" y="0" w="4" h="32" color="$highlight"/>
+                <rect x="20" y="0" w="4" h="32" color="$shadow"/>
+                <rect x="24" y="0" w="4" h="32" color="$highlight"/>
+                <rect x="28" y="0" w="4" h="32" color="$shadow"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <animation name="idle" frames="1" fps="1" loop="false" frame-width="32" frame-height="32">
+            <frame index="0" layer-offsets=""/>
+        </animation>
+    </animations>
+</asset-spec>

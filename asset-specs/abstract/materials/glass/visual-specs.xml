@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Life of T — Abstract Glass Material Spec v1.0
+    Tile: 32×32
+    Patterns: clear, frosted, stained
+    Used by: mirror, windows in locations
+-->
+<asset-spec abstract="true" version="1.0">
+    <meta>
+        <entity-type>material</entity-type>
+        <entity-name>glass</entity-name>
+        <spec-version>1.0</spec-version>
+        <canvas width="32" height="32"/>
+        <display-scale>1.0</display-scale>
+    </meta>
+
+    <color-palette>
+        <color id="base" value="#C8E0F0" description="Glass tint"/>
+        <color id="edge" value="#A0B8C8" description="Edge darkening"/>
+        <color id="highlight" value="#F0F8FF" description="Primary reflection"/>
+        <color id="bright" value="#FFFFFF" description="Specular highlight"/>
+        <color id="shadow" value="#88A0B0" description="Glass shadow"/>
+        <color id="refraction" value="#D8F0FF" description="Refraction band"/>
+    </color-palette>
+
+    <layers>
+        <layer id="clear_base" type="base" z-order="0" width="32" height="32">
+            <pixel-data>
+                <rect x="0" y="0" w="32" h="32" color="$base"/>
+                <rect x="0" y="0" w="2" h="32" color="$edge"/>
+                <rect x="30" y="0" w="2" h="32" color="$edge"/>
+                <hline x="0" y="0" len="32" color="$edge"/>
+                <hline x="0" y="31" len="32" color="$edge"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="clear_reflection" type="overlay" z-order="1" width="32" height="32">
+            <pixel-data>
+                <rect x="4" y="4" w="12" h="8" color="$highlight"/>
+                <rect x="6" y="6" w="6" h="4" color="$bright"/>
+                <rect x="20" y="16" w="8" h="12" color="$refraction"/>
+                <pixel x="24" y="20" color="$bright"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="frosted_base" type="base" z-order="0" width="32" height="32">
+            <pixel-data>
+                <rect x="0" y="0" w="32" h="32" color="$shadow"/>
+                <pixel x="4" y="4" color="$base"/>
+                <pixel x="8" y="2" color="$base"/>
+                <pixel x="12" y="6" color="$base"/>
+                <pixel x="16" y="4" color="$base"/>
+                <pixel x="20" y="8" color="$base"/>
+                <pixel x="24" y="2" color="$base"/>
+                <pixel x="28" y="6" color="$base"/>
+                <pixel x="6" y="12" color="$base"/>
+                <pixel x="10" y="10" color="$base"/>
+                <pixel x="14" y="14" color="$base"/>
+                <pixel x="18" y="12" color="$base"/>
+                <pixel x="22" y="16" color="$base"/>
+                <pixel x="26" y="10" color="$base"/>
+                <pixel x="4" y="20" color="$base"/>
+                <pixel x="8" y="18" color="$base"/>
+                <pixel x="12" y="22" color="$base"/>
+                <pixel x="16" y="20" color="$base"/>
+                <pixel x="20" y="24" color="$base"/>
+                <pixel x="24" y="18" color="$base"/>
+                <pixel x="28" y="22" color="$base"/>
+                <pixel x="6" y="28" color="$base"/>
+                <pixel x="10" y="26" color="$base"/>
+                <pixel x="14" y="30" color="$base"/>
+                <pixel x="18" y="28" color="$base"/>
+                <pixel x="22" y="30" color="$base"/>
+                <pixel x="26" y="26" color="$base"/>
+            </pixel-data>
+        </layer>
+
+        <layer id="frosted_diffuse" type="overlay" z-order="1" width="32" height="32">
+            <pixel-data>
+                <rect x="8" y="8" w="16" h="16" color="$refraction"/>
+                <rect x="12" y="12" w="8" h="8" color="$highlight"/>
+            </pixel-data>
+        </layer>
+    </layers>
+
+    <animations>
+        <animation name="idle" frames="1" fps="1" loop="false" frame-width="32" frame-height="32">
+            <frame index="0" layer-offsets=""/>
+        </animation>
+
+        <animation name="shimmer" frames="8" fps="4" loop="true" frame-width="32" frame-height="32">
+            <frame index="0" layer-offsets=""/>
+            <frame index="1" layer-offsets="clear_reflection:-1,-1"/>
+            <frame index="2" layer-offsets="clear_reflection:-2,-2"/>
+            <frame index="3" layer-offsets="clear_reflection:-1,-1"/>
+            <frame index="4" layer-offsets=""/>
+            <frame index="5" layer-offsets="clear_reflection:1,1"/>
+            <frame index="6" layer-offsets="clear_reflection:2,2"/>
+            <frame index="7" layer-offsets="clear_reflection:1,1"/>
+        </animation>
+    </animations>
+</asset-spec>
