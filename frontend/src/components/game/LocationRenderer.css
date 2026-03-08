@@ -18,7 +18,17 @@
   pointer-events: none;
 }
 
+/* Overlay sprite must cover the full scene and scale the atlas to fill.
+ * The atlas is generated at native resolution (e.g. 320×240);
+ * background-size is overridden to 100% 100% so it stretches to fill
+ * the PixelScene container regardless of zoom level. */
 .location-renderer__overlay-sprite {
   width: 100% !important;
   height: 100% !important;
+}
+
+.location-renderer__overlay-sprite.sprite-animator--overlay {
+  /* Override the pixel-exact background-size from SpriteAnimator
+   * so the overlay stretches to fill the scene container. */
+  background-size: 100% auto !important;
 }
