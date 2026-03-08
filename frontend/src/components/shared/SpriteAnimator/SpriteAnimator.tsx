@@ -116,8 +116,6 @@ export const SpriteAnimator = memo(function SpriteAnimator({
 
   // Sprite renderMode (default)
   // Scale atlas background proportionally
-  const scaleX = displayWidth / anim.frameWidth;
-  const scaleY = displayHeight / anim.frameHeight;
   const bgWidth = anim.frameCount * displayWidth;
   const bgHeight = anim.totalRows * displayHeight;
 

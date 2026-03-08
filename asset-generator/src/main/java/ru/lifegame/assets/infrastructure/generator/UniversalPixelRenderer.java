@@ -1,5 +1,7 @@
 package ru.lifegame.assets.infrastructure.generator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.lifegame.assets.domain.model.asset.*;
 
 import java.awt.Color;
@@ -11,6 +13,8 @@ import java.util.*;
  * Reads pixel-data from AssetLayer and draws via PixelCanvas.
  */
 public final class UniversalPixelRenderer {
+
+    private static final Logger log = LoggerFactory.getLogger(UniversalPixelRenderer.class);
 
     public BufferedImage renderLayer(AssetLayer layer, int defaultWidth, int defaultHeight) {
         int w = layer.width() > 0 ? layer.width() : defaultWidth;
@@ -84,30 +88,53 @@ public final class UniversalPixelRenderer {
         if (data == null || data.isEmpty()) return;
 
         for (PixelRect rect : data.rects()) {
-            canvas.fillRect(rect.x() + dx, rect.y() + dy,
-                    rect.w(), rect.h(), parseColor(rect.color()));
+            Color color = parseColor(rect.color());
+            if (color != null) {
+                canvas.fillRect(rect.x() + dx, rect.y() + dy, rect.w(), rect.h(), color);
+            }
         }
         for (PixelLine line : data.lines()) {
-            if (line.direction() == PixelLine.Direction.HORIZONTAL) {
-                canvas.hLine(line.x() + dx, line.y() + dy, line.length(), parseColor(line.color()));
-            } else {
-                canvas.vLine(line.x() + dx, line.y() + dy, line.length(), parseColor(line.color()));
+            Color color = parseColor(line.color());
+            if (color != null) {
+                if (line.direction() == PixelLine.Direction.HORIZONTAL) {
+                    canvas.hLine(line.x() + dx, line.y() + dy, line.length(), color);
+                } else {
+                    canvas.vLine(line.x() + dx, line.y() + dy, line.length(), color);
+                }
             }
         }
         for (PixelDot dot : data.dots()) {
-            canvas.setPixel(dot.x() + dx, dot.y() + dy, parseColor(dot.color()));
+            Color color = parseColor(dot.color());
+            if (color != null) {
+                canvas.setPixel(dot.x() + dx, dot.y() + dy, color);
+            }
         }
     }
 
+    /**
+     * Parses hex color string to Color. Returns null for unresolved $-variables
+     * or invalid strings (defensive — should not happen after resolution).
+     */
     private Color parseColor(String hex) {
-        String cleaned = hex.startsWith("#") ? hex.substring(1) : hex;
-        int r = Integer.parseInt(cleaned.substring(0, 2), 16);
-        int g = Integer.parseInt(cleaned.substring(2, 4), 16);
-        int b = Integer.parseInt(cleaned.substring(4, 6), 16);
-        if (cleaned.length() == 8) {
-            int a = Integer.parseInt(cleaned.substring(6, 8), 16);
-            return new Color(r, g, b, a);
+        if (hex == null || hex.isBlank()) return null;
+        // Skip unresolved $-variable references (defensive guard)
+        if (hex.startsWith("$")) {
+            log.warn("Unresolved color variable in pixel data: {}", hex);
+            return null;
         }
-        return new Color(r, g, b);
+        try {
+            String cleaned = hex.startsWith("#") ? hex.substring(1) : hex;
+            int r = Integer.parseInt(cleaned.substring(0, 2), 16);
+            int g = Integer.parseInt(cleaned.substring(2, 4), 16);
+            int b = Integer.parseInt(cleaned.substring(4, 6), 16);
+            if (cleaned.length() == 8) {
+                int a = Integer.parseInt(cleaned.substring(6, 8), 16);
+                return new Color(r, g, b, a);
+            }
+            return new Color(r, g, b);
+        } catch (Exception e) {
+            log.warn("Invalid color value '{}': {}", hex, e.getMessage());
+            return null;
+        }
     }
 }
