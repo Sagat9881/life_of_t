@@ -59,7 +59,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
     id: 'home_room',
     name: 'Комната Татьяны',
     locationAsset: 'home_room',
-    backgroundAnimation: 'ambient',
+    backgroundAnimation: 'idle',
     furniture: [
       {
         id: 'bed',
@@ -141,7 +141,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
     id: 'kitchen',
     name: 'Кухня',
     locationAsset: 'kitchen',
-    backgroundAnimation: 'ambient',
+    backgroundAnimation: 'idle',
     furniture: [
       {
         id: 'stove',
@@ -203,7 +203,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
     id: 'dacha_yard',
     name: 'Двор на даче',
     locationAsset: 'dacha_yard',
-    backgroundAnimation: 'ambient',
+    backgroundAnimation: 'idle',
     furniture: [
       {
         id: 'dog_house',
@@ -263,7 +263,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
     id: 'parents_cottage',
     name: 'Дом родителей',
     locationAsset: 'parents_cottage',
-    backgroundAnimation: 'ambient',
+    backgroundAnimation: 'idle',
     furniture: [
       {
         id: 'fireplace',
@@ -310,7 +310,7 @@ export const LOCATIONS: Record<string, LocationConfig> = {
     id: 'summer_camp',
     name: 'Летний лагерь',
     locationAsset: 'summer_camp',
-    backgroundAnimation: 'ambient',
+    backgroundAnimation: 'idle',
     furniture: [
       {
         id: 'tent',
