@@ -16,6 +16,9 @@ import java.util.List;
  */
 public class ConflictManager {
 
+    /**
+     * Add a new conflict instance created by ConflictEngine.
+     */
     public void addNewConflict(
             Conflict conflict,
             GameSessionContext context,
@@ -31,6 +34,29 @@ public class ConflictManager {
 
         activeConflicts.add(conflict);
         eventPublisher.publish(new ConflictTriggeredEvent(context.sessionId(), conflict.id()));
+    }
+
+    /**
+     * Create a conflict from conflictId and add to active conflicts.
+     * Used when manually triggering a conflict (e.g., from action or event).
+     */
+    public Conflict startConflict(
+            String conflictId,
+            GameSessionContext context,
+            DomainEventPublisher eventPublisher
+    ) {
+        // TODO: Lookup ConflictSpec from ConflictEngine and create Conflict instance
+        // For now, create a minimal stub
+        Conflict conflict = new Conflict(
+            java.util.UUID.randomUUID().toString(),
+            conflictId,
+            "[Placeholder Label]",
+            "[Placeholder Description]",
+            "SELF",
+            "internal"
+        );
+        addNewConflict(conflict, context, eventPublisher);
+        return conflict;
     }
 
     public void avoidConflict(
@@ -92,7 +118,7 @@ public class ConflictManager {
         return activeConflicts.stream()
             .anyMatch(c -> c.conflictId().equals(conflictId) && !c.isResolved());
     }
-
+    
     private Conflict findConflictById(String id, List<Conflict> activeConflicts) {
         return activeConflicts.stream()
             .filter(c -> c.id().equals(id))

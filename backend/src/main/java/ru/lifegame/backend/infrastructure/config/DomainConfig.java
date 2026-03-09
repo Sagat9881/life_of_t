@@ -10,6 +10,7 @@ import ru.lifegame.backend.domain.conflict.spec.ConflictLoader;
 import ru.lifegame.backend.domain.conflict.spec.ConflictSpec;
 import ru.lifegame.backend.domain.ending.EndingEvaluator;
 import ru.lifegame.backend.domain.model.session.ActionExecutor;
+import ru.lifegame.backend.domain.model.session.ConflictManager;
 import ru.lifegame.backend.domain.model.session.DayEndProcessor;
 import ru.lifegame.backend.domain.model.session.GameOverChecker;
 import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
@@ -46,6 +47,11 @@ public class DomainConfig {
     }
 
     @Bean
+    public ConflictManager conflictManager() {
+        return new ConflictManager();
+    }
+
+    @Bean
     public GameOverChecker gameOverChecker() {
         return new GameOverChecker();
     }
@@ -58,10 +64,11 @@ public class DomainConfig {
     @Bean
     public DayEndProcessor dayEndProcessor(
             ConflictEngine conflictEngine,
+            ConflictManager conflictManager,
             GameOverChecker gameOverChecker,
             EndingEvaluator endingEvaluator,
             NpcLifecycleEngine npcLifecycleEngine
     ) {
-        return new DayEndProcessor(conflictEngine, gameOverChecker, endingEvaluator, npcLifecycleEngine);
+        return new DayEndProcessor(conflictEngine, conflictManager, gameOverChecker, endingEvaluator, npcLifecycleEngine);
     }
 }
