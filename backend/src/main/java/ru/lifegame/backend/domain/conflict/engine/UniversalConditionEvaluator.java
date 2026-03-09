@@ -1,7 +1,9 @@
 package ru.lifegame.backend.domain.conflict.engine;
 
 import ru.lifegame.backend.domain.conflict.spec.TriggerCondition;
+import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
+import ru.lifegame.backend.domain.model.session.GameTime;
 
 import java.util.Map;
 
@@ -24,7 +26,7 @@ public class UniversalConditionEvaluator {
     }
 
     private boolean evaluateStat(TriggerCondition condition, Map<String, Object> context) {
-        Player player = (Player) context.get("player");
+        PlayerCharacter player = (PlayerCharacter) context.get("player");
         if (player == null) return false;
 
         double actualValue = switch (condition.field()) {

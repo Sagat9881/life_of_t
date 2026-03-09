@@ -83,8 +83,11 @@ public class GameSession {
         return result;
     }
 
-    public void endDay() {
-        DayEndProcessor processor = new DayEndProcessor();
+    /**
+     * End day logic delegated to DayEndProcessor (injected via service layer).
+     * GameSession does NOT instantiate DayEndProcessor directly.
+     */
+    public void endDay(DayEndProcessor processor) {
         processor.processEndOfDay(context, eventPublisher);
         eventPublisher.publish(new DayEndedEvent(sessionId, time().day()));
     }

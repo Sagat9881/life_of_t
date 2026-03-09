@@ -148,16 +148,14 @@ public class GameStateViewMapper {
         return session.activeConflicts().stream()
                 .filter(c -> !c.isResolved())
                 .map(c -> new ConflictView(
-                        c.id(), c.type().code(), c.type().label(),
-                        c.stage().name(), c.csp().player(), c.csp().opponent(),
-                        toTacticOptions(session.player(), c)
+                        c.id(),
+                        c.conflictId(),
+                        c.label(),
+                        c.stage().name(),
+                        c.csp().player(),
+                        c.csp().opponent(),
+                        List.of() // TODO: Load tactics from ConflictSpec via ConflictEngine
                 ))
-                .toList();
-    }
-
-    private List<TacticOptionView> toTacticOptions(PlayerCharacter player, Conflict conflict) {
-        return player.availableConflictTactics().stream()
-                .map(t -> new TacticOptionView(t.code(), t.label(), t.description()))
                 .toList();
     }
 
