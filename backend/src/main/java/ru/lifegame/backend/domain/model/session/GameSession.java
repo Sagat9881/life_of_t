@@ -160,18 +160,6 @@ public class GameSession {
         }
     }
 
-    public void checkGameOver() {
-        GameOverChecker checker = new GameOverChecker();
-        Optional<GameOverReason> gameOverEnding = checker.check(player(), relationships(), pets());
-        gameOverEnding.ifPresent(end -> {
-            this.ending = end.ending();
-            this.context.setGameOverReason(end);
-            this.context.setEnding(this.ending);
-            eventPublisher.publish(
-                    new GameOverEvent(sessionId, ending.type().name())
-            );
-        });
-    }
 
     public boolean isGameOver() {
         return ending != null;

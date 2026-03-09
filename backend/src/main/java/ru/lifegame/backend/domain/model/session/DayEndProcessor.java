@@ -108,7 +108,7 @@ public class DayEndProcessor {
         gameOverEnding.ifPresent(ending -> {
             context.setEnding(ending);
             eventPublisher.publish(
-                new GameOverEvent(context.sessionId(), ending.type().name())
+                new GameOverEvent(context.sessionId(), ending.endingId())
             );
         });
     }
@@ -131,7 +131,7 @@ public class DayEndProcessor {
             ).ifPresent(ending -> {
                 context.setEnding(ending);
                 eventPublisher.publish(
-                    new EndingAchievedEvent(context.sessionId(), ending.type().name())
+                    new EndingAchievedEvent(context.sessionId(), ending.endingId())
                 );
             });
         }

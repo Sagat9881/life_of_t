@@ -94,11 +94,9 @@ public class EndingEngine {
             return true; // Always-true fallback (NEUTRAL_EPILOGUE)
         }
 
-        boolean result = "OR".equals(conditions.mode())
+        return "OR".equals(conditions.mode())
             ? condList.stream().anyMatch(c -> evaluator.evaluate(c, player, relationships, questLog))
             : condList.stream().allMatch(c -> evaluator.evaluate(c, player, relationships, questLog));
-
-        return result;
     }
 
     private Ending toEnding(EndingSpec spec) {

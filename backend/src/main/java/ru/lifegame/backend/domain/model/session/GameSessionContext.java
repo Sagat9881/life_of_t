@@ -29,8 +29,6 @@ public class GameSessionContext {
     private final NpcRegistry npcRegistry;
     @Setter
     private Ending ending;
-    @Setter
-    private GameOverReason gameOverReason;
 
     public GameSessionContext(
             String sessionId,
@@ -77,7 +75,6 @@ public class GameSessionContext {
     public QuestLog questLog() { return questLog; }
     public List<GameEvent> events() { return events; }
     public Ending ending() { return ending; }
-    public GameOverReason gameOverReason() { return gameOverReason; }
     public NpcRegistry npcRegistry() { return npcRegistry; }
 
     public void advanceTime(int hours) {
@@ -86,10 +83,6 @@ public class GameSessionContext {
 
     public void startNewDay() {
         this.time = time.startNewDay();
-    }
-
-    public boolean isFinished() {
-        return ending != null || gameOverReason != null;
     }
 
     public GameSessionReadModel asReadModel() {
