@@ -3,7 +3,7 @@ import { api } from '../services/api';
 import type {
   Player, GameTime, ActionOption, RelationshipView,
   PetView, QuestView, ConflictView, EventView,
-  EndingView, ActionResultView, NPC,
+  EndingView, ActionResultView, NPC, NpcActivityView, DomainEventView,
 } from '../types/game';
 
 interface GameStore {
@@ -18,6 +18,8 @@ interface GameStore {
   currentEvent: EventView | null;
   ending: EndingView | null;
   lastActionResult: ActionResultView | null;
+  npcActivities: NpcActivityView[];
+  domainEvents: DomainEventView[];
   isLoading: boolean;
   error: string | null;
   npcs: NPC[];
@@ -35,6 +37,7 @@ const initialState = {
   player: null, time: null, availableActions: [], relationships: [],
   pets: [], activeQuests: [], completedQuestIds: [], activeConflicts: [],
   currentEvent: null, ending: null, lastActionResult: null,
+  npcActivities: [], domainEvents: [],
   isLoading: false, error: null, npcs: [], actions: [],
 };
 
@@ -57,6 +60,8 @@ function applyState(state: Record<string, unknown>) {
     currentEvent: (state.currentEvent as EventView) ?? null,
     ending: (state.ending as EndingView) ?? null,
     lastActionResult: (state.lastActionResult as ActionResultView) ?? null,
+    npcActivities: (state.npcActivities as NpcActivityView[]) ?? [],
+    domainEvents: (state.domainEvents as DomainEventView[]) ?? [],
     isLoading: false, error: null,
   };
 }

@@ -180,6 +180,7 @@ export interface GameTime {
   day: number;
   hour: number;
   timeSlot: TimeSlot;
+  dayOver?: boolean;
 }
 
 export interface Relationship {
@@ -187,6 +188,31 @@ export interface Relationship {
   level: number;
   trust: number;
   romance?: number;
+}
+
+/**
+ * NPC Activity View — current physical state of an NPC
+ * Used to render NPC sprite/animation at correct location
+ */
+export interface NpcActivityView {
+  npcId: string;
+  displayName: string;
+  category: string;        // "human", "cat", "dog"
+  activityId: string;      // "breakfast", "sleeping", "phone_scroll"
+  animationKey: string;    // "eating", "sleeping", "typing"
+  locationId: string;      // "kitchen", "living_room", "away"
+  moodSummary: string;     // dominant mood axis: "happy", "lonely", "irritated"
+  isAvailable: boolean;    // can player interact right now?
+}
+
+/**
+ * Domain Event View — narrative/NPC events from backend
+ * Used to show toasts, logs, or trigger animations
+ */
+export interface DomainEventView {
+  eventType: string;       // "NPC_ACTIVITY_CHANGED", "NPC_MOOD_EXTREME", etc.
+  timestamp: string;       // ISO 8601
+  payload: Record<string, unknown>;  // eventType-specific data
 }
 
 /**
@@ -207,4 +233,6 @@ export interface GameState {
   currentEvent: EventView | null;
   ending: EndingView | null;
   lastActionResult: ActionResultView | null;
+  npcActivities: NpcActivityView[];
+  domainEvents: DomainEventView[];
 }
