@@ -84,7 +84,8 @@ public class GameControllerImpl implements GameController {
     }
 
     @Override
-    public GameStateView endDay(@RequestBody EndDayRequestDto request) {
-        return endDayUseCase.endDay(new EndDayCommand(request.telegramUserId()));
+    public ResponseEntity<GameStateView> endDay(@RequestBody EndDayRequestDto request) {
+        GameStateView view = endDayUseCase.endDay(new EndDayCommand(request.telegramUserId()));
+        return ResponseEntity.ok(view);
     }
 }

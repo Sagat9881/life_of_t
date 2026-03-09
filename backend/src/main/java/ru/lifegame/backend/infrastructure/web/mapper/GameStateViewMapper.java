@@ -57,10 +57,11 @@ public class GameStateViewMapper {
     }
 
     private TimeView toTimeView(GameTime time) {
-        return new TimeView(time.day(), time.hour(), resolveTimeSlot(time.hour()));
+        return new TimeView(time.day(), time.hour(), resolveTimeSlot(time.hour()), time.isDayOver());
     }
 
     static String resolveTimeSlot(int hour) {
+        if (hour >= 24) return "NIGHT";
         if (hour < 7) return "NIGHT";
         if (hour < 12) return "MORNING";
         if (hour < 17) return "DAY";
@@ -110,7 +111,8 @@ public class GameStateViewMapper {
         return allActions.stream()
                 .map(action -> {
                     int timeCost = action.calculateTimeCost(session.context().asReadModel());
-                    boolean available = session.player().canPerformAction(action.type(), session.time(), timeCost);
+                    boolean available = !session.time().isDayOver()
+                            && session.player().canPerformAction(action.type(), session.time(), timeCost);
                     String reason = available ? null : resolveUnavailableReason(session, timeCost);
                     return new ActionOptionView(
                             action.type().code(), action.type().label(),
@@ -121,9 +123,10 @@ public class GameStateViewMapper {
     }
 
     private String resolveUnavailableReason(GameSession session, int timeCost) {
-        if (!session.time().hasEnoughTime(timeCost)) return "\u041d\u0435\u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u043e \u0432\u0440\u0435\u043c\u0435\u043d\u0438";
-        if (session.player().stats().energy() < 5) return "\u041d\u0435\u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u043e \u044d\u043d\u0435\u0440\u0433\u0438\u0438";
-        return "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u043d\u043e";
+        if (session.time().isDayOver()) return "День закончен";
+        if (!session.time().hasEnoughTime(timeCost)) return "Недостаточно времени";
+        if (session.player().stats().energy() < 5) return "Недостаточно энергии";
+        return "Действие недоступно";
     }
 
     private List<QuestView> toQuestViews(GameSession session) {
@@ -191,9 +194,11 @@ public class GameStateViewMapper {
     private List<NpcActivityView> toNpcActivityViews(GameSession session) {
         if (npcLifecycleEngine == null) return List.of();
         int currentHour = session.time().hour();
+        // Clamp hour for NPC schedule lookup (24 is end-of-day sentinel)
+        int lookupHour = Math.min(currentHour, 23);
         return npcLifecycleEngine.getRegistry().getAll().stream()
                 .map(npc -> {
-                    npc.updateScheduleActivity(currentHour);
+                    npc.updateScheduleActivity(lookupHour);
                     var activity = npc.currentActivity();
                     return NpcActivityView.fromInstance(
                             npc.id(),

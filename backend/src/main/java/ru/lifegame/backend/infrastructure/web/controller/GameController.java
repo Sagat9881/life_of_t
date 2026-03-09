@@ -153,5 +153,28 @@ public interface GameController {
         @RequestBody ChooseEventOptionRequestDto request
     );
 
-    GameStateView endDay(EndDayRequestDto request);
+    @Operation(
+        summary = "Завершить текущий день",
+        description = "Запускает обработку конца дня: восстановление/расход статов, поведение NPC, проверка конфликтов, начало нового дня"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "День завершён, начат новый день",
+            content = @Content(schema = @Schema(implementation = GameStateView.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Сессия не найдена"
+        )
+    })
+    @PostMapping("/end-day")
+    ResponseEntity<GameStateView> endDay(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Запрос на завершение дня",
+            required = true,
+            content = @Content(schema = @Schema(implementation = EndDayRequestDto.class))
+        )
+        @RequestBody EndDayRequestDto request
+    );
 }
