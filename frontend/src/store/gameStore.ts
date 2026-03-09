@@ -1,24 +1,36 @@
 import { create } from 'zustand';
 import { api } from '../services/api';
-import type { Player, NPC, Pet, GameAction, Conflict, GameEvent, GameTime } from '../types/game';
+import type {
+  Player, GameTime, ActionOption, RelationshipView,
+  PetView, QuestView, ConflictView, EventView,
+  EndingView, ActionResultView, NPC,
+} from '../types/game';
 
 interface GameStore {
-  // State
+  // State — matches backend GameStateView fields
   player: Player | null;
   time: GameTime | null;
-  actions: GameAction[];
-  npcs: NPC[];
-  pets: Pet[];
-  currentConflict: Conflict | null;
-  currentEvent: GameEvent | null;
+  availableActions: ActionOption[];
+  relationships: RelationshipView[];
+  pets: PetView[];
+  activeQuests: QuestView[];
+  completedQuestIds: string[];
+  activeConflicts: ConflictView[];
+  currentEvent: EventView | null;
+  ending: EndingView | null;
+  lastActionResult: ActionResultView | null;
   isLoading: boolean;
   error: string | null;
 
-  // Actions
+  // Legacy compatibility — derived from relationships
+  npcs: NPC[];
+  actions: ActionOption[];
+
+  // Operations
   fetchGameState: () => Promise<void>;
   executeAction: (actionCode: string) => Promise<void>;
-  selectTactic: (tacticCode: string) => Promise<void>;
-  selectChoice: (choiceCode: string) => Promise<void>;
+  selectTactic: (conflictId: string, tacticCode: string) => Promise<void>;
+  selectChoice: (eventId: string, optionCode: string) => Promise<void>;
   cancelConflict: () => void;
   cancelEvent: () => void;
   reset: () => void;
@@ -27,18 +39,54 @@ interface GameStore {
 const initialState = {
   player: null,
   time: null,
-  actions: [],
-  npcs: [],
+  availableActions: [],
+  relationships: [],
   pets: [],
-  currentConflict: null,
+  activeQuests: [],
+  completedQuestIds: [],
+  activeConflicts: [],
   currentEvent: null,
+  ending: null,
+  lastActionResult: null,
   isLoading: false,
   error: null,
+  npcs: [],
+  actions: [],
 };
 
-/**
- * Zustand store для игрового состояния
- */
+/** Map backend RelationshipView[] to legacy NPC[] for Sidebar compatibility */
+function toNpcs(rels: RelationshipView[]): NPC[] {
+  return rels.map((r) => ({
+    id: r.npcId,
+    name: r.name || r.npcId,
+    relationship: r.closeness ?? 0,
+    type: 'friend' as const,
+  }));
+}
+
+/** Apply full GameStateView to store */
+function applyState(state: Record<string, unknown>) {
+  const rels = (state.relationships as RelationshipView[]) ?? [];
+  const actions = (state.availableActions as ActionOption[]) ?? [];
+  return {
+    player: (state.player as Player) ?? null,
+    time: (state.time as GameTime) ?? null,
+    availableActions: actions,
+    actions, // alias
+    relationships: rels,
+    npcs: toNpcs(rels),
+    pets: (state.pets as PetView[]) ?? [],
+    activeQuests: (state.activeQuests as QuestView[]) ?? [],
+    completedQuestIds: (state.completedQuestIds as string[]) ?? [],
+    activeConflicts: (state.activeConflicts as ConflictView[]) ?? [],
+    currentEvent: (state.currentEvent as EventView) ?? null,
+    ending: (state.ending as EndingView) ?? null,
+    lastActionResult: (state.lastActionResult as ActionResultView) ?? null,
+    isLoading: false,
+    error: null,
+  };
+}
+
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
@@ -46,28 +94,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const state = await api.getGameState();
-      
-      // Map backend DTO to frontend store
-      set({
-        player: state.player,
-        time: state.time,
-        // Backend: availableActions -> Frontend: actions
-        actions: (state as any).availableActions || [],
-        // Backend: relationships -> Frontend: npcs (temporary mapping)
-        npcs: ((state as any).relationships || []).map((rel: any) => ({
-          id: rel.id || rel.npcCode,
-          name: rel.name,
-          relationship: rel.closeness || 0,
-          type: rel.npcCode?.toLowerCase() || 'friend'
-        })),
-        pets: state.pets || [],
-        // Backend: activeConflicts[0] -> Frontend: currentConflict
-        currentConflict: ((state as any).activeConflicts && (state as any).activeConflicts.length > 0)
-          ? (state as any).activeConflicts[0]
-          : null,
-        currentEvent: state.currentEvent ?? null,
-        isLoading: false,
-      });
+      set(applyState(state as unknown as Record<string, unknown>));
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Не удалось загрузить данные',
@@ -80,25 +107,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const result = await api.executeAction(actionCode);
-      
-      // Map backend response properly
-      set({
-        player: result.player,
-        time: result.time,
-        actions: (result as any).availableActions || [],
-        npcs: ((result as any).relationships || []).map((rel: any) => ({
-          id: rel.id || rel.npcCode,
-          name: rel.name,
-          relationship: rel.closeness || 0,
-          type: rel.npcCode?.toLowerCase() || 'friend'
-        })),
-        pets: result.pets || [],
-        currentConflict: ((result as any).activeConflicts && (result as any).activeConflicts.length > 0)
-          ? (result as any).activeConflicts[0]
-          : null,
-        currentEvent: result.currentEvent ?? null,
-        isLoading: false,
-      });
+      set(applyState(result as unknown as Record<string, unknown>));
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Не удалось выполнить действие',
@@ -107,20 +116,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
-  selectTactic: async (tacticCode: string) => {
-    const { currentConflict } = get();
-    if (!currentConflict) return;
-
+  selectTactic: async (conflictId: string, tacticCode: string) => {
     set({ isLoading: true, error: null });
     try {
-      const result = await api.resolveTactic(currentConflict.id, tacticCode);
-      set({
-        player: result.player,
-        time: result.time,
-        actions: (result as any).availableActions || [],
-        currentConflict: null, // Конфликт разрешён
-        isLoading: false,
-      });
+      const result = await api.resolveTactic(conflictId, tacticCode);
+      set(applyState(result as unknown as Record<string, unknown>));
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Не удалось разрешить конфликт',
@@ -129,20 +129,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
-  selectChoice: async (choiceCode: string) => {
-    const { currentEvent } = get();
-    if (!currentEvent) return;
-
+  selectChoice: async (eventId: string, optionCode: string) => {
     set({ isLoading: true, error: null });
     try {
-      const result = await api.selectChoice(currentEvent.id, choiceCode);
-      set({
-        player: result.player,
-        time: result.time,
-        actions: (result as any).availableActions || [],
-        currentEvent: null, // Событие завершено
-        isLoading: false,
-      });
+      const result = await api.selectChoice(eventId, optionCode);
+      set(applyState(result as unknown as Record<string, unknown>));
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Не удалось выбрать вариант',
@@ -151,13 +142,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
-  cancelConflict: () => {
-    set({ currentConflict: null });
-  },
-
-  cancelEvent: () => {
-    set({ currentEvent: null });
-  },
-
+  cancelConflict: () => set({ activeConflicts: [] }),
+  cancelEvent: () => set({ currentEvent: null }),
   reset: () => set(initialState),
 }));

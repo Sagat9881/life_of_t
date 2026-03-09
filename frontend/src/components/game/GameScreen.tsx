@@ -1,14 +1,19 @@
 /**
  * GameScreen — main pixel-art game layout.
  *
- * Maps backend NPC behavior/activity to sprite animation names
- * and passes them to LocationRenderer.
+ * All actions come from backend (availableActions).
+ * No hardcoded action lists. Furniture actionCode in locations.ts
+ * is just a hint for click-to-action mapping on the scene.
+ *
+ * Animation mapping: reads animationKey from backend ActionOption
+ * when available, otherwise falls back to action code heuristics.
  */
 import { useState, useEffect, useMemo } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { LocationRenderer } from './LocationRenderer';
 import { Sidebar } from './Sidebar';
 import { getLocationConfig, getLocationForTimeSlot } from '../../config/locations';
+import type { ActionOption } from '../../types/game';
 import './GameScreen.css';
 
 const deriveTimeSlot = (hour: number): string => {
@@ -20,55 +25,36 @@ const deriveTimeSlot = (hour: number): string => {
 };
 
 /**
- * Maps backend behavior/activity codes to sprite animation names.
+ * Derive sprite animation name from an action.
+ * Priority: action.animationKey (from backend/atlas) > code-based heuristic > 'idle'
  */
-const BEHAVIOR_TO_ANIMATION: Record<string, string> = {
-  IDLE: 'idle',
-  SLEEPING: 'sleep',
-  RESTING: 'sleep',
-  WORKING: 'work',
-  WORKING_ON_PROJECT: 'work',
-  STUDYING: 'work',
-  COOKING: 'work',
-  WALKING: 'walk',
-  WALKING_DOG: 'walk',
-  EXERCISING: 'exercise',
+const ACTION_CODE_TO_ANIMATION: Record<string, string> = {
+  REST_AT_HOME: 'sleep',
+  SLEEP: 'sleep',
+  WORK_ON_PROJECT: 'work',
+  STUDY: 'work',
+  COOK_FOOD: 'work',
   EXERCISE: 'exercise',
-  EATING: 'idle',
-  SOCIALIZING: 'idle',
-  TALKING: 'idle',
-  BEAUTY_ROUTINE: 'idle',
+  WALK_DOG: 'walk',
+  GO_FOR_WALK: 'walk',
 };
 
-/** Safely read a string field from an object that may have extra backend fields. */
-function getField(obj: unknown, field: string): string | undefined {
-  if (obj != null && typeof obj === 'object' && field in (obj as object)) {
-    const val = (obj as Record<string, unknown>)[field];
-    return typeof val === 'string' ? val : undefined;
-  }
-  return undefined;
+function resolveAnimation(action?: ActionOption | null): string {
+  if (!action) return 'idle';
+  // Future: backend provides animationKey from atlas config
+  if (action.animationKey) return action.animationKey;
+  // Fallback: code-based heuristic (will be removed once backend provides animationKey)
+  return ACTION_CODE_TO_ANIMATION[action.code] ?? 'idle';
 }
 
-const mapBehaviorToAnimation = (behavior?: string, activity?: string): string => {
-  if (activity) {
-    const mapped = BEHAVIOR_TO_ANIMATION[activity.toUpperCase()];
-    if (mapped) return mapped;
-  }
-  if (behavior) {
-    const mapped = BEHAVIOR_TO_ANIMATION[behavior.toUpperCase()];
-    if (mapped) return mapped;
-  }
-  return 'idle';
-};
-
 export function GameScreen() {
-  const { player, time, npcs, isLoading, error, fetchGameState, executeAction } = useGameStore();
-  const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
-  const [selectedAction, setSelectedAction] = useState<{
-    id: string;
-    code: string;
-    label: string;
-  } | null>(null);
+  const {
+    player, time, npcs, availableActions, activeQuests, relationships,
+    isLoading, error, fetchGameState, executeAction,
+    activeConflicts, currentEvent, lastActionResult,
+  } = useGameStore();
+
+  const [selectedAction, setSelectedAction] = useState<ActionOption | null>(null);
 
   useEffect(() => {
     fetchGameState();
@@ -80,44 +66,34 @@ export function GameScreen() {
   const timeOfDay = rawTimeSlot.toLowerCase();
   const gameTime = time ?? { day: 1, hour: 7, timeSlot: 'MORNING' as const };
 
+  // Build animation map for characters based on current player activity
   const characterAnimations = useMemo(() => {
     const anims: Record<string, string> = {};
-
-    if (player) {
-      const activity = getField(player, 'currentActivity');
-      const behavior = getField(player, 'currentBehavior');
-      anims['tanya'] = mapBehaviorToAnimation(behavior, activity);
-    }
-
-    if (npcs && Array.isArray(npcs)) {
-      for (const npc of npcs) {
-        const name = (npc.name ?? '').toLowerCase();
-        const behavior = getField(npc, 'currentBehavior');
-        const activity = getField(npc, 'currentActivity');
-        if (name) {
-          anims[name] = mapBehaviorToAnimation(behavior, activity);
-        }
+    // Player animation from last executed action
+    anims['tanya'] = resolveAnimation(lastActionResult
+      ? availableActions.find(a => a.code === lastActionResult.actionCode)
+      : null);
+    // NPCs default to idle (future: backend NpcActivityView provides animationKey)
+    for (const slot of locationConfig.characters) {
+      if (slot.id !== 'tanya' && !anims[slot.id]) {
+        anims[slot.id] = 'idle';
       }
     }
-
     return anims;
-  }, [player, npcs]);
+  }, [lastActionResult, availableActions, locationConfig.characters]);
 
+  // Map furniture click → find matching backend action
   const handleObjectClick = (objectId: string, actionCode: string) => {
-    const furniture = locationConfig.furniture.find((f) => f.id === objectId);
-    setSelectedObjectId(objectId);
-    setSelectedAction({
-      id: objectId,
-      code: actionCode,
-      label: furniture?.label ?? objectId,
-    });
+    const backendAction = availableActions.find(a => a.code === actionCode);
+    if (backendAction) {
+      setSelectedAction(backendAction);
+    }
   };
 
   const handleActionConfirm = async () => {
     if (!selectedAction || !player) return;
     try {
       await executeAction(selectedAction.code);
-      setSelectedObjectId(null);
       setSelectedAction(null);
     } catch (err: unknown) {
       console.error('Action failed:', err instanceof Error ? err.message : err);
@@ -125,18 +101,15 @@ export function GameScreen() {
   };
 
   const handleActionCancel = () => {
-    setSelectedObjectId(null);
     setSelectedAction(null);
   };
 
   if (isLoading && !player) {
     return <div className="gs-loading">Загрузка...</div>;
   }
-
   if (error) {
     return <div className="gs-loading">Ошибка: {error}</div>;
   }
-
   if (!player) {
     return <div className="gs-loading">Нет данных об игроке</div>;
   }
@@ -159,7 +132,7 @@ export function GameScreen() {
         <div className="gs-scene">
           <LocationRenderer
             config={locationConfig}
-            selectedObjectId={selectedObjectId}
+            selectedObjectId={selectedAction?.code ?? null}
             onObjectClick={handleObjectClick}
             characterAnimations={characterAnimations}
             timeOfDay={timeOfDay}
@@ -170,25 +143,33 @@ export function GameScreen() {
           player={player}
           npcs={npcs}
           gameTime={gameTime}
+          availableActions={availableActions}
+          activeQuests={activeQuests}
+          relationships={relationships}
+          onActionClick={(action) => setSelectedAction(action)}
         />
       </div>
 
       <footer className="gs-footer">
-        Кликни на персонажа для взаимодействия
+        Кликни на предмет или выбери действие
       </footer>
 
       {selectedAction ? (
         <div className="gs-dialog-overlay" onClick={handleActionCancel}>
           <div className="gs-dialog" onClick={(e) => e.stopPropagation()}>
             <div className="gs-dialog__title">{selectedAction.label}</div>
-            <div className="gs-dialog__text">Выполнить действие?</div>
+            <div className="gs-dialog__text">
+              {selectedAction.description}
+              <br />
+              <span className="gs-dialog__cost">⏱ {selectedAction.estimatedTimeCost}ч</span>
+            </div>
             <div className="gs-dialog__buttons">
               <button
                 className="gs-dialog__btn gs-dialog__btn--confirm"
                 onClick={handleActionConfirm}
-                disabled={isLoading}
+                disabled={isLoading || !selectedAction.isAvailable}
               >
-                {isLoading ? '...' : 'Да'}
+                {isLoading ? '...' : selectedAction.isAvailable ? 'Да' : selectedAction.unavailableReason ?? 'Недоступно'}
               </button>
               <button
                 className="gs-dialog__btn gs-dialog__btn--cancel"

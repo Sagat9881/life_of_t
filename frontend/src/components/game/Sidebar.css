@@ -1,163 +1,197 @@
-/* ═══════════════════════════════════════════
-   Sidebar — right panel, pixel-art style
-   ═══════════════════════════════════════════ */
-
+/* Sidebar — pixel-art styled right panel */
 .sb {
-  background: #1a1230;
-  border-left: 2px solid #4a3f5d;
+  width: 280px;
+  min-width: 280px;
+  background: #1a1a2e;
+  border-left: 3px solid #16213e;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: #e0e0e0;
+  padding: 8px;
 }
 
-/* ── Section ── */
 .sb-section {
-  padding: 12px 14px;
-  border-bottom: 2px solid #4a3f5d;
-}
-
-.sb-section:last-child {
-  border-bottom: none;
+  margin-bottom: 12px;
 }
 
 .sb-section__title {
   font-size: 9px;
-  color: #e0d8f0;
-  letter-spacing: 2px;
-  margin-bottom: 10px;
+  color: #fff;
+  margin: 0 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #333;
   text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-/* ── Stats ── */
+/* Stats */
 .sb-stats {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 3px;
 }
 
 .sb-stat {
-  display: grid;
-  grid-template-columns: 100px 1fr 30px;
+  display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .sb-stat__label {
-  font-size: 7px;
-  color: #c0b8d0;
+  min-width: 80px;
   text-align: right;
+  color: #aaa;
 }
 
 .sb-stat__bar {
-  height: 10px;
-  background: #2a1f3d;
-  border: 1px solid #4a3f5d;
-  position: relative;
-  overflow: hidden;
+  flex: 1;
+  height: 8px;
+  background: #333;
+  border: 1px solid #555;
 }
 
 .sb-stat__fill {
   height: 100%;
-  transition: width 0.5s ease;
-  image-rendering: pixelated;
+  transition: width 0.3s ease;
 }
 
 .sb-stat__value {
-  font-size: 7px;
-  color: #e0d8f0;
+  min-width: 28px;
   text-align: right;
+  color: #fff;
 }
 
-/* ── Quests ── */
-.sb-quests {
+/* Actions */
+.sb-actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 3px;
 }
 
-.sb-quest__tag {
-  display: inline-block;
-  font-size: 6px;
-  padding: 2px 6px;
-  margin-bottom: 4px;
-  letter-spacing: 1px;
+.sb-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2a2a4a;
+  border: 1px solid #444;
+  color: #e0e0e0;
+  padding: 4px 6px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  cursor: pointer;
+  transition: background 0.15s;
 }
 
-.sb-quest__tag--care {
-  background: #4caf50;
-  color: #000;
+.sb-action:hover:not(:disabled) {
+  background: #3a3a6a;
+  border-color: #66f;
 }
 
-.sb-quest__tag--family {
-  background: #f44336;
-  color: #fff;
+.sb-action--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
-.sb-quest__name {
-  font-size: 8px;
-  color: #fff;
-  margin-bottom: 4px;
+.sb-action__label {
+  flex: 1;
 }
 
-.sb-quest__tasks {
-  list-style: none;
-  padding: 0;
+.sb-action__cost {
+  color: #aaa;
+  margin-left: 4px;
 }
 
-.sb-quest__tasks li {
-  font-size: 6px;
-  color: #8a7fa0;
-  padding: 1px 0;
-}
-
-.sb-quest__tasks li::before {
-  content: '• ';
-  color: #4a3f5d;
-}
-
-/* ── Relationships ── */
-.sb-relationships {
+/* Quests */
+.sb-quests {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
+.sb-quest__name {
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 3px;
+}
+
+.sb-quest__progress {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sb-quest__bar {
+  flex: 1;
+  height: 6px;
+  background: #333;
+  border: 1px solid #555;
+}
+
+.sb-quest__fill {
+  height: 100%;
+  background: #4caf50;
+  transition: width 0.3s ease;
+}
+
+.sb-quest__pct {
+  min-width: 30px;
+  text-align: right;
+  color: #aaa;
+}
+
+/* Relationships */
+.sb-relationships {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .sb-rel {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 6px;
 }
 
 .sb-rel__name {
-  font-size: 8px;
-  color: #e0d8f0;
+  min-width: 70px;
+  color: #ccc;
 }
 
 .sb-hearts {
-  font-size: 8px;
-  color: #f093fb;
+  color: #f44;
   letter-spacing: 1px;
 }
 
-/* ── Scrollbar ── */
-.sb::-webkit-scrollbar {
-  width: 6px;
+/* Empty state */
+.sb-empty {
+  color: #666;
+  font-style: italic;
+  padding: 4px 0;
 }
 
-.sb::-webkit-scrollbar-track {
-  background: #1a1230;
+/* Legacy quest tags — kept for backward compat */
+.sb-quest__tag {
+  display: inline-block;
+  font-size: 6px;
+  padding: 1px 4px;
+  border: 1px solid;
+  margin-bottom: 2px;
 }
-
-.sb::-webkit-scrollbar-thumb {
-  background: #4a3f5d;
+.sb-quest__tag--care {
+  color: #4caf50;
+  border-color: #4caf50;
 }
-
-/* ── Responsive ── */
-@media (max-width: 700px) {
-  .sb {
-    border-left: none;
-    border-top: 2px solid #4a3f5d;
-    max-height: 40vh;
-  }
+.sb-quest__tag--family {
+  color: #f44;
+  border-color: #f44;
+}
+.sb-quest__tasks {
+  margin: 2px 0 0 10px;
+  padding: 0;
+  list-style: disc;
+  color: #888;
+}
+.sb-quest__tasks li {
+  margin-bottom: 1px;
 }
