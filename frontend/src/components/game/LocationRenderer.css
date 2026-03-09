@@ -1,14 +1,7 @@
-/* LocationRenderer — all layers via SpriteAnimator */
+/* LocationRenderer — minimal styles, all sizing done by SpriteAnimator inline */
 
 .location-renderer {
   position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-/* Background layer: SpriteAnimator fills entire scene */
-.location-renderer__bg-layer .sprite-animator {
-  display: block;
   width: 100%;
   height: 100%;
 }
