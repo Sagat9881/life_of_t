@@ -2,18 +2,19 @@ package ru.lifegame.backend.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import ru.lifegame.backend.domain.action.ActionProvider;
 import ru.lifegame.backend.domain.action.spec.DataDrivenActionProvider;
 import ru.lifegame.backend.domain.action.spec.PlayerActionSpecLoader;
 import ru.lifegame.backend.domain.conflict.engine.ConflictEngine;
 import ru.lifegame.backend.domain.conflict.spec.ConflictSpec;
-import ru.lifegame.backend.domain.ending.EndingEvaluator;
+import ru.lifegame.backend.domain.ending.EndingEngine;
 import ru.lifegame.backend.domain.model.session.ActionExecutor;
 import ru.lifegame.backend.domain.model.session.ConflictManager;
 import ru.lifegame.backend.domain.model.session.DayEndProcessor;
-import ru.lifegame.backend.domain.model.session.GameOverChecker;
 import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
 
+import java.io.InputStream;
 import java.util.List;
 
 @Configuration
@@ -51,23 +52,22 @@ public class DomainConfig {
     }
 
     @Bean
-    public GameOverChecker gameOverChecker() {
-        return new GameOverChecker();
-    }
-
-    @Bean
-    public EndingEvaluator endingEvaluator() {
-        return new EndingEvaluator();
+    public EndingEngine endingEngine() {
+        try {
+            InputStream xmlStream = new ClassPathResource("game-data/endings.xml").getInputStream();
+            return new EndingEngine(xmlStream);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load endings.xml", e);
+        }
     }
 
     @Bean
     public DayEndProcessor dayEndProcessor(
             ConflictEngine conflictEngine,
             ConflictManager conflictManager,
-            GameOverChecker gameOverChecker,
-            EndingEvaluator endingEvaluator,
+            EndingEngine endingEngine,
             NpcLifecycleEngine npcLifecycleEngine
     ) {
-        return new DayEndProcessor(conflictEngine, conflictManager, gameOverChecker, endingEvaluator, npcLifecycleEngine);
+        return new DayEndProcessor(conflictEngine, conflictManager, endingEngine, npcLifecycleEngine);
     }
 }
