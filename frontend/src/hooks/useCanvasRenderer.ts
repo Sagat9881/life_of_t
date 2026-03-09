@@ -16,7 +16,7 @@ interface UseCanvasRendererOptions {
   timeOfDay: string;
   selectedObjectId: string | null;
   hoveredObjectId: string | null;
-  characterAnimations?: Record<string, { animationName: string; frameIndex: number }>;
+  characterAnimations?: Record<string, { animationName: string; frameIndex: number }> | undefined;
 }
 
 export function useCanvasRenderer({

@@ -19,7 +19,7 @@ interface PixelSceneCanvasProps {
   timeOfDay: string;
   selectedObjectId: string | null;
   hoveredObjectId: string | null;
-  characterAnimations?: Record<string, { animationName: string; frameIndex: number }>;
+  characterAnimations?: Record<string, { animationName: string; frameIndex: number }> | undefined;
   onObjectClick: (objectId: string | null) => void;
   onObjectHover: (objectId: string | null) => void;
 }
@@ -42,7 +42,7 @@ export function PixelSceneCanvas({
     timeOfDay,
     selectedObjectId,
     hoveredObjectId,
-    characterAnimations: characterAnimations ?? undefined,
+    characterAnimations,
   });
 
   // Handle clicks

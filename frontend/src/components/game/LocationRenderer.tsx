@@ -14,9 +14,9 @@
  * LocationConfig → useCanvasRenderer → Canvas 2D drawImage()
  * No DOM elements for sprites. No CSS transforms. No background-position.
  */
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { PixelSceneCanvas } from './PixelSceneCanvas';
-import type { LocationConfig } from '@/config/locations';
+import type { LocationConfig } from '../../types/location.types';
 
 export interface LocationRendererProps {
   readonly config: LocationConfig;
@@ -27,7 +27,25 @@ export interface LocationRendererProps {
 }
 
 export const LocationRenderer = memo(function LocationRenderer(props: LocationRendererProps) {
-  return <PixelSceneCanvas {...props} />;
+  const [hoveredObjectId, setHoveredObjectId] = useState<string | null>(null);
+
+  return (
+    <PixelSceneCanvas
+      config={props.config}
+      timeOfDay={props.timeOfDay || 'day'}
+      selectedObjectId={props.selectedObjectId || null}
+      hoveredObjectId={hoveredObjectId}
+      onObjectClick={(id) => {
+        if (id && props.onObjectClick) {
+          const furniture = props.config.furniture?.find((f: any) => f.id === id);
+          if (furniture?.actionCode) {
+            props.onObjectClick(id, furniture.actionCode);
+          }
+        }
+      }}
+      onObjectHover={setHoveredObjectId}
+    />
+  );
 });
 
 export default LocationRenderer;
