@@ -7,8 +7,8 @@ export const API_TIMEOUT = 10000; // 10 секунд
 
 // Assets — путь к сгенерированным ассетам.
 // Generator (NamingSpec) outputs to: {outputDir}/assets/{entityType}/{entityName}/
-// Spring Boot serves from: /assets/{entityType}/{entityName}/
-export const ASSETS_BASE_URL = import.meta.env.VITE_ASSETS_BASE_URL || '/assets';
+// Spring Boot serves from root: /{entityType}/{entityName}/
+export const ASSETS_BASE_URL = import.meta.env.VITE_ASSETS_BASE_URL || '';
 
 // Статы
 export const MIN_STAT = 0;
