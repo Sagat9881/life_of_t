@@ -174,8 +174,9 @@ public class GameStateViewMapper {
     private EndingView toEndingView(GameSession session) {
         if (session.ending() == null) return null;
         return new EndingView(
-                session.ending().type().name(),
+                session.ending().endingId(),
                 session.ending().category().name(),
+                session.ending().title(),
                 session.ending().summary()
         );
     }
@@ -194,7 +195,6 @@ public class GameStateViewMapper {
     private List<NpcActivityView> toNpcActivityViews(GameSession session) {
         if (npcLifecycleEngine == null) return List.of();
         int currentHour = session.time().hour();
-        // Clamp hour for NPC schedule lookup (24 is end-of-day sentinel)
         int lookupHour = Math.min(currentHour, 23);
         return npcLifecycleEngine.getRegistry().getAll().stream()
                 .map(npc -> {

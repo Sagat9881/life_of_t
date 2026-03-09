@@ -1,7 +1,7 @@
 package ru.lifegame.backend.domain.ending;
 
 public record Ending(
-        EndingType type,
+        String endingId,
         EndingCategory category,
         String title,
         String summary,

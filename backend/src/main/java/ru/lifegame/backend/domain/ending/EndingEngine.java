@@ -64,10 +64,10 @@ public class EndingEngine {
         Pets pets,
         QuestLog questLog
     ) {
-        // Add pet death check (not in XML yet, can add later)
+        // Pet death check (not in XML yet, can add later)
         if (pets.hasDeadPet()) {
             return Optional.of(new Ending(
-                EndingType.TOTAL_BURNOUT,
+                "PET_DEATH",
                 EndingCategory.GAME_OVER_ENDING,
                 "Питомец погиб",
                 "Нужно было заботиться о питомце.",
@@ -102,13 +102,12 @@ public class EndingEngine {
     }
 
     private Ending toEnding(EndingSpec spec) {
-        EndingType type = EndingType.valueOf(spec.id());
         EndingCategory category = "STORY".equals(spec.category())
             ? EndingCategory.STORY_ENDING
             : EndingCategory.GAME_OVER_ENDING;
 
         return new Ending(
-            type,
+            spec.id(),
             category,
             spec.meta().title(),
             spec.meta().summary(),
