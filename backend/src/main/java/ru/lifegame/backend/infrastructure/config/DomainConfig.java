@@ -5,12 +5,16 @@ import org.springframework.context.annotation.Configuration;
 import ru.lifegame.backend.domain.action.ActionProvider;
 import ru.lifegame.backend.domain.action.spec.DataDrivenActionProvider;
 import ru.lifegame.backend.domain.action.spec.PlayerActionSpecLoader;
-import ru.lifegame.backend.domain.conflict.triggers.ConflictTriggers;
+import ru.lifegame.backend.domain.conflict.engine.ConflictEngine;
+import ru.lifegame.backend.domain.conflict.spec.ConflictLoader;
+import ru.lifegame.backend.domain.conflict.spec.ConflictSpec;
 import ru.lifegame.backend.domain.ending.EndingEvaluator;
 import ru.lifegame.backend.domain.model.session.ActionExecutor;
 import ru.lifegame.backend.domain.model.session.DayEndProcessor;
 import ru.lifegame.backend.domain.model.session.GameOverChecker;
 import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
+
+import java.util.List;
 
 @Configuration
 public class DomainConfig {
@@ -31,8 +35,14 @@ public class DomainConfig {
     }
 
     @Bean
-    public ConflictTriggers conflictTriggers() {
-        return new ConflictTriggers();
+    public ConflictLoader conflictLoader() {
+        return new ConflictLoader();
+    }
+
+    @Bean
+    public ConflictEngine conflictEngine(ConflictLoader loader) {
+        List<ConflictSpec> specs = loader.loadFromClasspath("game-config/conflicts.xml");
+        return new ConflictEngine(specs);
     }
 
     @Bean
@@ -47,11 +57,11 @@ public class DomainConfig {
 
     @Bean
     public DayEndProcessor dayEndProcessor(
-            ConflictTriggers conflictTriggers,
+            ConflictEngine conflictEngine,
             GameOverChecker gameOverChecker,
             EndingEvaluator endingEvaluator,
             NpcLifecycleEngine npcLifecycleEngine
     ) {
-        return new DayEndProcessor(conflictTriggers, gameOverChecker, endingEvaluator, npcLifecycleEngine);
+        return new DayEndProcessor(conflictEngine, gameOverChecker, endingEvaluator, npcLifecycleEngine);
     }
 }

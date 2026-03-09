@@ -4,7 +4,6 @@ import ru.lifegame.backend.domain.action.ActionResult;
 import ru.lifegame.backend.domain.action.GameAction;
 import ru.lifegame.backend.domain.balance.GameBalance;
 import ru.lifegame.backend.domain.conflict.core.Conflict;
-import ru.lifegame.backend.domain.conflict.tactics.ConflictTactic;
 import ru.lifegame.backend.domain.ending.Ending;
 import ru.lifegame.backend.domain.event.domain.*;
 import ru.lifegame.backend.domain.event.game.EventResult;
@@ -90,9 +89,13 @@ public class GameSession {
         eventPublisher.publish(new DayEndedEvent(sessionId, time().day()));
     }
 
-    public Conflict startConflict(ru.lifegame.backend.domain.conflict.core.ConflictType conflictType) {
+    /**
+     * Start a conflict from ConflictSpec (loaded from XML).
+     * @param conflictId ID from conflicts.xml (e.g. "BURNOUT", "LACK_OF_ATTENTION")
+     */
+    public Conflict startConflict(String conflictId) {
         ConflictManager manager = new ConflictManager();
-        return manager.startConflict(conflictType, context, eventPublisher);
+        return manager.startConflict(conflictId, context, eventPublisher);
     }
 
     public void avoidBrewingConflict(String conflictId) {
@@ -100,9 +103,13 @@ public class GameSession {
         manager.avoidConflict(conflictId, context, eventPublisher);
     }
 
-    public void applyTacticToActiveConflict(ConflictTactic tactic) {
+    /**
+     * Apply a tactic to the active conflict.
+     * @param tacticCode Tactic code from conflicts.xml (e.g. "SURRENDER", "COMPROMISE")
+     */
+    public void applyTacticToActiveConflict(String tacticCode) {
         ConflictManager manager = new ConflictManager();
-        manager.applyTactic(tactic, context, eventPublisher);
+        manager.applyTactic(tacticCode, context, eventPublisher);
     }
 
     public Optional<GameEvent> currentEvent() {
