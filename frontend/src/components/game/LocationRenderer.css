@@ -1,4 +1,5 @@
-/* LocationRenderer — minimal styles, all sizing done by SpriteAnimator inline */
+/* LocationRenderer — now delegates to PixelSceneCanvas (Canvas 2D) */
+/* CSS kept minimal; all rendering is canvas-based */
 
 .location-renderer {
   position: relative;

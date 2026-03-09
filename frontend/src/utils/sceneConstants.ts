@@ -1,12 +1,11 @@
 /**
  * Scene dimension constants — single source of truth.
  *
- * The background (location) defines the coordinate space.
- * Everything else scales relative to these dimensions.
+ * Canvas 2D renders at SCENE_WIDTH × SCENE_HEIGHT logical pixels.
+ * The canvas auto-scales to fill its container while maintaining aspect ratio.
  *
- * Background assets are rendered at exactly SCENE_WIDTH × SCENE_HEIGHT.
- * Characters, furniture, UI — all compute their display size as a
- * fraction of the scene viewport.
+ * All entity positions use percentages (0–100) of scene dimensions.
+ * Entity sizes use sceneHeight: percentage (0–100) of scene height.
  */
 
 /** Native scene width in logical pixels */
@@ -19,14 +18,20 @@ export const SCENE_HEIGHT = 480;
 export const SCENE_ASPECT = SCENE_WIDTH / SCENE_HEIGHT;
 
 /**
- * Compute the CSS display height for a sprite, given its native frame
- * height and the desired fraction of the scene viewport it should occupy.
- *
- * @param frameHeight - native pixel height of one animation frame
- * @param frameWidth  - native pixel width of one animation frame
- * @param targetHeightFraction - fraction of SCENE_HEIGHT (0..1).
- *        e.g. 0.40 means the sprite occupies 40% of the viewport height.
- * @returns { displayWidth, displayHeight } in scene-logical pixels
+ * 1% of scene height in logical pixels.
+ * Usage: entityPixelHeight = sceneHeight * SCENE_UNIT_Y
+ */
+export const SCENE_UNIT_Y = SCENE_HEIGHT / 100;
+
+/**
+ * 1% of scene width in logical pixels.
+ * Usage: entityPixelX = xPercent * SCENE_UNIT_X
+ */
+export const SCENE_UNIT_X = SCENE_WIDTH / 100;
+
+/**
+ * @deprecated Kept for backward compat with SpriteAnimator.
+ * Canvas rendering uses sceneHeight (0-100) directly.
  */
 export function computeRelativeSize(
   frameWidth: number,
@@ -40,30 +45,16 @@ export function computeRelativeSize(
 }
 
 /**
- * Default height fractions for entity types.
- * These define how tall each entity type appears relative to the scene.
- *
- * The values are chosen so that:
- * - A character (128×192 canvas) at 0.40 = 192px display height
- *   → scale factor = 192/192 = 1.0 (pixel-perfect at native resolution)
- * - A cat (128×96 canvas) at 0.20 = 96px display height
- *   → scale factor = 96/96 = 1.0 (pixel-perfect)
- * - Furniture varies by item; falls back to frameHeight/SCENE_HEIGHT
- *   so that each item renders at its native pixel size within the scene.
- *
- * These are DEFAULTS. LocationConfig can override per-placement via `scale`.
+ * @deprecated Kept for backward compat with SpriteAnimator.
+ * Canvas rendering uses sceneHeight from LocationConfig directly.
  */
 export const DEFAULT_HEIGHT_FRACTIONS: Record<string, number> = {
-  // Characters: 192px frame → 40% of 480px = 192px (1:1 pixel mapping)
   characters: 192 / SCENE_HEIGHT,
-  // Locations: background fills entire viewport
   locations: 1.0,
 };
 
 /**
- * For entity types not in DEFAULT_HEIGHT_FRACTIONS,
- * compute fraction from the frame's native height.
- * This ensures the sprite renders at 1:1 pixel scale within the scene.
+ * @deprecated Kept for backward compat with SpriteAnimator.
  */
 export function getDefaultHeightFraction(
   entityType: string,
