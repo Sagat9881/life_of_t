@@ -7,6 +7,7 @@ import ru.lifegame.backend.application.port.out.EventPublisher;
 import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.service.*;
 import ru.lifegame.backend.domain.action.ActionProvider;
+import ru.lifegame.backend.domain.model.session.DayEndProcessor;
 import ru.lifegame.backend.domain.narrative.NarrativeEventEngine;
 import ru.lifegame.backend.domain.narrative.NarrativeQuestEngine;
 import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
@@ -59,7 +60,8 @@ public class ApplicationConfig {
     @Bean
     public EndDayUseCase endDayUseCase(SessionRepository sessionRepository,
                                         GameStateViewMapper mapper,
-                                        NarrativeEventEngine narrativeEventEngine) {
-        return new EndDayService(sessionRepository, mapper, narrativeEventEngine);
+                                        NarrativeEventEngine narrativeEventEngine,
+                                        DayEndProcessor dayEndProcessor) {
+        return new EndDayService(sessionRepository, mapper, narrativeEventEngine, dayEndProcessor);
     }
 }
