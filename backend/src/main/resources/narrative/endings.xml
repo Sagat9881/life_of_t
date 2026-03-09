@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<endings xmlns="https://lifeoft.sagat.dev/narrative/endings" strategy="best-score">
+  
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- STORY ENDINGS: 7 концовок с best-score стратегией -->
+  <!-- Каждое выполненное условие = +1 к score -->
+  <!-- Побеждает концовка с максимальным score -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  
+  <story-endings>
+    
+    <ending id="PERFECT_BALANCE">
+      <title>Идеальная гармония</title>
+      <summary>Татьяна достигла баланса во всех сферах жизни</summary>
+      <epilogue>Карьера, семья, забота о себе — всё в гармонии. Это и есть настоящее счастье.</epilogue>
+      
+      <conditions>
+        <condition type="quests-completed" count="3"/>                                      <!-- +1 -->
+        <condition type="stat" field="mood" operator="gte" value="80"/>                    <!-- +1 -->
+        <condition type="stat" field="self_esteem" operator="gte" value="80"/>            <!-- +1 -->
+        <condition type="relationship" target="HUSBAND" field="closeness" operator="gte" value="80"/> <!-- +1 -->
+        <condition type="relationship" target="FATHER" field="closeness" operator="gte" value="70"/>  <!-- +1 -->
+        <condition type="time-ratio" activity1="work" activity2="self_care" operator="lte" ratio="2.5"/> <!-- +1 -->
+        <condition type="unique-actions" operator="gte" count="12"/>                       <!-- +1 -->
+      </conditions>
+      
+      <min-score>5</min-score> <!-- Нужно минимум 5 из 7 условий -->
+    </ending>
+    
+    <ending id="WORKAHOLIC_SUCCESS">
+      <title>Карьерный взлёт ценой всего</title>
+      <summary>Работа поглотила жизнь, но результаты впечатляют</summary>
+      <epilogue>Татьяна стала признанным специалистом, но личная жизнь осталась за бортом.</epilogue>
+      
+      <conditions>
+        <condition type="quest" id="CAREER_GROWTH" state="completed"/>                    <!-- +1 -->
+        <condition type="stat" field="job_satisfaction" operator="gte" value="85"/>       <!-- +1 -->
+        <condition type="time-spent" activity="work" operator="gte" hours="150"/>         <!-- +1 -->
+        <condition type="stat" field="money" operator="gte" value="3000"/>                <!-- +1 -->
+        <condition type="stat" field="burnout_risk" operator="gte" value="70"/>          <!-- +1 -->
+        <condition type="relationship-sum" field="closeness" operator="lt" value="120"/>  <!-- +1 -->
+        <condition type="action-count" action="date_husband" operator="lt" count="5"/>    <!-- +1 -->
+      </conditions>
+      
+      <min-score>5</min-score>
+    </ending>
+    
+    <ending id="FAMILY_ORIENTED">
+      <title>Семья превыше всего</title>
+      <summary>Карьера не задалась, но семья крепка</summary>
+      <epilogue>Татьяна нашла счастье в близких людях. Это тоже успех.</epilogue>
+      
+      <conditions>
+        <condition type="quest" id="FAMILY_HARMONY" state="completed"/>                   <!-- +1 -->
+        <condition type="relationship" target="HUSBAND" field="romance" operator="gte" value="80"/> <!-- +1 -->
+        <condition type="relationship" target="FATHER" field="closeness" operator="gte" value="75"/> <!-- +1 -->
+        <condition type="action-count" action="date_husband" operator="gte" count="10"/>   <!-- +1 -->
+        <condition type="action-count" action="visit_father" operator="gte" count="8"/>    <!-- +1 -->
+        <condition type="time-spent" activity="work" operator="lt" hours="80"/>           <!-- +1 -->
+        <condition type="stat" field="job_satisfaction" operator="lt" value="50"/>        <!-- +1 -->
+      </conditions>
+      
+      <min-score>5</min-score>
+    </ending>
+    
+    <ending id="SELF_ACTUALIZATION">
+      <title>Нашла себя</title>
+      <summary>Забота о себе стала приоритетом</summary>
+      <epilogue>Татьяна научилась ценить себя и своё время. Это главное достижение.</epilogue>
+      
+      <conditions>
+        <condition type="quest" id="SELF_CARE_ARC" state="completed"/>                    <!-- +1 -->
+        <condition type="stat" field="self_esteem" operator="gte" value="85"/>            <!-- +1 -->
+        <condition type="stat" field="mood" operator="gte" value="85"/>                    <!-- +1 -->
+        <condition type="action-count" action="self_care" operator="gte" count="15"/>      <!-- +1 -->
+        <condition type="daily-average" action="rest" operator="gte" hours="3"/>          <!-- +1 -->
+        <condition type="unique-actions" operator="gte" count="15"/>                       <!-- +1 -->
+        <condition type="time-ratio" activity1="work" activity2="self_care" operator="lte" ratio="1.5"/> <!-- +1 -->
+      </conditions>
+      
+      <min-score>5</min-score>
+    </ending>
+    
+    <ending id="BURNOUT_SURVIVOR">
+      <title>Выжившая в аду</title>
+      <summary>Почти сгорела, но смогла остановиться</summary>
+      <epilogue>Татьяна прошла через выгорание, но смогла вовремя остановиться и переосмыслить приоритеты.</epilogue>
+      
+      <conditions>
+        <condition type="stat" field="burnout_risk" operator="gte" value="80"/>           <!-- +1 -->
+        <condition type="consecutive-days" action="work" operator="gte" count="7"/>        <!-- +1 -->
+        <condition type="action-count" action="rest" operator="gte" count="8"/>            <!-- +1 в конце спохватилась -->
+        <condition type="quest" id="SELF_CARE_ARC" state="completed"/>                    <!-- +1 -->
+        <condition type="stat" field="mood" operator="gte" value="60"/>                    <!-- +1 восстановилась -->
+      </conditions>
+      
+      <min-score>4</min-score>
+    </ending>
+    
+    <ending id="CHAOTIC_LIFE">
+      <title>Хаотичная жизнь</title>
+      <summary>Металась между всем, ничего не довела до конца</summary>
+      <epilogue>Татьяна пробовала всё, но так и не нашла свой путь. Жизнь продолжается.</epilogue>
+      
+      <conditions>
+        <condition type="quests-completed" count="0"/>                                      <!-- +1 -->
+        <condition type="quests-failed" operator="gte" count="2"/>                         <!-- +1 -->
+        <condition type="unique-actions" operator="gte" count="18"/>                        <!-- +1 много всего пробовала -->
+        <condition type="action-count" action="work" operator="between" min="10" max="20"/> <!-- +1 средне -->
+        <condition type="stat" field="stress" operator="gte" value="70"/>                  <!-- +1 -->
+        <condition type="relationship-sum" field="closeness" operator="between" min="80" max="150"/> <!-- +1 средне -->
+      </conditions>
+      
+      <min-score>4</min-score>
+    </ending>
+    
+    <ending id="LONELY_SURVIVOR">
+      <title>Одиночество</title>
+      <summary>Все отношения разрушены</summary>
+      <epilogue>Татьяна осталась одна. Остались только кошки...</epilogue>
+      
+      <conditions>
+        <condition type="relationship-sum" field="closeness" operator="lt" value="50"/>    <!-- +1 -->
+        <condition type="relationship" target="HUSBAND" field="broken" operator="eq" value="true"/> <!-- +1 -->
+        <condition type="action-count" action="date_husband" operator="lt" count="3"/>     <!-- +1 -->
+        <condition type="action-count" action="visit_father" operator="lt" count="3"/>     <!-- +1 -->
+        <condition type="pet" id="garfield" field="alive" operator="eq" value="true"/>    <!-- +1 -->
+        <condition type="stat" field="self_esteem" operator="lt" value="40"/>             <!-- +1 -->
+      </conditions>
+      
+      <min-score>4</min-score>
+    </ending>
+    
+    <ending id="NEUTRAL_EPILOGUE">
+      <title>Жизнь продолжается</title>
+      <summary>30 дней позади. Жизнь идёт своим чередом.</summary>
+      <epilogue>Татьяна продолжает свой путь. Что будет дальше — покажет время.</epilogue>
+      
+      <!-- Fallback концовка — всегда score=0, проигрывает всем -->
+      <conditions/>
+    </ending>
+    
+  </story-endings>
+  
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- GAME OVER ENDINGS: 5 причин проигрыша -->
+  <!-- Проверяются первыми, до story-endings -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  
+  <game-over-endings>
+    
+    <ending id="BURNOUT">
+      <title>Вы погибли от изнурения</title>
+      <summary>Нужно было меньше работать</summary>
+      <epilogue>Отдохните и выпейте чашечку чая перед следующей игровой сессией :3</epilogue>
+      
+      <trigger>
+        <condition type="player-state" field="burned_out" operator="eq" value="true"/>
+      </trigger>
+    </ending>
+    
+    <ending id="DIVORCE">
+      <title>Вы расстались</title>
+      <summary>Стоило больше ценить все радостные моменты жизни</summary>
+      <epilogue>Вы не знали, что такое "время". Не переживайте, в следующий раз все получится. Попробуйте еще раз.</epilogue>
+      
+      <trigger>
+        <condition type="relationships" method="is_divorced" operator="eq" value="true"/>
+      </trigger>
+    </ending>
+    
+    <ending id="ISOLATION">
+      <title>Вы остались совсем одни</title>
+      <summary>Сердце не бьется, но и не болит</summary>
+      <epilogue>Одиночество — это когда рядом никого нет. Попробуйте ещё раз.</epilogue>
+      
+      <trigger>
+        <condition type="relationship-sum" field="closeness" operator="lt" value="20"/>
+      </trigger>
+    </ending>
+    
+    <ending id="PET_DEATH">
+      <title>Питомец умер</title>
+      <summary>Вы не смогли позаботиться о своём друге</summary>
+      <epilogue>Заботьтесь о тех, кто рядом с вами.</epilogue>
+      
+      <trigger>
+        <condition type="pets" method="has_dead_pet" operator="eq" value="true"/>
+      </trigger>
+    </ending>
+    
+    <ending id="BANKRUPTCY">
+      <title>Банкротство</title>
+      <summary>Долги поглотили всё</summary>
+      <epilogue>Деньги — не главное, но без них трудно.</epilogue>
+      
+      <trigger>
+        <condition type="player-state" field="bankrupt" operator="eq" value="true"/>
+      </trigger>
+    </ending>
+    
+  </game-over-endings>
+  
+</endings>
