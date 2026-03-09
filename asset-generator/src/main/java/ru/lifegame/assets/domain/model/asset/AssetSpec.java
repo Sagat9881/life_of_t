@@ -10,9 +10,6 @@ import java.util.List;
  * @param entityType   "characters", "locations", "pets"
  * @param entityName   snake_case name of the entity
  * @param version      spec version string
- * @param referenceHeight percentage of scene height (0-100) this entity occupies when rendered.
- *                        Used for unified scaling across all entity types. Examples: humans 35-40%,
- *                        cats 11-14%, dogs 15-35%, furniture 5-50%. Null = use frame dimensions directly.
  * @param layers       ordered list of layers to generate
  * @param colorPalette color palette to use
  * @param animations   list of animation specifications (may be empty for static-only assets)
@@ -24,7 +21,6 @@ public record AssetSpec(
         String entityType,
         String entityName,
         String version,
-        Integer referenceHeight,
         List<AssetLayer> layers,
         ColorPalette colorPalette,
         List<AnimationSpec> animations,
@@ -41,9 +37,6 @@ public record AssetSpec(
         }
         if (layers == null || layers.isEmpty()) {
             throw new IllegalArgumentException("layers must not be empty");
-        }
-        if (referenceHeight != null && (referenceHeight < 1 || referenceHeight > 100)) {
-            throw new IllegalArgumentException("referenceHeight must be between 1 and 100 (percent of scene)");
         }
         layers = Collections.unmodifiableList(layers);
         animations = animations != null ? Collections.unmodifiableList(animations) : List.of();
