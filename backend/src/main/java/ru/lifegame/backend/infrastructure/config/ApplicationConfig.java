@@ -7,14 +7,16 @@ import ru.lifegame.backend.application.port.out.EventPublisher;
 import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.service.*;
 import ru.lifegame.backend.domain.action.ActionProvider;
+import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
 import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
 
 @Configuration
 public class ApplicationConfig {
 
     @Bean
-    public GameStateViewMapper gameStateViewMapper(ActionProvider actionProvider) {
-        return new GameStateViewMapper(actionProvider.allActions().stream().toList());
+    public GameStateViewMapper gameStateViewMapper(ActionProvider actionProvider,
+                                                    NpcLifecycleEngine npcLifecycleEngine) {
+        return new GameStateViewMapper(actionProvider.allActions().stream().toList(), npcLifecycleEngine);
     }
 
     @Bean
@@ -45,7 +47,7 @@ public class ApplicationConfig {
     @Bean
     public ChooseEventOptionUseCase chooseEventOptionUseCase(SessionRepository repo,
                                                                GameStateViewMapper mapper) {
-        return new ChooseEventOptionService(repo,  mapper);
+        return new ChooseEventOptionService(repo, mapper);
     }
 
     @Bean
@@ -53,5 +55,4 @@ public class ApplicationConfig {
                                         GameStateViewMapper mapper) {
         return new EndDayService(sessionRepository, mapper);
     }
-
 }

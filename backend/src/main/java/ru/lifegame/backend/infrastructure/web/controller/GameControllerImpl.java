@@ -2,7 +2,6 @@ package ru.lifegame.backend.infrastructure.web.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import ru.lifegame.backend.application.command.*;
@@ -20,17 +19,20 @@ public class GameControllerImpl implements GameController {
     private final GetGameStateUseCase getGameState;
     private final ChooseConflictTacticUseCase chooseConflictTactic;
     private final ChooseEventOptionUseCase chooseEventOption;
+    private final EndDayUseCase endDayUseCase;
 
     public GameControllerImpl(StartOrLoadSessionUseCase startOrLoadSession,
                               ExecutePlayerActionUseCase executeAction,
                               GetGameStateUseCase getGameState,
                               ChooseConflictTacticUseCase chooseConflictTactic,
-                              ChooseEventOptionUseCase chooseEventOption) {
+                              ChooseEventOptionUseCase chooseEventOption,
+                              EndDayUseCase endDayUseCase) {
         this.startOrLoadSession = startOrLoadSession;
         this.executeAction = executeAction;
         this.getGameState = getGameState;
         this.chooseConflictTactic = chooseConflictTactic;
         this.chooseEventOption = chooseEventOption;
+        this.endDayUseCase = endDayUseCase;
     }
 
     @Override
@@ -47,7 +49,6 @@ public class GameControllerImpl implements GameController {
             GameStateView view = getGameState.execute(query);
             return ResponseEntity.ok(view);
         } catch (SessionNotFoundException e) {
-            // Автоматически создаем новую сессию
             StartSessionCommand command = new StartSessionCommand(telegramUserId);
             GameStateView view = startOrLoadSession.execute(command);
             return ResponseEntity.ok(view);
@@ -82,12 +83,8 @@ public class GameControllerImpl implements GameController {
         return ResponseEntity.ok(view);
     }
 
-    private EndDayUseCase endDayUseCase; // TODO: add to constructor
-
-    @PostMapping("/session/end-day")
     @Override
     public GameStateView endDay(@RequestBody EndDayRequestDto request) {
         return endDayUseCase.endDay(new EndDayCommand(request.telegramUserId()));
     }
-
 }

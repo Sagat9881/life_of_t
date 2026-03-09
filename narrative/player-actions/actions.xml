@@ -131,4 +131,96 @@
         </skill-gains>
     </action>
 
+    <!-- ======= Furniture-bound actions (referenced by frontend locations.ts) ======= -->
+
+    <action id="CALL_HUSBAND" code="CALL_HUSBAND" time-cost="1">
+        <label>Позвонить мужу</label>
+        <description>Короткий звонок Александру</description>
+        <result-text>Татьяна позвонила мужу. Приятный разговор поднял настроение.</result-text>
+        <stats energy="-3" health="0" stress="-5" mood="8" money="0" self-esteem="0"/>
+        <relationships>
+            <change target="HUSBAND" delta="5"/>
+        </relationships>
+        <pet-mood/>
+        <flags rested="false" worked="false" interacted-npcs="HUSBAND" reset-household-days="false"/>
+        <skill-gains>
+            <skill name="communication" xp="1"/>
+        </skill-gains>
+        <extra-relationship-effects>
+            <effect target="HUSBAND" closeness="3" trust="2" stability="0" romance="0"/>
+        </extra-relationship-effects>
+    </action>
+
+    <action id="COOK_FOOD" code="COOK_FOOD" time-cost="2">
+        <label>Приготовить еду</label>
+        <description>Готовка на кухне</description>
+        <result-text>Татьяна приготовила вкусный обед.</result-text>
+        <stats energy="-10" health="5" stress="-5" mood="5" money="-5" self-esteem="0"/>
+        <relationships>
+            <change target="HUSBAND" delta="3"/>
+        </relationships>
+        <pet-mood/>
+        <flags rested="false" worked="false" interacted-npcs="" reset-household-days="true"/>
+        <skill-gains>
+            <skill name="cooking" xp="3"/>
+        </skill-gains>
+    </action>
+
+    <action id="EAT_FOOD" code="EAT_FOOD" time-cost="1">
+        <label>Поесть</label>
+        <description>Перекусить из холодильника</description>
+        <result-text>Татьяна перекусила. Энергия восстановилась.</result-text>
+        <stats energy="10" health="3" stress="-3" mood="3" money="-3" self-esteem="0"/>
+        <relationships/>
+        <pet-mood/>
+        <flags rested="false" worked="false" interacted-npcs="" reset-household-days="false"/>
+        <skill-gains/>
+    </action>
+
+    <action id="FEED_PETS" code="FEED_PETS" time-cost="1">
+        <label>Покормить питомцев</label>
+        <description>Наполнить миски</description>
+        <result-text>Питомцы накормлены. Гарфилд мурчит, Сэм виляет хвостом.</result-text>
+        <stats energy="-5" health="0" stress="-3" mood="5" money="-2" self-esteem="0"/>
+        <relationships/>
+        <pet-mood>
+            <change target="BARSIK" delta="15"/>
+            <change target="SAM" delta="15"/>
+        </pet-mood>
+        <flags rested="false" worked="false" interacted-npcs="" reset-household-days="false"/>
+        <skill-gains>
+            <skill name="empathy" xp="1"/>
+        </skill-gains>
+    </action>
+
+    <action id="BEAUTY_ROUTINE" code="BEAUTY_ROUTINE" time-cost="2">
+        <label>Уход за собой</label>
+        <description>Макияж, уходовые процедуры перед зеркалом</description>
+        <result-text>Татьяна привела себя в порядок. Отражение радует.</result-text>
+        <stats energy="-8" health="0" stress="-10" mood="12" money="-5" self-esteem="15"/>
+        <relationships/>
+        <pet-mood/>
+        <flags rested="false" worked="false" interacted-npcs="" reset-household-days="false"/>
+        <skill-gains>
+            <skill name="charisma" xp="2"/>
+        </skill-gains>
+    </action>
+
+    <action id="WORK_ON_PROJECT" code="WORK_ON_PROJECT" time-cost="3">
+        <label>Поработать за компьютером</label>
+        <description>Удалённая работа или личный проект</description>
+        <result-text>Татьяна продуктивно поработала за компьютером.</result-text>
+        <time-cost-skill skill="efficiency" reduction-per-level="0.02" min-cost="2"/>
+        <stats energy="-20" health="0" stress="10" mood="-3" money="30" self-esteem="5"/>
+        <relationships>
+            <change target="HUSBAND" delta="-3"/>
+        </relationships>
+        <pet-mood/>
+        <flags rested="false" worked="true" interacted-npcs="" reset-household-days="false"/>
+        <skill-gains>
+            <skill name="efficiency" xp="3"/>
+        </skill-gains>
+        <job-effects satisfaction="3" burnout-risk="2"/>
+    </action>
+
 </player-actions>

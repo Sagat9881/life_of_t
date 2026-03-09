@@ -12,6 +12,8 @@ import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.model.session.GameSession;
 import ru.lifegame.backend.domain.model.session.GameTime;
 import ru.lifegame.backend.domain.model.stats.Stats;
+import ru.lifegame.backend.domain.npc.runtime.NpcInstance;
+import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
 import ru.lifegame.backend.domain.quest.Quest;
 
 import java.util.List;
@@ -20,9 +22,11 @@ import java.util.Map;
 public class GameStateViewMapper {
 
     private final List<GameAction> allActions;
+    private final NpcLifecycleEngine npcLifecycleEngine;
 
-    public GameStateViewMapper(List<GameAction> allActions) {
+    public GameStateViewMapper(List<GameAction> allActions, NpcLifecycleEngine npcLifecycleEngine) {
         this.allActions = allActions;
+        this.npcLifecycleEngine = npcLifecycleEngine;
     }
 
     public GameStateView toView(GameSession session, ActionResult lastResult) {
@@ -39,7 +43,8 @@ public class GameStateViewMapper {
                 toConflictViews(session),
                 toEventView(session),
                 toEndingView(session),
-                lastResult != null ? toActionResultView(lastResult) : null
+                lastResult != null ? toActionResultView(lastResult) : null,
+                toNpcActivityViews(session)
         );
     }
 
@@ -177,5 +182,26 @@ public class GameStateViewMapper {
                 r.relationshipChanges(),
                 r.petMoodChanges()
         );
+    }
+
+    private List<NpcActivityView> toNpcActivityViews(GameSession session) {
+        if (npcLifecycleEngine == null) return List.of();
+        int currentHour = session.time().hour();
+        return npcLifecycleEngine.getRegistry().getAll().stream()
+                .map(npc -> {
+                    npc.updateScheduleActivity(currentHour);
+                    var activity = npc.currentActivity();
+                    return NpcActivityView.fromInstance(
+                            npc.id(),
+                            npc.displayName(),
+                            npc.category(),
+                            activity.activityId(),
+                            activity.animationKey(),
+                            activity.locationId(),
+                            npc.mood().dominantAxis(),
+                            true
+                    );
+                })
+                .toList();
     }
 }
