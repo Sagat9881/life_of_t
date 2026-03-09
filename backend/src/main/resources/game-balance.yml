@@ -1,0 +1,273 @@
+# Game Balance Configuration
+# Все числовые константы баланса игры
+
+# ═══════════════════════════════════════════════════════════════
+# PLAYER STATS
+# ═══════════════════════════════════════════════════════════════
+stats:
+  min: 0
+  max: 100
+  
+  initial:
+    energy: 100
+    health: 100
+    stress: 0
+    mood: 80
+    money: 1000
+    selfEsteem: 70
+  
+  job:
+    initialSatisfaction: 50
+    initialBurnoutRisk: 20
+
+# ═══════════════════════════════════════════════════════════════
+# DAILY DECAY
+# ═══════════════════════════════════════════════════════════════
+decay:
+  energy:
+    noRest: 20
+  
+  stress:
+    highThreshold: 50
+    dailyIncrease: 5
+  
+  mood:
+    dailyDecreaseHighStress: 10
+  
+  burnout:
+    dailyIncrease: 5
+    threshold: 100
+  
+  bankruptcy:
+    threshold: -500
+
+# ═══════════════════════════════════════════════════════════════
+# RELATIONSHIPS
+# ═══════════════════════════════════════════════════════════════
+relationships:
+  initial:
+    husband:
+      closeness: 80
+      trust: 75
+      stability: 70
+      romance: 85
+    father:
+      closeness: 60
+      trust: 90
+      stability: 80
+  
+  decay:
+    noInteraction:
+      mildDays: 3
+      severeDays: 7
+    mild:
+      closeness: 5
+      trust: 3
+    severe:
+      closeness: 15
+      trust: 10
+  
+  critical:
+    isolationClosenessSum: 20
+    trustForBreak: 10
+
+# ═══════════════════════════════════════════════════════════════
+# PETS
+# ═══════════════════════════════════════════════════════════════
+pets:
+  initial:
+    default:
+      satiety: 70
+      attention: 50
+      health: 90
+      mood: 80
+    sam:
+      satiety: 80
+      attention: 60
+      health: 95
+      mood: 85
+  
+  decay:
+    daily:
+      satiety: 10
+      attention: 15
+    lowSatiety:
+      threshold: 20
+      healthDecay: 10
+      moodDecay: 20
+
+# ═══════════════════════════════════════════════════════════════
+# CONFLICT SYSTEM
+# ═══════════════════════════════════════════════════════════════
+conflict:
+  csp:
+    base: 50
+    initial: 50
+    maxRounds: 3
+  
+  triggers:
+    husband:
+      householdDuties:
+        closenessThreshold: 50
+        daysNoHousehold: 5
+      lackOfAttention:
+        closenessThreshold: 40
+        daysNoAttention: 3
+      romanticCrisis:
+        romanceThreshold: 30
+        consecutiveWorkDays: 5
+      financial:
+        moneyLow: 500
+        moneyHigh: 5000
+    
+    father:
+      neglected:
+        closenessThreshold: 30
+        daysNoVisit: 7
+      criticism:
+        satisfactionThreshold: 30
+        selfEsteemThreshold: 30
+      concern:
+        moneyThreshold: 200
+        healthThreshold: 40
+    
+    internal:
+      identity:
+        selfEsteemThreshold: 20
+        satisfactionThreshold: 30
+      burnout:
+        burnoutRisk: 70
+        stress: 80
+      guilt:
+        closenessSum: 100
+        selfEsteemThreshold: 40
+  
+  tactics:
+    surrender:
+      playerCsp: -20
+      opponentCsp: 10
+      selfEsteem: -5
+      closeness: 5
+      trust: -5
+    
+    assert:
+      playerCsp: -15
+      opponentCsp: 15
+      selfEsteem: 10
+      closeness: -10
+      trust: 5
+    
+    compromise:
+      playerCsp: -10
+      opponentCsp: -10
+    
+    avoid:
+      playerCsp: -5
+      opponentCsp: 20
+      closeness: -5
+      trust: -10
+    
+    listen:
+      playerCsp: -5
+      opponentCsp: -25
+      closeness: 15
+      trust: 10
+    
+    humor:
+      playerCsp: -10
+      opponentCsp: -15
+      successChance: 0.8
+    
+    logical:
+      playerCsp: -10
+      opponentCsp: -20
+      trust: 20
+    
+    emotional:
+      playerCsp: -5
+      opponentCsp: -30
+      closeness: 20
+      romance: 15
+    
+    boundaries:
+      playerCsp: -20
+      opponentCsp: -10
+      selfEsteem: 15
+      trust: 15
+
+# ═══════════════════════════════════════════════════════════════
+# PLAYER ACTIONS
+# ═══════════════════════════════════════════════════════════════
+actions:
+  timeCost:
+    work: 8
+    visitFather: 4
+    dateHusband: 3
+    playCat: 1
+    walkDog: 2
+    selfCare: 2
+    rest: 3
+    household: 2
+  
+  effects:
+    work:
+      energy: -30
+      stress: 20
+      mood: -5
+      money: 55
+    
+    visitFather:
+      energy: -15
+      mood: 10
+      relationship:
+        closeness: 15
+        trust: 5
+    
+    dateHusband:
+      energy: -10
+      mood: 20
+      stress: -10
+      relationship:
+        closeness: 10
+        romance: 15
+    
+    playCat:
+      energy: -5
+      mood: 10
+      stress: -5
+      pet:
+        attention: 30
+        mood: 20
+    
+    walkDog:
+      energy: -10
+      health: 5
+      mood: 10
+      stress: -10
+      pet:
+        attention: 25
+        mood: 25
+    
+    selfCare:
+      energy: -10
+      mood: 15
+      stress: -15
+      selfEsteem: 10
+    
+    rest:
+      energy: 40
+      stress: -20
+      mood: 10
+    
+    household:
+      energy: -15
+      mood: -5
+
+# ═══════════════════════════════════════════════════════════════
+# TIME SYSTEM
+# ═══════════════════════════════════════════════════════════════
+time:
+  dayStart: 8
+  dayEnd: 24
+  hoursPerDay: 24
+  maxGameDays: 30
