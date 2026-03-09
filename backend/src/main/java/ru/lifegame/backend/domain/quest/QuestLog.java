@@ -52,6 +52,14 @@ public class QuestLog {
                 .anyMatch(q -> q.type() == type && q.isCompleted());
     }
 
+    /**
+     * Check if there is an active quest of given type.
+     */
+    public boolean hasActiveQuest(QuestType type) {
+        return quests.values().stream()
+                .anyMatch(q -> q.type() == type && q.isActive());
+    }
+
     public Map<String, Quest> all() {
         return Collections.unmodifiableMap(quests);
     }
