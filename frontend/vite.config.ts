@@ -12,7 +12,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: 5173,  // Vite default port
     proxy: {
       // Proxy API calls to Spring Boot backend
       '/api': {
@@ -30,7 +30,7 @@ export default defineConfig({
     // with /assets/** route used for game generated assets (sprites, atlases)
     assetsDir: '_app',
     target: 'es2020',
-    minify: 'terser',
+    minify: 'terter',
     sourcemap: true,
     rollupOptions: {
       output: {
