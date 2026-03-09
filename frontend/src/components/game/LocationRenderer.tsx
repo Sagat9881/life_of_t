@@ -63,30 +63,8 @@ export const LocationRenderer = memo(function LocationRenderer({
     [onObjectClick]
   );
 
-  /* ── Load atlas configs for furniture + characters (for relative height) ── */
-  const [furnitureAtlases, setFurnitureAtlases] = useState<Record<string, AtlasConfig>>({});
+  /* ── Load atlas configs for characters (for relative height) ── */
   const [charAtlases, setCharAtlases] = useState<Record<string, AtlasConfig>>({});
-
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      const result: Record<string, AtlasConfig> = {};
-      await Promise.allSettled(
-        config.furniture.map(async (f) => {
-          const key = `furniture/${f.entityName}`;
-          if (atlasCache.has(key)) { result[f.entityName] = atlasCache.get(key)!; return; }
-          try {
-            const ac = await loadAtlasConfig('furniture', f.entityName);
-            atlasCache.set(key, ac);
-            result[f.entityName] = ac;
-          } catch { /* no atlas — won't render */ }
-        })
-      );
-      if (!cancelled) setFurnitureAtlases(result);
-    };
-    void load();
-    return () => { cancelled = true; };
-  }, [config.furniture]);
 
   useEffect(() => {
     let cancelled = false;
@@ -138,6 +116,9 @@ export const LocationRenderer = memo(function LocationRenderer({
       )}
 
       {/* ═══ LAYER 2: Furniture — animated via SpriteAnimator ═══ */}
+      {/* Furniture sizing uses sceneHeight directly from config.
+          With v1.4 crop, frameWidth/Height in atlas are already cropped,
+          so SpriteAnimator handles everything via sceneRelativeHeight + cropOffset. */}
       <div
         className="pixel-scene__layer pixel-scene__layer--interactive"
         style={{ zIndex: 10 }}
@@ -145,13 +126,6 @@ export const LocationRenderer = memo(function LocationRenderer({
         {config.furniture.map((item) => {
           const isClickable = Boolean(item.actionCode);
           const isSelected = selectedObjectId === item.id;
-          const fa = furnitureAtlases[item.entityName];
-          const entry = fa?.animations[item.animation];
-
-          // With cropped frames, frameHeight already reflects visible content.
-          // sceneHeight from config is the fraction of SCENE_HEIGHT to occupy.
-          // We use it directly — no need for complex relH calculation.
-          const relH = item.sceneHeight;
 
           return (
             <div
@@ -173,7 +147,7 @@ export const LocationRenderer = memo(function LocationRenderer({
                 entityName={item.entityName}
                 animation={item.animation}
                 scale={item.scale}
-                sceneRelativeHeight={relH}
+                sceneRelativeHeight={item.sceneHeight}
                 condition={condition}
               />
               {item.label && (
