@@ -6,6 +6,7 @@ import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.view.GameStateView;
 import ru.lifegame.backend.domain.event.domain.NarrativeEventTriggeredEvent;
 import ru.lifegame.backend.domain.exception.SessionNotFoundException;
+import ru.lifegame.backend.domain.model.session.DayEndProcessor;
 import ru.lifegame.backend.domain.model.session.GameSession;
 import ru.lifegame.backend.domain.narrative.NarrativeEventEngine;
 import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
@@ -19,13 +20,16 @@ public class EndDayService implements EndDayUseCase {
     private final SessionRepository sessionRepository;
     private final GameStateViewMapper mapper;
     private final NarrativeEventEngine narrativeEventEngine;
+    private final DayEndProcessor dayEndProcessor;
 
     public EndDayService(SessionRepository sessionRepository,
                          GameStateViewMapper mapper,
-                         NarrativeEventEngine narrativeEventEngine) {
+                         NarrativeEventEngine narrativeEventEngine,
+                         DayEndProcessor dayEndProcessor) {
         this.sessionRepository = sessionRepository;
         this.mapper = mapper;
         this.narrativeEventEngine = narrativeEventEngine;
+        this.dayEndProcessor = dayEndProcessor;
     }
 
     @Override
@@ -33,7 +37,7 @@ public class EndDayService implements EndDayUseCase {
         GameSession session = sessionRepository.findByTelegramUserId(command.telegramUserId())
                 .orElseThrow(() -> new SessionNotFoundException(command.telegramUserId()));
 
-        session.endDay();
+        session.endDay(dayEndProcessor);
 
         // Evaluate narrative events at end of day
         if (narrativeEventEngine != null) {
