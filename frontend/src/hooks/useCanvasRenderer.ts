@@ -41,14 +41,14 @@ export function useCanvasRenderer({
     const loadAssets = async () => {
       const assetsToLoad: string[] = [];
 
-      // Background
-      const bgPath = `/assets/locations/${config.locationAsset}/background.png`;
+      // Background (Spring Boot serves from classpath:/static/)
+      const bgPath = `/locations/${config.locationAsset}/background.png`;
       assetsToLoad.push(bgPath);
 
-      // Furniture sprites
+      // Furniture sprites (Spring Boot serves from classpath:/static/)
       if (config.furniture) {
         config.furniture.forEach((f: any) => {
-          const path = `/assets/${f.entityName}/${f.animation}-atlas.png`;
+          const path = `/furniture/${f.entityName}/${f.animation}-atlas.png`;
           assetsToLoad.push(path);
         });
       }
@@ -82,7 +82,7 @@ export function useCanvasRenderer({
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // 1. Background
-      const bgPath = `/assets/locations/${config.locationAsset}/background.png`;
+      const bgPath = `/locations/${config.locationAsset}/background.png`;
       const bgImg = loadedAssetsRef.current.get(bgPath);
       if (bgImg && bgImg.complete) {
         ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
@@ -92,7 +92,7 @@ export function useCanvasRenderer({
       if (config.furniture) {
         const sorted = [...config.furniture].sort((a: any, b: any) => a.zOrder - b.zOrder);
         sorted.forEach((f: any) => {
-          const path = `/assets/${f.entityName}/${f.animation}-atlas.png`;
+          const path = `/furniture/${f.entityName}/${f.animation}-atlas.png`;
           const img = loadedAssetsRef.current.get(path);
           if (img && img.complete) {
             ctx.save();
