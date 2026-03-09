@@ -18,6 +18,14 @@
     <description>Backend module with game logic and REST API</description>
 
     <dependencies>
+        <!-- Asset Generator (compile-scope to use in exec-maven-plugin) -->
+        <dependency>
+            <groupId>ru.lifegame</groupId>
+            <artifactId>asset-generator</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- Spring Boot Starter Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -67,6 +75,12 @@
                     <include>**/*.xml</include>
                 </includes>
             </resource>
+            <!-- Generated assets (PNG, sprite-atlas.json) -->
+            <resource>
+                <directory>${project.build.directory}/generated-assets</directory>
+                <targetPath>assets</targetPath>
+                <filtering>false</filtering>
+            </resource>
         </resources>
 
         <plugins>
@@ -77,6 +91,30 @@
                 <configuration>
                     <parameters>true</parameters>
                 </configuration>
+            </plugin>
+
+            <!-- Asset Generator: Generate PNG + JSON from asset-specs -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>generate-assets</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>ru.lifegame.assets.AssetGeneratorRunner</mainClass>
+                            <arguments>
+                                <argument>${project.basedir}/../asset-specs</argument>
+                                <argument>${project.build.directory}/generated-assets</argument>
+                            </arguments>
+                            <classpathScope>compile</classpathScope>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
