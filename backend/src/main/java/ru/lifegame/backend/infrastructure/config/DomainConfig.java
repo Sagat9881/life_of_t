@@ -6,7 +6,6 @@ import ru.lifegame.backend.domain.action.ActionProvider;
 import ru.lifegame.backend.domain.action.spec.DataDrivenActionProvider;
 import ru.lifegame.backend.domain.action.spec.PlayerActionSpecLoader;
 import ru.lifegame.backend.domain.conflict.engine.ConflictEngine;
-import ru.lifegame.backend.domain.conflict.spec.ConflictLoader;
 import ru.lifegame.backend.domain.conflict.spec.ConflictSpec;
 import ru.lifegame.backend.domain.ending.EndingEvaluator;
 import ru.lifegame.backend.domain.model.session.ActionExecutor;
@@ -42,7 +41,7 @@ public class DomainConfig {
 
     @Bean
     public ConflictEngine conflictEngine(ConflictLoader loader) {
-        List<ConflictSpec> specs = loader.loadFromClasspath("game-config/conflicts.xml");
+        List<ConflictSpec> specs = loader.loadConflicts("game-config/conflicts.xml");
         return new ConflictEngine(specs);
     }
 

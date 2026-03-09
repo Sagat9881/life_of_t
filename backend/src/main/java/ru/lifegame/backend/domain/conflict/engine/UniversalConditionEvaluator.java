@@ -1,9 +1,7 @@
 package ru.lifegame.backend.domain.conflict.engine;
 
 import ru.lifegame.backend.domain.conflict.spec.TriggerCondition;
-import ru.lifegame.backend.domain.model.player.Player;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
-import ru.lifegame.backend.domain.model.time.GameTime;
 
 import java.util.Map;
 

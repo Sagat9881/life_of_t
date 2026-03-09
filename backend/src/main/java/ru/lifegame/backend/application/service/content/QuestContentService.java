@@ -1,4 +1,4 @@
-package ru.lifegame.backend.application/service/content;
+package ru.lifegame.backend.application.service.content;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
