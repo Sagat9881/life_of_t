@@ -16,6 +16,7 @@ public record GameStateView(
         EventView currentEvent,
         EndingView ending,
         ActionResultView lastActionResult,
-        List<NpcActivityView> npcActivities
+        List<NpcActivityView> npcActivities,
+        List<DomainEventView> domainEvents
 ) {
 }

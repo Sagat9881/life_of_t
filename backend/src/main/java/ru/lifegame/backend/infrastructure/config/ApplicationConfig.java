@@ -7,6 +7,8 @@ import ru.lifegame.backend.application.port.out.EventPublisher;
 import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.service.*;
 import ru.lifegame.backend.domain.action.ActionProvider;
+import ru.lifegame.backend.domain.narrative.NarrativeEventEngine;
+import ru.lifegame.backend.domain.narrative.NarrativeQuestEngine;
 import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
 import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
 
@@ -28,8 +30,11 @@ public class ApplicationConfig {
     @Bean
     public ExecutePlayerActionUseCase executePlayerActionUseCase(SessionRepository repo,
                                                                   ActionProvider actionProvider,
-                                                                  GameStateViewMapper mapper) {
-        return new ExecutePlayerActionService(repo, actionProvider.allActions(), mapper);
+                                                                  GameStateViewMapper mapper,
+                                                                  NarrativeEventEngine narrativeEventEngine,
+                                                                  NarrativeQuestEngine narrativeQuestEngine) {
+        return new ExecutePlayerActionService(repo, actionProvider.allActions(), mapper,
+                narrativeEventEngine, narrativeQuestEngine);
     }
 
     @Bean
@@ -52,7 +57,8 @@ public class ApplicationConfig {
 
     @Bean
     public EndDayUseCase endDayUseCase(SessionRepository sessionRepository,
-                                        GameStateViewMapper mapper) {
-        return new EndDayService(sessionRepository, mapper);
+                                        GameStateViewMapper mapper,
+                                        NarrativeEventEngine narrativeEventEngine) {
+        return new EndDayService(sessionRepository, mapper, narrativeEventEngine);
     }
 }

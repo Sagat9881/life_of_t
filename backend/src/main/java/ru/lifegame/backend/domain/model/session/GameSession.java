@@ -69,6 +69,14 @@ public class GameSession {
     public Ending ending() { return ending; }
     public GameSessionContext context() { return context; }
 
+    /**
+     * Publish a domain event from external services (narrative engines, quest engines).
+     * These events will be drained into the response and sent to frontend.
+     */
+    public void publishDomainEvent(DomainEvent event) {
+        eventPublisher.publish(event);
+    }
+
     public ActionResult executeAction(GameAction actionType) {
         ActionExecutor executor = new ActionExecutor();
         ActionResult result = executor.execute(actionType, context, eventPublisher);
@@ -144,7 +152,7 @@ public class GameSession {
 
     public void checkGameOver() {
         GameOverChecker checker = new GameOverChecker();
-        Optional<GameOverReason> gameOverEnding = checker.check(player(),relationships(),pets());
+        Optional<GameOverReason> gameOverEnding = checker.check(player(), relationships(), pets());
         gameOverEnding.ifPresent(end -> {
             this.ending = end.ending();
             this.context.setGameOverReason(end);
@@ -159,6 +167,10 @@ public class GameSession {
         return ending != null;
     }
 
+    /**
+     * Drain all accumulated domain events. Used by services to include
+     * events in the response JSON so frontend can trigger animations.
+     */
     public List<DomainEvent> drainDomainEvents() {
         List<DomainEvent> events = new ArrayList<>(eventPublisher.drainEvents());
         domainEvents.addAll(events);

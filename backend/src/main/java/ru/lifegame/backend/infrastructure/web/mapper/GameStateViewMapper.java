@@ -4,6 +4,9 @@ import ru.lifegame.backend.application.view.*;
 import ru.lifegame.backend.domain.action.ActionResult;
 import ru.lifegame.backend.domain.action.GameAction;
 import ru.lifegame.backend.domain.conflict.core.Conflict;
+import ru.lifegame.backend.domain.event.domain.DomainEvent;
+import ru.lifegame.backend.domain.event.domain.NarrativeEventTriggeredEvent;
+import ru.lifegame.backend.domain.event.domain.QuestStepCompletedEvent;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.pet.Pet;
 import ru.lifegame.backend.domain.model.pet.Pets;
@@ -16,8 +19,7 @@ import ru.lifegame.backend.domain.npc.runtime.NpcInstance;
 import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
 import ru.lifegame.backend.domain.quest.Quest;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GameStateViewMapper {
 
@@ -30,6 +32,7 @@ public class GameStateViewMapper {
     }
 
     public GameStateView toView(GameSession session, ActionResult lastResult) {
+        List<DomainEvent> events = session.drainDomainEvents();
         return new GameStateView(
                 session.sessionId(),
                 String.valueOf(session.telegramUserId()),
@@ -44,7 +47,8 @@ public class GameStateViewMapper {
                 toEventView(session),
                 toEndingView(session),
                 lastResult != null ? toActionResultView(lastResult) : null,
-                toNpcActivityViews(session)
+                toNpcActivityViews(session),
+                toDomainEventViews(events)
         );
     }
 
@@ -203,5 +207,34 @@ public class GameStateViewMapper {
                     );
                 })
                 .toList();
+    }
+
+    private List<DomainEventView> toDomainEventViews(List<DomainEvent> events) {
+        if (events == null || events.isEmpty()) return List.of();
+        return events.stream()
+                .map(this::mapDomainEvent)
+                .toList();
+    }
+
+    private DomainEventView mapDomainEvent(DomainEvent event) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("sessionId", event.sessionId());
+
+        if (event instanceof NarrativeEventTriggeredEvent ne) {
+            payload.put("narrativeEventId", ne.narrativeEventId());
+            payload.put("title", ne.title());
+            payload.put("description", ne.description());
+            payload.put("options", ne.options());
+        } else if (event instanceof QuestStepCompletedEvent qe) {
+            payload.put("questId", qe.questId());
+            payload.put("stepId", qe.stepId());
+            payload.put("questCompleted", qe.questCompleted());
+        }
+
+        return new DomainEventView(
+                event.eventType(),
+                event.timestamp().toString(),
+                payload
+        );
     }
 }
