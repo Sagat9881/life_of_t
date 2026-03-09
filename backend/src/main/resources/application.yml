@@ -6,11 +6,6 @@ spring:
     name: lifegame-backend
   jackson:
     default-property-inclusion: non_null
-  web:
-    resources:
-      static-locations:
-        - classpath:/static/
-        - classpath:/assets/
 
 session:
   persistence:
