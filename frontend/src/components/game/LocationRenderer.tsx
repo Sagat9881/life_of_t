@@ -1,18 +1,17 @@
 /**
- * LocationRenderer — compositing layer approach.
+ * LocationRenderer — all entities rendered via SpriteAnimator.
  *
- * Layer 0: Background — static composite PNG from location asset (fills scene)
+ * Layer 0: Background — SpriteAnimator with location atlas (fills scene)
  * Layer 1: Ambient — CSS time-of-day color overlay
- * Layer 2: Furniture — scaled composite PNGs positioned in scene
- * Layer 3: Characters — SpriteAnimator with atlas animations
+ * Layer 2: Furniture — SpriteAnimator with furniture atlas, positioned in scene
+ * Layer 3: Characters + Pets — SpriteAnimator with character atlas
  *
- * NO atlas loading for background or furniture.
- * Furniture uses pre-rendered composite PNGs scaled to scene.
+ * Everything uses sprite-atlas.json → SpriteAnimator → animated.
  */
 import { memo, useCallback, useEffect, useState } from 'react';
 import { PixelScene } from '@/components/shared/PixelScene/PixelScene';
 import { SpriteAnimator } from '@/components/shared/SpriteAnimator/SpriteAnimator';
-import { getCompositeUrl, loadAtlasConfig } from '@/services/assetService';
+import { loadAtlasConfig } from '@/services/assetService';
 import { SCENE_HEIGHT } from '@/utils/sceneConstants';
 import type { LocationConfig, FurniturePlacement } from '@/config/locations';
 import type { AtlasConfig } from '@/types/sprite';
@@ -58,8 +57,30 @@ export const LocationRenderer = memo(function LocationRenderer({
     [onObjectClick]
   );
 
-  /* ── Load character atlas configs for relative height ── */
+  /* ── Load atlas configs for furniture + characters (for relative height) ── */
+  const [furnitureAtlases, setFurnitureAtlases] = useState<Record<string, AtlasConfig>>({});
   const [charAtlases, setCharAtlases] = useState<Record<string, AtlasConfig>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      const result: Record<string, AtlasConfig> = {};
+      await Promise.allSettled(
+        config.furniture.map(async (f) => {
+          const key = `furniture/${f.entityName}`;
+          if (atlasCache.has(key)) { result[f.entityName] = atlasCache.get(key)!; return; }
+          try {
+            const ac = await loadAtlasConfig('furniture', f.entityName);
+            atlasCache.set(key, ac);
+            result[f.entityName] = ac;
+          } catch { /* no atlas — won't render */ }
+        })
+      );
+      if (!cancelled) setFurnitureAtlases(result);
+    };
+    void load();
+    return () => { cancelled = true; };
+  }, [config.furniture]);
 
   useEffect(() => {
     let cancelled = false;
@@ -85,13 +106,14 @@ export const LocationRenderer = memo(function LocationRenderer({
   return (
     <PixelScene className="location-renderer">
 
-      {/* ═══ LAYER 0: Background composite ═══ */}
-      <div className="pixel-scene__layer" style={{ zIndex: 0 }}>
-        <img
-          className="location-renderer__bg"
-          src={getCompositeUrl('locations', config.locationAsset)}
-          alt={config.name}
-          draggable={false}
+      {/* ═══ LAYER 0: Background — animated via SpriteAnimator ═══ */}
+      <div className="pixel-scene__layer location-renderer__bg-layer" style={{ zIndex: 0 }}>
+        <SpriteAnimator
+          entityType="locations"
+          entityName={config.locationAsset}
+          animation={config.backgroundAnimation}
+          sceneRelativeHeight={1.0}
+          condition={condition}
         />
       </div>
 
@@ -109,7 +131,7 @@ export const LocationRenderer = memo(function LocationRenderer({
         />
       )}
 
-      {/* ═══ LAYER 2: Furniture composites ═══ */}
+      {/* ═══ LAYER 2: Furniture — animated via SpriteAnimator ═══ */}
       <div
         className="pixel-scene__layer pixel-scene__layer--interactive"
         style={{ zIndex: 10 }}
@@ -117,7 +139,11 @@ export const LocationRenderer = memo(function LocationRenderer({
         {config.furniture.map((item) => {
           const isClickable = Boolean(item.actionCode);
           const isSelected = selectedObjectId === item.id;
-          const compositeUrl = getCompositeUrl('furniture', item.entityName);
+          const fa = furnitureAtlases[item.entityName];
+          const entry = fa?.animations[item.animation];
+          const relH = entry
+            ? (entry.frameHeight / SCENE_HEIGHT) * item.sceneHeight / (entry.frameHeight / SCENE_HEIGHT)
+            : item.sceneHeight;
 
           return (
             <div
@@ -134,16 +160,13 @@ export const LocationRenderer = memo(function LocationRenderer({
               }}
               onClick={isClickable ? () => handleFurnitureClick(item) : undefined}
             >
-              <img
-                className="location-renderer__furniture"
-                src={compositeUrl}
-                alt={item.label ?? item.entityName}
-                draggable={false}
-                style={{
-                  height: `${SCENE_HEIGHT * (item.sceneHeight ?? 0.30) * (item.scale ?? 1)}px`,
-                  width: 'auto',
-                  imageRendering: 'pixelated',
-                }}
+              <SpriteAnimator
+                entityType="furniture"
+                entityName={item.entityName}
+                animation={item.animation}
+                scale={item.scale}
+                sceneRelativeHeight={relH}
+                condition={condition}
               />
               {item.label && (
                 <span className="pixel-scene__label">{item.label}</span>
@@ -153,7 +176,7 @@ export const LocationRenderer = memo(function LocationRenderer({
         })}
       </div>
 
-      {/* ═══ LAYER 3: Characters (animated sprites) ═══ */}
+      {/* ═══ LAYER 3: Characters + Pets (animated sprites) ═══ */}
       <div className="pixel-scene__layer" style={{ zIndex: 50 }}>
         {config.characters.map((char) => {
           const anim = characterAnimations?.[char.entityName] ?? char.defaultAnimation;

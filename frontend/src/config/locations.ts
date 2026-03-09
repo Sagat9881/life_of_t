@@ -1,17 +1,17 @@
 /**
- * Location configuration — compositing layer approach.
+ * Location configuration — all entities rendered via SpriteAnimator.
  *
  * ── COORDINATE SYSTEM ──
  * x/y: percentage (0–100) relative to scene viewport (640×480).
- * Entities are positioned at these % coords.
+ * Entities positioned at these % coords with transform: translate(-50%, -100%).
  *
  * ── FURNITURE SIZING ──
  * sceneHeight: fraction of SCENE_HEIGHT (0..1) this item occupies.
  *   e.g. 0.35 = 35% of 480px = 168px tall.
  * scale: optional multiplier on top of sceneHeight. Default 1.0.
  *
- * Furniture renders as static composite PNG (no atlas animation needed).
- * Characters render via SpriteAnimator with atlas.
+ * ALL entities (background, furniture, characters, pets) render via
+ * SpriteAnimator using sprite-atlas.json from generated assets.
  */
 
 export interface FurniturePlacement {
@@ -20,7 +20,6 @@ export interface FurniturePlacement {
   readonly animation: string;
   readonly x: number;
   readonly y: number;
-  /** Fraction of scene height this furniture occupies (0..1) */
   readonly sceneHeight: number;
   readonly scale: number;
   readonly zOrder: number;
@@ -142,6 +141,24 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         scale: 1,
         zOrder: 48,
       },
+      {
+        id: 'klop',
+        entityName: 'klop',
+        defaultAnimation: 'idle',
+        x: 88,
+        y: 95,
+        scale: 1,
+        zOrder: 52,
+      },
+      {
+        id: 'garfield',
+        entityName: 'garfield',
+        defaultAnimation: 'idle',
+        x: 30,
+        y: 96,
+        scale: 1,
+        zOrder: 52,
+      },
     ],
   },
 
@@ -208,6 +225,15 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         scale: 1,
         zOrder: 50,
       },
+      {
+        id: 'klop',
+        entityName: 'klop',
+        defaultAnimation: 'idle',
+        x: 60,
+        y: 96,
+        scale: 1,
+        zOrder: 52,
+      },
     ],
   },
 
@@ -266,10 +292,19 @@ export const LOCATIONS: Record<string, LocationConfig> = {
         id: 'sam',
         entityName: 'sam',
         defaultAnimation: 'idle',
-        x: 30,
+        x: 25,
         y: 92,
         scale: 1,
         zOrder: 45,
+      },
+      {
+        id: 'duke',
+        entityName: 'duke',
+        defaultAnimation: 'idle',
+        x: 70,
+        y: 93,
+        scale: 1,
+        zOrder: 46,
       },
     ],
   },

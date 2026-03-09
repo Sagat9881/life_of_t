@@ -1,4 +1,4 @@
-/* LocationRenderer — compositing layer styles */
+/* LocationRenderer — all layers via SpriteAnimator */
 
 .location-renderer {
   position: relative;
@@ -6,19 +6,9 @@
   height: 100%;
 }
 
-/* Background: fills entire scene viewport */
-.location-renderer__bg {
+/* Background layer: SpriteAnimator fills entire scene */
+.location-renderer__bg-layer .sprite-animator {
   display: block;
   width: 100%;
   height: 100%;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  object-fit: fill;
-}
-
-/* Furniture composites: pixel-perfect scaling */
-.location-renderer__furniture {
-  display: block;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
 }
