@@ -3,40 +3,34 @@ package ru.lifegame.backend.domain.model.session;
 import ru.lifegame.backend.domain.conflict.core.Conflict;
 import ru.lifegame.backend.domain.conflict.core.ConflictResolution;
 import ru.lifegame.backend.domain.conflict.core.ConflictStage;
-import ru.lifegame.backend.domain.conflict.core.ConflictType;
-import ru.lifegame.backend.domain.conflict.tactics.ConflictTactic;
-import ru.lifegame.backend.domain.conflict.tactics.TacticEffects;
 import ru.lifegame.backend.domain.event.domain.ConflictResolvedEvent;
-import ru.lifegame.backend.domain.event.domain.ConflictTacticAppliedEvent;
 import ru.lifegame.backend.domain.event.domain.ConflictTriggeredEvent;
 import ru.lifegame.backend.domain.event.domain.RelationshipBrokenEvent;
 import ru.lifegame.backend.domain.exception.InvalidGameStateException;
 
 import java.util.List;
-import java.util.UUID;
 
+/**
+ * Manages active conflicts within a game session.
+ * Updated to work with string-based conflict IDs (no more ConflictType/ConflictTactic enums).
+ */
 public class ConflictManager {
 
-    public Conflict startConflict(
-            ConflictType type,
+    public void addNewConflict(
+            Conflict conflict,
             GameSessionContext context,
             DomainEventPublisher eventPublisher
     ) {
         List<Conflict> activeConflicts = context.activeConflicts();
         
-        if (hasActiveConflictOfType(type, activeConflicts)) {
+        if (hasActiveConflictOfType(conflict.conflictId(), activeConflicts)) {
             throw new InvalidGameStateException(
-                "Conflict of type '" + type.code() + "' is already active"
+                "Conflict of type '" + conflict.conflictId() + "' is already active"
             );
         }
 
-        String conflictId = UUID.randomUUID().toString();
-        Conflict conflict = new Conflict(conflictId, type);
         activeConflicts.add(conflict);
-        
-        eventPublisher.publish(new ConflictTriggeredEvent(context.sessionId(), conflictId));
-        
-        return conflict;
+        eventPublisher.publish(new ConflictTriggeredEvent(context.sessionId(), conflict.id()));
     }
 
     public void avoidConflict(
@@ -58,38 +52,20 @@ public class ConflictManager {
         );
     }
 
-    public TacticEffects applyTactic(
-            ConflictTactic tactic,
+    /**
+     * Apply tactic (stub for now — tactics engine not yet integrated).
+     * TODO: Integrate ConflictEngine tactic application when ready.
+     */
+    public void applyTactic(
+            String tacticCode,
             GameSessionContext context,
             DomainEventPublisher eventPublisher
     ) {
         Conflict conflict = findActiveConflict(context.activeConflicts());
-
-        TacticEffects effects = conflict.applyTactic(
-            tactic,
-            context.player(),
-            context.relationships()
-        );
         
-        if (effects.statChanges() != null) {
-            context.player().applyStatChanges(effects.statChanges());
-        }
-        if (effects.relationshipChanges() != null) {
-            context.relationships().applyChanges(
-                effects.relationshipChanges().npcId(),
-                effects.relationshipChanges()
-            );
-        }
-
-        eventPublisher.publish(
-            new ConflictTacticAppliedEvent(context.sessionId(), conflict.id(), tactic.code())
-        );
-
-        if (conflict.isResolved()) {
-            handleConflictResolution(conflict, context, eventPublisher);
-        }
-        
-        return effects;
+        // TODO: Lookup tactic from ConflictEngine, evaluate outcomes, apply effects
+        // For now, just mark conflict as resolved (placeholder)
+        throw new UnsupportedOperationException("Tactic application not yet implemented with new engine");
     }
 
     private void handleConflictResolution(
@@ -103,8 +79,8 @@ public class ConflictManager {
             new ConflictResolvedEvent(context.sessionId(), conflict.id(), res.outcome().name())
         );
         
-        if (res.relationshipBreak() && conflict.type().opponent().isPresent()) {
-            String npc = conflict.type().opponent().get();
+        if (res.relationshipBreak() && conflict.opponent().isPresent()) {
+            String npc = conflict.opponent().get();
             context.relationships().breakRelationship(npc);
             eventPublisher.publish(
                 new RelationshipBrokenEvent(context.sessionId(), npc)
@@ -112,17 +88,17 @@ public class ConflictManager {
         }
     }
 
-    private boolean hasActiveConflictOfType(ConflictType type, List<Conflict> activeConflicts) {
+    private boolean hasActiveConflictOfType(String conflictId, List<Conflict> activeConflicts) {
         return activeConflicts.stream()
-            .anyMatch(c -> c.type().code().equals(type.code()) && !c.isResolved());
+            .anyMatch(c -> c.conflictId().equals(conflictId) && !c.isResolved());
     }
 
-    private Conflict findConflictById(String conflictId, List<Conflict> activeConflicts) {
+    private Conflict findConflictById(String id, List<Conflict> activeConflicts) {
         return activeConflicts.stream()
-            .filter(c -> c.id().equals(conflictId))
+            .filter(c -> c.id().equals(id))
             .findFirst()
             .orElseThrow(() -> new InvalidGameStateException(
-                "Conflict with id '" + conflictId + "' not found"
+                "Conflict with id '" + id + "' not found"
             ));
     }
 

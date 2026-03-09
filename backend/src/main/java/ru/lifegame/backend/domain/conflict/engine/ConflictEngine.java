@@ -3,9 +3,9 @@ package ru.lifegame.backend.domain.conflict.engine;
 import ru.lifegame.backend.domain.conflict.core.Conflict;
 import ru.lifegame.backend.domain.conflict.spec.ConflictSpec;
 import ru.lifegame.backend.domain.conflict.spec.TriggerCondition;
-import ru.lifegame.backend.domain.model.player.Player;
+import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
-import ru.lifegame.backend.domain.model.time.GameTime;
+import ru.lifegame.backend.domain.model.session.GameTime;
 
 import java.util.*;
 
@@ -30,7 +30,7 @@ public class ConflictEngine {
      * Called at end of day.
      */
     public List<Conflict> evaluateTriggers(
-            Player player,
+            PlayerCharacter player,
             Relationships relationships,
             GameTime time,
             Map<String, Object> additionalContext
@@ -41,7 +41,7 @@ public class ConflictEngine {
 
         for (ConflictSpec spec : conflictSpecs) {
             if (shouldTrigger(spec, context, time.day())) {
-                Conflict conflict = createConflictFromSpec(spec);
+                Conflict conflict = Conflict.fromSpec(spec);
                 newConflicts.add(conflict);
                 lastTriggeredDay.put(spec.id(), time.day());
             }
@@ -74,7 +74,7 @@ public class ConflictEngine {
     }
 
     private Map<String, Object> buildContext(
-            Player player,
+            PlayerCharacter player,
             Relationships relationships,
             GameTime time,
             Map<String, Object> additionalContext
@@ -89,12 +89,6 @@ public class ConflictEngine {
         }
 
         return context;
-    }
-
-    private Conflict createConflictFromSpec(ConflictSpec spec) {
-        // TODO: Convert ConflictSpec to Conflict domain object
-        // For now, return a placeholder
-        throw new UnsupportedOperationException("ConflictSpec to Conflict conversion not yet implemented");
     }
 
     /**

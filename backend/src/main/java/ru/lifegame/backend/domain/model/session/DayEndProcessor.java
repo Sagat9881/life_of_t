@@ -2,42 +2,38 @@ package ru.lifegame.backend.domain.model.session;
 
 import ru.lifegame.backend.domain.balance.GameBalance;
 import ru.lifegame.backend.domain.conflict.core.Conflict;
-import ru.lifegame.backend.domain.conflict.triggers.ConflictTriggers;
+import ru.lifegame.backend.domain.conflict.engine.ConflictEngine;
 import ru.lifegame.backend.domain.ending.EndingEvaluator;
-import ru.lifegame.backend.domain.event.domain.ConflictTriggeredEvent;
 import ru.lifegame.backend.domain.event.domain.DayEndedEvent;
 import ru.lifegame.backend.domain.event.domain.DomainEvent;
 import ru.lifegame.backend.domain.event.domain.EndingAchievedEvent;
 import ru.lifegame.backend.domain.event.domain.GameOverEvent;
 import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Domain service responsible for end-of-day processing.
- * Handles daily decay, NPC behavior, conflict triggers, game over checks, and ending evaluation.
+ * Updated to use ConflictEngine (data-driven) instead of ConflictTriggers (hardcoded).
  */
 public class DayEndProcessor {
-    private final ConflictTriggers conflictTriggers;
+    private final ConflictEngine conflictEngine;
+    private final ConflictManager conflictManager;
     private final GameOverChecker gameOverChecker;
     private final EndingEvaluator endingEvaluator;
     private final NpcLifecycleEngine npcLifecycleEngine;
 
-    public DayEndProcessor() {
-        this.conflictTriggers = new ConflictTriggers();
-        this.gameOverChecker = new GameOverChecker();
-        this.endingEvaluator = new EndingEvaluator();
-        this.npcLifecycleEngine = null;
-    }
-
     public DayEndProcessor(
-            ConflictTriggers conflictTriggers,
+            ConflictEngine conflictEngine,
+            ConflictManager conflictManager,
             GameOverChecker gameOverChecker,
             EndingEvaluator endingEvaluator,
             NpcLifecycleEngine npcLifecycleEngine
     ) {
-        this.conflictTriggers = conflictTriggers;
+        this.conflictEngine = conflictEngine;
+        this.conflictManager = conflictManager;
         this.gameOverChecker = gameOverChecker;
         this.endingEvaluator = endingEvaluator;
         this.npcLifecycleEngine = npcLifecycleEngine;
@@ -82,27 +78,18 @@ public class DayEndProcessor {
             GameSessionContext context,
             DomainEventPublisher eventPublisher
     ) {
-        List<Conflict> newConflicts = conflictTriggers.checkTriggers(
+        Map<String, Object> additionalContext = new HashMap<>();
+        // Add any extra context (e.g., quest state, story flags)
+        
+        List<Conflict> newConflicts = conflictEngine.evaluateTriggers(
             context.player(),
             context.relationships(),
-            context.time()
+            context.time(),
+            additionalContext
         );
 
-        List<Conflict> activeConflicts = context.activeConflicts();
-
         for (Conflict newConflict : newConflicts) {
-            boolean alreadyExists = activeConflicts.stream()
-                .anyMatch(existing ->
-                    existing.type().code().equals(newConflict.type().code())
-                    && !existing.isResolved()
-                );
-
-            if (!alreadyExists) {
-                activeConflicts.add(newConflict);
-                eventPublisher.publish(
-                    new ConflictTriggeredEvent(context.sessionId(), newConflict.id())
-                );
-            }
+            conflictManager.addNewConflict(newConflict, context, eventPublisher);
         }
     }
 

@@ -2,9 +2,6 @@ package ru.lifegame.backend.domain.model.character;
 
 import ru.lifegame.backend.domain.action.ActionType;
 import ru.lifegame.backend.domain.balance.GameBalance;
-import ru.lifegame.backend.domain.conflict.tactics.BaseConflictTactics;
-import ru.lifegame.backend.domain.conflict.tactics.ConflictTactic;
-import ru.lifegame.backend.domain.conflict.tactics.SkillBasedConflictTactics;
 import ru.lifegame.backend.domain.model.common.Location;
 import ru.lifegame.backend.domain.model.common.PlayerId;
 import ru.lifegame.backend.domain.model.session.GameTime;
@@ -50,19 +47,23 @@ public class PlayerCharacter {
         return true;
     }
 
-    public boolean canUseTactic(ConflictTactic tactic) {
-        if (tactic.isBaseAvailable()) return true;
-        return tactic.requiredSkill()
-                .map(skill -> skills.hasLevel(skill, tactic.requiredSkillLevel()))
-                .orElse(true);
+    /**
+     * Check if player can use a tactic (by code).
+     * TODO: Integrate with ConflictEngine spec-based tactics.
+     */
+    public boolean canUseTactic(String tacticCode) {
+        // Stub: assume all base tactics are available
+        // Skill-based tactics will be checked via ConflictEngine
+        return true;
     }
 
-    public List<ConflictTactic> availableConflictTactics() {
-        List<ConflictTactic> result = new ArrayList<>(Arrays.asList(BaseConflictTactics.values()));
-        for (SkillBasedConflictTactics t : SkillBasedConflictTactics.values()) {
-            if (canUseTactic(t)) result.add(t);
-        }
-        return result;
+    /**
+     * Get available conflict tactics (stub).
+     * TODO: Query ConflictEngine for tactics available based on player skills.
+     */
+    public List<String> availableConflictTactics() {
+        // Return base tactic codes for now
+        return List.of("SURRENDER", "ASSERT", "COMPROMISE", "AVOID", "LISTEN");
     }
 
     public void applyStatChanges(StatChanges changes) {
@@ -143,7 +144,4 @@ public class PlayerCharacter {
     public void changeJobBurnoutRisk(int delta) {
         this.job = job.changeBurnoutRisk(delta);
     }
-
-
-
 }
