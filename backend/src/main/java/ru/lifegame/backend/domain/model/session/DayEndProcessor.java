@@ -3,7 +3,8 @@ package ru.lifegame.backend.domain.model.session;
 import ru.lifegame.backend.domain.balance.GameBalance;
 import ru.lifegame.backend.domain.conflict.core.Conflict;
 import ru.lifegame.backend.domain.conflict.engine.ConflictEngine;
-import ru.lifegame.backend.domain.ending.EndingEvaluator;
+import ru.lifegame.backend.domain.ending.Ending;
+import ru.lifegame.backend.domain.ending.EndingEngine;
 import ru.lifegame.backend.domain.event.domain.DayEndedEvent;
 import ru.lifegame.backend.domain.event.domain.DomainEvent;
 import ru.lifegame.backend.domain.event.domain.EndingAchievedEvent;
@@ -13,29 +14,27 @@ import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Domain service responsible for end-of-day processing.
- * Updated to use ConflictEngine (data-driven) instead of ConflictTriggers (hardcoded).
+ * Now fully data-driven: uses ConflictEngine and EndingEngine.
  */
 public class DayEndProcessor {
     private final ConflictEngine conflictEngine;
     private final ConflictManager conflictManager;
-    private final GameOverChecker gameOverChecker;
-    private final EndingEvaluator endingEvaluator;
+    private final EndingEngine endingEngine;
     private final NpcLifecycleEngine npcLifecycleEngine;
 
     public DayEndProcessor(
             ConflictEngine conflictEngine,
             ConflictManager conflictManager,
-            GameOverChecker gameOverChecker,
-            EndingEvaluator endingEvaluator,
+            EndingEngine endingEngine,
             NpcLifecycleEngine npcLifecycleEngine
     ) {
         this.conflictEngine = conflictEngine;
         this.conflictManager = conflictManager;
-        this.gameOverChecker = gameOverChecker;
-        this.endingEvaluator = endingEvaluator;
+        this.endingEngine = endingEngine;
         this.npcLifecycleEngine = npcLifecycleEngine;
     }
 
@@ -79,7 +78,6 @@ public class DayEndProcessor {
             DomainEventPublisher eventPublisher
     ) {
         Map<String, Object> additionalContext = new HashMap<>();
-        // Add any extra context (e.g., quest state, story flags)
         
         List<Conflict> newConflicts = conflictEngine.evaluateTriggers(
             context.player(),
@@ -93,35 +91,43 @@ public class DayEndProcessor {
         }
     }
 
+    /**
+     * Check for game-over conditions using EndingEngine (data-driven).
+     */
     private void checkGameOver(
             GameSessionContext context,
             DomainEventPublisher eventPublisher
     ) {
-        gameOverChecker.check(
+        Optional<Ending> gameOverEnding = endingEngine.checkGameOver(
             context.player(),
             context.relationships(),
-            context.pets()
-        ).ifPresent(reason -> {
-            context.setGameOverReason(reason);
+            context.pets(),
+            context.questLog()
+        );
+
+        gameOverEnding.ifPresent(ending -> {
+            context.setEnding(ending);
             eventPublisher.publish(
-                new GameOverEvent(context.sessionId(), reason.name())
+                new GameOverEvent(context.sessionId(), ending.type().name())
             );
         });
     }
 
+    /**
+     * Evaluate story ending on day 30 using EndingEngine (data-driven).
+     */
     private void evaluateEnding(
             GameSessionContext context,
             DomainEventPublisher eventPublisher
     ) {
-        if (context.gameOverReason() == null
+        if (context.ending() == null
             && context.time().day() >= GameBalance.MAX_GAME_DAYS) {
 
-            endingEvaluator.findBestEnding(
+            endingEngine.findBestStoryEnding(
                 context.player(),
                 context.relationships(),
                 context.pets(),
-                context.questLog(),
-                context.time()
+                context.questLog()
             ).ifPresent(ending -> {
                 context.setEnding(ending);
                 eventPublisher.publish(

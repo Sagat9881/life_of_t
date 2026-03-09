@@ -11,6 +11,11 @@ import ru.lifegame.backend.domain.quest.QuestType;
 
 import java.util.Optional;
 
+/**
+ * @deprecated Use EndingEngine instead (data-driven approach via endings.xml).
+ * This class will be removed in future refactoring.
+ */
+@Deprecated(since = "2026-03-09", forRemoval = true)
 public class EndingEvaluator {
 
     public Optional<Ending> findBestEnding(

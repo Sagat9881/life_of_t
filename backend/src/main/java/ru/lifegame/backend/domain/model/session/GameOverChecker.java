@@ -8,10 +8,10 @@ import ru.lifegame.backend.domain.model.relationship.Relationships;
 import java.util.Optional;
 
 /**
- * Domain service that checks for game over conditions.
- * Evaluates player state, relationships, and pets to determine if game should end.
- * Part of the GameSession aggregate.
+ * @deprecated Use EndingEngine instead (data-driven approach).
+ * This class will be removed in future refactoring.
  */
+@Deprecated(since = "2026-03-09", forRemoval = true)
 public class GameOverChecker {
 
     public Optional<GameOverReason> check(PlayerCharacter player, Relationships relationships, Pets pets) {
