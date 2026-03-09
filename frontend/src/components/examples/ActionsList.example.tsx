@@ -1,6 +1,8 @@
 /**
  * Example: Data-driven Actions List
  * 
+ * TEMPORARILY DISABLED - requires useGameState hook implementation
+ * 
  * This component demonstrates how to use ContentStore to render
  * action buttons WITHOUT hardcoding any game data in UI code.
  * 
@@ -10,7 +12,7 @@
  * - UI is fully data-driven: add new action in XML → appears automatically
  */
 
-import React from 'react';
+/*
 import { useContentStore } from '../../store/contentStore';
 import { useGameState } from '../../hooks/useGameState';
 
@@ -27,7 +29,6 @@ export function ActionsList() {
       <h2>Доступные действия</h2>
       
       {gameState.availableActions.map(option => {
-        // Look up action metadata from ContentStore
         const actionDef = actions[option.actionCode];
         
         if (!actionDef) {
@@ -35,14 +36,10 @@ export function ActionsList() {
           return null;
         }
 
-        // Check if player has enough energy
         const canAfford = gameState.player.stats.energy >= actionDef.minEnergy;
-        
-        // Check skill requirements
         const hasSkills = Object.entries(actionDef.requiredSkills).every(
           ([skill, minLevel]) => (gameState.player.skills[skill] || 0) >= minLevel
         );
-
         const isDisabled = !canAfford || !hasSkills;
 
         return (
@@ -70,8 +67,6 @@ export function ActionsList() {
     </div>
   );
 }
-
-// ==================== Action Button Component ====================
 
 interface ActionButtonProps {
   code: string;
@@ -126,3 +121,7 @@ function ActionButton({
     </button>
   );
 }
+*/
+
+// Placeholder export to prevent import errors
+export {};

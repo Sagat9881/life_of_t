@@ -1,81 +1,132 @@
 /**
- * PixelSceneCanvas — HTML5 Canvas 2D game scene renderer.
- *
- * Replaces the CSS-based PixelScene + SpriteAnimator pipeline with a single
- * <canvas> element that draws all layers directly via Canvas 2D API.
- *
- * The canvas has a fixed logical resolution of 640×480 and auto-scales
- * to fit its container while maintaining 4:3 aspect ratio and pixel-perfect
- * rendering (imageSmoothingEnabled = false, image-rendering: pixelated).
- *
- * All entity positions use percentage coordinates (0–100) mapped to the
- * 640×480 logical space. Entity sizes use sceneHeight (0–100) = % of
- * scene height.
+ * PixelSceneCanvas Component
+ * 
+ * Renders a pixel-art game location using Canvas API.
+ * 
+ * Features:
+ * - Multi-layer rendering (background, midground, foreground)
+ * - Sprite-based furniture with click detection
+ * - Character animations
+ * - Time-of-day variations
  */
-import { memo, useRef, useCallback, useState } from 'react';
-import { useCanvasRenderer } from '@/hooks/useCanvasRenderer';
-import type { LocationConfig } from '@/config/locations';
-import './PixelSceneCanvas.css';
 
-const CANVAS_W = 640;
-const CANVAS_H = 480;
+import React, { useRef, useEffect } from 'react';
+import { useCanvasRenderer } from '../../hooks/useCanvasRenderer';
+import type { LocationConfig } from '../../types/location.types';
 
-export interface PixelSceneCanvasProps {
-  readonly config: LocationConfig;
-  readonly selectedObjectId?: string | null;
-  readonly onObjectClick?: (objectId: string, actionCode: string) => void;
-  readonly characterAnimations?: Record<string, string>;
-  readonly timeOfDay?: string;
+interface PixelSceneCanvasProps {
+  config: LocationConfig;
+  timeOfDay: string;
+  selectedObjectId: string | null;
+  hoveredObjectId: string | null;
+  characterAnimations?: Record<string, { animationName: string; frameIndex: number }>;
+  onObjectClick: (objectId: string | null) => void;
+  onObjectHover: (objectId: string | null) => void;
 }
 
-export const PixelSceneCanvas = memo(function PixelSceneCanvas({
+export function PixelSceneCanvas({
   config,
+  timeOfDay,
   selectedObjectId,
-  onObjectClick,
+  hoveredObjectId,
   characterAnimations,
-  timeOfDay = 'day',
+  onObjectClick,
+  onObjectHover,
 }: PixelSceneCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  const { handleCanvasClick, handleCanvasMove } = useCanvasRenderer({
+  // Initialize renderer
+  useCanvasRenderer({
     config,
     canvasRef,
     timeOfDay,
-    selectedObjectId,
-    hoveredObjectId: hoveredId,
+    selectedObjectId: selectedObjectId ?? null,
+    hoveredObjectId: hoveredObjectId ?? null,
     characterAnimations,
   });
 
-  const onClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    const hit = handleCanvasClick(e);
-    if (hit?.actionCode && onObjectClick) {
-      onObjectClick(hit.id, hit.actionCode);
-    }
-  }, [handleCanvasClick, onObjectClick]);
+  // Handle clicks
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-  const onMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    const id = handleCanvasMove(e);
-    setHoveredId(id);
-  }, [handleCanvasMove]);
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-  const onLeave = useCallback(() => {
-    setHoveredId(null);
-  }, []);
+    // Scale to internal coordinates
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const scaledX = x * scaleX;
+    const scaledY = y * scaleY;
+
+    // Check furniture hit boxes
+    const clickedFurniture = config.furniture?.find(f => {
+      if (!f.x || !f.y) return false;
+      const hitBox = {
+        x: f.x,
+        y: f.y,
+        width: 32, // TODO: Get from atlas metadata
+        height: 32,
+      };
+      return (
+        scaledX >= hitBox.x &&
+        scaledX <= hitBox.x + hitBox.width &&
+        scaledY >= hitBox.y &&
+        scaledY <= hitBox.y + hitBox.height
+      );
+    });
+
+    onObjectClick(clickedFurniture?.id ?? null);
+  };
+
+  // Handle hover
+  const handleCanvasMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const scaledX = x * scaleX;
+    const scaledY = y * scaleY;
+
+    const hoveredFurniture = config.furniture?.find(f => {
+      if (!f.x || !f.y) return false;
+      const hitBox = {
+        x: f.x,
+        y: f.y,
+        width: 32,
+        height: 32,
+      };
+      return (
+        scaledX >= hitBox.x &&
+        scaledX <= hitBox.x + hitBox.width &&
+        scaledY >= hitBox.y &&
+        scaledY <= hitBox.y + hitBox.height
+      );
+    });
+
+    onObjectHover(hoveredFurniture?.id ?? null);
+  };
 
   return (
-    <div className="pixel-scene-canvas">
-      <canvas
-        ref={canvasRef}
-        width={CANVAS_W}
-        height={CANVAS_H}
-        className="pixel-scene-canvas__canvas"
-        onClick={onClick}
-        onMouseMove={onMove}
-        onMouseLeave={onLeave}
-      />
-    </div>
+    <canvas
+      ref={canvasRef}
+      width={config.canvasWidth}
+      height={config.canvasHeight}
+      onClick={handleCanvasClick}
+      onMouseMove={handleCanvasMove}
+      onMouseLeave={() => onObjectHover(null)}
+      style={{
+        width: '100%',
+        height: 'auto',
+        imageRendering: 'pixelated',
+        cursor: hoveredObjectId ? 'pointer' : 'default',
+      }}
+    />
   );
-});
-
-export default PixelSceneCanvas;
+}

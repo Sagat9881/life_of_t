@@ -1,6 +1,8 @@
 /**
  * Example: Data-driven Conflict Resolver
  * 
+ * TEMPORARILY DISABLED - requires useGameState hook implementation
+ * 
  * Shows how to render conflict resolution UI dynamically from ContentStore.
  * 
  * Key features:
@@ -10,7 +12,7 @@
  * - Locked tactics grayed out with tooltip
  */
 
-import React from 'react';
+/*
 import { useContentStore } from '../../store/contentStore';
 import { useGameState } from '../../hooks/useGameState';
 
@@ -45,13 +47,10 @@ export function ConflictResolver({ conflictId, conflictType }: ConflictResolverP
         <h3>Выберите тактику:</h3>
         
         {conflictDef.tactics.map(tactic => {
-          // Check if player meets skill requirements
           const missingSkills = Object.entries(tactic.skillRequirements)
             .filter(([skill, minLevel]) => (playerSkills[skill] || 0) < minLevel);
           
           const isLocked = missingSkills.length > 0;
-          
-          // Calculate success chance
           const successChance = calculateSuccessChance(tactic, playerSkills);
 
           return (
@@ -70,15 +69,12 @@ export function ConflictResolver({ conflictId, conflictType }: ConflictResolverP
   );
 }
 
-// ==================== Success Chance Calculator ====================
-
 function calculateSuccessChance(
   tactic: any,
   playerSkills: Record<string, number>
 ): number {
   let chance = tactic.baseSuccessChance;
   
-  // Add modifiers from skills
   Object.entries(tactic.skillSuccessModifiers).forEach(([skill, modifier]) => {
     const skillLevel = playerSkills[skill] || 0;
     chance += (modifier as number) * (skillLevel / 100);
@@ -86,8 +82,6 @@ function calculateSuccessChance(
   
   return Math.min(100, Math.max(0, chance));
 }
-
-// ==================== Tactic Button Component ====================
 
 interface TacticButtonProps {
   tactic: any;
@@ -157,3 +151,7 @@ function TacticButton({
     </button>
   );
 }
+*/
+
+// Placeholder export to prevent import errors
+export {};
