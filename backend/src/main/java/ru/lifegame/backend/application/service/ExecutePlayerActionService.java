@@ -6,12 +6,14 @@ import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.view.GameStateView;
 import ru.lifegame.backend.domain.action.ActionResult;
 import ru.lifegame.backend.domain.action.GameAction;
+import ru.lifegame.backend.domain.event.domain.DomainEvent;
 import ru.lifegame.backend.domain.event.domain.NarrativeEventTriggeredEvent;
 import ru.lifegame.backend.domain.event.domain.QuestStepCompletedEvent;
 import ru.lifegame.backend.domain.exception.SessionNotFoundException;
 import ru.lifegame.backend.domain.model.session.GameSession;
 import ru.lifegame.backend.domain.narrative.NarrativeEventEngine;
 import ru.lifegame.backend.domain.narrative.NarrativeQuestEngine;
+import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
 import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
 
 import java.util.*;
@@ -24,17 +26,20 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
     private final GameStateViewMapper mapper;
     private final NarrativeEventEngine narrativeEventEngine;
     private final NarrativeQuestEngine narrativeQuestEngine;
+    private final NpcLifecycleEngine npcLifecycleEngine;
 
     public ExecutePlayerActionService(SessionRepository sessionRepository,
                                       Collection<GameAction> allActions,
                                       GameStateViewMapper mapper,
                                       NarrativeEventEngine narrativeEventEngine,
-                                      NarrativeQuestEngine narrativeQuestEngine) {
+                                      NarrativeQuestEngine narrativeQuestEngine,
+                                      NpcLifecycleEngine npcLifecycleEngine) {
         this.sessionRepository = sessionRepository;
         this.allActions = allActions;
         this.mapper = mapper;
         this.narrativeEventEngine = narrativeEventEngine;
         this.narrativeQuestEngine = narrativeQuestEngine;
+        this.npcLifecycleEngine = npcLifecycleEngine;
     }
 
     @Override
@@ -82,6 +87,18 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
                     ));
                 });
             }
+        }
+
+        // Tick NPC lifecycle engine for current hour — produces activity/mood events
+        if (npcLifecycleEngine != null) {
+            Map<String, Object> npcCtx = Map.of(
+                    "hour", session.time().hour(),
+                    "day", session.time().day()
+            );
+            List<DomainEvent> npcEvents = npcLifecycleEngine.hourlyTick(
+                    session.sessionId(), session.time().hour(), npcCtx
+            );
+            npcEvents.forEach(session::publishDomainEvent);
         }
 
         sessionRepository.save(session);

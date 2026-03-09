@@ -6,6 +6,8 @@ import ru.lifegame.backend.domain.action.GameAction;
 import ru.lifegame.backend.domain.conflict.core.Conflict;
 import ru.lifegame.backend.domain.event.domain.DomainEvent;
 import ru.lifegame.backend.domain.event.domain.NarrativeEventTriggeredEvent;
+import ru.lifegame.backend.domain.event.domain.NpcActivityChangedEvent;
+import ru.lifegame.backend.domain.event.domain.NpcMoodExtremeEvent;
 import ru.lifegame.backend.domain.event.domain.QuestStepCompletedEvent;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.pet.Pet;
@@ -234,6 +236,16 @@ public class GameStateViewMapper {
             payload.put("questId", qe.questId());
             payload.put("stepId", qe.stepId());
             payload.put("questCompleted", qe.questCompleted());
+        } else if (event instanceof NpcActivityChangedEvent nae) {
+            payload.put("npcId", nae.npcId());
+            payload.put("oldActivity", nae.oldActivity());
+            payload.put("newActivity", nae.newActivity());
+            payload.put("locationId", nae.locationId());
+        } else if (event instanceof NpcMoodExtremeEvent nme) {
+            payload.put("npcId", nme.npcId());
+            payload.put("axis", nme.axis());
+            payload.put("value", nme.value());
+            payload.put("dominantMood", nme.dominantMood());
         }
 
         return new DomainEventView(

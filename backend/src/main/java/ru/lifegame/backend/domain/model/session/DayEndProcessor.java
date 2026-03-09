@@ -6,6 +6,7 @@ import ru.lifegame.backend.domain.conflict.triggers.ConflictTriggers;
 import ru.lifegame.backend.domain.ending.EndingEvaluator;
 import ru.lifegame.backend.domain.event.domain.ConflictTriggeredEvent;
 import ru.lifegame.backend.domain.event.domain.DayEndedEvent;
+import ru.lifegame.backend.domain.event.domain.DomainEvent;
 import ru.lifegame.backend.domain.event.domain.EndingAchievedEvent;
 import ru.lifegame.backend.domain.event.domain.GameOverEvent;
 import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
@@ -70,7 +71,10 @@ public class DayEndProcessor {
                 "hour", context.time().hour(),
                 "day", context.time().day()
             );
-            npcLifecycleEngine.dailyTick(npcContext);
+            List<DomainEvent> npcEvents = npcLifecycleEngine.dailyTick(
+                    context.sessionId(), npcContext
+            );
+            npcEvents.forEach(eventPublisher::publish);
         }
     }
 

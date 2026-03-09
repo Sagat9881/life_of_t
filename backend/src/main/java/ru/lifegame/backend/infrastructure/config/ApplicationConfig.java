@@ -32,9 +32,10 @@ public class ApplicationConfig {
                                                                   ActionProvider actionProvider,
                                                                   GameStateViewMapper mapper,
                                                                   NarrativeEventEngine narrativeEventEngine,
-                                                                  NarrativeQuestEngine narrativeQuestEngine) {
+                                                                  NarrativeQuestEngine narrativeQuestEngine,
+                                                                  NpcLifecycleEngine npcLifecycleEngine) {
         return new ExecutePlayerActionService(repo, actionProvider.allActions(), mapper,
-                narrativeEventEngine, narrativeQuestEngine);
+                narrativeEventEngine, narrativeQuestEngine, npcLifecycleEngine);
     }
 
     @Bean
