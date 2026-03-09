@@ -75,9 +75,10 @@
                     <include>**/*.xml</include>
                 </includes>
             </resource>
-            <!-- Generated assets (PNG, sprite-atlas.json) - no targetPath, direct to classpath root -->
+            <!-- Generated assets (PNG, sprite-atlas.json) → static/ for Spring Boot conventions -->
             <resource>
                 <directory>${project.build.directory}/generated-assets</directory>
+                <targetPath>static</targetPath>
                 <filtering>false</filtering>
             </resource>
         </resources>
