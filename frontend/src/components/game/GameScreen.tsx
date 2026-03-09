@@ -1,12 +1,6 @@
 /**
  * GameScreen — main pixel-art game layout.
- *
  * All actions come from backend (availableActions).
- * No hardcoded action lists. Furniture actionCode in locations.ts
- * is just a hint for click-to-action mapping on the scene.
- *
- * Animation mapping: reads animationKey from backend ActionOption
- * when available, otherwise falls back to action code heuristics.
  */
 import { useState, useEffect, useMemo } from 'react';
 import { useGameStore } from '../../store/gameStore';
@@ -24,41 +18,27 @@ const deriveTimeSlot = (hour: number): string => {
   return 'NIGHT';
 };
 
-/**
- * Derive sprite animation name from an action.
- * Priority: action.animationKey (from backend/atlas) > code-based heuristic > 'idle'
- */
 const ACTION_CODE_TO_ANIMATION: Record<string, string> = {
-  REST_AT_HOME: 'sleep',
-  SLEEP: 'sleep',
-  WORK_ON_PROJECT: 'work',
-  STUDY: 'work',
-  COOK_FOOD: 'work',
-  EXERCISE: 'exercise',
-  WALK_DOG: 'walk',
-  GO_FOR_WALK: 'walk',
+  REST_AT_HOME: 'sleep', SLEEP: 'sleep',
+  WORK_ON_PROJECT: 'work', STUDY: 'work', COOK_FOOD: 'work',
+  EXERCISE: 'exercise', WALK_DOG: 'walk', GO_FOR_WALK: 'walk',
 };
 
 function resolveAnimation(action?: ActionOption | null): string {
   if (!action) return 'idle';
-  // Future: backend provides animationKey from atlas config
   if (action.animationKey) return action.animationKey;
-  // Fallback: code-based heuristic (will be removed once backend provides animationKey)
   return ACTION_CODE_TO_ANIMATION[action.code] ?? 'idle';
 }
 
 export function GameScreen() {
   const {
     player, time, npcs, availableActions, activeQuests, relationships,
-    isLoading, error, fetchGameState, executeAction,
-    activeConflicts, currentEvent, lastActionResult,
+    isLoading, error, fetchGameState, executeAction, lastActionResult,
   } = useGameStore();
 
   const [selectedAction, setSelectedAction] = useState<ActionOption | null>(null);
 
-  useEffect(() => {
-    fetchGameState();
-  }, [fetchGameState]);
+  useEffect(() => { fetchGameState(); }, [fetchGameState]);
 
   const rawTimeSlot = time?.timeSlot ?? (time ? deriveTimeSlot(time.hour) : 'MORNING');
   const locationId = getLocationForTimeSlot(rawTimeSlot);
@@ -66,53 +46,30 @@ export function GameScreen() {
   const timeOfDay = rawTimeSlot.toLowerCase();
   const gameTime = time ?? { day: 1, hour: 7, timeSlot: 'MORNING' as const };
 
-  // Build animation map for characters based on current player activity
   const characterAnimations = useMemo(() => {
     const anims: Record<string, string> = {};
-    // Player animation from last executed action
     anims['tanya'] = resolveAnimation(lastActionResult
-      ? availableActions.find(a => a.code === lastActionResult.actionCode)
-      : null);
-    // NPCs default to idle (future: backend NpcActivityView provides animationKey)
+      ? availableActions.find(a => a.code === lastActionResult.actionCode) : null);
     for (const slot of locationConfig.characters) {
-      if (slot.id !== 'tanya' && !anims[slot.id]) {
-        anims[slot.id] = 'idle';
-      }
+      if (slot.id !== 'tanya' && !anims[slot.id]) anims[slot.id] = 'idle';
     }
     return anims;
   }, [lastActionResult, availableActions, locationConfig.characters]);
 
-  // Map furniture click → find matching backend action
-  const handleObjectClick = (objectId: string, actionCode: string) => {
+  const handleObjectClick = (_objectId: string, actionCode: string) => {
     const backendAction = availableActions.find(a => a.code === actionCode);
-    if (backendAction) {
-      setSelectedAction(backendAction);
-    }
+    if (backendAction) setSelectedAction(backendAction);
   };
 
   const handleActionConfirm = async () => {
     if (!selectedAction || !player) return;
-    try {
-      await executeAction(selectedAction.code);
-      setSelectedAction(null);
-    } catch (err: unknown) {
-      console.error('Action failed:', err instanceof Error ? err.message : err);
-    }
+    try { await executeAction(selectedAction.code); setSelectedAction(null); }
+    catch (err: unknown) { console.error('Action failed:', err instanceof Error ? err.message : err); }
   };
 
-  const handleActionCancel = () => {
-    setSelectedAction(null);
-  };
-
-  if (isLoading && !player) {
-    return <div className="gs-loading">Загрузка...</div>;
-  }
-  if (error) {
-    return <div className="gs-loading">Ошибка: {error}</div>;
-  }
-  if (!player) {
-    return <div className="gs-loading">Нет данных об игроке</div>;
-  }
+  if (isLoading && !player) return <div className="gs-loading">Загрузка...</div>;
+  if (error) return <div className="gs-loading">Ошибка: {error}</div>;
+  if (!player) return <div className="gs-loading">Нет данных об игроке</div>;
 
   return (
     <div className="gs">
@@ -122,12 +79,9 @@ export function GameScreen() {
           <span className="gs-header__version">Demo v0.9</span>
         </div>
         <div className="gs-header__right">
-          <span className="gs-header__time">
-            День {gameTime.day} | {String(gameTime.hour).padStart(2, '0')}:00
-          </span>
+          <span className="gs-header__time">День {gameTime.day} | {String(gameTime.hour).padStart(2, '0')}:00</span>
         </div>
       </header>
-
       <div className="gs-main">
         <div className="gs-scene">
           <LocationRenderer
@@ -138,50 +92,32 @@ export function GameScreen() {
             timeOfDay={timeOfDay}
           />
         </div>
-
         <Sidebar
-          player={player}
-          npcs={npcs}
-          gameTime={gameTime}
-          availableActions={availableActions}
-          activeQuests={activeQuests}
+          player={player} npcs={npcs} gameTime={gameTime}
+          availableActions={availableActions} activeQuests={activeQuests}
           relationships={relationships}
           onActionClick={(action) => setSelectedAction(action)}
         />
       </div>
-
-      <footer className="gs-footer">
-        Кликни на предмет или выбери действие
-      </footer>
-
-      {selectedAction ? (
-        <div className="gs-dialog-overlay" onClick={handleActionCancel}>
+      <footer className="gs-footer">Кликни на предмет или выбери действие</footer>
+      {selectedAction && (
+        <div className="gs-dialog-overlay" onClick={() => setSelectedAction(null)}>
           <div className="gs-dialog" onClick={(e) => e.stopPropagation()}>
             <div className="gs-dialog__title">{selectedAction.label}</div>
             <div className="gs-dialog__text">
-              {selectedAction.description}
-              <br />
+              {selectedAction.description}<br />
               <span className="gs-dialog__cost">⏱ {selectedAction.estimatedTimeCost}ч</span>
             </div>
             <div className="gs-dialog__buttons">
-              <button
-                className="gs-dialog__btn gs-dialog__btn--confirm"
-                onClick={handleActionConfirm}
-                disabled={isLoading || !selectedAction.isAvailable}
-              >
+              <button className="gs-dialog__btn gs-dialog__btn--confirm" onClick={handleActionConfirm}
+                disabled={isLoading || !selectedAction.isAvailable}>
                 {isLoading ? '...' : selectedAction.isAvailable ? 'Да' : selectedAction.unavailableReason ?? 'Недоступно'}
               </button>
-              <button
-                className="gs-dialog__btn gs-dialog__btn--cancel"
-                onClick={handleActionCancel}
-                disabled={isLoading}
-              >
-                Отмена
-              </button>
+              <button className="gs-dialog__btn gs-dialog__btn--cancel" onClick={() => setSelectedAction(null)} disabled={isLoading}>Отмена</button>
             </div>
           </div>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }

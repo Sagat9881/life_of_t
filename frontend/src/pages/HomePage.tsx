@@ -8,137 +8,45 @@ import { LoadingSpinner } from '../components/shared/LoadingSpinner';
 import { ErrorMessage } from '../components/shared/ErrorMessage';
 import styles from './HomePage.module.css';
 
-/**
- * Главная страница игры
- * 
- * Отображает:
- * - Панель игрока (статы, уровень)
- * - Список доступных действий
- * - Активные конфликты (если есть)
- * - Текущие события (если есть)
- * 
- * Использует gameStore для получения актуального состояния игры
- * и выполнения действий
- */
 export const HomePage = () => {
-  const { 
-    player, 
-    actions, 
-    currentConflict,
-    currentEvent,
-    isLoading, 
-    error, 
-    fetchGameState, 
-    executeAction,
-    selectTactic,
-    selectChoice,
-    cancelConflict,
-    cancelEvent
+  const {
+    player, actions, activeConflicts, currentEvent,
+    isLoading, error, fetchGameState, executeAction,
+    selectTactic, selectChoice, cancelConflict, cancelEvent
   } = useGameStore();
 
-  useEffect(() => {
-    // Загрузить состояние игры при монтировании
-    fetchGameState();
-  }, [fetchGameState]);
+  const currentConflict = activeConflicts.length > 0 ? activeConflicts[0] : null;
 
-  // Обработчик выполнения действия
-  const handleActionExecute = async (actionCode: string) => {
-    await executeAction(actionCode);
-  };
+  useEffect(() => { fetchGameState(); }, [fetchGameState]);
 
-  // Обработчик выбора тактики в конфликте
-  const handleTacticSelect = async (tacticCode: string) => {
-    await selectTactic(tacticCode);
-  };
+  const handleActionExecute = async (actionCode: string) => { await executeAction(actionCode); };
+  const handleTacticSelect = async (conflictId: string, tacticCode: string) => { await selectTactic(conflictId, tacticCode); };
+  const handleChoiceSelect = async (eventId: string, choiceCode: string) => { await selectChoice(eventId, choiceCode); };
 
-  // Обработчик выбора варианта в событии
-  const handleChoiceSelect = async (choiceCode: string) => {
-    await selectChoice(choiceCode);
-  };
-
-  // Loading состояние при первой загрузке
-  if (isLoading && !player) {
-    return (
-      <div className={styles.centerContainer}>
-        <LoadingSpinner size="large" />
-        <p className={styles.loadingText}>Загрузка игры...</p>
-      </div>
-    );
-  }
-
-  // Error состояние
-  if (error) {
-    return (
-      <div className={styles.centerContainer}>
-        <ErrorMessage 
-          message={error}
-          onRetry={fetchGameState}
-        />
-      </div>
-    );
-  }
-
-  // Нет данных об игроке
-  if (!player) {
-    return (
-      <div className={styles.centerContainer}>
-        <ErrorMessage 
-          message="Нет данных об игроке"
-          onRetry={fetchGameState}
-        />
-      </div>
-    );
-  }
+  if (isLoading && !player) return <div className={styles.centerContainer}><LoadingSpinner size="large" /><p className={styles.loadingText}>Загрузка игры...</p></div>;
+  if (error) return <div className={styles.centerContainer}><ErrorMessage message={error} onRetry={fetchGameState} /></div>;
+  if (!player) return <div className={styles.centerContainer}><ErrorMessage message="Нет данных об игроке" onRetry={fetchGameState} /></div>;
 
   return (
     <div className={styles.homePage}>
-      {/* Player Panel - всегда виден сверху */}
-      <div className={styles.playerSection}>
-        <PlayerPanel player={player} />
-      </div>
-
-      {/* Priority: Конфликт (если есть) */}
+      <div className={styles.playerSection}><PlayerPanel player={player} /></div>
       {currentConflict && (
         <div className={styles.conflictSection}>
-          <ConflictResolver
-            conflict={currentConflict}
-            isLoading={isLoading}
-            onSelectTactic={handleTacticSelect}
-            onCancel={cancelConflict}
-          />
+          <ConflictResolver conflict={currentConflict} isLoading={isLoading} onSelectTactic={handleTacticSelect} onCancel={cancelConflict} />
         </div>
       )}
-
-      {/* Priority: Событие (если есть и нет конфликта) */}
       {!currentConflict && currentEvent && (
         <div className={styles.eventSection}>
-          <EventChoice
-            event={currentEvent}
-            isLoading={isLoading}
-            onSelectChoice={handleChoiceSelect}
-            onCancel={cancelEvent}
-          />
+          <EventChoice event={currentEvent} isLoading={isLoading} onSelectChoice={handleChoiceSelect} onCancel={cancelEvent} />
         </div>
       )}
-
-      {/* Actions List - основной контент */}
       {!currentConflict && !currentEvent && (
         <div className={styles.actionsSection}>
           <h2 className={styles.sectionTitle}>🎯 Доступные действия</h2>
-          <ActionList
-            actions={actions}
-            isLoading={isLoading}
-            onExecuteAction={handleActionExecute}
-          />
+          <ActionList actions={actions} isLoading={isLoading} onExecuteAction={handleActionExecute} />
         </div>
       )}
-
-      {/* Loading Overlay - при выполнении действий */}
-      {isLoading && player && (
-        <div className={styles.loadingOverlay}>
-          <LoadingSpinner size="medium" />
-        </div>
-      )}
+      {isLoading && player && <div className={styles.loadingOverlay}><LoadingSpinner size="medium" /></div>}
     </div>
   );
 };

@@ -3,11 +3,11 @@ import { Search } from 'lucide-react';
 import { ActionCard } from './ActionCard';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { ErrorMessage } from '../shared/ErrorMessage';
-import type { GameAction } from '../../types/game';
+import type { ActionOption } from '../../types/game';
 import '../../styles/components/ActionList.css';
 
 interface ActionListProps {
-  actions: GameAction[];
+  actions: ActionOption[];
   isLoading?: boolean;
   error?: string | null;
   onExecuteAction?: (actionCode: string) => void;
@@ -22,30 +22,16 @@ export function ActionList({
   onRetry,
 }: ActionListProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-
-  const categories = useMemo(() => {
-    const cats = new Set(['all']);
-    (actions || []).forEach(action => {
-      if (action?.category) cats.add(action.category);
-    });
-    return Array.from(cats);
-  }, [actions]);
 
   const filteredActions = useMemo(() => {
     return (actions || []).filter(action => {
       if (!action) return false;
-      
-      const actionName = action.name || '';
-      const actionDesc = action.description || '';
-      const actionCategory = action.category || '';
-      
-      const matchesSearch = actionName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          actionDesc.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = categoryFilter === 'all' || actionCategory === categoryFilter;
-      return matchesSearch && matchesCategory;
+      const label = action.label || '';
+      const desc = action.description || '';
+      return label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+             desc.toLowerCase().includes(searchQuery.toLowerCase());
     });
-  }, [actions, searchQuery, categoryFilter]);
+  }, [actions, searchQuery]);
 
   if (isLoading) {
     return (
@@ -76,22 +62,6 @@ export function ActionList({
             className="action-list__search-input"
           />
         </div>
-
-        {categories.length > 1 && (
-          <div className="action-list__categories">
-            {categories.map(category => (
-              <button
-                key={category}
-                onClick={() => setCategoryFilter(category)}
-                className={`action-list__category-button ${
-                  categoryFilter === category ? 'action-list__category-button--active' : ''
-                }`}
-              >
-                {category === 'all' ? 'Все' : category}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className="action-list__grid">
