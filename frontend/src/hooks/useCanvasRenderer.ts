@@ -204,7 +204,7 @@ export function useCanvasRenderer({
       const sceneX = (c.x / 100) * SCENE_W;
       const sceneY = (c.y / 100) * SCENE_H;
       // Characters: sceneHeight from config (percentage of scene)
-      const h = ((c as CharacterSlotWithHeight).sceneHeight ?? 38) / 100 * SCENE_H;
+      const h = (c.sceneHeight ?? 38) / 100 * SCENE_H;
 
       drawSpriteFrame(ctx, state.img, state.anim, state.frame, sceneX, sceneY, h, c.scale ?? 1);
     }
@@ -270,9 +270,4 @@ function advanceFrame(state: EntityAnimState, timestamp: number): void {
       state.frame = next;
     }
   }
-}
-
-/** Extended character slot with optional sceneHeight */
-interface CharacterSlotWithHeight extends CharacterSlot {
-  sceneHeight?: number;
 }
