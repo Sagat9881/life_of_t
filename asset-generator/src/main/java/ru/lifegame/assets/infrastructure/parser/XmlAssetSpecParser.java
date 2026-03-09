@@ -74,6 +74,30 @@ public class XmlAssetSpecParser {
         }
     }
 
+    /**
+     * Extracts ONLY the color variable map from an XML spec file.
+     * Lightweight parse — reads just the color-palette section.
+     * Used by VisualSpecResolver to cache parent color vars BEFORE full parsing
+     * (since full parsing resolves $-vars in the parent's own layers,
+     * making the original variable names unavailable to child specs).
+     *
+     * @param xmlFile path to the visual-specs.xml file
+     * @return map of "$varName" -> "#hexValue"
+     */
+    public Map<String, String> extractColorVarsFromFile(Path xmlFile) {
+        try (InputStream is = Files.newInputStream(xmlFile)) {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(is);
+            doc.getDocumentElement().normalize();
+            return parseColorVariableMap(doc.getDocumentElement());
+        } catch (Exception e) {
+            log.warn("Failed to extract color vars from {}: {}", xmlFile, e.getMessage());
+            return Map.of();
+        }
+    }
+
     private AssetSpec parseRoot(Element root, Path sourceFile) {
         String extendsAttr = root.getAttribute("extends");
         boolean isAbstract = "true".equals(root.getAttribute("abstract"));
@@ -126,15 +150,16 @@ public class XmlAssetSpecParser {
                 parentSpec.layers(), layerOverrides, ownLayers, colorOverrides, colorRemaps);
 
         // Build combined color variable map: parent palette + child palette.
+        // Parent vars come from the pre-parse cache in VisualSpecResolver
+        // (extracted before parseFlatSpec resolved them in parent layers).
         // Child values override parent values for same variable name.
-        // This ensures $-variables from BOTH parent and child are resolved
-        // in all merged layers (parent layers that weren't overridden may
-        // still contain unresolved $-references if parent caching is bypassed).
-        Map<String, String> allColorVars = new HashMap<>(parseParentColorVars(parentSpec));
+        Map<String, String> allColorVars = new HashMap<>(resolver.getParentColorVars(extendsRef));
         allColorVars.putAll(childColorVars);
 
         if (!allColorVars.isEmpty()) {
             mergedLayers = VisualSpecResolver.resolveColorVariablesInLayers(mergedLayers, allColorVars);
+            log.debug("Resolved {} color variables in merged layers for {}/{}",
+                    allColorVars.size(), entityType, entityName);
         }
 
         // Merge animations: parent + extra
@@ -152,37 +177,6 @@ public class XmlAssetSpecParser {
         return new AssetSpec(entityType, entityName, version,
                 mergedLayers, mergedPalette, mergedAnimations,
                 variations, naming, constraints);
-    }
-
-    /**
-     * Extracts color variable map from an already-parsed parent AssetSpec.
-     * Reconstructs $-variable mappings from the parent's color palette entries.
-     * This is a safety net: even if parent layers were already resolved,
-     * having the full variable map ensures child layer-overrides and own layers
-     * that reference parent-defined variables are properly resolved.
-     */
-    private Map<String, String> parseParentColorVars(AssetSpec parentSpec) {
-        // The parent's color palette "primary" and "secondary" are hex lists,
-        // not variable maps. We need to re-parse the parent XML to get variables.
-        // Instead, we load the parent from cache and re-parse its XML for color vars.
-        // BUT this is expensive. A better approach: use the specsRoot to find
-        // the parent's XML and parse just the color-palette.
-        //
-        // However, since parent layers should already be resolved in parseFlatSpec,
-        // this is only needed for the child's OWN layers and layer-overrides that
-        // might reference parent-defined variable names.
-        //
-        // For robustness, re-read the parent's color-palette from its XML file.
-        Map<String, String> parentVars = new HashMap<>();
-        if (specsRoot == null) return parentVars;
-
-        // Walk the cache — the parent was already loaded, so we can find its path
-        // from the extends reference. Instead, just return empty and rely on the
-        // parent spec's layers being already resolved.
-        // The REAL fix: also resolve $-vars in layer-override pixel data and own
-        // layers using the child's color vars (which already happens), plus we
-        // ensure parent's unresolved $-refs are caught by a defensive parseColor.
-        return parentVars;
     }
 
     /** Parses a flat spec without inheritance (original behavior). */

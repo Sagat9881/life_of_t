@@ -23,6 +23,8 @@ public class VisualSpecResolver {
     private final Path specsRoot;
     private final XmlAssetSpecParser parser;
     private final Map<String, AssetSpec> cache = new ConcurrentHashMap<>();
+    /** Cache of $-variable color maps extracted from parent specs before resolution. */
+    private final Map<String, Map<String, String>> colorVarsCache = new ConcurrentHashMap<>();
 
     public VisualSpecResolver(Path specsRoot, XmlAssetSpecParser parser) {
         this.specsRoot = specsRoot;
@@ -32,6 +34,10 @@ public class VisualSpecResolver {
     /**
      * Loads and caches the parent abstract spec referenced by extendsRef.
      * Format: "abstract/entities/human@1.0" or "abstract/entities/human"
+     *
+     * Also extracts and caches the parent's raw color variable map BEFORE
+     * parsing (since parseFlatSpec resolves $-vars in parent's own layers,
+     * losing the original mappings needed by child layer-overrides).
      *
      * @param extendsRef the extends attribute value
      * @return parsed parent AssetSpec
@@ -50,12 +56,29 @@ public class VisualSpecResolver {
                     : versionStr;
         }
 
+        // Extract color vars first (lightweight — only parses color-palette).
+        // This must happen outside computeIfAbsent to avoid deadlocks if
+        // extractColorVarsFromFile triggers any cache access.
+        final String resolvedPath = path;
+        if (!colorVarsCache.containsKey(resolvedPath)) {
+            Path specFile = specsRoot.resolve(resolvedPath).resolve("visual-specs.xml");
+            if (Files.exists(specFile)) {
+                Map<String, String> parentColorVars = parser.extractColorVarsFromFile(specFile);
+                if (!parentColorVars.isEmpty()) {
+                    colorVarsCache.put(resolvedPath, parentColorVars);
+                    log.info("Cached {} color variables from parent spec: {}",
+                            parentColorVars.size(), resolvedPath);
+                }
+            }
+        }
+
         String finalRequiredMajor = requiredMajor;
-        return cache.computeIfAbsent(path, key -> {
+        return cache.computeIfAbsent(resolvedPath, key -> {
             Path specFile = specsRoot.resolve(key).resolve("visual-specs.xml");
             if (!Files.exists(specFile)) {
                 throw new XmlParseException(
-                        "Abstract spec not found: " + specFile + " (referenced by extends=\"" + extendsRef + "\")");
+                        "Abstract spec not found: " + specFile
+                                + " (referenced by extends=\"" + extendsRef + "\")");
             }
             log.info("Loading abstract spec: {}", specFile);
             AssetSpec parentSpec = parser.parse(specFile);
@@ -74,6 +97,23 @@ public class VisualSpecResolver {
 
             return parentSpec;
         });
+    }
+
+    /**
+     * Returns the cached color variable map for a parent spec.
+     * These are the raw $-variable -> hex mappings extracted from the parent's
+     * color-palette BEFORE the parent's own layers were resolved.
+     *
+     * @param extendsRef the extends attribute value (e.g. "abstract/environments/indoor_room@1.0")
+     * @return color variable map, or empty map if none cached
+     */
+    public Map<String, String> getParentColorVars(String extendsRef) {
+        String path = extendsRef;
+        int atIdx = extendsRef.indexOf('@');
+        if (atIdx > 0) {
+            path = extendsRef.substring(0, atIdx);
+        }
+        return colorVarsCache.getOrDefault(path, Map.of());
     }
 
     public List<AssetLayer> mergeLayers(
