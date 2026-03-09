@@ -12,6 +12,7 @@ spring:
         - classpath:/static/
         - classpath:/public/
         - classpath:/assets/
+        - classpath:/generated-assets/
 
 session:
   persistence:
