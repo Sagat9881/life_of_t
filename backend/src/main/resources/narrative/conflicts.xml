@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<conflicts xmlns="https://lifeoft.sagat.dev/narrative/conflicts">
+  
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- CONFLICT TYPES: 10 типов конфликтов с триггерами и тактиками -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  
+  <conflict id="HOUSEHOLD_DUTIES" category="FAMILY" opponent="HUSBAND">
+    <label>Домашние обязанности</label>
+    <description>Муж недоволен распределением домашних дел</description>
+    <intro-dialogue>Почему я должен всегда сам убирать? Ты же дома!</intro-dialogue>
+    
+    <trigger cooldown-days="5">
+      <condition type="relationship" target="HUSBAND" field="closeness" operator="lt" value="50"/>
+      <condition type="counter" target="days_no_household" operator="gte" value="5"/>
+    </trigger>
+    
+    <available-tactics>
+      <tactic ref="SURRENDER"/>
+      <tactic ref="ASSERT"/>
+      <tactic ref="COMPROMISE"/>
+      <tactic ref="AVOID"/>
+      <tactic ref="LISTEN"/>
+    </available-tactics>
+    
+    <consequences>
+      <if-unresolved rounds="3">
+        <effect target="HUSBAND" field="trust" delta="-10"/>
+        <effect target="player" field="stress" delta="15"/>
+      </if-unresolved>
+    </consequences>
+  </conflict>
+  
+  <conflict id="LACK_OF_ATTENTION" category="FAMILY" opponent="HUSBAND">
+    <label>Недостаток внимания</label>
+    <description>Муж чувствует себя заброшенным</description>
+    <intro-dialogue>Мы совсем перестали проводить время вместе...</intro-dialogue>
+    
+    <trigger cooldown-days="5">
+      <condition type="relationship" target="HUSBAND" field="closeness" operator="lt" value="40"/>
+      <condition type="counter" target="days_no_date" operator="gte" value="3"/>
+    </trigger>
+    
+    <available-tactics>
+      <tactic ref="COMPROMISE"/>
+      <tactic ref="EMOTIONAL_APPEAL"/>
+      <tactic ref="LISTEN"/>
+    </available-tactics>
+  </conflict>
+  
+  <conflict id="ROMANTIC_CRISIS" category="FAMILY" opponent="HUSBAND">
+    <label>Романтический кризис</label>
+    <description>Угасание романтики в отношениях</description>
+    <intro-dialogue>Кажется, между нами больше ничего не осталось...</intro-dialogue>
+    
+    <trigger cooldown-days="7">
+      <condition type="relationship" target="HUSBAND" field="romance" operator="lt" value="30"/>
+      <condition type="counter" target="consecutive_work_days" operator="gte" value="5"/>
+    </trigger>
+    
+    <available-tactics>
+      <tactic ref="EMOTIONAL_APPEAL"/>
+      <tactic ref="COMPROMISE"/>
+      <tactic ref="ASSERT"/>
+    </available-tactics>
+  </conflict>
+  
+  <conflict id="FINANCIAL_DISAGREEMENT" category="FAMILY" opponent="HUSBAND">
+    <label>Финансовые разногласия</label>
+    <description>Споры о деньгах и бюджете</description>
+    <intro-dialogue>Мы не можем так тратить деньги...</intro-dialogue>
+    
+    <trigger cooldown-days="5">
+      <condition type="stat" target="player" field="money" operator="lt" value="500"/>
+      <condition type="stat" target="player" field="money" operator="gt" value="5000"/>
+      <operator>OR</operator>
+    </trigger>
+    
+    <available-tactics>
+      <tactic ref="LOGICAL_ARGUMENT"/>
+      <tactic ref="COMPROMISE"/>
+      <tactic ref="ASSERT"/>
+    </available-tactics>
+  </conflict>
+  
+  <conflict id="FATHER_NEGLECTED" category="FAMILY" opponent="FATHER">
+    <label>Забытый отец</label>
+    <description>Отец чувствует, что о нём забыли</description>
+    <intro-dialogue>Ты совсем перестала ко мне заходить...</intro-dialogue>
+    
+    <trigger cooldown-days="7">
+      <condition type="relationship" target="FATHER" field="closeness" operator="lt" value="30"/>
+      <condition type="counter" target="days_no_visit" operator="gte" value="7"/>
+    </trigger>
+    
+    <available-tactics>
+      <tactic ref="LISTEN"/>
+      <tactic ref="COMPROMISE"/>
+      <tactic ref="EMOTIONAL_APPEAL"/>
+    </available-tactics>
+  </conflict>
+  
+  <conflict id="FATHER_CRITICISM" category="FAMILY" opponent="FATHER">
+    <label>Критика от отца</label>
+    <description>Отец критикует твои жизненные выборы</description>
+    <intro-dialogue>Ты так и не добилась ничего значимого...</intro-dialogue>
+    
+    <trigger cooldown-days="5">
+      <condition type="stat" target="player" field="job_satisfaction" operator="lt" value="30"/>
+      <condition type="stat" target="player" field="self_esteem" operator="lt" value="30"/>
+    </trigger>
+    
+    <available-tactics>
+      <tactic ref="SET_BOUNDARIES"/>
+      <tactic ref="ASSERT"/>
+      <tactic ref="AVOID"/>
+    </available-tactics>
+  </conflict>
+  
+  <conflict id="FATHER_CONCERN" category="FAMILY" opponent="FATHER">
+    <label>Отеческая тревога</label>
+    <description>Отец переживает за твоё состояние</description>
+    <intro-dialogue>Ты выглядишь такой уставшей... Всё ли в порядке?</intro-dialogue>
+    
+    <trigger cooldown-days="5">
+      <condition type="stat" target="player" field="money" operator="lt" value="200"/>
+      <condition type="stat" target="player" field="health" operator="lt" value="40"/>
+      <operator>OR</operator>
+    </trigger>
+    
+    <available-tactics>
+      <tactic ref="LISTEN"/>
+      <tactic ref="EMOTIONAL_APPEAL"/>
+      <tactic ref="AVOID"/>
+    </available-tactics>
+  </conflict>
+  
+  <conflict id="IDENTITY_CRISIS" category="INTERNAL">
+    <label>Кризис идентичности</label>
+    <description>Внутренний конфликт о смысле жизни</description>
+    <intro-dialogue>Кто я на самом деле? Что я делаю со своей жизнью?</intro-dialogue>
+    
+    <trigger cooldown-days="7">
+      <condition type="stat" target="player" field="self_esteem" operator="lt" value="20"/>
+      <condition type="stat" target="player" field="job_satisfaction" operator="lt" value="30"/>
+    </trigger>
+    
+    <available-tactics>
+      <tactic ref="COMPROMISE"/>
+      <tactic ref="LOGICAL_ARGUMENT"/>
+      <tactic ref="LISTEN"/>
+    </available-tactics>
+  </conflict>
+  
+  <conflict id="BURNOUT" category="INTERNAL">
+    <label>Выгорание</label>
+    <description>Эмоциональное и физическое истощение</description>
+    <intro-dialogue>Я больше не могу так жить... Сил не осталось...</intro-dialogue>
+    
+    <trigger cooldown-days="7">
+      <condition type="stat" target="player" field="burnout_risk" operator="gte" value="70"/>
+      <condition type="stat" target="player" field="stress" operator="gte" value="80"/>
+    </trigger>
+    
+    <available-tactics>
+      <tactic ref="SURRENDER"/>
+      <tactic ref="SET_BOUNDARIES"/>
+      <tactic ref="COMPROMISE"/>
+    </available-tactics>
+  </conflict>
+  
+  <conflict id="GUILT" category="INTERNAL">
+    <label>Чувство вины</label>
+    <description>Вина за недостаток внимания близким</description>
+    <intro-dialogue>Я плохая дочь... плохая жена...</intro-dialogue>
+    
+    <trigger cooldown-days="5">
+      <condition type="relationship-sum" field="closeness" operator="lt" value="100"/>
+      <condition type="stat" target="player" field="self_esteem" operator="lt" value="40"/>
+    </trigger>
+    
+    <available-tactics>
+      <tactic ref="LISTEN"/>
+      <tactic ref="LOGICAL_ARGUMENT"/>
+      <tactic ref="EMOTIONAL_APPEAL"/>
+    </available-tactics>
+  </conflict>
+  
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- TACTICS: 9 тактик разрешения конфликтов -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  
+  <tactics>
+    <!-- BASE TACTICS -->
+    <tactic id="SURRENDER">
+      <label>Уступить</label>
+      <description>Согласиться с оппонентом</description>
+      <default-reaction>Ладно, ты прав(а)...</default-reaction>
+      
+      <effects>
+        <csp-effect player="-20" opponent="10"/>
+        <stat-effect target="player" field="self_esteem" delta="-5"/>
+        <relationship-effect target="opponent" field="closeness" delta="5"/>
+        <relationship-effect target="opponent" field="trust" delta="-5"/>
+      </effects>
+      
+      <resolves-conflict>true</resolves-conflict>
+    </tactic>
+    
+    <tactic id="ASSERT">
+      <label>Настоять на своём</label>
+      <description>Отстоять свою позицию</description>
+      <default-reaction>Нет, я считаю иначе!</default-reaction>
+      
+      <effects>
+        <csp-effect player="-15" opponent="15"/>
+        <stat-effect target="player" field="self_esteem" delta="10"/>
+        <relationship-effect target="opponent" field="closeness" delta="-10"/>
+        <relationship-effect target="opponent" field="trust" delta="5"/>
+      </effects>
+      
+      <resolves-conflict>true</resolves-conflict>
+    </tactic>
+    
+    <tactic id="COMPROMISE">
+      <label>Компромисс</label>
+      <description>Найти компромисс</description>
+      <default-reaction>Давай найдём решение вместе.</default-reaction>
+      
+      <effects>
+        <csp-effect player="-10" opponent="-10"/>
+      </effects>
+      
+      <success-condition>
+        <skill name="communication" level="30"/>
+        <relationship target="opponent" field="closeness" threshold="50"/>
+        <operator>OR</operator>
+      </success-condition>
+      
+      <on-success>
+        <reaction>Хорошо, давай так и сделаем.</reaction>
+      </on-success>
+      <on-failure>
+        <reaction>Это не компромисс, а полумера.</reaction>
+        <csp-effect player="-5" opponent="5"/>
+      </on-failure>
+      
+      <resolves-conflict>conditional</resolves-conflict>
+    </tactic>
+    
+    <tactic id="AVOID">
+      <label>Избежать разговора</label>
+      <description>Уйти от конфликта</description>
+      <default-reaction>Я не хочу об этом говорить.</default-reaction>
+      
+      <effects>
+        <csp-effect player="-5" opponent="20"/>
+        <relationship-effect target="opponent" field="closeness" delta="-5"/>
+        <relationship-effect target="opponent" field="trust" delta="-10"/>
+      </effects>
+      
+      <resolves-conflict>true</resolves-conflict>
+    </tactic>
+    
+    <tactic id="LISTEN">
+      <label>Выслушать</label>
+      <description>Внимательно выслушать оппонента</description>
+      <default-reaction>Спасибо, что выслушала...</default-reaction>
+      
+      <effects>
+        <csp-effect player="-5" opponent="-25"/>
+        <relationship-effect target="opponent" field="closeness" delta="15"/>
+        <relationship-effect target="opponent" field="trust" delta="10"/>
+      </effects>
+      
+      <resolves-conflict>true</resolves-conflict>
+    </tactic>
+    
+    <!-- SKILL-BASED TACTICS -->
+    <tactic id="HUMOR">
+      <label>Юмор</label>
+      <description>Разрядить обстановку шуткой</description>
+      <default-reaction>Ты права, давай просто посмеёмся над этим.</default-reaction>
+      
+      <required-skill name="communication" level="20"/>
+      
+      <effects>
+        <csp-effect player="-10" opponent="-15"/>
+      </effects>
+      
+      <success-rate>0.8</success-rate>
+      <on-failure>
+        <reaction>Это не смешно.</reaction>
+        <csp-effect player="5" opponent="10"/>
+      </on-failure>
+      
+      <resolves-conflict>conditional</resolves-conflict>
+    </tactic>
+    
+    <tactic id="LOGICAL_ARGUMENT">
+      <label>Логические аргументы</label>
+      <description>Использовать логику и факты</description>
+      <default-reaction>Ты права, это разумно.</default-reaction>
+      
+      <required-skill name="intelligence" level="25"/>
+      
+      <effects>
+        <csp-effect player="-10" opponent="-20"/>
+        <relationship-effect target="opponent" field="trust" delta="20"/>
+      </effects>
+      
+      <resolves-conflict>true</resolves-conflict>
+    </tactic>
+    
+    <tactic id="EMOTIONAL_APPEAL">
+      <label>Эмоциональный призыв</label>
+      <description>Обратиться к чувствам</description>
+      <default-reaction>Я понимаю твои чувства...</default-reaction>
+      
+      <required-skill name="empathy" level="30"/>
+      
+      <effects>
+        <csp-effect player="-5" opponent="-30"/>
+        <relationship-effect target="opponent" field="closeness" delta="20"/>
+        <relationship-effect target="opponent" field="romance" delta="15"/>
+      </effects>
+      
+      <resolves-conflict>true</resolves-conflict>
+    </tactic>
+    
+    <tactic id="SET_BOUNDARIES">
+      <label>Установить границы</label>
+      <description>Чётко обозначить свои границы</description>
+      <default-reaction>Я уважаю твои границы.</default-reaction>
+      
+      <required-skill name="assertiveness" level="35"/>
+      
+      <effects>
+        <csp-effect player="-20" opponent="-10"/>
+        <stat-effect target="player" field="self_esteem" delta="15"/>
+        <relationship-effect target="opponent" field="trust" delta="15"/>
+      </effects>
+      
+      <resolves-conflict>true</resolves-conflict>
+    </tactic>
+  </tactics>
+  
+</conflicts>
