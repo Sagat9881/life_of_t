@@ -7,6 +7,12 @@
  * Layer 3: Characters + Pets — SpriteAnimator with character atlas
  *
  * Everything uses sprite-atlas.json → SpriteAnimator → animated.
+ *
+ * ── CROP-AWARE SIZING ──
+ * Since v1.4, atlas frames may be cropped to their non-transparent bounding box.
+ * frameWidth/frameHeight in sprite-atlas.json now reflect the CROPPED dimensions.
+ * LocationRenderer uses these directly — no sceneHeight fudge factors needed.
+ * The SpriteAnimator applies cropOffset as CSS translate to position correctly.
  */
 import { memo, useCallback, useEffect, useState } from 'react';
 import { PixelScene } from '@/components/shared/PixelScene/PixelScene';
@@ -141,9 +147,11 @@ export const LocationRenderer = memo(function LocationRenderer({
           const isSelected = selectedObjectId === item.id;
           const fa = furnitureAtlases[item.entityName];
           const entry = fa?.animations[item.animation];
-          const relH = entry
-            ? (entry.frameHeight / SCENE_HEIGHT) * item.sceneHeight / (entry.frameHeight / SCENE_HEIGHT)
-            : item.sceneHeight;
+
+          // With cropped frames, frameHeight already reflects visible content.
+          // sceneHeight from config is the fraction of SCENE_HEIGHT to occupy.
+          // We use it directly — no need for complex relH calculation.
+          const relH = item.sceneHeight;
 
           return (
             <div

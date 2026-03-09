@@ -19,7 +19,11 @@ import java.util.regex.Pattern;
 /**
  * Generates layered PNG assets and animation atlases from XML-driven AssetSpec.
  * All animation metadata is written to a single <b>sprite-atlas.json</b> per entity
- * (config version 1.3) via {@link AtlasConfigWriter}.
+ * (config version 1.4) via {@link AtlasConfigWriter}.
+ *
+ * Frames are cropped to their non-transparent bounding box before atlas packing.
+ * The original crop offset is recorded in sprite-atlas.json so the frontend can
+ * position the sprite correctly within the scene.
  */
 public class LayeredAssetGenerator implements AssetGenerationService {
 
@@ -112,6 +116,7 @@ public class LayeredAssetGenerator implements AssetGenerationService {
         }
 
         Map<String, AtlasConfigWriter.GridAnimDef> gridAnimDefs = new LinkedHashMap<>();
+        Map<String, AtlasConfigWriter.CropOffsetDef> cropOffsets = new LinkedHashMap<>();
 
         for (var entry : todGroups.entrySet()) {
             String baseName = entry.getKey();
@@ -122,10 +127,37 @@ public class LayeredAssetGenerator implements AssetGenerationService {
                 if (variants.containsKey(tod)) sorted.put(tod, variants.get(tod));
             }
 
+            // Render all rows, collect all frames for crop bounds computation
             LinkedHashMap<String, List<BufferedImage>> rowFrames = new LinkedHashMap<>();
+            List<BufferedImage> allFramesForCrop = new ArrayList<>();
             for (var rowEntry : sorted.entrySet()) {
                 List<BufferedImage> frames = renderer.renderAnimationFrames(layers, rowEntry.getValue());
                 rowFrames.put(rowEntry.getKey(), frames);
+                allFramesForCrop.addAll(frames);
+            }
+
+            // Compute crop bounds across ALL rows and crop
+            int[] bounds = renderer.computeCropBounds(allFramesForCrop);
+            boolean needsCrop = bounds[0] != 0 || bounds[1] != 0
+                    || (!allFramesForCrop.isEmpty()
+                        && (bounds[2] != allFramesForCrop.get(0).getWidth()
+                            || bounds[3] != allFramesForCrop.get(0).getHeight()));
+
+            if (needsCrop) {
+                LinkedHashMap<String, List<BufferedImage>> croppedRows = new LinkedHashMap<>();
+                for (var rowEntry : rowFrames.entrySet()) {
+                    croppedRows.put(rowEntry.getKey(), renderer.cropFrames(rowEntry.getValue(), bounds));
+                }
+                rowFrames = croppedRows;
+
+                AnimationSpec firstSpec = sorted.values().iterator().next();
+                cropOffsets.put(baseName, new AtlasConfigWriter.CropOffsetDef(
+                        bounds[0], bounds[1],
+                        firstSpec.frameWidth(), firstSpec.frameHeight()));
+                log.info("Cropped grid atlas '{}': {}x{} -> {}x{} (offset {}, {})",
+                        baseName,
+                        firstSpec.frameWidth(), firstSpec.frameHeight(),
+                        bounds[2], bounds[3], bounds[0], bounds[1]);
             }
 
             try {
@@ -138,8 +170,29 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             }
         }
 
+        // Standalone strip animations
+        Map<String, AtlasConfigWriter.CropOffsetDef> stripCropOffsets = new LinkedHashMap<>();
+
         for (AnimationSpec animSpec : standaloneAnims) {
             List<BufferedImage> frames = renderer.renderAnimationFrames(layers, animSpec);
+
+            int[] bounds = renderer.computeCropBounds(frames);
+            boolean needsCrop = bounds[0] != 0 || bounds[1] != 0
+                    || (!frames.isEmpty()
+                        && (bounds[2] != frames.get(0).getWidth()
+                            || bounds[3] != frames.get(0).getHeight()));
+
+            if (needsCrop) {
+                stripCropOffsets.put(animSpec.name(), new AtlasConfigWriter.CropOffsetDef(
+                        bounds[0], bounds[1],
+                        animSpec.frameWidth(), animSpec.frameHeight()));
+                frames = renderer.cropFrames(frames, bounds);
+                log.info("Cropped strip atlas '{}': {}x{} -> {}x{} (offset {}, {})",
+                        animSpec.name(),
+                        animSpec.frameWidth(), animSpec.frameHeight(),
+                        bounds[2], bounds[3], bounds[0], bounds[1]);
+            }
+
             try {
                 Path atlasPath = atlasWriter.writeAtlas(frames, animSpec, animDir);
                 generated.add(atlasPath);
@@ -183,13 +236,19 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             }
         }
 
-        // Determine displayScale: characters get 3x, locations get 1x
+        // Merge all crop offsets
+        Map<String, AtlasConfigWriter.CropOffsetDef> allCropOffsets = new LinkedHashMap<>();
+        allCropOffsets.putAll(cropOffsets);
+        allCropOffsets.putAll(stripCropOffsets);
+
+        // Determine displayScale
         double scale = resolveDisplayScale(spec);
         configWriter.withDisplayScale(scale);
 
         try {
             Path configPath = configWriter.writeSpriteAtlas(
-                    spec.entityName(), standaloneAnims, gridAnimDefs, overlayAnimDefs, animDir);
+                    spec.entityName(), standaloneAnims, gridAnimDefs,
+                    overlayAnimDefs, allCropOffsets, animDir);
             generated.add(configPath);
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to write sprite-atlas.json for " + spec.entityName(), e);
@@ -199,8 +258,6 @@ public class LayeredAssetGenerator implements AssetGenerationService {
     }
 
     private double resolveDisplayScale(AssetSpec spec) {
-        // If entity type is characters or pets, use larger scale so they're
-        // proportional to the 320×240 background.
         return switch (spec.entityType()) {
             case "characters" -> DEFAULT_CHARACTER_DISPLAY_SCALE;
             case "pets" -> 2.0;

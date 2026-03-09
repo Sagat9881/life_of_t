@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import ru.lifegame.assets.domain.model.asset.*;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.*;
 
@@ -48,13 +49,11 @@ public final class UniversalPixelRenderer {
             PixelCanvas canvas = new PixelCanvas(fw, fh);
             FrameOffset offset = findFrameOffset(animSpec.frameOffsets(), i);
 
-            // Build mutable offset map for follows resolution
             Map<String, int[]> resolvedOffsets = new HashMap<>();
             if (offset != null) {
                 resolvedOffsets.putAll(offset.layerOffsets());
             }
 
-            // Resolve follows: inherit parent layer offsets for child layers
             for (AssetLayer layer : sorted) {
                 if (layer.follows() != null
                         && !resolvedOffsets.containsKey(layer.id())) {
@@ -74,6 +73,72 @@ public final class UniversalPixelRenderer {
             frames.add(canvas.toImage());
         }
         return frames;
+    }
+
+    /**
+     * Computes the union bounding box of all non-transparent pixels across
+     * a list of frames. Returns {x, y, width, height} of the content region.
+     * If all frames are fully transparent, returns the full frame dimensions.
+     */
+    public int[] computeCropBounds(List<BufferedImage> frames) {
+        if (frames == null || frames.isEmpty()) {
+            return new int[]{0, 0, 0, 0};
+        }
+
+        int imgW = frames.get(0).getWidth();
+        int imgH = frames.get(0).getHeight();
+        int minX = imgW, minY = imgH, maxX = 0, maxY = 0;
+
+        for (BufferedImage frame : frames) {
+            for (int y = 0; y < imgH; y++) {
+                for (int x = 0; x < imgW; x++) {
+                    int alpha = (frame.getRGB(x, y) >> 24) & 0xFF;
+                    if (alpha > 0) {
+                        if (x < minX) minX = x;
+                        if (y < minY) minY = y;
+                        if (x > maxX) maxX = x;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+        }
+
+        // If no non-transparent pixel found, return full dimensions
+        if (maxX < minX || maxY < minY) {
+            return new int[]{0, 0, imgW, imgH};
+        }
+
+        int cropW = maxX - minX + 1;
+        int cropH = maxY - minY + 1;
+        return new int[]{minX, minY, cropW, cropH};
+    }
+
+    /**
+     * Crops a list of frames to the given bounds.
+     * @param frames source frames
+     * @param bounds {x, y, width, height} as returned by computeCropBounds
+     * @return new list of cropped frames
+     */
+    public List<BufferedImage> cropFrames(List<BufferedImage> frames, int[] bounds) {
+        int cx = bounds[0], cy = bounds[1], cw = bounds[2], ch = bounds[3];
+
+        // Skip cropping if bounds match original frame dimensions
+        if (!frames.isEmpty()
+                && cx == 0 && cy == 0
+                && cw == frames.get(0).getWidth()
+                && ch == frames.get(0).getHeight()) {
+            return frames;
+        }
+
+        List<BufferedImage> cropped = new ArrayList<>(frames.size());
+        for (BufferedImage frame : frames) {
+            BufferedImage sub = new BufferedImage(cw, ch, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = sub.createGraphics();
+            g.drawImage(frame, 0, 0, cw, ch, cx, cy, cx + cw, cy + ch, null);
+            g.dispose();
+            cropped.add(sub);
+        }
+        return cropped;
     }
 
     private FrameOffset findFrameOffset(List<FrameOffset> offsets, int frameIndex) {
@@ -111,13 +176,8 @@ public final class UniversalPixelRenderer {
         }
     }
 
-    /**
-     * Parses hex color string to Color. Returns null for unresolved $-variables
-     * or invalid strings (defensive — should not happen after resolution).
-     */
     private Color parseColor(String hex) {
         if (hex == null || hex.isBlank()) return null;
-        // Skip unresolved $-variable references (defensive guard)
         if (hex.startsWith("$")) {
             log.warn("Unresolved color variable in pixel data: {}", hex);
             return null;

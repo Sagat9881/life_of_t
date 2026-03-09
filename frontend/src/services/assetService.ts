@@ -1,6 +1,6 @@
 /**
  * Asset loading service.
- * Loads sprite-atlas.json (v1.3) and resolves animations.
+ * Loads sprite-atlas.json (v1.4) and resolves animations.
  */
 import { ASSETS_BASE_URL } from '@/utils/constants';
 import type { AtlasConfig, AtlasAnimationEntry, SpriteAnimation } from '@/types/sprite';
@@ -20,7 +20,7 @@ export const getCompositeUrl = (entityType: string, entityName: string): string 
 
 /**
  * Loads and caches sprite-atlas.json for an entity.
- * Accepts v1.0 through v1.3 (any 1.* version).
+ * Accepts v1.0 through v1.4 (any 1.* version).
  */
 export const loadAtlasConfig = async (
   entityType: string,
@@ -70,6 +70,7 @@ export const loadAtlasConfig = async (
 /**
  * Resolves a specific animation from sprite-atlas.json into a renderable SpriteAnimation.
  * Supports strip, grid, and overlay layouts.
+ * Propagates cropOffset if present in the atlas entry.
  *
  * @param condition - current condition value for grid row selection (e.g. "morning")
  */
@@ -88,19 +89,18 @@ export const resolveAnimation = (
   const displayScale = config.displayScale ?? 1.0;
   const renderMode = entry.renderMode ?? 'sprite';
 
+  // Propagate cropOffset if present
+  const cropSpread = entry.cropOffset !== undefined ? { cropOffset: entry.cropOffset } : {};
+
   if (entry.layout === 'grid' && entry.rows && entry.rows.length > 0) {
-    // Grid layout: find the row matching the condition
     let row = entry.rows.find(
       (r) => condition && r.condition.value === condition
     );
-    // Fallback to default row
     if (!row) {
       const defaultIdx = entry.defaultRow ?? 0;
       row = entry.rows.find((r) => r.rowIndex === defaultIdx) ?? entry.rows[0];
     }
 
-    // Use conditional spread to avoid assigning undefined to optional props
-    // (required by exactOptionalPropertyTypes in tsconfig)
     return {
       name: animationName,
       atlasUrl,
@@ -114,6 +114,7 @@ export const resolveAnimation = (
       totalRows: entry.rows.length,
       currentRow: row!.rowIndex,
       displayScale,
+      ...cropSpread,
       ...(row!.tint !== undefined ? { tint: row!.tint } : {}),
       ...(row!.opacity !== undefined ? { opacity: row!.opacity } : {}),
     };
@@ -133,6 +134,7 @@ export const resolveAnimation = (
     totalRows: 1,
     currentRow: 0,
     displayScale,
+    ...cropSpread,
   };
 };
 
