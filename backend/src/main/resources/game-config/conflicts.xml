@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<conflicts>
+
+  <!-- Example 1: BURNOUT — replaces BurnoutTrigger.java -->
+  <conflict id="BURNOUT">
+    <meta>
+      <label>Профессиональное выгорание</label>
+      <description>Работа поглощает все силы</description>
+      <opponent-id>SELF</opponent-id>
+      <category>internal</category>
+    </meta>
+
+    <trigger cooldown-days="5" mode="ALL">
+      <condition type="stat" field="burnout_risk" operator="gte" value="80"/>
+      <condition type="stat" field="stress" operator="gte" value="70"/>
+    </trigger>
+
+    <tactic code="TAKE_BREAK" base-csp-cost="20" base-opponent-csp-cost="30">
+      <label>Взять отгул</label>
+      <description>Отдохнуть от работы, восстановить силы</description>
+      <success-outcome>
+        <stat-changes>
+          <change field="stress" value="-15"/>
+          <change field="mood" value="+10"/>
+        </stat-changes>
+        <narrative>Вы взяли выходной и почувствовали себя лучше</narrative>
+      </success-outcome>
+      <failure-outcome>
+        <stat-changes>
+          <change field="stress" value="-5"/>
+          <change field="job_satisfaction" value="-10"/>
+        </stat-changes>
+        <narrative>Отдохнули, но чувство вины осталось</narrative>
+      </failure-outcome>
+    </tactic>
+
+    <tactic code="PUSH_THROUGH" base-csp-cost="15" base-opponent-csp-cost="20">
+      <label>Перетерпеть</label>
+      <description>Продолжить работать через силу</description>
+      <success-outcome>
+        <stat-changes>
+          <change field="self_esteem" value="+5"/>
+          <change field="stress" value="+5"/>
+        </stat-changes>
+        <narrative>Справились, но ценой здоровья</narrative>
+      </success-outcome>
+      <failure-outcome>
+        <stat-changes>
+          <change field="health" value="-10"/>
+          <change field="stress" value="+15"/>
+        </stat-changes>
+        <narrative>Силы на исходе</narrative>
+      </failure-outcome>
+    </tactic>
+
+    <tactic code="DELEGATE" base-csp-cost="25" base-opponent-csp-cost="40">
+      <label>Делегировать задачи</label>
+      <description>Попросить коллег о помощи</description>
+      <success-outcome>
+        <stat-changes>
+          <change field="stress" value="-20"/>
+          <change field="job_satisfaction" value="+5"/>
+        </stat-changes>
+        <narrative>Коллеги помогли, нагрузка снизилась</narrative>
+      </success-outcome>
+      <failure-outcome>
+        <stat-changes>
+          <change field="stress" value="-5"/>
+          <change field="self_esteem" value="-5"/>
+        </stat-changes>
+        <narrative>Попытка делегировать не удалась</narrative>
+      </failure-outcome>
+    </tactic>
+  </conflict>
+
+  <!-- Example 2: LACK_OF_ATTENTION — replaces LackOfAttentionTrigger.java -->
+  <conflict id="LACK_OF_ATTENTION">
+    <meta>
+      <label>Муж чувствует себя брошенным</label>
+      <description>Недостаток внимания от жены</description>
+      <opponent-id>HUSBAND</opponent-id>
+      <category>relationship</category>
+    </meta>
+
+    <trigger cooldown-days="7" mode="ALL">
+      <condition type="relationship" target="HUSBAND" field="closeness" operator="lt" value="50"/>
+      <condition type="days-played" operator="gte" value="10"/>
+    </trigger>
+
+    <tactic code="QUALITY_TIME" base-csp-cost="20" base-opponent-csp-cost="35">
+      <label>Провести вечер вместе</label>
+      <description>Устроить романтический ужин</description>
+      <success-outcome>
+        <stat-changes>
+          <change field="mood" value="+10"/>
+        </stat-changes>
+        <relationship-changes>
+          <change field="HUSBAND.closeness" value="+15"/>
+          <change field="HUSBAND.romance" value="+10"/>
+        </relationship-changes>
+        <narrative>Приятный вечер сблизил вас</narrative>
+      </success-outcome>
+      <failure-outcome>
+        <stat-changes>
+          <change field="mood" value="-5"/>
+        </stat-changes>
+        <relationship-changes>
+          <change field="HUSBAND.closeness" value="+5"/>
+        </relationship-changes>
+        <narrative>Попытка наладить контакт не удалась</narrative>
+      </failure-outcome>
+    </tactic>
+
+    <tactic code="APOLOGIZE" base-csp-cost="15" base-opponent-csp-cost="25">
+      <label>Извиниться</label>
+      <description>Признать недостаток внимания</description>
+      <success-outcome>
+        <relationship-changes>
+          <change field="HUSBAND.trust" value="+10"/>
+          <change field="HUSBAND.closeness" value="+10"/>
+        </relationship-changes>
+        <narrative>Искреннее извинение помогло</narrative>
+      </success-outcome>
+      <failure-outcome>
+        <relationship-changes>
+          <change field="HUSBAND.trust" value="-5"/>
+        </relationship-changes>
+        <narrative>Извинение не было принято</narrative>
+      </failure-outcome>
+    </tactic>
+
+    <tactic code="DEFLECT" base-csp-cost="10" base-opponent-csp-cost="15">
+      <label>Обвинить мужа</label>
+      <description>Перевести внимание на его ошибки</description>
+      <success-outcome>
+        <stat-changes>
+          <change field="self_esteem" value="+5"/>
+        </stat-changes>
+        <relationship-changes>
+          <change field="HUSBAND.closeness" value="-10"/>
+          <change field="HUSBAND.trust" value="-5"/>
+        </relationship-changes>
+        <narrative>Конфликт отложен, но не решен</narrative>
+      </success-outcome>
+      <failure-outcome>
+        <stat-changes>
+          <change field="stress" value="+10"/>
+        </stat-changes>
+        <relationship-changes>
+          <change field="HUSBAND.closeness" value="-15"/>
+        </relationship-changes>
+        <narrative>Конфликт обострился</narrative>
+      </failure-outcome>
+    </tactic>
+  </conflict>
+
+  <!-- Example 3: FATHER_NEGLECTED — replaces FatherNeglectedTrigger.java -->
+  <conflict id="FATHER_NEGLECTED">
+    <meta>
+      <label>Отец обижен</label>
+      <description>Давно не навещала отца</description>
+      <opponent-id>FATHER</opponent-id>
+      <category>relationship</category>
+    </meta>
+
+    <trigger cooldown-days="10" mode="ALL">
+      <condition type="time-spent" field="visit_father" operator="lt" value="5"/>
+      <condition type="days-played" operator="gte" value="15"/>
+    </trigger>
+
+    <tactic code="VISIT_NOW" base-csp-cost="25" base-opponent-csp-cost="40">
+      <label>Навестить сегодня</label>
+      <description>Срочно поехать к отцу</description>
+      <success-outcome>
+        <stat-changes>
+          <change field="mood" value="+5"/>
+        </stat-changes>
+        <relationship-changes>
+          <change field="FATHER.closeness" value="+20"/>
+          <change field="FATHER.trust" value="+10"/>
+        </relationship-changes>
+        <narrative>Отец обрадовался визиту</narrative>
+      </success-outcome>
+      <failure-outcome>
+        <stat-changes>
+          <change field="energy" value="-10"/>
+        </stat-changes>
+        <relationship-changes>
+          <change field="FATHER.closeness" value="+10"/>
+        </relationship-changes>
+        <narrative>Визит получился короче, чем хотелось</narrative>
+      </failure-outcome>
+    </tactic>
+
+    <tactic code="CALL" base-csp-cost="15" base-opponent-csp-cost="25">
+      <label>Позвонить</label>
+      <description>Извиниться по телефону</description>
+      <success-outcome>
+        <relationship-changes>
+          <change field="FATHER.closeness" value="+10"/>
+        </relationship-changes>
+        <narrative>Разговор по телефону помог</narrative>
+      </success-outcome>
+      <failure-outcome>
+        <relationship-changes>
+          <change field="FATHER.closeness" value="+3"/>
+        </relationship-changes>
+        <narrative>Отец был сдержан</narrative>
+      </failure-outcome>
+    </tactic>
+
+    <tactic code="PROMISE_LATER" base-csp-cost="10" base-opponent-csp-cost="15">
+      <label>Пообещать навестить позже</label>
+      <description>Сослаться на занятость</description>
+      <success-outcome>
+        <relationship-changes>
+          <change field="FATHER.closeness" value="-5"/>
+        </relationship-changes>
+        <narrative>Отец принял отговорку</narrative>
+      </success-outcome>
+      <failure-outcome>
+        <relationship-changes>
+          <change field="FATHER.closeness" value="-15"/>
+          <change field="FATHER.trust" value="-10"/>
+        </relationship-changes>
+        <narrative>Отец почувствовал себя ненужным</narrative>
+      </failure-outcome>
+    </tactic>
+  </conflict>
+
+  <!-- TODO: Add remaining 7 conflicts:
+       - HOUSEHOLD_DUTIES (HouseholdDutiesTrigger.java)
+       - FINANCIAL_DISAGREEMENT (FinancialDisagreementTrigger.java)
+       - ROMANTIC_CRISIS (RomanticCrisisTrigger.java)
+       - FATHER_CRITICISM (FatherCriticismTrigger.java)
+       - FATHER_CONCERN (FatherConcernTrigger.java)
+       - GUILT (GuiltTrigger.java)
+       - IDENTITY_CRISIS (IdentityCrisisTrigger.java)
+  -->
+
+</conflicts>
