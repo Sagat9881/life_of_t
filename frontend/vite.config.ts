@@ -19,8 +19,11 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
-      // Assets are served from frontend/public/assets/ by Vite directly.
-      // No proxy needed — Vite serves public/ at root.
+      // Proxy generated assets (PNG, sprite-atlas.json) to backend
+      '/assets': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
     },
   },
   build: {
@@ -30,7 +33,7 @@ export default defineConfig({
     // with /assets/** route used for game generated assets (sprites, atlases)
     assetsDir: '_app',
     target: 'es2020',
-    minify: 'terter',
+    minify: 'terser',  // Fixed typo
     sourcemap: true,
     rollupOptions: {
       output: {
