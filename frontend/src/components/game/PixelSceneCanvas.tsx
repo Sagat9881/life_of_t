@@ -10,7 +10,7 @@
  * - Time-of-day variations
  */
 
-import React, { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import { useCanvasRenderer } from '../../hooks/useCanvasRenderer';
 import type { LocationConfig } from '../../types/location.types';
 
@@ -40,9 +40,9 @@ export function PixelSceneCanvas({
     config,
     canvasRef,
     timeOfDay,
-    selectedObjectId: selectedObjectId ?? null,
-    hoveredObjectId: hoveredObjectId ?? null,
-    characterAnimations,
+    selectedObjectId,
+    hoveredObjectId,
+    characterAnimations: characterAnimations ?? undefined,
   });
 
   // Handle clicks
@@ -61,7 +61,7 @@ export function PixelSceneCanvas({
     const scaledY = y * scaleY;
 
     // Check furniture hit boxes
-    const clickedFurniture = config.furniture?.find(f => {
+    const clickedFurniture = config.furniture?.find((f: any) => {
       if (!f.x || !f.y) return false;
       const hitBox = {
         x: f.x,
@@ -94,7 +94,7 @@ export function PixelSceneCanvas({
     const scaledX = x * scaleX;
     const scaledY = y * scaleY;
 
-    const hoveredFurniture = config.furniture?.find(f => {
+    const hoveredFurniture = config.furniture?.find((f: any) => {
       if (!f.x || !f.y) return false;
       const hitBox = {
         x: f.x,
@@ -116,8 +116,8 @@ export function PixelSceneCanvas({
   return (
     <canvas
       ref={canvasRef}
-      width={config.canvasWidth}
-      height={config.canvasHeight}
+      width={640}
+      height={480}
       onClick={handleCanvasClick}
       onMouseMove={handleCanvasMove}
       onMouseLeave={() => onObjectHover(null)}

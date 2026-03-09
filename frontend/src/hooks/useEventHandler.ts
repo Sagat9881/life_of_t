@@ -10,11 +10,12 @@ import { useEventStream } from './useEventStream';
 
 type EventHandler = (event: { type: string; data: unknown }) => void;
 
-export function useEventHandler(eventType: string, handler: EventHandler) {
-  const events = useEventStream();
+export function useEventHandler(sessionId: string, eventType: string, handler: EventHandler) {
+  const { status } = useEventStream({ sessionId, autoConnect: true });
 
   useEffect(() => {
-    const matching = events.filter(e => e.type === eventType);
-    matching.forEach(handler);
-  }, [events, eventType, handler]);
+    // TODO: Subscribe to specific event types from eventStreamService
+    // This is a placeholder — actual implementation needs event filtering
+    console.log(`Subscribed to ${eventType}, stream status: ${status}`);
+  }, [status, eventType, handler]);
 }

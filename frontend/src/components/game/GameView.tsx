@@ -7,9 +7,9 @@
  * - Event handling
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { PixelSceneCanvas } from './PixelSceneCanvas';
-import { locations } from '../../config/locations';
+import { LOCATIONS } from '../../config/locations';
 import type { LocationConfig } from '../../types/location.types';
 
 interface GameViewProps {
@@ -22,7 +22,7 @@ export function GameView({ locationId, onAction }: GameViewProps) {
   const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
   const [hoveredObjectId, setHoveredObjectId] = useState<string | null>(null);
 
-  const config = locations[locationId] as LocationConfig;
+  const config = LOCATIONS[locationId] as LocationConfig;
 
   if (!config) {
     return <div className="error">Location not found: {locationId}</div>;
@@ -30,10 +30,9 @@ export function GameView({ locationId, onAction }: GameViewProps) {
 
   const handleClick = (objectId: string | null) => {
     if (objectId) {
-      const furniture = config.furniture?.find(f => f.id === objectId);
-      if (furniture?.actions && furniture.actions.length > 0) {
-        // Trigger first action
-        onAction(furniture.actions[0]);
+      const furniture = config.furniture?.find((f: any) => f.id === objectId);
+      if (furniture?.actionCode) {
+        onAction(furniture.actionCode);
       }
     }
     setSelectedObjectId(objectId);
@@ -92,10 +91,14 @@ export function GameView({ locationId, onAction }: GameViewProps) {
           color: 'white'
         }}>
           <h3>{selectedObjectId}</h3>
-          {config.furniture?.find(f => f.id === selectedObjectId)?.actions?.map(actionId => (
+          {config.furniture?.find((f: any) => f.id === selectedObjectId)?.actionCode && (
             <button
-              key={actionId}
-              onClick={() => onAction(actionId)}
+              onClick={() => {
+                const furniture = config.furniture.find((f: any) => f.id === selectedObjectId);
+                if (furniture?.actionCode) {
+                  onAction(furniture.actionCode);
+                }
+              }}
               style={{
                 display: 'block',
                 marginTop: '10px',
@@ -107,9 +110,9 @@ export function GameView({ locationId, onAction }: GameViewProps) {
                 cursor: 'pointer'
               }}
             >
-              {actionId}
+              {config.furniture.find((f: any) => f.id === selectedObjectId)?.label || 'Действие'}
             </button>
-          ))}
+          )}
         </div>
       )}
     </div>

@@ -41,18 +41,15 @@ export function useCanvasRenderer({
     const loadAssets = async () => {
       const assetsToLoad: string[] = [];
 
-      // Background layers
-      if (config.backgroundLayers) {
-        config.backgroundLayers.forEach(layer => {
-          const path = layer.variations?.[timeOfDay] || layer.path;
-          if (path) assetsToLoad.push(path);
-        });
-      }
+      // Background
+      const bgPath = `/assets/locations/${config.locationAsset}/background.png`;
+      assetsToLoad.push(bgPath);
 
       // Furniture sprites
       if (config.furniture) {
-        config.furniture.forEach(f => {
-          if (f.spritePath) assetsToLoad.push(f.spritePath);
+        config.furniture.forEach((f: any) => {
+          const path = `/assets/${f.entityName}/${f.animation}-atlas.png`;
+          assetsToLoad.push(path);
         });
       }
 
@@ -84,28 +81,19 @@ export function useCanvasRenderer({
     const render = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 1. Background layers
-      if (config.backgroundLayers) {
-        config.backgroundLayers.forEach(layer => {
-          const path = layer.variations?.[timeOfDay] || layer.path;
-          if (!path) return;
-
-          const img = loadedAssetsRef.current.get(path);
-          if (img && img.complete) {
-            const x = layer.offset?.x || 0;
-            const y = layer.offset?.y || 0;
-            ctx.drawImage(img, x, y);
-          }
-        });
+      // 1. Background
+      const bgPath = `/assets/locations/${config.locationAsset}/background.png`;
+      const bgImg = loadedAssetsRef.current.get(bgPath);
+      if (bgImg && bgImg.complete) {
+        ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
       }
 
       // 2. Furniture (sorted by zOrder)
       if (config.furniture) {
-        const sorted = [...config.furniture].sort((a, b) => (a.zOrder || 0) - (b.zOrder || 0));
-        sorted.forEach(f => {
-          if (!f.spritePath || !f.x || !f.y) return;
-
-          const img = loadedAssetsRef.current.get(f.spritePath);
+        const sorted = [...config.furniture].sort((a: any, b: any) => a.zOrder - b.zOrder);
+        sorted.forEach((f: any) => {
+          const path = `/assets/${f.entityName}/${f.animation}-atlas.png`;
+          const img = loadedAssetsRef.current.get(path);
           if (img && img.complete) {
             ctx.save();
 
@@ -118,7 +106,13 @@ export function useCanvasRenderer({
               ctx.shadowBlur = 5;
             }
 
-            ctx.drawImage(img, f.x, f.y);
+            // Calculate position (simplified — needs proper scale logic)
+            const x = (f.x / 100) * canvas.width;
+            const y = (f.y / 100) * canvas.height;
+            const height = (f.sceneHeight / 100) * canvas.height;
+            const width = height; // Assume square for now
+
+            ctx.drawImage(img, x - width / 2, y - height, width, height);
             ctx.restore();
           }
         });

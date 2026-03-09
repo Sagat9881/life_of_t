@@ -1,22 +1,17 @@
 import { useEventStream } from '../../hooks/useEventStream';
 
 export function EventStreamExample() {
-  const events = useEventStream();
+  const { status, isConnected, connect } = useEventStream({
+    sessionId: 'demo',
+    autoConnect: false,
+  });
 
   return (
     <div className="event-stream">
-      <h3>События</h3>
-      {events.length === 0 ? (
-        <p>Нет событий</p>
-      ) : (
-        <ul>
-          {events.map((event, idx) => (
-            <li key={idx}>
-              <strong>{event.type}</strong>: {JSON.stringify(event.data)}
-            </li>
-          ))}
-        </ul>
-      )}
+      <h3>Событийный поток</h3>
+      <p>Статус: {status}</p>
+      <p>Подключено: {isConnected ? 'Да' : 'Нет'}</p>
+      <button onClick={connect}>Подключиться</button>
     </div>
   );
 }
