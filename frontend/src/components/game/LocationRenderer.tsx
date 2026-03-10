@@ -4,12 +4,12 @@
  * This component is a thin wrapper that maps LocationConfig and interaction
  * props to the Canvas-based renderer. All drawing happens in useCanvasRenderer.
  *
- * ── COORDINATE SYSTEM ──────────────────────────────────────────
+ * ── COORDINATE SYSTEM ──────────────────────────────────────────────
  * x, y: 0–100 (percentage of scene dimensions)
  * sceneHeight: 0–100 (percentage of scene height)
  * scale: multiplier on top of sceneHeight (default 1)
  *
- * ── RENDERING PIPELINE ──────────────────────────────────────
+ * ── RENDERING PIPELINE ───────────────────────────────────────
  * LocationConfig → useCanvasRenderer → Canvas 2D drawImage()
  * No DOM elements for sprites. No CSS transforms. No background-position.
  */
@@ -35,7 +35,7 @@ export const LocationRenderer = memo(function LocationRenderer(props: LocationRe
       timeOfDay={props.timeOfDay ?? 'day'}
       selectedObjectId={props.selectedObjectId ?? null}
       hoveredObjectId={hoveredObjectId}
-      characterAnimations={props.characterAnimations}
+      {...(props.characterAnimations !== undefined && { characterAnimations: props.characterAnimations })}
       onObjectClick={(id) => {
         if (id && props.onObjectClick) {
           const furniture = props.config.furniture.find(
