@@ -7,7 +7,14 @@ public record QuestSpec(
     QuestMeta meta,
     List<StepSpec> steps
 ) {
-    public record QuestMeta(String title, String description, String type, int triggerDay, List<String> requiredNpcs) {}
+    public record QuestMeta(
+        String title,
+        String description,
+        String type,
+        int triggerDay,
+        boolean autoStart,
+        List<String> requiredNpcs
+    ) {}
     public record StepSpec(String stepId, String description, List<ObjectiveSpec> objectives, List<RewardSpec> rewards, String dialogueText) {}
     public record ObjectiveSpec(String type, String target, String operator, String value) {}
     public record RewardSpec(String type, String target, int amount) {}

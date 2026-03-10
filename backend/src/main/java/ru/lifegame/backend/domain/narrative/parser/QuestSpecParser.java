@@ -10,104 +10,171 @@ import java.io.InputStream;
 import java.util.*;
 
 /**
- * Parses a single narrative/quests/*.xml file into a {@link QuestSpec}.
+ * Parses narrative/quests.xml — a single container file with a <quests> root
+ * holding multiple <quest> children.
  *
- * Two entry points:
- *   - {@link #parse(InputStream, String)} — preferred; works inside JARs
- *   - {@link #parse(File)}               — delegates to the above; kept for tests
+ * parseAll(InputStream, filename) — preferred (works in JAR)
+ * parseAll(File)                  — convenience for tests
  */
 public class QuestSpecParser {
 
-    // ── public API ───────────────────────────────────────────────────────────
-
-    /** Preferred entry point — works both on filesystem and inside JARs. */
-    public QuestSpec parse(InputStream xmlStream, String filename) throws Exception {
-        Document doc;
+    public List<QuestSpec> parseAll(InputStream xmlStream, String filename) throws Exception {
         try {
-            doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlStream);
+            DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
+            f.setNamespaceAware(false);
+            return parseDocument(f.newDocumentBuilder().parse(xmlStream));
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to parse quest XML: " + filename, e);
         }
-        return parseDocument(doc);
     }
 
-    /** Convenience overload for filesystem files (e.g. unit tests). */
-    public QuestSpec parse(File xmlFile) throws Exception {
-        Document doc;
+    public List<QuestSpec> parseAll(File xmlFile) throws Exception {
         try {
-            doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlFile);
+            DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
+            f.setNamespaceAware(false);
+            return parseDocument(f.newDocumentBuilder().parse(xmlFile));
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to parse quest XML: " + xmlFile.getName(), e);
         }
-        return parseDocument(doc);
     }
 
-    // ── core parsing ─────────────────────────────────────────────────────────
+    private List<QuestSpec> parseDocument(Document doc) {
+        doc.getDocumentElement().normalize();
+        NodeList questNodes = doc.getElementsByTagName("quest");
+        List<QuestSpec> result = new ArrayList<>();
+        for (int i = 0; i < questNodes.getLength(); i++) {
+            result.add(parseQuest((Element) questNodes.item(i)));
+        }
+        return result;
+    }
 
-    private QuestSpec parseDocument(Document doc) {
-        Element root = doc.getDocumentElement();
+    private QuestSpec parseQuest(Element el) {
+        String  id        = el.getAttribute("id");
+        String  type      = el.getAttribute("type");
+        boolean autoStart = "true".equalsIgnoreCase(el.getAttribute("auto-start"));
+        int     triggerDay = autoStart
+                ? parseIntAttr(el, "trigger-day", 0)
+                : parseIntAttr(el, "trigger-day", 1);
 
-        String id          = root.getAttribute("id");
-        String title       = getTextContent(root, "title");
-        String description = getTextContent(root, "description");
-        String type        = root.getAttribute("type");
-        int    triggerDay  = parseIntAttr(root, "trigger-day", 1);
-        List<String> requiredNpcs = parseRequiredNpcs(root);
+        String label       = directChildText(el, "label");
+        String description = directChildText(el, "description");
+        List<String> requiredNpcs = parseRequiredNpcs(el);
+        QuestMeta meta = new QuestMeta(label, description, type, triggerDay, autoStart, requiredNpcs);
 
-        QuestMeta meta = new QuestMeta(title, description, type, triggerDay, requiredNpcs);
+        List<StepSpec> steps = parseSteps(el);
 
-        List<StepSpec> steps = new ArrayList<>();
-        NodeList stepNodes = root.getElementsByTagName("step");
-        for (int i = 0; i < stepNodes.getLength(); i++) {
-            Element el       = (Element) stepNodes.item(i);
-            String  stepId   = el.getAttribute("id");
-            String  stepDesc = getTextContent(el, "description");
-
-            List<ObjectiveSpec> objectives = new ArrayList<>();
-            NodeList objNodes = el.getElementsByTagName("objective");
-            for (int j = 0; j < objNodes.getLength(); j++) {
-                Element obj = (Element) objNodes.item(j);
-                objectives.add(new ObjectiveSpec(
-                        obj.getAttribute("type"),
-                        obj.getAttribute("target"),
-                        obj.getAttribute("operator"),
-                        obj.getAttribute("value")
-                ));
-            }
-
-            List<RewardSpec> rewards = new ArrayList<>();
-            NodeList rewNodes = el.getElementsByTagName("reward");
-            for (int j = 0; j < rewNodes.getLength(); j++) {
-                Element rew = (Element) rewNodes.item(j);
-                rewards.add(new RewardSpec(
-                        rew.getAttribute("type"),
-                        rew.getAttribute("target"),
-                        parseIntAttr(rew, "amount", 0)
-                ));
-            }
-
-            String dialogue = getTextContent(el, "dialogue");
-            steps.add(new StepSpec(stepId, stepDesc, objectives, rewards, dialogue));
+        // Quest-level rewards are merged into the last step
+        List<RewardSpec> questRewards = parseQuestRewards(el);
+        if (!questRewards.isEmpty() && !steps.isEmpty()) {
+            int last = steps.size() - 1;
+            StepSpec ls = steps.get(last);
+            List<RewardSpec> merged = new ArrayList<>(ls.rewards());
+            merged.addAll(questRewards);
+            steps.set(last, new StepSpec(ls.stepId(), ls.description(), ls.objectives(), merged, ls.dialogueText()));
         }
 
         return new QuestSpec(id, meta, steps);
     }
 
-    // ── helpers ───────────────────────────────────────────────────────────────
+    private List<StepSpec> parseSteps(Element questEl) {
+        List<StepSpec> steps = new ArrayList<>();
+        NodeList stepsContainers = questEl.getElementsByTagName("steps");
+        if (stepsContainers.getLength() == 0) return steps;
+        NodeList stepNodes = ((Element) stepsContainers.item(0)).getElementsByTagName("step");
+        for (int i = 0; i < stepNodes.getLength(); i++) {
+            steps.add(parseStep((Element) stepNodes.item(i)));
+        }
+        return steps;
+    }
+
+    private StepSpec parseStep(Element el) {
+        String stepId   = el.getAttribute("id");
+        String stepType = el.getAttribute("type");
+        String label    = directChildText(el, "label");
+
+        List<ObjectiveSpec> objectives = new ArrayList<>();
+        if ("compound".equals(stepType)) {
+            NodeList conditions = el.getElementsByTagName("condition");
+            for (int i = 0; i < conditions.getLength(); i++) {
+                Element c        = (Element) conditions.item(i);
+                String condType  = c.getAttribute("type");
+                String field     = c.getAttribute("field");
+                String operator  = c.getAttribute("operator");
+                String value     = c.getAttribute("value");
+                String target    = "relationship".equals(condType)
+                        ? c.getAttribute("target") + ":" + field
+                        : field;
+                objectives.add(new ObjectiveSpec(condType, target, operator, value));
+            }
+        } else {
+            String target    = directChildText(el, "target");
+            String threshold = directChildText(el, "threshold");
+            if (!target.isBlank() && !threshold.isBlank()) {
+                objectives.add(new ObjectiveSpec(stepType, target, "gte", threshold));
+            }
+        }
+
+        List<RewardSpec> rewards = parseRewardElements(el);
+        String dialogue = directChildText(el, "dialogue");
+        return new StepSpec(stepId, label, objectives, rewards, dialogue);
+    }
+
+    private List<RewardSpec> parseQuestRewards(Element questEl) {
+        List<RewardSpec> rewards = new ArrayList<>();
+        NodeList containers = questEl.getElementsByTagName("rewards");
+        if (containers.getLength() == 0) return rewards;
+        Element rewardsEl = (Element) containers.item(0);
+
+        NodeList statEffects = rewardsEl.getElementsByTagName("stat-effect");
+        for (int i = 0; i < statEffects.getLength(); i++) {
+            Element r = (Element) statEffects.item(i);
+            rewards.add(new RewardSpec("stat", r.getAttribute("field"), parseIntAttr(r, "delta", 0)));
+        }
+        NodeList relEffects = rewardsEl.getElementsByTagName("relationship-effect");
+        for (int i = 0; i < relEffects.getLength(); i++) {
+            Element r = (Element) relEffects.item(i);
+            rewards.add(new RewardSpec("relationship",
+                    r.getAttribute("target") + ":" + r.getAttribute("field"),
+                    parseIntAttr(r, "delta", 0)));
+        }
+        NodeList achievements = rewardsEl.getElementsByTagName("achievement");
+        for (int i = 0; i < achievements.getLength(); i++) {
+            Element r = (Element) achievements.item(i);
+            rewards.add(new RewardSpec("achievement", r.getAttribute("id"), 0));
+        }
+        return rewards;
+    }
+
+    private List<RewardSpec> parseRewardElements(Element parent) {
+        List<RewardSpec> rewards = new ArrayList<>();
+        NodeList nodes = parent.getElementsByTagName("reward");
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Element r = (Element) nodes.item(i);
+            rewards.add(new RewardSpec(r.getAttribute("type"), r.getAttribute("target"),
+                    parseIntAttr(r, "amount", 0)));
+        }
+        return rewards;
+    }
 
     private List<String> parseRequiredNpcs(Element root) {
-        String text = getTextContent(root, "required-npcs");
+        String text = directChildText(root, "required-npcs");
         if (text.isBlank()) return List.of();
         return Arrays.stream(text.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
     }
 
-    private String getTextContent(Element root, String tagName) {
-        NodeList nodes = root.getElementsByTagName(tagName);
-        return nodes.getLength() > 0 ? nodes.item(0).getTextContent().trim() : "";
+    private String directChildText(Element parent, String tagName) {
+        NodeList children = parent.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            if (child.getNodeType() == Node.ELEMENT_NODE && tagName.equals(child.getNodeName())) {
+                return child.getTextContent().trim();
+            }
+        }
+        return "";
     }
 
     private int parseIntAttr(Element el, String attr, int defaultVal) {
         String val = el.getAttribute(attr);
-        return val.isEmpty() ? defaultVal : Integer.parseInt(val);
+        return (val == null || val.isEmpty()) ? defaultVal : Integer.parseInt(val);
     }
 }

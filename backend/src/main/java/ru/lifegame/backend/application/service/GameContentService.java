@@ -24,15 +24,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Loads and caches all game content from XML specs at startup.
- *
- * Parsing happens exactly once in {@link #initialize()} (via {@code @PostConstruct}).
- * All public getters return unmodifiable views of the in-memory cache.
- *
- * All XML loading uses {@link Resource#getInputStream()} so the service works
- * both on the filesystem and inside a JAR (res.getFile() would fail in a JAR).
- */
 @Service
 public class GameContentService {
 
@@ -57,8 +48,6 @@ public class GameContentService {
                 actions.size(), events.size(), quests.size(), conflicts.size());
     }
 
-    // ── public API ──────────────────────────────────────────────────────
-
     public List<ActionDefView>   getAllActions()   { return List.copyOf(actions.values()); }
     public List<ConflictDefView> getAllConflicts() { return List.copyOf(conflicts.values()); }
     public List<EventSpec>       getAllEvents()    { return List.copyOf(events.values()); }
@@ -67,8 +56,6 @@ public class GameContentService {
 
     public Optional<EventSpec> getEvent(String id) { return Optional.ofNullable(events.get(id)); }
     public Optional<QuestSpec> getQuest(String id) { return Optional.ofNullable(quests.get(id)); }
-
-    // ── loaders ──────────────────────────────────────────────────────
 
     private void loadEventsFromXml() {
         EventSpecParser parser = new EventSpecParser();
@@ -90,23 +77,26 @@ public class GameContentService {
         }
     }
 
+    /**
+     * Loads all quests from the single narrative/quests.xml container.
+     * Was: scanning narrative/quests/*.xml (directory does not exist -> 0 quests).
+     */
     private void loadQuestsFromXml() {
         QuestSpecParser parser = new QuestSpecParser();
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         try {
-            Resource[] files = resolver.getResources("classpath:narrative/quests/*.xml");
-            for (Resource res : files) {
-                String filename = res.getFilename();
-                try (InputStream is = res.getInputStream()) {
-                    QuestSpec spec = parser.parse(is, filename);
-                    quests.put(spec.id(), spec);
-                } catch (Exception e) {
-                    log.error("Failed to parse quest file: {}", filename, e);
-                }
+            Resource res = resolver.getResource("classpath:narrative/quests.xml");
+            if (!res.exists()) {
+                log.warn("narrative/quests.xml not found — no quests loaded");
+                return;
             }
-            log.info("Loaded {} quests", quests.size());
+            try (InputStream is = res.getInputStream()) {
+                List<QuestSpec> parsed = parser.parseAll(is, "quests.xml");
+                parsed.forEach(q -> quests.put(q.id(), q));
+                log.info("Loaded {} quests from quests.xml", parsed.size());
+            }
         } catch (Exception e) {
-            log.error("Failed to scan narrative/quests/", e);
+            log.error("Failed to load narrative/quests.xml", e);
         }
     }
 
@@ -141,8 +131,6 @@ public class GameContentService {
             loadPlaceholderActions();
         }
     }
-
-    // ── action parsing (no ActionSpecParser yet) ────────────────────────
 
     private ActionDefView parseAction(Element el) {
         String code        = el.getAttribute("code");
@@ -199,18 +187,16 @@ public class GameContentService {
             case "DATE_WITH_HUSBAND"             -> "heart";
             case "VISIT_FATHER"                  -> "car";
             case "PLAY_WITH_CAT"                 -> "cat";
-            case "WALK_DOG"                       -> "dog";
+            case "WALK_DOG"                      -> "dog";
             case "REST_AT_HOME", "SELF_CARE"     -> "bed";
             case "HOUSEHOLD", "COOK_FOOD"        -> "home";
             case "CALL_HUSBAND"                  -> "phone";
-            case "EAT_FOOD"                       -> "utensils";
-            case "FEED_PETS"                      -> "bowl";
+            case "EAT_FOOD"                      -> "utensils";
+            case "FEED_PETS"                     -> "bowl";
             case "BEAUTY_ROUTINE"                -> "mirror";
             default                              -> "circle";
         };
     }
-
-    // ── placeholders ──────────────────────────────────────────────────────
 
     private void loadPlaceholderActions() {
         actions.put("REST", new ActionDefView(
@@ -224,7 +210,6 @@ public class GameContentService {
     }
 
     private void loadPlaceholderConflicts() {
-        // TODO: Create conflict XMLs in narrative/
         conflicts.put("WORK_DEADLINE", new ConflictDefView(
                 "WORK_DEADLINE",
                 "Рабочий дедлайн",

@@ -7,6 +7,7 @@ import ru.lifegame.backend.domain.event.domain.DomainEvent;
 import ru.lifegame.backend.domain.event.domain.NarrativeEventTriggeredEvent;
 import ru.lifegame.backend.domain.event.domain.NpcActivityChangedEvent;
 import ru.lifegame.backend.domain.event.domain.NpcMoodExtremeEvent;
+import ru.lifegame.backend.domain.event.domain.QuestActivatedEvent;
 import ru.lifegame.backend.domain.event.domain.QuestStepCompletedEvent;
 import ru.lifegame.backend.domain.event.game.GameEvent;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
@@ -17,7 +18,6 @@ import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.model.session.GameSession;
 import ru.lifegame.backend.domain.model.session.GameTime;
 import ru.lifegame.backend.domain.model.stats.Stats;
-import ru.lifegame.backend.domain.npc.runtime.NpcInstance;
 import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
 import ru.lifegame.backend.domain.quest.Quest;
 
@@ -90,10 +90,8 @@ public class GameStateViewMapper {
                 .map(e -> {
                     Relationship r = e.getValue();
                     String npcId = e.getKey();
-                    return new RelationshipView(
-                            npcId, npcId,
-                            r.closeness(), r.trust(), r.stability(), r.romance()
-                    );
+                    return new RelationshipView(npcId, npcId,
+                            r.closeness(), r.trust(), r.stability(), r.romance());
                 })
                 .toList();
     }
@@ -102,8 +100,7 @@ public class GameStateViewMapper {
         return pets.all().entrySet().stream()
                 .map(e -> {
                     Pet p = e.getValue();
-                    String petId = e.getKey();
-                    return new PetView(petId, petId,
+                    return new PetView(e.getKey(), e.getKey(),
                             p.name(), p.satiety(), p.attention(), p.health(), p.mood());
                 })
                 .toList();
@@ -118,8 +115,7 @@ public class GameStateViewMapper {
                     String reason = available ? null : resolveUnavailableReason(session, timeCost);
                     return new ActionOptionView(
                             action.type().code(), action.type().label(),
-                            action.type().description(), timeCost, available, reason
-                    );
+                            action.type().description(), timeCost, available, reason);
                 })
                 .toList();
     }
@@ -139,66 +135,34 @@ public class GameStateViewMapper {
     }
 
     private List<String> toCompletedQuestIds(GameSession session) {
-        return session.questLog().completedQuests().stream()
-                .map(Quest::id)
-                .toList();
+        return session.questLog().completedQuests().stream().map(Quest::id).toList();
     }
 
     private List<ConflictView> toConflictViews(GameSession session) {
         return session.activeConflicts().stream()
                 .filter(c -> !c.isResolved())
                 .map(c -> new ConflictView(
-                        c.id(),
-                        c.conflictId(),
-                        c.label(),
-                        c.stage().name(),
-                        c.csp().player(),
-                        c.csp().opponent(),
-                        List.of()
-                ))
+                        c.id(), c.conflictId(), c.label(), c.stage().name(),
+                        c.csp().player(), c.csp().opponent(), List.of()))
                 .toList();
     }
 
-    /**
-     * Maps the first active (triggered, not resolved) GameEvent to EventView.
-     *
-     * dialogue[] is populated from GameEvent.dialogueLines() — each DialogueLine
-     * (speaker, textRu) maps to DialogueLineView(speaker, textRu).
-     *
-     * options uses EventOption.id() and EventOption.labelRu() directly
-     * (legacy aliases code()/label() were removed).
-     */
     private EventView toEventView(GameSession session) {
         Optional<GameEvent> activeEvent = session.currentEvent();
         if (activeEvent.isEmpty()) return null;
-
         GameEvent e = activeEvent.get();
-
         List<DialogueLineView> dialogue = e.dialogueLines().stream()
-                .map(dl -> new DialogueLineView(dl.speaker(), dl.textRu()))
-                .toList();
-
+                .map(dl -> new DialogueLineView(dl.speaker(), dl.textRu())).toList();
         List<EventOptionView> options = e.options().stream()
-                .map(o -> new EventOptionView(o.id(), o.labelRu()))
-                .toList();
-
-        return new EventView(
-                e.id(),
-                e.title(),
-                e.description(),
-                dialogue,
-                options
-        );
+                .map(o -> new EventOptionView(o.id(), o.labelRu())).toList();
+        return new EventView(e.id(), e.title(), e.description(), dialogue, options);
     }
 
     private EndingView toEndingView(GameSession session) {
         if (session.ending() == null) return null;
         return new EndingView(
-                session.ending().endingId(),
-                session.ending().category().name(),
-                session.ending().title(),
-                session.ending().summary()
-        );
+                session.ending().endingId(), session.ending().category().name(),
+                session.ending().title(), session.ending().summary());
     }
 
     private ActionResultView toActionResultView(ActionResult r) {
@@ -208,37 +172,26 @@ public class GameStateViewMapper {
                         "stress", r.statChanges().stress(), "mood", r.statChanges().mood(),
                         "money", r.statChanges().money(), "selfEsteem", r.statChanges().selfEsteem()),
                 r.relationshipChanges(),
-                r.petMoodChanges()
-        );
+                r.petMoodChanges());
     }
 
     private List<NpcActivityView> toNpcActivityViews(GameSession session) {
         if (npcLifecycleEngine == null) return List.of();
-        int currentHour = session.time().hour();
-        int lookupHour = Math.min(currentHour, 23);
+        int lookupHour = Math.min(session.time().hour(), 23);
         return npcLifecycleEngine.getRegistry().getAll().stream()
                 .map(npc -> {
                     npc.updateScheduleActivity(lookupHour);
-                    var activity = npc.currentActivity();
-                    return NpcActivityView.fromInstance(
-                            npc.id(),
-                            npc.displayName(),
-                            npc.category(),
-                            activity.activityId(),
-                            activity.animationKey(),
-                            activity.locationId(),
-                            npc.mood().dominantAxis(),
-                            true
-                    );
+                    var a = npc.currentActivity();
+                    return NpcActivityView.fromInstance(npc.id(), npc.displayName(), npc.category(),
+                            a.activityId(), a.animationKey(), a.locationId(),
+                            npc.mood().dominantAxis(), true);
                 })
                 .toList();
     }
 
     private List<DomainEventView> toDomainEventViews(List<DomainEvent> events) {
         if (events == null || events.isEmpty()) return List.of();
-        return events.stream()
-                .map(this::mapDomainEvent)
-                .toList();
+        return events.stream().map(this::mapDomainEvent).toList();
     }
 
     private DomainEventView mapDomainEvent(DomainEvent event) {
@@ -247,29 +200,40 @@ public class GameStateViewMapper {
 
         if (event instanceof NarrativeEventTriggeredEvent ne) {
             payload.put("narrativeEventId", ne.narrativeEventId());
-            payload.put("title", ne.title());
-            payload.put("description", ne.description());
-            payload.put("options", ne.options());
+            payload.put("title",            ne.title());
+            payload.put("description",      ne.description());
+            payload.put("options",          ne.options());
+
+        } else if (event instanceof QuestActivatedEvent qa) {
+            payload.put("questId",    qa.questId());
+            payload.put("questTitle", qa.questTitle());
+
         } else if (event instanceof QuestStepCompletedEvent qe) {
-            payload.put("questId", qe.questId());
-            payload.put("stepId", qe.stepId());
+            payload.put("questId",        qe.questId());
+            payload.put("stepId",         qe.stepId());
             payload.put("questCompleted", qe.questCompleted());
+            payload.put("rewards", qe.rewards().stream()
+                    .map(r -> {
+                        Map<String, Object> m = new LinkedHashMap<>();
+                        m.put("type",   r.type());
+                        m.put("target", r.target());
+                        m.put("amount", r.amount());
+                        return m;
+                    }).toList());
+
         } else if (event instanceof NpcActivityChangedEvent nae) {
-            payload.put("npcId", nae.npcId());
+            payload.put("npcId",       nae.npcId());
             payload.put("oldActivity", nae.oldActivity());
             payload.put("newActivity", nae.newActivity());
-            payload.put("locationId", nae.locationId());
+            payload.put("locationId",  nae.locationId());
+
         } else if (event instanceof NpcMoodExtremeEvent nme) {
-            payload.put("npcId", nme.npcId());
-            payload.put("axis", nme.axis());
-            payload.put("value", nme.value());
+            payload.put("npcId",        nme.npcId());
+            payload.put("axis",         nme.axis());
+            payload.put("value",        nme.value());
             payload.put("dominantMood", nme.dominantMood());
         }
 
-        return new DomainEventView(
-                event.eventType(),
-                event.timestamp().toString(),
-                payload
-        );
+        return new DomainEventView(event.eventType(), event.timestamp().toString(), payload);
     }
 }
