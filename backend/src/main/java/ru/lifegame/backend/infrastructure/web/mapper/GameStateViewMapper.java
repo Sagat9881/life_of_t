@@ -78,7 +78,7 @@ public class GameStateViewMapper {
                 p.name(),
                 new StatsView(s.energy(), s.health(), s.stress(), s.mood(), s.money(), s.selfEsteem()),
                 new JobView(p.job().title(), p.job().satisfaction(), p.job().burnoutRisk()),
-                p.location().name(),
+                p.location(),
                 p.tags(),
                 p.skills().toMap(),
                 p.inventory()
@@ -129,8 +129,8 @@ public class GameStateViewMapper {
 
     private List<QuestView> toQuestViews(GameSession session) {
         return session.questLog().activeQuests().stream()
-                .map(q -> new QuestView(q.id(), q.type().label(),
-                        q.type().description(), q.progressPercent(), q.isCompleted()))
+                .map(q -> new QuestView(q.id(), q.title(),
+                        q.description(), q.progressPercent(), q.isCompleted()))
                 .toList();
     }
 

@@ -7,6 +7,8 @@ import ru.lifegame.backend.application.port.out.EventPublisher;
 import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.service.*;
 import ru.lifegame.backend.domain.action.ActionProvider;
+import ru.lifegame.backend.domain.model.session.ActionExecutor;
+import ru.lifegame.backend.domain.model.session.ConflictManager;
 import ru.lifegame.backend.domain.model.session.DayEndProcessor;
 import ru.lifegame.backend.domain.narrative.NarrativeEventEngine;
 import ru.lifegame.backend.domain.narrative.NarrativeQuestEngine;
@@ -24,8 +26,10 @@ public class ApplicationConfig {
 
     @Bean
     public StartOrLoadSessionUseCase startOrLoadSessionUseCase(SessionRepository repo,
-                                                               GameStateViewMapper mapper) {
-        return new StartOrLoadSessionService(repo, mapper);
+                                                               GameStateViewMapper mapper,
+                                                               ConflictManager conflictManager,
+                                                               ActionExecutor actionExecutor) {
+        return new StartOrLoadSessionService(repo, mapper, conflictManager, actionExecutor);
     }
 
     @Bean
