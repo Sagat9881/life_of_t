@@ -20,8 +20,19 @@ management:
 
 # Assets: filesystem fallback for /assets/** in dev mode.
 # StaticResourceConfig reads this via @Value("${assets.output-dir}").
-# Points to backend/target/generated-assets where exec-maven-plugin
-# writes generated assets during the backend build phase.
-# Override in application module or via env var ASSETS_OUTPUT_DIR for prod/docker.
+#
+# Default points to backend/target/generated-assets — the directory
+# where exec-maven-plugin writes generated assets during generate-resources phase.
+#
+# HOW THE DEFAULT WORKS:
+#   The value @project.build.directory@ is replaced by Maven resource filtering
+#   at build time with the absolute path to the module's target/ directory.
+#   This means the default is always correct regardless of JVM working directory
+#   (fixes the bug where running from IDEA with workdir=backend/ produced
+#   .../backend/backend/target/... which never exists).
+#
+# OVERRIDE:
+#   Set env var ASSETS_OUTPUT_DIR for prod/docker deployments, e.g.:
+#     ASSETS_OUTPUT_DIR=/app/assets java -jar backend.jar
 assets:
-  output-dir: ${ASSETS_OUTPUT_DIR:${user.dir}/backend/target/generated-assets}
+  output-dir: ${ASSETS_OUTPUT_DIR:@project.build.directory@/generated-assets}
