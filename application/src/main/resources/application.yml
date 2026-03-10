@@ -20,9 +20,15 @@ server:
       - audio/mpeg
     min-response-size: 1024
 
-# Asset generation output
+# Asset generation output.
+# Backend module writes generated assets to backend/target/generated-assets
+# during the generate-resources Maven phase (exec-maven-plugin).
+# StaticResourceConfig uses this path as filesystem fallback for /assets/**
+# so that dev-mode hot-reload picks up freshly generated files without
+# requiring a full jar repack.
+# Override via ASSETS_OUTPUT_DIR env var for Docker / prod deployments.
 assets:
-  output-dir: ${user.dir}/asset-generator/target/generated-assets
+  output-dir: ${ASSETS_OUTPUT_DIR:${user.dir}/backend/target/generated-assets}
 
 # Actuator
 management:
