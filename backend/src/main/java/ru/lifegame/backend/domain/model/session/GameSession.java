@@ -26,6 +26,7 @@ public class GameSession {
     private final DomainEventPublisher eventPublisher;
     private final List<DomainEvent> domainEvents;
     private final ConflictManager conflictManager;
+    private final ActionExecutor actionExecutor;
     private Ending ending;
 
     public GameSession(
@@ -36,7 +37,8 @@ public class GameSession {
             Pets pets,
             QuestLog questLog,
             GameTime time,
-            ConflictManager conflictManager
+            ConflictManager conflictManager,
+            ActionExecutor actionExecutor
     ) {
         this.sessionId = sessionId;
         this.telegramUserId = telegramUserId;
@@ -47,16 +49,24 @@ public class GameSession {
         );
         this.domainEvents = new ArrayList<>();
         this.conflictManager = conflictManager;
+        this.actionExecutor = actionExecutor;
     }
 
-    public static GameSession createNew(String telegramUserId, ConflictManager conflictManager) {
+    public static GameSession createNew(
+            String telegramUserId,
+            ConflictManager conflictManager,
+            ActionExecutor actionExecutor
+    ) {
         String sessionId = UUID.randomUUID().toString();
         PlayerCharacter player = PlayerCharacter.initial();
         Relationships relationships = Relationships.initial();
         Pets pets = Pets.initial();
         QuestLog questLog = new QuestLog();
         GameTime time = new GameTime(1, GameBalance.DAY_START_HOUR);
-        return new GameSession(sessionId, telegramUserId, player, relationships, pets, questLog, time, conflictManager);
+        return new GameSession(
+                sessionId, telegramUserId, player, relationships,
+                pets, questLog, time, conflictManager, actionExecutor
+        );
     }
 
     public String sessionId() { return sessionId; }
@@ -76,10 +86,7 @@ public class GameSession {
     }
 
     public ActionResult executeAction(GameAction actionType) {
-        ActionExecutor executor = new ActionExecutor();
-        ActionResult result = executor.execute(actionType, context, eventPublisher);
-        eventPublisher.publish(new ActionExecutedEvent(sessionId, actionType.type().code()));
-        return result;
+        return actionExecutor.execute(actionType, context, eventPublisher);
     }
 
     public void endDay(DayEndProcessor processor) {
