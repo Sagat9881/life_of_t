@@ -7,8 +7,6 @@ import ru.lifegame.backend.domain.action.spec.PlayerActionSpec;
 import ru.lifegame.backend.domain.event.domain.ActionExecutedEvent;
 import ru.lifegame.backend.domain.exception.InvalidActionException;
 import ru.lifegame.backend.domain.exception.NotEnoughTimeException;
-import ru.lifegame.backend.domain.model.pet.PetCode;
-import ru.lifegame.backend.domain.model.pet.Pets;
 import ru.lifegame.backend.domain.model.relationship.RelationshipChanges;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 
@@ -46,7 +44,6 @@ public class ActionExecutor {
         applyRelationshipChanges(result, context);
         applyPetChanges(result, context);
 
-        // Data-driven skill gains + job effects from spec
         if (action instanceof DataDrivenAction dda) {
             applySkillGains(dda.spec(), context);
             applyJobEffects(dda.spec(), context);
@@ -56,7 +53,6 @@ public class ActionExecutor {
             }
         }
 
-        // Mark NPC interactions from interactedNpcs set
         int currentDay = context.time().day();
         if (result.interactedNpcs() != null) {
             for (String npcId : result.interactedNpcs()) {
@@ -73,13 +69,9 @@ public class ActionExecutor {
     }
 
     private void applyPetChanges(ActionResult result, GameSessionContext context) {
-        Pets pets = context.pets();
-        result.petMoodChanges().forEach((petStr, delta) -> {
-            try {
-                PetCode pet = PetCode.valueOf(petStr.toUpperCase());
-                pets.applyMoodChange(pet, delta);
-                pets.applyAttentionChange(pet, Math.abs(delta));
-            } catch (IllegalArgumentException e) { /* skip unknown pet */ }
+        result.petMoodChanges().forEach((petId, delta) -> {
+            context.pets().applyMoodChange(petId.toLowerCase(), delta);
+            context.pets().applyAttentionChange(petId.toLowerCase(), Math.abs(delta));
         });
     }
 

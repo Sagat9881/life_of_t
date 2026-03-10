@@ -18,7 +18,7 @@ public class Conflict {
     private final String description;
     private final String opponentId;
     private final String category;
-    private ConflictStage stage;
+    private String stage;
     private ConflictStressPoints csp;
     private final List<ConflictRound> rounds;
     private ConflictResolution resolution;
@@ -31,7 +31,7 @@ public class Conflict {
         this.description = description;
         this.opponentId = opponentId;
         this.category = category;
-        this.stage = ConflictStage.BREWING;
+        this.stage = "BREWING";
         this.csp = ConflictStressPoints.initial();
         this.rounds = new ArrayList<>();
         this.resolution = null;
@@ -49,15 +49,15 @@ public class Conflict {
     }
 
     public void escalate() {
-        if (stage == ConflictStage.BREWING) {
-            stage = ConflictStage.ESCALATION;
+        if ("BREWING".equals(stage)) {
+            stage = "ESCALATION";
         }
     }
 
     public void avoidAtBrewingStage() {
-        if (stage == ConflictStage.BREWING) {
+        if ("BREWING".equals(stage)) {
             this.resolution = ConflictResolution.avoided();
-            this.stage = ConflictStage.RESOLUTION;
+            this.stage = "RESOLUTION";
         }
     }
 
@@ -66,8 +66,8 @@ public class Conflict {
      */
     public void updateCsp(ConflictStressPoints updated) {
         this.csp = updated;
-        if (stage == ConflictStage.BREWING) {
-            this.stage = ConflictStage.ESCALATION;
+        if ("BREWING".equals(stage)) {
+            this.stage = "ESCALATION";
         }
     }
 
@@ -76,11 +76,11 @@ public class Conflict {
      */
     public void resolve(ConflictResolution resolution) {
         this.resolution = resolution;
-        this.stage = ConflictStage.RESOLUTION;
+        this.stage = "RESOLUTION";
     }
 
     public boolean isResolved() {
-        return stage == ConflictStage.RESOLUTION && resolution != null;
+        return "RESOLUTION".equals(stage) && resolution != null;
     }
 
     public Optional<String> opponent() {
@@ -97,7 +97,7 @@ public class Conflict {
     public String description() { return description; }
     public String opponentId() { return opponentId; }
     public String category() { return category; }
-    public ConflictStage stage() { return stage; }
+    public String stage() { return stage; }
     public ConflictStressPoints csp() { return csp; }
     public List<ConflictRound> rounds() { return List.copyOf(rounds); }
     public ConflictResolution resolution() { return resolution; }

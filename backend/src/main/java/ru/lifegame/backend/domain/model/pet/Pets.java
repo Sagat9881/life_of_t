@@ -26,17 +26,17 @@ public class Pets {
         return pets.values().stream().anyMatch(pet -> pet.health() <= 0);
     }
 
-    public void applyMoodChange(PetCode petCode, int moodDelta) {
-        Pet pet = pets.get(petCode.code());
+    public void applyMoodChange(String petId, int moodDelta) {
+        Pet pet = pets.get(petId);
         if (pet != null) {
-            pets.put(petCode.code(), pet.withMood(pet.mood() + moodDelta));
+            pets.put(petId, pet.withMood(pet.mood() + moodDelta));
         }
     }
 
-    public void applyAttentionChange(PetCode petCode, int attentionDelta) {
-        Pet pet = pets.get(petCode.code());
+    public void applyAttentionChange(String petId, int attentionDelta) {
+        Pet pet = pets.get(petId);
         if (pet != null) {
-            pets.put(petCode.code(), pet.withAttention(pet.attention() + attentionDelta));
+            pets.put(petId, pet.withAttention(pet.attention() + attentionDelta));
         }
     }
 
@@ -47,12 +47,12 @@ public class Pets {
     public static Pets initial() {
         return new Pets(Map.of(
             "barsik", new Pet(
-                "barsik", "\u0411\u0430\u0440\u0441\u0438\u043a", PetType.CAT,
+                "barsik", "\u0411\u0430\u0440\u0441\u0438\u043a", "CAT",
                 GameBalance.PET_INITIAL_SATIETY, GameBalance.PET_INITIAL_ATTENTION,
                 GameBalance.PET_INITIAL_HEALTH, GameBalance.PET_INITIAL_MOOD
             ),
             "sam", new Pet(
-                "sam", "\u0421\u044d\u043c", PetType.DOG,
+                "sam", "\u0421\u044d\u043c", "DOG",
                 GameBalance.PET_SAM_INITIAL_SATIETY, GameBalance.PET_SAM_INITIAL_ATTENTION,
                 GameBalance.PET_SAM_INITIAL_HEALTH, GameBalance.PET_SAM_INITIAL_MOOD
             )

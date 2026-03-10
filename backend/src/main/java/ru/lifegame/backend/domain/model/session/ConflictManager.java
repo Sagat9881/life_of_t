@@ -2,7 +2,6 @@ package ru.lifegame.backend.domain.model.session;
 
 import ru.lifegame.backend.domain.conflict.core.Conflict;
 import ru.lifegame.backend.domain.conflict.core.ConflictResolution;
-import ru.lifegame.backend.domain.conflict.core.ConflictStage;
 import ru.lifegame.backend.domain.conflict.core.ConflictStressPoints;
 import ru.lifegame.backend.domain.conflict.core.CspChanges;
 import ru.lifegame.backend.domain.conflict.spec.ConflictSpec;
@@ -70,7 +69,7 @@ public class ConflictManager {
             DomainEventPublisher eventPublisher
     ) {
         Conflict conflict = findConflictById(conflictId, context.activeConflicts());
-        if (conflict.stage() != ConflictStage.BREWING) {
+        if (!"BREWING".equals(conflict.stage())) {
             throw new InvalidGameStateException(
                     "Cannot avoid conflict '" + conflictId + "': conflict is not in BREWING stage"
             );
@@ -103,13 +102,11 @@ public class ConflictManager {
                         "Unknown tactic '" + tacticCode + "' for conflict '" + conflict.conflictId() + "'"
                 ));
 
-        // Apply CSP: deduct player cost and deal damage to opponent
         ConflictStressPoints updatedCsp = conflict.csp().apply(
                 new CspChanges(-tactic.baseCspCost(), -tactic.baseOpponentCspCost())
         );
         conflict.updateCsp(updatedCsp);
 
-        // Success = opponent CSP reaches 0, failure = player CSP reaches 0 first
         boolean success = updatedCsp.isOpponentDefeated() ||
                 (!updatedCsp.isPlayerDefeated() && tactic.baseOpponentCspCost() > tactic.baseCspCost());
 
@@ -125,23 +122,19 @@ public class ConflictManager {
                 ? tactic.successOutcome().narrative()
                 : tactic.failureOutcome().narrative();
 
-        // Apply stat changes
         if (statChanges != null && !statChanges.isEmpty()) {
             StatChanges sc = buildStatChanges(statChanges);
             context.player().applyStatChanges(sc);
         }
 
-        // Apply relationship changes: key format is "NPC_ID.field" e.g. "HUSBAND.closeness"
         if (relChanges != null && !relChanges.isEmpty()) {
             applyRelationshipChanges(relChanges, context);
         }
 
-        // Publish tactic applied event with outcome
         eventPublisher.publish(new ConflictTacticAppliedEvent(
                 context.sessionId(), conflict.id(), tacticCode, success, narrative
         ));
 
-        // Resolve conflict if either side reaches 0 CSP
         if (updatedCsp.isOpponentDefeated() || updatedCsp.isPlayerDefeated()) {
             String outcome = updatedCsp.isOpponentDefeated()
                     ? "PLAYER_VICTORY"
@@ -166,8 +159,6 @@ public class ConflictManager {
             eventPublisher.publish(new RelationshipBrokenEvent(context.sessionId(), npc));
         }
     }
-
-    // ---- helpers ----
 
     private ConflictSpec findSpec(String conflictId) {
         return conflictEngine.getConflictSpecs().stream()

@@ -2,7 +2,6 @@ package ru.lifegame.backend.domain.model.character;
 
 import ru.lifegame.backend.domain.action.ActionType;
 import ru.lifegame.backend.domain.balance.GameBalance;
-import ru.lifegame.backend.domain.model.common.Location;
 import ru.lifegame.backend.domain.model.common.PlayerId;
 import ru.lifegame.backend.domain.model.session.GameTime;
 import ru.lifegame.backend.domain.model.stats.StatChanges;
@@ -15,7 +14,7 @@ public class PlayerCharacter {
     private final String name;
     private Stats stats;
     private JobInfo job;
-    private Location location;
+    private String location;
     private final Map<String, Boolean> tags;
     private Skills skills;
     private final List<String> inventory;
@@ -25,7 +24,7 @@ public class PlayerCharacter {
     private int daysSinceHousehold;
 
     public PlayerCharacter(PlayerId id, String name, Stats stats, JobInfo job,
-                           Location location, Map<String, Boolean> tags,
+                           String location, Map<String, Boolean> tags,
                            Skills skills, List<String> inventory) {
         this.id = id;
         this.name = name;
@@ -59,7 +58,11 @@ public class PlayerCharacter {
             stats = stats.changeMood(-GameBalance.MOOD_DAILY_DECREASE_HIGH_STRESS);
             job = job.changeBurnoutRisk(GameBalance.BURNOUT_RISK_DAILY_INCREASE);
         }
-        workedToday ? consecutiveWorkDays++ : (consecutiveWorkDays = 0);
+        if (workedToday) {
+            consecutiveWorkDays++;
+        } else {
+            consecutiveWorkDays = 0;
+        }
         daysSinceHousehold++;
         restedToday = false;
         workedToday = false;
@@ -86,14 +89,14 @@ public class PlayerCharacter {
         this.skills = skills.improve(skill, delta);
     }
 
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(String location) { this.location = location; }
 
     // --- Getters ---
     public PlayerId id() { return id; }
     public String name() { return name; }
     public Stats stats() { return stats; }
     public JobInfo job() { return job; }
-    public Location location() { return location; }
+    public String location() { return location; }
     public Map<String, Boolean> tags() { return Collections.unmodifiableMap(tags); }
     public Skills skills() { return skills; }
     public List<String> inventory() { return Collections.unmodifiableList(inventory); }
@@ -111,10 +114,10 @@ public class PlayerCharacter {
     public static PlayerCharacter initial() {
         return new PlayerCharacter(
                 PlayerId.generate(),
-                "Татьяна",
+                "\u0422\u0430\u0442\u044c\u044f\u043d\u0430",
                 Stats.initial(),
                 JobInfo.initial(),
-                Location.HOME,
+                "HOME",
                 Map.of("loves_cats", true, "efficient_worker", false),
                 Skills.initial(),
                 List.of("laptop", "smartphone")

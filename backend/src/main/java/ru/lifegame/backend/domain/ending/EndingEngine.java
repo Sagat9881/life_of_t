@@ -64,14 +64,13 @@ public class EndingEngine {
         Pets pets,
         QuestLog questLog
     ) {
-        // Pet death check (not in XML yet, can add later)
         if (pets.hasDeadPet()) {
             return Optional.of(new Ending(
                 "PET_DEATH",
-                EndingCategory.GAME_OVER_ENDING,
-                "Питомец погиб",
-                "Нужно было заботиться о питомце.",
-                "Попробуйте ещё раз."
+                "GAME_OVER",
+                "\u041f\u0438\u0442\u043e\u043c\u0435\u0446 \u043f\u043e\u0433\u0438\u0431",
+                "\u041d\u0443\u0436\u043d\u043e \u0431\u044b\u043b\u043e \u0437\u0430\u0431\u043e\u0442\u0438\u0442\u044c\u0441\u044f \u043e \u043f\u0438\u0442\u043e\u043c\u0446\u0435.",
+                "\u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437."
             ));
         }
 
@@ -91,7 +90,7 @@ public class EndingEngine {
         List<EndingSpec.EndingCondition> condList = conditions.conditions();
 
         if (condList == null || condList.isEmpty()) {
-            return true; // Always-true fallback (NEUTRAL_EPILOGUE)
+            return true;
         }
 
         return "OR".equals(conditions.mode())
@@ -100,10 +99,7 @@ public class EndingEngine {
     }
 
     private Ending toEnding(EndingSpec spec) {
-        EndingCategory category = "STORY".equals(spec.category())
-            ? EndingCategory.STORY_ENDING
-            : EndingCategory.GAME_OVER_ENDING;
-
+        String category = "STORY".equals(spec.category()) ? "STORY" : "GAME_OVER";
         return new Ending(
             spec.id(),
             category,

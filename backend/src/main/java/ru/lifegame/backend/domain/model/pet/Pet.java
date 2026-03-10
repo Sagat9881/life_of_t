@@ -5,7 +5,7 @@ import ru.lifegame.backend.domain.balance.GameBalance;
 public record Pet(
     String id,
     String name,
-    PetType type,
+    String type,
     int satiety,
     int attention,
     int health,
