@@ -10,14 +10,29 @@
         <condition type="time_of_day" value="night"/>
         <condition type="stat_min" stat="anxiety" value="60"/>
     </conditions>
-    <effects>
-        <stat-change stat="anxiety" value="+15"/>
-        <stat-change stat="energy" value="-10"/>
-        <dialogue speaker="narrator">
-            <line-ru>03:47. Темно. Александр спит. Всё тихо — но тревога уже здесь, сидит на груди невидимым весом. Мысли сразу начинают: а вдруг? а если? а зачем?</line-ru>
-        </dialogue>
-        <dialogue speaker="tanya">
-            <line-ru>Нет. Стоп. Это просто мысли. Не факты. (лежит, дышит) Просто мысли.</line-ru>
-        </dialogue>
-    </effects>
+    <dialogue>
+        <line speaker="narrator" lang="ru">03:47. Темно. Александр спит. Всё тихо — но тревога уже здесь, сидит на груди невидимым весом. Мысли сразу начинают: а вдруг? а если? а зачем?</line>
+        <line speaker="tanya" lang="ru">Нет. Стоп. Это просто мысли. Не факты. (лежит, дышит) Просто мысли.</line>
+    </dialogue>
+    <options>
+        <option id="breathe" label-ru="Дышать и ждать">
+            <effects>
+                <stat-change stat="anxiety" value="+10"/>
+                <stat-change stat="energy" value="-5"/>
+            </effects>
+        </option>
+        <option id="wake_alexander" label-ru="Разбудить Сашу">
+            <effects>
+                <stat-change stat="anxiety" value="-5"/>
+                <stat-change stat="energy" value="-3"/>
+                <relationship-change target="alexander" value="+2"/>
+            </effects>
+        </option>
+        <option id="get_up" label-ru="Встать и выпить воды">
+            <effects>
+                <stat-change stat="anxiety" value="-3"/>
+                <stat-change stat="energy" value="-8"/>
+            </effects>
+        </option>
+    </options>
 </event>

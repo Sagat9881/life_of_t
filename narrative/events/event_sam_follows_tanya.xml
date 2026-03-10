@@ -9,16 +9,16 @@
     <conditions>
         <condition type="time_of_day" value="morning"/>
     </conditions>
-    <effects>
-        <stat-change stat="happiness" value="+8"/>
-        <dialogue speaker="narrator">
-            <line-ru>Кухня. Сэм тут. Ванная. Сэм под дверью. Рабочий стол. Сэм рядом. Таня оглядывается — маленькая чёрная тень с подпалинами смотрит на неё обожающим взглядом.</line-ru>
-        </dialogue>
-        <dialogue speaker="tanya">
-            <line-ru>Сэм, ты мой охранник или мой хвост? (чешет за ухом) Оба варианта подходят.</line-ru>
-        </dialogue>
-        <dialogue speaker="sam">
-            <line-ru>Тяв! (виляет, продолжает следовать)</line-ru>
-        </dialogue>
-    </effects>
+    <dialogue>
+        <line speaker="narrator" lang="ru">Кухня. Сэм тут. Ванная. Сэм под дверью. Рабочий стол. Сэм рядом. Таня оглядывается — маленькая чёрная тень с подпалинами смотрит на неё обожающим взглядом.</line>
+        <line speaker="tanya" lang="ru">Сэм, ты мой охранник или мой хвост? (чешет за ухом) Оба варианта подходят.</line>
+        <line speaker="sam" lang="ru">Тяв! (виляет, продолжает следовать)</line>
+    </dialogue>
+    <options>
+        <option id="ok" label-ru="Взять его на прогулку">
+            <effects>
+                <stat-change stat="happiness" value="+8"/>
+            </effects>
+        </option>
+    </options>
 </event>

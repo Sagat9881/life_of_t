@@ -10,13 +10,15 @@
         <condition type="time_of_day" value="day"/>
         <condition type="location" value="kitchen"/>
     </conditions>
-    <effects>
-        <stat-change stat="happiness" value="+7"/>
-        <dialogue speaker="narrator">
-            <line-ru>Металлический звук по плитке — тик-тик-тик. Цирилла катит мюзле носом через всю кухню, подбрасывает лапой, ловит, катит обратно. Совершенно одна, совершенно довольна.</line-ru>
-        </dialogue>
-        <dialogue speaker="tanya">
-            <line-ru>Цирилла, откуда ты вообще достала это? (смотрит на неё) Не отвечай. Я не хочу знать.</line-ru>
-        </dialogue>
-    </effects>
+    <dialogue>
+        <line speaker="narrator" lang="ru">Металлический звук по плитке — тик-тик-тик. Цирилла катит мюзле носом через всю кухню, подбрасывает лапой, ловит, катит обратно. Совершенно одна, совершенно довольна.</line>
+        <line speaker="tanya" lang="ru">Цирилла, откуда ты вообще достала это? (смотрит на неё) Не отвечай. Я не хочу знать.</line>
+    </dialogue>
+    <options>
+        <option id="ok" label-ru="Пусть играет">
+            <effects>
+                <stat-change stat="happiness" value="+7"/>
+            </effects>
+        </option>
+    </options>
 </event>

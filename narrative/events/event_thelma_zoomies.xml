@@ -11,19 +11,17 @@
         <condition type="season" value="summer"/>
         <condition type="time_of_day" value="evening"/>
     </conditions>
-    <effects>
-        <stat-change stat="happiness" value="+15"/>
-        <dialogue speaker="narrator">
-            <line-ru>Что-то переключается внутри Тельмы. Она срывается с места — и летит. Через грядку, вокруг яблони, под забором, по всему огороду. Чёрно-белая молния.</line-ru>
-        </dialogue>
-        <dialogue speaker="tanya">
-            <line-ru>ТЕЛЬМА! СМОТРИ НА ТЕЛЬМУ! (хохочет) Саша! Она бежит! Она БЕЖИТ!</line-ru>
-        </dialogue>
-        <dialogue speaker="alexander">
-            <line-ru>Вижу. (улыбается) Летом она другая.</line-ru>
-        </dialogue>
-        <dialogue speaker="thelma">
-            <line-ru>МЯУ-У-У! (не останавливается)</line-ru>
-        </dialogue>
-    </effects>
+    <dialogue>
+        <line speaker="narrator" lang="ru">Что-то переключается внутри Тельмы. Она срывается с места — и летит. Через грядку, вокруг яблони, под забором, по всему огороду. Чёрно-белая молния.</line>
+        <line speaker="tanya" lang="ru">ТЕЛЬМА! СМОТРИ НА ТЕЛЬМУ! (хохочет) Саша! Она бежит! Она БЕЖИТ!</line>
+        <line speaker="alexander" lang="ru">Вижу. (улыбается) Летом она другая.</line>
+        <line speaker="thelma" lang="ru">МЯУ-У-У! (не останавливается)</line>
+    </dialogue>
+    <options>
+        <option id="ok" label-ru="Смеяться и наслаждаться">
+            <effects>
+                <stat-change stat="happiness" value="+15"/>
+            </effects>
+        </option>
+    </options>
 </event>

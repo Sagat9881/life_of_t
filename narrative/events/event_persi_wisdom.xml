@@ -10,17 +10,17 @@
         <condition type="stat_min" stat="anxiety" value="40"/>
         <condition type="location" value="home_room"/>
     </conditions>
-    <effects>
-        <stat-change stat="anxiety" value="-8"/>
-        <stat-change stat="happiness" value="+5"/>
-        <dialogue speaker="narrator">
-            <line-ru>Перси поднимает голову и смотрит на Таню. Долго. Спокойно. Без суеты и без паники — просто смотрит, как будто говорит: «Я вижу тебя. Всё будет хорошо.»</line-ru>
-        </dialogue>
-        <dialogue speaker="tanya">
-            <line-ru>Перси... ты умная, да? Ты знаешь что-то, чего я не знаю?</line-ru>
-        </dialogue>
-        <dialogue speaker="persi">
-            <line-ru>...(медленно опускает голову на лапы, не отрывая взгляда)</line-ru>
-        </dialogue>
-    </effects>
+    <dialogue>
+        <line speaker="narrator" lang="ru">Перси поднимает голову и смотрит на Таню. Долго. Спокойно. Без суеты и без паники — просто смотрит, как будто говорит: «Я вижу тебя. Всё будет хорошо.»</line>
+        <line speaker="tanya" lang="ru">Перси... ты умная, да? Ты знаешь что-то, чего я не знаю?</line>
+        <line speaker="persi" lang="ru">...(медленно опускает голову на лапы, не отрывая взгляда)</line>
+    </dialogue>
+    <options>
+        <option id="ok" label-ru="Погладить её и выдохнуть">
+            <effects>
+                <stat-change stat="anxiety" value="-8"/>
+                <stat-change stat="happiness" value="+5"/>
+            </effects>
+        </option>
+    </options>
 </event>

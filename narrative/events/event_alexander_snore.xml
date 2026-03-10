@@ -10,20 +10,24 @@
         <condition type="time_of_day" value="night"/>
         <condition type="location" value="home_room"/>
     </conditions>
-    <effects>
-        <stat-change stat="happiness" value="+5"/>
-        <stat-change stat="energy" value="-3"/>
-        <dialogue speaker="narrator">
-            <line-ru>Тихо. Спокойно. Потом: хр-р-р. Пауза. Хр-р-р-р. Александр спит богатырским сном программиста после трудного дня.</line-ru>
-        </dialogue>
-        <dialogue speaker="tanya">
-            <line-ru>(шёпотом) Саша. Тихо. (пауза) Саша. (толкает) Саша!</line-ru>
-        </dialogue>
-        <dialogue speaker="alexander">
-            <line-ru>(сквозь сон) Мм... да... коммит...(переворачивается, замолкает)</line-ru>
-        </dialogue>
-        <dialogue speaker="tanya">
-            <line-ru>(тихо смеётся) Я тебя всё равно люблю.</line-ru>
-        </dialogue>
-    </effects>
+    <dialogue>
+        <line speaker="narrator" lang="ru">Тихо. Спокойно. Потом: хр-р-р. Пауза. Хр-р-р-р. Александр спит богатырским сном программиста после трудного дня.</line>
+        <line speaker="tanya" lang="ru">(шёпотом) Саша. Тихо. (пауза) Саша. (толкает) Саша!</line>
+        <line speaker="alexander" lang="ru">(сквозь сон) Мм... да... коммит...(переворачивается, замолкает)</line>
+        <line speaker="tanya" lang="ru">(тихо смеётся) Я тебя всё равно люблю.</line>
+    </dialogue>
+    <options>
+        <option id="laugh_it_off" label-ru="Посмеяться и засыпать">
+            <effects>
+                <stat-change stat="happiness" value="+5"/>
+                <stat-change stat="energy" value="-3"/>
+            </effects>
+        </option>
+        <option id="poke_again" label-ru="Ещё раз потолкать его">
+            <effects>
+                <stat-change stat="happiness" value="+3"/>
+                <stat-change stat="energy" value="-5"/>
+            </effects>
+        </option>
+    </options>
 </event>

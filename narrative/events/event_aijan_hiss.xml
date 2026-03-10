@@ -10,19 +10,17 @@
         <condition type="location" value="alexander_room"/>
         <condition type="trigger" value="cat_enters_room"/>
     </conditions>
-    <effects>
-        <stat-change stat="anxiety" value="+3"/>
-        <dialogue speaker="aijan">
-            <line-ru>ШШШШ!!!! (шерсть дыбом, хвост трубой, максимальная драматичность)</line-ru>
-        </dialogue>
-        <dialogue speaker="narrator">
-            <line-ru>Другая кошка замирает. Айджан делает один шаг вперёд — просто чтобы обозначить позицию. Самая сильная. Всегда.</line-ru>
-        </dialogue>
-        <dialogue speaker="tanya">
-            <line-ru>Айджан! Никто не претендует на твою территорию! Успокойся!</line-ru>
-        </dialogue>
-        <dialogue speaker="aijan">
-            <line-ru>Ш... (недовольно, но успокаивается)</line-ru>
-        </dialogue>
-    </effects>
+    <dialogue>
+        <line speaker="aijan" lang="ru">ШШШШ!!!! (шерсть дыбом, хвост трубой, максимальная драматичность)</line>
+        <line speaker="narrator" lang="ru">Другая кошка замирает. Айджан делает один шаг вперёд — просто чтобы обозначить позицию. Самая сильная. Всегда.</line>
+        <line speaker="tanya" lang="ru">Айджан! Никто не претендует на твою территорию! Успокойся!</line>
+        <line speaker="aijan" lang="ru">Ш... (недовольно, но успокаивается)</line>
+    </dialogue>
+    <options>
+        <option id="ok" label-ru="Понятно, всё под контролем">
+            <effects>
+                <stat-change stat="anxiety" value="+3"/>
+            </effects>
+        </option>
+    </options>
 </event>

@@ -10,17 +10,22 @@
         <condition type="time_of_day" value="day"/>
         <condition type="location" value="living_room"/>
     </conditions>
-    <effects>
-        <stat-change stat="happiness" value="+10"/>
-        <stat-change stat="anxiety" value="-5"/>
-        <dialogue speaker="klop">
-            <line-ru>Пурр-р-р... (переворачивается с видом существа, которое полностью контролирует ситуацию)</line-ru>
-        </dialogue>
-        <dialogue speaker="tanya">
-            <line-ru>Клоп. Ты делаешь это каждый раз когда я прохожу мимо. (наклоняется и жмякает его живот) Ты идеальный.</line-ru>
-        </dialogue>
-        <dialogue speaker="klop">
-            <line-ru>Пурр-р-р-р-р... (интенсивнее)</line-ru>
-        </dialogue>
-    </effects>
+    <dialogue>
+        <line speaker="klop" lang="ru">Пурр-р-р... (переворачивается с видом существа, которое полностью контролирует ситуацию)</line>
+        <line speaker="tanya" lang="ru">Клоп. Ты делаешь это каждый раз когда я прохожу мимо. (наклоняется и жмякает его живот) Ты идеальный.</line>
+        <line speaker="klop" lang="ru">Пурр-р-р-р-р... (интенсивнее)</line>
+    </dialogue>
+    <options>
+        <option id="belly_rub" label-ru="Хорошенько почесать живот">
+            <effects>
+                <stat-change stat="happiness" value="+10"/>
+                <stat-change stat="anxiety" value="-5"/>
+            </effects>
+        </option>
+        <option id="quick_pat" label-ru="Быстро потрепать и пойти дальше">
+            <effects>
+                <stat-change stat="happiness" value="+4"/>
+            </effects>
+        </option>
+    </options>
 </event>

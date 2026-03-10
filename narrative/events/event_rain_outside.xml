@@ -10,14 +10,23 @@
         <condition type="time_of_day" value="evening"/>
         <condition type="weather" value="rain"/>
     </conditions>
-    <effects>
-        <stat-change stat="happiness" value="+12"/>
-        <stat-change stat="anxiety" value="-8"/>
-        <dialogue speaker="narrator">
-            <line-ru>Дождь пришёл внезапно — сначала пара капель на стекло, потом настоящий. Гарфилд и Цирилла сидят на подоконнике, смотрят на улицу. В квартире тепло и пахнет кофе.</line-ru>
-        </dialogue>
-        <dialogue speaker="tanya">
-            <line-ru>Слышите? Дождь. (закутывается в плед) Вот это и называется «хорошо».</line-ru>
-        </dialogue>
-    </effects>
+    <dialogue>
+        <line speaker="narrator" lang="ru">Дождь пришёл внезапно — сначала пара капель на стекло, потом настоящий. Гарфилд и Цирилла сидят на подоконнике, смотрят на улицу. В квартире тепло и пахнет кофе.</line>
+        <line speaker="tanya" lang="ru">Слышите? Дождь. (закутывается в плед) Вот это и называется «хорошо».</line>
+    </dialogue>
+    <options>
+        <option id="tea_and_book" label-ru="Заварить чай и взять книгу">
+            <effects>
+                <stat-change stat="happiness" value="+15"/>
+                <stat-change stat="anxiety" value="-10"/>
+                <stat-change stat="energy" value="+5"/>
+            </effects>
+        </option>
+        <option id="just_watch" label-ru="Просто смотреть на дождь">
+            <effects>
+                <stat-change stat="happiness" value="+12"/>
+                <stat-change stat="anxiety" value="-8"/>
+            </effects>
+        </option>
+    </options>
 </event>

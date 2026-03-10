@@ -9,19 +9,23 @@
     <conditions>
         <condition type="time_of_day" value="day"/>
     </conditions>
-    <effects>
-        <stat-change stat="happiness" value="+3"/>
-        <dialogue speaker="narrator">
-            <line-ru>Подозрительная тишина. Потом звук: хрум-хрум-хрум. Дюк лежит в углу и грызёт что-то явно не своё — судя по цвету, это был тапочек.</line-ru>
-        </dialogue>
-        <dialogue speaker="tanya">
-            <line-ru>Дюк! Это мой тапочек! Отдай! ОТДАЙ! Перси, скажи ему!</line-ru>
-        </dialogue>
-        <dialogue speaker="persi">
-            <line-ru>...(смотрит в другую сторону)</line-ru>
-        </dialogue>
-        <dialogue speaker="tanya">
-            <line-ru>Предательница.</line-ru>
-        </dialogue>
-    </effects>
+    <dialogue>
+        <line speaker="narrator" lang="ru">Подозрительная тишина. Потом звук: хрум-хрум-хрум. Дюк лежит в углу и грызёт что-то явно не своё — судя по цвету, это был тапочек.</line>
+        <line speaker="tanya" lang="ru">Дюк! Это мой тапочек! Отдай! ОТДАЙ! Перси, скажи ему!</line>
+        <line speaker="persi" lang="ru">...(смотрит в другую сторону)</line>
+        <line speaker="tanya" lang="ru">Предательница.</line>
+    </dialogue>
+    <options>
+        <option id="rescue_slipper" label-ru="Отобрать тапочек">
+            <effects>
+                <stat-change stat="happiness" value="+3"/>
+            </effects>
+        </option>
+        <option id="let_go" label-ru="Тапочек уже не спасти">
+            <effects>
+                <stat-change stat="happiness" value="+5"/>
+                <stat-change stat="energy" value="+2"/>
+            </effects>
+        </option>
+    </options>
 </event>

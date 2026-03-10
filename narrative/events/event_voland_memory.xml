@@ -9,14 +9,16 @@
     <conditions>
         <condition type="trigger" value="view_old_photo"/>
     </conditions>
-    <effects>
-        <stat-change stat="happiness" value="+5"/>
-        <stat-change stat="anxiety" value="-5"/>
-        <dialogue speaker="narrator">
-            <line-ru>[ВОСПОМИНАНИЕ] Воланд молодой — прыгает, носится, видит всё. Таня и Александр — совсем молодые, смеются.</line-ru>
-        </dialogue>
-        <dialogue speaker="tanya">
-            <line-ru>Помню как он гонялся за своим хвостом. Целый час. Мы хохотали так что живот болел. (пауза, тише) Он всё ещё счастлив. Просто по-другому.</line-ru>
-        </dialogue>
-    </effects>
+    <dialogue>
+        <line speaker="narrator" lang="ru">[ВОСПОМИНАНИЕ] Воланд молодой — прыгает, носится, видит всё. Таня и Александр — совсем молодые, смеются.</line>
+        <line speaker="tanya" lang="ru">Помню как он гонялся за своим хвостом. Целый час. Мы хохотали так что живот болел. (пауза, тише) Он всё ещё счастлив. Просто по-другому.</line>
+    </dialogue>
+    <options>
+        <option id="ok" label-ru="Побыть с этим воспоминанием">
+            <effects>
+                <stat-change stat="happiness" value="+5"/>
+                <stat-change stat="anxiety" value="-5"/>
+            </effects>
+        </option>
+    </options>
 </event>
