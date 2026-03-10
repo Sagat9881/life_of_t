@@ -6,7 +6,7 @@ import '../styles/pages/ActionsPage.css';
 
 export function ActionsPage() {
   const {
-    actions,
+    availableActions,
     isLoading,
     error,
     fetchGameState,
@@ -24,9 +24,8 @@ export function ActionsPage() {
         <p className="actions-page__subtitle">
           Выберите действие, чтобы продвинуться в игре
         </p>
-        
         <ActionList
-          actions={actions}
+          actions={availableActions}
           isLoading={isLoading}
           error={error}
           onExecuteAction={executeAction}

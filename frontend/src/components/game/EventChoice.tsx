@@ -6,42 +6,68 @@ import type { EventView } from '../../types/game';
 import '../../styles/components/EventChoice.css';
 
 interface EventChoiceProps {
-  event: EventView;
-  isLoading?: boolean;
-  error?: string | null;
+  event:           EventView;
+  isLoading?:      boolean;
+  error?:          string | null;
   onSelectChoice?: (eventId: string, choiceCode: string) => void;
-  onCancel?: () => void;
-  onRetry?: () => void;
+  onCancel?:       () => void;
+  onRetry?:        () => void;
 }
 
-export function EventChoice({ event, isLoading = false, error = null, onSelectChoice, onCancel, onRetry }: EventChoiceProps) {
-  const { id, label, description, options } = event;
+export function EventChoice({
+  event,
+  isLoading = false,
+  error = null,
+  onSelectChoice,
+  onCancel,
+  onRetry,
+}: EventChoiceProps) {
+  // EventView uses titleRu / descriptionRu / options[].labelRu
+  const { id, titleRu, descriptionRu, options } = event;
 
-  if (isLoading) return <div className="event-choice event-choice--loading"><LoadingSpinner size="large" text="Обработка события..." /></div>;
-  if (error) return <div className="event-choice event-choice--error"><ErrorMessage message={error} {...(onRetry && { onRetry })} /></div>;
+  if (isLoading) {
+    return (
+      <div className="event-choice event-choice--loading">
+        <LoadingSpinner size="large" text="Обработка события..." />
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="event-choice event-choice--error">
+        <ErrorMessage message={error} {...(onRetry && { onRetry })} />
+      </div>
+    );
+  }
 
   return (
     <div className="event-choice">
-      {onCancel && <button onClick={onCancel} className="event-choice__close" aria-label="Закрыть"><X size={24} /></button>}
+      {onCancel && (
+        <button onClick={onCancel} className="event-choice__close" aria-label="Закрыть">
+          <X size={24} />
+        </button>
+      )}
       <div className="event-choice__header">
         <div className="event-choice__icon"><Sparkles size={32} /></div>
-        <h2 className="event-choice__title">{label}</h2>
+        <h2 className="event-choice__title">{titleRu}</h2>
       </div>
-      <div className="event-choice__description"><p>{description}</p></div>
+      <div className="event-choice__description"><p>{descriptionRu}</p></div>
       <div className="event-choice__choices">
         <h3 className="event-choice__choices-title">Что вы сделаете?</h3>
         <div className="event-choice__choices-list">
           {options.map((option, index) => (
             <ChoiceButton
               key={option.code}
-              choice={{ code: option.code, text: option.label }}
+              choice={{ code: option.code, text: option.labelRu }}
               index={index}
               {...(onSelectChoice && { onSelect: (code: string) => onSelectChoice(id, code) })}
             />
           ))}
         </div>
       </div>
-      {options.length === 0 && <div className="event-choice__empty"><p>Нет доступных вариантов</p></div>}
+      {options.length === 0 && (
+        <div className="event-choice__empty"><p>Нет доступных вариантов</p></div>
+      )}
     </div>
   );
 }

@@ -5,7 +5,8 @@ import { useGameStore } from '../store/gameStore';
 import '../styles/pages/RelationshipsPage.css';
 
 export function RelationshipsPage() {
-  const { npcs, pets, isLoading, error, fetchGameState } = useGameStore();
+  const { relationships, pets, isLoading, error, fetchGameState } = useGameStore();
+
   useEffect(() => { fetchGameState(); }, [fetchGameState]);
 
   return (
@@ -14,7 +15,7 @@ export function RelationshipsPage() {
         <h1 className="relationships-page__title">Отношения</h1>
         <p className="relationships-page__subtitle">Управляйте отношениями с близкими людьми и питомцами</p>
         <RelationshipList
-          npcs={npcs}
+          relationships={relationships}
           pets={pets}
           isLoading={isLoading}
           error={error}

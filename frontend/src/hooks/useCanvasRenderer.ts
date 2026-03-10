@@ -21,17 +21,17 @@
  *   3. Characters  (animated strip, z-sorted)
  *
  * Effect structure (3 effects, no restarts):
- *   Effect 1 — dep: [config]     — full asset reload on location change
+ *   Effect 1 — dep: [config]              — full asset reload on location change
  *   Effect 2 — dep: [characterAnimations] — delta-load new anim sprites
- *   Effect 3 — dep: [canvasRef]  — RAF loop, never restarts
+ *   Effect 3 — dep: [canvasRef]           — RAF loop, never restarts
  */
 
 import { useEffect, useRef } from 'react';
 import type { LocationConfig, FurniturePlacement, CharacterSlot } from '../types/location.types';
 
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // Types
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface CropOffset {
   x: number;
@@ -71,9 +71,9 @@ export interface UseCanvasRendererOptions {
   characterAnimations?: Record<string, string>;
 }
 
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // Helpers
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 
 const atlasUrl = (type: string, name: string, animation: string): string =>
   `/assets/${type}/${name}/animations/${animation}_atlas.png`;
@@ -94,7 +94,7 @@ async function fetchAtlasConfig(type: string, name: string): Promise<AtlasConfig
 function loadImage(src: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image();
-    img.onload = () => resolve(img);
+    img.onload  = () => resolve(img);
     img.onerror = () => { console.warn(`[canvas] 404: ${src}`); resolve(null); };
     img.src = src;
   });
@@ -108,36 +108,35 @@ function frameH(img: HTMLImageElement, cfg: AnimationConfig): number {
   return cfg.frameHeight > 0 ? cfg.frameHeight : img.naturalHeight;
 }
 
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // Hook
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function useCanvasRenderer({
   config,
   canvasRef,
-  timeOfDay,
   selectedObjectId,
   hoveredObjectId,
   characterAnimations,
 }: UseCanvasRendererOptions): void {
 
   // Stable refs — RAF reads these without restarting
-  const imagesRef        = useRef<Map<string, HTMLImageElement>>(new Map());
-  const atlasConfigsRef  = useRef<Map<string, AtlasConfig>>(new Map());
-  const slotStateRef     = useRef<Map<string, SlotState>>(new Map());
-  const configRef        = useRef(config);
-  const selectedRef      = useRef(selectedObjectId);
-  const hoveredRef       = useRef(hoveredObjectId);
-  const charAnimsRef     = useRef(characterAnimations);
-  const rafRef           = useRef<number | undefined>(undefined);
+  const imagesRef       = useRef<Map<string, HTMLImageElement>>(new Map());
+  const atlasConfigsRef = useRef<Map<string, AtlasConfig>>(new Map());
+  const slotStateRef    = useRef<Map<string, SlotState>>(new Map());
+  const configRef       = useRef(config);
+  const selectedRef     = useRef(selectedObjectId);
+  const hoveredRef      = useRef(hoveredObjectId);
+  const charAnimsRef    = useRef(characterAnimations);
+  const rafRef          = useRef<number | undefined>(undefined);
 
-  // Keep refs in sync on every render (no effect needed)
+  // Keep refs in sync on every render
   configRef.current    = config;
   selectedRef.current  = selectedObjectId;
   hoveredRef.current   = hoveredObjectId;
   charAnimsRef.current = characterAnimations;
 
-  // ── Effect 1: Full asset reload when location config changes ───
+  // ── Effect 1: Full asset reload when location config changes ───────────────
   useEffect(() => {
     imagesRef.current.clear();
     atlasConfigsRef.current.clear();
@@ -151,13 +150,21 @@ export function useCanvasRenderer({
       const enqueueImage = (type: string, name: string, anim: string): void => {
         const url = atlasUrl(type, name, anim);
         if (imagesRef.current.has(url)) return;
-        work.push(loadImage(url).then((img) => { if (img && !cancelled) imagesRef.current.set(url, img); }));
+        work.push(
+          loadImage(url).then((img) => {
+            if (img && !cancelled) imagesRef.current.set(url, img);
+          })
+        );
       };
 
       const enqueueConfig = (type: string, name: string): void => {
         const key = atlasConfigUrl(type, name);
         if (atlasConfigsRef.current.has(key)) return;
-        work.push(fetchAtlasConfig(type, name).then((cfg) => { if (cfg && !cancelled) atlasConfigsRef.current.set(key, cfg); }));
+        work.push(
+          fetchAtlasConfig(type, name).then((cfg) => {
+            if (cfg && !cancelled) atlasConfigsRef.current.set(key, cfg);
+          })
+        );
       };
 
       enqueueImage('locations', config.locationAsset, config.backgroundAnimation);
@@ -182,9 +189,7 @@ export function useCanvasRenderer({
     return () => { cancelled = true; };
   }, [config]);
 
-  // ── Effect 2: Delta-load when a character switches animation ───
-  // Only fetches the new PNG if it’s not already in cache.
-  // RAF is NOT interrupted.
+  // ── Effect 2: Delta-load when a character switches animation ──────────────
   useEffect(() => {
     if (!characterAnimations) return;
     let cancelled = false;
@@ -194,14 +199,20 @@ export function useCanvasRenderer({
       const anim = characterAnimations[c.id] ?? c.defaultAnimation;
       const url  = atlasUrl('characters', c.entityName, anim);
       if (imagesRef.current.has(url)) return;
-      work.push(loadImage(url).then((img) => { if (img && !cancelled) imagesRef.current.set(url, img); }));
+      work.push(
+        loadImage(url).then((img) => {
+          if (img && !cancelled) imagesRef.current.set(url, img);
+        })
+      );
     });
 
-    if (work.length > 0) Promise.all(work).catch((e) => console.error('[canvas] delta load error:', e));
+    if (work.length > 0) {
+      Promise.all(work).catch((e) => console.error('[canvas] delta load error:', e));
+    }
     return () => { cancelled = true; };
   }, [characterAnimations, config.characters]);
 
-  // ── Effect 3: RAF render loop — starts once, never restarts ──
+  // ── Effect 3: RAF render loop — starts once, never restarts ───────────────
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -211,7 +222,6 @@ export function useCanvasRenderer({
     const W = canvas.width;   // 640
     const H = canvas.height;  // 480
 
-    /** Draw a single sprite frame (or full image for statics). */
     const drawSprite = (
       img: HTMLImageElement,
       animCfg: AnimationConfig | undefined,
@@ -221,7 +231,6 @@ export function useCanvasRenderer({
       destH: number,
       now: number
     ): void => {
-      // Static / no config: draw full image
       if (!animCfg || animCfg.columns <= 1) {
         const dw = img.naturalWidth > 0 ? destH * (img.naturalWidth / img.naturalHeight) : destH;
         ctx.drawImage(img, destX - dw / 2, destY - destH, dw, destH);
@@ -237,7 +246,6 @@ export function useCanvasRenderer({
         let state = slotStateRef.current.get(slotId);
         const currentAnim = charAnimsRef.current?.[slotId];
 
-        // Detect animation switch → reset frame
         if (state && currentAnim && state.animationName !== currentAnim) {
           state = { animationName: currentAnim, frameIndex: 0, lastFrameTime: now };
           slotStateRef.current.set(slotId, state);
@@ -248,7 +256,7 @@ export function useCanvasRenderer({
           if (now - state.lastFrameTime >= interval) {
             let next = state.frameIndex + 1;
             if (next >= animCfg.columns) next = animCfg.loop ? 0 : animCfg.columns - 1;
-            state.frameIndex = next;
+            state.frameIndex    = next;
             state.lastFrameTime = now;
           }
           frame = state.frameIndex;
@@ -257,14 +265,14 @@ export function useCanvasRenderer({
 
       ctx.drawImage(
         img,
-        frame * fw, 0, fw, fh,               // source rect
-        destX - dw / 2, destY - destH, dw, destH  // dest rect
+        frame * fw, 0, fw, fh,
+        destX - dw / 2, destY - destH, dw, destH
       );
     };
 
     const render = (now: number): void => {
       ctx.clearRect(0, 0, W, H);
-      ctx.imageSmoothingEnabled = false; // pixel-art: no bilinear blur
+      ctx.imageSmoothingEnabled = false;
 
       const cfg      = configRef.current;
       const selected = selectedRef.current;
@@ -321,5 +329,5 @@ export function useCanvasRenderer({
 
     rafRef.current = requestAnimationFrame(render);
     return () => { if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current); };
-  }, [canvasRef]); // intentionally empty of other deps — reads state via refs
+  }, [canvasRef]);
 }
