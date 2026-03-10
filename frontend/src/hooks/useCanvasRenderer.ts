@@ -19,6 +19,11 @@
  *   1. Background  (single frame, stretched to canvas)
  *   2. Furniture   (static single frame, z-sorted)
  *   3. Characters  (animated strip, z-sorted)
+ *
+ * Effect structure (3 effects, no restarts):
+ *   Effect 1 — dep: [config]     — full asset reload on location change
+ *   Effect 2 — dep: [characterAnimations] — delta-load new anim sprites
+ *   Effect 3 — dep: [canvasRef]  — RAF loop, never restarts
  */
 
 import { useEffect, useRef } from 'react';
@@ -39,8 +44,8 @@ interface AnimationConfig {
   file: string;
   layout: 'strip';
   columns: number;
-  frameWidth: number;   // 0 = derive
-  frameHeight: number;  // 0 = derive
+  frameWidth: number;   // 0 = derive from image
+  frameHeight: number;  // 0 = derive from image
   fps: number;
   loop: boolean;
   cropOffset: CropOffset;
@@ -90,20 +95,15 @@ function loadImage(src: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => resolve(img);
-    img.onerror = () => {
-      console.warn(`[useCanvasRenderer] 404: ${src}`);
-      resolve(null);
-    };
+    img.onerror = () => { console.warn(`[canvas] 404: ${src}`); resolve(null); };
     img.src = src;
   });
 }
 
-/** Derive effective frameWidth from atlas image and column count. */
 function frameW(img: HTMLImageElement, cfg: AnimationConfig): number {
   return cfg.frameWidth > 0 ? cfg.frameWidth : Math.floor(img.naturalWidth / cfg.columns);
 }
 
-/** Derive effective frameHeight from atlas image. */
 function frameH(img: HTMLImageElement, cfg: AnimationConfig): number {
   return cfg.frameHeight > 0 ? cfg.frameHeight : img.naturalHeight;
 }
@@ -120,90 +120,88 @@ export function useCanvasRenderer({
   hoveredObjectId,
   characterAnimations,
 }: UseCanvasRendererOptions): void {
-  // Loaded sprite images keyed by atlasUrl()
-  const imagesRef = useRef<Map<string, HTMLImageElement>>(new Map());
-  // Atlas JSON configs keyed by atlasConfigUrl()
-  const atlasConfigsRef = useRef<Map<string, AtlasConfig>>(new Map());
-  // Per-character-slot animation state
-  const slotStateRef = useRef<Map<string, SlotState>>(new Map());
-  // RAF handle
-  const rafRef = useRef<number | undefined>(undefined);
-  // Latest render-loop inputs as refs so RAF never needs to restart
-  const selectedRef = useRef(selectedObjectId);
-  const hoveredRef = useRef(hoveredObjectId);
-  const charAnimsRef = useRef(characterAnimations);
 
-  selectedRef.current = selectedObjectId;
-  hoveredRef.current = hoveredObjectId;
+  // Stable refs — RAF reads these without restarting
+  const imagesRef        = useRef<Map<string, HTMLImageElement>>(new Map());
+  const atlasConfigsRef  = useRef<Map<string, AtlasConfig>>(new Map());
+  const slotStateRef     = useRef<Map<string, SlotState>>(new Map());
+  const configRef        = useRef(config);
+  const selectedRef      = useRef(selectedObjectId);
+  const hoveredRef       = useRef(hoveredObjectId);
+  const charAnimsRef     = useRef(characterAnimations);
+  const rafRef           = useRef<number | undefined>(undefined);
+
+  // Keep refs in sync on every render (no effect needed)
+  configRef.current    = config;
+  selectedRef.current  = selectedObjectId;
+  hoveredRef.current   = hoveredObjectId;
   charAnimsRef.current = characterAnimations;
 
-  // ── Effect 1: load assets when location config changes ─────
+  // ── Effect 1: Full asset reload when location config changes ───
   useEffect(() => {
-    // Clear cached assets when location changes
     imagesRef.current.clear();
     atlasConfigsRef.current.clear();
     slotStateRef.current.clear();
 
     let cancelled = false;
 
-    const load = async (): Promise<void> => {
-      const imagePromises: Promise<void>[] = [];
-      const configPromises: Promise<void>[] = [];
+    const loadAll = async (): Promise<void> => {
+      const work: Promise<void>[] = [];
 
-      const scheduleImage = (type: string, name: string, animation: string): void => {
-        const url = atlasUrl(type, name, animation);
+      const enqueueImage = (type: string, name: string, anim: string): void => {
+        const url = atlasUrl(type, name, anim);
         if (imagesRef.current.has(url)) return;
-        imagePromises.push(
-          loadImage(url).then((img) => {
-            if (img && !cancelled) imagesRef.current.set(url, img);
-          })
-        );
+        work.push(loadImage(url).then((img) => { if (img && !cancelled) imagesRef.current.set(url, img); }));
       };
 
-      const scheduleConfig = (type: string, name: string): void => {
+      const enqueueConfig = (type: string, name: string): void => {
         const key = atlasConfigUrl(type, name);
         if (atlasConfigsRef.current.has(key)) return;
-        configPromises.push(
-          fetchAtlasConfig(type, name).then((cfg) => {
-            if (cfg && !cancelled) atlasConfigsRef.current.set(key, cfg);
-          })
-        );
+        work.push(fetchAtlasConfig(type, name).then((cfg) => { if (cfg && !cancelled) atlasConfigsRef.current.set(key, cfg); }));
       };
 
-      // Background
-      scheduleImage('locations', config.locationAsset, config.backgroundAnimation);
-      scheduleConfig('locations', config.locationAsset);
+      enqueueImage('locations', config.locationAsset, config.backgroundAnimation);
+      enqueueConfig('locations', config.locationAsset);
 
-      // Furniture
       config.furniture.forEach((f: FurniturePlacement) => {
-        scheduleImage('furniture', f.entityName, f.animation);
-        scheduleConfig('furniture', f.entityName);
+        enqueueImage('furniture', f.entityName, f.animation);
+        enqueueConfig('furniture', f.entityName);
       });
 
-      // Characters
       config.characters.forEach((c: CharacterSlot) => {
         const anim = charAnimsRef.current?.[c.id] ?? c.defaultAnimation;
-        scheduleImage('characters', c.entityName, anim);
-        scheduleConfig('characters', c.entityName);
-        // Pre-init slot state
-        if (!slotStateRef.current.has(c.id)) {
-          slotStateRef.current.set(c.id, {
-            animationName: anim,
-            frameIndex: 0,
-            lastFrameTime: 0,
-          });
-        }
+        enqueueImage('characters', c.entityName, anim);
+        enqueueConfig('characters', c.entityName);
+        slotStateRef.current.set(c.id, { animationName: anim, frameIndex: 0, lastFrameTime: 0 });
       });
 
-      await Promise.all([...imagePromises, ...configPromises]);
+      await Promise.all(work);
     };
 
-    load().catch((err) => console.error('[useCanvasRenderer] load error:', err));
-
+    loadAll().catch((e) => console.error('[canvas] load error:', e));
     return () => { cancelled = true; };
-  }, [config]); // only reload when location changes
+  }, [config]);
 
-  // ── Effect 2: RAF render loop — never restarts ──────────────
+  // ── Effect 2: Delta-load when a character switches animation ───
+  // Only fetches the new PNG if it’s not already in cache.
+  // RAF is NOT interrupted.
+  useEffect(() => {
+    if (!characterAnimations) return;
+    let cancelled = false;
+
+    const work: Promise<void>[] = [];
+    config.characters.forEach((c: CharacterSlot) => {
+      const anim = characterAnimations[c.id] ?? c.defaultAnimation;
+      const url  = atlasUrl('characters', c.entityName, anim);
+      if (imagesRef.current.has(url)) return;
+      work.push(loadImage(url).then((img) => { if (img && !cancelled) imagesRef.current.set(url, img); }));
+    });
+
+    if (work.length > 0) Promise.all(work).catch((e) => console.error('[canvas] delta load error:', e));
+    return () => { cancelled = true; };
+  }, [characterAnimations, config.characters]);
+
+  // ── Effect 3: RAF render loop — starts once, never restarts ──
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -213,6 +211,7 @@ export function useCanvasRenderer({
     const W = canvas.width;   // 640
     const H = canvas.height;  // 480
 
+    /** Draw a single sprite frame (or full image for statics). */
     const drawSprite = (
       img: HTMLImageElement,
       animCfg: AnimationConfig | undefined,
@@ -222,34 +221,31 @@ export function useCanvasRenderer({
       destH: number,
       now: number
     ): void => {
-      // No atlas config → draw full image (fallback for backgrounds/static)
+      // Static / no config: draw full image
       if (!animCfg || animCfg.columns <= 1) {
-        const destW = img.naturalWidth > 0
-          ? destH * (img.naturalWidth / img.naturalHeight)
-          : destH;
-        ctx.drawImage(img, destX - destW / 2, destY - destH, destW, destH);
+        const dw = img.naturalWidth > 0 ? destH * (img.naturalWidth / img.naturalHeight) : destH;
+        ctx.drawImage(img, destX - dw / 2, destY - destH, dw, destH);
         return;
       }
 
       const fw = frameW(img, animCfg);
       const fh = frameH(img, animCfg);
-      const destW = fh > 0 ? destH * (fw / fh) : destH;
+      const dw = fh > 0 ? destH * (fw / fh) : destH;
 
-      // Advance frame for character slots
       let frame = 0;
       if (slotId !== null) {
         let state = slotStateRef.current.get(slotId);
         const currentAnim = charAnimsRef.current?.[slotId];
 
-        // Reset frame if animation changed
+        // Detect animation switch → reset frame
         if (state && currentAnim && state.animationName !== currentAnim) {
           state = { animationName: currentAnim, frameIndex: 0, lastFrameTime: now };
           slotStateRef.current.set(slotId, state);
         }
 
         if (state) {
-          const frameDuration = 1000 / animCfg.fps;
-          if (now - state.lastFrameTime >= frameDuration) {
+          const interval = 1000 / animCfg.fps;
+          if (now - state.lastFrameTime >= interval) {
             let next = state.frameIndex + 1;
             if (next >= animCfg.columns) next = animCfg.loop ? 0 : animCfg.columns - 1;
             state.frameIndex = next;
@@ -259,92 +255,71 @@ export function useCanvasRenderer({
         }
       }
 
-      // Source rect: strip layout, frame index = column
-      const sx = frame * fw;
-      const sy = 0;
-
       ctx.drawImage(
         img,
-        sx, sy, fw, fh,                        // source
-        destX - destW / 2, destY - destH, destW, destH  // dest
+        frame * fw, 0, fw, fh,               // source rect
+        destX - dw / 2, destY - destH, dw, destH  // dest rect
       );
     };
 
     const render = (now: number): void => {
       ctx.clearRect(0, 0, W, H);
-      ctx.imageSmoothingEnabled = false; // keep pixel-art crisp
+      ctx.imageSmoothingEnabled = false; // pixel-art: no bilinear blur
 
-      const cfg = config;
+      const cfg      = configRef.current;
       const selected = selectedRef.current;
-      const hovered = hoveredRef.current;
+      const hovered  = hoveredRef.current;
 
-      // 1. Background — single frame, stretched
+      // 1. Background
       const bgUrl = atlasUrl('locations', cfg.locationAsset, cfg.backgroundAnimation);
       const bgImg = imagesRef.current.get(bgUrl);
       if (bgImg) {
         ctx.drawImage(bgImg, 0, 0, W, H);
       } else {
-        // Fallback: dark grey placeholder
         ctx.fillStyle = '#1a1a2e';
         ctx.fillRect(0, 0, W, H);
       }
 
-      // 2. Furniture — static single frame, z-sorted
-      const sortedFurniture = [...cfg.furniture].sort(
-        (a, b) => a.zOrder - b.zOrder
-      );
-      for (const f of sortedFurniture) {
+      // 2. Furniture — static, z-sorted
+      const furniture = [...cfg.furniture].sort((a, b) => a.zOrder - b.zOrder);
+      for (const f of furniture) {
         const url = atlasUrl('furniture', f.entityName, f.animation);
         const img = imagesRef.current.get(url);
         if (!img) continue;
 
         const atlasKey = atlasConfigUrl('furniture', f.entityName);
-        const atlasCfg = atlasConfigsRef.current.get(atlasKey);
-        const animCfg = atlasCfg?.animations[f.animation];
+        const animCfg  = atlasConfigsRef.current.get(atlasKey)?.animations[f.animation];
 
         ctx.save();
-        if (f.id === selected) {
-          ctx.shadowColor = '#4a90e2';
-          ctx.shadowBlur = 12;
-        } else if (f.id === hovered) {
-          ctx.shadowColor = '#ffffff';
-          ctx.shadowBlur = 6;
-        }
+        if      (f.id === selected) { ctx.shadowColor = '#4a90e2'; ctx.shadowBlur = 12; }
+        else if (f.id === hovered)  { ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 6;  }
 
-        const x = (f.x / 100) * W;
-        const y = (f.y / 100) * H;
-        const h = (f.sceneHeight / 100) * H * f.scale;
-        drawSprite(img, animCfg, null, x, y, h, now);
+        drawSprite(img, animCfg, null,
+          (f.x / 100) * W, (f.y / 100) * H,
+          (f.sceneHeight / 100) * H * f.scale, now);
         ctx.restore();
       }
 
       // 3. Characters — animated, z-sorted
-      const sortedChars = [...cfg.characters].sort(
-        (a, b) => a.zOrder - b.zOrder
-      );
-      for (const c of sortedChars) {
+      const characters = [...cfg.characters].sort((a, b) => a.zOrder - b.zOrder);
+      for (const c of characters) {
         const animName = charAnimsRef.current?.[c.id] ?? c.defaultAnimation;
-        const url = atlasUrl('characters', c.entityName, animName);
-        const img = imagesRef.current.get(url);
+        const url      = atlasUrl('characters', c.entityName, animName);
+        const img      = imagesRef.current.get(url);
         if (!img) continue;
 
         const atlasKey = atlasConfigUrl('characters', c.entityName);
-        const atlasCfg = atlasConfigsRef.current.get(atlasKey);
-        const animCfg = atlasCfg?.animations[animName];
+        const animCfg  = atlasConfigsRef.current.get(atlasKey)?.animations[animName];
 
-        const x = (c.x / 100) * W;
-        const y = (c.y / 100) * H;
-        const h = (c.sceneHeight / 100) * H * c.scale;
-        drawSprite(img, animCfg, c.id, x, y, h, now);
+        drawSprite(img, animCfg, c.id,
+          (c.x / 100) * W, (c.y / 100) * H,
+          (c.sceneHeight / 100) * H * c.scale, now);
       }
 
       rafRef.current = requestAnimationFrame(render);
     };
 
     rafRef.current = requestAnimationFrame(render);
-
-    return () => {
-      if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current);
-    };
-  }, [canvasRef]); // RAF loop never restarts — reads everything via refs
+    return () => { if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current); };
+  }, [canvasRef]); // intentionally empty of other deps — reads state via refs
 }
