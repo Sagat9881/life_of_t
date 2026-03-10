@@ -13,41 +13,12 @@
  * scale: optional multiplier on top of sceneHeight. Default 1.0.
  *
  * All rendering happens via Canvas 2D drawImage() — no DOM, no CSS transforms.
- * Atlas frames (including cropped) are drawn directly.
  */
 
-export interface FurniturePlacement {
-  readonly id: string;
-  readonly entityName: string;
-  readonly animation: string;
-  readonly x: number;          // 0–100 (% of scene width)
-  readonly y: number;          // 0–100 (% of scene height)
-  readonly sceneHeight: number; // 0–100 (% of scene height)
-  readonly scale: number;       // multiplier, default 1
-  readonly zOrder: number;
-  readonly actionCode?: string;
-  readonly label?: string;
-}
+import type { FurniturePlacement, CharacterSlot, LocationConfig } from '../types/location.types';
 
-export interface CharacterSlot {
-  readonly id: string;
-  readonly entityName: string;
-  readonly defaultAnimation: string;
-  readonly x: number;          // 0–100
-  readonly y: number;          // 0–100
-  readonly sceneHeight: number; // 0–100 (NEW: % of scene height)
-  readonly scale: number;
-  readonly zOrder: number;
-}
-
-export interface LocationConfig {
-  readonly id: string;
-  readonly name: string;
-  readonly locationAsset: string;
-  readonly backgroundAnimation: string;
-  readonly furniture: readonly FurniturePlacement[];
-  readonly characters: readonly CharacterSlot[];
-}
+// Re-export so existing imports from 'config/locations' continue to work.
+export type { FurniturePlacement, CharacterSlot, LocationConfig };
 
 export const LOCATIONS: Record<string, LocationConfig> = {
   home_room: {
@@ -356,9 +327,8 @@ export const LOCATIONS: Record<string, LocationConfig> = {
   },
 };
 
-export const getLocationConfig = (locationId: string): LocationConfig => {
-  return LOCATIONS[locationId] ?? LOCATIONS['home_room']!;
-};
+export const getLocationConfig = (locationId: string): LocationConfig =>
+  LOCATIONS[locationId] ?? LOCATIONS['home_room']!;
 
 export const getLocationForTimeSlot = (timeSlot: string): string => {
   switch (timeSlot) {
