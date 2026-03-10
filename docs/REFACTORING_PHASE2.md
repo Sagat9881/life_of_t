@@ -304,6 +304,6 @@ src/main/java/ru/lifegame/backend/
 
 ## Ссылки
 
-- [REFACTORING.md](./REFACTORING.md) - Фаза 1
+- [REFACTORING.md](REFACTORING.md) - Фаза 1
 - [Domain-Driven Design](https://martinfowler.com/bliki/DomainDrivenDesign.html)
 - [Aggregate Pattern](https://martinfowler.com/bliki/DDD_Aggregate.html)

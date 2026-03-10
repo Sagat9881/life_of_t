@@ -1,4 +1,4 @@
-package ru.lifegame.backend.api.controller;
+package ru.lifegame.backend.infrastructure.web.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

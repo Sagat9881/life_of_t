@@ -1,4 +1,4 @@
-package ru.lifegame.backend.config;
+package ru.lifegame.backend.infrastructure.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
