@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quest id="quest_career_growth" type="CAREER_GROWTH" auto-start="true">
+  <label>Карьерный рост</label>
+  <description>Добиться признания на работе</description>
+  
+  <steps>
+    <step id="work_5_days" type="counter">
+      <label>Отработать 5 дней</label>
+      <target>work_days</target>
+      <threshold>5</threshold>
+    </step>
+    
+    <step id="satisfaction_70" type="threshold">
+      <label>Удовлетворённость работой >= 70</label>
+      <target>job_satisfaction</target>
+      <threshold>70</threshold>
+    </step>
+    
+    <step id="satisfaction_80" type="threshold">
+      <label>Удовлетворённость работой >= 80</label>
+      <target>job_satisfaction</target>
+      <threshold>80</threshold>
+    </step>
+  </steps>
+  
+  <rewards>
+    <stat-effect field="self_esteem" delta="10"/>
+    <achievement id="CAREER_SUCCESS"/>
+  </rewards>
+</quest>
