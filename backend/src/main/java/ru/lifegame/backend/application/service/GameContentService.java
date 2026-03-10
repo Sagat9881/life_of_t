@@ -148,49 +148,56 @@ public class GameContentService {
     private void loadActionsFromXml() {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         try {
-            Resource actionsXml = resolver.getResource("classpath:narrative/player-actions/actions.xml");
-            if (!actionsXml.exists()) {
-                loadPlaceholderActions();
-                return;
+            Resource[] files = resolver.getResources("classpath:narrative/actions/**/*.xml");
+            if (files.length == 0) {
+                throw new IllegalStateException(
+                    "No player action XML files found at classpath:narrative/actions/ — game cannot start");
             }
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc;
-            try (InputStream is = actionsXml.getInputStream()) {
-                doc = builder.parse(is);
-            }
-            doc.getDocumentElement().normalize();
-            NodeList actionNodes = doc.getElementsByTagName("action");
-            for (int i = 0; i < actionNodes.getLength(); i++) {
-                try {
-                    ActionDefView action = parseAction((Element) actionNodes.item(i));
+            for (Resource res : files) {
+                String filename = res.getFilename();
+                try (InputStream is = res.getInputStream()) {
+                    Document doc = builder.parse(is);
+                    doc.getDocumentElement().normalize();
+                    Element root = doc.getDocumentElement();
+                    ActionDefView action = parseAction(root, filename);
                     actions.put(action.code(), action);
                 } catch (Exception e) {
-                    log.error("Failed to parse action at index {}", i, e);
+                    throw new RuntimeException(
+                        "Failed to parse action file: " + filename + " — game cannot start", e);
                 }
             }
             log.info("Loaded {} actions", actions.size());
+        } catch (IllegalStateException | RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            log.error("Failed to load actions.xml", e);
-            loadPlaceholderActions();
+            throw new RuntimeException(
+                "Failed to scan classpath:narrative/actions/ — game cannot start", e);
         }
     }
 
-    private ActionDefView parseAction(Element el) {
-        String code        = el.getAttribute("code");
+    private ActionDefView parseAction(Element el, String filename) {
+        String code        = requireAttr(el, "code", filename);
         String label       = getTextContent(el, "label");
         String description = getTextContent(el, "description");
-        int    timeCost    = Integer.parseInt(el.getAttribute("time-cost"));
+        String icon        = getTextContent(el, "icon");
+        String animTrigger = getTextContent(el, "animation-trigger");
+        if (animTrigger.isEmpty()) animTrigger = code.toLowerCase();
+
+        int timeCost = 60;
+        String timeCostAttr = el.getAttribute("time-cost");
+        if (!timeCostAttr.isEmpty()) timeCost = Integer.parseInt(timeCostAttr);
 
         Map<String, Integer> statEffects = new HashMap<>();
         Element statsEl = (Element) el.getElementsByTagName("stats").item(0);
         if (statsEl != null) {
-            parseAttr(statsEl, "energy",      statEffects, "energy");
-            parseAttr(statsEl, "health",      statEffects, "health");
-            parseAttr(statsEl, "stress",      statEffects, "stress");
-            parseAttr(statsEl, "mood",        statEffects, "mood");
-            parseAttr(statsEl, "money",       statEffects, "money");
-            parseAttr(statsEl, "self-esteem", statEffects, "selfEsteem");
+            parseStatAttr(statsEl, "energy",      statEffects, "energy");
+            parseStatAttr(statsEl, "health",      statEffects, "health");
+            parseStatAttr(statsEl, "stress",      statEffects, "stress");
+            parseStatAttr(statsEl, "mood",        statEffects, "mood");
+            parseStatAttr(statsEl, "money",       statEffects, "money");
+            parseStatAttr(statsEl, "self-esteem", statEffects, "selfEsteem");
         }
 
         Map<String, Integer> skillGains = new HashMap<>();
@@ -200,23 +207,57 @@ public class GameContentService {
             skillGains.put(s.getAttribute("name"), Integer.parseInt(s.getAttribute("xp")));
         }
 
+        List<String> tags = parseTextList(el, "tags", "tag");
+        List<String> requiredTags   = parseTextList(el, "required-tags",  "tag");
+        List<String> forbiddenTags  = parseTextList(el, "forbidden-tags", "tag");
+        List<String> timeSlots      = parseTextList(el, "time-slots",     "slot");
+        List<String> locations      = parseTextList(el, "locations",      "location");
+        List<String> conflictTypes  = parseTextList(el, "potential-conflicts", "conflict");
+        List<String> relatedQuests  = parseTextList(el, "related-quests",      "quest");
+
+        if (timeSlots.isEmpty()) timeSlots = List.of("morning", "day", "evening");
+        if (locations.isEmpty()) locations = List.of("any");
+
+        Map<String, Integer> requiredSkills = new HashMap<>();
+        Element reqSkillsEl = (Element) el.getElementsByTagName("required-skills").item(0);
+        if (reqSkillsEl != null) {
+            NodeList rs = reqSkillsEl.getElementsByTagName("skill");
+            for (int i = 0; i < rs.getLength(); i++) {
+                Element s = (Element) rs.item(i);
+                requiredSkills.put(s.getAttribute("name"), Integer.parseInt(s.getAttribute("level")));
+            }
+        }
+
         int energyCost = Math.abs(statEffects.getOrDefault("energy", 0));
         int moneyGain  = statEffects.getOrDefault("money", 0);
 
         return new ActionDefView(
                 code, label, description,
-                List.of(), energyCost, energyCost, Map.of(), List.of(), List.of(),
+                tags,
+                energyCost, energyCost,
+                requiredSkills,
+                requiredTags, forbiddenTags,
                 statEffects, skillGains, moneyGain,
                 timeCost * 60,
-                code.toLowerCase(),
-                mapActionToIcon(code),
-                List.of("morning", "day", "evening"),
-                List.of("any"),
-                List.of(), List.of()
+                animTrigger,
+                icon,
+                timeSlots,
+                locations,
+                conflictTypes,
+                relatedQuests
         );
     }
 
-    private void parseAttr(Element el, String xmlAttr, Map<String, Integer> map, String key) {
+    private String requireAttr(Element el, String attr, String filename) {
+        String val = el.getAttribute(attr);
+        if (val == null || val.isBlank()) {
+            throw new IllegalStateException(
+                "Missing required attribute '" + attr + "' in action file: " + filename);
+        }
+        return val;
+    }
+
+    private void parseStatAttr(Element el, String xmlAttr, Map<String, Integer> map, String key) {
         if (el.hasAttribute(xmlAttr)) map.put(key, Integer.parseInt(el.getAttribute(xmlAttr)));
     }
 
@@ -225,26 +266,15 @@ public class GameContentService {
         return nodes.getLength() > 0 ? nodes.item(0).getTextContent().trim() : "";
     }
 
-    private String mapActionToIcon(String code) {
-        return switch (code) {
-            case "GO_TO_WORK", "WORK_ON_PROJECT" -> "briefcase";
-            case "DATE_WITH_HUSBAND"             -> "heart";
-            case "VISIT_FATHER"                  -> "car";
-            case "PLAY_WITH_CAT"                 -> "cat";
-            case "WALK_DOG"                      -> "dog";
-            case "REST_AT_HOME", "SELF_CARE"     -> "bed";
-            case "HOUSEHOLD", "COOK_FOOD"        -> "home";
-            case "CALL_HUSBAND"                  -> "phone";
-            case "EAT_FOOD"                      -> "utensils";
-            case "FEED_PETS"                     -> "bowl";
-            case "BEAUTY_ROUTINE"                -> "mirror";
-            default                              -> "circle";
-        };
-    }
-
-    private void loadPlaceholderActions() {
-        throw new IllegalStateException(
-                "actions.xml not found at classpath:narrative/player-actions/actions.xml" +
-                " — cannot start without action definitions");
+    private List<String> parseTextList(Element parent, String containerTag, String itemTag) {
+        Element container = (Element) parent.getElementsByTagName(containerTag).item(0);
+        if (container == null) return List.of();
+        NodeList items = container.getElementsByTagName(itemTag);
+        List<String> result = new ArrayList<>();
+        for (int i = 0; i < items.getLength(); i++) {
+            String text = items.item(i).getTextContent().trim();
+            if (!text.isEmpty()) result.add(text);
+        }
+        return Collections.unmodifiableList(result);
     }
 }

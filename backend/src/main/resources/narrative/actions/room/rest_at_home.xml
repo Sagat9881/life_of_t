@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action code="REST_AT_HOME" time-cost="60">
+  <label>Отдохнуть дома</label>
+  <description>Полежать на диване, восстановить силы и снять стресс.</description>
+  <icon>bed</icon>
+  <animation-trigger>rest_at_home</animation-trigger>
+  <stats energy="+20" stress="-15" mood="+10" health="+5"/>
+  <skills/>
+  <tags><tag>rest</tag><tag>home</tag></tags>
+  <time-slots>
+    <slot>morning</slot>
+    <slot>day</slot>
+    <slot>evening</slot>
+    <slot>night</slot>
+  </time-slots>
+  <locations><location>room</location></locations>
+</action>

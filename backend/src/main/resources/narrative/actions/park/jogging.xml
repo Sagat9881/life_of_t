@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action code="JOGGING" time-cost="45">
+  <label>Пробежка</label>
+  <description>Пробежать по парку — улучшить здоровье и выплеснуть напряжение.</description>
+  <icon>activity</icon>
+  <animation-trigger>jogging</animation-trigger>
+  <stats energy="-20" health="+20" stress="-15" mood="+10" self-esteem="+5"/>
+  <skills>
+    <skill name="fitness" xp="10"/>
+  </skills>
+  <tags><tag>sport</tag><tag>outdoor</tag><tag>fitness</tag></tags>
+  <time-slots>
+    <slot>morning</slot>
+    <slot>day</slot>
+  </time-slots>
+  <locations><location>park</location></locations>
+</action>

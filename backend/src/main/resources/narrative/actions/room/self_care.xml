@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action code="SELF_CARE" time-cost="45">
+  <label>Уход за собой</label>
+  <description>Принять ванну, сделать уход за кожей, позаботиться о себе.</description>
+  <icon>sparkles</icon>
+  <animation-trigger>self_care</animation-trigger>
+  <stats mood="+15" stress="-15" health="+5" self-esteem="+10"/>
+  <skills>
+    <skill name="self_development" xp="3"/>
+  </skills>
+  <tags><tag>selfcare</tag><tag>home</tag></tags>
+  <time-slots>
+    <slot>morning</slot>
+    <slot>evening</slot>
+  </time-slots>
+  <locations><location>room</location></locations>
+</action>

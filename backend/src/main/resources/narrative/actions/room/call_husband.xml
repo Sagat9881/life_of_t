@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action code="CALL_HUSBAND" time-cost="30">
+  <label>Позвонить мужу</label>
+  <description>Поговорить по телефону с мужем, укрепить отношения.</description>
+  <icon>phone</icon>
+  <animation-trigger>call_husband</animation-trigger>
+  <stats mood="+10" stress="-5"/>
+  <skills>
+    <skill name="communication" xp="3"/>
+  </skills>
+  <tags><tag>relationship</tag><tag>husband</tag></tags>
+  <time-slots>
+    <slot>morning</slot>
+    <slot>day</slot>
+    <slot>evening</slot>
+  </time-slots>
+  <locations><location>room</location></locations>
+</action>
