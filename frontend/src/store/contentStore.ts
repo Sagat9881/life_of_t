@@ -22,6 +22,7 @@
  */
 
 import { create } from 'zustand';
+import { API_BASE_URL } from '@/utils/constants';
 
 // ==================== Types ====================
 
@@ -147,10 +148,8 @@ interface ContentState {
 
 // ==================== API Client ====================
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-
 async function fetchContent<T>(endpoint: string): Promise<T> {
-  const response = await fetch(`${API_BASE}/api/v1/content/${endpoint}`);
+  const response = await fetch(`${API_BASE_URL}/api/v1/content/${endpoint}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch ${endpoint}: ${response.statusText}`);
   }
