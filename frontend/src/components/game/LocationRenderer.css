@@ -1,8 +1,0 @@
-/* LocationRenderer — now delegates to PixelSceneCanvas (Canvas 2D) */
-/* CSS kept minimal; all rendering is canvas-based */
-
-.location-renderer {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
