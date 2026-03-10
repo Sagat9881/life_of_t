@@ -3,9 +3,15 @@ package ru.lifegame.backend.domain.event.game;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Runtime narrative event hydrated from EventSpec and attached to a GameSession.
+ *
+ * type: string from EventSpec.meta.type — one of "RANDOM", "TRIGGERED", "SEASONAL".
+ * (GameEventType enum was removed; classification is now string-based to match XML.)
+ */
 public class GameEvent {
     private final String id;
-    private final GameEventType type;
+    private final String type;
     private final String title;
     private final String description;
     private final List<DialogueLine> dialogueLines;
@@ -19,12 +25,9 @@ public class GameEvent {
     /** A single dialogue line shown before event choice buttons. */
     public record DialogueLine(String speaker, String textRu) {}
 
-    /**
-     * Full constructor with dialogue lines.
-     */
     public GameEvent(
             String id,
-            GameEventType type,
+            String type,
             String title,
             String description,
             List<DialogueLine> dialogueLines,
@@ -46,23 +49,6 @@ public class GameEvent {
         this.resolved = false;
     }
 
-    /**
-     * Backward-compatible constructor (no dialogue lines).
-     * Existing callers that don't provide dialogue continue to work.
-     */
-    public GameEvent(
-            String id,
-            GameEventType type,
-            String title,
-            String description,
-            List<EventOption> options,
-            Map<String, Object> context,
-            int priority,
-            int dayTriggered
-    ) {
-        this(id, type, title, description, List.of(), options, context, priority, dayTriggered);
-    }
-
     public EventResult applyOption(String optionId) {
         EventOption option = options.stream()
             .filter(o -> o.id().equals(optionId))
@@ -72,24 +58,24 @@ public class GameEvent {
         this.resolved = true;
 
         return new EventResult(
-            option.resultText(),
+            null,
             option.statChanges(),
             option.relationshipChanges(),
             null
         );
     }
 
-    public String id() { return id; }
-    public GameEventType type() { return type; }
-    public String title() { return title; }
-    public String description() { return description; }
+    public String id()                        { return id; }
+    public String type()                      { return type; }
+    public String title()                     { return title; }
+    public String description()               { return description; }
     public List<DialogueLine> dialogueLines() { return dialogueLines; }
-    public List<EventOption> options() { return options; }
-    public Map<String, Object> context() { return context; }
-    public int priority() { return priority; }
-    public int dayTriggered() { return dayTriggered; }
-    public boolean isTriggered() { return triggered; }
-    public boolean isResolved() { return resolved; }
+    public List<EventOption> options()        { return options; }
+    public Map<String, Object> context()      { return context; }
+    public int priority()                     { return priority; }
+    public int dayTriggered()                 { return dayTriggered; }
+    public boolean isTriggered()              { return triggered; }
+    public boolean isResolved()               { return resolved; }
 
     public void markTriggered() { this.triggered = true; }
 }

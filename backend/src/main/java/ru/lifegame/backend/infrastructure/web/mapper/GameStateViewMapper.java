@@ -164,6 +164,9 @@ public class GameStateViewMapper {
      *
      * dialogue[] is populated from GameEvent.dialogueLines() — each DialogueLine
      * (speaker, textRu) maps to DialogueLineView(speaker, textRu).
+     *
+     * options uses EventOption.id() and EventOption.labelRu() directly
+     * (legacy aliases code()/label() were removed).
      */
     private EventView toEventView(GameSession session) {
         Optional<GameEvent> activeEvent = session.currentEvent();
@@ -176,7 +179,7 @@ public class GameStateViewMapper {
                 .toList();
 
         List<EventOptionView> options = e.options().stream()
-                .map(o -> new EventOptionView(o.code(), o.label()))
+                .map(o -> new EventOptionView(o.id(), o.labelRu()))
                 .toList();
 
         return new EventView(
