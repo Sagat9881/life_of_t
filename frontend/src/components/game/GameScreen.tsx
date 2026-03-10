@@ -10,36 +10,13 @@ import { getLocationConfig, getLocationForTimeSlot } from '../../config/location
 import type { ActionOption } from '../../types/game';
 import './GameScreen.css';
 
-const deriveTimeSlot = (hour: number): string => {
-  if (hour < 7)  return 'NIGHT';
-  if (hour < 12) return 'MORNING';
-  if (hour < 17) return 'DAY';
-  if (hour < 21) return 'EVENING';
-  return 'NIGHT';
-};
-
-/** Maps backend action codes to character animation names. */
-const ACTION_CODE_TO_ANIMATION: Record<string, string> = {
-  REST_AT_HOME:    'sleep',
-  SLEEP:           'sleep',
-  WORK_ON_PROJECT: 'work',
-  STUDY:           'work',
-  COOK_FOOD:       'work',
-  EXERCISE:        'exercise',
-  WALK_DOG:        'walk',
-  GO_FOR_WALK:     'walk',
-};
-
-function resolveAnimation(action?: ActionOption | null): string {
-  if (!action) return 'idle';
-  if (action.animationKey) return action.animationKey;
-  return ACTION_CODE_TO_ANIMATION[action.code] ?? 'idle';
-}
+const resolveAnimation = (action?: ActionOption | null): string =>
+  action?.animationKey ?? 'idle';
 
 export function GameScreen() {
   const {
     player, time, availableActions, activeQuests, relationships,
-    isLoading, error, fetchGameState, executeAction, lastActionResult,
+    npcActivities, isLoading, error, fetchGameState, executeAction, lastActionResult,
   } = useGameStore();
 
   const [selectedAction, setSelectedAction] = useState<ActionOption | null>(null);
@@ -47,8 +24,8 @@ export function GameScreen() {
 
   useEffect(() => { fetchGameState(); }, [fetchGameState]);
 
-  const rawTimeSlot    = time?.timeSlot ?? (time ? deriveTimeSlot(time.hour) : 'MORNING');
-  const locationId     = getLocationForTimeSlot(rawTimeSlot);
+  const rawTimeSlot    = time?.timeSlot ?? 'MORNING';
+  const locationId     = player?.location ?? getLocationForTimeSlot(rawTimeSlot);
   const locationConfig = getLocationConfig(locationId);
   const timeOfDay      = rawTimeSlot.toLowerCase();
   const gameTime       = time ?? { day: 1, hour: 7, timeSlot: 'MORNING' as const };
@@ -62,12 +39,12 @@ export function GameScreen() {
         : null
     );
     for (const slot of locationConfig.characters) {
-      if (slot.id !== 'tanya' && !anims[slot.id]) {
-        anims[slot.id] = 'idle';
-      }
+      if (slot.id === 'tanya') continue;
+      const npcActivity = npcActivities.find((n) => n.npcId === slot.id);
+      anims[slot.id] = npcActivity?.animationKey ?? 'idle';
     }
     return anims;
-  }, [lastActionResult, availableActions, locationConfig.characters]);
+  }, [lastActionResult, availableActions, locationConfig.characters, npcActivities]);
 
   const handleObjectClick = (objectId: string, actionCode: string): void => {
     setSelectedObjectId(objectId);
