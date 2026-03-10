@@ -120,7 +120,6 @@ export function GameScreen() {
         </div>
         <Sidebar
           player={player}
-          gameTime={gameTime}
           availableActions={availableActions}
           activeQuests={activeQuests}
           relationships={relationships}

@@ -2,12 +2,11 @@
  * Sidebar — right panel: stats, actions from backend, quests, relationships.
  * No hardcoded quest/action data — everything from backend GameStateView.
  */
-import type { Player, GameTime, ActionOption, QuestView, RelationshipView } from '../../types/game';
+import type { Player, ActionOption, QuestView, RelationshipView } from '../../types/game';
 import './Sidebar.css';
 
 interface SidebarProps {
   readonly player: Player;
-  readonly gameTime: GameTime;
   readonly availableActions: readonly ActionOption[];
   readonly activeQuests: readonly QuestView[];
   readonly relationships: readonly RelationshipView[];
@@ -33,7 +32,13 @@ function Hearts({ value, max = 10 }: { value: number; max?: number }) {
   );
 }
 
-export function Sidebar({ player, availableActions, activeQuests, relationships, onActionClick }: SidebarProps) {
+export function Sidebar({
+  player,
+  availableActions,
+  activeQuests,
+  relationships,
+  onActionClick,
+}: SidebarProps) {
   const stats = player.stats;
 
   return (
