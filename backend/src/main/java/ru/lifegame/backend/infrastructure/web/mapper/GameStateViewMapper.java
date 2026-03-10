@@ -3,7 +3,6 @@ package ru.lifegame.backend.infrastructure.web.mapper;
 import ru.lifegame.backend.application.view.*;
 import ru.lifegame.backend.domain.action.ActionResult;
 import ru.lifegame.backend.domain.action.GameAction;
-import ru.lifegame.backend.domain.conflict.core.Conflict;
 import ru.lifegame.backend.domain.event.domain.DomainEvent;
 import ru.lifegame.backend.domain.event.domain.NarrativeEventTriggeredEvent;
 import ru.lifegame.backend.domain.event.domain.NpcActivityChangedEvent;
@@ -155,7 +154,7 @@ public class GameStateViewMapper {
                         c.stage().name(),
                         c.csp().player(),
                         c.csp().opponent(),
-                        List.of() // TODO: Load tactics from ConflictSpec via ConflictEngine
+                        List.of()
                 ))
                 .toList();
     }
@@ -163,17 +162,19 @@ public class GameStateViewMapper {
     /**
      * Maps the first active (triggered, not resolved) GameEvent to EventView.
      *
-     * Uses GameEvent.title() / .description() directly — NOT GameEventType labels.
-     * dialogue[] is empty for now: GameEvent does not carry dialogue lines yet.
-     * Dialogue migration is tracked separately (GameEvent needs a dialogueLines field).
-     *
-     * EventOptionView contract: { code, labelRu } — matches backend EventOptionView record.
+     * dialogue[] is populated from GameEvent.dialogueLines() — each DialogueLine
+     * (speaker, textRu) maps to DialogueLineView(speaker, textRu).
      */
     private EventView toEventView(GameSession session) {
         Optional<GameEvent> activeEvent = session.currentEvent();
         if (activeEvent.isEmpty()) return null;
 
         GameEvent e = activeEvent.get();
+
+        List<DialogueLineView> dialogue = e.dialogueLines().stream()
+                .map(dl -> new DialogueLineView(dl.speaker(), dl.textRu()))
+                .toList();
+
         List<EventOptionView> options = e.options().stream()
                 .map(o -> new EventOptionView(o.code(), o.label()))
                 .toList();
@@ -182,7 +183,7 @@ public class GameStateViewMapper {
                 e.id(),
                 e.title(),
                 e.description(),
-                List.of(), // dialogue — to be populated when GameEvent carries DialogueLines
+                dialogue,
                 options
         );
     }
