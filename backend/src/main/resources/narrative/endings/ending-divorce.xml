@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ending id="DIVORCE" category="GAME_OVER" priority="100">
+    <meta>
+        <title>Развод</title>
+        <summary>Вы расстались.</summary>
+        <epilogue>Стоило больше ценить радостные моменты. Попробуйте ещё раз.</epilogue>
+    </meta>
+    <conditions mode="AND">
+        <condition type="relationship" target="HUSBAND" field="closeness" operator="lte" value="10" />
+        <condition type="relationship" target="HUSBAND" field="trust" operator="lte" value="10" />
+    </conditions>
+</ending>
