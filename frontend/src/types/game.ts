@@ -114,16 +114,34 @@ export interface TacticOptionView {
   description: string;
 }
 
-export interface EventOptionView {
-  code: string;
-  label: string;
-  description: string;
+/** A single dialogue line shown before event choice buttons. */
+export interface DialogueLineView {
+  speaker: string; // "narrator" | "tanya" | "alexander" | "sam" | npc id
+  textRu: string;
 }
 
+/** A single choice button in a narrative event. */
+export interface EventOptionView {
+  code: string;    // sent back to backend on selection
+  labelRu: string; // button label shown to player
+}
+
+/**
+ * Narrative event modal — matches backend EventView exactly.
+ *
+ * Rendering contract:
+ *   1. Show titleRu as modal header
+ *   2. Show descriptionRu as subtitle/flavour text
+ *   3. Render each dialogue line as speech bubble (speaker + text)
+ *   4. Render options as choice buttons
+ *
+ * Every event has at least one option (minimum: a single "Ок" button).
+ */
 export interface EventView {
   id: string;
-  label: string;
-  description: string;
+  titleRu: string;
+  descriptionRu: string;
+  dialogue: DialogueLineView[];
   options: EventOptionView[];
 }
 
@@ -155,19 +173,6 @@ export interface ConflictTactic {
   name: string;
   description: string;
   successChance: number;
-}
-
-export interface GameEvent {
-  id: string;
-  title: string;
-  description: string;
-  choices: EventChoice[];
-}
-
-export interface EventChoice {
-  code: string;
-  text: string;
-  consequences?: string;
 }
 
 export type ActionCode = string;
