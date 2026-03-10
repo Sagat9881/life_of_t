@@ -180,7 +180,7 @@ public class GameContentService {
                 }
             }
             log.info("Loaded {} actions", actions.size());
-        } catch (IllegalStateException | RuntimeException e) {
+        } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException(

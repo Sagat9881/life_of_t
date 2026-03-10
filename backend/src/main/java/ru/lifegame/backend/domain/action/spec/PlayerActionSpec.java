@@ -16,7 +16,10 @@ public record PlayerActionSpec(
         Map<String, Integer> petMoodChanges,
         List<String> tags,
         List<String> timeSlots,
-        List<String> locations
+        List<String> locations,
+        Flags flags,
+        JobEffects jobEffects,
+        List<ExtraRelEffect> extraRelationshipEffects
 ) {
 
     public record StatEffects(
@@ -26,5 +29,30 @@ public record PlayerActionSpec(
             int mood,
             int money,
             int selfEsteem
+    ) {}
+
+    public record Flags(
+            boolean resetHouseholdDays
+    ) {
+        public static Flags defaults() {
+            return new Flags(false);
+        }
+    }
+
+    public record JobEffects(
+            int satisfaction,
+            int burnoutRisk
+    ) {
+        public static JobEffects none() {
+            return new JobEffects(0, 0);
+        }
+    }
+
+    public record ExtraRelEffect(
+            String target,
+            int closeness,
+            int trust,
+            int stability,
+            int romance
     ) {}
 }

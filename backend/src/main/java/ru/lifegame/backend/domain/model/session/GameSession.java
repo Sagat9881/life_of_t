@@ -152,4 +152,9 @@ public class GameSession {
         domainEvents.addAll(events);
         return events;
     }
+
+    /** Alias for {@link #drainEvents()} — used by services and mappers. */
+    public List<DomainEvent> drainDomainEvents() {
+        return drainEvents();
+    }
 }

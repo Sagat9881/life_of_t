@@ -37,7 +37,7 @@ public class PlayerActionSpecLoader {
                     doc.getDocumentElement().normalize();
                     PlayerActionSpec spec = parseAction(doc.getDocumentElement(), filename);
                     byCode.putIfAbsent(spec.code(), spec);
-                } catch (IllegalStateException e) {
+                } catch (RuntimeException e) {
                     throw e;
                 } catch (Exception e) {
                     throw new RuntimeException(
@@ -45,7 +45,7 @@ public class PlayerActionSpecLoader {
                 }
             }
             return List.copyOf(byCode.values());
-        } catch (IllegalStateException | RuntimeException e) {
+        } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException(
@@ -73,10 +73,15 @@ public class PlayerActionSpecLoader {
         List<String> timeSlots = parseTextList(el, "time-slots", "slot");
         List<String> locations = parseTextList(el, "locations",  "location");
 
+        PlayerActionSpec.Flags flags           = parseFlags(el);
+        PlayerActionSpec.JobEffects jobEffects = parseJobEffects(el);
+        List<PlayerActionSpec.ExtraRelEffect> extraRelEffects = parseExtraRelEffects(el);
+
         return new PlayerActionSpec(
                 code, label, description, icon, animationTrigger,
                 timeCost, stats, skillGains, relationshipChanges, petMoodChanges,
-                tags, timeSlots, locations
+                tags, timeSlots, locations,
+                flags, jobEffects, extraRelEffects
         );
     }
 
@@ -93,6 +98,39 @@ public class PlayerActionSpecLoader {
                 intAttr(statsEl, "money"),
                 intAttr(statsEl, "self-esteem")
         );
+    }
+
+    private PlayerActionSpec.Flags parseFlags(Element el) {
+        Element flagsEl = firstChild(el, "flags");
+        if (flagsEl == null) return PlayerActionSpec.Flags.defaults();
+        boolean resetHousehold = boolAttr(flagsEl, "reset-household-days");
+        return new PlayerActionSpec.Flags(resetHousehold);
+    }
+
+    private PlayerActionSpec.JobEffects parseJobEffects(Element el) {
+        Element jobEl = firstChild(el, "job-effects");
+        if (jobEl == null) return PlayerActionSpec.JobEffects.none();
+        int satisfaction = intAttr(jobEl, "satisfaction");
+        int burnoutRisk  = intAttr(jobEl, "burnout-risk");
+        return new PlayerActionSpec.JobEffects(satisfaction, burnoutRisk);
+    }
+
+    private List<PlayerActionSpec.ExtraRelEffect> parseExtraRelEffects(Element el) {
+        Element wrapper = firstChild(el, "extra-relationship-effects");
+        if (wrapper == null) return List.of();
+        NodeList nodes = wrapper.getElementsByTagName("effect");
+        List<PlayerActionSpec.ExtraRelEffect> result = new ArrayList<>();
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Element e = (Element) nodes.item(i);
+            result.add(new PlayerActionSpec.ExtraRelEffect(
+                    e.getAttribute("target"),
+                    intAttr(e, "closeness"),
+                    intAttr(e, "trust"),
+                    intAttr(e, "stability"),
+                    intAttr(e, "romance")
+            ));
+        }
+        return List.copyOf(result);
     }
 
     private Map<String, Integer> parseSkillGains(Element el) {
@@ -141,6 +179,11 @@ public class PlayerActionSpecLoader {
         String val = el.getAttribute(attr);
         if (val == null || val.isBlank()) return 0;
         return Integer.parseInt(val);
+    }
+
+    private boolean boolAttr(Element el, String attr) {
+        String val = el.getAttribute(attr);
+        return "true".equalsIgnoreCase(val);
     }
 
     private String textOf(Element parent, String tagName) {
