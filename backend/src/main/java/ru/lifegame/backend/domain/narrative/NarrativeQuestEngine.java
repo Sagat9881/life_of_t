@@ -8,6 +8,18 @@ import ru.lifegame.backend.domain.narrative.spec.QuestSpec.ObjectiveSpec;
 
 import java.util.*;
 
+/**
+ * Runtime engine for data-driven quests loaded from narrative/quests/*.xml.
+ *
+ * Lifecycle:
+ *   1. NarrativeBootstrap.onApplicationReady() calls reloadSpecs() with all parsed QuestSpecs.
+ *   2. EndDayService checks triggerDay on each endDay and calls activateQuest() for new quests.
+ *   3. On every player action, ExecutePlayerActionService calls tryCompleteStep() for each
+ *      active quest to advance it when all objectives are met.
+ *
+ * Thread safety: not thread-safe by design (one engine per Spring context,
+ * sessions are single-threaded per request).
+ */
 public class NarrativeQuestEngine {
 
     private List<QuestSpec> questSpecs;
@@ -25,6 +37,13 @@ public class NarrativeQuestEngine {
         this.questSpecs = newSpecs != null ? new ArrayList<>(newSpecs) : new ArrayList<>();
     }
 
+    /** Returns all loaded quest specs (used by EndDayService for triggerDay checks). */
+    public List<QuestSpec> getQuestSpecs() {
+        return Collections.unmodifiableList(questSpecs);
+    }
+
+    // ── quest state ──────────────────────────────────────────────────────────
+
     public record QuestState(
             QuestSpec spec,
             int currentStepIndex,
@@ -36,6 +55,10 @@ public class NarrativeQuestEngine {
         }
     }
 
+    /**
+     * Activate a quest by id. No-op if the quest is already active or id is unknown.
+     * Called by EndDayService when triggerDay <= currentDay.
+     */
     public void activateQuest(String questId) {
         questSpecs.stream()
                 .filter(q -> q.id().equals(questId))
@@ -43,6 +66,13 @@ public class NarrativeQuestEngine {
                 .ifPresent(q -> activeQuests.put(questId, new QuestState(q, 0, false)));
     }
 
+    // ── step completion ──────────────────────────────────────────────────────
+
+    /**
+     * Try to complete the current step of a quest.
+     * Returns a result if the step's objectives are all met; empty otherwise.
+     * Advances the step index (or marks the quest complete) on success.
+     */
     public Optional<StepCompletionResult> tryCompleteStep(String questId, Map<String, Object> context) {
         QuestState state = activeQuests.get(questId);
         if (state == null || state.completed()) return Optional.empty();
@@ -53,8 +83,8 @@ public class NarrativeQuestEngine {
                 .allMatch(c -> checkObjective(c, context));
         if (!met) return Optional.empty();
 
-        int nextIndex = state.currentStepIndex() + 1;
-        boolean done = nextIndex >= state.spec().steps().size();
+        int     nextIndex = state.currentStepIndex() + 1;
+        boolean done      = nextIndex >= state.spec().steps().size();
         activeQuests.put(questId, new QuestState(state.spec(), nextIndex, done));
 
         return Optional.of(new StepCompletionResult(
@@ -72,15 +102,19 @@ public class NarrativeQuestEngine {
             List<RewardSpec> rewards
     ) {}
 
+    // ── accessors ─────────────────────────────────────────────────────────────
+
     public Map<String, QuestState> getActiveQuests() {
         return Collections.unmodifiableMap(activeQuests);
     }
+
+    // ── objective evaluation ────────────────────────────────────────────────────
 
     private boolean checkObjective(ObjectiveSpec c, Map<String, Object> context) {
         Object val = context.get(c.target());
         if (val == null) return false;
         if (val instanceof Number num) {
-            double actual = num.doubleValue();
+            double actual   = num.doubleValue();
             double expected = Double.parseDouble(c.value());
             return switch (c.operator()) {
                 case "gte" -> actual >= expected;
