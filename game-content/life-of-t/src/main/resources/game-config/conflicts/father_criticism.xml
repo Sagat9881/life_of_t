@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<conflict id="FATHER_CRITICISM">
+
+  <meta>
+    <label>Критика от отца</label>
+    <description>Отец критикует жизненные выборы и достижения. Слова бьют по самооценке.</description>
+    <opponent-id>FATHER</opponent-id>
+    <category>relationship</category>
+    <intro-dialogue>Ты так и не добилась ничего значимого...</intro-dialogue>
+  </meta>
+
+  <trigger cooldown-days="5" mode="ALL">
+    <condition type="stat" field="job_satisfaction" operator="lt" value="30"/>
+    <condition type="stat" field="self_esteem" operator="lt" value="30"/>
+  </trigger>
+
+  <tactic code="SET_BOUNDARIES" base-csp-cost="20" base-opponent-csp-cost="10">
+    <label>Установить границы</label>
+    <description>Чётко, но уважительно объяснить, что такая критика недопустима</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="+15"/>
+      </stat-changes>
+      <relationship-changes>
+        <change field="FATHER.trust" value="+15"/>
+        <change field="FATHER.closeness" value="-5"/>
+      </relationship-changes>
+      <narrative>Отец услышал. Он не привык к такому ответу, но задумался.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="-5"/>
+      </stat-changes>
+      <narrative>Попытка установить границы вызвала ответную обиду.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="ASSERT" base-csp-cost="15" base-opponent-csp-cost="15">
+    <label>Ответить на критику</label>
+    <description>Защитить свои достижения и объяснить свой путь</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="+10"/>
+      </stat-changes>
+      <relationship-changes>
+        <change field="FATHER.trust" value="+5"/>
+      </relationship-changes>
+      <narrative>Слова дошли. Отец помолчал и впервые сказал что-то похожее на признание.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="-10"/>
+        <change field="stress" value="+10"/>
+      </stat-changes>
+      <narrative>Спор только усилил критику. Слова отца ранили сильнее обычного.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="AVOID" base-csp-cost="5" base-opponent-csp-cost="20">
+    <label>Уйти от темы</label>
+    <description>Переключить разговор или поскорее уйти</description>
+    <success-outcome>
+      <relationship-changes>
+        <change field="FATHER.closeness" value="-5"/>
+        <change field="FATHER.trust" value="-5"/>
+      </relationship-changes>
+      <narrative>Обошлось. Но слова отца всё равно крутятся в голове.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="-5"/>
+        <change field="stress" value="+5"/>
+      </stat-changes>
+      <relationship-changes>
+        <change field="FATHER.closeness" value="-10"/>
+      </relationship-changes>
+      <narrative>Бегство было замечено. Отец расценил это как слабость.</narrative>
+    </failure-outcome>
+  </tactic>
+
+</conflict>

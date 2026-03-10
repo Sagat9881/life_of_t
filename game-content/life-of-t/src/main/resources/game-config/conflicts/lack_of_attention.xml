@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<conflict id="LACK_OF_ATTENTION">
+
+  <meta>
+    <label>Муж чувствует себя брошенным</label>
+    <description>Недостаток внимания разрушает близость в отношениях.</description>
+    <opponent-id>HUSBAND</opponent-id>
+    <category>relationship</category>
+    <intro-dialogue>Мы совсем перестали проводить время вместе...</intro-dialogue>
+  </meta>
+
+  <trigger cooldown-days="5" mode="ALL">
+    <condition type="relationship" target="HUSBAND" field="closeness" operator="lt" value="40"/>
+    <condition type="days-played" operator="gte" value="10"/>
+  </trigger>
+
+  <tactic code="QUALITY_TIME" base-csp-cost="20" base-opponent-csp-cost="35">
+    <label>Провести вечер вместе</label>
+    <description>Устроить романтический ужин или совместный досуг</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="mood" value="+10"/>
+      </stat-changes>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="+15"/>
+        <change field="HUSBAND.romance" value="+10"/>
+      </relationship-changes>
+      <narrative>Приятный вечер вдвоём. Напряжение спало, стало теплее.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="+5"/>
+      </relationship-changes>
+      <narrative>Попытка сблизиться не совсем удалась — муж всё ещё напряжён.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="APOLOGIZE" base-csp-cost="15" base-opponent-csp-cost="25">
+    <label>Извиниться</label>
+    <description>Честно признать, что уделяла мало внимания</description>
+    <success-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.trust" value="+10"/>
+        <change field="HUSBAND.closeness" value="+5"/>
+      </relationship-changes>
+      <narrative>Искреннее извинение было принято. Доверие укрепилось.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.trust" value="-5"/>
+      </relationship-changes>
+      <narrative>Извинение прозвучало неубедительно. Муж остался недоволен.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="EMOTIONAL_APPEAL" base-csp-cost="5" base-opponent-csp-cost="30">
+    <label>Эмоциональный призыв</label>
+    <description>Открыто поговорить о своих чувствах и чувствах мужа</description>
+    <success-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="+20"/>
+        <change field="HUSBAND.romance" value="+15"/>
+      </relationship-changes>
+      <narrative>Разговор по душам. Оба почувствовали себя услышанными.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="-5"/>
+      </relationship-changes>
+      <narrative>Попытка поговорить переросла в взаимные упрёки.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="DEFLECT" base-csp-cost="10" base-opponent-csp-cost="15">
+    <label>Перевести стрелки</label>
+    <description>Уйти от темы, обвинив мужа в чём-то другом</description>
+    <success-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="-10"/>
+      </relationship-changes>
+      <narrative>Конфликт временно отложен. Но осадок остался у обоих.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="-15"/>
+        <change field="HUSBAND.trust" value="-10"/>
+      </relationship-changes>
+      <narrative>Конфликт обострился. Муж обиделся всерьёз.</narrative>
+    </failure-outcome>
+  </tactic>
+
+</conflict>

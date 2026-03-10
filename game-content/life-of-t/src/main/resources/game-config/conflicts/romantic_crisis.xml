@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<conflict id="ROMANTIC_CRISIS">
+
+  <meta>
+    <label>Романтический кризис</label>
+    <description>Романтика угасает. Отношения превращаются в рутину без искры.</description>
+    <opponent-id>HUSBAND</opponent-id>
+    <category>relationship</category>
+    <intro-dialogue>Кажется, между нами больше ничего не осталось...</intro-dialogue>
+  </meta>
+
+  <trigger cooldown-days="7" mode="ALL">
+    <condition type="relationship" target="HUSBAND" field="romance" operator="lt" value="30"/>
+    <condition type="days-played" operator="gte" value="10"/>
+  </trigger>
+
+  <tactic code="EMOTIONAL_APPEAL" base-csp-cost="5" base-opponent-csp-cost="30">
+    <label>Поговорить о чувствах</label>
+    <description>Открыто сказать мужу, что скучаешь по близости</description>
+    <success-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="+20"/>
+        <change field="HUSBAND.romance" value="+20"/>
+      </relationship-changes>
+      <narrative>Разговор растопил лёд. Оба вспомнили, почему любят друг друга.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.romance" value="-5"/>
+      </relationship-changes>
+      <narrative>Разговор зашёл в тупик — муж закрылся и не захотел обсуждать.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="COMPROMISE" base-csp-cost="10" base-opponent-csp-cost="10">
+    <label>Предложить романтический план</label>
+    <description>Договориться о совместных романтических традициях</description>
+    <success-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.romance" value="+15"/>
+        <change field="HUSBAND.closeness" value="+10"/>
+      </relationship-changes>
+      <narrative>Договорились о еженедельном свидании. Появилось что-то общее.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.romance" value="+5"/>
+      </relationship-changes>
+      <narrative>Идея понравилась, но воплощение забуксовало на первой же неделе.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="ASSERT" base-csp-cost="15" base-opponent-csp-cost="15">
+    <label>Потребовать внимания</label>
+    <description>Прямо сказать, что так продолжаться не может</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="+10"/>
+      </stat-changes>
+      <relationship-changes>
+        <change field="HUSBAND.romance" value="+10"/>
+        <change field="HUSBAND.closeness" value="-5"/>
+      </relationship-changes>
+      <narrative>Встряска подействовала. Муж осознал серьёзность ситуации.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="-15"/>
+        <change field="HUSBAND.romance" value="-10"/>
+      </relationship-changes>
+      <narrative>Ультиматум обидел мужа. Пропасть стала шире.</narrative>
+    </failure-outcome>
+  </tactic>
+
+</conflict>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<conflict id="FATHER_CONCERN">
+
+  <meta>
+    <label>Отеческая тревога</label>
+    <description>Отец видит, что дочь на грани — и не может не вмешаться.</description>
+    <opponent-id>FATHER</opponent-id>
+    <category>relationship</category>
+    <intro-dialogue>Ты выглядишь такой уставшей... Всё ли в порядке?</intro-dialogue>
+  </meta>
+
+  <trigger cooldown-days="5" mode="ANY">
+    <condition type="stat" field="money" operator="lt" value="200"/>
+    <condition type="stat" field="health" operator="lt" value="40"/>
+  </trigger>
+
+  <tactic code="LISTEN" base-csp-cost="5" base-opponent-csp-cost="25">
+    <label>Принять заботу</label>
+    <description>Позволить отцу выговориться и принять его тревогу с теплом</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="mood" value="+10"/>
+      </stat-changes>
+      <relationship-changes>
+        <change field="FATHER.closeness" value="+15"/>
+        <change field="FATHER.trust" value="+10"/>
+      </relationship-changes>
+      <narrative>Стало чуть легче. Отец рядом — и это важно.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <relationship-changes>
+        <change field="FATHER.closeness" value="+5"/>
+      </relationship-changes>
+      <narrative>Выслушали, но открыться до конца не получилось.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="EMOTIONAL_APPEAL" base-csp-cost="5" base-opponent-csp-cost="30">
+    <label>Признаться в трудностях</label>
+    <description>Честно рассказать отцу, как тяжело</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="mood" value="+15"/>
+        <change field="stress" value="-10"/>
+      </stat-changes>
+      <relationship-changes>
+        <change field="FATHER.closeness" value="+20"/>
+      </relationship-changes>
+      <narrative>Отец обнял. Просто обнял — и слова были не нужны.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <stat-changes>
+        <change field="stress" value="+5"/>
+      </stat-changes>
+      <narrative>Признание далось с трудом, но отец не нашёл нужных слов в ответ.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="AVOID" base-csp-cost="5" base-opponent-csp-cost="20">
+    <label>Сказать «всё хорошо»</label>
+    <description>Отмахнуться и сделать вид, что всё в порядке</description>
+    <success-outcome>
+      <relationship-changes>
+        <change field="FATHER.closeness" value="-5"/>
+      </relationship-changes>
+      <narrative>Отец отстал. Но в его глазах — недоверие.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <stat-changes>
+        <change field="stress" value="+5"/>
+      </stat-changes>
+      <relationship-changes>
+        <change field="FATHER.closeness" value="-10"/>
+        <change field="FATHER.trust" value="-10"/>
+      </relationship-changes>
+      <narrative>Отец не поверил. Обида и тревога смешались в его взгляде.</narrative>
+    </failure-outcome>
+  </tactic>
+
+</conflict>

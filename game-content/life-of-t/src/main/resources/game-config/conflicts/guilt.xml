@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<conflict id="GUILT">
+
+  <meta>
+    <label>Чувство вины</label>
+    <description>Вина за недостаток внимания близким давит и мешает жить.</description>
+    <opponent-id>SELF</opponent-id>
+    <category>internal</category>
+    <intro-dialogue>Я плохая дочь... плохая жена... Я не справляюсь...</intro-dialogue>
+  </meta>
+
+  <trigger cooldown-days="5" mode="ALL">
+    <condition type="relationship" target="HUSBAND" field="closeness" operator="lt" value="40"/>
+    <condition type="stat" field="self_esteem" operator="lt" value="40"/>
+  </trigger>
+
+  <tactic code="LISTEN" base-csp-cost="5" base-opponent-csp-cost="25">
+    <label>Признать вину</label>
+    <description>Остановиться и честно признать перед собой, что что-то идёт не так</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="+10"/>
+        <change field="mood" value="+5"/>
+      </stat-changes>
+      <narrative>Признание — первый шаг. Стало чуть легче.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <stat-changes>
+        <change field="stress" value="+10"/>
+        <change field="mood" value="-5"/>
+      </stat-changes>
+      <narrative>Признание вылилось в самобичевание. Стало только хуже.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="LOGICAL_ARGUMENT" base-csp-cost="10" base-opponent-csp-cost="20">
+    <label>Переосмыслить ситуацию</label>
+    <description>Рационально взглянуть на то, что реально возможно сделать</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="+15"/>
+        <change field="stress" value="-5"/>
+      </stat-changes>
+      <narrative>Вина немного отступила. Вы делаете что можете — и это не мало.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="-5"/>
+      </stat-changes>
+      <narrative>Логика не помогла. Вина — не про логику.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="EMOTIONAL_APPEAL" base-csp-cost="5" base-opponent-csp-cost="30">
+    <label>Поговорить с кем-то близким</label>
+    <description>Поделиться чувством вины с мужем или отцом</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="mood" value="+15"/>
+        <change field="self_esteem" value="+10"/>
+      </stat-changes>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="+10"/>
+      </relationship-changes>
+      <narrative>Оказалось, что близкие видят тебя иначе, чем ты видишь себя. Стало теплее.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <stat-changes>
+        <change field="stress" value="+5"/>
+      </stat-changes>
+      <narrative>Разговор не получился. Осталась одна наедине с виной.</narrative>
+    </failure-outcome>
+  </tactic>
+
+</conflict>

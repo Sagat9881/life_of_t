@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<conflict id="BURNOUT">
+
+  <meta>
+    <label>Профессиональное выгорание</label>
+    <description>Работа поглощает все силы. Эмоциональное и физическое истощение нарастает.</description>
+    <opponent-id>SELF</opponent-id>
+    <category>internal</category>
+    <intro-dialogue>Я больше не могу так жить... Сил не осталось...</intro-dialogue>
+  </meta>
+
+  <trigger cooldown-days="7" mode="ALL">
+    <condition type="stat" field="burnout_risk" operator="gte" value="70"/>
+    <condition type="stat" field="stress" operator="gte" value="80"/>
+  </trigger>
+
+  <tactic code="TAKE_BREAK" base-csp-cost="20" base-opponent-csp-cost="30">
+    <label>Взять отгул</label>
+    <description>Отдохнуть от работы — взять выходной и восстановить силы</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="stress" value="-15"/>
+        <change field="mood" value="+10"/>
+        <change field="energy" value="+20"/>
+      </stat-changes>
+      <narrative>Вы взяли выходной. День отдыха вернул немного сил и ясности мышления.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <stat-changes>
+        <change field="stress" value="-5"/>
+      </stat-changes>
+      <narrative>Отдохнули, но чувство вины за незавершённую работу осталось. Полноценно расслабиться не получилось.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="SET_BOUNDARIES" base-csp-cost="20" base-opponent-csp-cost="10">
+    <label>Установить границы</label>
+    <description>Чётко обозначить себе и окружающим предел допустимой нагрузки</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="+15"/>
+        <change field="stress" value="-10"/>
+      </stat-changes>
+      <narrative>Вы научились говорить «нет». Стало немного легче дышать.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <stat-changes>
+        <change field="stress" value="+5"/>
+      </stat-changes>
+      <narrative>Попытка провалилась — задачи снова навалились со всех сторон.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="PUSH_THROUGH" base-csp-cost="15" base-opponent-csp-cost="20">
+    <label>Перетерпеть</label>
+    <description>Стиснуть зубы и продолжить работать через усталость</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="+5"/>
+      </stat-changes>
+      <narrative>Справились. Но внутри что-то надломилось.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <stat-changes>
+        <change field="health" value="-10"/>
+        <change field="mood" value="-10"/>
+      </stat-changes>
+      <narrative>Силы на исходе. Тело начинает сигнализировать об опасности.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="DELEGATE" base-csp-cost="25" base-opponent-csp-cost="40">
+    <label>Делегировать</label>
+    <description>Попросить коллег взять на себя часть задач</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="stress" value="-20"/>
+        <change field="mood" value="+5"/>
+      </stat-changes>
+      <narrative>Коллеги помогли. Нагрузка стала терпимой.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <stat-changes>
+        <change field="stress" value="-5"/>
+      </stat-changes>
+      <narrative>Попытка делегировать не удалась — всё равно всё легло на плечи.</narrative>
+    </failure-outcome>
+  </tactic>
+
+</conflict>
