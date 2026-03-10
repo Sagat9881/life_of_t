@@ -51,13 +51,17 @@ public class DomainConfig {
 
     @Bean
     public ConflictEngine conflictEngine(ConflictLoader loader) {
-        List<ConflictSpec> specs = loader.loadConflicts("game-config/conflicts.xml");
+        List<ConflictSpec> specs = loader.loadAll();
         return new ConflictEngine(specs);
     }
 
+    /**
+     * ConflictManager now requires ConflictEngine to resolve specs for
+     * startConflict() and applyTactic().
+     */
     @Bean
-    public ConflictManager conflictManager() {
-        return new ConflictManager();
+    public ConflictManager conflictManager(ConflictEngine conflictEngine) {
+        return new ConflictManager(conflictEngine);
     }
 
     @Bean

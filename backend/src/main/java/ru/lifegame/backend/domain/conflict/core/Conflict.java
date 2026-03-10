@@ -1,6 +1,5 @@
 package ru.lifegame.backend.domain.conflict.core;
 
-import ru.lifegame.backend.domain.balance.GameBalance;
 import ru.lifegame.backend.domain.conflict.spec.ConflictSpec;
 
 import java.util.ArrayList;
@@ -10,15 +9,15 @@ import java.util.UUID;
 
 /**
  * Runtime domain object representing an active conflict instance.
- * Metadata comes from ConflictSpec (loaded from conflicts.xml).
+ * Metadata comes from ConflictSpec (loaded from conflicts XML).
  */
 public class Conflict {
     private final String id;
-    private final String conflictId;     // e.g. "BURNOUT"
-    private final String label;          // e.g. "Профессиональное выгорание"
-    private final String description;    // e.g. "Работа поглощает все силы"
-    private final String opponentId;     // e.g. "HUSBAND", "FATHER", "SELF"
-    private final String category;       // e.g. "internal", "relationship"
+    private final String conflictId;
+    private final String label;
+    private final String description;
+    private final String opponentId;
+    private final String category;
     private ConflictStage stage;
     private ConflictStressPoints csp;
     private final List<ConflictRound> rounds;
@@ -38,17 +37,14 @@ public class Conflict {
         this.resolution = null;
     }
 
-    /**
-     * Factory: create runtime Conflict from XML-loaded ConflictSpec.
-     */
     public static Conflict fromSpec(ConflictSpec spec) {
         return new Conflict(
-            UUID.randomUUID().toString(),
-            spec.id(),
-            spec.meta().label(),
-            spec.meta().description(),
-            spec.meta().opponentId(),
-            spec.meta().category()
+                UUID.randomUUID().toString(),
+                spec.id(),
+                spec.meta().label(),
+                spec.meta().description(),
+                spec.meta().opponentId(),
+                spec.meta().category()
         );
     }
 
@@ -65,12 +61,22 @@ public class Conflict {
         }
     }
 
-    private String buildSituation(int round) {
-        return switch (stage) {
-            case ESCALATION -> label + ": напряжение нарастает (раунд " + round + ")";
-            case CLIMAX -> label + ": решающий момент!";
-            default -> label + ": разговор";
-        };
+    /**
+     * Update CSP after a tactic is applied.
+     */
+    public void updateCsp(ConflictStressPoints updated) {
+        this.csp = updated;
+        if (stage == ConflictStage.BREWING) {
+            this.stage = ConflictStage.ESCALATION;
+        }
+    }
+
+    /**
+     * Finalize the conflict with a resolution.
+     */
+    public void resolve(ConflictResolution resolution) {
+        this.resolution = resolution;
+        this.stage = ConflictStage.RESOLUTION;
     }
 
     public boolean isResolved() {

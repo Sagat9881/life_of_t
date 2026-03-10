@@ -43,27 +43,7 @@ public class PlayerCharacter {
 
     public boolean canPerformAction(ActionType action, GameTime time, int timeCost) {
         if (!time.hasEnoughTime(timeCost)) return false;
-        if (stats.energy() < 5) return false;
-        return true;
-    }
-
-    /**
-     * Check if player can use a tactic (by code).
-     * TODO: Integrate with ConflictEngine spec-based tactics.
-     */
-    public boolean canUseTactic(String tacticCode) {
-        // Stub: assume all base tactics are available
-        // Skill-based tactics will be checked via ConflictEngine
-        return true;
-    }
-
-    /**
-     * Get available conflict tactics (stub).
-     * TODO: Query ConflictEngine for tactics available based on player skills.
-     */
-    public List<String> availableConflictTactics() {
-        // Return base tactic codes for now
-        return List.of("SURRENDER", "ASSERT", "COMPROMISE", "AVOID", "LISTEN");
+        return stats.energy() >= 5;
     }
 
     public void applyStatChanges(StatChanges changes) {
@@ -79,11 +59,7 @@ public class PlayerCharacter {
             stats = stats.changeMood(-GameBalance.MOOD_DAILY_DECREASE_HIGH_STRESS);
             job = job.changeBurnoutRisk(GameBalance.BURNOUT_RISK_DAILY_INCREASE);
         }
-        if (workedToday) {
-            consecutiveWorkDays++;
-        } else {
-            consecutiveWorkDays = 0;
-        }
+        workedToday ? consecutiveWorkDays++ : (consecutiveWorkDays = 0);
         daysSinceHousehold++;
         restedToday = false;
         workedToday = false;
@@ -124,6 +100,14 @@ public class PlayerCharacter {
     public int consecutiveWorkDays() { return consecutiveWorkDays; }
     public int daysSinceHousehold() { return daysSinceHousehold; }
 
+    public void changeJobSatisfaction(int delta) {
+        this.job = job.changeSatisfaction(delta);
+    }
+
+    public void changeJobBurnoutRisk(int delta) {
+        this.job = job.changeBurnoutRisk(delta);
+    }
+
     public static PlayerCharacter initial() {
         return new PlayerCharacter(
                 PlayerId.generate(),
@@ -135,13 +119,5 @@ public class PlayerCharacter {
                 Skills.initial(),
                 List.of("laptop", "smartphone")
         );
-    }
-
-    public void changeJobSatisfaction(int delta) {
-        this.job = job.changeSatisfaction(delta);
-    }
-
-    public void changeJobBurnoutRisk(int delta) {
-        this.job = job.changeBurnoutRisk(delta);
     }
 }
