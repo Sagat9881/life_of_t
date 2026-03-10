@@ -1,5 +1,7 @@
 package ru.lifegame.backend.application.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.lifegame.backend.application.command.ExecuteActionCommand;
 import ru.lifegame.backend.application.port.in.ExecutePlayerActionUseCase;
 import ru.lifegame.backend.application.port.out.SessionRepository;
@@ -27,6 +29,8 @@ import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
 import java.util.*;
 
 public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(ExecutePlayerActionService.class);
 
     private final SessionRepository sessionRepository;
     private final Collection<GameAction> allActions;
@@ -64,7 +68,7 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
         Map<String, String> narrativeCtx = buildNarrativeContext(session, command.actionCode());
         Map<String, Object> questCtx     = buildQuestContext(session, command.actionCode());
 
-        // ── Narrative events ─────────────────────────────────────────────────
+        // ── Narrative events ────────────────────────────────────────────────────────────
         if (narrativeEventEngine != null) {
             List<EventSpec> firedSpecs = narrativeEventEngine.evaluate(narrativeCtx);
             for (EventSpec spec : firedSpecs) {
@@ -80,7 +84,7 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
             }
         }
 
-        // ── Quest steps ─────────────────────────────────────────────────────────
+        // ── Quest steps ───────────────────────────────────────────────────────────────────
         if (narrativeQuestEngine != null) {
             for (String questId : narrativeQuestEngine.getActiveQuests().keySet()) {
                 narrativeQuestEngine.tryCompleteStep(questId, questCtx)
@@ -96,7 +100,7 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
             }
         }
 
-        // ── NPC lifecycle tick ────────────────────────────────────────────────────
+        // ── NPC lifecycle tick ───────────────────────────────────────────────────────────
         if (npcLifecycleEngine != null) {
             Map<String, Object> npcCtx = Map.of(
                     "hour", session.time().hour(),
@@ -110,15 +114,17 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
         return mapper.toView(session, result);
     }
 
-    // ── reward application ────────────────────────────────────────────────────
+    // ── reward application ───────────────────────────────────────────────────────────
 
     /**
      * Applies quest step rewards to the session.
      *
-     * Supported reward types (from QuestSpec XML):
+     * Supported reward types:
      *   stat         — target = stat name, amount = delta
-     *   skill        — target = skill name, amount = xp gained
-     *   relationship — target = NPC id,    amount = closeness delta
+     *   skill        — target = skill name, amount = xp
+     *   relationship — target = "NPC_ID:field" (e.g. "HUSBAND:closeness"),
+     *                   amount = delta applied to that specific field
+     *   achievement  — informational marker (no-op; used by frontend only)
      */
     private void applyQuestRewards(StepCompletionResult result, GameSession session) {
         if (result.rewards() == null || result.rewards().isEmpty()) return;
@@ -135,26 +141,54 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
                         case "mood"       -> mood       += reward.amount();
                         case "money"      -> money      += reward.amount();
                         case "selfesteem" -> selfEsteem += reward.amount();
-                        default -> System.err.println(
-                                "[QuestRewards] Unknown stat target: '" + reward.target() + "'");
+                        default -> log.warn("[QuestRewards] Unknown stat target: '{}'", reward.target());
                     }
                 }
                 case "skill" ->
                     session.player().improveSkill(reward.target(), reward.amount());
-                case "relationship" ->
-                    session.relationships().applyChanges(
-                            reward.target(),
-                            new RelationshipChanges(reward.target(), reward.amount(), 0, 0, 0));
-                default -> System.err.println(
-                        "[QuestRewards] Unknown reward type: '" + reward.type() + "'");
+
+                case "relationship" -> {
+                    // target format: "NPC_ID:field"  e.g. "HUSBAND:closeness"
+                    String[] parts = reward.target().split(":", 2);
+                    if (parts.length != 2) {
+                        log.warn("[QuestRewards] Invalid relationship target '{}', expected 'NPC_ID:field'",
+                                reward.target());
+                        break;
+                    }
+                    String npcId = parts[0];
+                    String field = parts[1].toLowerCase();
+                    int    delta = reward.amount();
+                    RelationshipChanges changes = switch (field) {
+                        case "closeness"  -> new RelationshipChanges(npcId, delta,  0,     0,     0);
+                        case "trust"      -> new RelationshipChanges(npcId, 0,      delta, 0,     0);
+                        case "stability"  -> new RelationshipChanges(npcId, 0,      0,     delta, 0);
+                        case "romance"    -> new RelationshipChanges(npcId, 0,      0,     0,     delta);
+                        default -> {
+                            log.warn("[QuestRewards] Unknown relationship field '{}' for npc '{}'",
+                                    field, npcId);
+                            yield null;
+                        }
+                    };
+                    if (changes != null) {
+                        session.relationships().applyChanges(npcId, changes);
+                    }
+                }
+
+                case "achievement" ->
+                    // Achievements are informational markers surfaced to the frontend
+                    // via QuestStepCompletedEvent.rewards[]. No server-side state needed.
+                    log.info("[QuestRewards] Achievement unlocked: '{}' (quest: {})",
+                            reward.target(), result.questId());
+
+                default ->
+                    log.warn("[QuestRewards] Unknown reward type: '{}'", reward.type());
             }
         }
 
-        // Apply all stat rewards in one call
-        StatChanges statChanges = new StatChanges(energy, health, stress, mood, money, selfEsteem);
         if (energy != 0 || health != 0 || stress != 0 || mood != 0
                 || money != 0 || selfEsteem != 0) {
-            session.player().applyStatChanges(statChanges);
+            session.player().applyStatChanges(
+                    new StatChanges(energy, health, stress, mood, money, selfEsteem));
         }
     }
 
@@ -163,7 +197,7 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
         return raw.toLowerCase().replace("-", "").replace("_", "");
     }
 
-    // ── context builders ───────────────────────────────────────────────────────
+    // ── context builders ─────────────────────────────────────────────────────────────
 
     private Map<String, String> buildNarrativeContext(GameSession session, String actionCode) {
         Map<String, String> ctx = new LinkedHashMap<>();
@@ -184,6 +218,18 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
         return ctx;
     }
 
+    /**
+     * Quest objective context.
+     *
+     * Key naming matches ObjectiveSpec.target as produced by QuestSpecParser:
+     *   - simple stats:       "energy", "mood", "work_days", ...
+     *   - relationship fields: "NPC_ID:field"  e.g. "HUSBAND:closeness"
+     *     (compound condition format from QuestSpecParser.parseStep)
+     *   - action tracking:    "actionCode"
+     *
+     * work_days = consecutiveWorkDays, used by CAREER_GROWTH quest step 1
+     * (objective: type=counter, target=work_days, threshold=5)
+     */
     private Map<String, Object> buildQuestContext(GameSession session, String actionCode) {
         Map<String, Object> ctx = new LinkedHashMap<>();
         ctx.put("actionCode", actionCode);
@@ -195,10 +241,16 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
         ctx.put("mood",       session.player().stats().mood());
         ctx.put("money",      session.player().stats().money());
         ctx.put("selfEsteem", session.player().stats().selfEsteem());
+        // work_days: consecutive days the player went to work
+        // used by CAREER_GROWTH quest step 1 objective (target=work_days, threshold=5)
+        ctx.put("work_days",  session.player().consecutiveWorkDays());
+        // Relationship fields in "NPC_ID:field" format
+        // Matches ObjectiveSpec.target for compound quest conditions
         session.relationships().all().forEach((npcId, rel) -> {
-            ctx.put("rel." + npcId + ".closeness", rel.closeness());
-            ctx.put("rel." + npcId + ".trust",     rel.trust());
-            ctx.put("rel." + npcId + ".romance",   rel.romance());
+            ctx.put(npcId + ":closeness", rel.closeness());
+            ctx.put(npcId + ":trust",     rel.trust());
+            ctx.put(npcId + ":romance",   rel.romance());
+            ctx.put(npcId + ":stability", rel.stability());
         });
         return ctx;
     }
