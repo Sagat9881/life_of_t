@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { Stats } from '@/types/game';
-import { STAT_NAMES } from '@/utils/constants';
+import { STAT_CONFIG } from '@/config/stats';
 import { getStatColor, getStressColor } from '@/utils/formatters';
 import styles from './StatBar.module.css';
 
@@ -37,7 +37,7 @@ export const StatBar = ({
     return getStatColor(value, maxValue);
   }, [statKey, value, maxValue]);
 
-  const label = STAT_NAMES[statKey];
+  const label = STAT_CONFIG[statKey].name;
 
   const barClassNames = [
     styles.bar,

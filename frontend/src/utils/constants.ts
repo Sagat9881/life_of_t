@@ -11,16 +11,6 @@ export const ASSETS_BASE_URL = import.meta.env.VITE_ASSETS_BASE_URL || '/assets'
 export const MIN_STAT = 0;
 export const MAX_STAT = 100;
 
-// Названия статов для UI
-export const STAT_NAMES: Record<string, string> = {
-  energy:      'Энергия',
-  health:      'Здоровье',
-  stress:      'Стресс',
-  mood:        'Настроение',
-  money:       'Деньги',
-  selfEsteem:  'Самооценка',
-};
-
 // Цвета
 export const COLORS = {
   primary:    '#FF6B9D',
