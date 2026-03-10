@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<conflict id="family-tension">
+    <meta>
+        <label>Напряжение дома</label>
+        <description>Сэм явно чем-то недоволен, но молчит. В доме витает напряжение.</description>
+        <opponent-id>sam</opponent-id>
+        <category>FAMILY</category>
+    </meta>
+    <trigger cooldown-days="7" mode="ALL">
+        <condition type="relationship" field="trust" operator="lt" value="40" target="sam"/>
+        <condition type="stat" field="stress" operator="gt" value="60"/>
+    </trigger>
+    <tactics>
+        <tactic code="talk-it-out" base-csp-cost="20" base-opponent-csp-cost="20">
+            <label>Поговорить начистоту</label>
+            <description>Сесть и спокойно обсудить, что происходит.</description>
+            <success-outcome>
+                <stat-changes>
+                    <change field="stress" value="-20"/>
+                    <change field="mood" value="+15"/>
+                </stat-changes>
+                <relationship-changes>
+                    <change field="sam" value="+15"/>
+                </relationship-changes>
+                <narrative>Разговор получился сложным, но честным. Стало легче.</narrative>
+            </success-outcome>
+            <failure-outcome>
+                <stat-changes>
+                    <change field="stress" value="+10"/>
+                    <change field="mood" value="-10"/>
+                </stat-changes>
+                <relationship-changes>
+                    <change field="sam" value="-10"/>
+                </relationship-changes>
+                <narrative>Разговор перешёл в ссору. Лучше бы промолчала.</narrative>
+            </failure-outcome>
+        </tactic>
+        <tactic code="give-space" base-csp-cost="10" base-opponent-csp-cost="5">
+            <label>Дать ему время</label>
+            <description>Не давить, дать Сэму самому прийти и поговорить.</description>
+            <success-outcome>
+                <stat-changes>
+                    <change field="stress" value="-10"/>
+                </stat-changes>
+                <relationship-changes>
+                    <change field="sam" value="+5"/>
+                </relationship-changes>
+                <narrative>Сэм сам пришёл вечером. Поговорили спокойно.</narrative>
+            </success-outcome>
+            <failure-outcome>
+                <stat-changes>
+                    <change field="mood" value="-5"/>
+                </stat-changes>
+                <relationship-changes>
+                    <change field="sam" value="-5"/>
+                </relationship-changes>
+                <narrative>Сэм воспринял молчание как безразличие. Стало хуже.</narrative>
+            </failure-outcome>
+        </tactic>
+        <tactic code="surprise" base-csp-cost="15" base-opponent-csp-cost="0">
+            <label>Сделать приятный сюрприз</label>
+            <description>Приготовить любимый ужин и устроить уютный вечер.</description>
+            <success-outcome>
+                <stat-changes>
+                    <change field="mood" value="+20"/>
+                    <change field="stress" value="-15"/>
+                </stat-changes>
+                <relationship-changes>
+                    <change field="sam" value="+20"/>
+                </relationship-changes>
+                <narrative>Вечер получился чудесным. Напряжение растворилось.</narrative>
+            </success-outcome>
+            <failure-outcome>
+                <stat-changes>
+                    <change field="mood" value="-5"/>
+                    <change field="money" value="-20"/>
+                </stat-changes>
+                <relationship-changes/>
+                <narrative>Сэм не оценил — у него была другая причина для плохого настроения.</narrative>
+            </failure-outcome>
+        </tactic>
+    </tactics>
+</conflict>
