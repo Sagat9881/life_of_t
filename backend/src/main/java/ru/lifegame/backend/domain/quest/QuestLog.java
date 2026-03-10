@@ -41,23 +41,23 @@ public class QuestLog {
         return quests.values().stream().filter(Quest::isCompleted).map(Quest::id).toList();
     }
 
-    public Optional<Quest> findByType(QuestType type) {
+    public Optional<Quest> findByType(String type) {
         return quests.values().stream()
-                .filter(q -> q.type() == type)
+                .filter(q -> type.equals(q.type()))
                 .findFirst();
     }
 
-    public boolean hasCompletedQuest(QuestType type) {
+    public boolean hasCompletedQuest(String type) {
         return quests.values().stream()
-                .anyMatch(q -> q.type() == type && q.isCompleted());
+                .anyMatch(q -> type.equals(q.type()) && q.isCompleted());
     }
 
     /**
      * Check if there is an active quest of given type.
      */
-    public boolean hasActiveQuest(QuestType type) {
+    public boolean hasActiveQuest(String type) {
         return quests.values().stream()
-                .anyMatch(q -> q.type() == type && q.isActive());
+                .anyMatch(q -> type.equals(q.type()) && q.isActive());
     }
 
     public Map<String, Quest> all() {

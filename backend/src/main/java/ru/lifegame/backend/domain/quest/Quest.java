@@ -5,24 +5,24 @@ import java.util.List;
 
 public class Quest {
     private final String id;
-    private final QuestType type;
+    private final String type;
     private final String title;
     private final String description;
-    private QuestStatus status;
+    private String status;
     private final List<QuestStepState> steps;
 
-    public Quest(String id, QuestType type, String title, String description, List<QuestStepState> steps) {
+    public Quest(String id, String type, String title, String description, List<QuestStepState> steps) {
         this.id = id;
         this.type = type;
         this.title = title;
         this.description = description;
-        this.status = QuestStatus.NOT_STARTED;
+        this.status = "NOT_STARTED";
         this.steps = new ArrayList<>(steps);
     }
 
     public void start() {
-        if (status == QuestStatus.NOT_STARTED) {
-            status = QuestStatus.IN_PROGRESS;
+        if ("NOT_STARTED".equals(status)) {
+            status = "IN_PROGRESS";
         }
     }
 
@@ -33,14 +33,14 @@ public class Quest {
     }
 
     public void checkCompletion() {
-        if (status == QuestStatus.IN_PROGRESS && steps.stream().allMatch(QuestStepState::isCompleted)) {
-            status = QuestStatus.COMPLETED;
+        if ("IN_PROGRESS".equals(status) && steps.stream().allMatch(QuestStepState::isCompleted)) {
+            status = "COMPLETED";
         }
     }
 
     public void fail() {
-        if (status == QuestStatus.IN_PROGRESS) {
-            status = QuestStatus.FAILED;
+        if ("IN_PROGRESS".equals(status)) {
+            status = "FAILED";
         }
     }
 
@@ -50,14 +50,14 @@ public class Quest {
         return (int) (done * 100 / steps.size());
     }
 
-    public boolean isActive() { return status == QuestStatus.IN_PROGRESS; }
-    public boolean isCompleted() { return status == QuestStatus.COMPLETED; }
+    public boolean isActive() { return "IN_PROGRESS".equals(status); }
+    public boolean isCompleted() { return "COMPLETED".equals(status); }
 
     // Accessor methods
     public String id() { return id; }
-    public QuestType type() { return type; }
+    public String type() { return type; }
     public String title() { return title; }
     public String description() { return description; }
-    public QuestStatus status() { return status; }
+    public String status() { return status; }
     public List<QuestStepState> steps() { return List.copyOf(steps); }
 }
