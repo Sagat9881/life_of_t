@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assetManifest>
+    <!-- 
+        Asset Manifest: Bridge between backend narrative specs and frontend visual assets.
+        Backend loads this XML and serves it via /api/v1/assets/manifest REST endpoint.
+        Frontend fetches manifest on startup to know which PNGs/atlases to load for each location/activity.
+    -->
+
+    <!-- LOCATIONS -->
+    <locations>
+        <location id="kitchen">
+            <background src="/assets/locations/kitchen/background.png"/>
+            <midground src="/assets/locations/kitchen/midground.png"/>
+            <foreground src="/assets/locations/kitchen/foreground.png"/>
+            <props>
+                <prop id="stove" atlas="/assets/kitchen/stove-idle-atlas.json"/>
+                <prop id="table" atlas="/assets/kitchen/table-idle-atlas.json"/>
+            </props>
+        </location>
+
+        <location id="bedroom">
+            <background src="/assets/locations/homeroom/background.png"/>
+            <midground src="/assets/locations/homeroom/midground.png"/>
+            <props>
+                <prop id="bed" atlas="/assets/bed/idle-atlas.json"/>
+                <prop id="bookshelf" atlas="/assets/bookshelf/idle-atlas.json"/>
+                <prop id="computer" atlas="/assets/computer/idle-atlas.json"/>
+                <prop id="mirror" atlas="/assets/mirror/idle-atlas.json"/>
+                <prop id="phone" atlas="/assets/phone/idle-atlas.json"/>
+            </props>
+        </location>
+
+        <location id="livingroom">
+            <background src="/assets/locations/livingroom/background.png"/>
+            <midground src="/assets/locations/livingroom/midground.png"/>
+            <props>
+                <prop id="cattree" atlas="/assets/cattree/idle-atlas.json"/>
+            </props>
+        </location>
+
+        <location id="bathroom">
+            <background src="/assets/locations/bathroom/background.png"/>
+        </location>
+
+        <location id="office">
+            <background src="/assets/locations/office/background.png"/>
+        </location>
+
+        <location id="fatherhouse">
+            <background src="/assets/locations/fatherhouse/background.png"/>
+        </location>
+    </locations>
+
+    <!-- ACTIVITY ANIMATIONS: Map NPC activity IDs to animation keys -->
+    <activityAnimations>
+        <activity id="breakfast">
+            <animation npc="SAM" key="eating" atlas="/assets/characters/sam/eating-atlas.json"/>
+            <animation npc="TANYA" key="eating" atlas="/assets/characters/tanya/eating-atlas.json"/>
+        </activity>
+        <activity id="sleeping">
+            <animation npc="SAM" key="sleeping" atlas="/assets/characters/sam/sleeping-atlas.json"/>
+            <animation npc="TANYA" key="sleeping" atlas="/assets/characters/tanya/sleeping-atlas.json"/>
+        </activity>
+        <activity id="working">
+            <animation npc="SAM" key="working" atlas="/assets/characters/sam/working-atlas.json"/>
+            <animation npc="TANYA" key="working" atlas="/assets/characters/tanya/working-atlas.json"/>
+        </activity>
+        <activity id="reading">
+            <animation npc="SAM" key="reading" atlas="/assets/characters/sam/reading-atlas.json"/>
+            <animation npc="ALEXANDER" key="reading" atlas="/assets/characters/alexander/reading-atlas.json"/>
+        </activity>
+        <activity id="relaxing">
+            <animation npc="SAM" key="relaxing" atlas="/assets/characters/sam/relaxing-atlas.json"/>
+            <animation npc="TANYA" key="relaxing" atlas="/assets/characters/tanya/relaxing-atlas.json"/>
+        </activity>
+        <activity id="idle">
+            <animation npc="SAM" key="idle" atlas="/assets/characters/sam/idle-atlas.json"/>
+            <animation npc="TANYA" key="idle" atlas="/assets/characters/tanya/idle-atlas.json"/>
+            <animation npc="ALEXANDER" key="idle" atlas="/assets/characters/alexander/idle-atlas.json"/>
+            <animation npc="GARFIELD" key="idle" atlas="/assets/characters/garfield/idle-atlas.json"/>
+            <animation npc="DUKE" key="idle" atlas="/assets/characters/duke/idle-atlas.json"/>
+        </activity>
+    </activityAnimations>
+
+    <!-- CHARACTER SPRITES -->
+    <characters>
+        <character id="SAM">
+            <displayName>Sam</displayName>
+            <spriteSheet src="/assets/characters/sam/spritesheet.png"/>
+            <animations>
+                <anim key="idle" atlas="/assets/characters/sam/idle-atlas.json"/>
+                <anim key="walking" atlas="/assets/characters/sam/walking-atlas.json"/>
+                <anim key="eating" atlas="/assets/characters/sam/eating-atlas.json"/>
+                <anim key="sleeping" atlas="/assets/characters/sam/sleeping-atlas.json"/>
+                <anim key="working" atlas="/assets/characters/sam/working-atlas.json"/>
+            </animations>
+        </character>
+        <character id="TANYA">
+            <displayName>Tanya</displayName>
+            <spriteSheet src="/assets/characters/tanya/spritesheet.png"/>
+            <animations>
+                <anim key="idle" atlas="/assets/characters/tanya/idle-atlas.json"/>
+                <anim key="walking" atlas="/assets/characters/tanya/walking-atlas.json"/>
+                <anim key="eating" atlas="/assets/characters/tanya/eating-atlas.json"/>
+            </animations>
+        </character>
+        <character id="ALEXANDER">
+            <displayName>Alexander (Father)</displayName>
+            <spriteSheet src="/assets/characters/alexander/spritesheet.png"/>
+            <animations>
+                <anim key="idle" atlas="/assets/characters/alexander/idle-atlas.json"/>
+                <anim key="reading" atlas="/assets/characters/alexander/reading-atlas.json"/>
+            </animations>
+        </character>
+        <character id="GARFIELD">
+            <displayName>Garfield (Cat)</displayName>
+            <spriteSheet src="/assets/characters/garfield/spritesheet.png"/>
+            <animations>
+                <anim key="idle" atlas="/assets/characters/garfield/idle-atlas.json"/>
+            </animations>
+        </character>
+        <character id="DUKE">
+            <displayName>Duke (Dog)</displayName>
+            <spriteSheet src="/assets/characters/duke/spritesheet.png"/>
+            <animations>
+                <anim key="idle" atlas="/assets/characters/duke/idle-atlas.json"/>
+            </animations>
+        </character>
+    </characters>
+</assetManifest>

@@ -13,8 +13,17 @@
     <name>Life of T - Parent</name>
     <description>Уютный life-sim симулятор про Татьяну</description>
 
-    <!-- Build order: asset-generator -> backend -> frontend -> application -->
+    <!--
+        Build order:
+          game-content (data-only content pack)
+            └── life-of-t (narrative + asset-specs + balance XMLs)
+          asset-generator  (reads asset-specs from game-content/life-of-t)
+          backend          (reads narrative/game-config/game-data from classpath)
+          frontend         (React SPA)
+          application      (wires everything: depends on backend + frontend + life-of-t)
+    -->
     <modules>
+        <module>game-content</module>
         <module>asset-generator</module>
         <module>backend</module>
         <module>frontend</module>
@@ -47,6 +56,11 @@
             </dependency>
             
             <!-- Internal modules -->
+            <dependency>
+                <groupId>ru.lifegame</groupId>
+                <artifactId>life-of-t</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>ru.lifegame</groupId>
                 <artifactId>backend</artifactId>

@@ -18,6 +18,17 @@
     <description>Main application: backend API + frontend SPA + asset generation</description>
 
     <dependencies>
+        <!--
+            Content pack for «Life of T».
+            Puts narrative/, game-config/, game-data/, asset-specs/ onto the classpath.
+            To run a different game, replace this dependency with another game-content submodule.
+            Backend and frontend code must NOT be changed — they are data-driven.
+        -->
+        <dependency>
+            <groupId>ru.lifegame</groupId>
+            <artifactId>life-of-t</artifactId>
+        </dependency>
+
         <!-- Backend module (domain + REST API /api/v1/game) -->
         <dependency>
             <groupId>ru.lifegame</groupId>
@@ -52,24 +63,16 @@
 
     <build>
         <resources>
-            <!-- Default resources -->
+            <!-- Default resources only.
+                 All narrative XMLs, game-config and game-data come from
+                 the life-of-t jar (game-content/life-of-t) on the classpath.
+                 No manual ../narrative copy needed here. -->
             <resource>
                 <directory>src/main/resources</directory>
-            </resource>
-            <!-- Narrative XML specs from project root narrative/ directory.
-                 Copies into classpath:narrative/ so PlayerActionSpecLoader,
-                 NpcSpecLoader, NarrativeContentLoader all find their files. -->
-            <resource>
-                <directory>${project.basedir}/../narrative</directory>
-                <targetPath>narrative</targetPath>
-                <includes>
-                    <include>**/*.xml</include>
-                </includes>
             </resource>
         </resources>
 
         <plugins>
-            <!-- Spring Boot Maven Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

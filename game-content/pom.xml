@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>ru.lifegame</groupId>
+        <artifactId>life-of-t-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>game-content</artifactId>
+    <packaging>pom</packaging>
+    <name>Game Content — Parent</name>
+    <description>
+        Aggregator for all data-driven game content modules.
+        Each submodule is a self-contained content pack (narrative XMLs +
+        asset-specs) that can be swapped to run a different game without
+        changing backend or frontend code.
+    </description>
+
+    <modules>
+        <module>life-of-t</module>
+    </modules>
+</project>

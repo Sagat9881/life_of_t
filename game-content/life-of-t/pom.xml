@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>ru.lifegame</groupId>
+        <artifactId>game-content</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>life-of-t</artifactId>
+    <packaging>jar</packaging>
+    <name>Game Content — Life of T</name>
+    <description>
+        Data-only content pack for the «Life of T» game.
+        Contains all narrative XMLs, balance configs and asset-specs.
+        No Java sources — pure classpath resources.
+        Swap this dependency in application/pom.xml to run a different game.
+    </description>
+
+    <!--
+        No dependencies: this module is pure XML content.
+        No Java sources: only src/main/resources is used.
+    -->
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <!-- Skip compilation phase — no sources -->
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <skipMain>true</skipMain>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

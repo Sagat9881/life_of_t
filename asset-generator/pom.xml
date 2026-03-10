@@ -62,9 +62,10 @@
 
             <!--
               Run asset generation AFTER compilation (process-classes).
-              Output goes to target/generated-assets/ only.
-              The backend module picks up these assets via exec-maven-plugin
-              and packs them into classpath:/assets/ inside the jar.
+              Input:  game-content/life-of-t/src/main/resources/asset-specs/
+              Output: target/generated-assets/
+              The application module picks up generated assets via the
+              spring-boot repackage and serves them from classpath:/assets/.
               Assets are NOT copied to frontend/public/ — Vite proxies
               /assets/** to the backend in dev mode.
             -->
@@ -82,7 +83,7 @@
                         <configuration>
                             <mainClass>ru.lifegame.assets.AssetGeneratorRunner</mainClass>
                             <arguments>
-                                <argument>${project.basedir}/../asset-specs</argument>
+                                <argument>${project.basedir}/../game-content/life-of-t/src/main/resources/asset-specs</argument>
                                 <argument>${project.build.directory}/generated-assets</argument>
                             </arguments>
                         </configuration>

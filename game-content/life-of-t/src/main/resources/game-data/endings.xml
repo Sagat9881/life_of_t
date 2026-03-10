@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<endings>
+    <!-- Story endings (evaluated on day 30 if no game-over) -->
+    <ending id="GOOD_CAREER" category="STORY" priority="80">
+        <meta>
+            <title>Карьерный взлёт</title>
+            <summary>Татьяна стала востребованным специалистом.</summary>
+            <epilogue>Её проекты признаны лучшими в индустрии.</epilogue>
+        </meta>
+        <conditions mode="AND">
+            <condition type="stat" field="job_satisfaction" operator="gte" value="80" />
+            <condition type="quest" questId="CAREER_GROWTH" state="COMPLETED" />
+        </conditions>
+    </ending>
+
+    <ending id="FAMILY_HAPPINESS" category="STORY" priority="85">
+        <meta>
+            <title>Семейное счастье</title>
+            <summary>Семья стала крепче и дружнее.</summary>
+            <epilogue>Татьяна нашла баланс между работой и семьёй.</epilogue>
+        </meta>
+        <conditions mode="AND">
+            <condition type="relationship" target="HUSBAND" field="closeness" operator="gte" value="80" />
+            <condition type="relationship" target="HUSBAND" field="romance" operator="gte" value="70" />
+            <condition type="relationship" target="HUSBAND" field="broken" operator="eq" value="0" />
+        </conditions>
+    </ending>
+
+    <ending id="BALANCED_LIFE" category="STORY" priority="75">
+        <meta>
+            <title>Гармония</title>
+            <summary>Татьяна научилась заботиться о себе.</summary>
+            <epilogue>Жизнь обрела баланс и смысл.</epilogue>
+        </meta>
+        <conditions mode="AND">
+            <condition type="quest" questId="SELF_CARE_ARC" state="COMPLETED" />
+            <condition type="stat" field="mood" operator="gte" value="70" />
+            <condition type="stat" field="self_esteem" operator="gte" value="70" />
+        </conditions>
+    </ending>
+
+    <ending id="WORKAHOLIC_BURNOUT" category="STORY" priority="60">
+        <meta>
+            <title>Трудоголик</title>
+            <summary>Работа поглотила всю жизнь.</summary>
+            <epilogue>Карьера на высоте, но ценой одиночества.</epilogue>
+        </meta>
+        <conditions mode="AND">
+            <condition type="stat" field="job_satisfaction" operator="gte" value="75" />
+            <condition type="stat" field="burnout_risk" operator="gte" value="60" />
+            <condition type="relationship" target="HUSBAND" field="closeness" operator="lte" value="40" />
+        </conditions>
+    </ending>
+
+    <ending id="FAMILY_FOCUS" category="STORY" priority="70">
+        <meta>
+            <title>Семья превыше всего</title>
+            <summary>Приоритет — близкие люди.</summary>
+            <epilogue>Работа на втором плане, зато дома всё прекрасно.</epilogue>
+        </meta>
+        <conditions mode="AND">
+            <condition type="relationship" target="HUSBAND" field="closeness" operator="gte" value="70" />
+            <condition type="relationship" target="FATHER" field="closeness" operator="gte" value="60" />
+            <condition type="stat" field="job_satisfaction" operator="lte" value="50" />
+        </conditions>
+    </ending>
+
+    <ending id="NEUTRAL_EPILOGUE" category="STORY" priority="10">
+        <meta>
+            <title>Жизнь продолжается</title>
+            <summary>30 дней позади. Жизнь идёт своим чередом.</summary>
+            <epilogue>Татьяна продолжает свой путь.</epilogue>
+        </meta>
+        <conditions mode="AND">
+            <!-- Always true fallback -->
+        </conditions>
+    </ending>
+
+    <!-- Game-over endings -->
+    <ending id="BURNOUT" category="GAME_OVER" priority="100">
+        <meta>
+            <title>Выгорание</title>
+            <summary>Вы погибли от изнурения.</summary>
+            <epilogue>Нужно было меньше работать. Отдохните и выпейте чашечку чая перед следующей сессией :3</epilogue>
+        </meta>
+        <conditions mode="AND">
+            <condition type="stat" field="burnout_risk" operator="gte" value="100" />
+        </conditions>
+    </ending>
+
+    <ending id="DIVORCE" category="GAME_OVER" priority="100">
+        <meta>
+            <title>Развод</title>
+            <summary>Вы расстались.</summary>
+            <epilogue>Стоило больше ценить радостные моменты. Попробуйте ещё раз.</epilogue>
+        </meta>
+        <conditions mode="AND">
+            <condition type="relationship" target="HUSBAND" field="broken" operator="eq" value="1" />
+        </conditions>
+    </ending>
+
+    <ending id="ISOLATION" category="GAME_OVER" priority="100">
+        <meta>
+            <title>Изоляция</title>
+            <summary>Вы остались совсем одни.</summary>
+            <epilogue>Сердце не бьётся, но и не болит. Попробуйте ещё раз.</epilogue>
+        </meta>
+        <conditions mode="AND">
+            <condition type="stat" field="total_closeness" operator="lte" value="20" />
+        </conditions>
+    </ending>
+
+    <ending id="BANKRUPTCY" category="GAME_OVER" priority="100">
+        <meta>
+            <title>Банкротство</title>
+            <summary>Деньги закончились.</summary>
+            <epilogue>Финансовое планирование — важный навык. Попробуйте ещё раз.</epilogue>
+        </meta>
+        <conditions mode="AND">
+            <condition type="stat" field="money" operator="lte" value="-500" />
+        </conditions>
+    </ending>
+</endings>
