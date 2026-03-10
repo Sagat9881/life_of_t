@@ -21,8 +21,6 @@ export const COLORS = {
   accent: '#FFE66D',       // жёлтый для энергии
   background: '#F7F7F7',   // светло-серый
   text: '#2C3E50',         // тёмно-синий
-  
-  // Дополнительные
   success: '#4CAF50',
   warning: '#FF9800',
   error: '#F44336',
@@ -44,63 +42,6 @@ export const TIME_SLOTS = {
   NIGHT: 'Ночь',
 } as const;
 
-// Названия действий
-export const ACTION_NAMES = {
-  WORK: 'Работа',
-  DATE_WITH_HUSBAND: 'Свидание с мужем',
-  FEED_PETS: 'Покормить питомцев',
-  PLAY_WITH_PETS: 'Поиграть с питомцами',
-  WALK_PETS: 'Выгулять питомцев',
-  VISIT_FATHER: 'Навестить отца',
-  REST: 'Отдохнуть',
-  SOCIAL_MEDIA: 'Соцсети',
-} as const;
-
-// Названия тактик
-export const TACTIC_NAMES = {
-  SURRENDER: 'Уступить',
-  ASSERT: 'Настоять на своём',
-  COMPROMISE: 'Компромисс',
-  AVOID: 'Избежать',
-  LISTEN_AND_UNDERSTAND: 'Выслушать и понять',
-  USE_HUMOR: 'Пошутить',
-  LOGICAL_ARGUMENT: 'Логический аргумент',
-  EMOTIONAL_APPEAL: 'Эмоциональный призыв',
-  SET_BOUNDARIES: 'Установить границы',
-} as const;
-
-// Названия статов
-export const STAT_NAMES = {
-  energy: 'Энергия',
-  health: 'Здоровье',
-  stress: 'Стресс',
-  mood: 'Настроение',
-  money: 'Деньги',
-  selfEsteem: 'Самооценка',
-} as const;
-
-// Иконки для статов (используем Lucide React)
-export const STAT_ICONS = {
-  energy: 'Zap',
-  health: 'Heart',
-  stress: 'AlertCircle',
-  mood: 'Smile',
-  money: 'DollarSign',
-  selfEsteem: 'Award',
-} as const;
-
-// Типы питомцев
-export const PET_NAMES = {
-  GARFIELD: 'Гарфилд',
-  SAM: 'Сэм',
-} as const;
-
-// Типы NPC
-export const NPC_NAMES = {
-  HUSBAND: 'Муж',
-  FATHER: 'Отец',
-} as const;
-
 // Лимиты
 export const LIMITS = {
   maxEnergy: 100,
@@ -108,6 +49,3 @@ export const LIMITS = {
   minMoneyForAction: 0,
   questProgressStep: 10,
 } as const;
-
-// Размеры бандла
-export const BUNDLE_SIZE_LIMIT = 200 * 1024; // 200KB gzipped
