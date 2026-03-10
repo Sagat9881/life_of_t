@@ -3,7 +3,7 @@ import { api } from '../services/api';
 import type {
   Player, GameTime, ActionOption, RelationshipView,
   PetView, QuestView, ConflictView, EventView,
-  EndingView, ActionResultView, NPC, NpcActivityView, DomainEventView,
+  EndingView, ActionResultView, NpcActivityView, DomainEventView,
 } from '../types/game';
 
 interface GameStore {
@@ -22,8 +22,6 @@ interface GameStore {
   domainEvents: DomainEventView[];
   isLoading: boolean;
   error: string | null;
-  npcs: NPC[];
-  actions: ActionOption[];
   fetchGameState: () => Promise<void>;
   executeAction: (actionCode: string) => Promise<void>;
   selectTactic: (conflictId: string, tacticCode: string) => Promise<void>;
@@ -38,21 +36,15 @@ const initialState = {
   pets: [], activeQuests: [], completedQuestIds: [], activeConflicts: [],
   currentEvent: null, ending: null, lastActionResult: null,
   npcActivities: [], domainEvents: [],
-  isLoading: false, error: null, npcs: [], actions: [],
+  isLoading: false, error: null,
 };
 
-function toNpcs(rels: RelationshipView[]): NPC[] {
-  return rels.map((r) => ({ id: r.npcId, name: r.name || r.npcId, relationship: r.closeness ?? 0, type: 'friend' as const }));
-}
-
 function applyState(state: Record<string, unknown>) {
-  const rels = (state.relationships as RelationshipView[]) ?? [];
-  const actions = (state.availableActions as ActionOption[]) ?? [];
   return {
     player: (state.player as Player) ?? null,
     time: (state.time as GameTime) ?? null,
-    availableActions: actions, actions,
-    relationships: rels, npcs: toNpcs(rels),
+    availableActions: (state.availableActions as ActionOption[]) ?? [],
+    relationships: (state.relationships as RelationshipView[]) ?? [],
     pets: (state.pets as PetView[]) ?? [],
     activeQuests: (state.activeQuests as QuestView[]) ?? [],
     completedQuestIds: (state.completedQuestIds as string[]) ?? [],
