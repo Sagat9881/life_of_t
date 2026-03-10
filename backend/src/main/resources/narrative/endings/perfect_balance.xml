@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ending id="PERFECT_BALANCE" category="STORY" priority="70">
+  <meta>
+    <title>Идеальная гармония</title>
+    <summary>Татьяна достигла баланса во всех сферах жизни</summary>
+    <epilogue>Карьера, семья, забота о себе — всё в гармонии. Это и есть настоящее счастье.</epilogue>
+  </meta>
+  <conditions mode="AND">
+    <condition type="quests-completed" count="3"/>
+    <condition type="stat" field="mood" operator="gte" value="80"/>
+    <condition type="stat" field="self_esteem" operator="gte" value="80"/>
+    <condition type="relationship" target="HUSBAND" field="closeness" operator="gte" value="80"/>
+    <condition type="relationship" target="FATHER" field="closeness" operator="gte" value="70"/>
+    <condition type="time-ratio" activity1="work" activity2="self_care" operator="lte" ratio="2.5"/>
+    <condition type="unique-actions" operator="gte" count="12"/>
+    <min-score>5</min-score>
+  </conditions>
+</ending>

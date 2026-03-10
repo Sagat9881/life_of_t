@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ending id="PET_DEATH" category="GAME_OVER" priority="100">
+  <meta>
+    <title>Питомец умер</title>
+    <summary>Вы не смогли позаботиться о своём друге</summary>
+    <epilogue>Заботьтесь о тех, кто рядом с вами.</epilogue>
+  </meta>
+  <conditions mode="AND">
+    <condition type="pets" method="has_dead_pet" operator="eq" value="true"/>
+  </conditions>
+</ending>

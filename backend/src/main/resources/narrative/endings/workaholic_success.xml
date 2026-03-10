@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ending id="WORKAHOLIC_SUCCESS" category="STORY" priority="60">
+  <meta>
+    <title>Карьерный взлёт ценой всего</title>
+    <summary>Работа поглотила жизнь, но результаты впечатляют</summary>
+    <epilogue>Татьяна стала признанным специалистом, но личная жизнь осталась за бортом.</epilogue>
+  </meta>
+  <conditions mode="AND">
+    <condition type="quest" id="CAREER_GROWTH" state="completed"/>
+    <condition type="stat" field="job_satisfaction" operator="gte" value="85"/>
+    <condition type="time-spent" activity="work" operator="gte" hours="150"/>
+    <condition type="stat" field="money" operator="gte" value="3000"/>
+    <condition type="stat" field="burnout_risk" operator="gte" value="70"/>
+    <condition type="relationship-sum" field="closeness" operator="lt" value="120"/>
+    <condition type="action-count" action="date_husband" operator="lt" count="5"/>
+    <min-score>5</min-score>
+  </conditions>
+</ending>

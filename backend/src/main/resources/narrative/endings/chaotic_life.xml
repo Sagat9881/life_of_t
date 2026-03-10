@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ending id="CHAOTIC_LIFE" category="STORY" priority="40">
+  <meta>
+    <title>Хаотичная жизнь</title>
+    <summary>Металась между всем, ничего не довела до конца</summary>
+    <epilogue>Татьяна пробовала всё, но так и не нашла свой путь. Жизнь продолжается.</epilogue>
+  </meta>
+  <conditions mode="AND">
+    <condition type="quests-completed" count="0"/>
+    <condition type="quests-failed" operator="gte" count="2"/>
+    <condition type="unique-actions" operator="gte" count="18"/>
+    <condition type="action-count" action="work" operator="between" min="10" max="20"/>
+    <condition type="stat" field="stress" operator="gte" value="70"/>
+    <condition type="relationship-sum" field="closeness" operator="between" min="80" max="150"/>
+    <min-score>4</min-score>
+  </conditions>
+</ending>

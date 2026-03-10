@@ -29,6 +29,20 @@ public class EndingLoader {
         return specs;
     }
 
+    public EndingSpec loadOne(InputStream xmlStream, String filename) throws Exception {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document doc = builder.parse(xmlStream);
+        doc.getDocumentElement().normalize();
+        Element root = doc.getDocumentElement();
+        if (!"ending".equals(root.getTagName())) {
+            throw new IllegalArgumentException(
+                "Expected root element <ending> in " + filename +
+                ", got <" + root.getTagName() + ">");
+        }
+        return parseEnding(root);
+    }
+
     private EndingSpec parseEnding(Element endingEl) {
         String id = endingEl.getAttribute("id");
         String category = endingEl.getAttribute("category");

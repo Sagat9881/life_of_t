@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ending id="SELF_ACTUALIZATION" category="STORY" priority="60">
+  <meta>
+    <title>Нашла себя</title>
+    <summary>Забота о себе стала приоритетом</summary>
+    <epilogue>Татьяна научилась ценить себя и своё время. Это главное достижение.</epilogue>
+  </meta>
+  <conditions mode="AND">
+    <condition type="quest" id="SELF_CARE_ARC" state="completed"/>
+    <condition type="stat" field="self_esteem" operator="gte" value="85"/>
+    <condition type="stat" field="mood" operator="gte" value="85"/>
+    <condition type="action-count" action="self_care" operator="gte" count="15"/>
+    <condition type="daily-average" action="rest" operator="gte" hours="3"/>
+    <condition type="unique-actions" operator="gte" count="15"/>
+    <condition type="time-ratio" activity1="work" activity2="self_care" operator="lte" ratio="1.5"/>
+    <min-score>5</min-score>
+  </conditions>
+</ending>

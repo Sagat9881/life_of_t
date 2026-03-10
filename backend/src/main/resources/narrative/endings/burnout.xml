@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ending id="BURNOUT" category="GAME_OVER" priority="100">
+  <meta>
+    <title>Вы погибли от изнурения</title>
+    <summary>Нужно было меньше работать</summary>
+    <epilogue>Отдохните и выпейте чашечку чая перед следующей игровой сессией :3</epilogue>
+  </meta>
+  <conditions mode="AND">
+    <condition type="player-state" field="burned_out" operator="eq" value="true"/>
+  </conditions>
+</ending>

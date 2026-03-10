@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ending id="DIVORCE" category="GAME_OVER" priority="100">
+  <meta>
+    <title>Вы расстались</title>
+    <summary>Стоило больше ценить все радостные моменты жизни</summary>
+    <epilogue>Вы не знали, что такое "время". Не переживайте, в следующий раз все получится. Попробуйте еще раз.</epilogue>
+  </meta>
+  <conditions mode="AND">
+    <condition type="relationships" method="is_divorced" operator="eq" value="true"/>
+  </conditions>
+</ending>

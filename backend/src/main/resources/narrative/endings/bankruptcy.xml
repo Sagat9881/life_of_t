@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ending id="BANKRUPTCY" category="GAME_OVER" priority="100">
+  <meta>
+    <title>Банкротство</title>
+    <summary>Долги поглотили всё</summary>
+    <epilogue>Деньги — не главное, но без них трудно.</epilogue>
+  </meta>
+  <conditions mode="AND">
+    <condition type="player-state" field="bankrupt" operator="eq" value="true"/>
+  </conditions>
+</ending>

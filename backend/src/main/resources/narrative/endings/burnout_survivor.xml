@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ending id="BURNOUT_SURVIVOR" category="STORY" priority="50">
+  <meta>
+    <title>Выжившая в аду</title>
+    <summary>Почти сгорела, но смогла остановиться</summary>
+    <epilogue>Татьяна прошла через выгорание, но смогла вовремя остановиться и переосмыслить приоритеты.</epilogue>
+  </meta>
+  <conditions mode="AND">
+    <condition type="stat" field="burnout_risk" operator="gte" value="80"/>
+    <condition type="consecutive-days" action="work" operator="gte" count="7"/>
+    <condition type="action-count" action="rest" operator="gte" count="8"/>
+    <condition type="quest" id="SELF_CARE_ARC" state="completed"/>
+    <condition type="stat" field="mood" operator="gte" value="60"/>
+    <min-score>4</min-score>
+  </conditions>
+</ending>
