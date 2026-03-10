@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.lifegame.backend.application.service.GameContentService;
 import ru.lifegame.backend.domain.dto.content.ContentVersion;
-import ru.lifegame.backend.domain.dto.content.QuestDefView;
+import ru.lifegame.backend.domain.narrative.spec.QuestSpec;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -27,19 +27,19 @@ public class QuestsContentController {
 
     @GetMapping("/quests")
     @Operation(summary = "Get all quest definitions",
-               description = "Returns quest structure with steps and rewards")
+               description = "Returns quest structure with steps, objectives and rewards")
     public ResponseEntity<QuestsContentResponse> getQuests() {
         ContentVersion version = contentService.getCurrentVersion();
-        List<QuestDefView> quests = contentService.getAllQuests();
-        
+        List<QuestSpec> quests = contentService.getAllQuests();
+
         return ResponseEntity.ok()
-            .cacheControl(CacheControl.maxAge(1, TimeUnit.HOURS))
-            .eTag(version.version())
-            .body(new QuestsContentResponse(version, quests));
+                .cacheControl(CacheControl.maxAge(1, TimeUnit.HOURS))
+                .eTag(version.version())
+                .body(new QuestsContentResponse(version, quests));
     }
 
     public record QuestsContentResponse(
-        ContentVersion version,
-        List<QuestDefView> quests
+            ContentVersion version,
+            List<QuestSpec> quests
     ) {}
 }

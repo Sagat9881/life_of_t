@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.lifegame.backend.application.service.GameContentService;
 import ru.lifegame.backend.domain.dto.content.ContentVersion;
-import ru.lifegame.backend.domain.dto.content.EventDefView;
+import ru.lifegame.backend.domain.npc.spec.EventSpec;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -27,19 +27,19 @@ public class EventsContentController {
 
     @GetMapping("/events")
     @Operation(summary = "Get all narrative event definitions",
-               description = "Returns events with options and effects")
+               description = "Returns all narrative events with dialogue lines, options and effects")
     public ResponseEntity<EventsContentResponse> getEvents() {
         ContentVersion version = contentService.getCurrentVersion();
-        List<EventDefView> events = contentService.getAllEvents();
-        
+        List<EventSpec> events = contentService.getAllEvents();
+
         return ResponseEntity.ok()
-            .cacheControl(CacheControl.maxAge(1, TimeUnit.HOURS))
-            .eTag(version.version())
-            .body(new EventsContentResponse(version, events));
+                .cacheControl(CacheControl.maxAge(1, TimeUnit.HOURS))
+                .eTag(version.version())
+                .body(new EventsContentResponse(version, events));
     }
 
     public record EventsContentResponse(
-        ContentVersion version,
-        List<EventDefView> events
+            ContentVersion version,
+            List<EventSpec> events
     ) {}
 }
