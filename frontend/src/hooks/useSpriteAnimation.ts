@@ -95,17 +95,26 @@ export function useSpriteAnimation({
         if (!animCfg) { setError(`Animation '${animation}' not found`); return; }
         const frameCount = animCfg.columns;
         const totalRows  = animCfg.rows ?? 1;
-        setMeta({
-          atlasUrl:   `/assets/${entityType}/${entityName}/animations/${animCfg.file}`,
-          frameWidth: animCfg.frameWidth,
-          frameHeight:animCfg.frameHeight,
+
+        // Build base meta without optional fields first, then conditionally spread
+        // cropOffset — required by exactOptionalPropertyTypes: assigning undefined
+        // to an optional field `cropOffset?: T` is a type error; only absence is valid.
+        const baseMeta: AnimationMeta = {
+          atlasUrl:    `/assets/${entityType}/${entityName}/animations/${animCfg.file}`,
+          frameWidth:  animCfg.frameWidth,
+          frameHeight: animCfg.frameHeight,
           frameCount,
-          fps:        animCfg.fps,
-          loop:       animCfg.loop,
-          currentRow: 0,
+          fps:         animCfg.fps,
+          loop:        animCfg.loop,
+          currentRow:  0,
           totalRows,
-          cropOffset: animCfg.cropOffset ? { x: animCfg.cropOffset.x, y: animCfg.cropOffset.y } : undefined,
-        });
+        };
+
+        const resolvedMeta: AnimationMeta = animCfg.cropOffset
+          ? { ...baseMeta, cropOffset: { x: animCfg.cropOffset.x, y: animCfg.cropOffset.y } }
+          : baseMeta;
+
+        setMeta(resolvedMeta);
         setIsLoaded(true);
       })
       .catch((e: unknown) => { if (!cancelled) setError(e instanceof Error ? e.message : String(e)); });

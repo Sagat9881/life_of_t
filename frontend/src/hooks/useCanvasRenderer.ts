@@ -48,7 +48,7 @@ interface AnimationConfig {
   frameHeight: number;  // 0 = derive from image
   fps: number;
   loop: boolean;
-  cropOffset: CropOffset;
+  cropOffset?: CropOffset; // optional — not all atlases carry crop data
 }
 
 interface AtlasConfig {
@@ -65,7 +65,7 @@ interface SlotState {
 export interface UseCanvasRendererOptions {
   config: LocationConfig;
   canvasRef: React.RefObject<HTMLCanvasElement>;
-  timeOfDay: string;
+  timeOfDay?: string; // kept in interface for callers, not used internally
   selectedObjectId: string | null;
   hoveredObjectId: string | null;
   characterAnimations?: Record<string, string>;

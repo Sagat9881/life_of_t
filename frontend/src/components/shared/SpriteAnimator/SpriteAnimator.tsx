@@ -44,16 +44,17 @@ export const SpriteAnimator = memo(function SpriteAnimator({
   condition,
 }: SpriteAnimatorProps) {
   const hookOptions: UseSpriteAnimationOptions = useMemo(() => {
+    // Build options without optional fields, then set them only when defined.
+    // exactOptionalPropertyTypes forbids: `field: undefined` on `field?: T`.
+    // Only field absence (never assigning undefined) satisfies the constraint.
     const opts: UseSpriteAnimationOptions = {
       entityType,
       entityName,
       animation,
       playing,
-      condition,
     };
-    if (onComplete !== undefined) {
-      return { ...opts, onComplete };
-    }
+    if (onComplete !== undefined) opts.onComplete = onComplete;
+    if (condition  !== undefined) opts.condition  = condition;
     return opts;
   }, [entityType, entityName, animation, playing, onComplete, condition]);
 
@@ -90,9 +91,6 @@ export const SpriteAnimator = memo(function SpriteAnimator({
   }
 
   // ── CROP OFFSET ──
-  // When frames were cropped, we need to translate the sprite so it
-  // appears at its original position within the full canvas.
-  // The scale factor maps from cropped frame pixels to display pixels.
   let cropTranslateX = 0;
   let cropTranslateY = 0;
   if (anim.cropOffset) {
@@ -145,8 +143,6 @@ export const SpriteAnimator = memo(function SpriteAnimator({
     backgroundPosition: `${bgOffsetX}px ${bgOffsetY}px`,
     backgroundRepeat: 'no-repeat',
     imageRendering: 'pixelated',
-    // Apply crop offset as transform so sprite is positioned correctly
-    // within its parent container (which is placed at the entity's scene coords).
     ...(cropTranslateX !== 0 || cropTranslateY !== 0
       ? { transform: `translate(${cropTranslateX}px, ${cropTranslateY}px)` }
       : {}),
