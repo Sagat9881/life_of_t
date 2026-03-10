@@ -21,6 +21,20 @@ import java.util.regex.Pattern;
  * All animation metadata is written to a single <b>sprite-atlas.json</b> per entity
  * (config version 1.4) via {@link AtlasConfigWriter}.
  *
+ * Output structure per entity:
+ * <pre>
+ *   outputRoot/{type}/{name}/
+ *     {name}.png                       ← composite static image
+ *     {layer-id}.png                   ← individual layer PNGs
+ *     sprite-atlas.json                ← atlas config (consumed by frontend + AnimationContentService)
+ *     animations/
+ *       {anim}_atlas.png               ← strip / grid animation atlases
+ * </pre>
+ *
+ * URL mapping (Spring Boot static → frontend):
+ *   /assets/{type}/{name}/sprite-atlas.json      → classpath:/assets/{type}/{name}/sprite-atlas.json
+ *   /assets/{type}/{name}/animations/*_atlas.png → classpath:/assets/{type}/{name}/animations/*.png
+ *
  * Frames are cropped to their non-transparent bounding box before atlas packing.
  * The original crop offset is recorded in sprite-atlas.json so the frontend can
  * position the sprite correctly within the scene.
@@ -82,12 +96,16 @@ public class LayeredAssetGenerator implements AssetGenerationService {
         }
 
         // 3. Animation atlases
+        //    Atlas PNGs → entityDir/animations/
+        //    sprite-atlas.json → entityDir/  (one level up from animations/)
         Path animDir = entityDir.resolve("animations");
         boolean hasCharacterAnims = !spec.animations().isEmpty();
         boolean hasOverlayLayers = spec.layers().stream().anyMatch(AssetLayer::hasConditions);
 
         if (hasCharacterAnims || hasOverlayLayers) {
-            generated.addAll(generateAllAtlases(spec, animDir, width, height));
+            // entityDir is passed for sprite-atlas.json placement;
+            // animDir is passed for atlas PNG placement inside generateAllAtlases.
+            generated.addAll(generateAllAtlases(spec, entityDir, animDir, width, height));
         }
 
         log.info("Generated {} files for {}/{}", generated.size(),
@@ -95,7 +113,18 @@ public class LayeredAssetGenerator implements AssetGenerationService {
         return generated;
     }
 
-    private List<Path> generateAllAtlases(AssetSpec spec, Path animDir, int bgWidth, int bgHeight) {
+    /**
+     * Generates all animation atlases (PNG strips/grids) into {@code animDir},
+     * and writes sprite-atlas.json into {@code entityDir}.
+     *
+     * @param spec       entity asset spec
+     * @param entityDir  root entity directory — sprite-atlas.json goes here
+     * @param animDir    animations sub-directory — atlas PNGs go here
+     * @param bgWidth    canvas width
+     * @param bgHeight   canvas height
+     */
+    private List<Path> generateAllAtlases(AssetSpec spec, Path entityDir, Path animDir,
+                                          int bgWidth, int bgHeight) {
         List<Path> generated = new ArrayList<>();
         List<AssetLayer> layers = spec.layers();
 
@@ -161,6 +190,7 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             }
 
             try {
+                // Atlas PNGs → animDir
                 Path atlasPath = atlasWriter.writeGridAtlas(rowFrames, baseName, animDir);
                 generated.add(atlasPath);
                 gridAnimDefs.put(baseName,
@@ -194,6 +224,7 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             }
 
             try {
+                // Atlas PNGs → animDir
                 Path atlasPath = atlasWriter.writeAtlas(frames, animSpec, animDir);
                 generated.add(atlasPath);
             } catch (IOException e) {
@@ -224,6 +255,7 @@ public class LayeredAssetGenerator implements AssetGenerationService {
 
             if (!overlayRows.isEmpty()) {
                 try {
+                    // Overlay atlas PNGs → animDir
                     Path atlasPath = atlasWriter.writeGridAtlas(overlayRows, layer.id(), animDir);
                     generated.add(atlasPath);
                 } catch (IOException e) {
@@ -246,9 +278,11 @@ public class LayeredAssetGenerator implements AssetGenerationService {
         configWriter.withDisplayScale(scale);
 
         try {
+            // sprite-atlas.json → entityDir (NOT animDir)
+            // This matches the frontend URL: /assets/{type}/{name}/sprite-atlas.json
             Path configPath = configWriter.writeSpriteAtlas(
                     spec.entityName(), standaloneAnims, gridAnimDefs,
-                    overlayAnimDefs, allCropOffsets, animDir);
+                    overlayAnimDefs, allCropOffsets, entityDir);
             generated.add(configPath);
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to write sprite-atlas.json for " + spec.entityName(), e);
