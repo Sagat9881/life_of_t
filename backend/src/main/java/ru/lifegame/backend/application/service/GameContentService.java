@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import ru.lifegame.backend.domain.conflict.engine.ConflictEngine;
+import ru.lifegame.backend.domain.conflict.spec.ConflictSpec;
+import ru.lifegame.backend.domain.conflict.spec.ConflictTacticSpec;
 import ru.lifegame.backend.domain.dto.content.ActionDefView;
 import ru.lifegame.backend.domain.dto.content.ConflictDefView;
 import ru.lifegame.backend.domain.dto.content.ContentVersion;
@@ -34,7 +37,13 @@ public class GameContentService {
     private final Map<String, EventSpec>       events    = new ConcurrentHashMap<>();
     private final Map<String, QuestSpec>       quests    = new ConcurrentHashMap<>();
 
+    private final ConflictEngine conflictEngine;
+
     private ContentVersion currentVersion;
+
+    public GameContentService(ConflictEngine conflictEngine) {
+        this.conflictEngine = conflictEngine;
+    }
 
     @PostConstruct
     public void initialize() {
@@ -42,7 +51,7 @@ public class GameContentService {
         loadActionsFromXml();
         loadEventsFromXml();
         loadQuestsFromXml();
-        loadPlaceholderConflicts();
+        loadConflictsFromEngine();
         currentVersion = new ContentVersion("2.0.0-xml", Instant.now());
         log.info("Content loaded: {} actions, {} events, {} quests, {} conflicts",
                 actions.size(), events.size(), quests.size(), conflicts.size());
@@ -56,6 +65,46 @@ public class GameContentService {
 
     public Optional<EventSpec> getEvent(String id) { return Optional.ofNullable(events.get(id)); }
     public Optional<QuestSpec> getQuest(String id) { return Optional.ofNullable(quests.get(id)); }
+
+    private void loadConflictsFromEngine() {
+        conflictEngine.getConflictSpecs().forEach(spec -> {
+            ConflictDefView view = toConflictDefView(spec);
+            conflicts.put(view.type(), view);
+        });
+        log.info("Loaded {} conflicts from ConflictEngine", conflicts.size());
+    }
+
+    private ConflictDefView toConflictDefView(ConflictSpec spec) {
+        List<ConflictDefView.TacticDefView> tacticViews = spec.tactics().stream()
+                .map(this::toTacticDefView)
+                .toList();
+        return new ConflictDefView(
+                spec.id(),
+                spec.meta().label(),
+                spec.meta().description(),
+                tacticViews,
+                50
+        );
+    }
+
+    private ConflictDefView.TacticDefView toTacticDefView(ConflictTacticSpec tactic) {
+        Map<String, Integer> successRelChanges = tactic.successOutcome().relationshipChanges() != null
+                ? tactic.successOutcome().relationshipChanges() : Map.of();
+        Map<String, Integer> successStatChanges = tactic.successOutcome().statChanges() != null
+                ? tactic.successOutcome().statChanges() : Map.of();
+        int stressReduction = -successStatChanges.getOrDefault("stress", 0);
+        return new ConflictDefView.TacticDefView(
+                tactic.code(),
+                tactic.label(),
+                tactic.description(),
+                Map.of(),
+                stressReduction,
+                successRelChanges,
+                Map.of(),
+                tactic.baseCspCost(),
+                Map.of()
+        );
+    }
 
     private void loadEventsFromXml() {
         EventSpecParser parser = new EventSpecParser();
@@ -77,10 +126,6 @@ public class GameContentService {
         }
     }
 
-    /**
-     * Loads all quests from the single narrative/quests.xml container.
-     * Was: scanning narrative/quests/*.xml (directory does not exist -> 0 quests).
-     */
     private void loadQuestsFromXml() {
         QuestSpecParser parser = new QuestSpecParser();
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
@@ -105,7 +150,6 @@ public class GameContentService {
         try {
             Resource actionsXml = resolver.getResource("classpath:narrative/player-actions/actions.xml");
             if (!actionsXml.exists()) {
-                log.warn("actions.xml not found, using placeholder data");
                 loadPlaceholderActions();
                 return;
             }
@@ -127,7 +171,7 @@ public class GameContentService {
             }
             log.info("Loaded {} actions", actions.size());
         } catch (Exception e) {
-            log.error("Failed to load actions.xml, using placeholders", e);
+            log.error("Failed to load actions.xml", e);
             loadPlaceholderActions();
         }
     }
@@ -199,38 +243,8 @@ public class GameContentService {
     }
 
     private void loadPlaceholderActions() {
-        actions.put("REST", new ActionDefView(
-                "REST", "Отдохнуть", "Отдохнуть и восстановить силы",
-                List.of("self_care"), 0, 0, Map.of(), List.of(), List.of(),
-                Map.of("energy", 30, "stress", -10, "mood", 10),
-                Map.of(), 0, 60, "rest", "bed",
-                List.of("morning", "day", "evening", "night"),
-                List.of("home"), List.of(), List.of()
-        ));
-    }
-
-    private void loadPlaceholderConflicts() {
-        conflicts.put("WORK_DEADLINE", new ConflictDefView(
-                "WORK_DEADLINE",
-                "Рабочий дедлайн",
-                "Начальник требует сделать работу в нереальные сроки",
-                List.of(
-                        new ConflictDefView.TacticDefView(
-                                "SURRENDER", "Уступить", "Согласиться и работать сверхурочно",
-                                Map.of(), -5, Map.of("boss", 5), Map.of(), 80, Map.of()
-                        ),
-                        new ConflictDefView.TacticDefView(
-                                "ASSERT", "Настоять", "Объяснить, что сроки нереальны",
-                                Map.of("assertiveness", 30), 15, Map.of("boss", -10),
-                                Map.of("assertiveness", 2), 40, Map.of("assertiveness", 20)
-                        ),
-                        new ConflictDefView.TacticDefView(
-                                "COMPROMISE", "Компромисс", "Предложить реалистичный промежуточный вариант",
-                                Map.of("communication", 20), 10, Map.of("boss", 0),
-                                Map.of("communication", 2), 60, Map.of("communication", 15)
-                        )
-                ),
-                50
-        ));
+        throw new IllegalStateException(
+                "actions.xml not found at classpath:narrative/player-actions/actions.xml" +
+                " — cannot start without action definitions");
     }
 }
