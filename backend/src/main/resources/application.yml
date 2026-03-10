@@ -17,3 +17,11 @@ management:
     web:
       exposure:
         include: health,info
+
+# Assets: filesystem fallback for /assets/** in dev mode.
+# StaticResourceConfig reads this via @Value("${assets.output-dir}").
+# Points to backend/target/generated-assets where exec-maven-plugin
+# writes generated assets during the backend build phase.
+# Override in application module or via env var ASSETS_OUTPUT_DIR for prod/docker.
+assets:
+  output-dir: ${ASSETS_OUTPUT_DIR:${user.dir}/backend/target/generated-assets}
