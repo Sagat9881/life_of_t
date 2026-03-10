@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, X, Loader2 } from 'lucide-react';
-import { useTelegram } from '../../hooks/useTelegram';
+import { useHaptic } from '../../hooks/useHaptic';
 import type { ActionOption } from '../../types/game';
 import '../../styles/components/ActionCard.css';
 
@@ -11,25 +11,25 @@ interface ActionCardProps {
 }
 
 export function ActionCard({ action, onExecute }: ActionCardProps) {
-  const { hapticFeedback } = useTelegram();
+  const { impact } = useHaptic();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
 
   const handleExecute = async () => {
     if (!onExecute || isProcessing || !action.isAvailable) return;
-    hapticFeedback?.impactOccurred('medium');
+    impact('medium');
     setIsProcessing(true);
     setIsSuccess(false);
     setIsError(false);
     try {
       await onExecute(action.code);
       setIsSuccess(true);
-      hapticFeedback?.impactOccurred('light');
+      impact('light');
       setTimeout(() => { setIsSuccess(false); setIsProcessing(false); }, 1500);
     } catch {
       setIsError(true);
-      hapticFeedback?.impactOccurred('heavy');
+      impact('heavy');
       setTimeout(() => { setIsError(false); setIsProcessing(false); }, 2000);
     }
   };
