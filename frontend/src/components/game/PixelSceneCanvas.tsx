@@ -1,18 +1,18 @@
 /**
  * PixelSceneCanvas Component
- * 
- * Renders a pixel-art game location using Canvas API.
- * 
- * Features:
- * - Multi-layer rendering (background, midground, foreground)
- * - Sprite-based furniture with click detection
- * - Character animations
- * - Time-of-day variations
+ *
+ * Renders a pixel-art game location using the Canvas API.
+ *
+ * Coordinate system:
+ * - All x/y/sceneHeight values in LocationConfig are 0–100 (% of canvas).
+ * - Hit detection mirrors the renderer's coordinate computation.
+ *
+ * Layers (bottom → top): background → furniture (z-sorted) → characters (z-sorted).
  */
 
 import { useRef } from 'react';
 import { useCanvasRenderer } from '../../hooks/useCanvasRenderer';
-import type { LocationConfig } from '../../types/location.types';
+import type { LocationConfig, FurniturePlacement } from '../../types/location.types';
 
 interface PixelSceneCanvasProps {
   config: LocationConfig;
@@ -22,6 +22,23 @@ interface PixelSceneCanvasProps {
   characterAnimations?: Record<string, { animationName: string; frameIndex: number }> | undefined;
   onObjectClick: (objectId: string | null) => void;
   onObjectHover: (objectId: string | null) => void;
+}
+
+/**
+ * Returns canvas-pixel coordinates of the hit-box centre for a furniture item.
+ * Matches the draw logic in useCanvasRenderer: anchor = (x%, y%) = bottom-centre.
+ * Width uses a 1:1 fallback (square) since we don't have atlas metadata here.
+ */
+function getFurnitureHitBox(
+  f: FurniturePlacement,
+  canvasWidth: number,
+  canvasHeight: number
+): { x: number; y: number; width: number; height: number } {
+  const cx = (f.x / 100) * canvasWidth;
+  const cy = (f.y / 100) * canvasHeight;
+  const height = (f.sceneHeight / 100) * canvasHeight * f.scale;
+  const width = height; // 1:1 fallback — atlas aspect ratio not available here
+  return { x: cx - width / 2, y: cy - height, width, height };
 }
 
 export function PixelSceneCanvas({
@@ -35,7 +52,6 @@ export function PixelSceneCanvas({
 }: PixelSceneCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Initialize renderer
   useCanvasRenderer({
     config,
     canvasRef,
@@ -45,72 +61,50 @@ export function PixelSceneCanvas({
     characterAnimations,
   });
 
-  // Handle clicks
-  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  /** Convert a MouseEvent to internal canvas coordinates. */
+  const toCanvasCoords = (
+    e: React.MouseEvent<HTMLCanvasElement>
+  ): { x: number; y: number } | null => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-
+    if (!canvas) return null;
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    // Scale to internal coordinates
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    const scaledX = x * scaleX;
-    const scaledY = y * scaleY;
-
-    // Check furniture hit boxes
-    const clickedFurniture = config.furniture?.find((f: any) => {
-      if (!f.x || !f.y) return false;
-      const hitBox = {
-        x: f.x,
-        y: f.y,
-        width: 32, // TODO: Get from atlas metadata
-        height: 32,
-      };
-      return (
-        scaledX >= hitBox.x &&
-        scaledX <= hitBox.x + hitBox.width &&
-        scaledY >= hitBox.y &&
-        scaledY <= hitBox.y + hitBox.height
-      );
-    });
-
-    onObjectClick(clickedFurniture?.id ?? null);
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY,
+    };
   };
 
-  // Handle hover
-  const handleCanvasMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const scaledX = x * scaleX;
-    const scaledY = y * scaleY;
-
-    const hoveredFurniture = config.furniture?.find((f: any) => {
-      if (!f.x || !f.y) return false;
-      const hitBox = {
-        x: f.x,
-        y: f.y,
-        width: 32,
-        height: 32,
-      };
+  const hitTest = (
+    coords: { x: number; y: number },
+    canvasWidth: number,
+    canvasHeight: number
+  ): FurniturePlacement | undefined =>
+    config.furniture.find((f: FurniturePlacement) => {
+      const hb = getFurnitureHitBox(f, canvasWidth, canvasHeight);
       return (
-        scaledX >= hitBox.x &&
-        scaledX <= hitBox.x + hitBox.width &&
-        scaledY >= hitBox.y &&
-        scaledY <= hitBox.y + hitBox.height
+        coords.x >= hb.x &&
+        coords.x <= hb.x + hb.width &&
+        coords.y >= hb.y &&
+        coords.y <= hb.y + hb.height
       );
     });
 
-    onObjectHover(hoveredFurniture?.id ?? null);
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>): void => {
+    const canvas = canvasRef.current;
+    const coords = toCanvasCoords(e);
+    if (!canvas || !coords) return;
+    const hit = hitTest(coords, canvas.width, canvas.height);
+    onObjectClick(hit?.id ?? null);
+  };
+
+  const handleCanvasMove = (e: React.MouseEvent<HTMLCanvasElement>): void => {
+    const canvas = canvasRef.current;
+    const coords = toCanvasCoords(e);
+    if (!canvas || !coords) return;
+    const hit = hitTest(coords, canvas.width, canvas.height);
+    onObjectHover(hit?.id ?? null);
   };
 
   return (

@@ -1,14 +1,17 @@
 /**
  * useCanvasRenderer Hook
- * 
+ *
  * Manages canvas rendering lifecycle:
- * - Loads sprite atlases
- * - Renders layers (background, furniture, characters)
- * - Handles animations via requestAnimationFrame
+ * - Loads sprite atlases from backend /assets/** endpoint
+ * - Renders layers: background → furniture (z-sorted) → characters
+ * - Drives animation via requestAnimationFrame
+ *
+ * Asset URL convention (matches LayeredAssetGenerator output):
+ *   /assets/{type}/{name}/animations/{animationName}_atlas.png
  */
 
 import { useEffect, useRef } from 'react';
-import type { LocationConfig } from '../types/location.types';
+import type { LocationConfig, FurniturePlacement, CharacterSlot } from '../types/location.types';
 
 interface UseCanvasRendererOptions {
   config: LocationConfig;
@@ -18,6 +21,10 @@ interface UseCanvasRendererOptions {
   hoveredObjectId: string | null;
   characterAnimations?: Record<string, { animationName: string; frameIndex: number }> | undefined;
 }
+
+/** Build the backend URL for a sprite atlas PNG. */
+const atlasUrl = (type: string, name: string, animation: string): string =>
+  `/assets/${type}/${name}/animations/${animation}_atlas.png`;
 
 export function useCanvasRenderer({
   config,
@@ -37,99 +44,125 @@ export function useCanvasRenderer({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Preload assets
-    const loadAssets = async () => {
-      const assetsToLoad: string[] = [];
+    // ── ASSET LOADING ──────────────────────────────────────────────────
+    const loadAssets = async (): Promise<void> => {
+      const paths: string[] = [];
 
-      // Background (Spring Boot serves from classpath:/static/)
-      const bgPath = `/locations/${config.locationAsset}/background.png`;
-      assetsToLoad.push(bgPath);
+      // Background atlas — served by backend under /assets/locations/...
+      paths.push(atlasUrl('locations', config.locationAsset, config.backgroundAnimation));
 
-      // Furniture sprites (Spring Boot serves from classpath:/static/)
-      if (config.furniture) {
-        config.furniture.forEach((f: any) => {
-          const path = `/furniture/${f.entityName}/${f.animation}-atlas.png`;
-          assetsToLoad.push(path);
-        });
-      }
+      // Furniture atlases
+      config.furniture.forEach((f: FurniturePlacement) => {
+        paths.push(atlasUrl('furniture', f.entityName, f.animation));
+      });
 
-      // Load all
+      // Character atlases
+      config.characters.forEach((c: CharacterSlot) => {
+        const animName =
+          characterAnimations?.[c.id]?.animationName ?? c.defaultAnimation;
+        paths.push(atlasUrl('characters', c.entityName, animName));
+      });
+
       await Promise.all(
-        assetsToLoad.map(path => {
-          return new Promise<void>((resolve) => {
+        paths.map((path) =>
+          new Promise<void>((resolve) => {
             if (loadedAssetsRef.current.has(path)) {
               resolve();
               return;
             }
-
             const img = new Image();
             img.onload = () => {
               loadedAssetsRef.current.set(path, img);
               resolve();
             };
             img.onerror = () => {
-              console.error(`Failed to load: ${path}`);
-              resolve(); // Don't block render
+              console.error(`[useCanvasRenderer] Failed to load: ${path}`);
+              resolve(); // Don't block the render loop on missing assets
             };
             img.src = path;
-          });
-        })
+          })
+        )
       );
     };
 
-    // Render loop
-    const render = () => {
+    // ── RENDER LOOP ────────────────────────────────────────────────────
+    const render = (): void => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // 1. Background
-      const bgPath = `/locations/${config.locationAsset}/background.png`;
+      const bgPath = atlasUrl('locations', config.locationAsset, config.backgroundAnimation);
       const bgImg = loadedAssetsRef.current.get(bgPath);
-      if (bgImg && bgImg.complete) {
+      if (bgImg?.complete) {
         ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
       }
 
-      // 2. Furniture (sorted by zOrder)
-      if (config.furniture) {
-        const sorted = [...config.furniture].sort((a: any, b: any) => a.zOrder - b.zOrder);
-        sorted.forEach((f: any) => {
-          const path = `/furniture/${f.entityName}/${f.animation}-atlas.png`;
-          const img = loadedAssetsRef.current.get(path);
-          if (img && img.complete) {
-            ctx.save();
+      // 2. Furniture — sorted by zOrder, positions in % of canvas
+      const sortedFurniture = [...config.furniture].sort(
+        (a: FurniturePlacement, b: FurniturePlacement) => a.zOrder - b.zOrder
+      );
+      sortedFurniture.forEach((f: FurniturePlacement) => {
+        const path = atlasUrl('furniture', f.entityName, f.animation);
+        const img = loadedAssetsRef.current.get(path);
+        if (!img?.complete) return;
 
-            // Highlight if selected/hovered
-            if (f.id === selectedObjectId) {
-              ctx.shadowColor = '#4a90e2';
-              ctx.shadowBlur = 10;
-            } else if (f.id === hoveredObjectId) {
-              ctx.shadowColor = '#ffffff';
-              ctx.shadowBlur = 5;
-            }
+        ctx.save();
 
-            // Calculate position (simplified — needs proper scale logic)
-            const x = (f.x / 100) * canvas.width;
-            const y = (f.y / 100) * canvas.height;
-            const height = (f.sceneHeight / 100) * canvas.height;
-            const width = height; // Assume square for now
+        if (f.id === selectedObjectId) {
+          ctx.shadowColor = '#4a90e2';
+          ctx.shadowBlur = 10;
+        } else if (f.id === hoveredObjectId) {
+          ctx.shadowColor = '#ffffff';
+          ctx.shadowBlur = 5;
+        }
 
-            ctx.drawImage(img, x - width / 2, y - height, width, height);
-            ctx.restore();
-          }
-        });
-      }
+        const x = (f.x / 100) * canvas.width;
+        const y = (f.y / 100) * canvas.height;
+        const height = (f.sceneHeight / 100) * canvas.height * f.scale;
+        // Preserve natural aspect ratio using the loaded image dimensions.
+        // img.naturalWidth / img.naturalHeight gives the atlas sheet ratio;
+        // for a single-frame strip it equals frameWidth / frameHeight.
+        const width =
+          img.naturalWidth > 0 && img.naturalHeight > 0
+            ? height * (img.naturalWidth / img.naturalHeight)
+            : height; // fallback: square, only if image not yet measured
 
-      // 3. Characters (if any)
-      // TODO: Render character sprites based on characterAnimations
+        ctx.drawImage(img, x - width / 2, y - height, width, height);
+        ctx.restore();
+      });
+
+      // 3. Characters — sorted by zOrder
+      const sortedChars = [...config.characters].sort(
+        (a: CharacterSlot, b: CharacterSlot) => a.zOrder - b.zOrder
+      );
+      sortedChars.forEach((c: CharacterSlot) => {
+        const animState = characterAnimations?.[c.id];
+        const animName = animState?.animationName ?? c.defaultAnimation;
+        const path = atlasUrl('characters', c.entityName, animName);
+        const img = loadedAssetsRef.current.get(path);
+        if (!img?.complete) return;
+
+        const x = (c.x / 100) * canvas.width;
+        const y = (c.y / 100) * canvas.height;
+        const height = (c.sceneHeight / 100) * canvas.height * c.scale;
+        const width =
+          img.naturalWidth > 0 && img.naturalHeight > 0
+            ? height * (img.naturalWidth / img.naturalHeight)
+            : height;
+
+        ctx.drawImage(img, x - width / 2, y - height, width, height);
+      });
 
       animationFrameRef.current = requestAnimationFrame(render);
     };
 
     loadAssets().then(() => {
       render();
+    }).catch((err) => {
+      console.error('[useCanvasRenderer] Asset load failed:', err);
     });
 
     return () => {
-      if (animationFrameRef.current) {
+      if (animationFrameRef.current !== undefined) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
