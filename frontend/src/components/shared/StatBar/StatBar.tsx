@@ -17,27 +17,30 @@ interface StatBarProps {
 export const StatBar = ({
   statKey,
   value,
-  maxValue = 100,
+  maxValue,
   showLabel = true,
   showValue = true,
   size = 'medium',
   animated = true,
 }: StatBarProps) => {
+  const config = STAT_CONFIG[statKey];
+  const effectiveMax = maxValue ?? config.max;
+
   const percentage = useMemo(() => {
-    return Math.min(Math.max((value / maxValue) * 100, 0), 100);
-  }, [value, maxValue]);
+    return Math.min(Math.max((value / effectiveMax) * 100, 0), 100);
+  }, [value, effectiveMax]);
 
   const color = useMemo(() => {
-    if (statKey === 'stress') {
-      return getStressColor(value, maxValue);
-    }
     if (statKey === 'money') {
       return 'var(--color-accent)';
     }
-    return getStatColor(value, maxValue);
-  }, [statKey, value, maxValue]);
+    if (config.inverted) {
+      return getStressColor(value, effectiveMax);
+    }
+    return getStatColor(value, effectiveMax);
+  }, [statKey, value, effectiveMax, config.inverted]);
 
-  const label = STAT_CONFIG[statKey].name;
+  const label = config.name;
 
   const barClassNames = [
     styles.bar,
