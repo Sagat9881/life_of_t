@@ -63,7 +63,7 @@ export function PixelSceneCanvas({
     timeOfDay,
     selectedObjectId,
     hoveredObjectId,
-    characterAnimations,
+    ...(characterAnimations !== undefined && { characterAnimations }),
   });
 
   const toCanvasCoords = (
