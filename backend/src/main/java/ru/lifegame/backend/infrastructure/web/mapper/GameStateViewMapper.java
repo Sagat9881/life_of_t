@@ -9,6 +9,7 @@ import ru.lifegame.backend.domain.event.domain.NarrativeEventTriggeredEvent;
 import ru.lifegame.backend.domain.event.domain.NpcActivityChangedEvent;
 import ru.lifegame.backend.domain.event.domain.NpcMoodExtremeEvent;
 import ru.lifegame.backend.domain.event.domain.QuestStepCompletedEvent;
+import ru.lifegame.backend.domain.event.game.GameEvent;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.pet.Pet;
 import ru.lifegame.backend.domain.model.pet.Pets;
@@ -64,7 +65,7 @@ public class GameStateViewMapper {
 
     static String resolveTimeSlot(int hour) {
         if (hour >= 24) return "NIGHT";
-        if (hour < 7) return "NIGHT";
+        if (hour < 7)  return "NIGHT";
         if (hour < 12) return "MORNING";
         if (hour < 17) return "DAY";
         if (hour < 21) return "EVENING";
@@ -159,16 +160,31 @@ public class GameStateViewMapper {
                 .toList();
     }
 
+    /**
+     * Maps the first active (triggered, not resolved) GameEvent to EventView.
+     *
+     * Uses GameEvent.title() / .description() directly — NOT GameEventType labels.
+     * dialogue[] is empty for now: GameEvent does not carry dialogue lines yet.
+     * Dialogue migration is tracked separately (GameEvent needs a dialogueLines field).
+     *
+     * EventOptionView contract: { code, labelRu } — matches backend EventOptionView record.
+     */
     private EventView toEventView(GameSession session) {
-        return session.events().stream()
-                .filter(e -> e.isTriggered() && !e.isResolved())
-                .findFirst()
-                .map(e -> new EventView(e.id(), e.type().label(),
-                        e.type().description(),
-                        e.options().stream()
-                                .map(o -> new EventOptionView(o.code(), o.label(), o.description()))
-                                .toList()))
-                .orElse(null);
+        Optional<GameEvent> activeEvent = session.currentEvent();
+        if (activeEvent.isEmpty()) return null;
+
+        GameEvent e = activeEvent.get();
+        List<EventOptionView> options = e.options().stream()
+                .map(o -> new EventOptionView(o.code(), o.label()))
+                .toList();
+
+        return new EventView(
+                e.id(),
+                e.title(),
+                e.description(),
+                List.of(), // dialogue — to be populated when GameEvent carries DialogueLines
+                options
+        );
     }
 
     private EndingView toEndingView(GameSession session) {
