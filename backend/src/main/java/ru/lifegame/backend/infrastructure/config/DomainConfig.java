@@ -3,6 +3,7 @@ package ru.lifegame.backend.infrastructure.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.ResourceLoader;
 import ru.lifegame.backend.domain.action.ActionProvider;
 import ru.lifegame.backend.domain.action.spec.DataDrivenActionProvider;
 import ru.lifegame.backend.domain.action.spec.PlayerActionSpecLoader;
@@ -44,9 +45,13 @@ public class DomainConfig {
         return new ActionExecutor();
     }
 
+    /**
+     * Spring automatically injects ApplicationContext as ResourceLoader.
+     * ConflictLoader receives it via constructor — no ApplicationContextAware needed.
+     */
     @Bean
-    public ConflictLoader conflictLoader() {
-        return new ConflictLoader();
+    public ConflictLoader conflictLoader(ResourceLoader resourceLoader) {
+        return new ConflictLoader(resourceLoader);
     }
 
     @Bean
@@ -56,7 +61,7 @@ public class DomainConfig {
     }
 
     /**
-     * ConflictManager now requires ConflictEngine to resolve specs for
+     * ConflictManager requires ConflictEngine to resolve specs for
      * startConflict() and applyTactic().
      */
     @Bean

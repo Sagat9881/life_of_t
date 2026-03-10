@@ -1,8 +1,7 @@
 package ru.lifegame.backend.infrastructure.config;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.w3c.dom.*;
@@ -16,33 +15,34 @@ import java.util.*;
 
 /**
  * Loads conflict specifications by scanning all XML files in
- * classpath*:game-config/conflicts/*.xml
+ * classpath*:game-data/conflicts/*.xml
  *
  * Uses Spring ResourcePatternResolver so it correctly scans
- * across all JARs on the classpath (including game-content module).
- *
- * Replaces the old single-file loadConflicts(path) approach.
+ * across all JARs on the classpath.
+ * ResourceLoader is injected via constructor — no ApplicationContextAware,
+ * no risk of resolver being null at loadAll() call time.
  */
-public class ConflictLoader implements ApplicationContextAware {
+public class ConflictLoader {
 
-    private ResourcePatternResolver resolver;
+    private final ResourceLoader resourceLoader;
 
-    @Override
-    public void setApplicationContext(ApplicationContext ctx) {
-        this.resolver = ResourcePatternUtils.getResourcePatternResolver(ctx);
+    public ConflictLoader(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
     }
 
     /**
-     * Scan and parse all conflict specs from all classpath JARs.
+     * Scan and parse all conflict specs from classpath.
      */
     public List<ConflictSpec> loadAll() {
+        ResourcePatternResolver resolver =
+                ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
         try {
             Resource[] resources = resolver.getResources(
-                    "classpath*:game-config/conflicts/*.xml"
+                    "classpath*:game-data/conflicts/*.xml"
             );
             if (resources.length == 0) {
                 throw new IllegalStateException(
-                        "No conflict specs found at classpath*:game-config/conflicts/*.xml"
+                        "No conflict specs found at classpath*:game-data/conflicts/*.xml"
                 );
             }
             List<ConflictSpec> result = new ArrayList<>();
@@ -159,7 +159,6 @@ public class ConflictLoader implements ApplicationContextAware {
         for (int i = 0; i < changeNodes.getLength(); i++) {
             Element changeEl = (Element) changeNodes.item(i);
             String field = changeEl.getAttribute("field");
-            // Strip leading '+' so Integer.parseInt works for "+10"
             String rawValue = changeEl.getAttribute("value").replace("+", "");
             changes.put(field, Integer.parseInt(rawValue));
         }
