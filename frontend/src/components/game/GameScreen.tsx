@@ -28,7 +28,7 @@ export function GameScreen() {
   const locationId     = player?.location ?? getLocationForTimeSlot(rawTimeSlot);
   const locationConfig = getLocationConfig(locationId);
   const timeOfDay      = rawTimeSlot.toLowerCase();
-  const gameTime       = time ?? { day: 1, hour: 7, timeSlot: 'MORNING' as const };
+  const gameTime       = time ?? { day: 1, hour: 7, timeSlot: 'MORNING' };
 
   /** Record<characterSlotId, animationName> */
   const characterAnimations = useMemo((): Record<string, string> => {

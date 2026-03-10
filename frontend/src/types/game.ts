@@ -135,12 +135,13 @@ export type ActionCode = string;
 export type TacticCode = string;
 export type EventChoiceCode = string;
 
-export type TimeSlot = 'MORNING' | 'DAY' | 'EVENING' | 'NIGHT';
+/** Time slot value comes from backend XML config — kept as plain string. */
+export type TimeSlot = string;
 
 export interface GameTime {
   day: number;
   hour: number;
-  timeSlot: TimeSlot;
+  timeSlot: string;
   dayOver?: boolean;
 }
 
