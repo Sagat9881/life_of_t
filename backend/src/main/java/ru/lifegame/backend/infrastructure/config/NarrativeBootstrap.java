@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import ru.lifegame.backend.domain.narrative.NarrativeContentLoader;
+import ru.lifegame.backend.application.service.GameContentService;
 import ru.lifegame.backend.domain.narrative.NarrativeEventEngine;
 import ru.lifegame.backend.domain.narrative.NarrativeQuestEngine;
 import ru.lifegame.backend.domain.npc.NpcSpecLoader;
@@ -15,15 +15,13 @@ import ru.lifegame.backend.domain.npc.spec.NpcSpec;
 import java.util.List;
 
 /**
- * Loads all narrative content (NPC specs, events, quests) from XML
- * when the Spring application context is fully ready.
+ * Bootstraps all narrative content when the Spring context is fully ready.
  *
  * Boot sequence:
- *   1. Load NPC specs → register into NpcRegistry
- *   2. Load EventSpecs + QuestSpecs via NarrativeContentLoader
- *   3. Re-populate NarrativeEventEngine and NarrativeQuestEngine
- *      (both beans are constructed empty in DomainConfig to avoid
- *       circular deps; this step feeds them the real data)
+ *   1. Load NPC specs from XML → register into NpcRegistry
+ *   2. Feed already-parsed EventSpecs and QuestSpecs from GameContentService
+ *      into NarrativeEventEngine / NarrativeQuestEngine
+ *      (GameContentService parses XMLs once via @PostConstruct — no second scan)
  */
 @Component
 public class NarrativeBootstrap {
@@ -32,18 +30,18 @@ public class NarrativeBootstrap {
 
     private final NpcSpecLoader npcSpecLoader;
     private final NpcRegistry npcRegistry;
-    private final NarrativeContentLoader narrativeContentLoader;
+    private final GameContentService gameContentService;
     private final NarrativeEventEngine narrativeEventEngine;
     private final NarrativeQuestEngine narrativeQuestEngine;
 
     public NarrativeBootstrap(NpcSpecLoader npcSpecLoader,
                               NpcRegistry npcRegistry,
-                              NarrativeContentLoader narrativeContentLoader,
+                              GameContentService gameContentService,
                               NarrativeEventEngine narrativeEventEngine,
                               NarrativeQuestEngine narrativeQuestEngine) {
         this.npcSpecLoader = npcSpecLoader;
         this.npcRegistry = npcRegistry;
-        this.narrativeContentLoader = narrativeContentLoader;
+        this.gameContentService = gameContentService;
         this.narrativeEventEngine = narrativeEventEngine;
         this.narrativeQuestEngine = narrativeQuestEngine;
     }
@@ -68,22 +66,16 @@ public class NarrativeBootstrap {
             log.error("❌ Failed to load NPC specs: {}", e.getMessage(), e);
         }
 
-        // 2. Load narrative events and quests from classpath XMLs
+        // 2. Feed engines from GameContentService (already parsed at @PostConstruct)
         try {
-            narrativeContentLoader.loadFromClasspath();
-            int eventCount = narrativeContentLoader.eventSpecs().size();
-            int questCount = narrativeContentLoader.questSpecs().size();
-            log.info("✅ Narrative content loaded: {} events, {} quests", eventCount, questCount);
-
-            // 3. Feed loaded specs into the engines
-            // NarrativeEventEngine and NarrativeQuestEngine are constructed empty
-            // (see DomainConfig) — reload them here with real data.
-            narrativeEventEngine.reloadSpecs(narrativeContentLoader.eventSpecs());
-            narrativeQuestEngine.reloadSpecs(narrativeContentLoader.questSpecs());
+            var events = gameContentService.getAllEvents();
+            var quests = gameContentService.getAllQuests();
+            narrativeEventEngine.reloadSpecs(events);
+            narrativeQuestEngine.reloadSpecs(quests);
             log.info("✅ Engines populated: {} event specs, {} quest specs",
-                    eventCount, questCount);
+                    events.size(), quests.size());
         } catch (Exception e) {
-            log.error("❌ Failed to load narrative content: {}", e.getMessage(), e);
+            log.error("❌ Failed to populate narrative engines: {}", e.getMessage(), e);
         }
 
         log.info("─── Narrative Bootstrap: complete ───");

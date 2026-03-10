@@ -2,18 +2,19 @@ package ru.lifegame.backend.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.lifegame.backend.domain.narrative.NarrativeContentLoader;
-import ru.lifegame.backend.domain.narrative.NarrativeEventEngine;
-import ru.lifegame.backend.domain.narrative.NarrativeQuestEngine;
 import ru.lifegame.backend.domain.npc.NpcSpecLoader;
 import ru.lifegame.backend.domain.npc.NpcUtilityBrain;
 import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
 import ru.lifegame.backend.domain.npc.runtime.NpcRegistry;
 
+/**
+ * Spring bean declarations for the NPC subsystem.
+ *
+ * Narrative engine beans (NarrativeEventEngine, NarrativeQuestEngine) live in
+ * DomainConfig and are populated by NarrativeBootstrap on ApplicationReadyEvent.
+ */
 @Configuration
 public class NpcConfig {
-
-    // ── NPC engine beans ─────────────────────────────────────
 
     @Bean
     public NpcSpecLoader npcSpecLoader() {
@@ -33,22 +34,5 @@ public class NpcConfig {
     @Bean
     public NpcLifecycleEngine npcLifecycleEngine(NpcRegistry registry, NpcUtilityBrain brain) {
         return new NpcLifecycleEngine(registry, brain);
-    }
-
-    // ── Narrative engine beans ────────────────────────────────
-
-    @Bean
-    public NarrativeContentLoader narrativeContentLoader() {
-        return new NarrativeContentLoader();
-    }
-
-    @Bean
-    public NarrativeEventEngine narrativeEventEngine(NarrativeContentLoader loader) {
-        return new NarrativeEventEngine(loader.eventSpecs());
-    }
-
-    @Bean
-    public NarrativeQuestEngine narrativeQuestEngine(NarrativeContentLoader loader) {
-        return new NarrativeQuestEngine(loader.questSpecs());
     }
 }
