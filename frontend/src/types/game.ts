@@ -42,18 +42,6 @@ export interface ActionOption {
   animationKey?: string | null;
 }
 
-/** @deprecated — use ActionOption instead */
-export interface GameAction {
-  code: string;
-  name: string;
-  description: string;
-  timeCost: number;
-  energyCost?: number;
-  effects?: Partial<Stats>;
-  available: boolean;
-  category?: string;
-}
-
 export interface RelationshipView {
   npcId: string;
   name: string;
@@ -61,14 +49,6 @@ export interface RelationshipView {
   trust: number;
   stability: number;
   romance: number;
-}
-
-export interface NPC {
-  id: string;
-  name: string;
-  relationship: number;
-  avatarUrl?: string;
-  type: 'husband' | 'father' | 'friend';
 }
 
 export interface PetView {
@@ -79,15 +59,6 @@ export interface PetView {
   attention: number;
   health: number;
   mood: number;
-}
-
-export interface Pet {
-  id: string;
-  name: string;
-  type: 'cat' | 'dog';
-  mood: number;
-  hunger: number;
-  avatarUrl?: string;
 }
 
 export interface QuestView {
@@ -160,21 +131,6 @@ export interface ActionResultView {
   petMoodChanges: Record<string, number>;
 }
 
-export interface Conflict {
-  id: string;
-  description: string;
-  csp: number;
-  maxCSP: number;
-  tactics: ConflictTactic[];
-}
-
-export interface ConflictTactic {
-  code: string;
-  name: string;
-  description: string;
-  successChance: number;
-}
-
 export type ActionCode = string;
 export type TacticCode = string;
 export type EventChoiceCode = string;
@@ -186,13 +142,6 @@ export interface GameTime {
   hour: number;
   timeSlot: TimeSlot;
   dayOver?: boolean;
-}
-
-export interface Relationship {
-  npcId: string;
-  level: number;
-  trust: number;
-  romance?: number;
 }
 
 /**
