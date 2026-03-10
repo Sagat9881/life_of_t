@@ -5,9 +5,8 @@ import '../../styles/components/ChoiceButton.css';
 
 /** Local shape — matches what EventChoice passes down */
 interface ChoiceItem {
-  code:          string;
-  text:          string;
-  consequences?: string;
+  code: string;
+  text: string;
 }
 
 interface ChoiceButtonProps {
@@ -25,7 +24,7 @@ const CHOICE_COLORS = [
 
 export function ChoiceButton({ choice, index, onSelect }: ChoiceButtonProps) {
   const { hapticFeedback } = useTelegram();
-  const { code, text, consequences } = choice;
+  const { code, text } = choice;
   const color = CHOICE_COLORS[index % CHOICE_COLORS.length];
 
   const handleClick = () => {
@@ -40,12 +39,6 @@ export function ChoiceButton({ choice, index, onSelect }: ChoiceButtonProps) {
       </div>
       <div className="choice-button__content">
         <p className="choice-button__text">{text}</p>
-        {consequences && (
-          <div className="choice-button__consequences">
-            <span className="choice-button__consequences-label">Последствия:</span>
-            <span className="choice-button__consequences-text">{consequences}</span>
-          </div>
-        )}
       </div>
       <div className="choice-button__arrow" style={{ color }}>
         <ArrowRight size={24} />
