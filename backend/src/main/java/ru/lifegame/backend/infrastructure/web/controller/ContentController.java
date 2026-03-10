@@ -10,18 +10,18 @@ import java.util.Map;
 
 /**
  * REST API for game content (data-driven frontend).
- * 
+ *
  * Frontend calls these endpoints ONCE at bootstrap to load all game content.
  * Content is static/cacheable — no session ID needed.
- * 
+ *
  * Endpoints:
- *   GET /api/content/actions       — all player actions
- *   GET /api/content/npcs          — all NPC definitions
- *   GET /api/content/locations     — all location configs
- *   GET /api/content/conflicts     — all conflict types
- *   GET /api/content/quests        — all quest definitions
- *   GET /api/content/animations    — all character animations
- *   GET /api/content/all           — everything in one call
+ *   GET /api/content/actions         — all player actions
+ *   GET /api/content/npcs            — all NPC definitions
+ *   GET /api/content/locations        — all location configs
+ *   GET /api/content/conflicts        — all conflict types
+ *   GET /api/content/narrative/quests — all quest definitions
+ *   GET /api/content/animations       — all character animations (from sprite-atlas.json)
+ *   GET /api/content/all              — everything in one call
  */
 @RestController
 @RequestMapping("/api/content")
@@ -33,65 +33,53 @@ public class ContentController {
     private final LocationContentService locationService;
     private final ConflictContentService conflictService;
     private final QuestContentService questService;
+    private final AnimationContentService animationService;
 
     public ContentController(
             ActionContentService actionService,
             NPCContentService npcService,
             LocationContentService locationService,
             ConflictContentService conflictService,
-            QuestContentService questService
+            QuestContentService questService,
+            AnimationContentService animationService
     ) {
         this.actionService = actionService;
         this.npcService = npcService;
         this.locationService = locationService;
         this.conflictService = conflictService;
         this.questService = questService;
+        this.animationService = animationService;
     }
 
-    /**
-     * Get all player actions.
-     * @return list of action definitions with effects, costs, requirements
-     */
+    /** Get all player actions. */
     @GetMapping("/actions")
     public List<Map<String, Object>> getAllActions() {
         log.debug("Loading all player actions");
         return actionService.loadAllActions();
     }
 
-    /**
-     * Get all NPC definitions.
-     * @return list of NPCs with schedules, personalities, relationships
-     */
+    /** Get all NPC definitions. */
     @GetMapping("/npcs")
     public List<Map<String, Object>> getAllNPCs() {
         log.debug("Loading all NPCs");
         return npcService.loadAllNPCs();
     }
 
-    /**
-     * Get all location configs.
-     * @return list of locations with objects, triggers, visual data
-     */
+    /** Get all location configs. */
     @GetMapping("/locations")
     public List<Map<String, Object>> getAllLocations() {
         log.debug("Loading all locations");
         return locationService.loadAllLocations();
     }
 
-    /**
-     * Get all conflict types.
-     * @return list of conflict definitions with tactics, resolutions
-     */
+    /** Get all conflict types. */
     @GetMapping("/conflicts")
     public List<Map<String, Object>> getAllConflicts() {
         log.debug("Loading all conflict types");
         return conflictService.loadAllConflicts();
     }
 
-    /**
-     * Get all quest definitions.
-     * @return list of quests with steps, rewards, triggers
-     */
+    /** Get all quest definitions. */
     @GetMapping("/narrative/quests")
     public List<Map<String, Object>> getAllQuests() {
         log.debug("Loading all quests");
@@ -100,23 +88,14 @@ public class ContentController {
 
     /**
      * Get all character animation definitions.
-     * @return map of characterId -> animations
+     * Data is loaded dynamically from sprite-atlas.json files generated at build time.
+     * Returns: { entityId -> [ { name, file, layout, fps, loop, columns,
+     *                            frameWidth, frameHeight, displayScale, ... } ] }
      */
     @GetMapping("/animations")
     public Map<String, List<Map<String, Object>>> getAllAnimations() {
-        log.debug("Loading all animations");
-        return Map.of(
-            "persi", List.of(
-                Map.of("name", "idle", "frames", 24, "fps", 12, "loop", true),
-                Map.of("name", "walk", "frames", 12, "fps", 8, "loop", true)
-            ),
-            "duke", List.of(
-                Map.of("name", "idle_morning", "frames", 12, "fps", 6, "loop", true),
-                Map.of("name", "walk", "frames", 12, "fps", 8, "loop", true),
-                Map.of("name", "run_puppy", "frames", 12, "fps", 14, "loop", true)
-            )
-            // TODO: load from asset-specs XML dynamically
-        );
+        log.debug("Loading all animations from sprite-atlas.json cache");
+        return animationService.getAllAnimations();
     }
 
     /**
@@ -127,12 +106,12 @@ public class ContentController {
     public Map<String, Object> getAllContent() {
         log.info("Loading ALL game content for frontend bootstrap");
         return Map.of(
-            "actions", actionService.loadAllActions(),
-            "npcs", npcService.loadAllNPCs(),
-            "locations", locationService.loadAllLocations(),
-            "conflicts", conflictService.loadAllConflicts(),
-                "narrative/quests", questService.loadAllQuests(),
-            "animations", getAllAnimations()
+            "actions",          actionService.loadAllActions(),
+            "npcs",             npcService.loadAllNPCs(),
+            "locations",        locationService.loadAllLocations(),
+            "conflicts",        conflictService.loadAllConflicts(),
+            "narrative/quests", questService.loadAllQuests(),
+            "animations",       animationService.getAllAnimations()
         );
     }
 }
