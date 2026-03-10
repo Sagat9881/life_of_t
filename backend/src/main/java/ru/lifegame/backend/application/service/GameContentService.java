@@ -19,7 +19,7 @@ import ru.lifegame.backend.domain.narrative.spec.QuestSpec;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
+import java.io.InputStream;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,19 +30,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * Parsing happens exactly once in {@link #initialize()} (via {@code @PostConstruct}).
  * All public getters return unmodifiable views of the in-memory cache.
  *
- * Event and Quest parsing is delegated to the canonical spec parsers:
- *   - {@link EventSpecParser}  → {@link EventSpec}
- *   - {@link QuestSpecParser}  → {@link QuestSpec}
- *
- * Actions and Conflicts still use inline XML parsing (no spec parser exists yet).
+ * All XML loading uses {@link Resource#getInputStream()} so the service works
+ * both on the filesystem and inside a JAR (res.getFile() would fail in a JAR).
  */
 @Service
 public class GameContentService {
 
     private static final Logger log = LoggerFactory.getLogger(GameContentService.class);
 
-    // —— caches (populated once at startup) ————————————————————————————————
-    private final Map<String, ActionDefView>  actions   = new ConcurrentHashMap<>();
+    private final Map<String, ActionDefView>   actions   = new ConcurrentHashMap<>();
     private final Map<String, ConflictDefView> conflicts = new ConcurrentHashMap<>();
     private final Map<String, EventSpec>       events    = new ConcurrentHashMap<>();
     private final Map<String, QuestSpec>       quests    = new ConcurrentHashMap<>();
@@ -61,9 +57,9 @@ public class GameContentService {
                 actions.size(), events.size(), quests.size(), conflicts.size());
     }
 
-    // —— public API —————————————————————————————————————————
+    // ── public API ──────────────────────────────────────────────────────
 
-    public List<ActionDefView>  getAllActions()   { return List.copyOf(actions.values()); }
+    public List<ActionDefView>   getAllActions()   { return List.copyOf(actions.values()); }
     public List<ConflictDefView> getAllConflicts() { return List.copyOf(conflicts.values()); }
     public List<EventSpec>       getAllEvents()    { return List.copyOf(events.values()); }
     public List<QuestSpec>       getAllQuests()    { return List.copyOf(quests.values()); }
@@ -72,7 +68,7 @@ public class GameContentService {
     public Optional<EventSpec> getEvent(String id) { return Optional.ofNullable(events.get(id)); }
     public Optional<QuestSpec> getQuest(String id) { return Optional.ofNullable(quests.get(id)); }
 
-    // —— loaders ————————————————————————————————————————
+    // ── loaders ──────────────────────────────────────────────────────
 
     private void loadEventsFromXml() {
         EventSpecParser parser = new EventSpecParser();
@@ -80,12 +76,12 @@ public class GameContentService {
         try {
             Resource[] files = resolver.getResources("classpath:narrative/events/*.xml");
             for (Resource res : files) {
-                try {
-                    File file = res.getFile();
-                    EventSpec spec = parser.parse(file);
+                String filename = res.getFilename();
+                try (InputStream is = res.getInputStream()) {
+                    EventSpec spec = parser.parse(is, filename);
                     events.put(spec.id(), spec);
                 } catch (Exception e) {
-                    log.error("Failed to parse event file: {}", res.getFilename(), e);
+                    log.error("Failed to parse event file: {}", filename, e);
                 }
             }
             log.info("Loaded {} events", events.size());
@@ -100,12 +96,12 @@ public class GameContentService {
         try {
             Resource[] files = resolver.getResources("classpath:narrative/quests/*.xml");
             for (Resource res : files) {
-                try {
-                    File file = res.getFile();
-                    QuestSpec spec = parser.parse(file);
+                String filename = res.getFilename();
+                try (InputStream is = res.getInputStream()) {
+                    QuestSpec spec = parser.parse(is, filename);
                     quests.put(spec.id(), spec);
                 } catch (Exception e) {
-                    log.error("Failed to parse quest file: {}", res.getFilename(), e);
+                    log.error("Failed to parse quest file: {}", filename, e);
                 }
             }
             log.info("Loaded {} quests", quests.size());
@@ -125,7 +121,10 @@ public class GameContentService {
             }
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(actionsXml.getInputStream());
+            Document doc;
+            try (InputStream is = actionsXml.getInputStream()) {
+                doc = builder.parse(is);
+            }
             doc.getDocumentElement().normalize();
             NodeList actionNodes = doc.getElementsByTagName("action");
             for (int i = 0; i < actionNodes.getLength(); i++) {
@@ -143,13 +142,13 @@ public class GameContentService {
         }
     }
 
-    // —— action parsing (no ActionSpecParser yet) ———————————————————————
+    // ── action parsing (no ActionSpecParser yet) ────────────────────────
 
     private ActionDefView parseAction(Element el) {
         String code        = el.getAttribute("code");
         String label       = getTextContent(el, "label");
         String description = getTextContent(el, "description");
-        int timeCost       = Integer.parseInt(el.getAttribute("time-cost"));
+        int    timeCost    = Integer.parseInt(el.getAttribute("time-cost"));
 
         Map<String, Integer> statEffects = new HashMap<>();
         Element statsEl = (Element) el.getElementsByTagName("stats").item(0);
@@ -211,7 +210,7 @@ public class GameContentService {
         };
     }
 
-    // —— placeholder conflicts (no XML yet) ————————————————————————
+    // ── placeholders ──────────────────────────────────────────────────────
 
     private void loadPlaceholderActions() {
         actions.put("REST", new ActionDefView(

@@ -6,12 +6,17 @@ import ru.lifegame.backend.domain.npc.spec.EventSpec.*;
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import java.io.File;
+import java.io.InputStream;
 import java.util.*;
 
 /**
  * Parses a single narrative/events/*.xml file into an {@link EventSpec}.
  *
- * Expected XML structure (see EventSpec javadoc for full contract):
+ * Two entry points:
+ *   - {@link #parse(InputStream, String)} — preferred; works inside JARs
+ *   - {@link #parse(File)}               — delegates to the above; kept for tests
+ *
+ * Expected XML structure:
  * <pre>
  *   &lt;event id="..." type="RANDOM|TRIGGERED|SEASONAL"&gt;
  *     &lt;meta&gt;
@@ -40,6 +45,20 @@ import java.util.*;
  */
 public class EventSpecParser {
 
+    // ── public API ───────────────────────────────────────────────────────────
+
+    /** Preferred entry point — works both on filesystem and inside JARs. */
+    public EventSpec parse(InputStream xmlStream, String filename) throws Exception {
+        Document doc;
+        try {
+            doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlStream);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to parse event XML: " + filename, e);
+        }
+        return parseDocument(doc, filename);
+    }
+
+    /** Convenience overload for filesystem files (e.g. unit tests). */
     public EventSpec parse(File xmlFile) throws Exception {
         Document doc;
         try {
@@ -47,31 +66,36 @@ public class EventSpecParser {
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to parse event XML: " + xmlFile.getName(), e);
         }
+        return parseDocument(doc, xmlFile.getName());
+    }
 
+    // ── core parsing ─────────────────────────────────────────────────
+
+    private EventSpec parseDocument(Document doc, String filename) throws Exception {
         Element root = doc.getDocumentElement();
-        String id   = require(root.getAttribute("id"),   xmlFile, "@id");
-        String type = require(root.getAttribute("type"), xmlFile, "@type");
+        String id   = require(root.getAttribute("id"),   filename, "@id");
+        String type = require(root.getAttribute("type"), filename, "@type");
 
-        EventMeta meta       = parseMeta(root, xmlFile, type);
+        EventMeta           meta       = parseMeta(root, filename, type);
         List<ConditionSpec> conditions = parseConditions(root);
         List<DialogueLine>  dialogue   = parseDialogue(root);
-        List<OptionSpec>    options    = parseOptions(root, xmlFile);
+        List<OptionSpec>    options    = parseOptions(root, filename);
 
         return new EventSpec(id, meta, conditions, dialogue, options);
     }
 
     // ── meta ────────────────────────────────────────────────────────────────
 
-    private EventMeta parseMeta(Element root, File file, String type) throws Exception {
+    private EventMeta parseMeta(Element root, String filename, String type) throws Exception {
         NodeList metaNodes = root.getElementsByTagName("meta");
         if (metaNodes.getLength() == 0)
-            throw new IllegalArgumentException("Missing <meta> in " + file.getName());
+            throw new IllegalArgumentException("Missing <meta> in " + filename);
 
         Element meta = (Element) metaNodes.item(0);
-        String titleRu      = text(meta, "title-ru");
+        String titleRu       = text(meta, "title-ru");
         String descriptionRu = text(meta, "description-ru");
-        double probability  = parseDouble(text(meta, "probability"), file, "probability");
-        int cooldownHours   = parseInt(text(meta, "cooldown-hours"), file, "cooldown-hours");
+        double probability   = parseDouble(text(meta, "probability"),   filename, "probability");
+        int    cooldownHours = parseInt  (text(meta, "cooldown-hours"), filename, "cooldown-hours");
 
         return new EventMeta(titleRu, descriptionRu, type, probability, cooldownHours);
     }
@@ -83,12 +107,11 @@ public class EventSpecParser {
         NodeList nodes = root.getElementsByTagName("condition");
         for (int i = 0; i < nodes.getLength(); i++) {
             Element el = (Element) nodes.item(i);
-            // only direct children of <conditions>
             if (!"conditions".equals(el.getParentNode().getNodeName())) continue;
             result.add(new ConditionSpec(
-                el.getAttribute("type"),
-                el.getAttribute("stat"),   // empty string if absent — that is fine
-                el.getAttribute("value")
+                    el.getAttribute("type"),
+                    el.getAttribute("stat"),
+                    el.getAttribute("value")
             ));
         }
         return result;
@@ -106,8 +129,8 @@ public class EventSpecParser {
         for (int i = 0; i < lines.getLength(); i++) {
             Element line = (Element) lines.item(i);
             result.add(new DialogueLine(
-                line.getAttribute("speaker"),
-                line.getTextContent().trim()
+                    line.getAttribute("speaker"),
+                    line.getTextContent().trim()
             ));
         }
         return result;
@@ -115,47 +138,44 @@ public class EventSpecParser {
 
     // ── options ─────────────────────────────────────────────────────────────
 
-    private List<OptionSpec> parseOptions(Element root, File file) throws Exception {
+    private List<OptionSpec> parseOptions(Element root, String filename) throws Exception {
         NodeList optionsNodes = root.getElementsByTagName("options");
         if (optionsNodes.getLength() == 0)
-            throw new IllegalArgumentException("Missing <options> in " + file.getName() +
-                ". Every event must have at least one option.");
+            throw new IllegalArgumentException(
+                    "Missing <options> in " + filename + ". Every event must have at least one option.");
 
-        Element optionsEl = (Element) optionsNodes.item(0);
+        Element optionsEl  = (Element) optionsNodes.item(0);
         NodeList optionNodes = optionsEl.getElementsByTagName("option");
         if (optionNodes.getLength() == 0)
-            throw new IllegalArgumentException("<options> has no <option> children in " + file.getName());
+            throw new IllegalArgumentException("<options> has no <option> children in " + filename);
 
         List<OptionSpec> options = new ArrayList<>();
         for (int i = 0; i < optionNodes.getLength(); i++) {
-            Element opt = (Element) optionNodes.item(i);
-            String optId      = require(opt.getAttribute("id"),       file, "option/@id");
-            String labelRu    = require(opt.getAttribute("label-ru"), file, "option/@label-ru");
-            List<EventSpec.EffectSpec> effects = parseEffects(opt);
-            options.add(new OptionSpec(optId, labelRu, effects));
+            Element opt     = (Element) optionNodes.item(i);
+            String  optId   = require(opt.getAttribute("id"),       filename, "option/@id");
+            String  labelRu = require(opt.getAttribute("label-ru"), filename, "option/@label-ru");
+            options.add(new OptionSpec(optId, labelRu, parseEffects(opt)));
         }
         return options;
     }
 
-    private List<EventSpec.EffectSpec> parseEffects(Element optionEl) {
-        List<EventSpec.EffectSpec> result = new ArrayList<>();
+    private List<EffectSpec> parseEffects(Element optionEl) {
+        List<EffectSpec> result = new ArrayList<>();
         NodeList effectsNodes = optionEl.getElementsByTagName("effects");
         if (effectsNodes.getLength() == 0) return result;
 
         Element effectsEl = (Element) effectsNodes.item(0);
 
-        // stat-change
         NodeList statChanges = effectsEl.getElementsByTagName("stat-change");
         for (int i = 0; i < statChanges.getLength(); i++) {
             Element el = (Element) statChanges.item(i);
-            result.add(new EventSpec.EffectSpec("stat-change", el.getAttribute("stat"), el.getAttribute("value")));
+            result.add(new EffectSpec("stat-change", el.getAttribute("stat"), el.getAttribute("value")));
         }
 
-        // relationship-change
         NodeList relChanges = effectsEl.getElementsByTagName("relationship-change");
         for (int i = 0; i < relChanges.getLength(); i++) {
             Element el = (Element) relChanges.item(i);
-            result.add(new EventSpec.EffectSpec("relationship-change", el.getAttribute("target"), el.getAttribute("value")));
+            result.add(new EffectSpec("relationship-change", el.getAttribute("target"), el.getAttribute("value")));
         }
 
         return result;
@@ -168,23 +188,26 @@ public class EventSpecParser {
         return nodes.getLength() > 0 ? nodes.item(0).getTextContent().trim() : "";
     }
 
-    private String require(String value, File file, String field) throws Exception {
+    private String require(String value, String filename, String field) throws Exception {
         if (value == null || value.isBlank())
-            throw new IllegalArgumentException("Missing required field '" + field + "' in " + file.getName());
+            throw new IllegalArgumentException(
+                    "Missing required field '" + field + "' in " + filename);
         return value;
     }
 
-    private double parseDouble(String value, File file, String field) throws Exception {
+    private double parseDouble(String value, String filename, String field) throws Exception {
         try { return Double.parseDouble(value); }
         catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid double for '" + field + "' in " + file.getName() + ": " + value);
+            throw new IllegalArgumentException(
+                    "Invalid double for '" + field + "' in " + filename + ": " + value);
         }
     }
 
-    private int parseInt(String value, File file, String field) throws Exception {
+    private int parseInt(String value, String filename, String field) throws Exception {
         try { return Integer.parseInt(value); }
         catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid int for '" + field + "' in " + file.getName() + ": " + value);
+            throw new IllegalArgumentException(
+                    "Invalid int for '" + field + "' in " + filename + ": " + value);
         }
     }
 }
