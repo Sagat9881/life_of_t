@@ -62,9 +62,16 @@
 
     <build>
         <resources>
-            <!-- Default resources -->
+            <!--
+              Default resources with filtering enabled.
+              Spring Boot uses @...@ delimiters (not ${...}) to avoid conflicts
+              with Spring's own property placeholders, so filtering is safe.
+              This allows @project.build.directory@ in application.yml to be
+              replaced at build time with the absolute path to target/.
+            -->
             <resource>
                 <directory>src/main/resources</directory>
+                <filtering>true</filtering>
             </resource>
             <!--
               Narrative XML specs (npc-behavior, events, quests, player-actions).
