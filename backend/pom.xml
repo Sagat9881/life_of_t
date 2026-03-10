@@ -75,10 +75,15 @@
                     <include>**/*.xml</include>
                 </includes>
             </resource>
-            <!-- Generated assets (PNG, sprite-atlas.json) → static/ for Spring Boot conventions -->
+            <!--
+              Generated assets (PNG, sprite-atlas.json) → classpath:/assets/
+              StaticResourceConfig maps /assets/** → classpath:/assets/
+              AssetConfigController reads ClassPathResource("assets/...")
+              Both require classpath:/assets/ — DO NOT use targetPath=static here.
+            -->
             <resource>
                 <directory>${project.build.directory}/generated-assets</directory>
-                <targetPath>static</targetPath>
+                <targetPath>assets</targetPath>
                 <filtering>false</filtering>
             </resource>
         </resources>
