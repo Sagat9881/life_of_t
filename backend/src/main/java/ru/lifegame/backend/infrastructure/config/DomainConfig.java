@@ -72,7 +72,7 @@ public class DomainConfig {
     @Bean
     public EndingEngine endingEngine() {
         try {
-            InputStream xmlStream = new ClassPathResource("game-data/endings.xml").getInputStream();
+            InputStream xmlStream = new ClassPathResource("narrative/endings.xml").getInputStream();
             return new EndingEngine(xmlStream);
         } catch (Exception e) {
             throw new RuntimeException("Failed to load endings.xml", e);
