@@ -8,6 +8,11 @@
  *
  * Asset URL convention (matches LayeredAssetGenerator output):
  *   /assets/{type}/{name}/animations/{animationName}_atlas.png
+ *
+ * characterAnimations: Record<string, string>
+ *   key   = CharacterSlot.id  (e.g. 'tanya')
+ *   value = animation name    (e.g. 'idle', 'walk', 'sleep')
+ *   frameIndex is managed internally by the RAF loop.
  */
 
 import { useEffect, useRef } from 'react';
@@ -19,7 +24,8 @@ interface UseCanvasRendererOptions {
   timeOfDay: string;
   selectedObjectId: string | null;
   hoveredObjectId: string | null;
-  characterAnimations?: Record<string, { animationName: string; frameIndex: number }> | undefined;
+  /** animationName per character slot id */
+  characterAnimations?: Record<string, string>;
 }
 
 /** Build the backend URL for a sprite atlas PNG. */
@@ -44,7 +50,7 @@ export function useCanvasRenderer({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // ── ASSET LOADING ──────────────────────────────────────────────────
+    // ── ASSET LOADING ─────────────────────────────────────────────────
     const loadAssets = async (): Promise<void> => {
       const paths: string[] = [];
 
@@ -56,10 +62,9 @@ export function useCanvasRenderer({
         paths.push(atlasUrl('furniture', f.entityName, f.animation));
       });
 
-      // Character atlases
+      // Character atlases — use current animation from characterAnimations or default
       config.characters.forEach((c: CharacterSlot) => {
-        const animName =
-          characterAnimations?.[c.id]?.animationName ?? c.defaultAnimation;
+        const animName = characterAnimations?.[c.id] ?? c.defaultAnimation;
         paths.push(atlasUrl('characters', c.entityName, animName));
       });
 
@@ -77,7 +82,7 @@ export function useCanvasRenderer({
             };
             img.onerror = () => {
               console.error(`[useCanvasRenderer] Failed to load: ${path}`);
-              resolve(); // Don't block the render loop on missing assets
+              resolve();
             };
             img.src = path;
           })
@@ -85,7 +90,7 @@ export function useCanvasRenderer({
       );
     };
 
-    // ── RENDER LOOP ────────────────────────────────────────────────────
+    // ── RENDER LOOP ─────────────────────────────────────────────────
     const render = (): void => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -118,13 +123,10 @@ export function useCanvasRenderer({
         const x = (f.x / 100) * canvas.width;
         const y = (f.y / 100) * canvas.height;
         const height = (f.sceneHeight / 100) * canvas.height * f.scale;
-        // Preserve natural aspect ratio using the loaded image dimensions.
-        // img.naturalWidth / img.naturalHeight gives the atlas sheet ratio;
-        // for a single-frame strip it equals frameWidth / frameHeight.
         const width =
           img.naturalWidth > 0 && img.naturalHeight > 0
             ? height * (img.naturalWidth / img.naturalHeight)
-            : height; // fallback: square, only if image not yet measured
+            : height;
 
         ctx.drawImage(img, x - width / 2, y - height, width, height);
         ctx.restore();
@@ -135,8 +137,7 @@ export function useCanvasRenderer({
         (a: CharacterSlot, b: CharacterSlot) => a.zOrder - b.zOrder
       );
       sortedChars.forEach((c: CharacterSlot) => {
-        const animState = characterAnimations?.[c.id];
-        const animName = animState?.animationName ?? c.defaultAnimation;
+        const animName = characterAnimations?.[c.id] ?? c.defaultAnimation;
         const path = atlasUrl('characters', c.entityName, animName);
         const img = loadedAssetsRef.current.get(path);
         if (!img?.complete) return;

@@ -8,6 +8,10 @@
  * - Hit detection mirrors the renderer's coordinate computation.
  *
  * Layers (bottom → top): background → furniture (z-sorted) → characters (z-sorted).
+ *
+ * characterAnimations: Record<string, string>
+ *   key   = CharacterSlot.id  (e.g. 'tanya')
+ *   value = animation name    (e.g. 'idle', 'walk', 'sleep')
  */
 
 import { useRef } from 'react';
@@ -19,15 +23,16 @@ interface PixelSceneCanvasProps {
   timeOfDay: string;
   selectedObjectId: string | null;
   hoveredObjectId: string | null;
-  characterAnimations?: Record<string, { animationName: string; frameIndex: number }> | undefined;
+  /** animationName per character slot id */
+  characterAnimations?: Record<string, string>;
   onObjectClick: (objectId: string | null) => void;
   onObjectHover: (objectId: string | null) => void;
 }
 
 /**
- * Returns canvas-pixel coordinates of the hit-box centre for a furniture item.
- * Matches the draw logic in useCanvasRenderer: anchor = (x%, y%) = bottom-centre.
- * Width uses a 1:1 fallback (square) since we don't have atlas metadata here.
+ * Returns the hit-box for a furniture item in canvas-pixel coordinates.
+ * Anchor: bottom-centre (matches useCanvasRenderer draw logic).
+ * Width uses 1:1 fallback — atlas aspect ratio not available at hit-test time.
  */
 function getFurnitureHitBox(
   f: FurniturePlacement,
@@ -37,7 +42,7 @@ function getFurnitureHitBox(
   const cx = (f.x / 100) * canvasWidth;
   const cy = (f.y / 100) * canvasHeight;
   const height = (f.sceneHeight / 100) * canvasHeight * f.scale;
-  const width = height; // 1:1 fallback — atlas aspect ratio not available here
+  const width = height;
   return { x: cx - width / 2, y: cy - height, width, height };
 }
 
@@ -61,7 +66,6 @@ export function PixelSceneCanvas({
     characterAnimations,
   });
 
-  /** Convert a MouseEvent to internal canvas coordinates. */
   const toCanvasCoords = (
     e: React.MouseEvent<HTMLCanvasElement>
   ): { x: number; y: number } | null => {
