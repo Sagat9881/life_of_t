@@ -2,12 +2,11 @@
  * Sidebar — right panel: stats, actions from backend, quests, relationships.
  * No hardcoded quest/action data — everything from backend GameStateView.
  */
-import type { Player, NPC, GameTime, ActionOption, QuestView, RelationshipView } from '../../types/game';
+import type { Player, GameTime, ActionOption, QuestView, RelationshipView } from '../../types/game';
 import './Sidebar.css';
 
 interface SidebarProps {
   readonly player: Player;
-  readonly npcs: readonly NPC[];
   readonly gameTime: GameTime;
   readonly availableActions: readonly ActionOption[];
   readonly activeQuests: readonly QuestView[];
@@ -34,7 +33,7 @@ function Hearts({ value, max = 10 }: { value: number; max?: number }) {
   );
 }
 
-export function Sidebar({ player, npcs, availableActions, activeQuests, relationships, onActionClick }: SidebarProps) {
+export function Sidebar({ player, availableActions, activeQuests, relationships, onActionClick }: SidebarProps) {
   const stats = player.stats;
 
   return (
@@ -123,13 +122,6 @@ export function Sidebar({ player, npcs, availableActions, activeQuests, relation
               <div className="sb-rel" key={rel.npcId}>
                 <span className="sb-rel__name">{rel.name || rel.npcId}</span>
                 <Hearts value={rel.closeness} />
-              </div>
-            ))
-          ) : npcs.length > 0 ? (
-            npcs.map((npc) => (
-              <div className="sb-rel" key={npc.id}>
-                <span className="sb-rel__name">{npc.name}</span>
-                <Hearts value={npc.relationship} />
               </div>
             ))
           ) : (

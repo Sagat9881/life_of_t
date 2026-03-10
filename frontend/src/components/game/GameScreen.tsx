@@ -38,13 +38,11 @@ function resolveAnimation(action?: ActionOption | null): string {
 
 export function GameScreen() {
   const {
-    player, time, npcs, availableActions, activeQuests, relationships,
+    player, time, availableActions, activeQuests, relationships,
     isLoading, error, fetchGameState, executeAction, lastActionResult,
   } = useGameStore();
 
-  // selectedAction: drives the confirmation dialog
   const [selectedAction, setSelectedAction] = useState<ActionOption | null>(null);
-  // selectedObjectId: tracks the clicked furniture id for canvas highlight
   const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
 
   useEffect(() => { fetchGameState(); }, [fetchGameState]);
@@ -58,13 +56,11 @@ export function GameScreen() {
   /** Record<characterSlotId, animationName> */
   const characterAnimations = useMemo((): Record<string, string> => {
     const anims: Record<string, string> = {};
-    // Tanya's animation reflects the last executed action
     anims['tanya'] = resolveAnimation(
       lastActionResult
         ? availableActions.find((a) => a.code === lastActionResult.actionCode)
         : null
     );
-    // All other characters default to idle
     for (const slot of locationConfig.characters) {
       if (slot.id !== 'tanya' && !anims[slot.id]) {
         anims[slot.id] = 'idle';
@@ -73,11 +69,6 @@ export function GameScreen() {
     return anims;
   }, [lastActionResult, availableActions, locationConfig.characters]);
 
-  /**
-   * Called when player clicks a furniture item on the canvas.
-   * - objectId   → stored in selectedObjectId for canvas highlight
-   * - actionCode → resolved to a backend ActionOption for the dialog
-   */
   const handleObjectClick = (objectId: string, actionCode: string): void => {
     setSelectedObjectId(objectId);
     const backendAction = availableActions.find((a) => a.code === actionCode);
@@ -129,13 +120,11 @@ export function GameScreen() {
         </div>
         <Sidebar
           player={player}
-          npcs={npcs}
           gameTime={gameTime}
           availableActions={availableActions}
           activeQuests={activeQuests}
           relationships={relationships}
           onActionClick={(action) => {
-            // Action from Sidebar: open dialog but no furniture to highlight
             setSelectedObjectId(null);
             setSelectedAction(action);
           }}
