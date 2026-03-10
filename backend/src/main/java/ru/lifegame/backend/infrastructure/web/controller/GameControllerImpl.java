@@ -1,5 +1,6 @@
 package ru.lifegame.backend.infrastructure.web.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -75,7 +76,7 @@ public class GameControllerImpl implements GameController {
     }
 
     @Override
-    public ResponseEntity<GameStateView> chooseEventOption(ChooseEventOptionRequestDto request) {
+    public ResponseEntity<GameStateView> chooseEventOption(@Valid @RequestBody ChooseEventOptionRequestDto request) {
         ChooseEventOptionCommand command = new ChooseEventOptionCommand(
                 request.telegramUserId(), request.eventId(), request.optionCode()
         );

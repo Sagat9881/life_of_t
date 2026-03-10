@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +12,7 @@ import ru.lifegame.backend.domain.exception.*;
 import ru.lifegame.backend.infrastructure.web.dto.ErrorResponseDto;
 
 import java.time.Instant;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class RestExceptionHandler {
@@ -22,6 +24,13 @@ public class RestExceptionHandler {
                                                                    HttpServletRequest request) {
         log.warn("Session not found: {}", ex.getMessage());
         return buildResponse(HttpStatus.NOT_FOUND, "SESSION_NOT_FOUND", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidGameStateException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidGameState(InvalidGameStateException ex,
+                                                                    HttpServletRequest request) {
+        log.warn("Invalid game state: {}", ex.getMessage());
+        return buildResponse(HttpStatus.CONFLICT, "INVALID_GAME_STATE", ex.getMessage(), request);
     }
 
     @ExceptionHandler(InvalidActionException.class)
@@ -48,8 +57,22 @@ public class RestExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponseDto> handleIllegalArgument(IllegalArgumentException ex,
                                                                     HttpServletRequest request) {
-        log.warn("Illegal argument: {}", ex.getMessage(), ex);
+        log.warn("Illegal argument: {}", ex.getMessage());
         return buildResponse(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", ex.getMessage(), request);
+    }
+
+    /**
+     * Handles @NotBlank / @NotNull / @Valid failures from request DTOs.
+     * Returns 400 with a joined message of all field errors.
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponseDto> handleValidation(MethodArgumentNotValidException ex,
+                                                              HttpServletRequest request) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+        log.warn("Validation failed: {}", message);
+        return buildResponse(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", message, request);
     }
 
     @ExceptionHandler(Exception.class)
@@ -60,9 +83,10 @@ public class RestExceptionHandler {
     }
 
     private ResponseEntity<ErrorResponseDto> buildResponse(HttpStatus status, String code,
-                                                            String message, HttpServletRequest request) {
-        ErrorResponseDto error = new ErrorResponseDto(code, message,
-                Instant.now().toString(), request.getRequestURI());
+                                                            String message,
+                                                            HttpServletRequest request) {
+        ErrorResponseDto error = new ErrorResponseDto(
+                code, message, Instant.now().toString(), request.getRequestURI());
         return ResponseEntity.status(status).body(error);
     }
 }
