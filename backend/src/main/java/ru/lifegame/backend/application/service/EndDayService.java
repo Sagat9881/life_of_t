@@ -3,6 +3,7 @@ package ru.lifegame.backend.application.service;
 import ru.lifegame.backend.application.command.EndDayCommand;
 import ru.lifegame.backend.application.port.in.EndDayUseCase;
 import ru.lifegame.backend.application.port.out.SessionRepository;
+import ru.lifegame.backend.application.view.EventOptionView;
 import ru.lifegame.backend.application.view.GameStateView;
 import ru.lifegame.backend.domain.event.domain.NarrativeEventTriggeredEvent;
 import ru.lifegame.backend.domain.exception.SessionNotFoundException;
@@ -12,8 +13,8 @@ import ru.lifegame.backend.domain.narrative.NarrativeEventEngine;
 import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class EndDayService implements EndDayUseCase {
 
@@ -41,18 +42,17 @@ public class EndDayService implements EndDayUseCase {
 
         // Evaluate narrative events at end of day
         if (narrativeEventEngine != null) {
-            Map<String, Object> ctx = buildEndDayContext(session);
+            Map<String, String> ctx = buildEndDayContext(session);
             var firedEvents = narrativeEventEngine.evaluate(ctx);
             for (var fired : firedEvents) {
-                var spec = fired.spec();
-                var options = spec.options().stream()
-                        .map(o -> Map.of("optionId", o.optionId(), "text", o.text()))
-                        .collect(Collectors.toList());
+                List<EventOptionView> options = fired.options().stream()
+                        .map(o -> new EventOptionView(o.id(), o.labelRu()))
+                        .toList();
                 session.publishDomainEvent(new NarrativeEventTriggeredEvent(
                         session.sessionId(),
-                        spec.id(),
-                        spec.meta().title(),
-                        spec.meta().description(),
+                        fired.id(),
+                        fired.meta().titleRu(),
+                        fired.meta().descriptionRu(),
                         options
                 ));
             }
@@ -62,20 +62,24 @@ public class EndDayService implements EndDayUseCase {
         return mapper.toView(session);
     }
 
-    private Map<String, Object> buildEndDayContext(GameSession session) {
-        Map<String, Object> ctx = new LinkedHashMap<>();
-        ctx.put("trigger", "END_DAY");
-        ctx.put("day", session.time().day());
-        ctx.put("energy", session.player().stats().energy());
-        ctx.put("health", session.player().stats().health());
-        ctx.put("stress", session.player().stats().stress());
-        ctx.put("mood", session.player().stats().mood());
-        ctx.put("money", session.player().stats().money());
-        ctx.put("selfEsteem", session.player().stats().selfEsteem());
+    /**
+     * Builds a String-valued context map for NarrativeEventEngine.
+     * All numeric stats are converted to String for uniform condition parsing.
+     */
+    private Map<String, String> buildEndDayContext(GameSession session) {
+        Map<String, String> ctx = new LinkedHashMap<>();
+        ctx.put("trigger",    "END_DAY");
+        ctx.put("day",        String.valueOf(session.time().day()));
+        ctx.put("energy",     String.valueOf(session.player().stats().energy()));
+        ctx.put("health",     String.valueOf(session.player().stats().health()));
+        ctx.put("stress",     String.valueOf(session.player().stats().stress()));
+        ctx.put("mood",       String.valueOf(session.player().stats().mood()));
+        ctx.put("money",      String.valueOf(session.player().stats().money()));
+        ctx.put("selfEsteem", String.valueOf(session.player().stats().selfEsteem()));
         session.relationships().all().forEach((npcId, rel) -> {
-            ctx.put("rel." + npcId + ".closeness", rel.closeness());
-            ctx.put("rel." + npcId + ".trust", rel.trust());
-            ctx.put("rel." + npcId + ".romance", rel.romance());
+            ctx.put("rel." + npcId + ".closeness", String.valueOf(rel.closeness()));
+            ctx.put("rel." + npcId + ".trust",     String.valueOf(rel.trust()));
+            ctx.put("rel." + npcId + ".romance",   String.valueOf(rel.romance()));
         });
         return ctx;
     }

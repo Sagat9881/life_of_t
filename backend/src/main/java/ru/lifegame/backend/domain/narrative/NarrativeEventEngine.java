@@ -24,22 +24,34 @@ import java.util.*;
  *   - trigger      : context key "activeTrigger"  — exact string match
  *   - weather      : context key "weather"        — exact string match
  *   - season       : context key "season"         — exact string match
+ *
+ * Context values are always Strings. Callers must convert numeric stats
+ * via String.valueOf() before passing the context map.
  */
 public class NarrativeEventEngine {
 
-    private final List<EventSpec> specs;
+    private List<EventSpec> specs;
     private final Map<String, Instant> lastFired = new HashMap<>();
     private final Random random = new Random();
 
     public NarrativeEventEngine(List<EventSpec> specs) {
-        this.specs = Collections.unmodifiableList(new ArrayList<>(specs));
+        this.specs = specs != null ? new ArrayList<>(specs) : new ArrayList<>();
+    }
+
+    /**
+     * Replaces the current spec list with a new set.
+     * Called by NarrativeBootstrap after XML loading completes.
+     */
+    public void reloadSpecs(List<EventSpec> newSpecs) {
+        this.specs = newSpecs != null ? Collections.unmodifiableList(new ArrayList<>(newSpecs)) : List.of();
     }
 
     /**
      * Evaluates all loaded specs against the given context.
      *
-     * @param context map of game-state keys to string values
-     *                (e.g. {"timeSlot": "night", "anxiety": "70", "location": "home_room"})
+     * @param context map of game-state keys to String values.
+     *                Numeric stats must be pre-converted: String.valueOf(energy).
+     *                e.g. {"timeSlot": "night", "anxiety": "70", "location": "home_room"}
      * @return list of EventSpec instances that fire on this tick (may be empty)
      */
     public List<EventSpec> evaluate(Map<String, String> context) {
@@ -57,7 +69,7 @@ public class NarrativeEventEngine {
         return fired;
     }
 
-    // ── condition evaluation ────────────────────────────────────────────────
+    // ── condition evaluation ────────────────────────────────────────────
 
     private boolean conditionsMet(List<ConditionSpec> conditions, Map<String, String> context) {
         for (ConditionSpec c : conditions) {
@@ -94,11 +106,11 @@ public class NarrativeEventEngine {
         }
     }
 
-    // ── cooldown ────────────────────────────────────────────────────────────
+    // ── cooldown ──────────────────────────────────────────────────────
 
     private boolean cooldownExpired(String eventId, int cooldownHours, Instant now) {
         Instant last = lastFired.get(eventId);
-        if (last == null) return true; // never fired
+        if (last == null) return true;
         return ChronoUnit.HOURS.between(last, now) >= cooldownHours;
     }
 

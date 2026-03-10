@@ -3,6 +3,7 @@ package ru.lifegame.backend.infrastructure.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import ru.lifegame.backend.application.service.GameContentService;
 import ru.lifegame.backend.domain.action.ActionProvider;
 import ru.lifegame.backend.domain.action.spec.DataDrivenActionProvider;
 import ru.lifegame.backend.domain.action.spec.PlayerActionSpecLoader;
@@ -12,6 +13,9 @@ import ru.lifegame.backend.domain.ending.EndingEngine;
 import ru.lifegame.backend.domain.model.session.ActionExecutor;
 import ru.lifegame.backend.domain.model.session.ConflictManager;
 import ru.lifegame.backend.domain.model.session.DayEndProcessor;
+import ru.lifegame.backend.domain.narrative.NarrativeContentLoader;
+import ru.lifegame.backend.domain.narrative.NarrativeEventEngine;
+import ru.lifegame.backend.domain.narrative.NarrativeQuestEngine;
 import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
 
 import java.io.InputStream;
@@ -69,5 +73,34 @@ public class DomainConfig {
             NpcLifecycleEngine npcLifecycleEngine
     ) {
         return new DayEndProcessor(conflictEngine, conflictManager, endingEngine, npcLifecycleEngine);
+    }
+
+    /**
+     * NarrativeContentLoader is the raw XML reader — constructed empty,
+     * populated by NarrativeBootstrap on ApplicationReadyEvent.
+     */
+    @Bean
+    public NarrativeContentLoader narrativeContentLoader() {
+        return new NarrativeContentLoader();
+    }
+
+    /**
+     * NarrativeEventEngine is constructed empty here.
+     * NarrativeBootstrap feeds it the loaded EventSpecs after parsing.
+     * This two-phase init (construct → populate) avoids a circular dependency
+     * with GameContentService and keeps domain objects free of Spring.
+     */
+    @Bean
+    public NarrativeEventEngine narrativeEventEngine() {
+        return new NarrativeEventEngine(List.of());
+    }
+
+    /**
+     * NarrativeQuestEngine is constructed empty here.
+     * NarrativeBootstrap feeds it the loaded QuestSpecs after parsing.
+     */
+    @Bean
+    public NarrativeQuestEngine narrativeQuestEngine() {
+        return new NarrativeQuestEngine(List.of());
     }
 }

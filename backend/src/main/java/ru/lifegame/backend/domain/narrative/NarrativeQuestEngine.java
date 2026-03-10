@@ -10,11 +10,19 @@ import java.util.*;
 
 public class NarrativeQuestEngine {
 
-    private final List<QuestSpec> questSpecs;
+    private List<QuestSpec> questSpecs;
     private final Map<String, QuestState> activeQuests = new LinkedHashMap<>();
 
     public NarrativeQuestEngine(List<QuestSpec> questSpecs) {
-        this.questSpecs = questSpecs != null ? questSpecs : List.of();
+        this.questSpecs = questSpecs != null ? new ArrayList<>(questSpecs) : new ArrayList<>();
+    }
+
+    /**
+     * Replaces the current quest spec list with a new set.
+     * Called by NarrativeBootstrap after XML loading completes.
+     */
+    public void reloadSpecs(List<QuestSpec> newSpecs) {
+        this.questSpecs = newSpecs != null ? new ArrayList<>(newSpecs) : new ArrayList<>();
     }
 
     public record QuestState(
@@ -77,8 +85,8 @@ public class NarrativeQuestEngine {
             return switch (c.operator()) {
                 case "gte" -> actual >= expected;
                 case "lte" -> actual <= expected;
-                case "eq" -> actual == expected;
-                default -> false;
+                case "eq"  -> actual == expected;
+                default    -> false;
             };
         }
         return val.toString().equals(c.value());
