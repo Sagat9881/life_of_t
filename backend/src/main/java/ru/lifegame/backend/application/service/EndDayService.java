@@ -6,10 +6,15 @@ import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.view.EventOptionView;
 import ru.lifegame.backend.application.view.GameStateView;
 import ru.lifegame.backend.domain.event.domain.NarrativeEventTriggeredEvent;
+import ru.lifegame.backend.domain.event.domain.QuestActivatedEvent;
+import ru.lifegame.backend.domain.event.game.GameEvent;
 import ru.lifegame.backend.domain.exception.SessionNotFoundException;
 import ru.lifegame.backend.domain.model.session.DayEndProcessor;
 import ru.lifegame.backend.domain.model.session.GameSession;
+import ru.lifegame.backend.domain.narrative.EventSpecMapper;
 import ru.lifegame.backend.domain.narrative.NarrativeEventEngine;
+import ru.lifegame.backend.domain.narrative.NarrativeQuestEngine;
+import ru.lifegame.backend.domain.npc.spec.EventSpec;
 import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
 
 import java.util.LinkedHashMap;
@@ -21,15 +26,18 @@ public class EndDayService implements EndDayUseCase {
     private final SessionRepository sessionRepository;
     private final GameStateViewMapper mapper;
     private final NarrativeEventEngine narrativeEventEngine;
+    private final NarrativeQuestEngine narrativeQuestEngine;
     private final DayEndProcessor dayEndProcessor;
 
     public EndDayService(SessionRepository sessionRepository,
                          GameStateViewMapper mapper,
                          NarrativeEventEngine narrativeEventEngine,
+                         NarrativeQuestEngine narrativeQuestEngine,
                          DayEndProcessor dayEndProcessor) {
         this.sessionRepository = sessionRepository;
         this.mapper = mapper;
         this.narrativeEventEngine = narrativeEventEngine;
+        this.narrativeQuestEngine = narrativeQuestEngine;
         this.dayEndProcessor = dayEndProcessor;
     }
 
@@ -40,20 +48,42 @@ public class EndDayService implements EndDayUseCase {
 
         session.endDay(dayEndProcessor);
 
-        // Evaluate narrative events at end of day
+        int currentDay = session.time().day();
+
+        // ── Auto-activate quests whose triggerDay has arrived ────────────────────
+        if (narrativeQuestEngine != null) {
+            narrativeQuestEngine.getQuestSpecs().stream()
+                    .filter(q -> q.meta().triggerDay() <= currentDay)
+                    .filter(q -> !narrativeQuestEngine.getActiveQuests().containsKey(q.id()))
+                    .forEach(q -> {
+                        narrativeQuestEngine.activateQuest(q.id());
+                        session.publishDomainEvent(new QuestActivatedEvent(
+                                session.sessionId(),
+                                q.id(),
+                                q.meta().title()
+                        ));
+                    });
+        }
+
+        // ── Narrative events at end of day ────────────────────────────────
         if (narrativeEventEngine != null) {
             Map<String, String> ctx = buildEndDayContext(session);
-            var firedEvents = narrativeEventEngine.evaluate(ctx);
-            for (var fired : firedEvents) {
-                List<EventOptionView> options = fired.options().stream()
+            List<EventSpec> firedSpecs = narrativeEventEngine.evaluate(ctx);
+            for (EventSpec spec : firedSpecs) {
+                // 1. Convert spec -> GameEvent and register in session
+                GameEvent gameEvent = EventSpecMapper.toGameEvent(spec, currentDay);
+                session.triggerEvent(gameEvent);
+
+                // 2. Notify frontend via SSE
+                List<EventOptionView> optionViews = spec.options().stream()
                         .map(o -> new EventOptionView(o.id(), o.labelRu()))
                         .toList();
                 session.publishDomainEvent(new NarrativeEventTriggeredEvent(
                         session.sessionId(),
-                        fired.id(),
-                        fired.meta().titleRu(),
-                        fired.meta().descriptionRu(),
-                        options
+                        spec.id(),
+                        spec.meta().titleRu(),
+                        spec.meta().descriptionRu(),
+                        optionViews
                 ));
             }
         }
@@ -63,8 +93,8 @@ public class EndDayService implements EndDayUseCase {
     }
 
     /**
-     * Builds a String-valued context map for NarrativeEventEngine.
-     * All numeric stats are converted to String for uniform condition parsing.
+     * String-valued context for NarrativeEventEngine condition evaluation.
+     * All numeric stats converted to String for uniform stat_min/time_of_day parsing.
      */
     private Map<String, String> buildEndDayContext(GameSession session) {
         Map<String, String> ctx = new LinkedHashMap<>();
