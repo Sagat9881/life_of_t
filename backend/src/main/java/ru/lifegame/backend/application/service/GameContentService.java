@@ -126,22 +126,33 @@ public class GameContentService {
         }
     }
 
+    /**
+     * Scans classpath:narrative/quests/**\/*.xml recursively.
+     * Each file must contain exactly one {@code <quest>} root element.
+     * Duplicate quest IDs: first file wins (alphabetical scan order).
+     * Missing directory: logs a warning, starts without quests (non-fatal).
+     */
     private void loadQuestsFromXml() {
         QuestSpecParser parser = new QuestSpecParser();
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         try {
-            Resource res = resolver.getResource("classpath:narrative/quests.xml");
-            if (!res.exists()) {
-                log.warn("narrative/quests.xml not found — no quests loaded");
+            Resource[] files = resolver.getResources("classpath:narrative/quests/**/*.xml");
+            if (files.length == 0) {
+                log.warn("No quest XML files found at classpath:narrative/quests/ — starting without quests");
                 return;
             }
-            try (InputStream is = res.getInputStream()) {
-                List<QuestSpec> parsed = parser.parseAll(is, "quests.xml");
-                parsed.forEach(q -> quests.put(q.id(), q));
-                log.info("Loaded {} quests from quests.xml", parsed.size());
+            for (Resource res : files) {
+                String filename = res.getFilename();
+                try (InputStream is = res.getInputStream()) {
+                    QuestSpec spec = parser.parseOne(is, filename);
+                    quests.putIfAbsent(spec.id(), spec);
+                } catch (Exception e) {
+                    log.error("Failed to parse quest file: {} — skipping", filename, e);
+                }
             }
+            log.info("Loaded {} quests", quests.size());
         } catch (Exception e) {
-            log.error("Failed to load narrative/quests.xml", e);
+            log.error("Failed to scan classpath:narrative/quests/", e);
         }
     }
 
@@ -207,11 +218,11 @@ public class GameContentService {
             skillGains.put(s.getAttribute("name"), Integer.parseInt(s.getAttribute("xp")));
         }
 
-        List<String> tags = parseTextList(el, "tags", "tag");
-        List<String> requiredTags   = parseTextList(el, "required-tags",  "tag");
-        List<String> forbiddenTags  = parseTextList(el, "forbidden-tags", "tag");
-        List<String> timeSlots      = parseTextList(el, "time-slots",     "slot");
-        List<String> locations      = parseTextList(el, "locations",      "location");
+        List<String> tags           = parseTextList(el, "tags",               "tag");
+        List<String> requiredTags   = parseTextList(el, "required-tags",      "tag");
+        List<String> forbiddenTags  = parseTextList(el, "forbidden-tags",     "tag");
+        List<String> timeSlots      = parseTextList(el, "time-slots",         "slot");
+        List<String> locations      = parseTextList(el, "locations",          "location");
         List<String> conflictTypes  = parseTextList(el, "potential-conflicts", "conflict");
         List<String> relatedQuests  = parseTextList(el, "related-quests",      "quest");
 

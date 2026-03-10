@@ -10,14 +10,42 @@ import java.io.InputStream;
 import java.util.*;
 
 /**
- * Parses narrative/quests.xml — a single container file with a <quests> root
- * holding multiple <quest> children.
+ * Parses quest XML files from classpath:narrative/quests/**\/*.xml.
  *
- * parseAll(InputStream, filename) — preferred (works in JAR)
- * parseAll(File)                  — convenience for tests
+ * Two supported root formats:
+ *   <quest id="...">...</quest>         — single-quest file (preferred, 1 file per quest)
+ *   <quests><quest>...</quest></quests> — legacy container (kept for test convenience)
+ *
+ * Public API:
+ *   parseOne(InputStream, filename)  — parses exactly 1 quest from a single-quest file
+ *   parseAll(InputStream, filename)  — parses 1..N quests from any supported format
+ *   parseAll(File)                   — convenience overload for unit tests
  */
 public class QuestSpecParser {
 
+    /**
+     * Parses a single-quest file (root element is {@code <quest>}).
+     * Throws if the file contains zero or more than one quest element.
+     */
+    public QuestSpec parseOne(InputStream xmlStream, String filename) throws Exception {
+        List<QuestSpec> all = parseAll(xmlStream, filename);
+        if (all.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "No <quest> element found in quest file: " + filename);
+        }
+        if (all.size() > 1) {
+            throw new IllegalArgumentException(
+                    "Expected exactly 1 <quest> in file " + filename +
+                    ", but found " + all.size() +
+                    ". Use parseAll() for multi-quest files.");
+        }
+        return all.get(0);
+    }
+
+    /**
+     * Parses all quests from an XML stream.
+     * Handles both {@code <quest>} root and {@code <quests>} container root.
+     */
     public List<QuestSpec> parseAll(InputStream xmlStream, String filename) throws Exception {
         try {
             DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
@@ -28,6 +56,9 @@ public class QuestSpecParser {
         }
     }
 
+    /**
+     * Convenience overload for unit tests — parses from a {@link File}.
+     */
     public List<QuestSpec> parseAll(File xmlFile) throws Exception {
         try {
             DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
@@ -37,6 +68,8 @@ public class QuestSpecParser {
             throw new IllegalArgumentException("Failed to parse quest XML: " + xmlFile.getName(), e);
         }
     }
+
+    // ── internals ───────────────────────────────────────────────────────────
 
     private List<QuestSpec> parseDocument(Document doc) {
         doc.getDocumentElement().normalize();
@@ -63,7 +96,6 @@ public class QuestSpecParser {
 
         List<StepSpec> steps = parseSteps(el);
 
-        // Quest-level rewards are merged into the last step
         List<RewardSpec> questRewards = parseQuestRewards(el);
         if (!questRewards.isEmpty() && !steps.isEmpty()) {
             int last = steps.size() - 1;
@@ -96,12 +128,12 @@ public class QuestSpecParser {
         if ("compound".equals(stepType)) {
             NodeList conditions = el.getElementsByTagName("condition");
             for (int i = 0; i < conditions.getLength(); i++) {
-                Element c        = (Element) conditions.item(i);
-                String condType  = c.getAttribute("type");
-                String field     = c.getAttribute("field");
-                String operator  = c.getAttribute("operator");
-                String value     = c.getAttribute("value");
-                String target    = "relationship".equals(condType)
+                Element c       = (Element) conditions.item(i);
+                String condType = c.getAttribute("type");
+                String field    = c.getAttribute("field");
+                String operator = c.getAttribute("operator");
+                String value    = c.getAttribute("value");
+                String target   = "relationship".equals(condType)
                         ? c.getAttribute("target") + ":" + field
                         : field;
                 objectives.add(new ObjectiveSpec(condType, target, operator, value));
