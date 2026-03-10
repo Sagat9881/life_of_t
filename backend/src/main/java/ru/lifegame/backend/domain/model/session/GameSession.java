@@ -141,7 +141,7 @@ public class GameSession {
     }
 
     public List<DomainEvent> drainEvents() {
-        List<DomainEvent> events = eventPublisher.drain();
+        List<DomainEvent> events = eventPublisher.drainEvents();
         domainEvents.addAll(events);
         return events;
     }

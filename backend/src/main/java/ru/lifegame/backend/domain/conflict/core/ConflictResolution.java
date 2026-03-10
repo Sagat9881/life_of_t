@@ -4,20 +4,20 @@ import ru.lifegame.backend.domain.model.relationship.RelationshipChanges;
 import ru.lifegame.backend.domain.model.stats.StatChanges;
 
 public record ConflictResolution(
-        ConflictOutcome outcome,
+        String outcome,
         StatChanges statChanges,
         RelationshipChanges relationshipChanges,
         boolean relationshipBreak
 ) {
     public static ConflictResolution avoided() {
-        return new ConflictResolution(ConflictOutcome.AVOIDED, StatChanges.none(), null, false);
+        return new ConflictResolution("AVOIDED", StatChanges.none(), null, false);
     }
 
-    public static ConflictResolution fromOutcome(ConflictOutcome outcome) {
+    public static ConflictResolution fromOutcome(String outcome) {
         return new ConflictResolution(outcome, StatChanges.none(), null, false);
     }
 
-    public static ConflictResolution withBreak(ConflictOutcome outcome) {
+    public static ConflictResolution withBreak(String outcome) {
         return new ConflictResolution(outcome, StatChanges.none(), null, true);
     }
 }

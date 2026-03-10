@@ -1,7 +1,6 @@
 package ru.lifegame.backend.domain.model.session;
 
 import ru.lifegame.backend.domain.conflict.core.Conflict;
-import ru.lifegame.backend.domain.conflict.core.ConflictOutcome;
 import ru.lifegame.backend.domain.conflict.core.ConflictResolution;
 import ru.lifegame.backend.domain.conflict.core.ConflictStage;
 import ru.lifegame.backend.domain.conflict.core.ConflictStressPoints;
@@ -144,9 +143,9 @@ public class ConflictManager {
 
         // Resolve conflict if either side reaches 0 CSP
         if (updatedCsp.isOpponentDefeated() || updatedCsp.isPlayerDefeated()) {
-            ConflictOutcome outcome = updatedCsp.isOpponentDefeated()
-                    ? ConflictOutcome.SUCCESS
-                    : ConflictOutcome.FAILURE;
+            String outcome = updatedCsp.isOpponentDefeated()
+                    ? "PLAYER_VICTORY"
+                    : "OPPONENT_VICTORY";
             conflict.resolve(ConflictResolution.fromOutcome(outcome));
             handleConflictResolution(conflict, context, eventPublisher);
         }
@@ -159,7 +158,7 @@ public class ConflictManager {
     ) {
         ConflictResolution res = conflict.resolution();
         eventPublisher.publish(
-                new ConflictResolvedEvent(context.sessionId(), conflict.id(), res.outcome().name())
+                new ConflictResolvedEvent(context.sessionId(), conflict.id(), res.outcome())
         );
         if (res.relationshipBreak() && conflict.opponent().isPresent()) {
             String npc = conflict.opponent().get();
@@ -190,13 +189,12 @@ public class ConflictManager {
     }
 
     private void applyRelationshipChanges(Map<String, Integer> raw, GameSessionContext context) {
-        // Group by npcId: collect all field deltas for the same NPC
         Map<String, int[]> byNpc = new java.util.LinkedHashMap<>();
         for (Map.Entry<String, Integer> entry : raw.entrySet()) {
             String[] parts = entry.getKey().split("\\.", 2);
             if (parts.length != 2) continue;
             String npcId = parts[0];
-            byNpc.computeIfAbsent(npcId, k -> new int[4]); // [closeness, trust, stability, romance]
+            byNpc.computeIfAbsent(npcId, k -> new int[4]);
             switch (parts[1]) {
                 case "closeness" -> byNpc.get(npcId)[0] += entry.getValue();
                 case "trust"     -> byNpc.get(npcId)[1] += entry.getValue();
