@@ -85,9 +85,19 @@ public class EndingLoader {
         String target = condEl.getAttribute("target");
         String operator = condEl.getAttribute("operator");
         String valueStr = condEl.getAttribute("value");
-        Double value = (valueStr != null && !valueStr.isEmpty()) ? Double.parseDouble(valueStr) : null;
         String questId = condEl.getAttribute("questId");
         String state = condEl.getAttribute("state");
+
+        Double value = null;
+        if (valueStr != null && !valueStr.isEmpty()) {
+            try {
+                value = Double.parseDouble(valueStr);
+            } catch (NumberFormatException e) {
+                // Non-numeric value (e.g. "true"/"false") — treat as null,
+                // condition evaluation relies on questId/state/operator instead.
+                value = null;
+            }
+        }
 
         return new EndingSpec.EndingCondition(type, field, target, operator, value, questId, state);
     }
