@@ -142,7 +142,7 @@ public class GameStateViewMapper {
         return session.activeConflicts().stream()
                 .filter(c -> !c.isResolved())
                 .map(c -> new ConflictView(
-                        c.id(), c.conflictId(), c.label(), c.stage().name(),
+                        c.id(), c.conflictId(), c.label(), c.stage(),
                         c.csp().player(), c.csp().opponent(), List.of()))
                 .toList();
     }
@@ -161,7 +161,7 @@ public class GameStateViewMapper {
     private EndingView toEndingView(GameSession session) {
         if (session.ending() == null) return null;
         return new EndingView(
-                session.ending().endingId(), session.ending().category().name(),
+                session.ending().endingId(), session.ending().category(),
                 session.ending().title(), session.ending().summary());
     }
 
