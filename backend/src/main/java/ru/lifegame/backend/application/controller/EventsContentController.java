@@ -25,7 +25,7 @@ public class EventsContentController {
         this.contentService = contentService;
     }
 
-    @GetMapping("/events")
+    @GetMapping("/narrative/events")
     @Operation(summary = "Get all narrative event definitions",
                description = "Returns all narrative events with dialogue lines, options and effects")
     public ResponseEntity<EventsContentResponse> getEvents() {

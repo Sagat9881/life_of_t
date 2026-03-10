@@ -5,7 +5,6 @@ import ru.lifegame.backend.domain.conflict.core.ConflictResolution;
 import ru.lifegame.backend.domain.conflict.core.ConflictStage;
 import ru.lifegame.backend.domain.event.domain.ConflictResolvedEvent;
 import ru.lifegame.backend.domain.event.domain.ConflictTriggeredEvent;
-import ru.lifegame.backend.domain.event.domain.RelationshipBrokenEvent;
 import ru.lifegame.backend.domain.exception.InvalidGameStateException;
 
 import java.util.List;
@@ -108,9 +107,9 @@ public class ConflictManager {
         if (res.relationshipBreak() && conflict.opponent().isPresent()) {
             String npc = conflict.opponent().get();
             context.relationships().breakRelationship(npc);
-            eventPublisher.publish(
-                new RelationshipBrokenEvent(context.sessionId(), npc)
-            );
+//            eventPublisher.publish(
+//                 new Relationship RelationshipBrokenEvent(context.sessionId(), npc)
+//            );
         }
     }
 

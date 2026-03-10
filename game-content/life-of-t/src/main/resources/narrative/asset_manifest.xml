@@ -53,26 +53,37 @@
 
     <!-- ACTIVITY ANIMATIONS: Map NPC activity IDs to animation keys -->
     <activityAnimations>
+        <!-- Breakfast -->
         <activity id="breakfast">
             <animation npc="SAM" key="eating" atlas="/assets/characters/sam/eating-atlas.json"/>
             <animation npc="TANYA" key="eating" atlas="/assets/characters/tanya/eating-atlas.json"/>
         </activity>
+
+        <!-- Sleeping -->
         <activity id="sleeping">
             <animation npc="SAM" key="sleeping" atlas="/assets/characters/sam/sleeping-atlas.json"/>
             <animation npc="TANYA" key="sleeping" atlas="/assets/characters/tanya/sleeping-atlas.json"/>
         </activity>
+
+        <!-- Working -->
         <activity id="working">
             <animation npc="SAM" key="working" atlas="/assets/characters/sam/working-atlas.json"/>
             <animation npc="TANYA" key="working" atlas="/assets/characters/tanya/working-atlas.json"/>
         </activity>
+
+        <!-- Reading -->
         <activity id="reading">
             <animation npc="SAM" key="reading" atlas="/assets/characters/sam/reading-atlas.json"/>
             <animation npc="ALEXANDER" key="reading" atlas="/assets/characters/alexander/reading-atlas.json"/>
         </activity>
+
+        <!-- Relaxing -->
         <activity id="relaxing">
             <animation npc="SAM" key="relaxing" atlas="/assets/characters/sam/relaxing-atlas.json"/>
             <animation npc="TANYA" key="relaxing" atlas="/assets/characters/tanya/relaxing-atlas.json"/>
         </activity>
+
+        <!-- Idle (default fallback) -->
         <activity id="idle">
             <animation npc="SAM" key="idle" atlas="/assets/characters/sam/idle-atlas.json"/>
             <animation npc="TANYA" key="idle" atlas="/assets/characters/tanya/idle-atlas.json"/>
@@ -82,7 +93,7 @@
         </activity>
     </activityAnimations>
 
-    <!-- CHARACTER SPRITES -->
+    <!-- CHARACTER SPRITES: Base spritesheets and animation atlases per character -->
     <characters>
         <character id="SAM">
             <displayName>Sam</displayName>
@@ -95,6 +106,7 @@
                 <anim key="working" atlas="/assets/characters/sam/working-atlas.json"/>
             </animations>
         </character>
+
         <character id="TANYA">
             <displayName>Tanya</displayName>
             <spriteSheet src="/assets/characters/tanya/spritesheet.png"/>
@@ -104,6 +116,7 @@
                 <anim key="eating" atlas="/assets/characters/tanya/eating-atlas.json"/>
             </animations>
         </character>
+
         <character id="ALEXANDER">
             <displayName>Alexander (Father)</displayName>
             <spriteSheet src="/assets/characters/alexander/spritesheet.png"/>
@@ -112,6 +125,7 @@
                 <anim key="reading" atlas="/assets/characters/alexander/reading-atlas.json"/>
             </animations>
         </character>
+
         <character id="GARFIELD">
             <displayName>Garfield (Cat)</displayName>
             <spriteSheet src="/assets/characters/garfield/spritesheet.png"/>
@@ -119,6 +133,7 @@
                 <anim key="idle" atlas="/assets/characters/garfield/idle-atlas.json"/>
             </animations>
         </character>
+
         <character id="DUKE">
             <displayName>Duke (Dog)</displayName>
             <spriteSheet src="/assets/characters/duke/spritesheet.png"/>

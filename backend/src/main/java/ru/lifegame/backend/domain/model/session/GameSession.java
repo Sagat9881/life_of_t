@@ -126,9 +126,9 @@ public class GameSession {
             events().add(event);
         }
         event.markTriggered();
-        eventPublisher.publish(
-                new EventTriggeredEvent(sessionId, event.id())
-        );
+//        eventPublisher.publish(
+//                new EventTriggeredEvent(sessionId, event.id())
+//        );
     }
 
     public void chooseEventOption(String eventId, String optionId) {

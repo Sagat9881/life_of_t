@@ -92,7 +92,7 @@ public class ContentController {
      * Get all quest definitions.
      * @return list of quests with steps, rewards, triggers
      */
-    @GetMapping("/quests")
+    @GetMapping("/narrative/quests")
     public List<Map<String, Object>> getAllQuests() {
         log.debug("Loading all quests");
         return questService.loadAllQuests();
@@ -131,7 +131,7 @@ public class ContentController {
             "npcs", npcService.loadAllNPCs(),
             "locations", locationService.loadAllLocations(),
             "conflicts", conflictService.loadAllConflicts(),
-            "quests", questService.loadAllQuests(),
+                "narrative/quests", questService.loadAllQuests(),
             "animations", getAllAnimations()
         );
     }
