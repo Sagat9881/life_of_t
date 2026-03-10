@@ -34,6 +34,10 @@ import java.util.List;
 @Configuration
 public class DomainConfig {
 
+    /**
+     * Scans classpath:narrative/actions/**\/*.xml on startup.
+     * Throws IllegalStateException if no files found.
+     */
     @Bean
     public PlayerActionSpecLoader playerActionSpecLoader() {
         return new PlayerActionSpecLoader();
@@ -109,8 +113,8 @@ public class DomainConfig {
     }
 
     /**
-     * Constructed empty — populated by NarrativeBootstrap.onApplicationReady().
-     * Evaluated by ExecutePlayerActionService and EndDayService on every tick.
+     * Constructed empty — populated by NarrativeBootstrap on ApplicationReadyEvent.
+     * Do NOT inject specs here: NarrativeBootstrap handles lifecycle.
      */
     @Bean
     public NarrativeEventEngine narrativeEventEngine() {
@@ -118,8 +122,8 @@ public class DomainConfig {
     }
 
     /**
-     * Constructed empty — populated by NarrativeBootstrap.onApplicationReady().
-     * Evaluated by ExecutePlayerActionService on every player action.
+     * Constructed empty — populated by NarrativeBootstrap on ApplicationReadyEvent.
+     * Do NOT inject specs here: NarrativeBootstrap handles lifecycle.
      */
     @Bean
     public NarrativeQuestEngine narrativeQuestEngine() {
