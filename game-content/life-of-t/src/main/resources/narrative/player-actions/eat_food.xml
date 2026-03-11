@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action id="EAT_FOOD" code="EAT_FOOD" time-cost="1">
+    <label>Поесть</label>
+    <description>Перекусить из холодильника</description>
+    <result-text>Татьяна перекусила. Энергия восстановилась.</result-text>
+    <stats energy="10" health="3" stress="-3" mood="3" money="-3" self-esteem="0"/>
+    <relationships/>
+    <pet-mood/>
+    <flags rested="false" worked="false" interacted-npcs="" reset-household-days="false"/>
+    <skill-gains/>
+</action>

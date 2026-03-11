@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action id="COOK_FOOD" code="COOK_FOOD" time-cost="2">
+    <label>Приготовить еду</label>
+    <description>Готовка на кухне</description>
+    <result-text>Татьяна приготовила вкусный обед.</result-text>
+    <stats energy="-10" health="5" stress="-5" mood="5" money="-5" self-esteem="0"/>
+    <relationships>
+        <change target="HUSBAND" delta="3"/>
+    </relationships>
+    <pet-mood/>
+    <flags rested="false" worked="false" interacted-npcs="" reset-household-days="true"/>
+    <skill-gains>
+        <skill name="cooking" xp="3"/>
+    </skill-gains>
+</action>

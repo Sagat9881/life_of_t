@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action id="WORK_ON_PROJECT" code="WORK_ON_PROJECT" time-cost="3">
+    <label>Поработать за компьютером</label>
+    <description>Удалённая работа или личный проект</description>
+    <result-text>Татьяна продуктивно поработала за компьютером.</result-text>
+    <time-cost-skill skill="efficiency" reduction-per-level="0.02" min-cost="2"/>
+    <stats energy="-20" health="0" stress="10" mood="-3" money="30" self-esteem="5"/>
+    <relationships>
+        <change target="HUSBAND" delta="-3"/>
+    </relationships>
+    <pet-mood/>
+    <flags rested="false" worked="true" interacted-npcs="" reset-household-days="false"/>
+    <skill-gains>
+        <skill name="efficiency" xp="3"/>
+    </skill-gains>
+    <job-effects satisfaction="3" burnout-risk="2"/>
+</action>

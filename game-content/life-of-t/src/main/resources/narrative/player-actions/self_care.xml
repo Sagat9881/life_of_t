@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action id="SELF_CARE" code="SELF_CARE" time-cost="2">
+    <label>Заняться собой</label>
+    <description>Время для себя</description>
+    <result-text>Татьяна уделила время себе. Стресс отступил.</result-text>
+    <stats energy="-10" health="0" stress="-15" mood="15" money="0" self-esteem="10"/>
+    <relationships/>
+    <pet-mood/>
+    <flags rested="false" worked="false" interacted-npcs="" reset-household-days="false"/>
+    <skill-gains>
+        <skill name="assertiveness" xp="2"/>
+        <skill name="communication" xp="1"/>
+    </skill-gains>
+    <job-effects satisfaction="0" burnout-risk="-3"/>
+</action>

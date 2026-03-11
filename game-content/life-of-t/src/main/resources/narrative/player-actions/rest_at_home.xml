@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action id="REST_AT_HOME" code="REST_AT_HOME" time-cost="3">
+    <label>Отдохнуть дома</label>
+    <description>Отдых и восстановление</description>
+    <result-text>Татьяна отдохнула дома. Силы восстановлены.</result-text>
+    <stats energy="40" health="0" stress="-20" mood="10" money="0" self-esteem="0"/>
+    <relationships/>
+    <pet-mood/>
+    <flags rested="true" worked="false" interacted-npcs="" reset-household-days="false"/>
+    <skill-gains>
+        <skill name="humor" xp="1"/>
+    </skill-gains>
+</action>

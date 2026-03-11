@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action id="DATE_WITH_HUSBAND" code="DATE_WITH_HUSBAND" time-cost="3">
+    <label>Свидание с мужем</label>
+    <description>Романтический вечер</description>
+    <result-text>Татьяна провела романтический вечер с мужем.</result-text>
+    <stats energy="-10" health="0" stress="-10" mood="20" money="0" self-esteem="0"/>
+    <relationships>
+        <change target="HUSBAND" delta="10"/>
+    </relationships>
+    <pet-mood/>
+    <flags rested="false" worked="false" interacted-npcs="HUSBAND" reset-household-days="false"/>
+    <skill-gains>
+        <skill name="charisma" xp="2"/>
+        <skill name="empathy" xp="1"/>
+    </skill-gains>
+    <extra-relationship-effects>
+        <effect target="HUSBAND" closeness="0" trust="5" stability="0" romance="15"/>
+    </extra-relationship-effects>
+</action>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action id="GO_TO_WORK" code="GO_TO_WORK" time-cost="8">
+    <label>Пойти на работу</label>
+    <description>Работать над проектом</description>
+    <result-text>Татьяна поработала {timeCost} часов. Устала, но заработала деньги.</result-text>
+    <time-cost-skill skill="efficiency" reduction-per-level="0.02" min-cost="6"/>
+    <stats energy="-30" health="0" stress="20" mood="-5" money="55" self-esteem="0"/>
+    <relationships>
+        <change target="HUSBAND" delta="-5"/>
+        <change target="FATHER" delta="-2"/>
+    </relationships>
+    <pet-mood/>
+    <flags rested="false" worked="true" interacted-npcs="" reset-household-days="false"/>
+    <skill-gains>
+        <skill name="efficiency" xp="2"/>
+    </skill-gains>
+    <job-effects satisfaction="2" burnout-risk="0"/>
+</action>

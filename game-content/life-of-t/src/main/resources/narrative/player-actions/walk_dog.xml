@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action id="WALK_DOG" code="WALK_DOG" time-cost="2">
+    <label>Погулять с Сэмом</label>
+    <description>Прогулка с собакой</description>
+    <result-text>Татьяна погуляла с Сэмом. Свежий воздух пошёл на пользу.</result-text>
+    <time-cost-skill skill="dog_care" reduction-per-level="0.02" min-cost="1"/>
+    <stats energy="-10" health="5" stress="-10" mood="10" money="0" self-esteem="0"/>
+    <relationships/>
+    <pet-mood>
+        <change target="SAM" delta="25"/>
+    </pet-mood>
+    <flags rested="false" worked="false" interacted-npcs="" reset-household-days="false"/>
+    <skill-gains>
+        <skill name="dog_care" xp="2"/>
+    </skill-gains>
+</action>

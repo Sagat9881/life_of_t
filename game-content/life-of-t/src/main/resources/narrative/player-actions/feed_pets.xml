@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action id="FEED_PETS" code="FEED_PETS" time-cost="1">
+    <label>Покормить питомцев</label>
+    <description>Наполнить миски</description>
+    <result-text>Питомцы накормлены. Гарфилд мурчит, Сэм виляет хвостом.</result-text>
+    <stats energy="-5" health="0" stress="-3" mood="5" money="-2" self-esteem="0"/>
+    <relationships/>
+    <pet-mood>
+        <change target="BARSIK" delta="15"/>
+        <change target="SAM" delta="15"/>
+    </pet-mood>
+    <flags rested="false" worked="false" interacted-npcs="" reset-household-days="false"/>
+    <skill-gains>
+        <skill name="empathy" xp="1"/>
+    </skill-gains>
+</action>

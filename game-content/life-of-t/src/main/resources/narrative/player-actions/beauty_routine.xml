@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action id="BEAUTY_ROUTINE" code="BEAUTY_ROUTINE" time-cost="2">
+    <label>Уход за собой</label>
+    <description>Макияж, уходовые процедуры перед зеркалом</description>
+    <result-text>Татьяна привела себя в порядок. Отражение радует.</result-text>
+    <stats energy="-8" health="0" stress="-10" mood="12" money="-5" self-esteem="15"/>
+    <relationships/>
+    <pet-mood/>
+    <flags rested="false" worked="false" interacted-npcs="" reset-household-days="false"/>
+    <skill-gains>
+        <skill name="charisma" xp="2"/>
+    </skill-gains>
+</action>

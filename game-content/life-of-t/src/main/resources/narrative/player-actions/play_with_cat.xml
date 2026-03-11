@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action id="PLAY_WITH_CAT" code="PLAY_WITH_CAT" time-cost="1">
+    <label>Поиграть с Гарфилдом</label>
+    <description>Время с котом</description>
+    <result-text>Татьяна поиграла с Барсиком. Кот доволен.</result-text>
+    <stats energy="-5" health="0" stress="-5" mood="10" money="0" self-esteem="0"/>
+    <relationships/>
+    <pet-mood>
+        <change target="BARSIK" delta="20"/>
+    </pet-mood>
+    <flags rested="false" worked="false" interacted-npcs="" reset-household-days="false"/>
+    <skill-gains>
+        <skill name="empathy" xp="1"/>
+    </skill-gains>
+</action>

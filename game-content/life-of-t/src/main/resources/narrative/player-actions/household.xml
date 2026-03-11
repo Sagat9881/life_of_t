@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action id="HOUSEHOLD" code="HOUSEHOLD" time-cost="2">
+    <label>Домашние дела</label>
+    <description>Уборка, готовка, уют в доме</description>
+    <result-text>Домашние дела сделаны. Муж ценит уют, но вы немного устали.</result-text>
+    <stats energy="-15" health="0" stress="0" mood="-5" money="0" self-esteem="0"/>
+    <relationships>
+        <change target="HUSBAND" delta="5"/>
+    </relationships>
+    <pet-mood/>
+    <flags rested="false" worked="false" interacted-npcs="HUSBAND" reset-household-days="true"/>
+    <skill-gains>
+        <skill name="cooking" xp="2"/>
+    </skill-gains>
+</action>
