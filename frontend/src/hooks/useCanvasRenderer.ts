@@ -232,11 +232,21 @@ export function useCanvasRenderer({
       destX: number,
       destY: number,
       destH: number,
-      now: number
+      now: number,
+      flipX = false
     ): void => {
       if (!animCfg || animCfg.columns <= 1) {
         const dw = img.naturalWidth > 0 ? destH * (img.naturalWidth / img.naturalHeight) : destH;
+        if (flipX) {
+          ctx.save();
+          ctx.translate(destX, 0);
+          ctx.scale(-1, 1);
+          ctx.translate(-destX, 0);
+        }
         ctx.drawImage(img, destX - dw / 2, destY - destH, dw, destH);
+        if (flipX) {
+          ctx.restore();
+        }
         return;
       }
 
@@ -266,11 +276,20 @@ export function useCanvasRenderer({
         }
       }
 
+      if (flipX) {
+        ctx.save();
+        ctx.translate(destX, 0);
+        ctx.scale(-1, 1);
+        ctx.translate(-destX, 0);
+      }
       ctx.drawImage(
         img,
         frame * fw, 0, fw, fh,
         destX - dw / 2, destY - destH, dw, destH
       );
+      if (flipX) {
+        ctx.restore();
+      }
     };
 
     const render = (now: number): void => {
@@ -337,7 +356,7 @@ export function useCanvasRenderer({
 
         drawSprite(img, animCfg, null,
           (f.x / 100) * W, (f.y / 100) * H,
-          (f.sceneHeight / 100) * H * f.scale, now);
+          (f.sceneHeight / 100) * H * f.scale, now, f.flipX ?? false);
         ctx.restore();
       }
 

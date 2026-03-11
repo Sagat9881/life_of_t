@@ -11,6 +11,7 @@ export interface FurniturePlacement {
   readonly sceneHeight: number; // 0–100 (% of scene height)
   readonly scale: number;       // multiplier, default 1
   readonly zOrder: number;
+  readonly flipX?: boolean;
   readonly actionCode?: string;
   readonly label?: string;
 }
