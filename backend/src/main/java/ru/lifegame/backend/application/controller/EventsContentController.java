@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.lifegame.backend.application.service.GameContentService;
 import ru.lifegame.backend.domain.dto.content.ContentVersion;
-import ru.lifegame.backend.domain.npc.spec.EventSpec;
+import ru.lifegame.backend.domain.narrative.spec.EventSpec;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
