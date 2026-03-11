@@ -236,14 +236,39 @@ export function useCanvasRenderer({
       flipX = false
     ): void => {
       if (!animCfg || animCfg.columns <= 1) {
-        const dw = img.naturalWidth > 0 ? destH * (img.naturalWidth / img.naturalHeight) : destH;
+        const fw = animCfg ? frameW(img, animCfg) : img.naturalWidth;
+        const fh = animCfg ? frameH(img, animCfg) : img.naturalHeight;
+
+        let drawX: number;
+        let drawY: number;
+        let drawW: number;
+        let drawH: number;
+
+        if (animCfg?.cropOffset) {
+          const crop = animCfg.cropOffset;
+          const scaleFactor = destH / crop.originalHeight;
+          const fullW = crop.originalWidth * scaleFactor;
+          const fullX = destX - fullW / 2;
+          const fullY = destY - destH;
+          drawX = fullX + crop.x * scaleFactor;
+          drawY = fullY + crop.y * scaleFactor;
+          drawW = fw * scaleFactor;
+          drawH = fh * scaleFactor;
+        } else {
+          const dw = img.naturalWidth > 0 ? destH * (img.naturalWidth / img.naturalHeight) : destH;
+          drawX = destX - dw / 2;
+          drawY = destY - destH;
+          drawW = dw;
+          drawH = destH;
+        }
+
         if (flipX) {
           ctx.save();
           ctx.translate(destX, 0);
           ctx.scale(-1, 1);
           ctx.translate(-destX, 0);
         }
-        ctx.drawImage(img, destX - dw / 2, destY - destH, dw, destH);
+        ctx.drawImage(img, 0, 0, fw, fh, drawX, drawY, drawW, drawH);
         if (flipX) {
           ctx.restore();
         }
@@ -252,7 +277,6 @@ export function useCanvasRenderer({
 
       const fw = frameW(img, animCfg);
       const fh = frameH(img, animCfg);
-      const dw = fh > 0 ? destH * (fw / fh) : destH;
 
       let frame = 0;
       if (slotId !== null) {
@@ -276,6 +300,29 @@ export function useCanvasRenderer({
         }
       }
 
+      let drawX: number;
+      let drawY: number;
+      let drawW: number;
+      let drawH: number;
+
+      if (animCfg.cropOffset) {
+        const crop = animCfg.cropOffset;
+        const scaleFactor = destH / crop.originalHeight;
+        const fullW = crop.originalWidth * scaleFactor;
+        const fullX = destX - fullW / 2;
+        const fullY = destY - destH;
+        drawX = fullX + crop.x * scaleFactor;
+        drawY = fullY + crop.y * scaleFactor;
+        drawW = fw * scaleFactor;
+        drawH = fh * scaleFactor;
+      } else {
+        const dw = fh > 0 ? destH * (fw / fh) : destH;
+        drawX = destX - dw / 2;
+        drawY = destY - destH;
+        drawW = dw;
+        drawH = destH;
+      }
+
       if (flipX) {
         ctx.save();
         ctx.translate(destX, 0);
@@ -285,7 +332,7 @@ export function useCanvasRenderer({
       ctx.drawImage(
         img,
         frame * fw, 0, fw, fh,
-        destX - dw / 2, destY - destH, dw, destH
+        drawX, drawY, drawW, drawH
       );
       if (flipX) {
         ctx.restore();
