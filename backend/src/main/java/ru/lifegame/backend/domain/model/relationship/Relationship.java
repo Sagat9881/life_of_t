@@ -13,18 +13,18 @@ public record Relationship(
 ) {
     public Relationship {
         closeness = clamp(closeness);
-        trust = clamp(trust);
+        trust     = clamp(trust);
         stability = clamp(stability);
-        romance = clamp(romance);
+        romance   = clamp(romance);
     }
 
     public Relationship applyChanges(RelationshipChanges c) {
         return new Relationship(
                 npcId,
                 closeness + c.closeness(),
-                trust + c.trust(),
+                trust     + c.trust(),
                 stability + c.stability(),
-                romance + c.romance(),
+                romance   + c.romance(),
                 lastInteractionDay,
                 broken
         );
@@ -34,6 +34,13 @@ public record Relationship(
         return new Relationship(npcId, closeness, trust, stability, romance, currentDay, broken);
     }
 
+    /**
+     * Applies time-based relationship decay per game-balance.yml (relationships.decay).
+     *
+     * gap < noInteraction.mildDays   → no decay
+     * gap < noInteraction.severeDays → mild decay  (closeness −DECAY_MILD_CLOSENESS, trust −DECAY_MILD_TRUST)
+     * gap ≥ noInteraction.severeDays → severe decay (closeness −DECAY_SEVERE_CLOSENESS, trust −DECAY_SEVERE_TRUST)
+     */
     public Relationship applyDecay(int currentDay) {
         int gap = currentDay - lastInteractionDay;
         if (gap < GameBalance.NO_INTERACTION_DAYS_MILD) {
@@ -42,12 +49,12 @@ public record Relationship(
         if (gap < GameBalance.NO_INTERACTION_DAYS_SEVERE) {
             return new Relationship(npcId,
                     closeness - GameBalance.DECAY_MILD_CLOSENESS,
-                    trust - GameBalance.DECAY_MILD_TRUST,
+                    trust     - GameBalance.DECAY_MILD_TRUST,
                     stability, romance, lastInteractionDay, broken);
         }
         return new Relationship(npcId,
                 closeness - GameBalance.DECAY_SEVERE_CLOSENESS,
-                trust - GameBalance.DECAY_SEVERE_TRUST,
+                trust     - GameBalance.DECAY_SEVERE_TRUST,
                 stability, romance, lastInteractionDay, broken);
     }
 
@@ -55,6 +62,7 @@ public record Relationship(
         return new Relationship(npcId, closeness, trust, stability, romance, lastInteractionDay, true);
     }
 
+    /** Clamp for relationship stats bounded by [STAT_MIN, STAT_MAX] per game-balance.yml. */
     private static int clamp(int value) {
         return Math.max(GameBalance.STAT_MIN, Math.min(GameBalance.STAT_MAX, value));
     }

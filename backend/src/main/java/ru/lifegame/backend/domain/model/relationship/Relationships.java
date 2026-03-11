@@ -5,6 +5,7 @@ import ru.lifegame.backend.domain.balance.GameBalance;
 import java.util.*;
 
 public class Relationships {
+
     private final Map<String, Relationship> map;
 
     public Relationships(Map<String, Relationship> map) {
@@ -60,18 +61,44 @@ public class Relationships {
                 .sum();
     }
 
+    /**
+     * True when combined closeness across all non-broken relationships
+     * has fallen below the isolation threshold.
+     * Threshold: conflict.critical.isolationClosenessSum in game-balance.yml.
+     */
+    public boolean isCriticallyIsolated() {
+        return totalCloseness() < GameBalance.ISOLATION_CLOSENESS_SUM;
+    }
+
+    /**
+     * True when trust with the given NPC has fallen below the break threshold.
+     * Threshold: conflict.critical.trustForBreak in game-balance.yml.
+     */
+    public boolean isTrustBroken(String npcId) {
+        Relationship r = get(npcId);
+        return r != null && !r.broken() && r.trust() < GameBalance.TRUST_CRITICAL_FOR_BREAK;
+    }
+
     public Map<String, Relationship> all() {
         return Collections.unmodifiableMap(map);
     }
 
     public static Relationships initial() {
         var m = new LinkedHashMap<String, Relationship>();
-        m.put(NpcCode.HUSBAND, new Relationship(NpcCode.HUSBAND,
-                GameBalance.HUSBAND_INITIAL_CLOSENESS, GameBalance.HUSBAND_INITIAL_TRUST,
-                GameBalance.HUSBAND_INITIAL_STABILITY, GameBalance.HUSBAND_INITIAL_ROMANCE, 1, false));
-        m.put(NpcCode.FATHER, new Relationship(NpcCode.FATHER,
-                GameBalance.FATHER_INITIAL_CLOSENESS, GameBalance.FATHER_INITIAL_TRUST,
-                GameBalance.FATHER_INITIAL_STABILITY, 0, 1, false));
+        m.put(NpcCode.HUSBAND, new Relationship(
+                NpcCode.HUSBAND,
+                GameBalance.HUSBAND_INITIAL_CLOSENESS,
+                GameBalance.HUSBAND_INITIAL_TRUST,
+                GameBalance.HUSBAND_INITIAL_STABILITY,
+                GameBalance.HUSBAND_INITIAL_ROMANCE,
+                1, false));
+        // FATHER has no romantic dimension in the game model — romance fixed at 0
+        m.put(NpcCode.FATHER, new Relationship(
+                NpcCode.FATHER,
+                GameBalance.FATHER_INITIAL_CLOSENESS,
+                GameBalance.FATHER_INITIAL_TRUST,
+                GameBalance.FATHER_INITIAL_STABILITY,
+                0, 1, false));
         return new Relationships(m);
     }
 }

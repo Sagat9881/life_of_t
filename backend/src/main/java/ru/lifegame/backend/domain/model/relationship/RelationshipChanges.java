@@ -18,4 +18,12 @@ public record RelationshipChanges(
     public static RelationshipChanges trust(String npcId, int delta) {
         return new RelationshipChanges(npcId, 0, delta, 0, 0);
     }
+
+    public static RelationshipChanges romance(String npcId, int delta) {
+        return new RelationshipChanges(npcId, 0, 0, 0, delta);
+    }
+
+    public static RelationshipChanges stability(String npcId, int delta) {
+        return new RelationshipChanges(npcId, 0, 0, delta, 0);
+    }
 }
