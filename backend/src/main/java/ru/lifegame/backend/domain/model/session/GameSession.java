@@ -11,6 +11,7 @@ import ru.lifegame.backend.domain.event.game.GameEvent;
 import ru.lifegame.backend.domain.exception.InvalidGameStateException;
 import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.pet.Pets;
+import ru.lifegame.backend.domain.model.relationship.RelationshipChanges;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.quest.QuestLog;
 
@@ -69,17 +70,17 @@ public class GameSession {
         );
     }
 
-    public String sessionId() { return sessionId; }
-    public String telegramUserId() { return telegramUserId; }
-    public PlayerCharacter player() { return context.player(); }
-    public Relationships relationships() { return context.relationships(); }
-    public Pets pets() { return context.pets(); }
-    public QuestLog questLog() { return context.questLog(); }
-    public GameTime time() { return context.time(); }
-    public List<Conflict> activeConflicts() { return context.activeConflicts(); }
-    public List<GameEvent> events() { return context.events(); }
-    public Ending ending() { return ending; }
-    public GameSessionContext context() { return context; }
+    public String sessionId()                    { return sessionId; }
+    public String telegramUserId()               { return telegramUserId; }
+    public PlayerCharacter player()              { return context.player(); }
+    public Relationships relationships()         { return context.relationships(); }
+    public Pets pets()                           { return context.pets(); }
+    public QuestLog questLog()                   { return context.questLog(); }
+    public GameTime time()                       { return context.time(); }
+    public List<Conflict> activeConflicts()      { return context.activeConflicts(); }
+    public List<GameEvent> events()              { return context.events(); }
+    public Ending ending()                       { return ending; }
+    public GameSessionContext context()          { return context; }
 
     public void publishDomainEvent(DomainEvent event) {
         eventPublisher.publish(event);
@@ -134,12 +135,12 @@ public class GameSession {
             player().applyStatChanges(result.statChanges());
         }
         if (result.relationshipChanges() != null && !result.relationshipChanges().isEmpty()) {
-            result.relationshipChanges().forEach((npcId, delta) -> {
-                relationships().applyChanges(npcId,
-                        new ru.lifegame.backend.domain.model.relationship.RelationshipChanges(
-                                npcId, delta, 0, 0, 0
-                        ));
-            });
+            result.relationshipChanges().forEach((npcId, delta) ->
+                    relationships().applyChanges(
+                            npcId,
+                            new RelationshipChanges(npcId, delta, 0, 0, 0)
+                    )
+            );
         }
     }
 
@@ -148,9 +149,9 @@ public class GameSession {
     }
 
     public List<DomainEvent> drainEvents() {
-        List<DomainEvent> events = eventPublisher.drainEvents();
-        domainEvents.addAll(events);
-        return events;
+        List<DomainEvent> drained = eventPublisher.drainEvents();
+        domainEvents.addAll(drained);
+        return drained;
     }
 
     /** Alias for {@link #drainEvents()} — used by services and mappers. */
