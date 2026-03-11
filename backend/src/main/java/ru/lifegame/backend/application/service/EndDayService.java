@@ -14,7 +14,7 @@ import ru.lifegame.backend.domain.model.session.GameSession;
 import ru.lifegame.backend.domain.narrative.EventSpecMapper;
 import ru.lifegame.backend.domain.narrative.NarrativeEventEngine;
 import ru.lifegame.backend.domain.narrative.NarrativeQuestEngine;
-import ru.lifegame.backend.domain.npc.spec.EventSpec;
+import ru.lifegame.backend.domain.narrative.spec.EventSpec;
 import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
 
 import java.util.LinkedHashMap;

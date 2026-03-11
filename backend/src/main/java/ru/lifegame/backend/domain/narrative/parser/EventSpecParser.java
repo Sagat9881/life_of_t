@@ -1,7 +1,7 @@
 package ru.lifegame.backend.domain.narrative.parser;
 
-import ru.lifegame.backend.domain.npc.spec.EventSpec;
-import ru.lifegame.backend.domain.npc.spec.EventSpec.*;
+import ru.lifegame.backend.domain.narrative.spec.EventSpec;
+import ru.lifegame.backend.domain.narrative.spec.EventSpec.*;
 
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
@@ -45,7 +45,7 @@ import java.util.*;
  */
 public class EventSpecParser {
 
-    // ── public API ───────────────────────────────────────────────────────────
+    // ── public API ─────────────────────────────────────────────────────────────
 
     /** Preferred entry point — works both on filesystem and inside JARs. */
     public EventSpec parse(InputStream xmlStream, String filename) throws Exception {
@@ -69,7 +69,7 @@ public class EventSpecParser {
         return parseDocument(doc, xmlFile.getName());
     }
 
-    // ── core parsing ─────────────────────────────────────────────────
+    // ── core parsing ──────────────────────────────────────────────────
 
     private EventSpec parseDocument(Document doc, String filename) throws Exception {
         Element root = doc.getDocumentElement();
@@ -84,7 +84,7 @@ public class EventSpecParser {
         return new EventSpec(id, meta, conditions, dialogue, options);
     }
 
-    // ── meta ────────────────────────────────────────────────────────────────
+    // ── meta ────────────────────────────────────────────────────────────────────
 
     private EventMeta parseMeta(Element root, String filename, String type) throws Exception {
         NodeList metaNodes = root.getElementsByTagName("meta");
@@ -100,7 +100,7 @@ public class EventSpecParser {
         return new EventMeta(titleRu, descriptionRu, type, probability, cooldownHours);
     }
 
-    // ── conditions ──────────────────────────────────────────────────────────
+    // ── conditions ─────────────────────────────────────────────────────────────────
 
     private List<ConditionSpec> parseConditions(Element root) {
         List<ConditionSpec> result = new ArrayList<>();
@@ -117,7 +117,7 @@ public class EventSpecParser {
         return result;
     }
 
-    // ── dialogue ────────────────────────────────────────────────────────────
+    // ── dialogue ──────────────────────────────────────────────────────────────────
 
     private List<DialogueLine> parseDialogue(Element root) {
         List<DialogueLine> result = new ArrayList<>();
@@ -136,7 +136,7 @@ public class EventSpecParser {
         return result;
     }
 
-    // ── options ─────────────────────────────────────────────────────────────
+    // ── options ───────────────────────────────────────────────────────────────────
 
     private List<OptionSpec> parseOptions(Element root, String filename) throws Exception {
         NodeList optionsNodes = root.getElementsByTagName("options");
@@ -181,7 +181,7 @@ public class EventSpecParser {
         return result;
     }
 
-    // ── helpers ─────────────────────────────────────────────────────────────
+    // ── helpers ─────────────────────────────────────────────────────────────────
 
     private String text(Element parent, String tagName) {
         NodeList nodes = parent.getElementsByTagName(tagName);

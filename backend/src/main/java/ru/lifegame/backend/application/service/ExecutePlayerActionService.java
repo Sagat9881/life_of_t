@@ -21,8 +21,8 @@ import ru.lifegame.backend.domain.narrative.EventSpecMapper;
 import ru.lifegame.backend.domain.narrative.NarrativeEventEngine;
 import ru.lifegame.backend.domain.narrative.NarrativeQuestEngine;
 import ru.lifegame.backend.domain.narrative.NarrativeQuestEngine.StepCompletionResult;
+import ru.lifegame.backend.domain.narrative.spec.EventSpec;
 import ru.lifegame.backend.domain.narrative.spec.QuestSpec.RewardSpec;
-import ru.lifegame.backend.domain.npc.spec.EventSpec;
 import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
 import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
 

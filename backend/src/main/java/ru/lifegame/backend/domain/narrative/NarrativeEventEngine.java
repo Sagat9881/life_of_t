@@ -1,7 +1,7 @@
 package ru.lifegame.backend.domain.narrative;
 
-import ru.lifegame.backend.domain.npc.spec.EventSpec;
-import ru.lifegame.backend.domain.npc.spec.EventSpec.ConditionSpec;
+import ru.lifegame.backend.domain.narrative.spec.EventSpec;
+import ru.lifegame.backend.domain.narrative.spec.EventSpec.ConditionSpec;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -69,7 +69,7 @@ public class NarrativeEventEngine {
         return fired;
     }
 
-    // ── condition evaluation ────────────────────────────────────────────
+    // ── condition evaluation ─────────────────────────────────────────────────────
 
     private boolean conditionsMet(List<ConditionSpec> conditions, Map<String, String> context) {
         for (ConditionSpec c : conditions) {
@@ -106,7 +106,7 @@ public class NarrativeEventEngine {
         }
     }
 
-    // ── cooldown ──────────────────────────────────────────────────────
+    // ── cooldown ─────────────────────────────────────────────────────────────────
 
     private boolean cooldownExpired(String eventId, int cooldownHours, Instant now) {
         Instant last = lastFired.get(eventId);

@@ -17,7 +17,7 @@ import ru.lifegame.backend.domain.dto.content.ConflictDefView;
 import ru.lifegame.backend.domain.dto.content.ContentVersion;
 import ru.lifegame.backend.domain.narrative.parser.EventSpecParser;
 import ru.lifegame.backend.domain.narrative.parser.QuestSpecParser;
-import ru.lifegame.backend.domain.npc.spec.EventSpec;
+import ru.lifegame.backend.domain.narrative.spec.EventSpec;
 import ru.lifegame.backend.domain.narrative.spec.QuestSpec;
 
 import javax.xml.parsers.DocumentBuilder;

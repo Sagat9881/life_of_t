@@ -3,9 +3,9 @@ package ru.lifegame.backend.domain.narrative;
 import ru.lifegame.backend.domain.event.game.EventOption;
 import ru.lifegame.backend.domain.event.game.GameEvent;
 import ru.lifegame.backend.domain.model.stats.StatChanges;
-import ru.lifegame.backend.domain.npc.spec.EventSpec;
-import ru.lifegame.backend.domain.npc.spec.EventSpec.EffectSpec;
-import ru.lifegame.backend.domain.npc.spec.EventSpec.OptionSpec;
+import ru.lifegame.backend.domain.narrative.spec.EventSpec;
+import ru.lifegame.backend.domain.narrative.spec.EventSpec.EffectSpec;
+import ru.lifegame.backend.domain.narrative.spec.EventSpec.OptionSpec;
 
 import java.util.HashMap;
 import java.util.List;
@@ -58,7 +58,7 @@ public final class EventSpecMapper {
         );
     }
 
-    // ── option conversion ─────────────────────────────────────────────────────
+    // ── option conversion ──────────────────────────────────────────────────
 
     private static EventOption toEventOption(OptionSpec optionSpec) {
         StatChanges statChanges = buildStatChanges(optionSpec.effects());
@@ -66,7 +66,7 @@ public final class EventSpecMapper {
         return new EventOption(optionSpec.id(), optionSpec.labelRu(), statChanges, relChanges);
     }
 
-    // ── effect parsing ──────────────────────────────────────────────────────
+    // ── effect parsing ────────────────────────────────────────────────────────────────
 
     private static StatChanges buildStatChanges(List<EffectSpec> effects) {
         int energy = 0, health = 0, stress = 0, mood = 0, money = 0, selfEsteem = 0;
