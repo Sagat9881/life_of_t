@@ -16,7 +16,7 @@
  *   /assets/{type}/{name}/sprite-atlas.json
  *
  * Rendering layers (bottom → top):
- *   1. Background  (single frame, stretched to canvas)
+ *   1. Background  (animated strip, stretched to canvas)
  *   2. Furniture   (static single frame, z-sorted)
  *   3. Characters  (animated strip, z-sorted)
  *
@@ -170,6 +170,9 @@ export function useCanvasRenderer({
       enqueueImage('locations', config.locationAsset, config.backgroundAnimation);
       enqueueConfig('locations', config.locationAsset);
 
+      // Initialize SlotState for background
+      slotStateRef.current.set('__background__', { animationName: '__bg__', frameIndex: 0, lastFrameTime: 0 });
+
       config.furniture.forEach((f: FurniturePlacement) => {
         enqueueImage('furniture', f.entityName, f.animation);
         enqueueConfig('furniture', f.entityName);
@@ -278,11 +281,41 @@ export function useCanvasRenderer({
       const selected = selectedRef.current;
       const hovered  = hoveredRef.current;
 
-      // 1. Background
+      // 1. Background — animated strip
       const bgUrl = atlasUrl('locations', cfg.locationAsset, cfg.backgroundAnimation);
       const bgImg = imagesRef.current.get(bgUrl);
+
+      const drawBackground = (img: HTMLImageElement, animCfg: AnimationConfig | undefined, now: number): void => {
+        const fw = animCfg ? frameW(img, animCfg) : img.naturalWidth;
+        const fh = animCfg ? frameH(img, animCfg) : img.naturalHeight;
+
+        let state = slotStateRef.current.get('__background__');
+        if (!state) {
+          state = { animationName: '__bg__', frameIndex: 0, lastFrameTime: now };
+          slotStateRef.current.set('__background__', state);
+        }
+
+        const interval = 1000 / (animCfg?.fps ?? 1);
+        if (now - state.lastFrameTime >= interval) {
+          let next = state.frameIndex + 1;
+          const cols = animCfg?.columns ?? 1;
+          if (next >= cols) next = animCfg?.loop !== false ? 0 : cols - 1;
+          state.frameIndex = next;
+          state.lastFrameTime = now;
+        }
+
+        if (!animCfg || animCfg.columns <= 1) {
+          ctx.drawImage(img, 0, 0, W, H);
+          return;
+        }
+
+        ctx.drawImage(img, state.frameIndex * fw, 0, fw, fh, 0, 0, W, H);
+      };
+
       if (bgImg) {
-        ctx.drawImage(bgImg, 0, 0, W, H);
+        const bgAtlasKey = atlasConfigUrl('locations', cfg.locationAsset);
+        const bgAnimCfg = atlasConfigsRef.current.get(bgAtlasKey)?.animations[cfg.backgroundAnimation];
+        drawBackground(bgImg, bgAnimCfg, now);
       } else {
         ctx.fillStyle = '#1a1a2e';
         ctx.fillRect(0, 0, W, H);
