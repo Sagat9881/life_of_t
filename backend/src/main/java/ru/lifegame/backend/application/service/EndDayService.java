@@ -5,6 +5,7 @@ import ru.lifegame.backend.application.port.in.EndDayUseCase;
 import ru.lifegame.backend.application.port.out.EventPublisher;
 import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.view.GameStateView;
+import ru.lifegame.backend.domain.event.domain.DomainEvent;
 import ru.lifegame.backend.domain.event.domain.NarrativeEventTriggeredEvent;
 import ru.lifegame.backend.domain.event.domain.QuestActivatedEvent;
 import ru.lifegame.backend.domain.event.game.GameEvent;
@@ -15,6 +16,7 @@ import ru.lifegame.backend.domain.narrative.EventSpecMapper;
 import ru.lifegame.backend.domain.narrative.NarrativeEventEngine;
 import ru.lifegame.backend.domain.narrative.NarrativeQuestEngine;
 import ru.lifegame.backend.domain.narrative.spec.EventSpec;
+import ru.lifegame.backend.domain.npc.runtime.NpcLifecycleEngine;
 import ru.lifegame.backend.infrastructure.web.mapper.GameStateViewMapper;
 
 import java.util.LinkedHashMap;
@@ -30,6 +32,7 @@ public class EndDayService implements EndDayUseCase {
     private final NarrativeQuestEngine narrativeQuestEngine;
     private final DayEndProcessor dayEndProcessor;
     private final GameContentService gameContentService;
+    private final NpcLifecycleEngine npcLifecycleEngine;
 
     public EndDayService(SessionRepository sessionRepository,
                          EventPublisher eventPublisher,
@@ -37,7 +40,8 @@ public class EndDayService implements EndDayUseCase {
                          NarrativeEventEngine narrativeEventEngine,
                          NarrativeQuestEngine narrativeQuestEngine,
                          DayEndProcessor dayEndProcessor,
-                         GameContentService gameContentService) {
+                         GameContentService gameContentService,
+                         NpcLifecycleEngine npcLifecycleEngine) {
         this.sessionRepository = sessionRepository;
         this.eventPublisher = eventPublisher;
         this.mapper = mapper;
@@ -45,6 +49,7 @@ public class EndDayService implements EndDayUseCase {
         this.narrativeQuestEngine = narrativeQuestEngine;
         this.dayEndProcessor = dayEndProcessor;
         this.gameContentService = gameContentService;
+        this.npcLifecycleEngine = npcLifecycleEngine;
     }
 
     @Override
@@ -71,17 +76,15 @@ public class EndDayService implements EndDayUseCase {
                     });
         }
 
-        // ── Narrative events at end of day ────────────────────────────────
+        // ── Narrative events at end of day ───────────────────────────────
         if (narrativeEventEngine != null) {
             Map<String, String> ctx = buildEndDayContext(session);
             List<EventSpec> firedSpecs = narrativeEventEngine.evaluate(
                     gameContentService.getAllEvents(), ctx, currentDay);
             for (EventSpec spec : firedSpecs) {
-                // 1. Convert spec -> GameEvent and register in session
                 GameEvent gameEvent = EventSpecMapper.toGameEvent(spec, currentDay);
                 session.triggerEvent(gameEvent);
 
-                // 2. Notify frontend via SSE
                 List<NarrativeEventTriggeredEvent.NarrativeOption> optionViews = spec.options().stream()
                         .map(o -> new NarrativeEventTriggeredEvent.NarrativeOption(o.id(), o.labelRu()))
                         .toList();
@@ -93,6 +96,16 @@ public class EndDayService implements EndDayUseCase {
                         optionViews
                 ));
             }
+        }
+
+        // ── NPC daily tick: mood decay, modifier expiry, schedule override reset ──
+        if (npcLifecycleEngine != null) {
+            Map<String, Object> npcCtx = Map.of(
+                    "day",  session.time().day(),
+                    "hour", session.time().hour());
+            List<DomainEvent> npcDailyEvents =
+                    npcLifecycleEngine.dailyTick(session.sessionId(), npcCtx);
+            npcDailyEvents.forEach(session::publishDomainEvent);
         }
 
         session.drainDomainEvents().forEach(eventPublisher::publish);

@@ -77,10 +77,12 @@ public class ApplicationConfig {
             NarrativeEventEngine narrativeEventEngine,
             NarrativeQuestEngine narrativeQuestEngine,
             DayEndProcessor dayEndProcessor,
-            GameContentService gameContentService) {
+            GameContentService gameContentService,
+            NpcLifecycleEngine npcLifecycleEngine) {
         return new EndDayService(
                 sessionRepository, publisher, mapper,
                 narrativeEventEngine, narrativeQuestEngine,
-                dayEndProcessor, gameContentService);
+                dayEndProcessor, gameContentService,
+                npcLifecycleEngine);
     }
 }
