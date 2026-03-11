@@ -38,7 +38,11 @@ public class NpcLifecycleEngine {
             Optional<NpcUtilityBrain.ScoredCandidate> best = brain.evaluate(npc, context);
             best.ifPresent(candidate -> {
                 if (candidate.score() > 0.5) {
-                    npc.setCurrentActivity(candidate.actionId(), candidate.actionId(), "default");
+                    npc.setCurrentActivity(
+                            candidate.actionId(),
+                            candidate.animationKey(),
+                            candidate.locationId()
+                    );
                 }
             });
 

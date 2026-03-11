@@ -14,8 +14,10 @@ public class NpcUtilityBrain {
 
     /**
      * ScoredCandidate used by NpcLifecycleEngine for hourly tick evaluation.
+     * Carries animationKey and locationId resolved from ActionSpec so that
+     * NpcLifecycleEngine does not need to re-look up the spec.
      */
-    public record ScoredCandidate(String actionId, double score) {}
+    public record ScoredCandidate(String actionId, String animationKey, String locationId, double score) {}
 
     public Optional<ScoredResult> evaluate(NpcInstance npc, int currentHour, int currentDay) {
         return npc.spec().actions().stream()
@@ -26,9 +28,19 @@ public class NpcUtilityBrain {
 
     public Optional<ScoredCandidate> evaluate(NpcInstance npc, Map<String, Object> context) {
         int currentHour = context.containsKey("hour") ? (int) context.get("hour") : 12;
-        int currentDay = context.containsKey("day") ? (int) context.get("day") : 1;
+        int currentDay  = context.containsKey("day")  ? (int) context.get("day")  : 1;
         return evaluate(npc, currentHour, currentDay)
-            .map(sr -> new ScoredCandidate(sr.action().actionId(), sr.score()));
+            .map(sr -> {
+                NpcSpec.ActionSpec action = sr.action();
+                // Fall back to safe defaults if XML parser did not populate these fields
+                String animKey  = (action.animationKey() != null && !action.animationKey().isBlank())
+                        ? action.animationKey()
+                        : action.actionId() + "_anim";
+                String locId    = (action.locationId() != null && !action.locationId().isBlank())
+                        ? action.locationId()
+                        : "default";
+                return new ScoredCandidate(action.actionId(), animKey, locId, sr.score());
+            });
     }
 
     private double calculateScore(NpcSpec.ActionSpec action, NpcInstance npc, int currentHour, int currentDay) {
@@ -46,24 +58,24 @@ public class NpcUtilityBrain {
 
     private boolean evaluateCondition(NpcSpec.ConditionSpec cond, NpcInstance npc, int currentHour, int currentDay) {
         return switch (cond.type()) {
-            case "mood" -> evaluateMoodCondition(cond, npc.mood());
+            case "mood"     -> evaluateMoodCondition(cond, npc.mood());
             case "schedule" -> "available".equals(cond.value()) || isInSchedule(npc, currentHour);
-            case "memory" -> evaluateMemoryCondition(cond, npc);
-            case "day" -> evaluateDayCondition(cond, currentDay);
-            default -> true;
+            case "memory"   -> evaluateMemoryCondition(cond, npc);
+            case "day"      -> evaluateDayCondition(cond, currentDay);
+            default         -> true;
         };
     }
 
     private boolean evaluateMoodCondition(NpcSpec.ConditionSpec cond, NpcMood mood) {
-        int val = mood.getAxis(cond.target());
+        int val       = mood.getAxis(cond.target());
         int threshold = Integer.parseInt(cond.value());
         return switch (cond.operator()) {
             case "gte" -> val >= threshold;
             case "lte" -> val <= threshold;
-            case "gt" -> val > threshold;
-            case "lt" -> val < threshold;
-            case "eq" -> val == threshold;
-            default -> true;
+            case "gt"  -> val >  threshold;
+            case "lt"  -> val <  threshold;
+            case "eq"  -> val == threshold;
+            default    -> true;
         };
     }
 
@@ -76,8 +88,8 @@ public class NpcUtilityBrain {
         if (!npc.spec().memoryEnabled()) return false;
         return switch (cond.target()) {
             case "work_obsession" -> npc.memory().detectPattern("GO_TO_WORK", 3);
-            case "being_ignored" -> npc.memory().isBeingIgnored( "DATE_WITH_HUSBAND",3);
-            default -> false;
+            case "being_ignored"  -> npc.memory().isBeingIgnored("DATE_WITH_HUSBAND", 3);
+            default               -> false;
         };
     }
 
@@ -86,7 +98,7 @@ public class NpcUtilityBrain {
         return switch (cond.operator()) {
             case "gte" -> currentDay >= threshold;
             case "lte" -> currentDay <= threshold;
-            default -> true;
+            default    -> true;
         };
     }
 
