@@ -15,16 +15,16 @@ import java.util.Map;
  * Content is static/cacheable — no session ID needed.
  *
  * Endpoints:
- *   GET /api/content/actions         — all player actions
- *   GET /api/content/npcs            — all NPC definitions
- *   GET /api/content/locations        — all location configs
- *   GET /api/content/conflicts        — all conflict types
- *   GET /api/content/narrative/quests — all quest definitions
- *   GET /api/content/animations       — all character animations (from sprite-atlas.json)
- *   GET /api/content/all              — everything in one call
+ *   GET /api/v1/content/actions         — all player actions
+ *   GET /api/v1/content/npcs            — all NPC definitions
+ *   GET /api/v1/content/locations        — all location configs
+ *   GET /api/v1/content/conflicts        — all conflict types
+ *   GET /api/v1/content/narrative/quests — all quest definitions
+ *   GET /api/v1/content/animations       — all character animations (from sprite-atlas.json)
+ *   GET /api/v1/content/all              — everything in one call
  */
 @RestController
-@RequestMapping("/api/content")
+@RequestMapping("/api/v1/content")
 public class ContentController {
     private static final Logger log = LoggerFactory.getLogger(ContentController.class);
 
