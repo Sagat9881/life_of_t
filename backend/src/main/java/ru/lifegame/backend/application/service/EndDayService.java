@@ -4,7 +4,6 @@ import ru.lifegame.backend.application.command.EndDayCommand;
 import ru.lifegame.backend.application.port.in.EndDayUseCase;
 import ru.lifegame.backend.application.port.out.EventPublisher;
 import ru.lifegame.backend.application.port.out.SessionRepository;
-import ru.lifegame.backend.application.view.EventOptionView;
 import ru.lifegame.backend.application.view.GameStateView;
 import ru.lifegame.backend.domain.event.domain.NarrativeEventTriggeredEvent;
 import ru.lifegame.backend.domain.event.domain.QuestActivatedEvent;
@@ -79,8 +78,8 @@ public class EndDayService implements EndDayUseCase {
                 session.triggerEvent(gameEvent);
 
                 // 2. Notify frontend via SSE
-                List<EventOptionView> optionViews = spec.options().stream()
-                        .map(o -> new EventOptionView(o.id(), o.labelRu()))
+                List<NarrativeEventTriggeredEvent.NarrativeOption> optionViews = spec.options().stream()
+                        .map(o -> new NarrativeEventTriggeredEvent.NarrativeOption(o.id(), o.labelRu()))
                         .toList();
                 session.publishDomainEvent(new NarrativeEventTriggeredEvent(
                         session.sessionId(),

@@ -6,7 +6,6 @@ import ru.lifegame.backend.application.command.ExecuteActionCommand;
 import ru.lifegame.backend.application.port.in.ExecutePlayerActionUseCase;
 import ru.lifegame.backend.application.port.out.EventPublisher;
 import ru.lifegame.backend.application.port.out.SessionRepository;
-import ru.lifegame.backend.application.view.EventOptionView;
 import ru.lifegame.backend.application.view.GameStateView;
 import ru.lifegame.backend.domain.action.ActionResult;
 import ru.lifegame.backend.domain.action.GameAction;
@@ -78,8 +77,8 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
             for (EventSpec spec : firedSpecs) {
                 GameEvent gameEvent = EventSpecMapper.toGameEvent(spec, session.time().day());
                 session.triggerEvent(gameEvent);
-                List<EventOptionView> optionViews = spec.options().stream()
-                        .map(o -> new EventOptionView(o.id(), o.labelRu()))
+                List<NarrativeEventTriggeredEvent.NarrativeOption> optionViews = spec.options().stream()
+                        .map(o -> new NarrativeEventTriggeredEvent.NarrativeOption(o.id(), o.labelRu()))
                         .toList();
                 session.publishDomainEvent(new NarrativeEventTriggeredEvent(
                         session.sessionId(), spec.id(),
@@ -99,7 +98,11 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
                                     stepResult.questId(),
                                     stepResult.stepId(),
                                     stepResult.questCompleted(),
-                                    stepResult.rewards()));
+                                    stepResult.rewards() == null ? List.of() :
+                                        stepResult.rewards().stream()
+                                            .map(r -> new QuestStepCompletedEvent.QuestReward(
+                                                    r.type(), r.target(), r.amount()))
+                                            .toList()));
                         });
             }
         }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import ru.lifegame.backend.domain.event.domain.DomainEvent;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.RecordComponent;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,41 +59,36 @@ public class DomainEventListener {
     }
 
     /**
-     * Serialize a DomainEvent record to Map using reflection.
+     * Serialize a DomainEvent record to Map using record components.
      * Works for any record implementing DomainEvent - no manual mapping needed.
      */
     private Map<String, Object> serializeEventToMap(DomainEvent event) {
         Map<String, Object> map = new HashMap<>();
         
         try {
-            // Get all record components (fields)
             Class<?> clazz = event.getClass();
-            
-            // For Java records, all fields have corresponding accessor methods
-            for (Method method : clazz.getMethods()) {
-                // Skip methods from Object, DomainEvent interface, etc.
-                if (method.getDeclaringClass() == Object.class) continue;
-                if (method.getName().equals("eventType") || 
-                    method.getName().equals("timestamp") || 
-                    method.getName().equals("sessionId")) continue;
-                
-                // Record accessors have no parameters
-                if (method.getParameterCount() == 0 && 
-                    !method.getReturnType().equals(Void.TYPE)) {
-                    
-                    String fieldName = method.getName();
-                    Object value = method.invoke(event);
-                    
-                    // Convert complex objects to JSON-serializable format
-                    if (value != null && !isPrimitive(value)) {
-                        value = objectMapper.convertValue(value, Object.class);
-                    }
-                    
-                    map.put(fieldName, value);
+            RecordComponent[] components = clazz.getRecordComponents();
+            if (components == null) return map;
+
+            for (RecordComponent rc : components) {
+                String fieldName = rc.getName();
+                // Standard fields are added separately in onDomainEvent
+                if (fieldName.equals("eventType") ||
+                    fieldName.equals("timestamp") ||
+                    fieldName.equals("sessionId")) continue;
+
+                Method accessor = rc.getAccessor();
+                Object value = accessor.invoke(event);
+
+                // Convert complex objects to JSON-serializable format
+                if (value != null && !isPrimitive(value)) {
+                    value = objectMapper.convertValue(value, Object.class);
                 }
+
+                map.put(fieldName, value);
             }
         } catch (Exception e) {
-            log.warn("Failed to serialize event using reflection, falling back to toString: {}", 
+            log.warn("Failed to serialize event using reflection, falling back to toString: {}",
                      event.getClass().getSimpleName(), e);
             map.put("_rawData", event.toString());
         }
