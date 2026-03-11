@@ -56,7 +56,7 @@ public class NpcLifecycleEngine {
                 String dominant = npc.mood().dominantAxis();
                 events.add(new NpcMoodExtremeEvent(
                         sessionId, npc.id(), dominant,
-                        npc.mood().getAxis(dominant), dominant
+                        npc.mood().getAxis(dominant)
                 ));
             }
         }
@@ -78,7 +78,7 @@ public class NpcLifecycleEngine {
                 String dominant = npc.mood().dominantAxis();
                 events.add(new NpcMoodExtremeEvent(
                         sessionId, npc.id(), dominant,
-                        npc.mood().getAxis(dominant), dominant
+                        npc.mood().getAxis(dominant)
                 ));
             }
         }

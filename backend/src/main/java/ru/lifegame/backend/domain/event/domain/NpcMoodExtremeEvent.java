@@ -7,13 +7,11 @@ public record NpcMoodExtremeEvent(
         String npcId,
         String axis,
         int value,
-        String dominantMood,
         Instant timestamp
 ) implements DomainEvent {
 
-    public NpcMoodExtremeEvent(String sessionId, String npcId,
-                               String axis, int value, String dominantMood) {
-        this(sessionId, npcId, axis, value, dominantMood, Instant.now());
+    public NpcMoodExtremeEvent(String sessionId, String npcId, String axis, int value) {
+        this(sessionId, npcId, axis, value, Instant.now());
     }
 
     @Override public String eventType() { return "NPC_MOOD_EXTREME"; }
