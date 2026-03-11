@@ -27,9 +27,8 @@ import java.util.List;
 /**
  * Spring bean declarations for core domain services.
  *
- * NarrativeEventEngine and NarrativeQuestEngine are constructed empty here.
- * NarrativeBootstrap feeds them real specs from GameContentService on
- * ApplicationReadyEvent (after @PostConstruct on GameContentService completes).
+ * NarrativeEventEngine holds only cooldown state (no spec copies).
+ * GameContentService is the single source of truth for EventSpec/QuestSpec data.
  */
 @Configuration
 public class DomainConfig {
@@ -113,12 +112,12 @@ public class DomainConfig {
     }
 
     /**
-     * Constructed empty — populated by NarrativeBootstrap on ApplicationReadyEvent.
-     * Do NOT inject specs here: NarrativeBootstrap handles lifecycle.
+     * Holds only cooldown state (Map<eventId, lastFiredGameDay>).
+     * Specs are fetched from GameContentService on each evaluate() call.
      */
     @Bean
     public NarrativeEventEngine narrativeEventEngine() {
-        return new NarrativeEventEngine(List.of());
+        return new NarrativeEventEngine();
     }
 
     /**

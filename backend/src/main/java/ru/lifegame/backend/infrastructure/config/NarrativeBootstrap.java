@@ -6,7 +6,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import ru.lifegame.backend.application.service.GameContentService;
-import ru.lifegame.backend.domain.narrative.NarrativeEventEngine;
 import ru.lifegame.backend.domain.narrative.NarrativeQuestEngine;
 import ru.lifegame.backend.domain.npc.NpcSpecLoader;
 import ru.lifegame.backend.domain.npc.runtime.NpcRegistry;
@@ -19,9 +18,11 @@ import java.util.List;
  *
  * Boot sequence:
  *   1. Load NPC specs from XML → register into NpcRegistry
- *   2. Feed already-parsed EventSpecs and QuestSpecs from GameContentService
- *      into NarrativeEventEngine / NarrativeQuestEngine
+ *   2. Feed already-parsed QuestSpecs from GameContentService into NarrativeQuestEngine
  *      (GameContentService parses XMLs once via @PostConstruct — no second scan)
+ *
+ * NarrativeEventEngine no longer needs bootstrapping — specs are passed
+ * per-call from GameContentService, keeping a single source of truth.
  */
 @Component
 public class NarrativeBootstrap {
@@ -31,18 +32,15 @@ public class NarrativeBootstrap {
     private final NpcSpecLoader npcSpecLoader;
     private final NpcRegistry npcRegistry;
     private final GameContentService gameContentService;
-    private final NarrativeEventEngine narrativeEventEngine;
     private final NarrativeQuestEngine narrativeQuestEngine;
 
     public NarrativeBootstrap(NpcSpecLoader npcSpecLoader,
                               NpcRegistry npcRegistry,
                               GameContentService gameContentService,
-                              NarrativeEventEngine narrativeEventEngine,
                               NarrativeQuestEngine narrativeQuestEngine) {
         this.npcSpecLoader = npcSpecLoader;
         this.npcRegistry = npcRegistry;
         this.gameContentService = gameContentService;
-        this.narrativeEventEngine = narrativeEventEngine;
         this.narrativeQuestEngine = narrativeQuestEngine;
     }
 
@@ -66,16 +64,13 @@ public class NarrativeBootstrap {
             log.error("❌ Failed to load NPC specs: {}", e.getMessage(), e);
         }
 
-        // 2. Feed engines from GameContentService (already parsed at @PostConstruct)
+        // 2. Feed quest engine from GameContentService (already parsed at @PostConstruct)
         try {
-            var events = gameContentService.getAllEvents();
             var quests = gameContentService.getAllQuests();
-            narrativeEventEngine.reloadSpecs(events);
             narrativeQuestEngine.reloadSpecs(quests);
-            log.info("✅ Engines populated: {} event specs, {} quest specs",
-                    events.size(), quests.size());
+            log.info("✅ Quest engine populated: {} quest specs", quests.size());
         } catch (Exception e) {
-            log.error("❌ Failed to populate narrative engines: {}", e.getMessage(), e);
+            log.error("❌ Failed to populate quest engine: {}", e.getMessage(), e);
         }
 
         log.info("─── Narrative Bootstrap: complete ───");

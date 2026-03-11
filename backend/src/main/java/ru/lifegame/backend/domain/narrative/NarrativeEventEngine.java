@@ -8,8 +8,11 @@ import ru.lifegame.backend.domain.narrative.spec.EventSpec.ConditionSpec;
 import java.util.*;
 
 /**
- * Evaluates loaded {@link EventSpec} instances against the current game context
+ * Evaluates {@link EventSpec} instances against the current game context
  * and determines which events fire on a given tick.
+ *
+ * Specs are NOT stored here — callers pass them on each {@link #evaluate} call.
+ * This keeps GameContentService as the single source of truth for event data.
  *
  * Evaluation pipeline for each spec:
  *   1. Check all conditions against context (all must pass — AND logic)
@@ -35,32 +38,22 @@ public class NarrativeEventEngine {
 
     private static final Logger log = LoggerFactory.getLogger(NarrativeEventEngine.class);
 
-    private List<EventSpec> specs;
     private final Map<String, Integer> lastFired = new HashMap<>();
     private final Random random = new Random();
 
-    public NarrativeEventEngine(List<EventSpec> specs) {
-        this.specs = specs != null ? new ArrayList<>(specs) : new ArrayList<>();
-    }
+    public NarrativeEventEngine() {}
 
     /**
-     * Replaces the current spec list with a new set.
-     * Called by NarrativeBootstrap after XML loading completes.
-     */
-    public void reloadSpecs(List<EventSpec> newSpecs) {
-        this.specs = newSpecs != null ? Collections.unmodifiableList(new ArrayList<>(newSpecs)) : List.of();
-    }
-
-    /**
-     * Evaluates all loaded specs against the given context.
+     * Evaluates all provided specs against the given context.
      *
+     * @param specs          list of event specs to evaluate (from GameContentService)
      * @param context        map of game-state keys to String values.
      *                       Numeric stats must be pre-converted: String.valueOf(energy).
      *                       e.g. {"timeSlot": "night", "anxiety": "70", "location": "home_room"}
      * @param currentGameDay current in-game day number, used for cooldown tracking
      * @return list of EventSpec instances that fire on this tick (may be empty)
      */
-    public List<EventSpec> evaluate(Map<String, String> context, int currentGameDay) {
+    public List<EventSpec> evaluate(List<EventSpec> specs, Map<String, String> context, int currentGameDay) {
         List<EventSpec> fired = new ArrayList<>();
 
         for (EventSpec spec : specs) {

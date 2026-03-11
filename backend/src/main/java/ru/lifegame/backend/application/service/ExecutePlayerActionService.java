@@ -39,6 +39,7 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
     private final NarrativeEventEngine narrativeEventEngine;
     private final NarrativeQuestEngine narrativeQuestEngine;
     private final NpcLifecycleEngine npcLifecycleEngine;
+    private final GameContentService gameContentService;
 
     public ExecutePlayerActionService(SessionRepository sessionRepository,
                                       EventPublisher eventPublisher,
@@ -46,7 +47,8 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
                                       GameStateViewMapper mapper,
                                       NarrativeEventEngine narrativeEventEngine,
                                       NarrativeQuestEngine narrativeQuestEngine,
-                                      NpcLifecycleEngine npcLifecycleEngine) {
+                                      NpcLifecycleEngine npcLifecycleEngine,
+                                      GameContentService gameContentService) {
         this.sessionRepository = sessionRepository;
         this.eventPublisher = eventPublisher;
         this.allActions = allActions;
@@ -54,6 +56,7 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
         this.narrativeEventEngine = narrativeEventEngine;
         this.narrativeQuestEngine = narrativeQuestEngine;
         this.npcLifecycleEngine = npcLifecycleEngine;
+        this.gameContentService = gameContentService;
     }
 
     @Override
@@ -73,7 +76,8 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
 
         // ── Narrative events ────────────────────────────────────────────────────────────
         if (narrativeEventEngine != null) {
-            List<EventSpec> firedSpecs = narrativeEventEngine.evaluate(narrativeCtx, session.time().day());
+            List<EventSpec> firedSpecs = narrativeEventEngine.evaluate(
+                    gameContentService.getAllEvents(), narrativeCtx, session.time().day());
             for (EventSpec spec : firedSpecs) {
                 GameEvent gameEvent = EventSpecMapper.toGameEvent(spec, session.time().day());
                 session.triggerEvent(gameEvent);

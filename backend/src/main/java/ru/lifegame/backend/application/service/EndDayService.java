@@ -29,19 +29,22 @@ public class EndDayService implements EndDayUseCase {
     private final NarrativeEventEngine narrativeEventEngine;
     private final NarrativeQuestEngine narrativeQuestEngine;
     private final DayEndProcessor dayEndProcessor;
+    private final GameContentService gameContentService;
 
     public EndDayService(SessionRepository sessionRepository,
                          EventPublisher eventPublisher,
                          GameStateViewMapper mapper,
                          NarrativeEventEngine narrativeEventEngine,
                          NarrativeQuestEngine narrativeQuestEngine,
-                         DayEndProcessor dayEndProcessor) {
+                         DayEndProcessor dayEndProcessor,
+                         GameContentService gameContentService) {
         this.sessionRepository = sessionRepository;
         this.eventPublisher = eventPublisher;
         this.mapper = mapper;
         this.narrativeEventEngine = narrativeEventEngine;
         this.narrativeQuestEngine = narrativeQuestEngine;
         this.dayEndProcessor = dayEndProcessor;
+        this.gameContentService = gameContentService;
     }
 
     @Override
@@ -71,7 +74,8 @@ public class EndDayService implements EndDayUseCase {
         // ── Narrative events at end of day ────────────────────────────────
         if (narrativeEventEngine != null) {
             Map<String, String> ctx = buildEndDayContext(session);
-            List<EventSpec> firedSpecs = narrativeEventEngine.evaluate(ctx, currentDay);
+            List<EventSpec> firedSpecs = narrativeEventEngine.evaluate(
+                    gameContentService.getAllEvents(), ctx, currentDay);
             for (EventSpec spec : firedSpecs) {
                 // 1. Convert spec -> GameEvent and register in session
                 GameEvent gameEvent = EventSpecMapper.toGameEvent(spec, currentDay);

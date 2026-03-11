@@ -40,10 +40,12 @@ public class ApplicationConfig {
             GameStateViewMapper mapper,
             NarrativeEventEngine narrativeEventEngine,
             NarrativeQuestEngine narrativeQuestEngine,
-            NpcLifecycleEngine npcLifecycleEngine) {
+            NpcLifecycleEngine npcLifecycleEngine,
+            GameContentService gameContentService) {
         return new ExecutePlayerActionService(
                 repo, publisher, actionProvider.allActions(), mapper,
-                narrativeEventEngine, narrativeQuestEngine, npcLifecycleEngine);
+                narrativeEventEngine, narrativeQuestEngine, npcLifecycleEngine,
+                gameContentService);
     }
 
     @Bean
@@ -73,10 +75,11 @@ public class ApplicationConfig {
             GameStateViewMapper mapper,
             NarrativeEventEngine narrativeEventEngine,
             NarrativeQuestEngine narrativeQuestEngine,
-            DayEndProcessor dayEndProcessor) {
+            DayEndProcessor dayEndProcessor,
+            GameContentService gameContentService) {
         return new EndDayService(
                 sessionRepository, publisher, mapper,
                 narrativeEventEngine, narrativeQuestEngine,
-                dayEndProcessor);
+                dayEndProcessor, gameContentService);
     }
 }
