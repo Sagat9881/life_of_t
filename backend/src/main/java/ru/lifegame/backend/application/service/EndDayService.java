@@ -2,6 +2,7 @@ package ru.lifegame.backend.application.service;
 
 import ru.lifegame.backend.application.command.EndDayCommand;
 import ru.lifegame.backend.application.port.in.EndDayUseCase;
+import ru.lifegame.backend.application.port.out.EventPublisher;
 import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.view.EventOptionView;
 import ru.lifegame.backend.application.view.GameStateView;
@@ -24,17 +25,20 @@ import java.util.Map;
 public class EndDayService implements EndDayUseCase {
 
     private final SessionRepository sessionRepository;
+    private final EventPublisher eventPublisher;
     private final GameStateViewMapper mapper;
     private final NarrativeEventEngine narrativeEventEngine;
     private final NarrativeQuestEngine narrativeQuestEngine;
     private final DayEndProcessor dayEndProcessor;
 
     public EndDayService(SessionRepository sessionRepository,
+                         EventPublisher eventPublisher,
                          GameStateViewMapper mapper,
                          NarrativeEventEngine narrativeEventEngine,
                          NarrativeQuestEngine narrativeQuestEngine,
                          DayEndProcessor dayEndProcessor) {
         this.sessionRepository = sessionRepository;
+        this.eventPublisher = eventPublisher;
         this.mapper = mapper;
         this.narrativeEventEngine = narrativeEventEngine;
         this.narrativeQuestEngine = narrativeQuestEngine;
@@ -88,6 +92,7 @@ public class EndDayService implements EndDayUseCase {
             }
         }
 
+        session.drainDomainEvents().forEach(eventPublisher::publish);
         sessionRepository.save(session);
         return mapper.toView(session);
     }

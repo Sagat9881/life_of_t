@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.lifegame.backend.application.command.ExecuteActionCommand;
 import ru.lifegame.backend.application.port.in.ExecutePlayerActionUseCase;
+import ru.lifegame.backend.application.port.out.EventPublisher;
 import ru.lifegame.backend.application.port.out.SessionRepository;
 import ru.lifegame.backend.application.view.EventOptionView;
 import ru.lifegame.backend.application.view.GameStateView;
@@ -33,6 +34,7 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
     private static final Logger log = LoggerFactory.getLogger(ExecutePlayerActionService.class);
 
     private final SessionRepository sessionRepository;
+    private final EventPublisher eventPublisher;
     private final Collection<GameAction> allActions;
     private final GameStateViewMapper mapper;
     private final NarrativeEventEngine narrativeEventEngine;
@@ -40,12 +42,14 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
     private final NpcLifecycleEngine npcLifecycleEngine;
 
     public ExecutePlayerActionService(SessionRepository sessionRepository,
+                                      EventPublisher eventPublisher,
                                       Collection<GameAction> allActions,
                                       GameStateViewMapper mapper,
                                       NarrativeEventEngine narrativeEventEngine,
                                       NarrativeQuestEngine narrativeQuestEngine,
                                       NpcLifecycleEngine npcLifecycleEngine) {
         this.sessionRepository = sessionRepository;
+        this.eventPublisher = eventPublisher;
         this.allActions = allActions;
         this.mapper = mapper;
         this.narrativeEventEngine = narrativeEventEngine;
@@ -110,6 +114,7 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
             npcEvents.forEach(session::publishDomainEvent);
         }
 
+        session.drainDomainEvents().forEach(eventPublisher::publish);
         sessionRepository.save(session);
         return mapper.toView(session, result);
     }

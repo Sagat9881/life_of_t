@@ -35,13 +35,14 @@ public class ApplicationConfig {
     @Bean
     public ExecutePlayerActionUseCase executePlayerActionUseCase(
             SessionRepository repo,
+            EventPublisher publisher,
             ActionProvider actionProvider,
             GameStateViewMapper mapper,
             NarrativeEventEngine narrativeEventEngine,
             NarrativeQuestEngine narrativeQuestEngine,
             NpcLifecycleEngine npcLifecycleEngine) {
         return new ExecutePlayerActionService(
-                repo, actionProvider.allActions(), mapper,
+                repo, publisher, actionProvider.allActions(), mapper,
                 narrativeEventEngine, narrativeQuestEngine, npcLifecycleEngine);
     }
 
@@ -60,19 +61,21 @@ public class ApplicationConfig {
 
     @Bean
     public ChooseEventOptionUseCase chooseEventOptionUseCase(SessionRepository repo,
+                                                             EventPublisher publisher,
                                                              GameStateViewMapper mapper) {
-        return new ChooseEventOptionService(repo, mapper);
+        return new ChooseEventOptionService(repo, publisher, mapper);
     }
 
     @Bean
     public EndDayUseCase endDayUseCase(
             SessionRepository sessionRepository,
+            EventPublisher publisher,
             GameStateViewMapper mapper,
             NarrativeEventEngine narrativeEventEngine,
             NarrativeQuestEngine narrativeQuestEngine,
             DayEndProcessor dayEndProcessor) {
         return new EndDayService(
-                sessionRepository, mapper,
+                sessionRepository, publisher, mapper,
                 narrativeEventEngine, narrativeQuestEngine,
                 dayEndProcessor);
     }
