@@ -8,8 +8,10 @@ public record JobInfo(
         int burnoutRisk
 ) {
     public JobInfo {
-        satisfaction = clamp(satisfaction);
-        burnoutRisk = Math.max(0, Math.min(burnoutRisk, GameBalance.BURNOUT_THRESHOLD));
+        // satisfaction is bounded [STAT_MIN, STAT_MAX] — same 0..100 scale as player stats
+        satisfaction = clampSatisfaction(satisfaction);
+        // burnoutRisk is bounded [0, BURNOUT_THRESHOLD] per game-balance.yml decay.burnout.threshold
+        burnoutRisk  = Math.max(0, Math.min(GameBalance.BURNOUT_THRESHOLD, burnoutRisk));
     }
 
     public JobInfo changeSatisfaction(int delta) {
@@ -22,13 +24,13 @@ public record JobInfo(
 
     public static JobInfo initial() {
         return new JobInfo(
-                "Web-дизайнер (Tilda)",
+                "Web-\u0434\u0438\u0437\u0430\u0439\u043d\u0435\u0440 (Tilda)",
                 GameBalance.INITIAL_JOB_SATISFACTION,
                 GameBalance.INITIAL_BURNOUT_RISK
         );
     }
 
-    private static int clamp(int value) {
+    private static int clampSatisfaction(int value) {
         return Math.max(GameBalance.STAT_MIN, Math.min(GameBalance.STAT_MAX, value));
     }
 }
