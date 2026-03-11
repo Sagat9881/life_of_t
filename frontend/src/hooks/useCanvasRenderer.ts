@@ -16,8 +16,8 @@
  *   /assets/{type}/{name}/sprite-atlas.json
  *
  * Rendering layers (bottom → top):
- *   1. Background  (animated strip, stretched to canvas)
- *   2. Furniture   (static single frame, z-sorted)
+ *   1. Background  (animated strip, stretched to viewport)
+ *   2. Furniture   (z-sorted)
  *   3. Characters  (animated strip, z-sorted)
  *
  * Effect structure (3 effects, no restarts):
@@ -65,6 +65,7 @@ interface SlotState {
 export interface UseCanvasRendererOptions {
   config: LocationConfig;
   canvasRef: React.RefObject<HTMLCanvasElement>;
+  viewportRef: React.RefObject<{ vpX: number; vpY: number; vpW: number; vpH: number }>;
   timeOfDay?: string; // kept in interface for callers, not used internally
   selectedObjectId: string | null;
   hoveredObjectId: string | null;
@@ -115,6 +116,7 @@ function frameH(img: HTMLImageElement, cfg: AnimationConfig): number {
 export function useCanvasRenderer({
   config,
   canvasRef,
+  viewportRef,
   selectedObjectId,
   hoveredObjectId,
   characterAnimations,
@@ -221,9 +223,6 @@ export function useCanvasRenderer({
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    const W = canvas.width;   // 640
-    const H = canvas.height;  // 480
 
     const drawSprite = (
       img: HTMLImageElement,
@@ -340,12 +339,27 @@ export function useCanvasRenderer({
     };
 
     const render = (now: number): void => {
-      ctx.clearRect(0, 0, W, H);
+      const bufW = canvas.width;
+      const bufH = canvas.height;
+      ctx.clearRect(0, 0, bufW, bufH);
       ctx.imageSmoothingEnabled = false;
+
+      // Letterbox/pillarbox фон
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillRect(0, 0, bufW, bufH);
+
+      const { vpX, vpY, vpW, vpH } = viewportRef.current ??
+        { vpX: 0, vpY: 0, vpW: bufW, vpH: bufH };
 
       const cfg      = configRef.current;
       const selected = selectedRef.current;
       const hovered  = hoveredRef.current;
+
+      // Clip к viewport чтобы сцена не вылезала за letterbox
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(vpX, vpY, vpW, vpH);
+      ctx.clip();
 
       // 1. Background — animated strip
       const bgUrl = atlasUrl('locations', cfg.locationAsset, cfg.backgroundAnimation);
@@ -371,11 +385,11 @@ export function useCanvasRenderer({
         }
 
         if (!animCfg || animCfg.columns <= 1) {
-          ctx.drawImage(img, 0, 0, W, H);
+          ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, vpX, vpY, vpW, vpH);
           return;
         }
 
-        ctx.drawImage(img, state.frameIndex * fw, 0, fw, fh, 0, 0, W, H);
+        ctx.drawImage(img, state.frameIndex * fw, 0, fw, fh, vpX, vpY, vpW, vpH);
       };
 
       if (bgImg) {
@@ -384,7 +398,7 @@ export function useCanvasRenderer({
         drawBackground(bgImg, bgAnimCfg, now);
       } else {
         ctx.fillStyle = '#1a1a2e';
-        ctx.fillRect(0, 0, W, H);
+        ctx.fillRect(vpX, vpY, vpW, vpH);
       }
 
       // 2. Furniture — static, z-sorted
@@ -402,8 +416,9 @@ export function useCanvasRenderer({
         else if (f.id === hovered)  { ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 6;  }
 
         drawSprite(img, animCfg, null,
-          (f.x / 100) * W, (f.y / 100) * H,
-          (f.sceneHeight / 100) * H * f.scale, now, f.flipX ?? false);
+          vpX + (f.x / 100) * vpW,
+          vpY + (f.y / 100) * vpH,
+          (f.sceneHeight / 100) * vpH * f.scale, now, f.flipX ?? false);
         ctx.restore();
       }
 
@@ -419,14 +434,16 @@ export function useCanvasRenderer({
         const animCfg  = atlasConfigsRef.current.get(atlasKey)?.animations[animName];
 
         drawSprite(img, animCfg, c.id,
-          (c.x / 100) * W, (c.y / 100) * H,
-          (c.sceneHeight / 100) * H * c.scale, now);
+          vpX + (c.x / 100) * vpW,
+          vpY + (c.y / 100) * vpH,
+          (c.sceneHeight / 100) * vpH * c.scale, now);
       }
 
+      ctx.restore();
       rafRef.current = requestAnimationFrame(render);
     };
 
     rafRef.current = requestAnimationFrame(render);
     return () => { if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current); };
-  }, [canvasRef]);
+  }, [canvasRef, viewportRef]);
 }
