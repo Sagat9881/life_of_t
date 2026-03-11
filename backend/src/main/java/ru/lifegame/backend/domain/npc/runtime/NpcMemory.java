@@ -53,6 +53,30 @@ public class NpcMemory {
         shortTerm.addLast(entry);
     }
 
+    /**
+     * Returns true if the given actionId appears at least {@code threshold} times
+     * across short-term and long-term memory combined.
+     * Used by NpcUtilityBrain to detect repetitive patterns (e.g. work obsession).
+     */
+    public boolean detectPattern(String actionId, int threshold) {
+        if (!enabled) return false;
+        long count = shortTerm.stream().filter(e -> actionId.equals(e.actionId())).count()
+                   + longTerm.stream().filter(e -> actionId.equals(e.actionId())).count();
+        return count >= threshold;
+    }
+
+    /**
+     * Returns true if {@code interactionActionId} has NOT appeared in memory
+     * at least {@code threshold} times — indicating the NPC is being ignored.
+     * Used by NpcUtilityBrain for "being_ignored" memory condition.
+     */
+    public boolean isBeingIgnored(String interactionActionId, int threshold) {
+        if (!enabled) return false;
+        long count = shortTerm.stream().filter(e -> interactionActionId.equals(e.actionId())).count()
+                   + longTerm.stream().filter(e -> interactionActionId.equals(e.actionId())).count();
+        return count < threshold;
+    }
+
     public List<MemoryEntry> shortTerm() { return List.copyOf(shortTerm); }
     public List<MemoryEntry> longTerm()  { return List.copyOf(longTerm); }
     public boolean isEnabled()           { return enabled; }

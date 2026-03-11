@@ -1,6 +1,5 @@
 package ru.lifegame.backend.domain.npc.runtime;
 
-import ru.lifegame.backend.domain.npc.graph.NpcRelationshipGraph;
 import ru.lifegame.backend.domain.npc.spec.NpcSpec;
 
 import java.util.*;
@@ -9,7 +8,6 @@ import java.util.stream.Collectors;
 public class NpcRegistry {
 
     private final Map<String, NpcInstance> instances = new LinkedHashMap<>();
-    private final NpcRelationshipGraph relationshipGraph = new NpcRelationshipGraph();
 
     public void registerFromSpecs(List<NpcSpec> specs) {
         for (NpcSpec spec : specs) {
@@ -53,10 +51,6 @@ public class NpcRegistry {
         return instances.values().stream()
                 .filter(i -> i.spec().category().equals(category))
                 .collect(Collectors.toList());
-    }
-
-    public NpcRelationshipGraph getRelationshipGraph() {
-        return relationshipGraph;
     }
 
     public int size() {
