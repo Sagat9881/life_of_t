@@ -40,6 +40,12 @@ decay:
   
   bankruptcy:
     threshold: -500
+  
+  # Ежедневные расходы на жизнь (аренда, еда, транспорт)
+  # Без работы деньги тают ~33 дня с нуля до банкротства
+  # При работе (money +40/день) чистый доход = +10/день
+  money:
+    dailyExpenses: 30
 
 # ═══════════════════════════════════════════════════════════════
 # RELATIONSHIPS
@@ -63,9 +69,11 @@ relationships:
     mild:
       closeness: 5
       trust: 3
+    # Усилен severe decay: игрок должен почувствовать последствия
+    # игнора мужа/отца за ~10-12 дней, а не за 17+
     severe:
-      closeness: 15
-      trust: 10
+      closeness: 20
+      trust: 15
   
   critical:
     isolationClosenessSum: 20
@@ -143,9 +151,11 @@ conflict:
         selfEsteemThreshold: 40
   
   tactics:
+    # surrender: сдаёшься — противник чуть успокаивается (-5 CSP),
+    # но ты теряешь самооценку. Не доминирующая стратегия.
     surrender:
       playerCsp: -20
-      opponentCsp: 10
+      opponentCsp: -5
       selfEsteem: -5
       closeness: 5
       trust: -5
@@ -161,14 +171,17 @@ conflict:
       playerCsp: -10
       opponentCsp: -10
     
+    # avoid: противник злится (+20 CSP) — намеренно плохая тактика,
+    # но дёшево по playerCsp. Высокий риск — оправдан.
     avoid:
       playerCsp: -5
       opponentCsp: 20
       closeness: -5
       trust: -10
     
+    # listen: поднят playerCsp cost — слушать тоже требует усилий
     listen:
-      playerCsp: -5
+      playerCsp: -10
       opponentCsp: -25
       closeness: 15
       trust: 10
@@ -183,8 +196,10 @@ conflict:
       opponentCsp: -20
       trust: 20
     
+    # emotional: была доминирующей (playerCsp -5, opponentCsp -30).
+    # Поднят playerCsp cost — эмоциональный разговор изматывает.
     emotional:
-      playerCsp: -5
+      playerCsp: -15
       opponentCsp: -30
       closeness: 20
       romance: 15
@@ -210,11 +225,14 @@ actions:
     household: 2
   
   effects:
+    # work: снижен доход 55→40 для создания реального money pressure.
+    # При dailyExpenses=30 чистый доход = +10/день.
+    # Без работы: -30/день → до bankruptcy за ~50 дней (не мгновенно, но ощутимо).
     work:
       energy: -30
       stress: 20
       mood: -5
-      money: 55
+      money: 40
     
     visitFather:
       energy: -15
@@ -248,20 +266,24 @@ actions:
         attention: 25
         mood: 25
     
+    # selfCare: selfEsteem снижен 10→5. Действие остаётся сильным
+    # (stress -15, mood +15), но не даёт бесплатную прокачку самооценки.
     selfCare:
       energy: -10
       mood: 15
       stress: -15
-      selfEsteem: 10
+      selfEsteem: 5
     
     rest:
       energy: 40
       stress: -20
       mood: 10
     
+    # household: mood penalty смягчён -5→-3. Домашние дела неприятны,
+    # но не настолько, чтобы игрок никогда их не делал.
     household:
       energy: -15
-      mood: -5
+      mood: -3
 
 # ═══════════════════════════════════════════════════════════════
 # TIME SYSTEM
