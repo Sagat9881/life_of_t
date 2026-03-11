@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ending id="NEUTRAL_EPILOGUE" category="STORY" priority="10">
+    <meta>
+        <title>Жизнь продолжается</title>
+        <summary>30 дней позади. Жизнь идёт своим чередом.</summary>
+        <epilogue>Татьяна продолжает свой путь.</epilogue>
+    </meta>
+    <conditions mode="AND">
+        <!-- Always true fallback -->
+    </conditions>
+</ending>

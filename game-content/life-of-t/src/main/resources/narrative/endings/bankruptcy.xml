@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ending id="BANKRUPTCY" category="GAME_OVER" priority="100">
+    <meta>
+        <title>Банкротство</title>
+        <summary>Деньги закончились.</summary>
+        <epilogue>Финансовое планирование — важный навык. Попробуйте ещё раз.</epilogue>
+    </meta>
+    <conditions mode="AND">
+        <condition type="stat" field="money" operator="lte" value="-500" />
+    </conditions>
+</ending>

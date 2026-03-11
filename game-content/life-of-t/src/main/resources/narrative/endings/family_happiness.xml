@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ending id="FAMILY_HAPPINESS" category="STORY" priority="85">
+    <meta>
+        <title>Семейное счастье</title>
+        <summary>Семья стала крепче и дружнее.</summary>
+        <epilogue>Татьяна нашла баланс между работой и семьёй.</epilogue>
+    </meta>
+    <conditions mode="AND">
+        <condition type="relationship" target="HUSBAND" field="closeness" operator="gte" value="80" />
+        <condition type="relationship" target="HUSBAND" field="romance" operator="gte" value="70" />
+        <condition type="relationship" target="HUSBAND" field="broken" operator="eq" value="0" />
+    </conditions>
+</ending>
