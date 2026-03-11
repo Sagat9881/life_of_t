@@ -1,5 +1,7 @@
 package ru.lifegame.backend.domain.narrative;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.lifegame.backend.domain.event.game.EventOption;
 import ru.lifegame.backend.domain.event.game.GameEvent;
 import ru.lifegame.backend.domain.model.stats.StatChanges;
@@ -28,6 +30,8 @@ import java.util.Map;
  *   energy, health, stress, mood, money, selfEsteem / self-esteem / self_esteem
  */
 public final class EventSpecMapper {
+
+    private static final Logger log = LoggerFactory.getLogger(EventSpecMapper.class);
 
     private EventSpecMapper() {}
 
@@ -80,8 +84,7 @@ public final class EventSpecMapper {
                 case "mood"       -> mood        += v;
                 case "money"      -> money       += v;
                 case "selfesteem" -> selfEsteem  += v;
-                default -> System.err.println(
-                        "[EventSpecMapper] Unknown stat target: '" + e.target() + "' — ignored");
+                default -> log.warn("[EventSpecMapper] Unknown stat target: '{}' — ignored", e.target());
             }
         }
         return new StatChanges(energy, health, stress, mood, money, selfEsteem);

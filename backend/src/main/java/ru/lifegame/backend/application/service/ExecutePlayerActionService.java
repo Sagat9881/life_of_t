@@ -73,7 +73,7 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
 
         // ── Narrative events ────────────────────────────────────────────────────────────
         if (narrativeEventEngine != null) {
-            List<EventSpec> firedSpecs = narrativeEventEngine.evaluate(narrativeCtx);
+            List<EventSpec> firedSpecs = narrativeEventEngine.evaluate(narrativeCtx, session.time().day());
             for (EventSpec spec : firedSpecs) {
                 GameEvent gameEvent = EventSpecMapper.toGameEvent(spec, session.time().day());
                 session.triggerEvent(gameEvent);

@@ -71,7 +71,7 @@ public class EndDayService implements EndDayUseCase {
         // ── Narrative events at end of day ────────────────────────────────
         if (narrativeEventEngine != null) {
             Map<String, String> ctx = buildEndDayContext(session);
-            List<EventSpec> firedSpecs = narrativeEventEngine.evaluate(ctx);
+            List<EventSpec> firedSpecs = narrativeEventEngine.evaluate(ctx, currentDay);
             for (EventSpec spec : firedSpecs) {
                 // 1. Convert spec -> GameEvent and register in session
                 GameEvent gameEvent = EventSpecMapper.toGameEvent(spec, currentDay);

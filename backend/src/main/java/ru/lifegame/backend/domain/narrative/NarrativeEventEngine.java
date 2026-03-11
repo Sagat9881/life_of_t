@@ -1,10 +1,10 @@
 package ru.lifegame.backend.domain.narrative;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.lifegame.backend.domain.narrative.spec.EventSpec;
 import ru.lifegame.backend.domain.narrative.spec.EventSpec.ConditionSpec;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
@@ -13,9 +13,12 @@ import java.util.*;
  *
  * Evaluation pipeline for each spec:
  *   1. Check all conditions against context (all must pass — AND logic)
- *   2. Check cooldown: event must not have fired within cooldownHours
+ *   2. Check cooldown: event must not have fired within cooldownDays (game days)
  *   3. Probability roll: Random.nextDouble() &lt; spec.meta().probability()
  *   4. If all pass → return as fired
+ *
+ * Cooldown note: cooldownHours from XML is treated as cooldownDays in game time
+ * (one game tick = one game day). This is an intentional simplification.
  *
  * Supported condition types:
  *   - time_of_day  : context key "timeSlot"       — values: morning/day/evening/night
@@ -30,8 +33,10 @@ import java.util.*;
  */
 public class NarrativeEventEngine {
 
+    private static final Logger log = LoggerFactory.getLogger(NarrativeEventEngine.class);
+
     private List<EventSpec> specs;
-    private final Map<String, Instant> lastFired = new HashMap<>();
+    private final Map<String, Integer> lastFired = new HashMap<>();
     private final Random random = new Random();
 
     public NarrativeEventEngine(List<EventSpec> specs) {
@@ -49,21 +54,21 @@ public class NarrativeEventEngine {
     /**
      * Evaluates all loaded specs against the given context.
      *
-     * @param context map of game-state keys to String values.
-     *                Numeric stats must be pre-converted: String.valueOf(energy).
-     *                e.g. {"timeSlot": "night", "anxiety": "70", "location": "home_room"}
+     * @param context        map of game-state keys to String values.
+     *                       Numeric stats must be pre-converted: String.valueOf(energy).
+     *                       e.g. {"timeSlot": "night", "anxiety": "70", "location": "home_room"}
+     * @param currentGameDay current in-game day number, used for cooldown tracking
      * @return list of EventSpec instances that fire on this tick (may be empty)
      */
-    public List<EventSpec> evaluate(Map<String, String> context) {
+    public List<EventSpec> evaluate(Map<String, String> context, int currentGameDay) {
         List<EventSpec> fired = new ArrayList<>();
-        Instant now = Instant.now();
 
         for (EventSpec spec : specs) {
             if (!conditionsMet(spec.conditions(), context)) continue;
-            if (!cooldownExpired(spec.id(), spec.meta().cooldownHours(), now)) continue;
+            if (!cooldownExpired(spec.id(), spec.meta().cooldownHours(), currentGameDay)) continue;
             if (random.nextDouble() >= spec.meta().probability()) continue;
 
-            lastFired.put(spec.id(), now);
+            lastFired.put(spec.id(), currentGameDay);
             fired.add(spec);
         }
         return fired;
@@ -87,9 +92,8 @@ public class NarrativeEventEngine {
             case "trigger"     -> c.value().equals(context.get("activeTrigger"));
             case "stat_min"    -> evaluateStatMin(c, context);
             default -> {
-                // Unknown condition type — log and skip (fail-open to avoid blocking new types)
-                System.err.println("[NarrativeEventEngine] Unknown condition type: '" + c.type() + "' — skipping");
-                yield true;
+                log.warn("[NarrativeEventEngine] Unknown condition type: '{}' — blocking event (fail-closed)", c.type());
+                yield false;
             }
         };
     }
@@ -108,18 +112,18 @@ public class NarrativeEventEngine {
 
     // ── cooldown ─────────────────────────────────────────────────────────────────
 
-    private boolean cooldownExpired(String eventId, int cooldownHours, Instant now) {
-        Instant last = lastFired.get(eventId);
-        if (last == null) return true;
-        return ChronoUnit.HOURS.between(last, now) >= cooldownHours;
+    private boolean cooldownExpired(String eventId, int cooldownDays, int currentGameDay) {
+        Integer lastFiredDay = lastFired.get(eventId);
+        if (lastFiredDay == null) return true;
+        return (currentGameDay - lastFiredDay) >= cooldownDays;
     }
 
-    /** Allows external code (e.g. tests, save/load) to reset or set the last-fired time. */
-    public void setLastFired(String eventId, Instant when) {
-        lastFired.put(eventId, when);
+    /** Allows external code (e.g. tests, save/load) to reset or set the last-fired game day. */
+    public void setLastFired(String eventId, int gameDay) {
+        lastFired.put(eventId, gameDay);
     }
 
-    public Optional<Instant> getLastFired(String eventId) {
+    public Optional<Integer> getLastFired(String eventId) {
         return Optional.ofNullable(lastFired.get(eventId));
     }
 }
