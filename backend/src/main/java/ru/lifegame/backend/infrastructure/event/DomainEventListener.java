@@ -34,7 +34,7 @@ public class DomainEventListener {
      * Listens to ALL DomainEvent implementations.
      * Automatically serializes event to JSON using reflection on record components.
      */
-    @Async
+    @Async("eventExecutor")
     @EventListener
     public void onDomainEvent(DomainEvent event) {
         try {
