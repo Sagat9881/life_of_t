@@ -10,9 +10,6 @@ import { getLocationConfig, getLocationForTimeSlot } from '../../config/location
 import type { ActionOption } from '../../types/game';
 import './GameScreen.css';
 
-const resolveAnimation = (action?: ActionOption | null): string =>
-  action?.animationKey ?? 'idle';
-
 export function GameScreen() {
   const {
     player, time, availableActions, activeQuests, relationships,
@@ -21,8 +18,19 @@ export function GameScreen() {
 
   const [selectedAction, setSelectedAction] = useState<ActionOption | null>(null);
   const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
+  const [tanyaAnimOverride, setTanyaAnimOverride] = useState<string | null>(null);
 
   useEffect(() => { fetchGameState(); }, [fetchGameState]);
+
+  // Авто-сброс анимации Тани через 2 секунды после действия
+  useEffect(() => {
+    if (!lastActionResult) return;
+    const action = availableActions.find((a) => a.code === lastActionResult.actionCode);
+    const anim = action?.animationKey ?? 'idle';
+    setTanyaAnimOverride(anim);
+    const timeout = setTimeout(() => setTanyaAnimOverride(null), 2000);
+    return () => clearTimeout(timeout);
+  }, [lastActionResult, availableActions]);
 
   const rawTimeSlot    = time?.timeSlot ?? 'MORNING';
   const locationId     = player?.location ?? getLocationForTimeSlot(rawTimeSlot);
@@ -33,18 +41,14 @@ export function GameScreen() {
   /** Record<characterSlotId, animationName> */
   const characterAnimations = useMemo((): Record<string, string> => {
     const anims: Record<string, string> = {};
-    anims['tanya'] = resolveAnimation(
-      lastActionResult
-        ? availableActions.find((a) => a.code === lastActionResult.actionCode)
-        : null
-    );
+    anims['tanya'] = tanyaAnimOverride ?? 'idle';
     for (const slot of locationConfig.characters) {
       if (slot.id === 'tanya') continue;
       const npcActivity = npcActivities.find((n) => n.npcId === slot.id);
       anims[slot.id] = npcActivity?.animationKey ?? 'idle';
     }
     return anims;
-  }, [lastActionResult, availableActions, locationConfig.characters, npcActivities]);
+  }, [tanyaAnimOverride, locationConfig.characters, npcActivities]);
 
   const handleObjectClick = (objectId: string, actionCode: string): void => {
     setSelectedObjectId(objectId);

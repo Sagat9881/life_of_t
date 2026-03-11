@@ -17,7 +17,7 @@
  *
  * Rendering layers (bottom → top):
  *   1. Background  (animated strip, stretched to viewport)
- *   2. Furniture   (z-sorted)
+ *   2. Furniture   (animated strip, z-sorted)
  *   3. Characters  (animated strip, z-sorted)
  *
  * Effect structure (3 effects, no restarts):
@@ -178,6 +178,9 @@ export function useCanvasRenderer({
       config.furniture.forEach((f: FurniturePlacement) => {
         enqueueImage('furniture', f.entityName, f.animation);
         enqueueConfig('furniture', f.entityName);
+        slotStateRef.current.set('furniture_' + f.id, {
+          animationName: f.animation, frameIndex: 0, lastFrameTime: 0
+        });
       });
 
       config.characters.forEach((c: CharacterSlot) => {
@@ -280,7 +283,10 @@ export function useCanvasRenderer({
       let frame = 0;
       if (slotId !== null) {
         let state = slotStateRef.current.get(slotId);
-        const currentAnim = charAnimsRef.current?.[slotId];
+
+        // Смену анимации отслеживаем только для персонажей
+        const isCharacter = !slotId.startsWith('furniture_') && !slotId.startsWith('__');
+        const currentAnim = isCharacter ? charAnimsRef.current?.[slotId] : undefined;
 
         if (state && currentAnim && state.animationName !== currentAnim) {
           state = { animationName: currentAnim, frameIndex: 0, lastFrameTime: now };
@@ -401,7 +407,7 @@ export function useCanvasRenderer({
         ctx.fillRect(vpX, vpY, vpW, vpH);
       }
 
-      // 2. Furniture — static, z-sorted
+      // 2. Furniture — animated, z-sorted
       const furniture = [...cfg.furniture].sort((a, b) => a.zOrder - b.zOrder);
       for (const f of furniture) {
         const url = atlasUrl('furniture', f.entityName, f.animation);
@@ -415,7 +421,7 @@ export function useCanvasRenderer({
         if      (f.id === selected) { ctx.shadowColor = '#4a90e2'; ctx.shadowBlur = 12; }
         else if (f.id === hovered)  { ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 6;  }
 
-        drawSprite(img, animCfg, null,
+        drawSprite(img, animCfg, 'furniture_' + f.id,
           vpX + (f.x / 100) * vpW,
           vpY + (f.y / 100) * vpH,
           (f.sceneHeight / 100) * vpH * f.scale, now, f.flipX ?? false);
