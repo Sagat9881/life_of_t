@@ -74,7 +74,7 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
         Map<String, String> narrativeCtx = buildNarrativeContext(session, command.actionCode());
         Map<String, Object> questCtx     = buildQuestContext(session, command.actionCode());
 
-        // ── Narrative events ────────────────────────────────────────────────────────────
+        // ── Narrative events ───────────────────────────────────────────────────────────────────────
         if (narrativeEventEngine != null) {
             List<EventSpec> firedSpecs = narrativeEventEngine.evaluate(
                     gameContentService.getAllEvents(), narrativeCtx, session.time().day());
@@ -91,7 +91,7 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
             }
         }
 
-        // ── Quest steps ───────────────────────────────────────────────────────────────────
+        // ── Quest steps ─────────────────────────────────────────────────────────────────────────
         if (narrativeQuestEngine != null) {
             for (String questId : narrativeQuestEngine.getActiveQuests().keySet()) {
                 narrativeQuestEngine.tryCompleteStep(questId, questCtx)
@@ -111,7 +111,7 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
             }
         }
 
-        // ── NPC lifecycle tick ───────────────────────────────────────────────────────────
+        // ── NPC lifecycle tick ──────────────────────────────────────────────────────────────────
         if (npcLifecycleEngine != null) {
             Map<String, Object> npcCtx = Map.of(
                     "hour", session.time().hour(),
@@ -121,12 +121,20 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
             npcEvents.forEach(session::publishDomainEvent);
         }
 
+        // ── NPC memory: record player action so utility brain conditions can evaluate it ─
+        if (npcLifecycleEngine != null) {
+            int day  = session.time().day();
+            int hour = session.time().hour();
+            npcLifecycleEngine.getRegistry().getAll()
+                    .forEach(npc -> npc.observePlayerAction(command.actionCode(), day, hour));
+        }
+
         session.drainDomainEvents().forEach(eventPublisher::publish);
         sessionRepository.save(session);
         return mapper.toView(session, result);
     }
 
-    // ── reward application ───────────────────────────────────────────────────────────
+    // ── reward application ───────────────────────────────────────────────────────────────────
 
     /**
      * Applies quest step rewards to the session.
@@ -160,7 +168,6 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
                     session.player().improveSkill(reward.target(), reward.amount());
 
                 case "relationship" -> {
-                    // target format: "NPC_ID:field"  e.g. "HUSBAND:closeness"
                     String[] parts = reward.target().split(":", 2);
                     if (parts.length != 2) {
                         log.warn("[QuestRewards] Invalid relationship target '{}', expected 'NPC_ID:field'",
@@ -187,8 +194,6 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
                 }
 
                 case "achievement" ->
-                    // Achievements are informational markers surfaced to the frontend
-                    // via QuestStepCompletedEvent.rewards[]. No server-side state needed.
                     log.info("[QuestRewards] Achievement unlocked: '{}' (quest: {})",
                             reward.target(), result.questId());
 
@@ -209,7 +214,7 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
         return raw.toLowerCase().replace("-", "").replace("_", "");
     }
 
-    // ── context builders ─────────────────────────────────────────────────────────────
+    // ── context builders ───────────────────────────────────────────────────────────────────
 
     private Map<String, String> buildNarrativeContext(GameSession session, String actionCode) {
         Map<String, String> ctx = new LinkedHashMap<>();
@@ -253,11 +258,7 @@ public class ExecutePlayerActionService implements ExecutePlayerActionUseCase {
         ctx.put("mood",       session.player().stats().mood());
         ctx.put("money",      session.player().stats().money());
         ctx.put("selfEsteem", session.player().stats().selfEsteem());
-        // work_days: consecutive days the player went to work
-        // used by CAREER_GROWTH quest step 1 objective (target=work_days, threshold=5)
         ctx.put("work_days",  session.player().consecutiveWorkDays());
-        // Relationship fields in "NPC_ID:field" format
-        // Matches ObjectiveSpec.target for compound quest conditions
         session.relationships().all().forEach((npcId, rel) -> {
             ctx.put(npcId + ":closeness", rel.closeness());
             ctx.put(npcId + ":trust",     rel.trust());
