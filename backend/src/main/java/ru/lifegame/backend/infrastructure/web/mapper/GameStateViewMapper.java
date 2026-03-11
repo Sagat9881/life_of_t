@@ -228,10 +228,10 @@ public class GameStateViewMapper {
             payload.put("locationId",  nae.locationId());
 
         } else if (event instanceof NpcMoodExtremeEvent nme) {
-            payload.put("npcId",        nme.npcId());
-            payload.put("axis",         nme.axis());
-            payload.put("value",        nme.value());
-            payload.put("dominantMood", nme.dominantMood());
+            payload.put("npcId",  nme.npcId());
+            payload.put("axis",   nme.axis());
+            payload.put("value",  nme.value());
+            // dominantMood removed — axis already carries this information
         }
 
         return new DomainEventView(event.eventType(), event.timestamp().toString(), payload);

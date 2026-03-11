@@ -67,7 +67,7 @@ public class NpcUtilityBrain {
     }
 
     private boolean evaluateMoodCondition(NpcSpec.ConditionSpec cond, NpcMood mood) {
-        int val       = mood.getAxis(cond.target());
+        int val       = resolveAxisValue(mood, cond.target());
         int threshold = Integer.parseInt(cond.value());
         return switch (cond.operator()) {
             case "gte" -> val >= threshold;
@@ -104,8 +104,24 @@ public class NpcUtilityBrain {
 
     private double conditionBonus(NpcSpec.ConditionSpec cond, NpcMood mood) {
         if ("mood".equals(cond.type())) {
-            return mood.getAxis(cond.target()) / 100.0 * 0.3;
+            return resolveAxisValue(mood, cond.target()) / 100.0 * 0.3;
         }
         return 0.0;
+    }
+
+    /**
+     * Resolves the integer value of the named mood axis.
+     * NpcMood exposes individual getters — there is no generic getAxis(String) method.
+     */
+    private static int resolveAxisValue(NpcMood mood, String axis) {
+        return switch (axis) {
+            case "happiness" -> mood.happiness();
+            case "energy"    -> mood.energy();
+            case "stress"    -> mood.stress();
+            case "trust"     -> mood.trust();
+            case "romance"   -> mood.romance();
+            case "anger"     -> mood.anger();
+            default          -> 0;
+        };
     }
 }

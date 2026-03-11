@@ -101,10 +101,16 @@ public class NpcSpecParser {
             Element el     = (Element) nodes.item(i);
             Element parent = (Element) el.getParentNode();
             if ("actions".equals(parent.getTagName())) {
+                // animationKey and locationId: read from XML if present, else leave blank
+                // (NpcUtilityBrain will apply fallback: actionId+"_anim" / "default")
+                String animationKey = el.getAttribute("animation-key");
+                String locationId   = el.getAttribute("location-id");
                 actions.add(new ActionSpec(
                         el.getAttribute("id"),
                         Double.parseDouble(el.getAttribute("base-score")),
                         el.getAttribute("event-type"),
+                        animationKey,
+                        locationId,
                         parseConditions(el),
                         parseOptions(el)
                 ));
@@ -120,11 +126,23 @@ public class NpcSpecParser {
         NodeList nodes = root.getElementsByTagName("reaction");
         for (int i = 0; i < nodes.getLength(); i++) {
             Element el = (Element) nodes.item(i);
+            // New fields: triggerAxis, activityId, locationId, animationKey, durationHours
+            // Read from XML attributes if present; fall back to safe defaults if absent.
+            String triggerAxis   = el.getAttribute("trigger-axis");
+            String activityId    = el.getAttribute("activity-id");
+            String locationId    = el.getAttribute("location-id");
+            String animationKey  = el.getAttribute("animation-key");
+            int    durationHours = parseIntAttr(el, "duration-hours", 1);
             reactions.add(new ReactionSpec(
                     el.getAttribute("id"),
                     el.getAttribute("pattern-type"),
+                    triggerAxis,
                     parseIntAttr(el, "threshold", 0),
                     getTextContent(el, "dialogue"),
+                    activityId,
+                    locationId,
+                    animationKey,
+                    durationHours,
                     parseEffects(el)
             ));
         }

@@ -58,10 +58,8 @@ public class NpcLifecycleEngine {
             // Emit mood extreme event if any axis is in extreme state
             if (npc.mood().hasExtremeState()) {
                 String dominant = npc.mood().dominantAxis();
-                events.add(new NpcMoodExtremeEvent(
-                        sessionId, npc.id(), dominant,
-                        npc.mood().getAxis(dominant)
-                ));
+                int dominantValue = resolveAxisValue(npc.mood(), dominant);
+                events.add(new NpcMoodExtremeEvent(sessionId, npc.id(), dominant, dominantValue));
             }
         }
 
@@ -80,14 +78,28 @@ public class NpcLifecycleEngine {
             // After decay, check if mood is still extreme
             if (npc.mood().hasExtremeState()) {
                 String dominant = npc.mood().dominantAxis();
-                events.add(new NpcMoodExtremeEvent(
-                        sessionId, npc.id(), dominant,
-                        npc.mood().getAxis(dominant)
-                ));
+                int dominantValue = resolveAxisValue(npc.mood(), dominant);
+                events.add(new NpcMoodExtremeEvent(sessionId, npc.id(), dominant, dominantValue));
             }
         }
 
         return events;
+    }
+
+    /**
+     * Resolves the integer value of the named mood axis.
+     * NpcMood exposes individual getters, not a generic getAxis(String) method.
+     */
+    private static int resolveAxisValue(NpcMood mood, String axis) {
+        return switch (axis) {
+            case "happiness" -> mood.happiness();
+            case "energy"    -> mood.energy();
+            case "stress"    -> mood.stress();
+            case "trust"     -> mood.trust();
+            case "romance"   -> mood.romance();
+            case "anger"     -> mood.anger();
+            default          -> 0;
+        };
     }
 
     public NpcRegistry getRegistry() {
