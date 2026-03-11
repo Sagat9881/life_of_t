@@ -22,6 +22,7 @@ import ru.lifegame.backend.domain.narrative.spec.QuestSpec;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.*;
@@ -32,11 +33,11 @@ public class GameContentService {
 
     private static final Logger log = LoggerFactory.getLogger(GameContentService.class);
 
-    // classpath*: prefix is required for PathMatchingResourcePatternResolver to
-    // scan inside nested JARs (BOOT-INF/lib/life-of-t.jar) in a Spring Boot fat JAR.
-    private static final String PATH_ACTIONS  = "classpath*:narrative/player-actions/**/*.xml";
-    private static final String PATH_EVENTS   = "classpath*:narrative/events/*.xml";
-    private static final String PATH_QUESTS   = "classpath*:narrative/quests/**/*.xml";
+    // classpath*: prefix required for PathMatchingResourcePatternResolver to
+    // scan inside nested JARs (BOOT-INF/lib/life-of-t.jar) in Spring Boot fat JAR.
+    private static final String PATH_ACTIONS = "classpath*:narrative/player-actions/**/*.xml";
+    private static final String PATH_EVENTS  = "classpath*:narrative/events/*.xml";
+    private static final String PATH_QUESTS  = "classpath*:narrative/quests/**/*.xml";
 
     private final Map<String, ActionDefView>   actions   = new ConcurrentHashMap<>();
     private final Map<String, ConflictDefView> conflicts = new ConcurrentHashMap<>();
@@ -44,7 +45,7 @@ public class GameContentService {
     private final Map<String, QuestSpec>       quests    = new ConcurrentHashMap<>();
 
     private final ConflictEngine conflictEngine;
-    // Resolver with explicit classLoader — required for nested-JAR scanning in fat JARs.
+    // Explicit classLoader — required for nested-JAR scanning in fat JARs.
     private final PathMatchingResourcePatternResolver resolver =
             new PathMatchingResourcePatternResolver(GameContentService.class.getClassLoader());
 
@@ -61,6 +62,13 @@ public class GameContentService {
         loadEventsFromXml();
         loadQuestsFromXml();
         loadConflictsFromEngine();
+        // CRITICAL: player actions are required for the game to function.
+        if (actions.isEmpty()) {
+            throw new IllegalStateException(
+                    "No player actions loaded from " + PATH_ACTIONS +
+                    " — cannot start the game. Check that life-of-t.jar is on the classpath "
+                    + "and contains narrative/player-actions/*.xml files.");
+        }
         currentVersion = new ContentVersion("2.0.0-xml", Instant.now());
         log.info("Content loaded: {} actions, {} events, {} quests, {} conflicts",
                 actions.size(), events.size(), quests.size(), conflicts.size());
@@ -80,89 +88,103 @@ public class GameContentService {
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * Loads all player action XML files from
-     * {@code classpath*:narrative/player-actions/**\/*.xml}.
-     *
-     * Non-fatal: if no files are found, logs a WARNING and continues startup.
-     * Individual parse errors are logged and the offending file is skipped.
+     * Scans {@code classpath*:narrative/player-actions/**\/*.xml}.
+     * Scan failure or empty result → WARN + return (non-fatal here;
+     * emptiness is checked critically in {@link #initialize()}).
+     * Per-file parse error → ERROR + skip file.
      */
     private void loadActionsFromXml() {
+        Resource[] files;
         try {
-            Resource[] files = resolver.getResources(PATH_ACTIONS);
-            if (files.length == 0) {
-                log.warn("No player action XML files found at {} — starting without actions", PATH_ACTIONS);
-                return;
-            }
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            for (Resource res : files) {
-                String filename = res.getFilename();
-                try (InputStream is = res.getInputStream()) {
-                    Document doc = builder.parse(is);
-                    doc.getDocumentElement().normalize();
-                    Element root = doc.getDocumentElement();
-                    ActionDefView action = parseAction(root, filename);
-                    actions.put(action.code(), action);
-                } catch (Exception e) {
-                    log.error("Failed to parse action file: {} — skipping", filename, e);
-                }
-            }
-            log.info("Loaded {} actions from {}", actions.size(), PATH_ACTIONS);
-        } catch (Exception e) {
-            log.error("Failed to scan {} — starting without actions", PATH_ACTIONS, e);
+            files = resolver.getResources(PATH_ACTIONS);
+        } catch (IOException e) {
+            log.warn("Cannot scan {}: {} — starting without actions", PATH_ACTIONS, e.getMessage());
+            return;
         }
+        if (files == null || files.length == 0) {
+            log.warn("No player action XML files found at {} — starting without actions", PATH_ACTIONS);
+            return;
+        }
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder;
+        try {
+            builder = factory.newDocumentBuilder();
+        } catch (Exception e) {
+            log.error("Cannot create XML DocumentBuilder — skipping action load", e);
+            return;
+        }
+        for (Resource res : files) {
+            String filename = res.getFilename();
+            try (InputStream is = res.getInputStream()) {
+                Document doc = builder.parse(is);
+                doc.getDocumentElement().normalize();
+                ActionDefView action = parseAction(doc.getDocumentElement(), filename);
+                actions.put(action.code(), action);
+            } catch (Exception e) {
+                log.error("Failed to parse action file: {} — skipping", filename, e);
+            }
+        }
+        log.info("Loaded {} actions from {}", actions.size(), PATH_ACTIONS);
     }
 
+    /**
+     * Scans {@code classpath*:narrative/events/*.xml}.
+     * Non-critical: missing directory or empty result → WARN only.
+     */
     private void loadEventsFromXml() {
-        EventSpecParser parser = new EventSpecParser();
+        Resource[] files;
         try {
-            Resource[] files = resolver.getResources(PATH_EVENTS);
-            if (files.length == 0) {
-                log.warn("No event XML files found at {} — starting without events", PATH_EVENTS);
-                return;
-            }
-            for (Resource res : files) {
-                String filename = res.getFilename();
-                try (InputStream is = res.getInputStream()) {
-                    EventSpec spec = parser.parse(is, filename);
-                    events.put(spec.id(), spec);
-                } catch (Exception e) {
-                    log.error("Failed to parse event file: {} — skipping", filename, e);
-                }
-            }
-            log.info("Loaded {} events from {}", events.size(), PATH_EVENTS);
-        } catch (Exception e) {
-            log.error("Failed to scan {} — starting without events", PATH_EVENTS, e);
+            files = resolver.getResources(PATH_EVENTS);
+        } catch (IOException e) {
+            log.warn("Cannot scan {}: {} — starting without events", PATH_EVENTS, e.getMessage());
+            return;
         }
+        if (files == null || files.length == 0) {
+            log.warn("No event XML files found at {} — starting without events", PATH_EVENTS);
+            return;
+        }
+        EventSpecParser parser = new EventSpecParser();
+        for (Resource res : files) {
+            String filename = res.getFilename();
+            try (InputStream is = res.getInputStream()) {
+                EventSpec spec = parser.parse(is, filename);
+                events.put(spec.id(), spec);
+            } catch (Exception e) {
+                log.error("Failed to parse event file: {} — skipping", filename, e);
+            }
+        }
+        log.info("Loaded {} events from {}", events.size(), PATH_EVENTS);
     }
 
     /**
      * Scans {@code classpath*:narrative/quests/**\/*.xml} recursively.
      * Each file must contain exactly one {@code <quest>} root element.
-     * Duplicate quest IDs: first file wins (alphabetical scan order).
-     * Missing directory: logs a warning, starts without quests (non-fatal).
+     * Duplicate quest IDs: first file wins.
+     * Non-critical: missing directory or empty result → WARN only.
      */
     private void loadQuestsFromXml() {
-        QuestSpecParser parser = new QuestSpecParser();
+        Resource[] files;
         try {
-            Resource[] files = resolver.getResources(PATH_QUESTS);
-            if (files.length == 0) {
-                log.warn("No quest XML files found at {} — starting without quests", PATH_QUESTS);
-                return;
-            }
-            for (Resource res : files) {
-                String filename = res.getFilename();
-                try (InputStream is = res.getInputStream()) {
-                    QuestSpec spec = parser.parseOne(is, filename);
-                    quests.putIfAbsent(spec.id(), spec);
-                } catch (Exception e) {
-                    log.error("Failed to parse quest file: {} — skipping", filename, e);
-                }
-            }
-            log.info("Loaded {} quests from {}", quests.size(), PATH_QUESTS);
-        } catch (Exception e) {
-            log.error("Failed to scan {} — starting without quests", PATH_QUESTS, e);
+            files = resolver.getResources(PATH_QUESTS);
+        } catch (IOException e) {
+            log.warn("Cannot scan {}: {} — starting without quests", PATH_QUESTS, e.getMessage());
+            return;
         }
+        if (files == null || files.length == 0) {
+            log.warn("No quest XML files found at {} — starting without quests", PATH_QUESTS);
+            return;
+        }
+        QuestSpecParser parser = new QuestSpecParser();
+        for (Resource res : files) {
+            String filename = res.getFilename();
+            try (InputStream is = res.getInputStream()) {
+                QuestSpec spec = parser.parseOne(is, filename);
+                quests.putIfAbsent(spec.id(), spec);
+            } catch (Exception e) {
+                log.error("Failed to parse quest file: {} — skipping", filename, e);
+            }
+        }
+        log.info("Loaded {} quests from {}", quests.size(), PATH_QUESTS);
     }
 
     private void loadConflictsFromEngine() {
@@ -239,13 +261,13 @@ public class GameContentService {
             skillGains.put(s.getAttribute("name"), Integer.parseInt(s.getAttribute("xp")));
         }
 
-        List<String> tags           = parseTextList(el, "tags",                "tag");
-        List<String> requiredTags   = parseTextList(el, "required-tags",       "tag");
-        List<String> forbiddenTags  = parseTextList(el, "forbidden-tags",      "tag");
-        List<String> timeSlots      = parseTextList(el, "time-slots",          "slot");
-        List<String> locations      = parseTextList(el, "locations",           "location");
-        List<String> conflictTypes  = parseTextList(el, "potential-conflicts",  "conflict");
-        List<String> relatedQuests  = parseTextList(el, "related-quests",       "quest");
+        List<String> tags          = parseTextList(el, "tags",                "tag");
+        List<String> requiredTags  = parseTextList(el, "required-tags",       "tag");
+        List<String> forbiddenTags = parseTextList(el, "forbidden-tags",      "tag");
+        List<String> timeSlots     = parseTextList(el, "time-slots",          "slot");
+        List<String> locations     = parseTextList(el, "locations",           "location");
+        List<String> conflictTypes = parseTextList(el, "potential-conflicts",  "conflict");
+        List<String> relatedQuests = parseTextList(el, "related-quests",       "quest");
 
         if (timeSlots.isEmpty()) timeSlots = List.of("morning", "day", "evening");
         if (locations.isEmpty()) locations = List.of("any");
