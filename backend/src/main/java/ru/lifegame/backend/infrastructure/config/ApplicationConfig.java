@@ -40,6 +40,7 @@ public class ApplicationConfig {
             GameStateViewMapper mapper,
             NarrativeEventEngine narrativeEventEngine,
             NarrativeQuestEngine narrativeQuestEngine,
+            // TODO: NpcLifecycleEngine must be per-session; snapshot registry here per session
             NpcLifecycleEngine npcLifecycleEngine,
             GameContentService gameContentService) {
         return new ExecutePlayerActionService(

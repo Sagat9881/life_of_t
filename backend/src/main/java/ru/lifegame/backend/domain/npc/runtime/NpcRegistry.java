@@ -18,6 +18,23 @@ public class NpcRegistry {
         }
     }
 
+    /**
+     * Creates a new NpcRegistry with deep copies of all NpcInstances.
+     * <p>
+     * The original registry remains the prototype (read-only source of truth).
+     * Each player session should receive its own snapshot so that NPC mood,
+     * memory and activity changes do not bleed between concurrent sessions.
+     *
+     * @return a new NpcRegistry whose instances are fully independent copies
+     */
+    public NpcRegistry snapshotForSession() {
+        NpcRegistry snapshot = new NpcRegistry();
+        for (Map.Entry<String, NpcInstance> entry : instances.entrySet()) {
+            snapshot.instances.put(entry.getKey(), entry.getValue().deepCopy());
+        }
+        return snapshot;
+    }
+
     public Optional<NpcInstance> get(String npcId) {
         return Optional.ofNullable(instances.get(npcId));
     }

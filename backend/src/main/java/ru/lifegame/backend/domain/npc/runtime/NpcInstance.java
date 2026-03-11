@@ -48,6 +48,23 @@ public class NpcInstance {
         return spec.isNamed() ? createNamed(spec) : createFiller(spec);
     }
 
+    /**
+     * Creates a deep copy of this NpcInstance for per-session isolation.
+     * <p>
+     * Uses copy constructors for NpcMood and NpcMemory (mutable state),
+     * and reuses the same NpcSchedule reference (immutable — slots come from NpcSpec).
+     *
+     * @return a new NpcInstance with the same spec but independent mood/memory/schedule
+     */
+    public NpcInstance deepCopy() {
+        NpcMood moodCopy = new NpcMood(this.mood);
+        NpcMemory memoryCopy = new NpcMemory(this.memory);
+        // NpcSchedule is immutable (slots are derived from NpcSpec), reuse the same reference
+        NpcInstance copy = new NpcInstance(this.spec, moodCopy, memoryCopy, this.schedule);
+        copy.currentActivity = this.currentActivity;
+        return copy;
+    }
+
     private static NpcSchedule buildSchedule(NpcSpec spec) {
         var slots = spec.schedule().stream()
                 .map(s -> new NpcSchedule.ScheduleSlot(
