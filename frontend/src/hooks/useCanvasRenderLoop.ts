@@ -26,9 +26,10 @@ export interface CanvasRenderLoopOptions {
   hoveredRef: React.MutableRefObject<string | null>;
   charAnimsRef: React.MutableRefObject<Record<string, string> | undefined>;
   rafRef: React.MutableRefObject<number | undefined>;
+  timeOfDayRef: React.MutableRefObject<string>;
 }
 
-// ── Frame helpers ─────────────────────────────────────────────────────────────
+// ── Frame helpers ────────────────────────────────────────────────────────────────
 
 function frameW(img: HTMLImageElement, cfg: AnimationConfig): number {
   return cfg.frameWidth > 0 ? cfg.frameWidth : Math.floor(img.naturalWidth / cfg.columns);
@@ -38,7 +39,7 @@ function frameH(img: HTMLImageElement, cfg: AnimationConfig): number {
   return cfg.frameHeight > 0 ? cfg.frameHeight : img.naturalHeight;
 }
 
-// ── Hook ─────────────────────────────────────────────────────────────────────
+// ── Hook ───────────────────────────────────────────────────────────────────
 
 export function useCanvasRenderLoop({
   canvasRef,
@@ -49,6 +50,7 @@ export function useCanvasRenderLoop({
   hoveredRef,
   charAnimsRef,
   rafRef,
+  timeOfDayRef,
 }: CanvasRenderLoopOptions): void {
   const { imagesRef, atlasConfigsRef, slotStateRef } = assetsRefs;
 
@@ -58,7 +60,7 @@ export function useCanvasRenderLoop({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // ── drawSprite ────────────────────────────────────────────────────────────
+    // ── drawSprite ───────────────────────────────────────────────────────────────
     const drawSprite = (
       img: HTMLImageElement,
       animCfg: AnimationConfig | undefined,
@@ -167,7 +169,7 @@ export function useCanvasRenderLoop({
       if (flipX) ctx.restore();
     };
 
-    // ── drawBackground ────────────────────────────────────────────────────────
+    // ── drawBackground ────────────────────────────────────────────────────────────
     const drawBackground = (
       img: HTMLImageElement,
       animCfg: AnimationConfig | undefined,
@@ -203,7 +205,7 @@ export function useCanvasRenderLoop({
       ctx.drawImage(img, state.frameIndex * fw, 0, fw, fh, vpX, vpY, vpW, vpH);
     };
 
-    // ── render ────────────────────────────────────────────────────────────────
+    // ── render ──────────────────────────────────────────────────────────────────
     const render = (now: number): void => {
       const bufW = canvas.width;
       const bufH = canvas.height;
@@ -226,12 +228,14 @@ export function useCanvasRenderLoop({
       ctx.clip();
 
       // Layer 1: Background
-      const bgUrl = atlasUrl('locations', cfg.locationAsset, cfg.backgroundAnimation);
-      const bgImg = imagesRef.current.get(bgUrl);
+      const timeOfDay  = timeOfDayRef.current;
+      const bgAnimName = cfg.backgroundAnimations?.[timeOfDay] ?? cfg.backgroundAnimation;
+      const bgUrl      = atlasUrl('locations', cfg.locationAsset, bgAnimName);
+      const bgImg      = imagesRef.current.get(bgUrl);
 
       if (bgImg) {
         const bgAtlasKey = atlasConfigUrl('locations', cfg.locationAsset);
-        const bgAnimCfg  = atlasConfigsRef.current.get(bgAtlasKey)?.animations[cfg.backgroundAnimation];
+        const bgAnimCfg  = atlasConfigsRef.current.get(bgAtlasKey)?.animations[bgAnimName];
         drawBackground(bgImg, bgAnimCfg, vpX, vpY, vpW, vpH, now);
       } else {
         ctx.fillStyle = '#1a1a2e';
