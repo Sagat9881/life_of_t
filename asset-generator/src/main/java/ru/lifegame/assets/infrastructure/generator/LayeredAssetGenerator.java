@@ -182,7 +182,8 @@ public class LayeredAssetGenerator implements AssetGenerationService {
                 AnimationSpec firstSpec = sorted.values().iterator().next();
                 cropOffsets.put(baseName, new AtlasConfigWriter.CropOffsetDef(
                         bounds[0], bounds[1],
-                        firstSpec.frameWidth(), firstSpec.frameHeight()));
+                        firstSpec.frameWidth(), firstSpec.frameHeight(),
+                        bounds[2], bounds[3]));
                 log.info("Cropped grid atlas '{}': {}x{} -> {}x{} (offset {}, {})",
                         baseName,
                         firstSpec.frameWidth(), firstSpec.frameHeight(),
@@ -215,7 +216,8 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             if (needsCrop) {
                 stripCropOffsets.put(animSpec.name(), new AtlasConfigWriter.CropOffsetDef(
                         bounds[0], bounds[1],
-                        animSpec.frameWidth(), animSpec.frameHeight()));
+                        animSpec.frameWidth(), animSpec.frameHeight(),
+                        bounds[2], bounds[3]));
                 frames = renderer.cropFrames(frames, bounds);
                 log.info("Cropped strip atlas '{}': {}x{} -> {}x{} (offset {}, {})",
                         animSpec.name(),
