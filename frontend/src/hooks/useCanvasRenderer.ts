@@ -48,7 +48,7 @@ export function useCanvasRenderer({
 
   useCanvasAssets({
     config,
-    characterAnimations,
+    characterAnimations: characterAnimations ?? {},
     assetsRefs: { imagesRef, atlasConfigsRef, slotStateRef },
   });
 
