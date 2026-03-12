@@ -20,7 +20,7 @@ export interface UseCanvasAssetsOptions {
   assetsRefs: CanvasAssetsRefs;
 }
 
-// ─── helpers ────────────────────────────────────────────────────────────────
+// ─── helpers ────────────────────────────────────────────────────────────────────────────
 
 export function atlasUrl(
   category: string,
@@ -53,7 +53,7 @@ async function loadImage(url: string): Promise<HTMLImageElement | null> {
   });
 }
 
-// ─── hook ───────────────────────────────────────────────────────────────────
+// ─── hook ─────────────────────────────────────────────────────────────────────────────
 
 export function useCanvasAssets({
   config,
@@ -105,8 +105,8 @@ export function useCanvasAssets({
       // Furniture
       for (const item of config.furniture) {
         const anim = item.animation ?? item.animationKey ?? 'idle';
-        enqueueImage('locations', item.assetKey, anim);
-        enqueueConfig('locations', item.assetKey);
+        enqueueImage('furniture', item.entityName, anim);
+        enqueueConfig('furniture', item.entityName);
         // init slot state
         if (!slotStateRef.current.has(item.id)) {
           slotStateRef.current.set(item.id, { animationName: anim, frameIndex: 0, lastFrameTime: 0 });
