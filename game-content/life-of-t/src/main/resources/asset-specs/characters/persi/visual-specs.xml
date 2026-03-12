@@ -1,175 +1,350 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Life of T — Persi Visual Spec v2.0.0
-    Extends: abstract/entities/dog@1.0
-    Canvas: 128×96 | displayScale: 1.5
-    Breed: Adult Black Shepherd
-    Coat: solid black + white chest patch + white paw tips
+    Life of T — Persi Character Visual Spec v7.0
+    Breed: Black German Shepherd
+    Markings: white chest blaze + white paw tips ONLY
+    Extends: abstract/entities/dog@2.0
+    Canvas: 128×96 (inherited)
+    View: SIDE PROFILE (голова слева, хвост справа)
+    Overrides: ALL 10 layers (replace="true")
+    Animations: inherited from abstract/entities/dog@2.0
 
-    OVERRIDES (3 layers only):
-      paws         — black base + white tip strip (2px) + dark paw pads
-      belly        — white chest patch (front) + black belly (rear)
-      face_details — dark brown eyes, black nose, closed mouth, no whiskers
-
-    All coordinates taken verbatim from abstract/entities/dog@1.0:
-      paws:  front-right x=14,y=72,w=16,h=14
-             front-left  x=38,y=72,w=16,h=14
-             hind-right  x=66,y=72,w=18,h=14
-             hind-left   x=90,y=72,w=18,h=14
-      belly: x=28,y=48,w=64,h=32 (base rect from dog belly)
-      face:  eyes x=14..28 y=8..18, nose x=28..44 y=20..30
+    FIX v7.0: front_legs far x=44..56, near x=48..60
+              paws FL-far x=44..56, FL-near x=48..60
+              No pixel left of x=44 in front_legs or FL paws.
 -->
-<asset-spec extends="abstract/entities/dog@1.0" version="2.0.0">
+<asset-spec extends="abstract/entities/dog@2.0" version="7.0">
+
     <meta>
         <entity-type>characters</entity-type>
         <entity-name>persi</entity-name>
-        <version>2.0.0</version>
-        <display-scale>1.5</display-scale>
+        <version>7.0</version>
     </meta>
 
     <color-palette>
-        <color name="$fur_base"        value="#101010"/>
-        <color name="$fur_shadow"      value="#000000"/>
-        <color name="$fur_highlight"   value="#282828"/>
-        <color name="$chest_base"      value="#E8E8E8"/>
-        <color name="$chest_highlight" value="#FFFFFF"/>
-        <color name="$nose_color"      value="#101010"/>
-        <color name="$nose_highlight"  value="#383838"/>
-        <color name="$eye_color"       value="#3A2800"/>
-        <color name="$eye_highlight"   value="#6A4810"/>
-        <color name="$paw_pad"         value="#303030"/>
-        <color name="$paw_tip"         value="#D0D0D0"/>
-        <color name="$ear_inner"       value="#1A1A1A"/>
-        <color name="$tongue_color"    value="#FF6060"/>
+        <color name="$fur_base"     value="#0E0E0E"/>
+        <color name="$fur_mid"      value="#1E1E1E"/>
+        <color name="$fur_high"     value="#2E2E2E"/>
+        <color name="$fur_deep"     value="#060606"/>
+        <color name="$ear_inside"   value="#181818"/>
+        <color name="$white_tip"    value="#F0F0F0"/>
+        <color name="$white_bright" value="#FFFFFF"/>
+        <color name="$white_shadow" value="#C0C0C0"/>
+        <color name="$eye_color"    value="#8A5A1A"/>
+        <color name="$nose_color"   value="#0A0A0A"/>
+        <color name="$nose_high"    value="#282828"/>
     </color-palette>
 
     <layer-overrides>
 
         <!-- ============================================================ -->
-        <!-- PAWS override                                                -->
-        <!-- Exact geometry from abstract/dog paws layer:                -->
-        <!--   front-right: x=14, y=72, w=16, h=14                      -->
-        <!--   front-left:  x=38, y=72, w=16, h=14                      -->
-        <!--   hind-right:  x=66, y=72, w=18, h=14                      -->
-        <!--   hind-left:   x=90, y=72, w=18, h=14                      -->
-        <!-- Black base + white tip strip at top (y=72, h=2) + dark pads -->
+        <!-- z=0  PAWS                                                    -->
+        <!-- FL-far  x=44..56 (on chest line). FL-near x=48..60.         -->
+        <!-- HL-far  x=72..84. HL-near x=84..98.                         -->
+        <!-- Base y=83..86 dark. White tip y=87..91.                     -->
         <!-- ============================================================ -->
         <layer id="paws" replace="true">
             <pixel-data>
-                <!-- FRONT RIGHT PAW — x=14, y=72, w=16, h=14 -->
-                <rect x="14" y="72" w="16" h="14" color="$fur_base"/>
-                <hline x="14" y="85" len="16"     color="$fur_shadow"/>
-                <rect  x="14" y="80" w="16" h="4"  color="$paw_pad"/>
-                <!-- white tip strip -->
-                <hline x="14" y="72" len="16"     color="$paw_tip"/>
-                <hline x="14" y="73" len="16"     color="$paw_tip"/>
+                <!-- FL-far base -->
+                <rect  x="44" y="83" w="12" h="4"  color="$fur_deep"/>
+                <!-- FL-far white tip -->
+                <rect  x="44" y="87" w="12" h="5"  color="$white_shadow"/>
 
-                <!-- FRONT LEFT PAW — x=38, y=72, w=16, h=14 -->
-                <rect x="38" y="72" w="16" h="14" color="$fur_base"/>
-                <hline x="38" y="85" len="16"     color="$fur_shadow"/>
-                <rect  x="38" y="80" w="16" h="4"  color="$paw_pad"/>
-                <!-- white tip strip -->
-                <hline x="38" y="72" len="16"     color="$paw_tip"/>
-                <hline x="38" y="73" len="16"     color="$paw_tip"/>
+                <!-- FL-near base -->
+                <rect  x="48" y="83" w="12" h="4"  color="$fur_base"/>
+                <!-- FL-near white tip -->
+                <rect  x="48" y="87" w="12" h="5"  color="$white_tip"/>
+                <hline x="50" y="87" len="8"        color="$white_bright"/>
 
-                <!-- HIND RIGHT PAW — x=66, y=72, w=18, h=14 -->
-                <rect x="66" y="72" w="18" h="14" color="$fur_base"/>
-                <hline x="66" y="85" len="18"     color="$fur_shadow"/>
-                <rect  x="66" y="80" w="18" h="4"  color="$paw_pad"/>
-                <!-- white tip strip -->
-                <hline x="66" y="72" len="18"     color="$paw_tip"/>
-                <hline x="66" y="73" len="18"     color="$paw_tip"/>
+                <!-- HL-far base -->
+                <rect  x="72" y="83" w="12" h="4"  color="$fur_deep"/>
+                <!-- HL-far white tip -->
+                <rect  x="72" y="87" w="12" h="5"  color="$white_shadow"/>
 
-                <!-- HIND LEFT PAW — x=90, y=72, w=18, h=14 -->
-                <rect x="90" y="72" w="18" h="14" color="$fur_base"/>
-                <hline x="90" y="85" len="18"     color="$fur_shadow"/>
-                <rect  x="90" y="80" w="18" h="4"  color="$paw_pad"/>
-                <!-- white tip strip -->
-                <hline x="90" y="72" len="18"     color="$paw_tip"/>
-                <hline x="90" y="73" len="18"     color="$paw_tip"/>
+                <!-- HL-near base -->
+                <rect  x="84" y="83" w="14" h="4"  color="$fur_base"/>
+                <!-- HL-near white tip -->
+                <rect  x="84" y="87" w="14" h="5"  color="$white_tip"/>
+                <hline x="86" y="87" len="10"       color="$white_bright"/>
             </pixel-data>
         </layer>
 
         <!-- ============================================================ -->
-        <!-- BELLY override                                               -->
-        <!-- Exact bounding box from abstract/dog belly layer:           -->
-        <!--   base rect: x=28, y=48, w=64, h=32                        -->
-        <!--   sternum overlay: x=36, y=36, w=40, h=24                  -->
-        <!-- White patch: FRONT portion x=28..56 (w=28)                 -->
-        <!-- Black belly: REAR portion x=56..92 (w=36)                  -->
-        <!-- Transition: 2px fade at x=54..56                            -->
+        <!-- z=1  HIND LEGS                                               -->
+        <!-- Near: thigh x=80..100, shin x=86..100, stifle x=96..106.   -->
+        <!-- Far: offset, $fur_deep.                                      -->
+        <!-- ============================================================ -->
+        <layer id="hind_legs" replace="true">
+            <pixel-data>
+                <!-- THIGH near -->
+                <rect x="80" y="44" w="20" h="20"  color="$fur_base"/>
+                <rect x="84" y="44" w="10" h="20"  color="$fur_mid"/>
+                <rect x="78" y="44" w="4"  h="20"  color="$fur_deep"/>
+                <!-- SHIN near -->
+                <rect x="86" y="62" w="14" h="20"  color="$fur_base"/>
+                <rect x="90" y="62" w="6"  h="20"  color="$fur_mid"/>
+                <!-- STIFLE SPUR — protrudes back -->
+                <rect  x="96" y="62" w="10" h="10" color="$fur_mid"/>
+                <hline x="97" y="65" len="8"        color="$fur_high"/>
+                <hline x="96" y="71" len="10"       color="$fur_deep"/>
+                <!-- METATARSUS near -->
+                <rect x="88" y="80" w="12" h="4"   color="$fur_base"/>
+                <hline x="90" y="80" len="8"        color="$fur_mid"/>
+
+                <!-- THIGH far -->
+                <rect x="68" y="44" w="20" h="20"  color="$fur_deep"/>
+                <!-- SHIN far -->
+                <rect x="74" y="62" w="14" h="20"  color="$fur_deep"/>
+                <!-- METATARSUS far -->
+                <rect x="76" y="80" w="12" h="4"   color="$fur_deep"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=2  FRONT LEGS                                              -->
+        <!-- far:  x=44..56 — starts AT chest line, never left of x=44  -->
+        <!-- near: x=48..60 — 4px right of far (depth, not 12px gap)    -->
+        <!-- ============================================================ -->
+        <layer id="front_legs" replace="true">
+            <pixel-data>
+                <!-- FAR leg: thigh -->
+                <rect x="44" y="58" w="12" h="12"  color="$fur_deep"/>
+                <!-- FAR leg: elbow -->
+                <hline x="44" y="69" len="12"       color="$fur_deep"/>
+                <!-- FAR leg: shin -->
+                <rect x="44" y="70" w="12" h="14"  color="$fur_deep"/>
+
+                <!-- NEAR leg: thigh -->
+                <rect x="48" y="58" w="12" h="12"  color="$fur_base"/>
+                <rect x="52" y="58" w="4"  h="12"  color="$fur_mid"/>
+                <vline x="48" y="58" len="12"       color="$fur_deep"/>
+                <!-- NEAR leg: elbow definition -->
+                <hline x="48" y="69" len="12"       color="$fur_deep"/>
+                <hline x="50" y="70" len="8"        color="$fur_mid"/>
+                <!-- NEAR leg: shin -->
+                <rect x="48" y="70" w="12" h="14"  color="$fur_base"/>
+                <rect x="50" y="70" w="5"  h="14"  color="$fur_mid"/>
+                <vline x="48" y="70" len="14"       color="$fur_deep"/>
+                <vline x="60" y="70" len="14"       color="$fur_deep"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=3  BODY                                                    -->
+        <!-- x=42..112. Withers y=22, croup y=30. White chest blaze.     -->
+        <!-- ============================================================ -->
+        <layer id="body" replace="true">
+            <pixel-data>
+                <!-- MAIN TORSO -->
+                <rect x="42" y="22" w="70" h="52"  color="$fur_base"/>
+                <!-- WITHERS block -->
+                <rect x="42" y="22" w="38" h="8"   color="$fur_base"/>
+                <!-- CROUP block -->
+                <rect x="78" y="30" w="34" h="8"   color="$fur_base"/>
+                <!-- SPINE HIGHLIGHT -->
+                <hline x="46" y="22" len="60"       color="$fur_high"/>
+                <rect  x="48" y="23" w="40" h="7"  color="$fur_high"/>
+                <!-- SHOULDER VOLUME -->
+                <rect x="42" y="30" w="18" h="14"  color="$fur_mid"/>
+                <!-- CROUP VOLUME -->
+                <rect x="90" y="30" w="16" h="14"  color="$fur_mid"/>
+                <!-- FLANK SHADOWS -->
+                <rect x="42" y="42" w="10" h="26"  color="$fur_deep"/>
+                <rect x="100" y="42" w="12" h="26" color="$fur_deep"/>
+                <!-- CHEST WALL -->
+                <vline x="42" y="28" len="44"       color="$fur_deep"/>
+                <!-- UNDERBELLY EDGE -->
+                <hline x="46" y="73" len="62"       color="$fur_deep"/>
+                <!-- WHITE CHEST BLAZE -->
+                <rect  x="44" y="44" w="12" h="12" color="$white_tip"/>
+                <rect  x="46" y="46" w="8"  h="8"  color="$white_bright"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=4  BELLY                                                   -->
+        <!-- Dark underside. Chest blaze continuation at top-left.       -->
         <!-- ============================================================ -->
         <layer id="belly" replace="true">
             <pixel-data>
-                <!-- Full belly base — black -->
-                <rect x="28" y="48" w="64" h="32" color="$fur_base"/>
-                <rect x="36" y="36" w="40" h="24" color="$fur_base"/>
-
-                <!-- WHITE CHEST PATCH — front portion only -->
-                <!-- Main white area -->
-                <rect x="28" y="48" w="28" h="28" color="$chest_base"/>
-                <!-- Centre highlight -->
-                <rect x="34" y="52" w="16" h="20" color="$chest_highlight"/>
-                <!-- Upper sternum extension -->
-                <rect x="36" y="36" w="16" h="16" color="$chest_base"/>
-                <rect x="38" y="38" w="12" h="12" color="$chest_highlight"/>
-
-                <!-- Transition edge — 2px fade strip at x=54..55 -->
-                <vline x="54" y="48" len="28"     color="$chest_base"/>
-                <vline x="55" y="48" len="28"     color="$fur_highlight"/>
-
-                <!-- Black belly continues from x=56 — already covered by base rect -->
-                <!-- Bottom shadow line -->
-                <hline x="28" y="79" len="64"     color="$fur_shadow"/>
+                <!-- BELLY BASE -->
+                <rect x="52" y="50" w="46" h="24"  color="$fur_base"/>
+                <!-- BELLY MID VOLUME -->
+                <rect x="60" y="54" w="30" h="14"  color="$fur_mid"/>
+                <!-- STERNUM -->
+                <rect x="44" y="46" w="14" h="18"  color="$fur_base"/>
+                <rect x="46" y="48" w="8"  h="14"  color="$fur_mid"/>
+                <!-- CHEST BLAZE CONTINUATION -->
+                <rect x="52" y="50" w="10" h="6"   color="$white_tip"/>
+                <!-- BOTTOM SHADOW -->
+                <hline x="52" y="73" len="46"       color="$fur_deep"/>
             </pixel-data>
         </layer>
 
         <!-- ============================================================ -->
-        <!-- FACE DETAILS override                                        -->
-        <!-- Side view — single near-side eye, nose at muzzle tip        -->
-        <!-- Coordinates from abstract/dog face_details:                 -->
-        <!--   eye:   x=14, y=8,  w=14, h=10                            -->
-        <!--   nose:  x=28, y=20, w=16, h=10                            -->
-        <!--   mouth: hline y=28                                         -->
-        <!-- No whiskers. Mouth closed.                                  -->
+        <!-- z=5  TAIL                                                    -->
+        <!-- Black arc x=98..126 y=16..42. 3px+ thickness. 16 elements. -->
+        <!-- ============================================================ -->
+        <layer id="tail" replace="true">
+            <pixel-data>
+                <!-- ROOT — base at croup -->
+                <rect  x="104" y="34" w="6"  h="6" color="$fur_base"/>
+                <rect  x="106" y="28" w="5"  h="8" color="$fur_base"/>
+                <hline x="104" y="39" len="6"       color="$fur_deep"/>
+                <!-- ARC seg 1 -->
+                <rect  x="108" y="26" w="5"  h="6" color="$fur_base"/>
+                <hline x="108" y="25" len="5"       color="$fur_high"/>
+                <!-- ARC seg 2 -->
+                <rect  x="110" y="23" w="4"  h="5" color="$fur_base"/>
+                <hline x="110" y="22" len="4"       color="$fur_high"/>
+                <!-- ARC seg 3 -->
+                <rect  x="112" y="20" w="4"  h="5" color="$fur_base"/>
+                <!-- OUTER HIGHLIGHT -->
+                <hline x="108" y="22" len="14"      color="$fur_high"/>
+                <!-- ARC seg 4 -->
+                <rect  x="114" y="18" w="4"  h="4" color="$fur_base"/>
+                <!-- ARC seg 5 -->
+                <rect  x="116" y="17" w="3"  h="4" color="$fur_base"/>
+                <!-- ARC seg 6 -->
+                <rect  x="118" y="16" w="3"  h="4" color="$fur_base"/>
+                <!-- ARC seg 7 — taper -->
+                <rect  x="120" y="16" w="3"  h="3" color="$fur_mid"/>
+                <!-- ARC seg 8 — taper -->
+                <rect  x="122" y="16" w="2"  h="3" color="$fur_mid"/>
+                <!-- TIP -->
+                <pixel x="124" y="16"               color="$fur_mid"/>
+                <pixel x="124" y="17"               color="$fur_deep"/>
+                <!-- UNDERSIDE SHADOW -->
+                <hline x="106" y="36" len="8"       color="$fur_deep"/>
+                <hline x="110" y="30" len="6"       color="$fur_deep"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=6  NECK                                                    -->
+        <!-- 3 rects angled 40° forward-upward, each -6..-8px X shift.  -->
+        <!-- ============================================================ -->
+        <layer id="neck" replace="true">
+            <pixel-data>
+                <!-- NECK BASE -->
+                <rect x="44" y="32" w="24" h="12"  color="$fur_base"/>
+                <rect x="46" y="32" w="16" h="12"  color="$fur_mid"/>
+                <vline x="44" y="32" len="12"       color="$fur_deep"/>
+                <vline x="68" y="32" len="12"       color="$fur_deep"/>
+                <!-- NECK MID — shift -6px X -->
+                <rect x="38" y="22" w="22" h="12"  color="$fur_base"/>
+                <rect x="40" y="22" w="14" h="12"  color="$fur_mid"/>
+                <vline x="38" y="22" len="12"       color="$fur_deep"/>
+                <vline x="60" y="22" len="12"       color="$fur_deep"/>
+                <!-- NECK TOP — shift -8px X -->
+                <rect x="30" y="12" w="20" h="12"  color="$fur_base"/>
+                <rect x="32" y="12" w="12" h="12"  color="$fur_mid"/>
+                <vline x="30" y="12" len="12"       color="$fur_deep"/>
+                <vline x="50" y="12" len="12"       color="$fur_deep"/>
+                <!-- THROAT HIGHLIGHT -->
+                <vline x="44" y="12" len="32"       color="$fur_high"/>
+                <!-- DEWLAP -->
+                <rect x="36" y="20" w="8"  h="10"  color="$fur_mid"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=7  HEAD                                                    -->
+        <!-- Full black skull+muzzle. ONE amber eye, profile.            -->
+        <!-- No brow spots, no tan patches.                               -->
+        <!-- ============================================================ -->
+        <layer id="head" replace="true">
+            <pixel-data>
+                <!-- SKULL -->
+                <rect x="18" y="4"  w="30" h="26"  color="$fur_base"/>
+                <!-- MUZZLE — protrudes LEFT to x=4 -->
+                <rect x="4"  y="20" w="22" h="14"  color="$fur_base"/>
+                <!-- SKULL-MUZZLE BRIDGE -->
+                <rect x="14" y="18" w="12" h="10"  color="$fur_base"/>
+                <!-- SKULL TOP HIGHLIGHT -->
+                <hline x="22" y="4"  len="20"       color="$fur_high"/>
+                <rect  x="24" y="5"  w="14" h="6"  color="$fur_high"/>
+                <!-- OCCIPUT SHADOW -->
+                <vline x="48" y="6"  len="20"       color="$fur_deep"/>
+                <vline x="47" y="5"  len="22"       color="$fur_deep"/>
+                <!-- CHEEKBONE VOLUME -->
+                <rect x="38" y="10" w="8"  h="16"  color="$fur_mid"/>
+                <!-- FRONTAL SHADOW -->
+                <rect x="18" y="10" w="6"  h="14"  color="$fur_deep"/>
+                <!-- MUZZLE TOP -->
+                <rect x="6"  y="20" w="16" h="5"   color="$fur_mid"/>
+                <!-- MUZZLE FRONT EDGE -->
+                <vline x="4"  y="20" len="14"       color="$fur_high"/>
+                <!-- MUZZLE TAPER -->
+                <rect x="8"  y="18" w="14" h="4"   color="$fur_base"/>
+                <hline x="10" y="18" len="10"       color="$fur_mid"/>
+                <!-- JAW BOTTOM -->
+                <hline x="6"  y="33" len="40"       color="$fur_deep"/>
+                <hline x="8"  y="34" len="36"       color="$fur_deep"/>
+                <!-- SUPRAORBITAL RIDGE -->
+                <hline x="19" y="9"  len="10"       color="$fur_deep"/>
+                <!-- SINGLE AMBER EYE — ONE only, profile -->
+                <rect  x="20" y="10" w="10" h="8"  color="#FFFFFF"/>
+                <rect  x="22" y="11" w="6"  h="6"  color="$eye_color"/>
+                <rect  x="24" y="12" w="2"  h="4"  color="#0A0A0A"/>
+                <pixel x="21" y="11"                color="#FFFFFF"/>
+                <!-- eyelids -->
+                <hline x="20" y="10" len="10"       color="$fur_deep"/>
+                <hline x="20" y="18" len="10"       color="$fur_deep"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=8  EARS                                                    -->
+        <!-- Pricked upward. Black exterior. $ear_inside interior.       -->
+        <!-- Near: tip y=0. Far: tip y=2. No pink, no rust.             -->
+        <!-- ============================================================ -->
+        <layer id="ears" replace="true">
+            <pixel-data>
+                <!-- NEAR EAR exterior -->
+                <hline x="20" y="6"  len="12"       color="$fur_base"/>
+                <hline x="22" y="4"  len="8"        color="$fur_base"/>
+                <hline x="24" y="2"  len="5"        color="$fur_base"/>
+                <hline x="25" y="1"  len="3"        color="$fur_base"/>
+                <pixel x="27" y="0"                 color="$fur_base"/>
+                <!-- NEAR EAR interior -->
+                <rect  x="22" y="3"  w="8"  h="5"  color="$ear_inside"/>
+                <hline x="23" y="2"  len="6"        color="$ear_inside"/>
+                <!-- NEAR EAR edge shadow -->
+                <vline x="20" y="3"  len="4"        color="$fur_deep"/>
+                <vline x="32" y="3"  len="4"        color="$fur_deep"/>
+                <hline x="20" y="7"  len="14"       color="$fur_deep"/>
+
+                <!-- FAR EAR exterior -->
+                <hline x="30" y="8"  len="10"       color="$fur_deep"/>
+                <hline x="32" y="5"  len="6"        color="$fur_deep"/>
+                <hline x="33" y="3"  len="4"        color="$fur_deep"/>
+                <pixel x="35" y="2"                 color="$fur_deep"/>
+                <!-- FAR EAR interior -->
+                <rect  x="31" y="5"  w="6"  h="4"  color="$fur_deep"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=9  FACE DETAILS                                            -->
+        <!-- Nose + closed mouth ONLY. Eye is in head layer.             -->
         <!-- ============================================================ -->
         <layer id="face_details" replace="true">
             <pixel-data>
-                <!-- EYE — single, near-side, side view -->
-                <!-- white sclera base -->
-                <rect x="14" y="8"  w="14" h="10" color="#FFFFFF"/>
-                <!-- dark brown iris -->
-                <rect x="18" y="10" w="8"  h="6"  color="$eye_color"/>
-                <!-- iris highlight -->
-                <pixel x="18" y="10"              color="$eye_highlight"/>
-                <pixel x="19" y="10"              color="$eye_highlight"/>
-                <!-- pupil -->
-                <rect x="21" y="11" w="3"  h="4"  color="#000000"/>
-                <!-- eye shine -->
-                <pixel x="21" y="11"              color="#FFFFFF"/>
-                <!-- brow ridge -->
-                <hline x="14" y="7"  len="14"     color="$fur_shadow"/>
-                <hline x="16" y="6"  len="10"     color="$fur_shadow"/>
-                <!-- lower lid -->
-                <hline x="14" y="18" len="14"     color="$fur_shadow"/>
-
-                <!-- NOSE — at muzzle tip, black with highlight -->
-                <!-- abstract/dog nose: x=28, y=20, w=16, h=10 -->
-                <rect x="28" y="20" w="16" h="10" color="$nose_color"/>
-                <!-- shine strip -->
-                <hline x="29" y="20" len="6"      color="$nose_highlight"/>
-                <hline x="29" y="21" len="4"      color="$nose_highlight"/>
-                <!-- nostril divider -->
-                <vline x="36" y="21" len="7"      color="$fur_shadow"/>
-                <!-- nose bridge -->
-                <rect x="30" y="16" w="6"  h="5"  color="$fur_shadow"/>
-
-                <!-- MOUTH — closed, single shadow line -->
-                <!-- abstract/dog mouth hline y=28 -->
-                <hline x="22" y="28" len="28"     color="$fur_shadow"/>
-                <!-- jaw fold corners -->
-                <pixel x="22" y="29"              color="$fur_shadow"/>
-                <pixel x="50" y="29"              color="$fur_shadow"/>
+                <!-- NOSE -->
+                <rect  x="4"  y="24" w="8"  h="6"  color="$nose_color"/>
+                <hline x="5"  y="24" len="4"        color="$nose_high"/>
+                <hline x="5"  y="25" len="3"        color="$nose_high"/>
+                <pixel x="7"  y="26"                color="#0A0A0A"/>
+                <pixel x="9"  y="27"                color="#0A0A0A"/>
+                <!-- NOSE BRIDGE -->
+                <rect  x="6"  y="20" w="4"  h="5"  color="$fur_deep"/>
+                <!-- MOUTH — closed -->
+                <hline x="6"  y="30" len="12"       color="$fur_deep"/>
+                <pixel x="6"  y="31"                color="$fur_deep"/>
+                <pixel x="18" y="31"                color="$fur_deep"/>
+                <!-- CHIN -->
+                <hline x="8"  y="32" len="8"        color="$fur_deep"/>
             </pixel-data>
         </layer>
 
