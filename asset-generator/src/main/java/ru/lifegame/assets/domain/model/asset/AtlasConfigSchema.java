@@ -36,8 +36,8 @@ import java.util.List;
  * {
  *   "configVersion": "1.4",
  *   "revision": "latest",
- *   "entity": "bookshelf",
- *   "displayScale": 1.0,
+ *   "entity": "tanya",
+ *   "displayScale": 3.0,
  *   "animations": {
  *     "idle": {
  *       "file": "idle_atlas.png",
@@ -52,6 +52,19 @@ import java.util.List;
  *       "frameHeight": 88,
  *       "fps": 2,
  *       "loop": true
+ *     },
+ *     "walk": {
+ *       "file": "walk_atlas.png",
+ *       "layout": "grid",
+ *       "renderMode": "sprite",
+ *       "columns": 4,
+ *       "frameWidth": 64,
+ *       "frameHeight": 64,
+ *       "rows": [
+ *         { "rowIndex": 0, "condition": { "type": "time_of_day", "value": "morning" }, "fps": 4, "loop": true },
+ *         { "rowIndex": 1, "condition": { "type": "time_of_day", "value": "day" }, "fps": 4, "loop": true }
+ *       ],
+ *       "defaultRow": 0
  *     }
  *   }
  * }
@@ -101,11 +114,24 @@ public record AtlasConfigSchema(
                               int fps, boolean loop) {
             this(file, "strip", "sprite", null, columns, frameWidth, frameHeight, fps, loop, List.of(), 0);
         }
+
+        /** Grid constructor — for multi-row animations (e.g. time-of-day variants). */
+        public AnimationEntry(String file, int columns, int frameWidth, int frameHeight,
+                              List<RowDef> rows, int defaultRow) {
+            this(file, "grid", "sprite", null, columns, frameWidth, frameHeight, 0, true, rows, defaultRow);
+        }
     }
 
     /**
      * Crop offset info — present when animation frames were cropped to their
      * non-transparent bounding box during generation.
+     * <p>
+     * These four fields are written to sprite-atlas.json so the frontend can
+     * position the sprite correctly within the scene.
+     * The actual cropped frame dimensions (croppedWidth, croppedHeight) are
+     * stored in Java only (in AtlasConfigWriter.CropOffsetDef) and reflected
+     * in the per-animation frameWidth/frameHeight JSON fields — they are NOT
+     * part of the cropOffset JSON block.
      *
      * @param x              X offset of cropped region from original canvas top-left
      * @param y              Y offset of cropped region from original canvas top-left
