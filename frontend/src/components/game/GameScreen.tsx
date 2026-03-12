@@ -14,8 +14,8 @@ import './GameScreen.css';
 
 export function GameScreen() {
   const {
-    player, time, availableActions, activeQuests, relationships,
-    npcActivities, isLoading, error, fetchGameState, executeAction, lastActionResult,
+    player, time, availableActions, activeQuests, relationships, pets,
+    npcActivities, domainEvents, isLoading, error, fetchGameState, executeAction, lastActionResult,
     activeConflicts, currentEvent, selectTactic, selectChoice, cancelConflict, cancelEvent,
   } = useGameStore();
 
@@ -35,12 +35,20 @@ export function GameScreen() {
     return () => clearTimeout(timeout);
   }, [lastActionResult, availableActions]);
 
-  const rawTimeSlot    = time?.timeSlot ?? 'MORNING';
-  const locationId     = player?.location ?? getLocationForTimeSlot(rawTimeSlot);
-  const locationConfig = getLocationConfig(locationId);
-  const timeOfDay      = rawTimeSlot.toLowerCase();
-  const gameTime       = time ?? { day: 1, hour: 7, timeSlot: 'MORNING' };
+  const rawTimeSlot = time?.timeSlot ?? 'MORNING';
+  const timeOfDay   = rawTimeSlot.toLowerCase();
 
+  const locationId = useMemo(
+    () => player?.location ?? getLocationForTimeSlot(rawTimeSlot),
+    [player?.location, rawTimeSlot]
+  );
+
+  const locationConfig = useMemo(
+    () => getLocationConfig(locationId),
+    [locationId]
+  );
+
+  const gameTime      = time ?? { day: 1, hour: 7, timeSlot: 'MORNING' };
   const activeConflict = activeConflicts[0] ?? null;
 
   /** Record<characterSlotId, animationName> */
@@ -119,6 +127,9 @@ export function GameScreen() {
           availableActions={availableActions}
           activeQuests={activeQuests}
           relationships={relationships}
+          pets={pets}
+          npcActivities={npcActivities}
+          domainEvents={domainEvents}
           onActionClick={(action) => {
             setSelectedObjectId(null);
             setSelectedAction(action);
