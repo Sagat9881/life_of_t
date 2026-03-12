@@ -326,6 +326,132 @@ export const LOCATIONS: Record<string, LocationConfig> = {
       },
     ],
   },
+
+  office: {
+    id: 'office',
+    name: 'Офис',
+    locationAsset: 'office',
+    backgroundAnimation: 'idle',
+    furniture: [
+      {
+        id: 'work_desk',
+        entityName: 'work_desk',
+        animation: 'idle',
+        x: 30, y: 88,
+        sceneHeight: 18,
+        scale: 1, zOrder: 12,
+        actionCode: 'WORK_AT_OFFICE',
+        label: 'Рабочее место',
+      },
+      {
+        id: 'office_chair',
+        entityName: 'office_chair',
+        animation: 'idle',
+        x: 30, y: 95,
+        sceneHeight: 12,
+        scale: 1, zOrder: 14,
+      },
+      {
+        id: 'printer',
+        entityName: 'printer',
+        animation: 'idle',
+        x: 70, y: 85,
+        sceneHeight: 14,
+        scale: 1, zOrder: 10,
+      },
+      {
+        id: 'coffee_machine',
+        entityName: 'coffee_machine',
+        animation: 'idle',
+        x: 82, y: 86,
+        sceneHeight: 12,
+        scale: 1, zOrder: 10,
+        actionCode: 'DRINK_COFFEE',
+        label: 'Кофемашина',
+      },
+      {
+        id: 'office_plant',
+        entityName: 'office_plant',
+        animation: 'idle',
+        x: 10, y: 82,
+        sceneHeight: 16,
+        scale: 1, zOrder: 8,
+      },
+    ],
+    characters: [
+      {
+        id: 'tanya',
+        entityName: 'tanya',
+        defaultAnimation: 'idle',
+        x: 35, y: 92,
+        sceneHeight: 38,
+        scale: 1, zOrder: 50,
+      },
+    ],
+  },
+
+  park: {
+    id: 'park',
+    name: 'Городской парк',
+    locationAsset: 'park',
+    backgroundAnimation: 'idle',
+    furniture: [
+      {
+        id: 'park_bench',
+        entityName: 'park_bench',
+        animation: 'idle',
+        x: 25, y: 90,
+        sceneHeight: 12,
+        scale: 1, zOrder: 10,
+        actionCode: 'REST_AT_PARK',
+        label: 'Скамейка',
+      },
+      {
+        id: 'park_tree',
+        entityName: 'park_tree',
+        animation: 'idle',
+        x: 75, y: 78,
+        sceneHeight: 28,
+        scale: 1, zOrder: 8,
+      },
+      {
+        id: 'park_tree_2',
+        entityName: 'park_tree',
+        animation: 'idle',
+        x: 15, y: 80,
+        sceneHeight: 24,
+        scale: 1, zOrder: 8,
+      },
+      {
+        id: 'fountain',
+        entityName: 'fountain',
+        animation: 'running',
+        x: 60, y: 88,
+        sceneHeight: 18,
+        scale: 1, zOrder: 12,
+      },
+      {
+        id: 'ice_cream_stall',
+        entityName: 'ice_cream_stall',
+        animation: 'idle',
+        x: 88, y: 88,
+        sceneHeight: 16,
+        scale: 1, zOrder: 10,
+        actionCode: 'BUY_ICE_CREAM',
+        label: 'Мороженое',
+      },
+    ],
+    characters: [
+      {
+        id: 'tanya',
+        entityName: 'tanya',
+        defaultAnimation: 'idle',
+        x: 45, y: 92,
+        sceneHeight: 38,
+        scale: 1, zOrder: 50,
+      },
+    ],
+  },
 };
 
 export const getLocationConfig = (locationId: string): LocationConfig =>
@@ -334,7 +460,7 @@ export const getLocationConfig = (locationId: string): LocationConfig =>
 export const getLocationForTimeSlot = (timeSlot: string): string => {
   switch (timeSlot) {
     case 'MORNING': return 'home_room';
-    case 'DAY':     return 'home_room';
+    case 'DAY':     return 'office';
     case 'EVENING': return 'kitchen';
     case 'NIGHT':   return 'home_room';
     default:        return 'home_room';
