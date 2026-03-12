@@ -11,10 +11,12 @@ import { useEffect } from 'react';
 import type { LocationConfig } from '../types/location.types';
 import type { AtlasConfig, CanvasAssetsRefs } from './canvasTypes';
 
+export type { CanvasAssetsRefs };
+
 export interface UseCanvasAssetsOptions {
   config: LocationConfig;
   characterAnimations: Record<string, string>;
-  timeOfDay?: string;
+  timeOfDay?: string | undefined;
   assetsRefs: CanvasAssetsRefs;
 }
 
@@ -102,21 +104,21 @@ export function useCanvasAssets({
 
       // Furniture
       for (const item of config.furniture) {
-        const anim = item.animationKey ?? 'idle';
+        const anim = item.animation ?? item.animationKey ?? 'idle';
         enqueueImage('locations', item.assetKey, anim);
         enqueueConfig('locations', item.assetKey);
         // init slot state
         if (!slotStateRef.current.has(item.id)) {
-          slotStateRef.current.set(item.id, { currentFrame: 0, lastFrameTime: 0 });
+          slotStateRef.current.set(item.id, { animationName: anim, frameIndex: 0, lastFrameTime: 0 });
         }
       }
 
       // Characters
       for (const slot of config.characters) {
-        enqueueImage('characters', slot.id, slot.defaultAnimation);
-        enqueueConfig('characters', slot.id);
+        enqueueImage('characters', slot.entityName, slot.defaultAnimation);
+        enqueueConfig('characters', slot.entityName);
         if (!slotStateRef.current.has(slot.id)) {
-          slotStateRef.current.set(slot.id, { currentFrame: 0, lastFrameTime: 0 });
+          slotStateRef.current.set(slot.id, { animationName: slot.defaultAnimation, frameIndex: 0, lastFrameTime: 0 });
         }
       }
 
@@ -136,7 +138,7 @@ export function useCanvasAssets({
 
     for (const slot of config.characters) {
       const animName = characterAnimations[slot.id] ?? slot.defaultAnimation;
-      const url = atlasUrl('characters', slot.id, animName);
+      const url = atlasUrl('characters', slot.entityName, animName);
       if (!imagesRef.current.has(url)) {
         tasks.push(
           loadImage(url).then((img) => {

@@ -4,6 +4,8 @@
  * Do NOT import from this file in non-canvas code.
  */
 
+import React from 'react';
+
 export interface CropOffset {
   x: number;
   y: number;
@@ -13,7 +15,7 @@ export interface CropOffset {
 
 export interface AnimationConfig {
   file: string;
-  layout: 'strip';
+  layout: 'strip' | 'grid';
   columns: number;
   frameWidth: number;
   frameHeight: number;
@@ -31,4 +33,10 @@ export interface SlotState {
   animationName: string;
   frameIndex: number;
   lastFrameTime: number;
+}
+
+export interface CanvasAssetsRefs {
+  imagesRef: React.MutableRefObject<Map<string, HTMLImageElement>>;
+  atlasConfigsRef: React.MutableRefObject<Map<string, AtlasConfig>>;
+  slotStateRef: React.MutableRefObject<Map<string, SlotState>>;
 }
