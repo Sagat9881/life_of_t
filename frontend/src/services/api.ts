@@ -19,11 +19,9 @@ export const api = {
    */
   async getGameState(): Promise<GameStateResponse> {
     const telegramUserId = getTelegramUserId();
-    
     try {
       return await gameApi.getState(telegramUserId);
     } catch (error) {
-      // Если сессия не найдена - создаём новую
       if (error instanceof ApiError && error.status === 404) {
         console.log('Session not found, creating new session...');
         return await gameApi.startSession({ telegramUserId });
@@ -54,5 +52,13 @@ export const api = {
   async selectChoice(eventId: string, optionCode: string): Promise<GameStateResponse> {
     const telegramUserId = getTelegramUserId();
     return gameApi.chooseEventOption({ telegramUserId, eventId, optionCode });
+  },
+
+  /**
+   * Завершить день
+   */
+  async endDay(): Promise<GameStateResponse> {
+    const telegramUserId = getTelegramUserId();
+    return gameApi.endDay({ telegramUserId });
   },
 };

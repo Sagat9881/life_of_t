@@ -23,6 +23,10 @@ export interface ChooseEventOptionRequest {
   optionCode: string;
 }
 
+export interface EndDayRequest {
+  telegramUserId: string;
+}
+
 export interface ApiError {
   code: string;
   message: string;
@@ -35,6 +39,7 @@ export type StartSessionResponse = GameState;
 export type ExecuteActionResponse = GameState;
 export type ChooseConflictTacticResponse = GameState;
 export type ChooseEventOptionResponse = GameState;
+export type EndDayResponse = GameState;
 
 export interface ApiConfig {
   baseUrl: string;
@@ -48,4 +53,5 @@ export interface GameApi {
   executeAction: (request: ExecuteActionRequest) => Promise<ExecuteActionResponse>;
   chooseConflictTactic: (request: ChooseConflictTacticRequest) => Promise<ChooseConflictTacticResponse>;
   chooseEventOption: (request: ChooseEventOptionRequest) => Promise<ChooseEventOptionResponse>;
+  endDay: (request: EndDayRequest) => Promise<EndDayResponse>;
 }

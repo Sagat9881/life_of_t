@@ -4,6 +4,8 @@ import type {
   ExecuteActionRequest,
   ChooseConflictTacticRequest,
   ChooseEventOptionRequest,
+  EndDayRequest,
+  EndDayResponse,
   GameStateResponse,
 } from '@/types/api';
 import { API_BASE_URL, API_TIMEOUT } from '@/utils/constants';
@@ -94,9 +96,7 @@ export const gameApi: GameApi = {
   getState: async (telegramUserId: string): Promise<GameStateResponse> => {
     return request<GameStateResponse>(
       `/api/v1/game/state?telegramUserId=${telegramUserId}`,
-      {
-        method: 'GET',
-      }
+      { method: 'GET' }
     );
   },
 
@@ -129,6 +129,16 @@ export const gameApi: GameApi = {
     data: ChooseEventOptionRequest
   ): Promise<GameStateResponse> => {
     return request<GameStateResponse>('/api/v1/game/event-choice', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  /**
+   * Завершить день
+   */
+  endDay: async (data: EndDayRequest): Promise<EndDayResponse> => {
+    return request<EndDayResponse>('/api/v1/game/day/end', {
       method: 'POST',
       body: JSON.stringify(data),
     });
