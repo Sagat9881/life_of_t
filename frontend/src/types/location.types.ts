@@ -1,30 +1,24 @@
-/**
- * Location type definitions for Canvas-based scene rendering
- */
-
 export interface FurniturePlacement {
   readonly id: string;
-  readonly entityName: string;
-  readonly animation: string;
-  readonly x: number;          // 0–100 (% of scene width)
-  readonly y: number;          // 0–100 (% of scene height)
-  readonly sceneHeight: number; // 0–100 (% of scene height)
-  readonly scale: number;       // multiplier, default 1
+  readonly assetKey: string;
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
   readonly zOrder: number;
-  readonly flipX?: boolean;
   readonly actionCode?: string;
   readonly label?: string;
+  readonly animationKey?: string;
 }
 
 export interface CharacterSlot {
   readonly id: string;
-  readonly entityName: string;
-  readonly defaultAnimation: string;
-  readonly x: number;          // 0–100
-  readonly y: number;          // 0–100
-  readonly sceneHeight: number; // 0–100 (% of scene height)
-  readonly scale: number;
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
   readonly zOrder: number;
+  readonly defaultAnimation: string;
 }
 
 export interface LocationConfig {
@@ -32,6 +26,7 @@ export interface LocationConfig {
   readonly name: string;
   readonly locationAsset: string;
   readonly backgroundAnimation: string;
+  readonly backgroundAnimations?: Readonly<Record<string, string>>;
   readonly furniture: readonly FurniturePlacement[];
   readonly characters: readonly CharacterSlot[];
 }
