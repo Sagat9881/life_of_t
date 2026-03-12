@@ -1,46 +1,40 @@
 /**
- * useCanvasAssets
+ * useCanvasAssets — asset loading for the Canvas pipeline.
  *
- * Manages loading of all atlas PNGs and sprite-atlas.json configs.
- *
- * Effect 1 (dep: config)              — full reload on location change
- * Effect 2 (dep: characterAnimations) — delta-load on animation switch
- *
- * URL scheme:
- *   /assets/{type}/{name}/animations/{animation}_atlas.png
- *   /assets/{type}/{name}/sprite-atlas.json
+ * Effect 1: loads all assets for the current location config (including
+ *           prefetch of all backgroundAnimations variants).
+ * Effect 2: delta-loads character animation atlases when characterAnimations changes.
+ * Effect 3: delta-loads the background atlas for the current timeOfDay if not cached.
  */
 
 import { useEffect } from 'react';
-import type { LocationConfig, FurniturePlacement, CharacterSlot } from '../types/location.types';
-import type { AtlasConfig, SlotState } from './canvasTypes';
-import React from 'react';
+import type { LocationConfig } from '../types/location.types';
+import type { AtlasConfig, CanvasAssetsRefs } from './canvasTypes';
 
-export interface CanvasAssetsRefs {
-  imagesRef: React.MutableRefObject<Map<string, HTMLImageElement>>;
-  atlasConfigsRef: React.MutableRefObject<Map<string, AtlasConfig>>;
-  slotStateRef: React.MutableRefObject<Map<string, SlotState>>;
-}
-
-interface UseCanvasAssetsOptions {
+export interface UseCanvasAssetsOptions {
   config: LocationConfig;
-  characterAnimations?: Record<string, string>;
+  characterAnimations: Record<string, string>;
+  timeOfDay?: string;
   assetsRefs: CanvasAssetsRefs;
 }
 
-// ── URL utilities ────────────────────────────────────────────────────────────
+// ─── helpers ────────────────────────────────────────────────────────────────
 
-export const atlasUrl = (type: string, name: string, animation: string): string =>
-  `/assets/${type}/${name}/animations/${animation}_atlas.png`;
+export function atlasUrl(
+  category: string,
+  assetKey: string,
+  animationName: string,
+): string {
+  return `/assets/${category}/${assetKey}/animations/${animationName}_atlas.png`;
+}
 
-export const atlasConfigUrl = (type: string, name: string): string =>
-  `/assets/${type}/${name}/sprite-atlas.json`;
+export function atlasConfigUrl(category: string, assetKey: string): string {
+  return `/assets/${category}/${assetKey}/sprite-atlas.json`;
+}
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-export async function fetchAtlasConfig(type: string, name: string): Promise<AtlasConfig | null> {
+async function fetchAtlasConfig(url: string): Promise<AtlasConfig | null> {
   try {
-    const res = await fetch(atlasConfigUrl(type, name));
+    const res = await fetch(url);
     if (!res.ok) return null;
     return (await res.json()) as AtlasConfig;
   } catch {
@@ -48,113 +42,128 @@ export async function fetchAtlasConfig(type: string, name: string): Promise<Atla
   }
 }
 
-export function loadImage(src: string): Promise<HTMLImageElement | null> {
+async function loadImage(url: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload  = () => resolve(img);
-    img.onerror = () => { console.warn(`[canvas] 404: ${src}`); resolve(null); };
-    img.src = src;
+    img.onerror = () => resolve(null);
+    img.src = url;
   });
 }
 
-// ── Hook ─────────────────────────────────────────────────────────────────────
+// ─── hook ───────────────────────────────────────────────────────────────────
 
 export function useCanvasAssets({
   config,
   characterAnimations,
+  timeOfDay,
   assetsRefs,
 }: UseCanvasAssetsOptions): void {
   const { imagesRef, atlasConfigsRef, slotStateRef } = assetsRefs;
 
-  // Effect 1: full asset reload when location config changes
+  // Effect 1: full location load
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    imagesRef.current.clear();
-    atlasConfigsRef.current.clear();
-    slotStateRef.current.clear();
-
     let cancelled = false;
 
-    const loadAll = async (): Promise<void> => {
-      const work: Promise<void>[] = [];
+    async function loadAll(): Promise<void> {
+      const toLoad: Array<Promise<void>> = [];
 
-      const enqueueImage = (type: string, name: string, anim: string): void => {
-        const url = atlasUrl(type, name, anim);
+      function enqueueImage(category: string, assetKey: string, animName: string): void {
+        const url = atlasUrl(category, assetKey, animName);
         if (imagesRef.current.has(url)) return;
-        work.push(
+        toLoad.push(
           loadImage(url).then((img) => {
             if (img && !cancelled) imagesRef.current.set(url, img);
-          })
+          }),
         );
-      };
+      }
 
-      const enqueueConfig = (type: string, name: string): void => {
-        const key = atlasConfigUrl(type, name);
-        if (atlasConfigsRef.current.has(key)) return;
-        work.push(
-          fetchAtlasConfig(type, name).then((cfg) => {
-            if (cfg && !cancelled) atlasConfigsRef.current.set(key, cfg);
-          })
+      function enqueueConfig(category: string, assetKey: string): void {
+        const url = atlasConfigUrl(category, assetKey);
+        if (atlasConfigsRef.current.has(url)) return;
+        toLoad.push(
+          fetchAtlasConfig(url).then((cfg) => {
+            if (cfg && !cancelled) atlasConfigsRef.current.set(url, cfg);
+          }),
         );
-      };
+      }
 
+      // Background: fallback
       enqueueImage('locations', config.locationAsset, config.backgroundAnimation);
+      // Background: prefetch all timeOfDay variants
+      if (config.backgroundAnimations) {
+        Object.values(config.backgroundAnimations).forEach((animName) => {
+          enqueueImage('locations', config.locationAsset, animName);
+        });
+      }
+      // Sprite-atlas config (one per location)
       enqueueConfig('locations', config.locationAsset);
 
-      slotStateRef.current.set('__background__', {
-        animationName: '__bg__',
-        frameIndex: 0,
-        lastFrameTime: 0,
-      });
+      // Furniture
+      for (const item of config.furniture) {
+        const anim = item.animationKey ?? 'idle';
+        enqueueImage('locations', item.assetKey, anim);
+        enqueueConfig('locations', item.assetKey);
+        // init slot state
+        if (!slotStateRef.current.has(item.id)) {
+          slotStateRef.current.set(item.id, { currentFrame: 0, lastFrameTime: 0 });
+        }
+      }
 
-      config.furniture.forEach((f: FurniturePlacement) => {
-        enqueueImage('furniture', f.entityName, f.animation);
-        enqueueConfig('furniture', f.entityName);
-        slotStateRef.current.set('furniture_' + f.id, {
-          animationName: f.animation,
-          frameIndex: 0,
-          lastFrameTime: 0,
-        });
-      });
+      // Characters
+      for (const slot of config.characters) {
+        enqueueImage('characters', slot.id, slot.defaultAnimation);
+        enqueueConfig('characters', slot.id);
+        if (!slotStateRef.current.has(slot.id)) {
+          slotStateRef.current.set(slot.id, { currentFrame: 0, lastFrameTime: 0 });
+        }
+      }
 
-      config.characters.forEach((c: CharacterSlot) => {
-        const anim = characterAnimations?.[c.id] ?? c.defaultAnimation;
-        enqueueImage('characters', c.entityName, anim);
-        enqueueConfig('characters', c.entityName);
-        slotStateRef.current.set(c.id, {
-          animationName: anim,
-          frameIndex: 0,
-          lastFrameTime: 0,
-        });
-      });
+      await Promise.all(toLoad);
+    }
 
-      await Promise.all(work);
-    };
-
-    loadAll().catch((e) => console.error('[canvas] load error:', e));
+    void loadAll();
     return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config]);
 
-  // Effect 2: delta-load when a character switches animation
+  // Effect 2: delta-load character animations
   useEffect(() => {
     if (!characterAnimations) return;
     let cancelled = false;
 
-    const work: Promise<void>[] = [];
-    config.characters.forEach((c: CharacterSlot) => {
-      const anim = characterAnimations[c.id] ?? c.defaultAnimation;
-      const url  = atlasUrl('characters', c.entityName, anim);
-      if (imagesRef.current.has(url)) return;
-      work.push(
-        loadImage(url).then((img) => {
-          if (img && !cancelled) imagesRef.current.set(url, img);
-        })
-      );
-    });
+    const tasks: Array<Promise<void>> = [];
 
-    if (work.length > 0) {
-      Promise.all(work).catch((e) => console.error('[canvas] delta load error:', e));
+    for (const slot of config.characters) {
+      const animName = characterAnimations[slot.id] ?? slot.defaultAnimation;
+      const url = atlasUrl('characters', slot.id, animName);
+      if (!imagesRef.current.has(url)) {
+        tasks.push(
+          loadImage(url).then((img) => {
+            if (img && !cancelled) imagesRef.current.set(url, img);
+          }),
+        );
+      }
     }
+
+    void Promise.all(tasks);
     return () => { cancelled = true; };
   }, [characterAnimations, config.characters]);
+
+  // Effect 3: delta-load background for current timeOfDay
+  useEffect(() => {
+    if (!timeOfDay || !config.backgroundAnimations) return;
+
+    const animName = config.backgroundAnimations[timeOfDay] ?? config.backgroundAnimation;
+    const url = atlasUrl('locations', config.locationAsset, animName);
+
+    if (imagesRef.current.has(url)) return;
+
+    let cancelled = false;
+    loadImage(url).then((img) => {
+      if (img && !cancelled) imagesRef.current.set(url, img);
+    }).catch((e) => console.error('[canvas] timeOfDay delta load error:', e));
+
+    return () => { cancelled = true; };
+  }, [timeOfDay, config.locationAsset, config.backgroundAnimation, config.backgroundAnimations]);
 }
