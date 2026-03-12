@@ -170,6 +170,216 @@
   cursor: not-allowed;
 }
 
+/* ── Conflict Dialog ── */
+.gs-conflict {
+  max-width: 480px;
+  width: 100%;
+  text-align: left;
+}
+
+.gs-conflict__header {
+  margin-bottom: 16px;
+}
+
+.gs-conflict__stage {
+  font-size: 8px;
+  color: #8a7fa0;
+  margin-top: 4px;
+}
+
+.gs-conflict__csp {
+  margin-bottom: 20px;
+}
+
+.gs-conflict__csp-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 8px;
+  margin-bottom: 6px;
+}
+
+.gs-conflict__csp-you {
+  color: #4fc3f7;
+}
+
+.gs-conflict__csp-vs {
+  color: #8a7fa0;
+}
+
+.gs-conflict__csp-opponent {
+  color: #f093fb;
+}
+
+.gs-conflict__csp-bar {
+  display: flex;
+  height: 12px;
+  border: 2px solid #4a3f5d;
+  overflow: hidden;
+  image-rendering: pixelated;
+}
+
+.gs-conflict__csp-player {
+  background: #4fc3f7;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.gs-conflict__csp-enemy {
+  background: #f093fb;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.gs-conflict__csp-values {
+  display: flex;
+  justify-content: space-between;
+  font-size: 8px;
+  color: #c0b8d0;
+  margin-top: 4px;
+}
+
+.gs-conflict__tactics-label {
+  font-size: 9px;
+  color: #f093fb;
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+}
+
+.gs-conflict__tactics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.gs-conflict__tactic {
+  background: #2a1f3d;
+  border: 2px solid #4a3f5d;
+  padding: 10px 8px;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.gs-conflict__tactic:hover:not(:disabled) {
+  border-color: #f093fb;
+  background: #3a2f4d;
+}
+
+.gs-conflict__tactic:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.gs-conflict__tactic-name {
+  display: block;
+  font-size: 8px;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.gs-conflict__tactic-desc {
+  display: block;
+  font-size: 7px;
+  color: #8a7fa0;
+}
+
+/* ── Event Dialog ── */
+.gs-event {
+  max-width: 520px;
+  width: 100%;
+  text-align: left;
+}
+
+.gs-event__description {
+  font-size: 8px;
+  color: #c0b8d0;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.gs-event__dialogue {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.gs-event__dialogue::-webkit-scrollbar {
+  width: 4px;
+}
+
+.gs-event__dialogue::-webkit-scrollbar-track {
+  background: #2a1f3d;
+}
+
+.gs-event__dialogue::-webkit-scrollbar-thumb {
+  background: #4a3f5d;
+}
+
+.gs-event__line {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  background: #2a1f3d;
+  border: 1px solid #4a3f5d;
+  padding: 8px 10px;
+}
+
+.gs-event__speaker {
+  font-size: 8px;
+  font-weight: bold;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.gs-event__text {
+  font-size: 8px;
+  color: #e0d8f0;
+  line-height: 1.5;
+}
+
+.gs-event__choices-label {
+  font-size: 9px;
+  color: #f093fb;
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+}
+
+.gs-event__choices {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.gs-event__choice {
+  background: #2a1f3d;
+  border: 2px solid #4a3f5d;
+  padding: 10px 12px;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 8px;
+  color: #e0d8f0;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.gs-event__choice:hover:not(:disabled) {
+  border-color: #f093fb;
+  background: #3a2f4d;
+  color: #fff;
+}
+
+.gs-event__choice:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .gs-main {
@@ -181,5 +391,9 @@
   .gs-main {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr auto;
+  }
+
+  .gs-conflict__tactics {
+    grid-template-columns: 1fr;
   }
 }

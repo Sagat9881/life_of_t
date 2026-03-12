@@ -6,6 +6,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { LocationRenderer } from './LocationRenderer';
 import { Sidebar } from './Sidebar';
+import { ConflictDialog } from './ConflictDialog';
+import { EventDialog } from './EventDialog';
 import { getLocationConfig, getLocationForTimeSlot } from '../../config/locations';
 import type { ActionOption } from '../../types/game';
 import './GameScreen.css';
@@ -14,6 +16,7 @@ export function GameScreen() {
   const {
     player, time, availableActions, activeQuests, relationships,
     npcActivities, isLoading, error, fetchGameState, executeAction, lastActionResult,
+    activeConflicts, currentEvent, selectTactic, selectChoice, cancelConflict, cancelEvent,
   } = useGameStore();
 
   const [selectedAction, setSelectedAction] = useState<ActionOption | null>(null);
@@ -37,6 +40,8 @@ export function GameScreen() {
   const locationConfig = getLocationConfig(locationId);
   const timeOfDay      = rawTimeSlot.toLowerCase();
   const gameTime       = time ?? { day: 1, hour: 7, timeSlot: 'MORNING' };
+
+  const activeConflict = activeConflicts[0] ?? null;
 
   /** Record<characterSlotId, animationName> */
   const characterAnimations = useMemo((): Record<string, string> => {
@@ -69,6 +74,16 @@ export function GameScreen() {
     } catch (err: unknown) {
       console.error('Action failed:', err instanceof Error ? err.message : err);
     }
+  };
+
+  const handleSelectTactic = async (tacticCode: string): Promise<void> => {
+    if (!activeConflict) return;
+    await selectTactic(activeConflict.id, tacticCode);
+  };
+
+  const handleSelectChoice = async (optionCode: string): Promise<void> => {
+    if (!currentEvent) return;
+    await selectChoice(currentEvent.id, optionCode);
   };
 
   if (isLoading && !player) return <div className="gs-loading">Загрузка...</div>;
@@ -113,7 +128,25 @@ export function GameScreen() {
 
       <footer className="gs-footer">Кликни на предмет или выбери действие</footer>
 
-      {selectedAction && (
+      {activeConflict && (
+        <ConflictDialog
+          conflict={activeConflict}
+          isLoading={isLoading}
+          onSelectTactic={handleSelectTactic}
+          onRetreat={cancelConflict}
+        />
+      )}
+
+      {!activeConflict && currentEvent && (
+        <EventDialog
+          event={currentEvent}
+          isLoading={isLoading}
+          onSelectOption={handleSelectChoice}
+          onClose={cancelEvent}
+        />
+      )}
+
+      {!activeConflict && !currentEvent && selectedAction && (
         <div className="gs-dialog-overlay" onClick={handleDialogClose}>
           <div className="gs-dialog" onClick={(e) => e.stopPropagation()}>
             <div className="gs-dialog__title">{selectedAction.label}</div>
