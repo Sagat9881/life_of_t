@@ -26,6 +26,7 @@ export function useCanvasRenderer({
   config,
   canvasRef,
   viewportRef,
+  timeOfDay,
   selectedObjectId,
   hoveredObjectId,
   characterAnimations,
@@ -39,16 +40,19 @@ export function useCanvasRenderer({
   const hoveredRef      = useRef<string | null>(hoveredObjectId);
   const charAnimsRef    = useRef<Record<string, string> | undefined>(characterAnimations);
   const rafRef          = useRef<number | undefined>(undefined);
+  const timeOfDayRef    = useRef<string>(timeOfDay ?? 'day');
 
   // Keep refs in sync on every render
   configRef.current    = config;
   selectedRef.current  = selectedObjectId;
   hoveredRef.current   = hoveredObjectId;
   charAnimsRef.current = characterAnimations;
+  timeOfDayRef.current = timeOfDay ?? 'day';
 
   useCanvasAssets({
     config,
     characterAnimations: characterAnimations ?? {},
+    timeOfDay,
     assetsRefs: { imagesRef, atlasConfigsRef, slotStateRef },
   });
 
@@ -61,5 +65,6 @@ export function useCanvasRenderer({
     hoveredRef,
     charAnimsRef,
     rafRef,
+    timeOfDayRef,
   });
 }
