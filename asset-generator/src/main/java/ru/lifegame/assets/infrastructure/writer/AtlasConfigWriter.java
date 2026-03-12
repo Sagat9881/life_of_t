@@ -127,35 +127,6 @@ public class AtlasConfigWriter {
     }
 
     private String formatStripEntry(AnimationSpec spec, CropOffsetDef crop) {
-        // If cropped, actual frame dimensions come from the cropped atlas
-        // (written by WebpAtlasWriter from cropped frames).
-        // frameWidth/frameHeight in JSON reflect the CROPPED size.
-        int fw = crop != null ? spec.frameWidth() : spec.frameWidth();
-        int fh = crop != null ? spec.frameHeight() : spec.frameHeight();
-        // Note: when frames are cropped, the AnimationSpec still has original dimensions.
-        // The actual cropped dimensions are in the atlas file. We need the real sizes.
-        // Since WebpAtlasWriter uses frame.getWidth()/getHeight() from the actual images,
-        // and LayeredAssetGenerator passes cropped frames, the atlas PNG is correct.
-        // But for the JSON we need cropped dimensions. We can derive them:
-        if (crop != null) {
-            // The cropped dimensions are: originalWidth - cropX adjustment
-            // But we have the crop bounds from computeCropBounds which gives us
-            // the exact cropped w/h. However, we don't store them separately.
-            // The CropOffsetDef stores original dimensions + offset.
-            // Cropped size = we need to compute it. Let's store it.
-            // Actually the simplest: frameWidth/Height in atlas = cropped.
-            // We need to read from crop info. Add croppedW/H to CropOffsetDef? No.
-            // Actually the atlas image IS cropped, so frameWidth/Height should
-            // match. The spec.frameWidth() is ORIGINAL. We need cropped.
-            // For now, the generator already passes cropped frames to the writer,
-            // so the actual PNG atlas has correct pixel sizes.
-            // The JSON needs to match. We compute from originalDim - offset.
-            // Actually, computeCropBounds returns {x, y, w, h} — the w, h ARE the
-            // cropped dimensions. But CropOffsetDef only stores x, y, origW, origH.
-            // Let's fix: store cropped dims too. But that changes the record.
-            // Simpler: the JSON frameWidth/Height = what the atlas actually contains.
-            // Since we don't have that info here, let's adjust CropOffsetDef.
-        }
         return "    \"" + spec.name() + "\": {\n"
                 + "      \"file\": \"" + spec.name() + "_atlas.png\",\n"
                 + "      \"layout\": \"strip\",\n"
@@ -282,10 +253,5 @@ public class AtlasConfigWriter {
             int originalHeight,
             int croppedWidth,
             int croppedHeight
-    ) {
-        /** Convenience constructor — computes cropped dims not needed at call site */
-        public CropOffsetDef(int x, int y, int originalWidth, int originalHeight) {
-            this(x, y, originalWidth, originalHeight, 0, 0);
-        }
-    }
+    ) {}
 }
