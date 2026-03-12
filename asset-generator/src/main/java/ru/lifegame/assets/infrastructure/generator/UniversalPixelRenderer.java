@@ -54,13 +54,17 @@ public final class UniversalPixelRenderer {
                 resolvedOffsets.putAll(offset.layerOffsets());
             }
 
-            for (AssetLayer layer : sorted) {
-                if (layer.follows() != null
-                        && !resolvedOffsets.containsKey(layer.id())) {
-                    int[] parentOffset = resolvedOffsets.get(layer.follows());
-                    if (parentOffset != null) {
-                        resolvedOffsets.put(layer.id(),
-                                new int[]{parentOffset[0], parentOffset[1]});
+            boolean changed = true;
+            while (changed) {
+                changed = false;
+                for (AssetLayer layer : sorted) {
+                    if (layer.follows() != null && !resolvedOffsets.containsKey(layer.id())) {
+                        int[] parentOffset = resolvedOffsets.get(layer.follows());
+                        if (parentOffset != null) {
+                            resolvedOffsets.put(layer.id(),
+                                    new int[]{parentOffset[0], parentOffset[1]});
+                            changed = true;
+                        }
                     }
                 }
             }
@@ -75,11 +79,6 @@ public final class UniversalPixelRenderer {
         return frames;
     }
 
-    /**
-     * Computes the union bounding box of all non-transparent pixels across
-     * a list of frames. Returns {x, y, width, height} of the content region.
-     * If all frames are fully transparent, returns the full frame dimensions.
-     */
     public int[] computeCropBounds(List<BufferedImage> frames) {
         if (frames == null || frames.isEmpty()) {
             return new int[]{0, 0, 0, 0};
@@ -103,7 +102,6 @@ public final class UniversalPixelRenderer {
             }
         }
 
-        // If no non-transparent pixel found, return full dimensions
         if (maxX < minX || maxY < minY) {
             return new int[]{0, 0, imgW, imgH};
         }
@@ -113,16 +111,9 @@ public final class UniversalPixelRenderer {
         return new int[]{minX, minY, cropW, cropH};
     }
 
-    /**
-     * Crops a list of frames to the given bounds.
-     * @param frames source frames
-     * @param bounds {x, y, width, height} as returned by computeCropBounds
-     * @return new list of cropped frames
-     */
     public List<BufferedImage> cropFrames(List<BufferedImage> frames, int[] bounds) {
         int cx = bounds[0], cy = bounds[1], cw = bounds[2], ch = bounds[3];
 
-        // Skip cropping if bounds match original frame dimensions
         if (!frames.isEmpty()
                 && cx == 0 && cy == 0
                 && cw == frames.get(0).getWidth()

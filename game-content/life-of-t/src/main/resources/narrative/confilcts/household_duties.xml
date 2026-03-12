@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<conflict id="HOUSEHOLD_DUTIES">
+
+  <meta>
+    <label>Домашние обязанности</label>
+    <description>Муж недоволен несправедливым распределением домашних дел.</description>
+    <opponent-id>HUSBAND</opponent-id>
+    <category>relationship</category>
+    <intro-dialogue>Почему я должен всегда сам убирать? Ты же дома!</intro-dialogue>
+  </meta>
+
+  <trigger cooldown-days="5" mode="ALL">
+    <condition type="relationship" target="HUSBAND" field="closeness" operator="lt" value="50"/>
+    <condition type="days-played" operator="gte" value="5"/>
+  </trigger>
+
+  <tactic code="COMPROMISE" base-csp-cost="10" base-opponent-csp-cost="10">
+    <label>Договориться о распределении</label>
+    <description>Вместе составить честное распределение домашних дел</description>
+    <success-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="+10"/>
+        <change field="HUSBAND.trust" value="+10"/>
+      </relationship-changes>
+      <narrative>Договорились. Теперь у каждого свои зоны ответственности.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="-5"/>
+      </relationship-changes>
+      <narrative>Попытка договориться зашла в тупик — каждый остался при своём.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="ASSERT" base-csp-cost="15" base-opponent-csp-cost="15">
+    <label>Отстоять свою позицию</label>
+    <description>Объяснить, почему нагрузка распределена именно так</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="+10"/>
+      </stat-changes>
+      <relationship-changes>
+        <change field="HUSBAND.trust" value="+5"/>
+        <change field="HUSBAND.closeness" value="-10"/>
+      </relationship-changes>
+      <narrative>Муж неохотно согласился. Понял, но остался слегка обиженным.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="-15"/>
+      </relationship-changes>
+      <narrative>Спор только обострился. Напряжение в доме выросло.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="SURRENDER" base-csp-cost="20" base-opponent-csp-cost="10">
+    <label>Уступить</label>
+    <description>Согласиться взять на себя больше домашних дел</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="-5"/>
+      </stat-changes>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="+5"/>
+        <change field="HUSBAND.trust" value="-5"/>
+      </relationship-changes>
+      <narrative>Конфликт разрядился. Но внутри — ощущение несправедливости.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="-10"/>
+        <change field="stress" value="+10"/>
+      </stat-changes>
+      <narrative>Согласились, но это не помогло — муж воспринял как должное.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="AVOID" base-csp-cost="5" base-opponent-csp-cost="20">
+    <label>Уйти от разговора</label>
+    <description>Сменить тему или выйти из комнаты</description>
+    <success-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="-5"/>
+        <change field="HUSBAND.trust" value="-10"/>
+      </relationship-changes>
+      <narrative>Конфликт отложен. Но проблема никуда не делась.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="-15"/>
+        <change field="HUSBAND.trust" value="-15"/>
+      </relationship-changes>
+      <narrative>Муж расценил уход как неуважение. Стало хуже.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="LISTEN" base-csp-cost="5" base-opponent-csp-cost="25">
+    <label>Выслушать</label>
+    <description>Дать мужу высказаться без перебиваний</description>
+    <success-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="+15"/>
+        <change field="HUSBAND.trust" value="+10"/>
+      </relationship-changes>
+      <narrative>Муж почувствовал себя услышанным. Напряжение спало.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="+5"/>
+      </relationship-changes>
+      <narrative>Выслушали, но конкретного решения так и не нашли.</narrative>
+    </failure-outcome>
+  </tactic>
+
+</conflict>

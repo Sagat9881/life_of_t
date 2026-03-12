@@ -31,7 +31,7 @@ export function atlasUrl(
 }
 
 export function atlasConfigUrl(category: string, assetKey: string): string {
-  return `/assets/${category}/${assetKey}/sprite-atlas.json`;
+  return `/assets/${category}/${assetKey}/animations/sprite-atlas.json`;
 }
 
 async function fetchAtlasConfig(url: string): Promise<AtlasConfig | null> {

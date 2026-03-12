@@ -15,7 +15,7 @@ import java.util.*;
 /**
  * Loads animation metadata from generated sprite-atlas.json files.
  *
- * <p>At startup scans all {@code classpath:/assets/**/sprite-atlas.json} files
+ * <p>At startup scans all {@code classpath:/assets//sprite-atlas.json} files
  * produced by the asset generator and builds a per-entity animation catalogue.
  * The result is cached in-memory — data is static for the lifetime of the JVM.
  *
@@ -33,7 +33,7 @@ import java.util.*;
  *   }
  * }
  * </pre>
- */
+ **/
 @Service
 public class AnimationContentService {
 

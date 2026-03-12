@@ -3,8 +3,8 @@ package ru.lifegame.backend.domain.action.spec;
 import ru.lifegame.backend.domain.action.ActionResult;
 import ru.lifegame.backend.domain.action.ActionType;
 import ru.lifegame.backend.domain.action.GameAction;
-import ru.lifegame.backend.domain.action.StatChanges;
-import ru.lifegame.backend.domain.session.GameSessionReadModel;
+import ru.lifegame.backend.domain.action.GameSessionReadModel;
+import ru.lifegame.backend.domain.model.stats.StatChanges;
 
 import java.util.Map;
 import java.util.Set;

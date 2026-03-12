@@ -17,7 +17,12 @@ function getSpeakerColor(speaker: string): string {
   return SPEAKER_COLORS[speaker.toLowerCase()] ?? '#e0d8f0';
 }
 
-export function EventDialog({ event, isLoading, onSelectOption, onClose }: EventDialogProps) {
+export function EventDialog({
+  event,
+  isLoading,
+  onSelectOption,
+  onClose,
+}: EventDialogProps) {
   return (
     <div className="gs-dialog-overlay">
       <div className="gs-dialog gs-event" onClick={(e) => e.stopPropagation()}>
@@ -29,8 +34,8 @@ export function EventDialog({ event, isLoading, onSelectOption, onClose }: Event
 
         {event.dialogue.length > 0 && (
           <div className="gs-event__dialogue">
-            {event.dialogue.map((line, idx) => (
-              <div key={idx} className="gs-event__line">
+            {event.dialogue.map((line, index) => (
+              <div key={`${line.speaker}-${index}`} className="gs-event__line">
                 <span
                   className="gs-event__speaker"
                   style={{ color: getSpeakerColor(line.speaker) }}

@@ -25,7 +25,7 @@ public class QuestsContentController {
         this.contentService = contentService;
     }
 
-    @GetMapping("/narrative/quests")
+    @GetMapping("/quests")
     @Operation(summary = "Get all quest definitions",
                description = "Returns quest structure with steps, objectives and rewards")
     public ResponseEntity<QuestsContentResponse> getQuests() {

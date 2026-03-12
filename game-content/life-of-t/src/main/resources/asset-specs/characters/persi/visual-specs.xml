@@ -1,127 +1,182 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Persi — Tiny calico kitten, ~3-4 months old.
-  Canvas inherited from abstract/entities/cat (128×96).
-  Smallest cat in the game. Calico patches: orange + black on white base.
-  Huge eyes relative to head size. Always playing or sleeping.
+    Life of T — Persi Visual Spec v2.0.0
+    Extends: abstract/entities/dog@1.0
+    Canvas: 128×96 | displayScale: 1.5
+    Breed: Adult Black Shepherd
+    Coat: solid black + white chest patch + white paw tips
+
+    OVERRIDES (3 layers only):
+      paws         — black base + white tip strip (2px) + dark paw pads
+      belly        — white chest patch (front) + black belly (rear)
+      face_details — dark brown eyes, black nose, closed mouth, no whiskers
+
+    All coordinates taken verbatim from abstract/entities/dog@1.0:
+      paws:  front-right x=14,y=72,w=16,h=14
+             front-left  x=38,y=72,w=16,h=14
+             hind-right  x=66,y=72,w=18,h=14
+             hind-left   x=90,y=72,w=18,h=14
+      belly: x=28,y=48,w=64,h=32 (base rect from dog belly)
+      face:  eyes x=14..28 y=8..18, nose x=28..44 y=20..30
 -->
-<asset-spec extends="abstract/entities/cat@1.0">
+<asset-spec extends="abstract/entities/dog@1.0" version="2.0.0">
     <meta>
         <entity-type>characters</entity-type>
         <entity-name>persi</entity-name>
-        <version>3.0.0</version>
+        <version>2.0.0</version>
+        <display-scale>1.5</display-scale>
     </meta>
 
     <color-palette>
-        <color name="$fur_base" value="#F0E8D8"/><!-- cream-white base -->
-        <color name="$fur_light" value="#FAF5ED"/>
-        <color name="$fur_shadow" value="#D8D0C0"/>
-        <color name="$fur_dark" value="#C0B8A8"/>
-        <color name="$fur_highlight" value="#FFFFFF"/>
-        <color name="$belly_color" value="#FAF5ED"/>
-        <color name="$eye_color" value="#44AADD"/><!-- kitten blue eyes -->
-        <color name="$eye_dark" value="#2277AA"/>
-        <color name="$nose_color" value="#FFAAAA"/><!-- pink kitten nose -->
-        <color name="$paw_pad" value="#FFBBCC"/>
-        <color name="$ear_inner" value="#FFCCCC"/>
-        <color name="$pupil" value="#111111"/>
-        <color name="$eye_shine" value="#FFFFFF"/>
-        <color name="$whisker" value="#EEEEEE"/>
-        <!-- Calico-specific colors -->
-        <color name="$calico_orange" value="#DD8833"/>
-        <color name="$calico_orange_light" value="#EEAA55"/>
-        <color name="$calico_black" value="#222222"/>
-        <color name="$calico_black_light" value="#333333"/>
+        <color name="$fur_base"        value="#101010"/>
+        <color name="$fur_shadow"      value="#000000"/>
+        <color name="$fur_highlight"   value="#282828"/>
+        <color name="$chest_base"      value="#E8E8E8"/>
+        <color name="$chest_highlight" value="#FFFFFF"/>
+        <color name="$nose_color"      value="#101010"/>
+        <color name="$nose_highlight"  value="#383838"/>
+        <color name="$eye_color"       value="#3A2800"/>
+        <color name="$eye_highlight"   value="#6A4810"/>
+        <color name="$paw_pad"         value="#303030"/>
+        <color name="$paw_tip"         value="#D0D0D0"/>
+        <color name="$ear_inner"       value="#1A1A1A"/>
+        <color name="$tongue_color"    value="#FF6060"/>
     </color-palette>
 
     <layer-overrides>
-        <!-- Calico body with orange and black patches on white base -->
-        <layer id="body" replace="true">
+
+        <!-- ============================================================ -->
+        <!-- PAWS override                                                -->
+        <!-- Exact geometry from abstract/dog paws layer:                -->
+        <!--   front-right: x=14, y=72, w=16, h=14                      -->
+        <!--   front-left:  x=38, y=72, w=16, h=14                      -->
+        <!--   hind-right:  x=66, y=72, w=18, h=14                      -->
+        <!--   hind-left:   x=90, y=72, w=18, h=14                      -->
+        <!-- Black base + white tip strip at top (y=72, h=2) + dark pads -->
+        <!-- ============================================================ -->
+        <layer id="paws" replace="true">
             <pixel-data>
-                <!-- main body: cream-white base, smaller than adult cats -->
-                <rect x="28" y="44" w="56" h="24" color="$fur_base"/>
-                <!-- back highlight -->
-                <hline x="32" y="44" len="48" color="$fur_light"/>
-                <!-- CALICO PATCH: orange on left shoulder/back -->
-                <rect x="28" y="44" w="20" h="12" color="$calico_orange"/>
-                <hline x="32" y="44" len="12" color="$calico_orange_light"/>
-                <!-- CALICO PATCH: black on right hip -->
-                <rect x="64" y="48" w="16" h="12" color="$calico_black"/>
-                <hline x="68" y="48" len="8" color="$calico_black_light"/>
-                <!-- CALICO PATCH: small orange spot on mid-back -->
-                <rect x="48" y="48" w="8" h="8" color="$calico_orange"/>
-                <!-- belly underside -->
-                <hline x="32" y="64" len="48" color="$fur_shadow"/>
+                <!-- FRONT RIGHT PAW — x=14, y=72, w=16, h=14 -->
+                <rect x="14" y="72" w="16" h="14" color="$fur_base"/>
+                <hline x="14" y="85" len="16"     color="$fur_shadow"/>
+                <rect  x="14" y="80" w="16" h="4"  color="$paw_pad"/>
+                <!-- white tip strip -->
+                <hline x="14" y="72" len="16"     color="$paw_tip"/>
+                <hline x="14" y="73" len="16"     color="$paw_tip"/>
+
+                <!-- FRONT LEFT PAW — x=38, y=72, w=16, h=14 -->
+                <rect x="38" y="72" w="16" h="14" color="$fur_base"/>
+                <hline x="38" y="85" len="16"     color="$fur_shadow"/>
+                <rect  x="38" y="80" w="16" h="4"  color="$paw_pad"/>
+                <!-- white tip strip -->
+                <hline x="38" y="72" len="16"     color="$paw_tip"/>
+                <hline x="38" y="73" len="16"     color="$paw_tip"/>
+
+                <!-- HIND RIGHT PAW — x=66, y=72, w=18, h=14 -->
+                <rect x="66" y="72" w="18" h="14" color="$fur_base"/>
+                <hline x="66" y="85" len="18"     color="$fur_shadow"/>
+                <rect  x="66" y="80" w="18" h="4"  color="$paw_pad"/>
+                <!-- white tip strip -->
+                <hline x="66" y="72" len="18"     color="$paw_tip"/>
+                <hline x="66" y="73" len="18"     color="$paw_tip"/>
+
+                <!-- HIND LEFT PAW — x=90, y=72, w=18, h=14 -->
+                <rect x="90" y="72" w="18" h="14" color="$fur_base"/>
+                <hline x="90" y="85" len="18"     color="$fur_shadow"/>
+                <rect  x="90" y="80" w="18" h="4"  color="$paw_pad"/>
+                <!-- white tip strip -->
+                <hline x="90" y="72" len="18"     color="$paw_tip"/>
+                <hline x="90" y="73" len="18"     color="$paw_tip"/>
             </pixel-data>
         </layer>
 
-        <!-- Kitten's huge eyes and tiny pink nose -->
+        <!-- ============================================================ -->
+        <!-- BELLY override                                               -->
+        <!-- Exact bounding box from abstract/dog belly layer:           -->
+        <!--   base rect: x=28, y=48, w=64, h=32                        -->
+        <!--   sternum overlay: x=36, y=36, w=40, h=24                  -->
+        <!-- White patch: FRONT portion x=28..56 (w=28)                 -->
+        <!-- Black belly: REAR portion x=56..92 (w=36)                  -->
+        <!-- Transition: 2px fade at x=54..56                            -->
+        <!-- ============================================================ -->
+        <layer id="belly" replace="true">
+            <pixel-data>
+                <!-- Full belly base — black -->
+                <rect x="28" y="48" w="64" h="32" color="$fur_base"/>
+                <rect x="36" y="36" w="40" h="24" color="$fur_base"/>
+
+                <!-- WHITE CHEST PATCH — front portion only -->
+                <!-- Main white area -->
+                <rect x="28" y="48" w="28" h="28" color="$chest_base"/>
+                <!-- Centre highlight -->
+                <rect x="34" y="52" w="16" h="20" color="$chest_highlight"/>
+                <!-- Upper sternum extension -->
+                <rect x="36" y="36" w="16" h="16" color="$chest_base"/>
+                <rect x="38" y="38" w="12" h="12" color="$chest_highlight"/>
+
+                <!-- Transition edge — 2px fade strip at x=54..55 -->
+                <vline x="54" y="48" len="28"     color="$chest_base"/>
+                <vline x="55" y="48" len="28"     color="$fur_highlight"/>
+
+                <!-- Black belly continues from x=56 — already covered by base rect -->
+                <!-- Bottom shadow line -->
+                <hline x="28" y="79" len="64"     color="$fur_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- FACE DETAILS override                                        -->
+        <!-- Side view — single near-side eye, nose at muzzle tip        -->
+        <!-- Coordinates from abstract/dog face_details:                 -->
+        <!--   eye:   x=14, y=8,  w=14, h=10                            -->
+        <!--   nose:  x=28, y=20, w=16, h=10                            -->
+        <!--   mouth: hline y=28                                         -->
+        <!-- No whiskers. Mouth closed.                                  -->
+        <!-- ============================================================ -->
         <layer id="face_details" replace="true">
             <pixel-data>
-                <!-- LEFT EYE: huge relative to face (kitten proportions) -->
-                <rect x="12" y="8" w="12" h="12" color="$eye_color"/>
-                <rect x="16" y="12" w="4" h="4" color="$pupil"/>
-                <pixel x="12" y="8" color="$eye_dark"/>
-                <pixel x="16" y="8" color="$eye_shine"/>
-                <pixel x="20" y="8" color="$eye_shine"/>
-                <!-- RIGHT EYE -->
-                <rect x="28" y="8" w="12" h="12" color="$eye_color"/>
-                <rect x="32" y="12" w="4" h="4" color="$pupil"/>
-                <pixel x="28" y="8" color="$eye_dark"/>
-                <pixel x="32" y="8" color="$eye_shine"/>
-                <pixel x="36" y="8" color="$eye_shine"/>
-                <!-- NOSE: tiny pink -->
-                <rect x="20" y="20" w="8" h="4" color="$nose_color"/>
-                <pixel x="20" y="24" color="#FF8888"/>
-                <pixel x="24" y="24" color="#FF8888"/>
-                <!-- tiny mouth -->
-                <pixel x="22" y="28" color="#CC9999"/>
-                <pixel x="26" y="28" color="#CC9999"/>
-                <!-- short kitten whiskers -->
-                <hline x="0" y="20" len="12" color="$whisker"/>
-                <hline x="40" y="20" len="12" color="$whisker"/>
+                <!-- EYE — single, near-side, side view -->
+                <!-- white sclera base -->
+                <rect x="14" y="8"  w="14" h="10" color="#FFFFFF"/>
+                <!-- dark brown iris -->
+                <rect x="18" y="10" w="8"  h="6"  color="$eye_color"/>
+                <!-- iris highlight -->
+                <pixel x="18" y="10"              color="$eye_highlight"/>
+                <pixel x="19" y="10"              color="$eye_highlight"/>
+                <!-- pupil -->
+                <rect x="21" y="11" w="3"  h="4"  color="#000000"/>
+                <!-- eye shine -->
+                <pixel x="21" y="11"              color="#FFFFFF"/>
+                <!-- brow ridge -->
+                <hline x="14" y="7"  len="14"     color="$fur_shadow"/>
+                <hline x="16" y="6"  len="10"     color="$fur_shadow"/>
+                <!-- lower lid -->
+                <hline x="14" y="18" len="14"     color="$fur_shadow"/>
+
+                <!-- NOSE — at muzzle tip, black with highlight -->
+                <!-- abstract/dog nose: x=28, y=20, w=16, h=10 -->
+                <rect x="28" y="20" w="16" h="10" color="$nose_color"/>
+                <!-- shine strip -->
+                <hline x="29" y="20" len="6"      color="$nose_highlight"/>
+                <hline x="29" y="21" len="4"      color="$nose_highlight"/>
+                <!-- nostril divider -->
+                <vline x="36" y="21" len="7"      color="$fur_shadow"/>
+                <!-- nose bridge -->
+                <rect x="30" y="16" w="6"  h="5"  color="$fur_shadow"/>
+
+                <!-- MOUTH — closed, single shadow line -->
+                <!-- abstract/dog mouth hline y=28 -->
+                <hline x="22" y="28" len="28"     color="$fur_shadow"/>
+                <!-- jaw fold corners -->
+                <pixel x="22" y="29"              color="$fur_shadow"/>
+                <pixel x="50" y="29"              color="$fur_shadow"/>
             </pixel-data>
         </layer>
 
-        <!-- Calico patches on head -->
-        <layer id="head" replace="true">
-            <pixel-data>
-                <!-- head: cream-white base, slightly rounder than adult -->
-                <rect x="4" y="0" w="44" h="36" color="$fur_base"/>
-                <!-- forehead highlight -->
-                <hline x="8" y="0" len="36" color="$fur_highlight"/>
-                <!-- CALICO: orange patch on left side of head -->
-                <rect x="4" y="4" w="16" h="12" color="$calico_orange"/>
-                <hline x="8" y="4" len="8" color="$calico_orange_light"/>
-                <!-- CALICO: black patch on right top -->
-                <rect x="32" y="0" w="12" h="8" color="$calico_black"/>
-                <!-- muzzle: white -->
-                <rect x="12" y="24" w="24" h="12" color="$fur_highlight"/>
-            </pixel-data>
-        </layer>
     </layer-overrides>
-
-    <!-- Base 5 animations inherited. Kitten-specific extras: -->
-    <animations-extra>
-        <!-- zoomies: kitten random sprint with sudden direction changes -->
-        <animation name="zoomies" frames="12" fps="12" loop="true" frame-width="128" frame-height="96">
-            <condition type="trigger" value="kitten_energy_burst"/>
-            <frame index="0" layer-offsets="body:0,4; belly:0,4; front_legs:0,8; hind_legs:0,8; paws:0,8; head:0,4; neck:0,4; ears:0,4; face_details:0,4; tail:-8,4"/>
-            <frame index="1" layer-offsets="body:-4,0; belly:-4,0; front_legs:-4,4; hind_legs:12,-4; paws:-4,4; head:-4,-4; neck:-4,0; ears:-4,-4; face_details:-4,-4; tail:12,-4"/>
-            <frame index="2" layer-offsets="body:-8,-8; belly:-8,-8; front_legs:-12,-8; hind_legs:8,-8; paws:-12,-12; head:-8,-12; neck:-8,-8; ears:-8,-12; face_details:-8,-12; tail:12,-12"/>
-            <frame index="3" layer-offsets="body:-12,-8; belly:-12,-8; front_legs:-16,-4; hind_legs:12,-8; paws:-16,-8; head:-12,-12; neck:-12,-8; ears:-12,-12; face_details:-12,-12; tail:16,-8"/>
-            <frame index="4" layer-offsets="body:-8,-4; belly:-8,-4; front_legs:-8,0; hind_legs:16,-8; paws:-8,0; head:-8,-8; neck:-8,-4; ears:-8,-8; face_details:-8,-8; tail:12,-8"/>
-            <frame index="5" layer-offsets="body:-4,4; belly:-4,4; front_legs:-4,4; hind_legs:8,0; paws:-4,4; head:-4,0; neck:-4,0; ears:-4,0; face_details:-4,0; tail:4,0"/>
-            <frame index="6" layer-offsets="body:0,4; belly:0,4; front_legs:0,8; hind_legs:0,8; paws:0,8; head:0,4; neck:0,4; ears:0,4; face_details:0,4; tail:-4,4"/>
-            <frame index="7" layer-offsets="body:4,0; belly:4,0; front_legs:4,4; hind_legs:-12,-4; paws:4,4; head:4,-4; neck:4,0; ears:4,-4; face_details:4,-4; tail:-12,-4"/>
-            <frame index="8" layer-offsets="body:8,-8; belly:8,-8; front_legs:12,-8; hind_legs:-8,-8; paws:12,-12; head:8,-12; neck:8,-8; ears:8,-12; face_details:8,-12; tail:-12,-12"/>
-            <frame index="9" layer-offsets="body:12,-8; belly:12,-8; front_legs:16,-4; hind_legs:-12,-8; paws:16,-8; head:12,-12; neck:12,-8; ears:12,-12; face_details:12,-12; tail:-16,-8"/>
-            <frame index="10" layer-offsets="body:8,-4; belly:8,-4; front_legs:8,0; hind_legs:-16,-8; paws:8,0; head:8,-8; neck:8,-4; ears:8,-8; face_details:8,-8; tail:-12,-8"/>
-            <frame index="11" layer-offsets="body:4,4; belly:4,4; front_legs:4,4; hind_legs:-8,0; paws:4,4; head:4,0; neck:4,0; ears:4,0; face_details:4,0; tail:-4,0"/>
-        </animation>
-    </animations-extra>
 
     <naming>
         <output-dir>characters/persi</output-dir>
     </naming>
+
 </asset-spec>

@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class PlayerActionSpecLoader {
 
-    private static final String PATTERN = "classpath:narrative/actions/**/*.xml";
+    private static final String PATTERN = "classpath*:narrative/player-actions/**/*.xml";
 
     public List<PlayerActionSpec> loadAll() {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
@@ -25,7 +25,7 @@ public class PlayerActionSpecLoader {
             Resource[] resources = resolver.getResources(PATTERN);
             if (resources.length == 0) {
                 throw new IllegalStateException(
-                        "No action XML files found at classpath:narrative/actions/ — game cannot start");
+                        "No action XML files found at classpath*:narrative/player-actions/ — game cannot start");
             }
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -49,7 +49,7 @@ public class PlayerActionSpecLoader {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException(
-                    "Failed to scan classpath:narrative/actions/ — game cannot start", e);
+                    "Failed to scan classpath:narrative/player-actions/ — game cannot start", e);
         }
     }
 

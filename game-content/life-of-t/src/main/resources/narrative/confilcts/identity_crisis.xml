@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<conflict id="IDENTITY_CRISIS">
+
+  <meta>
+    <label>Кризис идентичности</label>
+    <description>Внутренний конфликт о смысле жизни. Кто я? Что делаю? Зачем?</description>
+    <opponent-id>SELF</opponent-id>
+    <category>internal</category>
+    <intro-dialogue>Кто я на самом деле? Что я делаю со своей жизнью?</intro-dialogue>
+  </meta>
+
+  <trigger cooldown-days="7" mode="ALL">
+    <condition type="stat" field="self_esteem" operator="lt" value="20"/>
+    <condition type="stat" field="job_satisfaction" operator="lt" value="30"/>
+  </trigger>
+
+  <tactic code="LOGICAL_ARGUMENT" base-csp-cost="10" base-opponent-csp-cost="20">
+    <label>Проанализировать ситуацию</label>
+    <description>Честно разобрать, что идёт не так, и найти точку опоры</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="+10"/>
+        <change field="mood" value="+5"/>
+      </stat-changes>
+      <narrative>Стало чуть яснее. Хаос в голове разложился по полочкам.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <stat-changes>
+        <change field="stress" value="+5"/>
+      </stat-changes>
+      <narrative>Анализ только усилил тревогу — слишком много вопросов без ответов.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="COMPROMISE" base-csp-cost="10" base-opponent-csp-cost="10">
+    <label>Принять неопределённость</label>
+    <description>Смириться с тем, что не все ответы известны прямо сейчас</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="+5"/>
+        <change field="stress" value="-10"/>
+      </stat-changes>
+      <narrative>Тревога немного отступила. Не нужно знать всё прямо сейчас.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <stat-changes>
+        <change field="stress" value="+5"/>
+        <change field="mood" value="-5"/>
+      </stat-changes>
+      <narrative>Принять неопределённость не получилось. Тревога осталась.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="LISTEN" base-csp-cost="5" base-opponent-csp-cost="25">
+    <label>Прислушаться к себе</label>
+    <description>Остановиться и услышать, чего на самом деле хочется</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="+15"/>
+        <change field="mood" value="+10"/>
+      </stat-changes>
+      <narrative>Где-то внутри — тихий голос, который знает ответ. Он всё ещё здесь.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <stat-changes>
+        <change field="stress" value="+10"/>
+      </stat-changes>
+      <narrative>Тишина оказалась невыносимой. Мысли закружились с новой силой.</narrative>
+    </failure-outcome>
+  </tactic>
+
+</conflict>

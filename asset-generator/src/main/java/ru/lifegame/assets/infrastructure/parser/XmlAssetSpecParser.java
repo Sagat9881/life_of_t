@@ -29,16 +29,11 @@ public class XmlAssetSpecParser {
     private Path specsRoot;
     private VisualSpecResolver resolver;
 
-    /** Default constructor for backward compatibility. No inheritance support. */
     public XmlAssetSpecParser() {
         this.specsRoot = null;
         this.resolver = null;
     }
 
-    /**
-     * Constructor with specs root for inheritance resolution.
-     * @param specsRoot path to asset-specs/ directory
-     */
     public XmlAssetSpecParser(Path specsRoot) {
         this.specsRoot = specsRoot;
         this.resolver = new VisualSpecResolver(specsRoot, this);
@@ -74,16 +69,6 @@ public class XmlAssetSpecParser {
         }
     }
 
-    /**
-     * Extracts ONLY the color variable map from an XML spec file.
-     * Lightweight parse — reads just the color-palette section.
-     * Used by VisualSpecResolver to cache parent color vars BEFORE full parsing
-     * (since full parsing resolves $-vars in the parent's own layers,
-     * making the original variable names unavailable to child specs).
-     *
-     * @param xmlFile path to the visual-specs.xml file
-     * @return map of "$varName" -> "#hexValue"
-     */
     public Map<String, String> extractColorVarsFromFile(Path xmlFile) {
         try (InputStream is = Files.newInputStream(xmlFile)) {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -100,7 +85,6 @@ public class XmlAssetSpecParser {
 
     private AssetSpec parseRoot(Element root, Path sourceFile) {
         String extendsAttr = root.getAttribute("extends");
-        boolean isAbstract = "true".equals(root.getAttribute("abstract"));
 
         if (!extendsAttr.isBlank() && resolver != null) {
             return parseWithInheritance(root, extendsAttr, sourceFile);
@@ -109,50 +93,29 @@ public class XmlAssetSpecParser {
         return parseFlatSpec(root);
     }
 
-    /**
-     * Parses a spec that uses extends= inheritance.
-     * Loads the abstract parent, then applies overrides from the child.
-     */
     private AssetSpec parseWithInheritance(Element root, String extendsRef, Path sourceFile) {
         Element meta = getFirstChild(root, "meta");
         String entityType = getTextContent(meta, "entity-type");
         String entityName = getTextContent(meta, "entity-name");
         String version = getTextContentOrDefault(meta, "version", "1.0.0");
 
-        // Parse child-specific color palette (variable overrides)
         Map<String, String> colorOverrides = parseColorVariableOverrides(root);
-
-        // Parse color-remap entries
         List<ColorRemap> colorRemaps = parseColorRemaps(root);
-
-        // Parse layer-overrides
         List<LayerOverride> layerOverrides = parseLayerOverrides(root);
-
-        // Parse animations-extra (child-unique animations)
         List<AnimationSpec> extraAnimations = parseAnimationsExtra(root);
-
-        // Parse optional full layers block (for hybrid specs)
         List<AssetLayer> ownLayers = parseLayersOptional(root);
 
-        // Parse time-of-day, naming, constraints from child
         List<TimeOfDayVariation> variations = parseTimeOfDayVariations(root);
         NamingSpec naming = parseNaming(root, entityType, entityName);
         AssetConstraints constraints = parseConstraints(root);
 
-        // Parse $-variable color maps from child
         Map<String, String> childColorVars = parseColorVariableMap(root);
 
-        // Resolve inheritance
         AssetSpec parentSpec = resolver.loadParent(extendsRef);
 
-        // Merge layers: start with parent, apply overrides
         List<AssetLayer> mergedLayers = resolver.mergeLayers(
                 parentSpec.layers(), layerOverrides, ownLayers, colorOverrides, colorRemaps);
 
-        // Build combined color variable map: parent palette + child palette.
-        // Parent vars come from the pre-parse cache in VisualSpecResolver
-        // (extracted before parseFlatSpec resolved them in parent layers).
-        // Child values override parent values for same variable name.
         Map<String, String> allColorVars = new HashMap<>(resolver.getParentColorVars(extendsRef));
         allColorVars.putAll(childColorVars);
 
@@ -162,11 +125,9 @@ public class XmlAssetSpecParser {
                     allColorVars.size(), entityType, entityName);
         }
 
-        // Merge animations: parent + extra
         List<AnimationSpec> mergedAnimations = resolver.mergeAnimations(
                 parentSpec.animations(), extraAnimations);
 
-        // Merge palette
         ColorPalette mergedPalette = resolver.mergePalette(
                 parentSpec.colorPalette(), parseColorPalette(root));
 
@@ -179,7 +140,6 @@ public class XmlAssetSpecParser {
                 variations, naming, constraints);
     }
 
-    /** Parses a flat spec without inheritance (original behavior). */
     AssetSpec parseFlatSpec(Element root) {
         Element meta = getFirstChild(root, "meta");
         String entityType = getTextContent(meta, "entity-type");
@@ -187,7 +147,6 @@ public class XmlAssetSpecParser {
         String version = getTextContentOrDefault(meta, "version", "1.0.0");
 
         List<AssetLayer> layers = parseLayers(root);
-        // Resolve $-variable color references in pixel-data
         Map<String, String> colorVars = parseColorVariableMap(root);
         if (!colorVars.isEmpty()) {
             layers = VisualSpecResolver.resolveColorVariablesInLayers(layers, colorVars);
@@ -202,30 +161,10 @@ public class XmlAssetSpecParser {
                 layers, palette, animations, variations, naming, constraints);
     }
 
-    // ---- Inheritance-specific parsing ----
-
     private Map<String, String> parseColorVariableOverrides(Element root) {
-        Map<String, String> overrides = new HashMap<>();
-        Element paletteEl = getFirstChildOrNull(root, "color-palette");
-        if (paletteEl == null) return overrides;
-        NodeList varNodes = paletteEl.getElementsByTagName("var");
-        for (int i = 0; i < varNodes.getLength(); i++) {
-            Element el = (Element) varNodes.item(i);
-            String name = el.getAttribute("name");
-            String value = el.getAttribute("value");
-            if (!name.isBlank() && !value.isBlank()) {
-                overrides.put(name, value);
-            }
-        }
-        return overrides;
+        return parseColorVariableMap(root);
     }
 
-    /**
-     * Parses color-palette entries into a variable map for $-reference resolution.
-     * Supports both formats:
-     *   <color id="floor_base" value="#C8B090"/>   -> "$floor_base" -> "#C8B090"
-     *   <color name="$floor_tile" value="#E8E8EC"/> -> "$floor_tile" -> "#E8E8EC"
-     */
     Map<String, String> parseColorVariableMap(Element root) {
         Map<String, String> vars = new HashMap<>();
         Element paletteEl = getFirstChildOrNull(root, "color-palette");
@@ -236,13 +175,11 @@ public class XmlAssetSpecParser {
             String value = el.getAttribute("value");
             if (value.isBlank()) continue;
 
-            // Format 1: <color id="floor_base" value="#C8B090"/>
             String id = el.getAttribute("id");
             if (!id.isBlank()) {
                 vars.put("$" + id, value);
             }
 
-            // Format 2: <color name="$floor_tile" value="#E8E8EC"/>
             String name = el.getAttribute("name");
             if (!name.isBlank()) {
                 if (!name.startsWith("$")) name = "$" + name;
@@ -294,7 +231,6 @@ public class XmlAssetSpecParser {
         return overrides;
     }
 
-
     private List<AnimationSpec> parseAnimationsExtra(Element root) {
         List<AnimationSpec> animations = new ArrayList<>();
         Element animsEl = getFirstChildOrNull(root, "animations-extra");
@@ -312,8 +248,6 @@ public class XmlAssetSpecParser {
         if (layersEl == null) return List.of();
         return parseLayerElements(layersEl);
     }
-
-    // ---- Standard parsing (unchanged logic) ----
 
     private List<AssetLayer> parseLayers(Element root) {
         Element layersEl = getFirstChildOrNull(root, "layers");
@@ -345,7 +279,6 @@ public class XmlAssetSpecParser {
         }
         return layers;
     }
-
 
     private List<LayerCondition> parseLayerConditions(Element layerEl) {
         List<LayerCondition> conditions = new ArrayList<>();
@@ -458,7 +391,8 @@ public class XmlAssetSpecParser {
                     int dx = Integer.parseInt(coords[0].trim());
                     int dy = Integer.parseInt(coords[1].trim());
                     map.put(layerId, new int[]{dx, dy});
-                } catch (NumberFormatException ignored) {}
+                } catch (NumberFormatException ignored) {
+                }
             }
         }
         return map;
@@ -521,8 +455,6 @@ public class XmlAssetSpecParser {
                 intChild(el, "bit-depth", 32));
     }
 
-    // ---- XML helpers ----
-
     Element getFirstChild(Element parent, String tag) {
         Element el = getFirstChildOrNull(parent, tag);
         if (el == null) throw new XmlParseException("Missing required element: <" + tag + ">");
@@ -548,7 +480,11 @@ public class XmlAssetSpecParser {
     int intAttr(Element el, String attr, int def) {
         String val = el.getAttribute(attr);
         if (val.isBlank()) return def;
-        try { return Integer.parseInt(val); } catch (NumberFormatException e) { return def; }
+        try {
+            return Integer.parseInt(val);
+        } catch (NumberFormatException e) {
+            return def;
+        }
     }
 
     private boolean boolAttr(Element el, String attr, boolean def) {
@@ -559,6 +495,10 @@ public class XmlAssetSpecParser {
     private int intChild(Element parent, String tag, int def) {
         Element el = getFirstChildOrNull(parent, tag);
         if (el == null) return def;
-        try { return Integer.parseInt(el.getTextContent().trim()); } catch (NumberFormatException e) { return def; }
+        try {
+            return Integer.parseInt(el.getTextContent().trim());
+        } catch (NumberFormatException e) {
+            return def;
+        }
     }
 }

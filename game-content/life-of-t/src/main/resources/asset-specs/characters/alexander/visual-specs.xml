@@ -1,137 +1,719 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Life of T — Alexander Visual Spec v3.1.0
-    Extends: abstract/entities/human@1.0
+    Life of T — Alexander Visual Spec v2.1.0
+    Extends: abstract/entities/human@2.0
     Canvas: 128×192 | displayScale: 1.5
-    Character: Alexander — 30yo, IT engineer, short dark-brown hair, hazel eyes,
-               navy polo shirt, dark jeans, sneakers, smart watch.
+    Full 22-layer override. All coordinates verified pixel-to-pixel.
+
+    STITCH MAP (y-axis, top to bottom):
+      head:        y=10..54  (h=44)
+      neck:        y=52..66  (h=14, 2px overlap with head)
+      torso:       y=64..104 (h=40, 2px overlap with neck)
+      pelvis:      y=104..114 (h=10, flush with torso)
+      thigh_R/L:   y=112..146 (h=34, 2px overlap with pelvis)
+      shin_R/L:    y=144..176 (h=32, 2px overlap with thigh)
+      foot_R/L:    y=174..188 (h=14, 2px overlap with shin)
+
+    ARM STITCH:
+      torso right shoulder: x=96
+      upper_arm_right:      x=96..110 (w=14, center x=103)
+      forearm_right:        x=98..110 (w=12, center x=104)
+      hand_right:           x=98..110 (w=12, center x=104)
+
+      torso left shoulder:  x=32
+      upper_arm_left:       x=18..32  (w=14, center x=25)
+      forearm_left:         x=18..30  (w=12, center x=24)
+      hand_left:            x=18..30  (w=12, center x=24)
+
+    LEG STITCH:
+      pelvis right half:    x=64..92  → thigh_right center x=80
+      pelvis left half:     x=36..64  → thigh_left  center x=48
+      thigh_right:          x=68..92  (w=24, center x=80)
+      thigh_left:           x=36..60  (w=24, center x=48)
+      shin_right:           x=72..90  (w=18, center x=81)
+      shin_left:            x=38..56  (w=18, center x=47)
+      foot_right:           x=68..98  (w=30, center x=83)
+      foot_left:            x=30..60  (w=30, center x=45)
 -->
-<asset-spec extends="abstract/entities/human@1.0" version="3.1.0">
+<asset-spec extends="abstract/entities/human@2.0" version="2.1.0">
     <meta>
         <entity-type>characters</entity-type>
         <entity-name>alexander</entity-name>
-        <version>3.1.0</version>
+        <version>2.1.0</version>
         <display-scale>1.5</display-scale>
     </meta>
 
     <color-palette>
-        <color name="$skin_base" value="#E8B888"/>
-        <color name="$skin_shadow" value="#D09868"/>
-        <color name="$skin_highlight" value="#F0C8A0"/>
-        <color name="$hair_base" value="#3A2818"/>
-        <color name="$hair_shadow" value="#281810"/>
-        <color name="$hair_highlight" value="#4A3828"/>
-        <color name="$clothing_primary" value="#283848"/>
-        <color name="$clothing_primary_shadow" value="#182838"/>
-        <color name="$clothing_primary_highlight" value="#384858"/>
-        <color name="$clothing_secondary" value="#283848"/>
-        <color name="$clothing_secondary_shadow" value="#182838"/>
-        <color name="$clothing_secondary_highlight" value="#405060"/>
-        <color name="$pants_base" value="#303848"/>
-        <color name="$pants_shadow" value="#202830"/>
-        <color name="$pants_highlight" value="#404858"/>
-        <color name="$shoe_base" value="#404040"/>
-        <color name="$shoe_shadow" value="#282828"/>
-        <color name="$shoe_highlight" value="#585858"/>
-        <color name="$eye_color" value="#6B8E23"/>
-        <color name="$eye_highlight" value="#8AAE43"/>
-        <color name="$lip_color" value="#C08070"/>
-        <color name="$brow_color" value="#3A2818"/>
-        <color name="$accessory_base" value="#303030"/>
-        <color name="$accessory_highlight" value="#50A0F0"/>
+        <!-- skin — warm male tone -->
+        <color name="$skin_base"                    value="#D8A070"/>
+        <color name="$skin_shadow"                  value="#B87848"/>
+        <color name="$skin_highlight"               value="#E8B880"/>
+        <color name="$skin_dark"                    value="#906030"/>
+        <color name="$muscle_highlight"             value="#E8B070"/>
+
+        <!-- hair — dark brown, short -->
+        <color name="$hair_base"                    value="#1A1008"/>
+        <color name="$hair_shadow"                  value="#0E0804"/>
+        <color name="$hair_highlight"               value="#302010"/>
+
+        <!-- dark navy polo (primary) -->
+        <color name="$clothing_primary"             value="#283848"/>
+        <color name="$clothing_primary_shadow"      value="#182030"/>
+        <color name="$clothing_primary_highlight"   value="#384858"/>
+        <color name="$clothing_primary_dark"        value="#101820"/>
+
+        <!-- dark navy polo sleeve (secondary, matches primary) -->
+        <color name="$clothing_secondary"           value="#283848"/>
+        <color name="$clothing_secondary_shadow"    value="#182030"/>
+        <color name="$clothing_secondary_highlight" value="#384858"/>
+
+        <!-- dark denim jeans -->
+        <color name="$pants_base"                   value="#303848"/>
+        <color name="$pants_shadow"                 value="#202430"/>
+        <color name="$pants_highlight"              value="#404858"/>
+        <color name="$pants_seam"                   value="#181C24"/>
+        <color name="$pants_stitch"                 value="#484E5E"/>
+
+        <!-- dark grey sneakers -->
+        <color name="$shoe_base"                    value="#404040"/>
+        <color name="$shoe_shadow"                  value="#282828"/>
+        <color name="$shoe_highlight"               value="#585858"/>
+        <color name="$shoe_sole"                    value="#909090"/>
+        <color name="$shoe_lace"                    value="#D8D8D8"/>
+        <color name="$shoe_tongue"                  value="#F0F0F0"/>
+
+        <!-- eye -->
+        <color name="$eye_color"                    value="#3A5A7A"/>
+        <color name="$eye_highlight"                value="#5A7A9A"/>
+        <color name="$eye_white"                    value="#EEE8E0"/>
+        <color name="$eye_pupil"                    value="#0C0C0C"/>
+
+        <!-- face details -->
+        <color name="$lip_color"                    value="#A06858"/>
+        <color name="$brow_color"                   value="#1A1008"/>
+        <color name="$stubble"                      value="#302820"/>
+
+        <!-- polo collar -->
+        <color name="$collar_base"                  value="#1C2C3C"/>
+        <color name="$collar_highlight"             value="#2C3C4C"/>
+
+        <!-- smart watch -->
+        <color name="$watch_body"                   value="#202020"/>
+        <color name="$watch_screen"                 value="#1A3A6A"/>
+        <color name="$watch_strap"                  value="#181818"/>
+
+        <!-- effects -->
+        <color name="$outline"                      value="#0C0808"/>
     </color-palette>
 
     <layer-overrides>
-        <layer id="face" replace="true">
+
+        <!-- ============================================================ -->
+        <!-- z=0  FOOT RIGHT                                              -->
+        <!-- shin_right ends at y=176 → foot top = y=174 (2px overlap)   -->
+        <!-- x=68..98 (w=30), center x=83                                -->
+        <!-- Dark grey sneaker, light rubber sole, laces, tongue          -->
+        <!-- ============================================================ -->
+        <layer id="foot_right" replace="true">
             <pixel-data>
-                <rect x="44" y="28" w="14" h="10" color="#FFFFFF"/>
-                <rect x="46" y="26" w="10" h="13" color="$eye_color"/>
-                <rect x="48" y="28" w="7" h="8" color="#7A9E33"/>
-                <rect x="49" y="29" w="5" h="5" color="$eye_highlight"/>
-                <rect x="50" y="30" w="3" h="4" color="#101010"/>
-                <rect x="47" y="26" w="3" h="3" color="#FFFFFF"/>
-                <hline x="44" y="25" len="14" color="$skin_shadow"/>
-                <hline x="44" y="37" len="14" color="$skin_shadow"/>
-                <rect x="70" y="28" w="14" h="10" color="#FFFFFF"/>
-                <rect x="72" y="26" w="10" h="13" color="$eye_color"/>
-                <rect x="74" y="28" w="7" h="8" color="#7A9E33"/>
-                <rect x="75" y="29" w="5" h="5" color="$eye_highlight"/>
-                <rect x="76" y="30" w="3" h="4" color="#101010"/>
-                <rect x="73" y="26" w="3" h="3" color="#FFFFFF"/>
-                <hline x="70" y="25" len="14" color="$skin_shadow"/>
-                <hline x="70" y="37" len="14" color="$skin_shadow"/>
-                <rect x="44" y="22" w="14" h="3" color="$brow_color"/>
-                <rect x="70" y="22" w="14" h="3" color="$brow_color"/>
-                <rect x="60" y="36" w="6" h="5" color="$skin_shadow"/>
-                <hline x="56" y="42" len="14" color="#D09060"/>
-                <rect x="56" y="43" w="4" h="2" color="#B07050"/>
-                <rect x="66" y="43" w="4" h="2" color="#B07050"/>
-                <hline x="56" y="46" len="14" color="#A87060"/>
-                <rect x="58" y="46" w="10" h="2" color="$lip_color"/>
-                <hline x="56" y="48" len="14" color="#D09080"/>
-                <rect x="38" y="42" w="8" h="6" color="#D09060"/>
-                <rect x="82" y="42" w="8" h="6" color="#D09060"/>
-                <rect x="56" y="48" w="14" h="4" color="#D09060"/>
+                <!-- rubber sole -->
+                <rect x="68" y="183" w="32" h="3"  color="$shoe_sole"/>
+                <hline x="68" y="185" len="32" color="$outline"/>
+                <!-- main upper -->
+                <rect x="70" y="174" w="26" h="12" color="$shoe_base"/>
+                <!-- toe box -->
+                <rect x="94" y="176" w="6"  h="8"  color="$shoe_base"/>
+                <!-- toe highlight -->
+                <rect x="94" y="176" w="6"  h="3"  color="$shoe_highlight"/>
+                <!-- top highlight -->
+                <hline x="72" y="174" len="20" color="$shoe_highlight"/>
+                <!-- side shadow -->
+                <vline x="70" y="174" len="12" color="$shoe_shadow"/>
+                <!-- ankle crease -->
+                <hline x="70" y="177" len="26" color="$shoe_shadow"/>
+                <!-- tongue -->
+                <rect x="78" y="174" w="8"  h="6"  color="$shoe_tongue"/>
+                <hline x="78" y="174" len="8"  color="$shoe_lace"/>
+                <!-- lace lines -->
+                <hline x="72" y="178" len="18" color="$shoe_lace"/>
+                <hline x="72" y="181" len="18" color="$shoe_lace"/>
+                <!-- sole side -->
+                <rect x="68" y="180" w="2"  h="6"  color="$shoe_sole"/>
+                <rect x="98" y="180" w="2"  h="6"  color="$shoe_sole"/>
             </pixel-data>
         </layer>
 
-        <layer id="hair_front" replace="true">
+        <!-- ============================================================ -->
+        <!-- z=1  SHIN RIGHT                                              -->
+        <!-- thigh_right ends at y=146 → shin top = y=144 (2px overlap)  -->
+        <!-- shin ends at y=176 → foot y=174 (2px overlap) ✓             -->
+        <!-- x=72..90 (w=18), center x=81                                -->
+        <!-- Dark denim, vertical seam, fabric fold at ankle              -->
+        <!-- ============================================================ -->
+        <layer id="shin_right" replace="true">
             <pixel-data>
-                <rect x="36" y="6" w="56" h="12" color="$hair_base"/>
-                <hline x="40" y="6" len="48" color="$hair_highlight"/>
-                <rect x="36" y="12" w="8" h="8" color="$hair_shadow"/>
-                <rect x="84" y="12" w="8" h="8" color="$hair_shadow"/>
-                <hline x="42" y="7" len="40" color="#4A3828"/>
-                <rect x="32" y="16" w="6" h="10" color="$hair_shadow"/>
-                <rect x="90" y="16" w="6" h="10" color="$hair_shadow"/>
+                <!-- main denim -->
+                <rect x="72" y="144" w="18" h="32" color="$pants_base"/>
+                <!-- inner highlight -->
+                <rect x="77" y="144" w="7"  h="32" color="$pants_highlight"/>
+                <!-- outer shadow -->
+                <rect x="72" y="144" w="4"  h="32" color="$pants_shadow"/>
+                <!-- vertical seam -->
+                <vline x="81" y="146" len="28" color="$pants_seam"/>
+                <!-- stitch beside seam -->
+                <vline x="82" y="148" len="24" color="$pants_stitch"/>
+                <!-- knee fold top -->
+                <hline x="72" y="144" len="18" color="$pants_shadow"/>
+                <!-- ankle fold -->
+                <rect x="73" y="168" w="16" h="8"  color="$pants_shadow"/>
+                <hline x="73" y="170" len="16" color="$pants_seam"/>
+                <!-- depth side -->
+                <vline x="90" y="144" len="32" color="$pants_shadow"/>
             </pixel-data>
         </layer>
 
-        <layer id="hair_back" replace="true">
+        <!-- ============================================================ -->
+        <!-- z=2  THIGH RIGHT                                             -->
+        <!-- pelvis ends at y=114 → thigh top = y=112 (2px overlap)      -->
+        <!-- thigh ends at y=146 → shin y=144 (2px overlap) ✓            -->
+        <!-- x=68..92 (w=24), center x=80                                -->
+        <!-- Dark denim, vertical seam, knee stitch at y=132             -->
+        <!-- ============================================================ -->
+        <layer id="thigh_right" replace="true">
             <pixel-data>
-                <rect x="34" y="14" w="4" h="8" color="$hair_shadow"/>
-                <rect x="90" y="14" w="4" h="8" color="$hair_shadow"/>
+                <!-- main denim -->
+                <rect x="68" y="112" w="24" h="34" color="$pants_base"/>
+                <!-- inner highlight -->
+                <rect x="75" y="112" w="9"  h="34" color="$pants_highlight"/>
+                <!-- outer shadow -->
+                <rect x="68" y="112" w="4"  h="34" color="$pants_shadow"/>
+                <!-- vertical seam -->
+                <vline x="80" y="114" len="30" color="$pants_seam"/>
+                <!-- stitch beside seam -->
+                <vline x="81" y="116" len="26" color="$pants_stitch"/>
+                <!-- groin crease top -->
+                <hline x="68" y="112" len="24" color="$pants_shadow"/>
+                <!-- knee horizontal stitch -->
+                <hline x="68" y="132" len="24" color="$pants_seam"/>
+                <hline x="68" y="133" len="24" color="$pants_stitch"/>
+                <!-- knee taper -->
+                <rect x="70" y="138" w="20" h="8"  color="$pants_shadow"/>
+                <!-- depth side -->
+                <vline x="92" y="112" len="34" color="$pants_shadow"/>
             </pixel-data>
         </layer>
 
-        <layer id="accessory" follows="hand_left" replace="true">
-            <pixel-data>
-                <rect x="16" y="116" w="10" h="6" color="$accessory_base"/>
-                <rect x="18" y="117" w="6" h="4" color="$accessory_highlight"/>
-                <rect x="16" y="114" w="10" h="2" color="#404040"/>
-                <rect x="16" y="122" w="10" h="2" color="#404040"/>
-            </pixel-data>
-        </layer>
-
-        <layer id="torso" replace="true">
-            <pixel-data>
-                <rect x="32" y="64" w="64" h="40" color="$clothing_primary"/>
-                <rect x="50" y="64" w="28" h="40" color="$clothing_primary_highlight"/>
-                <rect x="32" y="64" w="10" h="40" color="$clothing_primary_shadow"/>
-                <rect x="86" y="64" w="10" h="40" color="$clothing_primary_shadow"/>
-                <rect x="46" y="60" w="36" h="6" color="$clothing_secondary_highlight"/>
-                <hline x="48" y="60" len="32" color="#506070"/>
-                <rect x="62" y="64" w="4" h="16" color="$clothing_primary_shadow"/>
-                <rect x="62" y="68" w="2" h="2" color="#606060"/>
-                <rect x="62" y="74" w="2" h="2" color="#606060"/>
-                <hline x="34" y="103" len="60" color="$clothing_primary_shadow"/>
-            </pixel-data>
-        </layer>
-
+        <!-- ============================================================ -->
+        <!-- z=3  PELVIS                                                  -->
+        <!-- torso ends at y=104 → pelvis top = y=104 flush ✓            -->
+        <!-- pelvis ends at y=114 → thigh y=112 (2px overlap) ✓          -->
+        <!-- x=36..92 (w=56), center x=64                                -->
+        <!-- Dark denim waistband, belt loops, centre stitch              -->
+        <!-- ============================================================ -->
         <layer id="pelvis" replace="true">
             <pixel-data>
+                <!-- main waistband -->
                 <rect x="36" y="104" w="56" h="10" color="$pants_base"/>
+                <!-- top shadow -->
                 <hline x="36" y="104" len="56" color="$pants_shadow"/>
-                <rect x="52" y="105" w="24" h="8" color="$pants_highlight"/>
-                <rect x="36" y="105" w="8" h="8" color="$pants_shadow"/>
-                <rect x="84" y="105" w="8" h="8" color="$pants_shadow"/>
-                <rect x="38" y="104" w="52" h="3" color="#282020"/>
-                <rect x="62" y="104" w="4" h="3" color="#808080"/>
+                <!-- center highlight -->
+                <rect x="50" y="104" w="28" h="8"  color="$pants_highlight"/>
+                <!-- left shadow block -->
+                <rect x="36" y="104" w="8"  h="10" color="$pants_shadow"/>
+                <!-- right shadow block -->
+                <rect x="84" y="104" w="8"  h="10" color="$pants_shadow"/>
+                <!-- belt loops -->
+                <rect x="44" y="104" w="3"  h="6"  color="$pants_seam"/>
+                <rect x="81" y="104" w="3"  h="6"  color="$pants_seam"/>
+                <rect x="62" y="104" w="3"  h="6"  color="$pants_seam"/>
+                <!-- centre fly stitch -->
+                <vline x="64" y="105" len="8"  color="$pants_stitch"/>
+                <!-- bottom fold -->
+                <hline x="38" y="113" len="52" color="$pants_shadow"/>
+                <!-- depth side right -->
+                <vline x="92" y="104" len="10" color="$pants_shadow"/>
             </pixel-data>
         </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=4  THIGH LEFT                                              -->
+        <!-- pelvis ends at y=114 → thigh top = y=112 (2px overlap)      -->
+        <!-- thigh ends at y=146 → shin y=144 (2px overlap) ✓            -->
+        <!-- x=36..60 (w=24), center x=48                                -->
+        <!-- ============================================================ -->
+        <layer id="thigh_left" replace="true">
+            <pixel-data>
+                <rect x="36" y="112" w="24" h="34" color="$pants_base"/>
+                <rect x="42" y="112" w="9"  h="34" color="$pants_highlight"/>
+                <rect x="56" y="112" w="4"  h="34" color="$pants_shadow"/>
+                <vline x="48" y="114" len="30" color="$pants_seam"/>
+                <vline x="47" y="116" len="26" color="$pants_stitch"/>
+                <hline x="36" y="112" len="24" color="$pants_shadow"/>
+                <hline x="36" y="132" len="24" color="$pants_seam"/>
+                <hline x="36" y="133" len="24" color="$pants_stitch"/>
+                <rect x="38" y="138" w="20" h="8"  color="$pants_shadow"/>
+                <vline x="36" y="112" len="34" color="$pants_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=5  SHIN LEFT                                               -->
+        <!-- thigh_left ends at y=146 → shin top = y=144 (2px overlap)   -->
+        <!-- shin ends at y=176 → foot y=174 (2px overlap) ✓             -->
+        <!-- x=38..56 (w=18), center x=47                                -->
+        <!-- ============================================================ -->
+        <layer id="shin_left" replace="true">
+            <pixel-data>
+                <rect x="38" y="144" w="18" h="32" color="$pants_base"/>
+                <rect x="43" y="144" w="7"  h="32" color="$pants_highlight"/>
+                <rect x="52" y="144" w="4"  h="32" color="$pants_shadow"/>
+                <vline x="47" y="146" len="28" color="$pants_seam"/>
+                <vline x="46" y="148" len="24" color="$pants_stitch"/>
+                <hline x="38" y="144" len="18" color="$pants_shadow"/>
+                <rect x="39" y="168" w="16" h="8"  color="$pants_shadow"/>
+                <hline x="39" y="170" len="16" color="$pants_seam"/>
+                <vline x="38" y="144" len="32" color="$pants_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=6  FOOT LEFT                                               -->
+        <!-- shin_left ends at y=176 → foot top = y=174 (2px overlap)    -->
+        <!-- x=30..60 (w=30), center x=45                                -->
+        <!-- ============================================================ -->
+        <layer id="foot_left" replace="true">
+            <pixel-data>
+                <!-- rubber sole -->
+                <rect x="30" y="183" w="32" h="3"  color="$shoe_sole"/>
+                <hline x="30" y="185" len="32" color="$outline"/>
+                <!-- main upper -->
+                <rect x="32" y="174" w="26" h="12" color="$shoe_base"/>
+                <!-- toe box -->
+                <rect x="28" y="176" w="6"  h="8"  color="$shoe_base"/>
+                <rect x="28" y="176" w="6"  h="3"  color="$shoe_highlight"/>
+                <hline x="36" y="174" len="20" color="$shoe_highlight"/>
+                <vline x="58" y="174" len="12" color="$shoe_shadow"/>
+                <hline x="32" y="177" len="26" color="$shoe_shadow"/>
+                <!-- tongue -->
+                <rect x="42" y="174" w="8"  h="6"  color="$shoe_tongue"/>
+                <hline x="42" y="174" len="8"  color="$shoe_lace"/>
+                <!-- lace lines -->
+                <hline x="38" y="178" len="18" color="$shoe_lace"/>
+                <hline x="38" y="181" len="18" color="$shoe_lace"/>
+                <!-- sole side -->
+                <rect x="28" y="180" w="2"  h="6"  color="$shoe_sole"/>
+                <rect x="60" y="180" w="2"  h="6"  color="$shoe_sole"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=7  TORSO — dark navy polo, short sleeves, polo collar       -->
+        <!-- neck ends at y=66 → torso top = y=64 (2px overlap) ✓        -->
+        <!-- torso ends at y=104 → pelvis y=104 flush ✓                  -->
+        <!-- x=32..96 (w=64), center x=64                                -->
+        <!-- ============================================================ -->
+        <layer id="torso" replace="true">
+            <pixel-data>
+                <!-- main body -->
+                <rect x="32" y="64"  w="64" h="40" color="$clothing_primary"/>
+                <!-- center highlight — chest plane -->
+                <rect x="46" y="64"  w="36" h="40" color="$clothing_primary_highlight"/>
+                <!-- left shadow — side plane -->
+                <rect x="32" y="64"  w="10" h="40" color="$clothing_primary_shadow"/>
+                <!-- right shadow -->
+                <rect x="86" y="64"  w="10" h="40" color="$clothing_primary_shadow"/>
+                <!-- deep left edge -->
+                <vline x="32" y="64" len="40" color="$clothing_primary_dark"/>
+                <!-- chest muscle definition left -->
+                <vline x="58" y="70" len="18" color="$clothing_primary_shadow"/>
+                <!-- chest muscle definition right -->
+                <vline x="70" y="70" len="18" color="$clothing_primary_shadow"/>
+                <!-- polo collar back -->
+                <rect x="52" y="64"  w="24" h="6"  color="$collar_base"/>
+                <!-- collar highlight -->
+                <hline x="54" y="64" len="20" color="$collar_highlight"/>
+                <!-- collar crease -->
+                <hline x="54" y="68" len="20" color="$clothing_primary_dark"/>
+                <!-- collar fold left -->
+                <rect x="52" y="64"  w="4"  h="8"  color="$collar_base"/>
+                <!-- collar fold right -->
+                <rect x="72" y="64"  w="4"  h="8"  color="$collar_base"/>
+                <!-- shoulder seam right -->
+                <hline x="86" y="66" len="10" color="$clothing_primary_dark"/>
+                <!-- shoulder seam left -->
+                <hline x="32" y="66" len="10" color="$clothing_primary_dark"/>
+                <!-- waist taper left -->
+                <rect x="32" y="90"  w="6"  h="14" color="$clothing_primary_dark"/>
+                <!-- waist taper right -->
+                <rect x="90" y="90"  w="6"  h="14" color="$clothing_primary_dark"/>
+                <!-- bottom hem -->
+                <hline x="34" y="102" len="60" color="$clothing_primary_shadow"/>
+                <hline x="34" y="103" len="60" color="$clothing_primary_dark"/>
+                <!-- shirt placket centre -->
+                <rect x="62" y="70"  w="4"  h="32" color="$clothing_primary_shadow"/>
+                <!-- placket buttons -->
+                <rect x="63" y="74"  w="2"  h="2"  color="$clothing_primary_dark"/>
+                <rect x="63" y="82"  w="2"  h="2"  color="$clothing_primary_dark"/>
+                <rect x="63" y="90"  w="2"  h="2"  color="$clothing_primary_dark"/>
+                <!-- isometric right-side depth -->
+                <rect x="93" y="66"  w="3"  h="38" color="$clothing_primary_dark"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=8  UPPER ARM RIGHT — dark navy polo short sleeve           -->
+        <!-- attaches at torso right shoulder x=96, y=66                  -->
+        <!-- x=96..110 (w=14), center x=103                              -->
+        <!-- ends at y=66+26=92 → forearm y=92 flush ✓                  -->
+        <!-- Short sleeve: polo fabric y=66..80, bare skin y=80..92       -->
+        <!-- ============================================================ -->
+        <layer id="upper_arm_right" replace="true">
+            <pixel-data>
+                <!-- polo sleeve upper portion -->
+                <rect x="96" y="66"  w="14" h="16" color="$clothing_secondary"/>
+                <rect x="100" y="66" w="6"  h="16" color="$clothing_secondary_highlight"/>
+                <rect x="96" y="66"  w="4"  h="16" color="$clothing_secondary_shadow"/>
+                <vline x="110" y="66" len="16" color="$clothing_secondary_shadow"/>
+                <hline x="96" y="66" len="14" color="$clothing_secondary_highlight"/>
+                <!-- sleeve hem / cuff -->
+                <hline x="96" y="80" len="14" color="$clothing_primary_dark"/>
+                <hline x="96" y="81" len="14" color="$clothing_primary_dark"/>
+                <!-- bare arm lower portion (deltoid/bicep) -->
+                <rect x="97" y="82"  w="12" h="10" color="$skin_base"/>
+                <rect x="101" y="82" w="4"  h="10" color="$skin_highlight"/>
+                <rect x="97" y="82"  w="3"  h="10" color="$skin_shadow"/>
+                <vline x="109" y="82" len="10" color="$skin_dark"/>
+                <!-- bicep peak -->
+                <rect x="102" y="84" w="4"  h="5"  color="$muscle_highlight"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=9  FOREARM RIGHT — bare skin                               -->
+        <!-- upper_arm_right ends at y=92 → forearm top = y=92 flush ✓   -->
+        <!-- forearm ends at y=92+24=116 → hand y=116 flush ✓            -->
+        <!-- x=98..110 (w=12), center x=104                              -->
+        <!-- ============================================================ -->
+        <layer id="forearm_right" replace="true">
+            <pixel-data>
+                <rect x="98" y="92"  w="12" h="24" color="$skin_base"/>
+                <rect x="103" y="92" w="4"  h="24" color="$skin_highlight"/>
+                <rect x="98" y="92"  w="3"  h="24" color="$skin_shadow"/>
+                <vline x="110" y="92" len="24" color="$skin_dark"/>
+                <!-- elbow crease top -->
+                <hline x="98" y="92" len="12" color="$skin_shadow"/>
+                <!-- wrist taper -->
+                <rect x="99" y="110" w="10" h="6"  color="$skin_shadow"/>
+                <!-- forearm vein / muscle definition -->
+                <rect x="104" y="96" w="3"  h="14" color="$muscle_highlight"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=10 HAND RIGHT                                              -->
+        <!-- forearm_right ends at y=116 → hand top = y=116 flush ✓      -->
+        <!-- x=98..110 (w=12), center x=104                              -->
+        <!-- ============================================================ -->
+        <layer id="hand_right" replace="true">
+            <pixel-data>
+                <!-- palm -->
+                <rect x="98" y="116" w="12" h="10" color="$skin_base"/>
+                <!-- palm highlight -->
+                <rect x="101" y="116" w="6"  h="6"  color="$skin_highlight"/>
+                <!-- side shadow -->
+                <vline x="98" y="116" len="10" color="$skin_shadow"/>
+                <vline x="110" y="116" len="10" color="$skin_dark"/>
+                <!-- knuckle line -->
+                <hline x="99" y="117" len="10" color="$skin_shadow"/>
+                <!-- fingers (3 pixel bumps) -->
+                <rect x="99" y="116" w="3"  h="3"  color="$skin_highlight"/>
+                <rect x="103" y="116" w="3"  h="3"  color="$skin_highlight"/>
+                <rect x="107" y="116" w="3"  h="3"  color="$skin_highlight"/>
+                <!-- wrist base -->
+                <hline x="98" y="125" len="12" color="$skin_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=11 UPPER ARM LEFT — dark navy polo short sleeve            -->
+        <!-- attaches at torso left shoulder x=32, y=66                   -->
+        <!-- x=18..32 (w=14), center x=25                                -->
+        <!-- ends at y=92 → forearm y=92 flush ✓                         -->
+        <!-- ============================================================ -->
+        <layer id="upper_arm_left" replace="true">
+            <pixel-data>
+                <!-- polo sleeve upper portion -->
+                <rect x="18" y="66"  w="14" h="16" color="$clothing_secondary"/>
+                <rect x="22" y="66"  w="6"  h="16" color="$clothing_secondary_highlight"/>
+                <rect x="28" y="66"  w="4"  h="16" color="$clothing_secondary_shadow"/>
+                <vline x="18" y="66" len="16" color="$clothing_secondary_shadow"/>
+                <hline x="18" y="66" len="14" color="$clothing_secondary_highlight"/>
+                <!-- sleeve hem / cuff -->
+                <hline x="18" y="80" len="14" color="$clothing_primary_dark"/>
+                <hline x="18" y="81" len="14" color="$clothing_primary_dark"/>
+                <!-- bare arm lower portion -->
+                <rect x="19" y="82"  w="12" h="10" color="$skin_base"/>
+                <rect x="23" y="82"  w="4"  h="10" color="$skin_highlight"/>
+                <rect x="28" y="82"  w="3"  h="10" color="$skin_shadow"/>
+                <vline x="19" y="82" len="10" color="$skin_dark"/>
+                <!-- bicep peak -->
+                <rect x="22" y="84"  w="4"  h="5"  color="$muscle_highlight"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=12 FOREARM LEFT — bare skin                                -->
+        <!-- upper_arm_left ends at y=92 → forearm top = y=92 flush ✓    -->
+        <!-- forearm ends at y=116 → hand y=116 flush ✓                  -->
+        <!-- x=18..30 (w=12), center x=24                                -->
+        <!-- NOTE: forearm ends at y=116; accessory watch at y=116..122  -->
+        <!-- Watch is drawn ON TOP of hand layer — no overlap issue ✓     -->
+        <!-- ============================================================ -->
+        <layer id="forearm_left" replace="true">
+            <pixel-data>
+                <rect x="18" y="92"  w="12" h="24" color="$skin_base"/>
+                <rect x="21" y="92"  w="4"  h="24" color="$skin_highlight"/>
+                <rect x="27" y="92"  w="3"  h="24" color="$skin_shadow"/>
+                <vline x="18" y="92" len="24" color="$skin_dark"/>
+                <hline x="18" y="92" len="12" color="$skin_shadow"/>
+                <rect x="18" y="110" w="10" h="6"  color="$skin_shadow"/>
+                <rect x="22" y="96"  w="3"  h="14" color="$muscle_highlight"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=13 HAND LEFT                                               -->
+        <!-- forearm_left ends at y=116 → hand top = y=116 flush ✓       -->
+        <!-- x=18..30 (w=12), center x=24                                -->
+        <!-- accessory watch follows="hand_left" at y=116..122, x=16..26  -->
+        <!-- Watch spans x=16..26, y=116..122: 2px left of hand — OK ✓   -->
+        <!-- ============================================================ -->
+        <layer id="hand_left" replace="true">
+            <pixel-data>
+                <!-- palm -->
+                <rect x="18" y="116" w="12" h="10" color="$skin_base"/>
+                <!-- palm highlight -->
+                <rect x="21" y="116" w="6"  h="6"  color="$skin_highlight"/>
+                <!-- side shadow -->
+                <vline x="30" y="116" len="10" color="$skin_shadow"/>
+                <vline x="18" y="116" len="10" color="$skin_dark"/>
+                <!-- knuckle line -->
+                <hline x="19" y="117" len="10" color="$skin_shadow"/>
+                <!-- fingers (3 pixel bumps) -->
+                <rect x="19" y="116" w="3"  h="3"  color="$skin_highlight"/>
+                <rect x="23" y="116" w="3"  h="3"  color="$skin_highlight"/>
+                <rect x="27" y="116" w="3"  h="3"  color="$skin_highlight"/>
+                <!-- wrist base -->
+                <hline x="18" y="125" len="12" color="$skin_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=14 NECK                                                    -->
+        <!-- head ends at y=54 → neck top = y=52 (2px overlap) ✓         -->
+        <!-- neck ends at y=66 → torso top = y=64 (2px overlap) ✓        -->
+        <!-- center x=64, collar of polo visible at y=64..70              -->
+        <!-- Neck wider for masculine proportions: x=52..76 (w=24) OK ✓  -->
+        <!-- Override to ensure correct skin tone and collar meeting       -->
+        <!-- ============================================================ -->
+        <layer id="neck" replace="true">
+            <pixel-data>
+                <!-- neck column -->
+                <rect x="54" y="52"  w="20" h="14" color="$skin_base"/>
+                <!-- highlight -->
+                <rect x="59" y="52"  w="6"  h="14" color="$skin_highlight"/>
+                <!-- left shadow -->
+                <rect x="54" y="52"  w="4"  h="14" color="$skin_shadow"/>
+                <!-- right shadow -->
+                <rect x="70" y="52"  w="4"  h="14" color="$skin_shadow"/>
+                <!-- top highlight -->
+                <hline x="56" y="52" len="12" color="$skin_highlight"/>
+                <!-- Adam's apple -->
+                <rect x="62" y="57"  w="4"  h="4"  color="$skin_shadow"/>
+                <rect x="63" y="58"  w="2"  h="2"  color="$skin_dark"/>
+                <!-- collar meeting line -->
+                <hline x="54" y="64" len="20" color="$clothing_primary_dark"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=15 HEAD                                                    -->
+        <!-- x=38..90 (w=52), y=10..54 (h=44)                            -->
+        <!-- neck top = y=52 → 2px overlap ✓                             -->
+        <!-- Override for masculine proportions (stronger jaw, wider)     -->
+        <!-- ============================================================ -->
+        <layer id="head" replace="true">
+            <pixel-data>
+                <!-- skull main -->
+                <rect x="38" y="10"  w="52" h="44" color="$skin_base"/>
+                <!-- forehead highlight -->
+                <rect x="44" y="10"  w="40" h="8"  color="$skin_highlight"/>
+                <!-- left cheek shadow -->
+                <rect x="38" y="22"  w="6"  h="28" color="$skin_shadow"/>
+                <!-- right cheek shadow -->
+                <rect x="84" y="22"  w="6"  h="28" color="$skin_shadow"/>
+                <!-- jawline — wider and squarer for male -->
+                <rect x="38" y="44"  w="52" h="10" color="$skin_base"/>
+                <!-- jaw shadow bottom -->
+                <rect x="40" y="50"  w="48" h="4"  color="$skin_shadow"/>
+                <!-- neck meet shadow -->
+                <rect x="54" y="52"  w="20" h="3"  color="$skin_dark"/>
+                <!-- left ear -->
+                <rect x="34" y="22"  w="6"  h="16" color="$skin_base"/>
+                <rect x="34" y="24"  w="4"  h="12" color="$skin_shadow"/>
+                <rect x="35" y="26"  w="2"  h="8"  color="$skin_dark"/>
+                <!-- right ear -->
+                <rect x="88" y="22"  w="6"  h="16" color="$skin_base"/>
+                <rect x="90" y="24"  w="4"  h="12" color="$skin_shadow"/>
+                <rect x="91" y="26"  w="2"  h="8"  color="$skin_dark"/>
+                <!-- cheekbone highlights -->
+                <rect x="40" y="32"  w="5"  h="4"  color="$skin_highlight"/>
+                <rect x="83" y="32"  w="5"  h="4"  color="$skin_highlight"/>
+                <!-- temple shadows -->
+                <rect x="38" y="12"  w="8"  h="8"  color="$skin_shadow"/>
+                <rect x="82" y="12"  w="8"  h="8"  color="$skin_shadow"/>
+                <!-- jaw line definition -->
+                <hline x="38" y="50" len="52" color="$skin_shadow"/>
+                <!-- isometric depth right -->
+                <vline x="90" y="12" len="42" color="$skin_shadow"/>
+                <!-- stubble on jaw -->
+                <rect x="42" y="44"  w="44" h="6"  color="$stubble"/>
+                <hline x="44" y="44" len="40" color="$skin_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=16 FACE — Alexander's features: blue-grey eyes, short hair  -->
+        <!-- ============================================================ -->
+        <layer id="face" replace="true">
+            <pixel-data>
+                <!-- LEFT EYE -->
+                <rect x="44" y="28"  w="14" h="10" color="$eye_white"/>
+                <rect x="46" y="26"  w="10" h="13" color="$eye_color"/>
+                <rect x="48" y="28"  w="7"  h="8"  color="$eye_highlight"/>
+                <rect x="50" y="30"  w="3"  h="4"  color="$eye_pupil"/>
+                <rect x="47" y="26"  w="3"  h="3"  color="$eye_white"/>
+                <hline x="44" y="25" len="14" color="$outline"/>
+                <hline x="44" y="38" len="14" color="$skin_shadow"/>
+                <!-- RIGHT EYE -->
+                <rect x="70" y="28"  w="14" h="10" color="$eye_white"/>
+                <rect x="72" y="26"  w="10" h="13" color="$eye_color"/>
+                <rect x="74" y="28"  w="7"  h="8"  color="$eye_highlight"/>
+                <rect x="76" y="30"  w="3"  h="4"  color="$eye_pupil"/>
+                <rect x="73" y="26"  w="3"  h="3"  color="$eye_white"/>
+                <hline x="70" y="25" len="14" color="$outline"/>
+                <hline x="70" y="38" len="14" color="$skin_shadow"/>
+                <!-- BROWS — thick, dark -->
+                <rect x="43" y="22"  w="16" h="4"  color="$brow_color"/>
+                <hline x="45" y="21" len="10" color="$brow_color"/>
+                <rect x="69" y="22"  w="16" h="4"  color="$brow_color"/>
+                <hline x="71" y="21" len="10" color="$brow_color"/>
+                <!-- NOSE — stronger, angular -->
+                <rect x="61" y="36"  w="6"  h="6"  color="$skin_shadow"/>
+                <rect x="57" y="40"  w="5"  h="3"  color="$skin_shadow"/>
+                <rect x="66" y="40"  w="5"  h="3"  color="$skin_shadow"/>
+                <hline x="59" y="42" len="10" color="$skin_dark"/>
+                <!-- MOUTH — thinner upper, fuller lower -->
+                <hline x="55" y="46" len="18" color="$skin_shadow"/>
+                <rect x="58" y="47"  w="12" h="3"  color="$lip_color"/>
+                <hline x="60" y="48" len="8"  color="$skin_base"/>
+                <hline x="55" y="50" len="18" color="$skin_highlight"/>
+                <!-- CHIN CREASE -->
+                <hline x="60" y="52" len="8"  color="$skin_shadow"/>
+                <!-- NASOLABIAL FOLDS -->
+                <vline x="56" y="43" len="5"  color="$skin_shadow"/>
+                <vline x="72" y="43" len="5"  color="$skin_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=17 HAIR BACK — very short, dark brown                      -->
+        <!-- ============================================================ -->
+        <layer id="hair_back" replace="true">
+            <pixel-data>
+                <rect x="34" y="18"  w="6"  h="10" color="$hair_shadow"/>
+                <rect x="88" y="18"  w="6"  h="10" color="$hair_shadow"/>
+                <rect x="34" y="26"  w="4"  h="6"  color="$hair_base"/>
+                <rect x="90" y="26"  w="4"  h="6"  color="$hair_base"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=18 HAIR FRONT — short, neat, dark brown                    -->
+        <!-- ============================================================ -->
+        <layer id="hair_front" replace="true">
+            <pixel-data>
+                <!-- crown cap -->
+                <rect x="38" y="8"   w="52" h="12" color="$hair_base"/>
+                <hline x="42" y="8"  len="44" color="$hair_highlight"/>
+                <hline x="46" y="9"  len="32" color="$hair_highlight"/>
+                <!-- left side — very close cropped -->
+                <rect x="36" y="14"  w="6"  h="8"  color="$hair_base"/>
+                <rect x="34" y="18"  w="4"  h="4"  color="$hair_shadow"/>
+                <!-- right side -->
+                <rect x="86" y="14"  w="6"  h="8"  color="$hair_base"/>
+                <rect x="90" y="18"  w="4"  h="4"  color="$hair_shadow"/>
+                <!-- hairline front -->
+                <hline x="42" y="14" len="44" color="$hair_shadow"/>
+                <!-- part line — slight off-centre -->
+                <vline x="66" y="8"  len="6"  color="$hair_shadow"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=19 ACCESSORY — smart watch on left wrist                   -->
+        <!-- follows="hand_left": hand_left top = y=116                   -->
+        <!-- Watch at x=16..26, y=116..122 — sits on wrist just above     -->
+        <!-- hand, 2px left of hand edge (x=18): bracelet wrap effect ✓   -->
+        <!-- forearm_left ends at y=116 → watch at y=116: no overlap ✓   -->
+        <!-- ============================================================ -->
+        <layer id="accessory" replace="true" follows="hand_left">
+            <pixel-data>
+                <!-- watch strap upper -->
+                <rect x="16" y="112" w="10" h="4"  color="$watch_strap"/>
+                <!-- watch body / case -->
+                <rect x="16" y="116" w="10" h="6"  color="$watch_body"/>
+                <!-- screen -->
+                <rect x="17" y="117" w="8"  h="4"  color="$watch_screen"/>
+                <!-- screen highlight -->
+                <rect x="17" y="117" w="3"  h="2"  color="#3A5A9A"/>
+                <!-- case highlight edge -->
+                <hline x="16" y="116" len="10" color="#383838"/>
+                <!-- strap lower -->
+                <rect x="16" y="122" w="10" h="3"  color="$watch_strap"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=20 SHADOW — standard width for 64px torso                  -->
+        <!-- ============================================================ -->
+        <layer id="shadow" replace="true">
+            <pixel-data>
+                <rect x="24" y="184" w="80" h="4"  color="#00000050"/>
+                <rect x="30" y="186" w="68" h="4"  color="#00000038"/>
+                <rect x="38" y="188" w="52" h="3"  color="#00000020"/>
+            </pixel-data>
+        </layer>
+
+        <!-- ============================================================ -->
+        <!-- z=21 HIGHLIGHT — rim light for male silhouette               -->
+        <!-- head left rim: x=38                                          -->
+        <!-- left arm outer: x=18                                         -->
+        <!-- left leg outer: x=36                                         -->
+        <!-- ============================================================ -->
+        <layer id="highlight" replace="true">
+            <pixel-data>
+                <vline x="38" y="10"  len="44" color="#FFFFFF20"/>
+                <vline x="32" y="64"  len="40" color="#FFFFFF18"/>
+                <vline x="18" y="66"  len="60" color="#FFFFFF14"/>
+                <vline x="36" y="112" len="64" color="#FFFFFF10"/>
+            </pixel-data>
+        </layer>
+
     </layer-overrides>
 
     <naming>
         <output-dir>characters/alexander</output-dir>
     </naming>
+
 </asset-spec>

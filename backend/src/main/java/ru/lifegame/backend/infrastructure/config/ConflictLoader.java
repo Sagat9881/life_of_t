@@ -15,7 +15,7 @@ import java.util.*;
 
 /**
  * Loads conflict specifications by scanning all XML files in
- * classpath*:game-data/conflicts/*.xml
+ * classpath*:game-config/conflicts/*.xml
  *
  * Uses Spring ResourcePatternResolver so it correctly scans
  * across all JARs on the classpath.
@@ -38,7 +38,7 @@ public class ConflictLoader {
                 ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
         try {
             Resource[] resources = resolver.getResources(
-                    "classpath*:game-data/conflicts/*.xml"
+                    "classpath*:game-config/conflicts/*.xml"
             );
             if (resources.length == 0) {
                 throw new IllegalStateException(

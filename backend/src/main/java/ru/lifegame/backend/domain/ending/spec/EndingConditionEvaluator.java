@@ -5,7 +5,6 @@ import ru.lifegame.backend.domain.model.character.PlayerCharacter;
 import ru.lifegame.backend.domain.model.relationship.Relationship;
 import ru.lifegame.backend.domain.model.relationship.Relationships;
 import ru.lifegame.backend.domain.quest.QuestLog;
-import ru.lifegame.backend.domain.quest.QuestType;
 
 public class EndingConditionEvaluator {
 
@@ -61,12 +60,11 @@ public class EndingConditionEvaluator {
     private boolean evaluateQuest(EndingCondition condition, QuestLog questLog) {
         if (condition.questId() == null) return false;
 
-        QuestType questType = QuestType.valueOf(condition.questId());
-        boolean completed = questLog.hasCompletedQuest(questType);
+        boolean completed =  questLog.getCompletedQuestIds().contains(condition.questId());
 
         return switch (condition.state()) {
             case "COMPLETED" -> completed;
-            case "ACTIVE" -> questLog.hasActiveQuest(questType);
+            case "ACTIVE" -> questLog.hasActiveQuest(condition.questId());
             default -> false;
         };
     }

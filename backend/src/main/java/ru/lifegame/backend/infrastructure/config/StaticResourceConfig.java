@@ -32,7 +32,7 @@ public class StaticResourceConfig implements WebMvcConfigurer {
         registry
                 .addResourceHandler("/assets/**")
                 .addResourceLocations(
-                        "classpath:/assets/",  // JAR-embedded assets
+                        "classpath*:/assets/**",  // JAR-embedded assets
                         fileLocation            // Filesystem assets (dev mode)
                 )
                 .setCachePeriod(3600); // 1 hour cache for static assets

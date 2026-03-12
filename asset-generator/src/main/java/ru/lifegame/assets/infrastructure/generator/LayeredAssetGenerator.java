@@ -169,8 +169,8 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             int[] bounds = renderer.computeCropBounds(allFramesForCrop);
             boolean needsCrop = bounds[0] != 0 || bounds[1] != 0
                     || (!allFramesForCrop.isEmpty()
-                        && (bounds[2] != allFramesForCrop.get(0).getWidth()
-                            || bounds[3] != allFramesForCrop.get(0).getHeight()));
+                        && (bounds[2] != allFramesForCrop.getFirst().getWidth()
+                            || bounds[3] != allFramesForCrop.getFirst().getHeight()));
 
             if (needsCrop) {
                 LinkedHashMap<String, List<BufferedImage>> croppedRows = new LinkedHashMap<>();
@@ -210,8 +210,8 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             int[] bounds = renderer.computeCropBounds(frames);
             boolean needsCrop = bounds[0] != 0 || bounds[1] != 0
                     || (!frames.isEmpty()
-                        && (bounds[2] != frames.get(0).getWidth()
-                            || bounds[3] != frames.get(0).getHeight()));
+                        && (bounds[2] != frames.getFirst().getWidth()
+                            || bounds[3] != frames.getFirst().getHeight()));
 
             if (needsCrop) {
                 stripCropOffsets.put(animSpec.name(), new AtlasConfigWriter.CropOffsetDef(
@@ -303,16 +303,32 @@ public class LayeredAssetGenerator implements AssetGenerationService {
 
     private int resolveWidth(AssetSpec spec) {
         return spec.layers().stream()
-                .mapToInt(AssetLayer::width)
-                .filter(w -> w > 0)
+                .mapToInt(l -> {
+                    PixelData pd = l.pixelData();
+                    if (pd == null || pd.isEmpty()) return Math.max(l.width(), 0);
+                    int maxX = pd.rects().stream()
+                            .mapToInt(r -> r.x() + r.w()).max().orElse(0);
+                    int maxXLine = pd.lines().stream()
+                            .mapToInt(line -> line.x() + (line.direction() == PixelLine.Direction.HORIZONTAL ? line.length() : 1))
+                            .max().orElse(0);
+                    return Math.max(maxX, maxXLine);
+                })
                 .max()
                 .orElse(DEFAULT_WIDTH);
     }
 
     private int resolveHeight(AssetSpec spec) {
         return spec.layers().stream()
-                .mapToInt(AssetLayer::height)
-                .filter(h -> h > 0)
+                .mapToInt(l -> {
+                    PixelData pd = l.pixelData();
+                    if (pd == null || pd.isEmpty()) return Math.max(l.height(), 0);
+                    int maxY = pd.rects().stream()
+                            .mapToInt(r -> r.y() + r.h()).max().orElse(0);
+                    int maxYLine = pd.lines().stream()
+                            .mapToInt(line -> line.y() + (line.direction() == PixelLine.Direction.VERTICAL ? line.length() : 1))
+                            .max().orElse(0);
+                    return Math.max(maxY, maxYLine);
+                })
                 .max()
                 .orElse(DEFAULT_HEIGHT);
     }

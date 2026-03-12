@@ -7,7 +7,12 @@ interface ConflictDialogProps {
   readonly onRetreat: () => void;
 }
 
-export function ConflictDialog({ conflict, isLoading, onSelectTactic, onRetreat }: ConflictDialogProps) {
+export function ConflictDialog({
+  conflict,
+  isLoading,
+  onSelectTactic,
+  onRetreat,
+}: ConflictDialogProps) {
   const totalCSP = conflict.playerCSP + conflict.opponentCSP;
   const playerPct = totalCSP > 0 ? Math.round((conflict.playerCSP / totalCSP) * 100) : 50;
   const opponentPct = 100 - playerPct;
@@ -26,6 +31,7 @@ export function ConflictDialog({ conflict, isLoading, onSelectTactic, onRetreat 
             <span className="gs-conflict__csp-vs">vs</span>
             <span className="gs-conflict__csp-opponent">Оппонент</span>
           </div>
+
           <div className="gs-conflict__csp-bar">
             <div
               className="gs-conflict__csp-player"
@@ -36,6 +42,7 @@ export function ConflictDialog({ conflict, isLoading, onSelectTactic, onRetreat 
               style={{ width: `${opponentPct}%` }}
             />
           </div>
+
           <div className="gs-conflict__csp-values">
             <span>{conflict.playerCSP}</span>
             <span>{conflict.opponentCSP}</span>

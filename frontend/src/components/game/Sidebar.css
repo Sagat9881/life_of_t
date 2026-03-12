@@ -163,6 +163,133 @@
   letter-spacing: 1px;
 }
 
+/* Pets */
+.sb-pets {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sb-pet {
+  border: 1px solid #444;
+  background: #2a2a4a;
+  padding: 6px;
+}
+
+.sb-pet__name {
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.sb-pet__stats {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sb-pet-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sb-pet-stat__label {
+  min-width: 54px;
+  color: #aaa;
+  font-size: 6px;
+}
+
+.sb-pet-stat__bar {
+  flex: 1;
+  height: 5px;
+  background: #333;
+  border: 1px solid #555;
+}
+
+.sb-pet-stat__fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.sb-pet-stat__value {
+  min-width: 24px;
+  text-align: right;
+  color: #fff;
+  font-size: 6px;
+}
+
+/* NPC activities */
+.sb-npc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sb-npc {
+  border: 1px solid #444;
+  background: #2a2a4a;
+  padding: 6px;
+}
+
+.sb-npc__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.sb-npc__name {
+  color: #fff;
+}
+
+.sb-npc__status {
+  font-size: 6px;
+}
+
+.sb-npc__status--available {
+  color: #4caf50;
+}
+
+.sb-npc__status--busy {
+  color: #f44336;
+}
+
+.sb-npc__meta {
+  color: #aaa;
+  margin-bottom: 3px;
+  font-size: 6px;
+}
+
+.sb-npc__mood {
+  color: #ccc;
+  font-size: 6px;
+}
+
+/* World events */
+.sb-events {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sb-event {
+  border: 1px solid #444;
+  background: #2a2a4a;
+  padding: 5px 6px;
+}
+
+.sb-event__type {
+  color: #fff;
+  margin-bottom: 3px;
+  font-size: 7px;
+}
+
+.sb-event__time {
+  color: #aaa;
+  font-size: 6px;
+}
+
 /* Empty state */
 .sb-empty {
   color: #666;

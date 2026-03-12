@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<conflict id="FINANCIAL_DISAGREEMENT">
+
+  <meta>
+    <label>Финансовые разногласия</label>
+    <description>Споры о деньгах и семейном бюджете создают напряжение.</description>
+    <opponent-id>HUSBAND</opponent-id>
+    <category>relationship</category>
+    <intro-dialogue>Мы не можем так тратить деньги...</intro-dialogue>
+  </meta>
+
+  <trigger cooldown-days="5" mode="ANY">
+    <condition type="stat" field="money" operator="lt" value="500"/>
+    <condition type="stat" field="money" operator="gt" value="5000"/>
+  </trigger>
+
+  <tactic code="LOGICAL_ARGUMENT" base-csp-cost="10" base-opponent-csp-cost="20">
+    <label>Логические аргументы</label>
+    <description>Объяснить финансовую ситуацию с цифрами и фактами</description>
+    <success-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.trust" value="+20"/>
+      </relationship-changes>
+      <narrative>Аргументы убедили. Совместно составили план расходов.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.trust" value="-5"/>
+      </relationship-changes>
+      <narrative>Цифры не помогли — эмоции оказались сильнее логики.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="COMPROMISE" base-csp-cost="10" base-opponent-csp-cost="10">
+    <label>Найти компромисс</label>
+    <description>Договориться о совместном бюджете с общими правилами</description>
+    <success-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.trust" value="+10"/>
+        <change field="HUSBAND.closeness" value="+5"/>
+      </relationship-changes>
+      <narrative>Нашли решение, которое устроило обоих. Финансовый мир восстановлен.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="-5"/>
+      </relationship-changes>
+      <narrative>Компромисс не был найден — остались каждый при своём мнении.</narrative>
+    </failure-outcome>
+  </tactic>
+
+  <tactic code="ASSERT" base-csp-cost="15" base-opponent-csp-cost="15">
+    <label>Настоять на своём</label>
+    <description>Защитить свой взгляд на то, как нужно распоряжаться деньгами</description>
+    <success-outcome>
+      <stat-changes>
+        <change field="self_esteem" value="+10"/>
+      </stat-changes>
+      <relationship-changes>
+        <change field="HUSBAND.trust" value="+5"/>
+        <change field="HUSBAND.closeness" value="-10"/>
+      </relationship-changes>
+      <narrative>Отстояли позицию. Но муж остался недоволен.</narrative>
+    </success-outcome>
+    <failure-outcome>
+      <relationship-changes>
+        <change field="HUSBAND.closeness" value="-15"/>
+        <change field="HUSBAND.trust" value="-10"/>
+      </relationship-changes>
+      <narrative>Конфликт обострился. Финансовые противоречия вышли на новый уровень.</narrative>
+    </failure-outcome>
+  </tactic>
+
+</conflict>
