@@ -4,11 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import ru.lifegame.assets.domain.model.asset.*;
+import ru.lifegame.assets.domain.model.asset.AtlasConfigSchema.SingleCondition;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,27 +29,25 @@ public class XmlAssetSpecParser {
 
     private static final Logger log = LoggerFactory.getLogger(XmlAssetSpecParser.class);
 
-    private Path specsRoot;
     private VisualSpecResolver resolver;
 
     public XmlAssetSpecParser() {
-        this.specsRoot = null;
         this.resolver = null;
     }
 
+    /** Primary constructor: source-agnostic. */
+    public XmlAssetSpecParser(SpecsSource source) {
+        this.resolver = new VisualSpecResolver(source, this);
+    }
+
+    /** Backward-compatible constructor for disk-based specs. */
     public XmlAssetSpecParser(Path specsRoot) {
-        this.specsRoot = specsRoot;
-        this.resolver = new VisualSpecResolver(specsRoot, this);
+        this(new DiskSpecsSource(specsRoot, new XmlAssetSpecParser()));
     }
 
     public AssetSpec parse(Path xmlFile) {
         try (InputStream is = Files.newInputStream(xmlFile)) {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(is);
-            doc.getDocumentElement().normalize();
-            return parseRoot(doc.getDocumentElement(), xmlFile);
+            return parseFromStream(is);
         } catch (XmlParseException e) {
             throw e;
         } catch (Exception e) {
@@ -71,6 +72,15 @@ public class XmlAssetSpecParser {
 
     public Map<String, String> extractColorVarsFromFile(Path xmlFile) {
         try (InputStream is = Files.newInputStream(xmlFile)) {
+            return extractColorVarsFromStream(is);
+        } catch (Exception e) {
+            log.warn("Failed to extract color vars from {}: {}", xmlFile, e.getMessage());
+            return Map.of();
+        }
+    }
+
+    public Map<String, String> extractColorVarsFromStream(InputStream is) {
+        try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -78,18 +88,16 @@ public class XmlAssetSpecParser {
             doc.getDocumentElement().normalize();
             return parseColorVariableMap(doc.getDocumentElement());
         } catch (Exception e) {
-            log.warn("Failed to extract color vars from {}: {}", xmlFile, e.getMessage());
+            log.warn("Failed to extract color vars from stream: {}", e.getMessage());
             return Map.of();
         }
     }
 
     private AssetSpec parseRoot(Element root, Path sourceFile) {
         String extendsAttr = root.getAttribute("extends");
-
         if (!extendsAttr.isBlank() && resolver != null) {
             return parseWithInheritance(root, extendsAttr, sourceFile);
         }
-
         return parseFlatSpec(root);
     }
 
@@ -174,12 +182,8 @@ public class XmlAssetSpecParser {
             Element el = (Element) colorNodes.item(i);
             String value = el.getAttribute("value");
             if (value.isBlank()) continue;
-
             String id = el.getAttribute("id");
-            if (!id.isBlank()) {
-                vars.put("$" + id, value);
-            }
-
+            if (!id.isBlank()) vars.put("$" + id, value);
             String name = el.getAttribute("name");
             if (!name.isBlank()) {
                 if (!name.startsWith("$")) name = "$" + name;
@@ -198,9 +202,7 @@ public class XmlAssetSpecParser {
             Element el = (Element) remapNodes.item(i);
             String from = el.getAttribute("from");
             String to = el.getAttribute("to");
-            if (!from.isBlank() && !to.isBlank()) {
-                remaps.add(new ColorRemap(from, to));
-            }
+            if (!from.isBlank() && !to.isBlank()) remaps.add(new ColorRemap(from, to));
         }
         return remaps;
     }
@@ -215,16 +217,13 @@ public class XmlAssetSpecParser {
             String id = el.getAttribute("id");
             boolean replace = "true".equals(el.getAttribute("replace"));
             if (id.isBlank()) continue;
-
             PixelData pixelData = parsePixelData(el);
             String type = el.getAttribute("type");
             int zOrder = intAttr(el, "z-order", -1);
             int width = intAttr(el, "width", 0);
             int height = intAttr(el, "height", 0);
-            String follows = el.hasAttribute("follows")
-                    ? el.getAttribute("follows") : null;
+            String follows = el.hasAttribute("follows") ? el.getAttribute("follows") : null;
             List<LayerCondition> conditions = parseLayerConditions(el);
-
             overrides.add(new LayerOverride(id, replace, type, zOrder, width, height,
                     pixelData, follows, conditions));
         }
@@ -237,8 +236,7 @@ public class XmlAssetSpecParser {
         if (animsEl == null) return animations;
         NodeList animNodes = animsEl.getElementsByTagName("animation");
         for (int i = 0; i < animNodes.getLength(); i++) {
-            Element el = (Element) animNodes.item(i);
-            animations.add(parseOneAnimation(el));
+            animations.add(parseOneAnimation((Element) animNodes.item(i)));
         }
         return animations;
     }
@@ -251,9 +249,7 @@ public class XmlAssetSpecParser {
 
     private List<AssetLayer> parseLayers(Element root) {
         Element layersEl = getFirstChildOrNull(root, "layers");
-        if (layersEl == null) {
-            throw new XmlParseException("Missing required <layers> element");
-        }
+        if (layersEl == null) throw new XmlParseException("Missing required <layers> element");
         return parseLayerElements(layersEl);
     }
 
@@ -268,12 +264,9 @@ public class XmlAssetSpecParser {
             int zOrder = intAttr(el, "z-order", i);
             int width = intAttr(el, "width", 0);
             int height = intAttr(el, "height", 0);
-
             PixelData pixelData = parsePixelData(el);
-            String follows = el.hasAttribute("follows")
-                    ? el.getAttribute("follows") : null;
+            String follows = el.hasAttribute("follows") ? el.getAttribute("follows") : null;
             List<LayerCondition> conditions = parseLayerConditions(el);
-
             layers.add(new AssetLayer(id, type, "", zOrder, width, height,
                     pixelData, follows, conditions));
         }
@@ -284,20 +277,16 @@ public class XmlAssetSpecParser {
         List<LayerCondition> conditions = new ArrayList<>();
         Element conditionsEl = getFirstChildOrNull(layerEl, "conditions");
         if (conditionsEl == null) return conditions;
-
         NodeList condNodes = conditionsEl.getElementsByTagName("condition");
         for (int i = 0; i < condNodes.getLength(); i++) {
             Element condEl = (Element) condNodes.item(i);
             String condId = condEl.getAttribute("id");
             if (condId.isBlank()) continue;
-
             Element overrideEl = getFirstChildOrNull(condEl, "override");
             if (overrideEl == null) continue;
-
             String layerRef = overrideEl.getAttribute("layer-ref");
             String tint = overrideEl.getAttribute("tint");
             String opacity = overrideEl.getAttribute("opacity");
-
             conditions.add(new LayerCondition(condId, tint, opacity, layerRef));
         }
         return conditions;
@@ -344,8 +333,7 @@ public class XmlAssetSpecParser {
         if (animsEl == null) return animations;
         NodeList animNodes = animsEl.getElementsByTagName("animation");
         for (int i = 0; i < animNodes.getLength(); i++) {
-            Element el = (Element) animNodes.item(i);
-            animations.add(parseOneAnimation(el));
+            animations.add(parseOneAnimation((Element) animNodes.item(i)));
         }
         return animations;
     }
@@ -359,16 +347,84 @@ public class XmlAssetSpecParser {
         int frameHeight = intAttr(el, "frame-height", 128);
 
         List<FrameOffset> frameOffsets = parseFrameOffsets(el);
-        return new AnimationSpec(name, frames, fps, loop, frameWidth, frameHeight, frameOffsets);
+        List<AnimationVariant> variants = parseVariants(el, fps, loop, frameOffsets);
+
+        return new AnimationSpec(name, frames, fps, loop, frameWidth, frameHeight,
+                frameOffsets, variants);
+    }
+
+    /**
+     * Parses direct {@code <variant>} children of the given animation element.
+     * Uses shallow iteration via {@code getChildNodes()} to avoid deep-scanning
+     * nested structures.
+     *
+     * @param animEl       the {@code <animation>} element
+     * @param defaultFps   fps to use when variant has no fps attribute
+     * @param defaultLoop  loop value to use when variant has no loop attribute
+     * @param defaultOffsets frame offsets to inherit when variant has none
+     * @return ordered list of parsed variants; empty if no {@code <variant>} children
+     */
+    private List<AnimationVariant> parseVariants(Element animEl, int defaultFps,
+                                                 boolean defaultLoop,
+                                                 List<FrameOffset> defaultOffsets) {
+        List<AnimationVariant> variants = new ArrayList<>();
+        NodeList children = animEl.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node node = children.item(i);
+            if (!(node instanceof Element child)) continue;
+            if (!"variant".equals(child.getTagName())) continue;
+
+            int varFps = intAttr(child, "fps", defaultFps);
+            boolean varLoop = boolAttr(child, "loop", defaultLoop);
+            List<SingleCondition> conditions = parseSingleConditions(child);
+            // variants share the animation-level frameOffsets unless overridden later
+            variants.add(new AnimationVariant(conditions, varFps, varLoop, defaultOffsets));
+        }
+        return variants;
+    }
+
+    /**
+     * Parses direct {@code <condition>} children of the given variant element.
+     * Shallow iteration via {@code getChildNodes()}.
+     */
+    private List<SingleCondition> parseSingleConditions(Element variantEl) {
+        List<SingleCondition> conditions = new ArrayList<>();
+        NodeList children = variantEl.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node node = children.item(i);
+            if (!(node instanceof Element child)) continue;
+            if (!"condition".equals(child.getTagName())) continue;
+
+            String space = child.getAttribute("space");
+            String npcId = child.hasAttribute("npcId") ? child.getAttribute("npcId") : null;
+            String stat = child.getAttribute("stat");
+            String operator = child.getAttribute("operator");
+            String rawValue = child.getAttribute("value");
+
+            Object value;
+            try {
+                value = Long.parseLong(rawValue);
+            } catch (NumberFormatException e) {
+                value = rawValue;
+            }
+
+            if (!space.isBlank() && !stat.isBlank() && !operator.isBlank()) {
+                conditions.add(new SingleCondition(space, npcId, stat, operator, value));
+            }
+        }
+        return conditions;
     }
 
     private List<FrameOffset> parseFrameOffsets(Element animEl) {
         List<FrameOffset> offsets = new ArrayList<>();
-        NodeList frameNodes = animEl.getElementsByTagName("frame");
-        for (int i = 0; i < frameNodes.getLength(); i++) {
-            Element el = (Element) frameNodes.item(i);
-            int index = intAttr(el, "index", i);
-            String offsetsStr = el.getAttribute("layer-offsets");
+        // Shallow iteration: only direct <frame> children of <animation>
+        NodeList children = animEl.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node node = children.item(i);
+            if (!(node instanceof Element child)) continue;
+            if (!"frame".equals(child.getTagName())) continue;
+            int index = intAttr(child, "index", offsets.size());
+            String offsetsStr = child.getAttribute("layer-offsets");
             Map<String, int[]> layerOffsets = parseLayerOffsets(offsetsStr);
             offsets.add(new FrameOffset(index, layerOffsets));
         }
@@ -391,8 +447,7 @@ public class XmlAssetSpecParser {
                     int dx = Integer.parseInt(coords[0].trim());
                     int dy = Integer.parseInt(coords[1].trim());
                     map.put(layerId, new int[]{dx, dy});
-                } catch (NumberFormatException ignored) {
-                }
+                } catch (NumberFormatException ignored) {}
             }
         }
         return map;
@@ -403,9 +458,7 @@ public class XmlAssetSpecParser {
         if (paletteEl == null) return ColorPalette.projectDefault();
         List<String> primary = parseColorList(paletteEl, "primary");
         List<String> secondary = parseColorList(paletteEl, "secondary");
-        if (primary.isEmpty() && secondary.isEmpty()) {
-            return ColorPalette.projectDefault();
-        }
+        if (primary.isEmpty() && secondary.isEmpty()) return ColorPalette.projectDefault();
         return new ColorPalette(primary, secondary);
     }
 

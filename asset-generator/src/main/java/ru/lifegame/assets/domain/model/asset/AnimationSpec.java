@@ -8,11 +8,13 @@ import java.util.List;
  *
  * @param name         animation identifier (e.g. "idle", "walk")
  * @param frames       total number of frames (1..50)
- * @param fps          frames per second for playback
- * @param loop         whether the animation loops
+ * @param fps          default frames per second (used when variants is empty)
+ * @param loop         default loop flag (used when variants is empty)
  * @param frameWidth   width of each frame in pixels
  * @param frameHeight  height of each frame in pixels
- * @param frameOffsets per-frame layer offsets (may be empty for static offset)
+ * @param frameOffsets per-frame layer offsets (used when variants is empty)
+ * @param variants     ordered list of grid-row variants with predicate conditions;
+ *                     empty means single-row default (use fps/loop/frameOffsets above)
  */
 public record AnimationSpec(
         String name,
@@ -21,7 +23,8 @@ public record AnimationSpec(
         boolean loop,
         int frameWidth,
         int frameHeight,
-        List<FrameOffset> frameOffsets
+        List<FrameOffset> frameOffsets,
+        List<AnimationVariant> variants
 ) {
     public static final int MAX_FRAMES = 50;
 
@@ -42,11 +45,19 @@ public record AnimationSpec(
         frameOffsets = frameOffsets != null
                 ? Collections.unmodifiableList(frameOffsets)
                 : List.of();
+        variants = variants != null ? List.copyOf(variants) : List.of();
     }
 
-    /** Backward-compatible constructor without frame offsets. */
+    /** Backward-compatible constructor without variants. */
+    public AnimationSpec(String name, int frames, int fps, boolean loop,
+                         int frameWidth, int frameHeight,
+                         List<FrameOffset> frameOffsets) {
+        this(name, frames, fps, loop, frameWidth, frameHeight, frameOffsets, List.of());
+    }
+
+    /** Backward-compatible constructor without frame offsets or variants. */
     public AnimationSpec(String name, int frames, int fps, boolean loop,
                          int frameWidth, int frameHeight) {
-        this(name, frames, fps, loop, frameWidth, frameHeight, List.of());
+        this(name, frames, fps, loop, frameWidth, frameHeight, List.of(), List.of());
     }
 }
