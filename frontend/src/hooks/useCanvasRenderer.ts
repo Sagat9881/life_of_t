@@ -8,7 +8,7 @@
 
 import { useRef } from 'react';
 import type { LocationConfig } from '../types/location.types';
-import type { AtlasConfig, SlotState } from './canvasTypes';
+import type { AtlasConfig, GameStateSnapshot, SlotState } from './canvasTypes';
 import { useCanvasAssets } from './useCanvasAssets';
 import { useCanvasRenderLoop } from './useCanvasRenderLoop';
 
@@ -17,6 +17,7 @@ export interface UseCanvasRendererOptions {
   canvasRef: React.RefObject<HTMLCanvasElement>;
   viewportRef: React.RefObject<{ vpX: number; vpY: number; vpW: number; vpH: number }>;
   timeOfDay?: string;
+  gameState?: GameStateSnapshot;
   selectedObjectId: string | null;
   hoveredObjectId: string | null;
   characterAnimations?: Record<string, string>;
@@ -27,6 +28,7 @@ export function useCanvasRenderer({
   canvasRef,
   viewportRef,
   timeOfDay,
+  gameState,
   selectedObjectId,
   hoveredObjectId,
   characterAnimations,
@@ -40,14 +42,14 @@ export function useCanvasRenderer({
   const hoveredRef      = useRef<string | null>(hoveredObjectId);
   const charAnimsRef    = useRef<Record<string, string> | undefined>(characterAnimations);
   const rafRef          = useRef<number | undefined>(undefined);
-  const timeOfDayRef    = useRef<string>(timeOfDay ?? 'day');
+  const gameStateRef    = useRef<GameStateSnapshot>(gameState ?? { player: {}, context: {} });
 
   // Keep refs in sync on every render
   configRef.current    = config;
   selectedRef.current  = selectedObjectId;
   hoveredRef.current   = hoveredObjectId;
   charAnimsRef.current = characterAnimations;
-  timeOfDayRef.current = timeOfDay ?? 'day';
+  gameStateRef.current = gameState ?? { player: {}, context: {} };
 
   useCanvasAssets({
     config,
@@ -65,6 +67,6 @@ export function useCanvasRenderer({
     hoveredRef,
     charAnimsRef,
     rafRef,
-    timeOfDayRef,
+    gameStateRef,
   });
 }

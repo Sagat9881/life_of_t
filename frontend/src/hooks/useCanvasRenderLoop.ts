@@ -12,9 +12,10 @@
 
 import { useEffect } from 'react';
 import type { LocationConfig } from '../types/location.types';
-import type { AnimationConfig, SlotState } from './canvasTypes';
+import type { AnimationConfig, GameStateSnapshot, SlotState } from './canvasTypes';
 import type { CanvasAssetsRefs } from './useCanvasAssets';
 import { atlasUrl, atlasConfigUrl } from './useCanvasAssets';
+import { resolveActiveRow, getRowPlayback } from './atlasUtils';
 import React from 'react';
 
 export interface CanvasRenderLoopOptions {
@@ -26,7 +27,7 @@ export interface CanvasRenderLoopOptions {
   hoveredRef: React.MutableRefObject<string | null>;
   charAnimsRef: React.MutableRefObject<Record<string, string> | undefined>;
   rafRef: React.MutableRefObject<number | undefined>;
-  timeOfDayRef: React.MutableRefObject<string>;
+  gameStateRef: React.MutableRefObject<GameStateSnapshot>;
 }
 
 // ── Frame helpers ────────────────────────────────────────────────────────────────
@@ -50,7 +51,7 @@ export function useCanvasRenderLoop({
   hoveredRef,
   charAnimsRef,
   rafRef,
-  timeOfDayRef,
+  gameStateRef,
 }: CanvasRenderLoopOptions): void {
   const { imagesRef, atlasConfigsRef, slotStateRef } = assetsRefs;
 
@@ -113,22 +114,39 @@ export function useCanvasRenderLoop({
       const fh = frameH(img, animCfg);
 
       let frame = 0;
+      let state: SlotState | undefined;
+
       if (slotId !== null) {
-        let state: SlotState | undefined = slotStateRef.current.get(slotId);
+        state = slotStateRef.current.get(slotId);
 
         const isCharacter = !slotId.startsWith('furniture_') && !slotId.startsWith('__');
         const currentAnim = isCharacter ? charAnimsRef.current?.[slotId] : undefined;
 
         if (state && currentAnim && state.animationName !== currentAnim) {
-          state = { animationName: currentAnim, frameIndex: 0, lastFrameTime: now };
+          state = {
+            animationName: currentAnim,
+            frameIndex: 0,
+            lastFrameTime: now,
+            activeRowIndex: animCfg?.defaultRow ?? 0,
+          };
           slotStateRef.current.set(slotId, state);
         }
 
         if (state) {
-          const interval = 1000 / animCfg.fps;
+          // Resolve active row from game state predicates
+          const activeRow = resolveActiveRow(
+            animCfg.rows,
+            animCfg.defaultRow,
+            gameStateRef.current
+          );
+          state.activeRowIndex = activeRow;
+
+          const { fps, loop } = getRowPlayback(animCfg.rows, activeRow, animCfg.defaultRow);
+          const interval = 1000 / fps;
+
           if (now - state.lastFrameTime >= interval) {
             let next = state.frameIndex + 1;
-            if (next >= animCfg.columns) next = animCfg.loop ? 0 : animCfg.columns - 1;
+            if (next >= animCfg.columns) next = loop ? 0 : animCfg.columns - 1;
             state.frameIndex    = next;
             state.lastFrameTime = now;
           }
@@ -159,13 +177,16 @@ export function useCanvasRenderLoop({
         drawH = destH;
       }
 
+      const srcRow = state?.activeRowIndex ?? animCfg.defaultRow;
+      const srcY   = srcRow * fh;
+
       if (flipX) {
         ctx.save();
         ctx.translate(destX, 0);
         ctx.scale(-1, 1);
         ctx.translate(-destX, 0);
       }
-      ctx.drawImage(img, frame * fw, 0, fw, fh, drawX, drawY, drawW, drawH);
+      ctx.drawImage(img, frame * fw, srcY, fw, fh, drawX, drawY, drawW, drawH);
       if (flipX) ctx.restore();
     };
 
@@ -184,7 +205,7 @@ export function useCanvasRenderLoop({
 
       let state = slotStateRef.current.get('__background__');
       if (!state) {
-        state = { animationName: '__bg__', frameIndex: 0, lastFrameTime: now };
+        state = { animationName: '__bg__', frameIndex: 0, lastFrameTime: now, activeRowIndex: 0 };
         slotStateRef.current.set('__background__', state);
       }
 
@@ -202,6 +223,7 @@ export function useCanvasRenderLoop({
         return;
       }
 
+      // Backgrounds are always single-row — srcY = 0
       ctx.drawImage(img, state.frameIndex * fw, 0, fw, fh, vpX, vpY, vpW, vpH);
     };
 
@@ -228,7 +250,8 @@ export function useCanvasRenderLoop({
       ctx.clip();
 
       // Layer 1: Background
-      const timeOfDay  = timeOfDayRef.current;
+      const gameState  = gameStateRef.current;
+      const timeOfDay  = (gameState.context?.['time'] as string | undefined) ?? 'day';
       const bgAnimName = cfg.backgroundAnimations?.[timeOfDay] ?? cfg.backgroundAnimation;
       const bgUrl      = atlasUrl('locations', cfg.locationAsset, bgAnimName);
       const bgImg      = imagesRef.current.get(bgUrl);
