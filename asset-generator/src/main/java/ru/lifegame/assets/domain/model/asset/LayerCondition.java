@@ -4,7 +4,7 @@ package ru.lifegame.assets.domain.model.asset;
  * A condition override for a layer, parsed from {@code <condition>} elements
  * within a layer's {@code <conditions>} block in visual-specs.xml.
  * <p>
- * Used for overlay layers like ambient_light where each time-of-day
+ * Used for overlay layers like ambient_light where each condition
  * has different tint and opacity.
  *
  * @param id       condition identifier (e.g. "time_morning")
@@ -22,18 +22,6 @@ public record LayerCondition(
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("Condition id must not be blank");
         }
-    }
-
-    /**
-     * Extracts time-of-day value from the condition id.
-     * E.g. "time_morning" → "morning", "time_night" → "night".
-     * Returns the full id if no "time_" prefix.
-     */
-    public String timeOfDayValue() {
-        if (id.startsWith("time_")) {
-            return id.substring(5);
-        }
-        return id;
     }
 
     public double opacityAsDouble() {

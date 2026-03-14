@@ -13,7 +13,6 @@ import java.util.List;
  * @param layers       ordered list of layers to generate
  * @param colorPalette color palette to use
  * @param animations   list of animation specifications (may be empty for static-only assets)
- * @param timeOfDayVariations time-of-day variations (for locations; may be empty)
  * @param naming       naming conventions
  * @param constraints  technical constraints
  */
@@ -24,7 +23,6 @@ public record AssetSpec(
         List<AssetLayer> layers,
         ColorPalette colorPalette,
         List<AnimationSpec> animations,
-        List<TimeOfDayVariation> timeOfDayVariations,
         NamingSpec naming,
         AssetConstraints constraints
 ) {
@@ -40,8 +38,6 @@ public record AssetSpec(
         }
         layers = Collections.unmodifiableList(layers);
         animations = animations != null ? Collections.unmodifiableList(animations) : List.of();
-        timeOfDayVariations = timeOfDayVariations != null
-                ? Collections.unmodifiableList(timeOfDayVariations) : List.of();
         if (colorPalette == null) {
             colorPalette = ColorPalette.projectDefault();
         }

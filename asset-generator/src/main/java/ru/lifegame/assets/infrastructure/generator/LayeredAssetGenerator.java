@@ -22,23 +22,16 @@ import java.util.*;
  * Output structure per entity:
  * <pre>
  *   outputRoot/{type}/{name}/
- *     {name}.png                       ← composite static image
- *     {layer-id}.png                   ← individual layer PNGs
- *     sprite-atlas.json                ← atlas config (consumed by frontend + AnimationContentService)
+ *     {name}.png                       <- composite static image
+ *     {layer-id}.png                   <- individual layer PNGs
+ *     sprite-atlas.json                <- atlas config (consumed by frontend + AnimationContentService)
  *     animations/
- *       {anim}_atlas.png               ← grid animation atlases (one per animation name)
+ *       {anim}_atlas.png               <- grid animation atlases (one per animation name)
  * </pre>
  *
- * URL mapping (Spring Boot static → frontend):
- *   /assets/{type}/{name}/sprite-atlas.json      → classpath:/assets/{type}/{name}/sprite-atlas.json
- *   /assets/{type}/{name}/animations/*_atlas.png → classpath:/assets/{type}/{name}/animations/*.png
- *
- * Frames are cropped to their non-transparent bounding box before atlas packing.
- * The original crop offset is recorded in sprite-atlas.json so the frontend can
- * position the sprite correctly within the scene.
- *
- * All animations are grid-only. An animation without explicit variants gets a
- * single-row grid (rowIndex=0, condition={ "all": [] }).
+ * Multi-row grids: each AnimationVariant becomes one row (row_0, row_1, ...).
+ * A variant-less animation gets a single row_0 with condition={ "all": [] }.
+ * Overlay animations via layer conditions are pending variant-based refactor.
  */
 public class LayeredAssetGenerator implements AssetGenerationService {
 
@@ -106,19 +99,6 @@ public class LayeredAssetGenerator implements AssetGenerationService {
         return generated;
     }
 
-    /**
-     * Generates all animation atlases (PNG grids) into {@code animDir},
-     * and writes sprite-atlas.json into {@code entityDir}.
-     * <p>
-     * Every animation in spec.animations() becomes a single-row grid
-     * with condition { "all": [] } (always-true default).
-     *
-     * @param spec      entity asset spec
-     * @param entityDir root entity directory — sprite-atlas.json goes here
-     * @param animDir   animations sub-directory — atlas PNGs go here
-     * @param bgWidth   canvas width
-     * @param bgHeight  canvas height
-     */
     private List<Path> generateAllAtlases(AssetSpec spec, Path entityDir, Path animDir,
                                           int bgWidth, int bgHeight) {
         List<Path> generated = new ArrayList<>();
@@ -127,7 +107,6 @@ public class LayeredAssetGenerator implements AssetGenerationService {
         Map<String, AtlasConfigWriter.GridAnimDef> gridAnimDefs = new LinkedHashMap<>();
         Map<String, AtlasConfigWriter.CropOffsetDef> cropOffsets = new LinkedHashMap<>();
 
-        // All animations → single-row grid (condition = { "all": [] })
         for (AnimationSpec animSpec : spec.animations()) {
             List<BufferedImage> frames = renderer.renderAnimationFrames(layers, animSpec);
 
@@ -149,72 +128,54 @@ public class LayeredAssetGenerator implements AssetGenerationService {
                         bounds[2], bounds[3], bounds[0], bounds[1]);
             }
 
-            // Single-row grid: condition = { "all": [] } (always-true default)
             LinkedHashMap<String, List<BufferedImage>> rowFrames = new LinkedHashMap<>();
-            rowFrames.put("default", frames);
+            List<AtlasConfigSchema.RowDef> rowDefs = new ArrayList<>();
 
-            AtlasConfigSchema.RowCondition defaultCondition =
-                    new AtlasConfigSchema.RowCondition(List.of());
-            AtlasConfigSchema.RowDef rowDef =
-                    new AtlasConfigSchema.RowDef(0, defaultCondition, animSpec.fps(), animSpec.loop());
+            if (animSpec.variants().isEmpty()) {
+                rowFrames.put("row_0", frames);
+                rowDefs.add(new AtlasConfigSchema.RowDef(
+                        0,
+                        new AtlasConfigSchema.RowCondition(List.of()),
+                        animSpec.fps(),
+                        animSpec.loop()
+                ));
+            } else {
+                for (int i = 0; i < animSpec.variants().size(); i++) {
+                    AnimationVariant variant = animSpec.variants().get(i);
+                    rowFrames.put("row_" + i, frames); // same pixels, different playback speed
+                    List<AtlasConfigSchema.SingleCondition> predicates = variant.conditions().stream()
+                            .map(c -> new AtlasConfigSchema.SingleCondition(
+                                    c.space(), c.npcId(), c.stat(), c.operator(), c.value()))
+                            .toList();
+                    rowDefs.add(new AtlasConfigSchema.RowDef(
+                            i,
+                            new AtlasConfigSchema.RowCondition(predicates),
+                            variant.fps(),
+                            variant.loop()
+                    ));
+                }
+            }
+
+            log.info("Grid atlas '{}': {} rows (variants={})",
+                    animSpec.name(), rowDefs.size(), animSpec.variants().size());
 
             try {
                 Path atlasPath = atlasWriter.writeGridAtlas(rowFrames, animSpec.name(), animDir);
                 generated.add(atlasPath);
                 gridAnimDefs.put(animSpec.name(),
-                        new AtlasConfigWriter.GridAnimDef(List.of(rowDef), animSpec));
+                        new AtlasConfigWriter.GridAnimDef(rowDefs, animSpec));
             } catch (IOException e) {
                 throw new UncheckedIOException("Failed to write grid atlas: " + animSpec.name(), e);
             }
         }
 
-        // --- Overlay layers with conditions ---
-        Map<String, AtlasConfigWriter.OverlayAnimDef> overlayAnimDefs = new LinkedHashMap<>();
-        List<String> todSuffixes = List.of("morning", "day", "evening", "night");
+        // Overlay animations via layer conditions -- pending variant-based refactor
+        Map<String, AtlasConfigWriter.OverlayAnimDef> overlayAnimDefs = Map.of();
 
-        for (AssetLayer layer : layers) {
-            if (!layer.hasConditions()) continue;
-
-            LinkedHashMap<String, List<BufferedImage>> overlayRows = new LinkedHashMap<>();
-            List<AtlasConfigWriter.OverlayRowDef> rowDefs = new ArrayList<>();
-
-            for (String tod : todSuffixes) {
-                LayerCondition cond = layer.conditions().stream()
-                        .filter(c -> c.timeOfDayValue().equals(tod))
-                        .findFirst().orElse(null);
-                if (cond == null) continue;
-
-                BufferedImage frame = renderer.renderLayer(layer, bgWidth, bgHeight);
-                overlayRows.put(tod, List.of(frame));
-
-                // Temporary mapping: time-of-day condition → context/time predicate
-                List<AtlasConfigSchema.SingleCondition> predicates = List.of(
-                        new AtlasConfigSchema.SingleCondition(
-                                "context", null, "time", "==", tod)
-                );
-                rowDefs.add(new AtlasConfigWriter.OverlayRowDef(predicates, cond.tint(), cond.opacityAsDouble()));
-            }
-
-            if (!overlayRows.isEmpty()) {
-                try {
-                    Path atlasPath = atlasWriter.writeGridAtlas(overlayRows, layer.id(), animDir);
-                    generated.add(atlasPath);
-                } catch (IOException e) {
-                    throw new UncheckedIOException("Failed to write overlay atlas: " + layer.id(), e);
-                }
-
-                int defaultRow = Math.min(1, rowDefs.size() - 1);
-                overlayAnimDefs.put(layer.id(), new AtlasConfigWriter.OverlayAnimDef(
-                        bgWidth, bgHeight, rowDefs, defaultRow));
-            }
-        }
-
-        // Determine displayScale
         double scale = resolveDisplayScale(spec);
         configWriter.withDisplayScale(scale);
 
         try {
-            // sprite-atlas.json → entityDir (NOT animDir)
             Path configPath = configWriter.writeSpriteAtlas(
                     spec.entityName(), gridAnimDefs,
                     overlayAnimDefs, cropOffsets, entityDir);

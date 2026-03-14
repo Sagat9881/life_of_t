@@ -113,7 +113,6 @@ public class XmlAssetSpecParser {
         List<AnimationSpec> extraAnimations = parseAnimationsExtra(root);
         List<AssetLayer> ownLayers = parseLayersOptional(root);
 
-        List<TimeOfDayVariation> variations = parseTimeOfDayVariations(root);
         NamingSpec naming = parseNaming(root, entityType, entityName);
         AssetConstraints constraints = parseConstraints(root);
 
@@ -145,7 +144,7 @@ public class XmlAssetSpecParser {
 
         return new AssetSpec(entityType, entityName, version,
                 mergedLayers, mergedPalette, mergedAnimations,
-                variations, naming, constraints);
+                naming, constraints);
     }
 
     AssetSpec parseFlatSpec(Element root) {
@@ -161,12 +160,11 @@ public class XmlAssetSpecParser {
         }
         ColorPalette palette = parseColorPalette(root);
         List<AnimationSpec> animations = parseAnimations(root);
-        List<TimeOfDayVariation> variations = parseTimeOfDayVariations(root);
         NamingSpec naming = parseNaming(root, entityType, entityName);
         AssetConstraints constraints = parseConstraints(root);
 
         return new AssetSpec(entityType, entityName, version,
-                layers, palette, animations, variations, naming, constraints);
+                layers, palette, animations, naming, constraints);
     }
 
     private Map<String, String> parseColorVariableOverrides(Element root) {
@@ -353,17 +351,6 @@ public class XmlAssetSpecParser {
                 frameOffsets, variants);
     }
 
-    /**
-     * Parses direct {@code <variant>} children of the given animation element.
-     * Uses shallow iteration via {@code getChildNodes()} to avoid deep-scanning
-     * nested structures.
-     *
-     * @param animEl       the {@code <animation>} element
-     * @param defaultFps   fps to use when variant has no fps attribute
-     * @param defaultLoop  loop value to use when variant has no loop attribute
-     * @param defaultOffsets frame offsets to inherit when variant has none
-     * @return ordered list of parsed variants; empty if no {@code <variant>} children
-     */
     private List<AnimationVariant> parseVariants(Element animEl, int defaultFps,
                                                  boolean defaultLoop,
                                                  List<FrameOffset> defaultOffsets) {
@@ -377,16 +364,11 @@ public class XmlAssetSpecParser {
             int varFps = intAttr(child, "fps", defaultFps);
             boolean varLoop = boolAttr(child, "loop", defaultLoop);
             List<SingleCondition> conditions = parseSingleConditions(child);
-            // variants share the animation-level frameOffsets unless overridden later
             variants.add(new AnimationVariant(conditions, varFps, varLoop, defaultOffsets));
         }
         return variants;
     }
 
-    /**
-     * Parses direct {@code <condition>} children of the given variant element.
-     * Shallow iteration via {@code getChildNodes()}.
-     */
     private List<SingleCondition> parseSingleConditions(Element variantEl) {
         List<SingleCondition> conditions = new ArrayList<>();
         NodeList children = variantEl.getChildNodes();
@@ -417,7 +399,6 @@ public class XmlAssetSpecParser {
 
     private List<FrameOffset> parseFrameOffsets(Element animEl) {
         List<FrameOffset> offsets = new ArrayList<>();
-        // Shallow iteration: only direct <frame> children of <animation>
         NodeList children = animEl.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
             Node node = children.item(i);
@@ -472,21 +453,6 @@ public class XmlAssetSpecParser {
             if (!hex.isBlank()) colors.add(hex);
         }
         return colors;
-    }
-
-    private List<TimeOfDayVariation> parseTimeOfDayVariations(Element root) {
-        List<TimeOfDayVariation> variations = new ArrayList<>();
-        Element todsEl = getFirstChildOrNull(root, "time-of-day-variations");
-        if (todsEl == null) return variations;
-        NodeList varNodes = todsEl.getElementsByTagName("variation");
-        for (int i = 0; i < varNodes.getLength(); i++) {
-            Element el = (Element) varNodes.item(i);
-            String time = el.getAttribute("time");
-            String lighting = getTextContentOrDefault(el, "lighting", "");
-            String mood = getTextContentOrDefault(el, "mood", "");
-            variations.add(new TimeOfDayVariation(time, lighting, mood));
-        }
-        return variations;
     }
 
     private NamingSpec parseNaming(Element root, String entityType, String entityName) {
