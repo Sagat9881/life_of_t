@@ -1,225 +1,390 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Life of T — Duke Visual Spec v3.0.0
-    Extends: abstract/entities/dog@1.0
-    Canvas: 128×96 | displayScale: 1.5
-    Breed: Adult East European Shepherd (sable/saddle coat)
+    Life of T — Duke Character Visual Spec v2.0
+    Breed: German Shepherd, bi-color (sable/saddle)
+    Markings: dark saddle on back, black facial mask, cream belly
+    Extends: abstract/entities/dog@2.0
+    Canvas: 128×96 (inherited)
+    View: SIDE PROFILE (голова слева, хвост справа)
+    Overrides: ALL 10 layers (replace="true")
+    Animations: inherited from abstract/entities/dog@2.0
 
-    COAT:
-      Body:  cream-beige base (#D4C090) + dark saddle stripe hatch y=28..42
-      Belly: cream-white (#EDE0C0)
-      Mask:  solid black (#101010) — lower head from y=12 downward
-      Eye:   amber, positioned ABOVE mask in cream skull zone (y=8..18)
-      Paws:  cream-beige, dark pads
-
-    OVERRIDES (4 layers):
-      body         — cream base + saddle hatch (y=28..42) + flank shadows
-      belly        — light cream underbelly + centre highlight
-      head         — cream skull (y=0..16) + black mask (y=12..28)
-      face_details — nose + closed mouth fully inside black mask; no whiskers
-
-    All coordinates from abstract/entities/dog@1.0:
-      body:  x=12, y=28, w=96, h=44  (x=12..108)
-      belly: base x=28,y=48,w=64,h=32 + sternum x=36,y=36,w=40,h=24
-      head:  x=6, y=0, w=60, h=28
-      face:  eye x=14..28 y=8..18 | nose x=28..44 y=20..30 | mouth hline y=28
+    CHECKLIST:
+      10 layers replace="true"                              ✓
+      body y=22..74 height=52px exactly                    ✓
+      saddle: 12 hlines INSIDE body layer, no separate layer ✓
+      front_legs x_min=44, paws FL x_min=44               ✓
+      head: ONE eye, dark-brown                            ✓
+      muzzle x=4..26 y=18..34: $mask_color=#0A0A0A         ✓
+      face_details: nose+mouth only, no eye                ✓
+      tail arc x=104..122, thickness 5..6px               ✓
+      all color= from palette + #FFFFFF/#0A0A0A/#000000    ✓
+      extends="abstract/entities/dog@2.0"                 ✓
+      layer-overrides, name="$..."                         ✓
+      XML well-formed                                      ✓
 -->
-<asset-spec extends="abstract/entities/dog@1.0" version="3.0.0">
+<asset-spec extends="abstract/entities/dog@2.0" version="2.0">
+
   <meta>
     <entity-type>characters</entity-type>
     <entity-name>duke</entity-name>
-    <version>3.0.0</version>
-    <display-scale>1.5</display-scale>
+    <version>2.0</version>
   </meta>
 
   <color-palette>
-    <color name="$fur_base"        value="#D4C090"/>
-    <color name="$fur_shadow"      value="#B0A070"/>
-    <color name="$fur_highlight"   value="#EAD8A8"/>
-    <color name="$belly_base"      value="#EDE0C0"/>
-    <color name="$belly_highlight" value="#FAF0D8"/>
-    <color name="$mask_color"      value="#101010"/>
-    <color name="$mask_shadow"     value="#000000"/>
-    <color name="$saddle_dark"     value="#1A1A10"/>
-    <color name="$saddle_mid"      value="#303020"/>
-    <color name="$nose_color"      value="#101010"/>
-    <color name="$nose_highlight"  value="#383838"/>
-    <color name="$eye_color"       value="#5A3A10"/>
-    <color name="$eye_highlight"   value="#8A6020"/>
-    <color name="$paw_pad"         value="#707060"/>
-    <color name="$ear_inner"       value="#C0B080"/>
-    <color name="$tongue_color"    value="#FF6060"/>
+    <color name="$fur_base"     value="#D4A870"/>
+    <color name="$fur_mid"      value="#B88A50"/>
+    <color name="$fur_light"    value="#EDD090"/>
+    <color name="$fur_cream"    value="#EDE0C0"/>
+    <color name="$fur_shadow"   value="#8A6030"/>
+    <color name="$saddle_color" value="#2A1A08"/>
+    <color name="$mask_color"   value="#0A0A0A"/>
+    <color name="$ear_inside"   value="#8A5030"/>
+    <color name="$eye_color"    value="#3A2A10"/>
+    <color name="$nose_color"   value="#0A0A0A"/>
+    <color name="$nose_high"    value="#282828"/>
   </color-palette>
 
   <layer-overrides>
 
     <!-- ============================================================ -->
-    <!-- BODY override                                                -->
-    <!-- abstract/dog body: x=12, y=28, w=96, h=44 (x=12..108)      -->
-    <!-- Cream-beige base + saddle hatch y=28..42 (14 lines)         -->
-    <!-- Flank shadows: x=12..25 and x=95..108                       -->
+    <!-- z=0  PAWS                                                    -->
+    <!-- FL-far x=44..56, FL-near x=48..60. x_min=44 enforced.      -->
+    <!-- HL-far x=72..84, HL-near x=84..98.                         -->
+    <!-- Base y=83..86, lighter tip y=87..91.                        -->
+    <!-- ============================================================ -->
+    <layer id="paws" replace="true">
+      <pixel-data>
+        <!-- FL-far base -->
+        <rect  x="44" y="83" w="12" h="4"  color="$fur_base"/>
+        <!-- FL-far light tip -->
+        <rect  x="44" y="87" w="12" h="5"  color="$fur_light"/>
+
+        <!-- FL-near base -->
+        <rect  x="48" y="83" w="12" h="4"  color="$fur_mid"/>
+        <!-- FL-near cream tip -->
+        <rect  x="48" y="87" w="12" h="5"  color="$fur_cream"/>
+        <hline x="50" y="87" len="8"        color="$fur_cream"/>
+
+        <!-- HL-far base -->
+        <rect  x="72" y="83" w="12" h="4"  color="$fur_base"/>
+        <!-- HL-far light tip -->
+        <rect  x="72" y="87" w="12" h="5"  color="$fur_light"/>
+
+        <!-- HL-near base -->
+        <rect  x="84" y="83" w="14" h="4"  color="$fur_mid"/>
+        <!-- HL-near cream tip -->
+        <rect  x="84" y="87" w="14" h="5"  color="$fur_cream"/>
+        <hline x="86" y="87" len="10"       color="$fur_cream"/>
+      </pixel-data>
+    </layer>
+
+    <!-- ============================================================ -->
+    <!-- z=1  HIND LEGS                                               -->
+    <!-- Near: thigh x=80..100, shin x=86..100, stifle x=96..106.   -->
+    <!-- Far: -12px X offset, $fur_shadow.                           -->
+    <!-- ============================================================ -->
+    <layer id="hind_legs" replace="true">
+      <pixel-data>
+        <!-- THIGH near -->
+        <rect x="80" y="44" w="20" h="20"  color="$fur_base"/>
+        <rect x="84" y="44" w="10" h="20"  color="$fur_mid"/>
+        <rect x="78" y="44" w="4"  h="20"  color="$fur_shadow"/>
+        <!-- SHIN near -->
+        <rect x="86" y="62" w="14" h="20"  color="$fur_base"/>
+        <rect x="88" y="62" w="8"  h="12"  color="$fur_mid"/>
+        <!-- STIFLE SPUR — protrudes back -->
+        <rect  x="96" y="62" w="10" h="10" color="$fur_mid"/>
+        <hline x="97" y="65" len="8"        color="$fur_light"/>
+        <hline x="96" y="71" len="10"       color="$fur_shadow"/>
+        <!-- METATARSUS near -->
+        <rect  x="88" y="80" w="12" h="4"  color="$fur_base"/>
+        <hline x="90" y="80" len="8"        color="$fur_mid"/>
+
+        <!-- THIGH far -->
+        <rect x="68" y="44" w="20" h="20"  color="$fur_shadow"/>
+        <!-- SHIN far -->
+        <rect x="74" y="62" w="14" h="20"  color="$fur_shadow"/>
+        <!-- METATARSUS far -->
+        <rect x="76" y="80" w="12" h="4"   color="$fur_shadow"/>
+      </pixel-data>
+    </layer>
+
+    <!-- ============================================================ -->
+    <!-- z=2  FRONT LEGS                                              -->
+    <!-- far x=44..56, near x=48..60. No pixel left of x=44.        -->
+    <!-- ============================================================ -->
+    <layer id="front_legs" replace="true">
+      <pixel-data>
+        <!-- FAR leg: thigh -->
+        <rect x="44" y="58" w="12" h="12"  color="$fur_shadow"/>
+        <!-- FAR leg: elbow -->
+        <hline x="44" y="69" len="12"       color="$fur_shadow"/>
+        <!-- FAR leg: shin -->
+        <rect x="44" y="70" w="12" h="14"  color="$fur_shadow"/>
+
+        <!-- NEAR leg: thigh -->
+        <rect x="48" y="58" w="12" h="12"  color="$fur_base"/>
+        <rect x="52" y="58" w="4"  h="12"  color="$fur_mid"/>
+        <vline x="48" y="58" len="12"       color="$fur_shadow"/>
+        <!-- NEAR leg: elbow -->
+        <hline x="48" y="69" len="12"       color="$fur_shadow"/>
+        <hline x="50" y="70" len="8"        color="$fur_mid"/>
+        <!-- NEAR leg: shin -->
+        <rect x="48" y="70" w="12" h="14"  color="$fur_base"/>
+        <rect x="50" y="70" w="6"  h="8"   color="$fur_mid"/>
+        <vline x="48" y="70" len="14"       color="$fur_shadow"/>
+        <vline x="60" y="70" len="14"       color="$fur_shadow"/>
+      </pixel-data>
+    </layer>
+
+    <!-- ============================================================ -->
+    <!-- z=3  BODY                                                    -->
+    <!-- x=42..112, y=22..74. Height=52px exactly.                   -->
+    <!-- Saddle: 12 hlines x=50..100 y=22..44 INSIDE this layer.    -->
+    <!-- No separate saddle layer.                                    -->
     <!-- ============================================================ -->
     <layer id="body" replace="true">
       <pixel-data>
-        <!-- CREAM BASE — full torso -->
-        <rect x="12" y="28" w="96" h="44" color="$fur_base"/>
+        <!-- MAIN TORSO — cream-russet -->
+        <rect x="42" y="22" w="70" h="52"  color="$fur_base"/>
 
-        <!-- DORSAL HIGHLIGHT — withers zone -->
-        <rect x="36" y="28" w="48" h="10" color="$fur_highlight"/>
-        <hline x="20" y="28" len="72"      color="$fur_highlight"/>
+        <!-- WITHERS block -->
+        <rect x="42" y="22" w="38" h="8"   color="$fur_base"/>
+        <!-- CROUP block -->
+        <rect x="78" y="30" w="34" h="8"   color="$fur_base"/>
 
-        <!-- SADDLE HATCH — y=28..42, alternating dark lines -->
-        <!-- y=28 --> <hline x="12" y="28" len="96" color="$saddle_dark"/>
-        <!-- y=29 --> <hline x="12" y="29" len="96" color="$saddle_mid"/>
-        <!-- y=30 --> <hline x="12" y="30" len="96" color="$saddle_dark"/>
-        <!-- y=31 --> <hline x="12" y="31" len="96" color="$saddle_mid"/>
-        <!-- y=32 --> <hline x="12" y="32" len="96" color="$saddle_dark"/>
-        <!-- y=33 --> <hline x="12" y="33" len="96" color="$saddle_mid"/>
-        <!-- y=34 --> <hline x="12" y="34" len="96" color="$saddle_dark"/>
-        <!-- y=35 --> <hline x="12" y="35" len="96" color="$saddle_mid"/>
-        <!-- y=36 --> <hline x="12" y="36" len="96" color="$saddle_dark"/>
-        <!-- y=37 --> <hline x="12" y="37" len="96" color="$saddle_mid"/>
-        <!-- y=38 --> <hline x="12" y="38" len="96" color="$saddle_dark"/>
-        <!-- y=39 --> <hline x="12" y="39" len="96" color="$saddle_mid"/>
-        <!-- y=40 --> <hline x="12" y="40" len="96" color="$saddle_dark"/>
-        <!-- y=41 --> <hline x="12" y="41" len="96" color="$saddle_mid"/>
-        <!-- y=42 saddle bottom edge -->
-        <hline x="12" y="42" len="96"      color="$fur_shadow"/>
+        <!-- SPINE HIGHLIGHT -->
+        <hline x="46" y="22" len="60"       color="$fur_light"/>
+        <rect  x="48" y="23" w="40" h="6"  color="$fur_light"/>
 
-        <!-- FLANK SHADOWS — left (chest side) -->
-        <rect x="12" y="36" w="14" h="36"  color="$fur_shadow"/>
-        <!-- FLANK SHADOWS — right (croup side) -->
-        <rect x="94" y="36" w="14" h="36"  color="$fur_shadow"/>
+        <!-- SHOULDER VOLUME -->
+        <rect x="42" y="30" w="18" h="14"  color="$fur_mid"/>
+        <!-- CROUP VOLUME -->
+        <rect x="90" y="30" w="16" h="14"  color="$fur_mid"/>
 
-        <!-- UNDERLINE SHADOW -->
-        <hline x="16" y="70" len="88"      color="$fur_shadow"/>
-        <hline x="12" y="71" len="96"      color="$fur_shadow"/>
+        <!-- FLANK SHADOWS -->
+        <rect x="42" y="44" w="10" h="24"  color="$fur_shadow"/>
+        <rect x="100" y="44" w="12" h="24" color="$fur_shadow"/>
+
+        <!-- CHEST WALL -->
+        <vline x="42" y="28" len="44"       color="$fur_shadow"/>
+
+        <!-- UNDERBELLY EDGE -->
+        <hline x="46" y="73" len="62"       color="$fur_shadow"/>
+
+        <!-- SADDLE: 12 hlines x=50..100, y=22..44 step 2px     -->
+        <hline x="50" y="22" len="50"       color="$saddle_color"/>
+        <hline x="50" y="24" len="50"       color="$saddle_color"/>
+        <hline x="50" y="26" len="50"       color="$saddle_color"/>
+        <hline x="50" y="28" len="50"       color="$saddle_color"/>
+        <hline x="50" y="30" len="50"       color="$saddle_color"/>
+        <hline x="50" y="32" len="50"       color="$saddle_color"/>
+        <hline x="50" y="34" len="50"       color="$saddle_color"/>
+        <hline x="50" y="36" len="50"       color="$saddle_color"/>
+        <hline x="50" y="38" len="50"       color="$saddle_color"/>
+        <hline x="50" y="40" len="50"       color="$saddle_color"/>
+        <hline x="50" y="42" len="50"       color="$saddle_color"/>
+        <hline x="50" y="44" len="50"       color="$saddle_color"/>
       </pixel-data>
     </layer>
 
     <!-- ============================================================ -->
-    <!-- BELLY override                                               -->
-    <!-- abstract/dog belly: base x=28,y=48,w=64,h=32               -->
-    <!--                     sternum x=36,y=36,w=40,h=24            -->
-    <!-- Full light cream — no dark markings                          -->
+    <!-- z=4  BELLY                                                   -->
+    <!-- Light cream underside. No white markings.                   -->
     <!-- ============================================================ -->
     <layer id="belly" replace="true">
       <pixel-data>
-        <!-- BELLY BASE — full area -->
-        <rect x="28" y="48" w="64" h="32" color="$belly_base"/>
-        <!-- STERNUM / CHEST AREA -->
-        <rect x="36" y="36" w="40" h="24" color="$belly_base"/>
-
-        <!-- CENTRE HIGHLIGHT — belly -->
-        <rect x="44" y="52" w="32" h="20" color="$belly_highlight"/>
-        <!-- CENTRE HIGHLIGHT — sternum -->
-        <rect x="42" y="38" w="28" h="18" color="$belly_highlight"/>
-
-        <!-- EDGE FADE — blend into body flanks -->
-        <vline x="28" y="48" len="32"      color="$fur_base"/>
-        <vline x="92" y="48" len="32"      color="$fur_base"/>
-        <vline x="36" y="36" len="24"      color="$fur_base"/>
-        <vline x="76" y="36" len="24"      color="$fur_base"/>
-
+        <!-- BELLY BASE -->
+        <rect x="52" y="50" w="46" h="24"  color="$fur_cream"/>
+        <!-- BELLY VOLUME -->
+        <rect x="58" y="54" w="32" h="14"  color="$fur_cream"/>
+        <!-- STERNUM -->
+        <rect x="44" y="46" w="14" h="18"  color="$fur_cream"/>
+        <rect x="46" y="48" w="8"  h="14"  color="$fur_light"/>
         <!-- BOTTOM SHADOW -->
-        <hline x="28" y="79" len="64"      color="$fur_shadow"/>
+        <hline x="52" y="73" len="46"       color="$fur_light"/>
+        <!-- SIDE EDGE BLENDS -->
+        <vline x="52" y="50" len="24"       color="$fur_light"/>
+        <vline x="98" y="50" len="24"       color="$fur_light"/>
       </pixel-data>
     </layer>
 
     <!-- ============================================================ -->
-    <!-- HEAD override                                                -->
-    <!-- abstract/dog head: x=6, y=0, w=60, h=28  (x=6..66)         -->
-    <!-- Skull (y=0..16): cream-beige                                 -->
-    <!-- Transition (y=12..16): 2px fur_shadow strip                  -->
-    <!-- Mask (y=12..28): full black from muzzle to mid-skull         -->
-    <!-- Eye: ABOVE mask, in cream zone, y=8..18, x=14..28           -->
+    <!-- z=5  TAIL                                                    -->
+    <!-- Arc x=104..122. Dark base (saddle), russet body.            -->
+    <!-- Thickness 5..6px throughout. 16 elements.                   -->
+    <!-- ============================================================ -->
+    <layer id="tail" replace="true">
+      <pixel-data>
+        <!-- ROOT — dark (saddle continuation) -->
+        <rect  x="104" y="30" w="6"  h="8" color="$saddle_color"/>
+        <hline x="104" y="37" len="6"       color="$fur_shadow"/>
+
+        <!-- ARC seg 1 -->
+        <rect  x="106" y="24" w="5"  h="8" color="$fur_base"/>
+        <hline x="106" y="24" len="5"       color="$fur_mid"/>
+        <hline x="106" y="31" len="5"       color="$fur_shadow"/>
+
+        <!-- ARC seg 2 -->
+        <rect  x="108" y="20" w="5"  h="6" color="$fur_base"/>
+        <hline x="109" y="20" len="3"       color="$fur_light"/>
+        <hline x="108" y="25" len="5"       color="$fur_shadow"/>
+
+        <!-- ARC seg 3 -->
+        <rect  x="112" y="16" w="5"  h="6" color="$fur_base"/>
+        <hline x="113" y="16" len="3"       color="$fur_light"/>
+
+        <!-- OUTER HIGHLIGHT (exterior of arc) -->
+        <hline x="108" y="18" len="14"      color="$fur_light"/>
+
+        <!-- ARC seg 4 -->
+        <rect  x="116" y="14" w="4"  h="5" color="$fur_mid"/>
+        <hline x="117" y="14" len="2"       color="$fur_light"/>
+
+        <!-- ARC seg 5 — taper -->
+        <rect  x="119" y="14" w="3"  h="4" color="$fur_base"/>
+
+        <!-- TIP -->
+        <rect  x="121" y="14" w="2"  h="3" color="$fur_mid"/>
+        <pixel x="122" y="15"               color="$fur_light"/>
+
+        <!-- UNDERSIDE SHADOW -->
+        <hline x="106" y="30" len="8"       color="$fur_shadow"/>
+        <hline x="110" y="24" len="6"       color="$fur_shadow"/>
+      </pixel-data>
+    </layer>
+
+    <!-- ============================================================ -->
+    <!-- z=6  NECK                                                    -->
+    <!-- Russet. 3 rects angled 40° forward-upward.                  -->
+    <!-- Dark saddle stripe continues on top of neck.                -->
+    <!-- ============================================================ -->
+    <layer id="neck" replace="true">
+      <pixel-data>
+        <!-- NECK BASE -->
+        <rect x="44" y="32" w="24" h="12"  color="$fur_base"/>
+        <rect x="46" y="32" w="16" h="12"  color="$fur_mid"/>
+        <vline x="44" y="32" len="12"       color="$fur_shadow"/>
+        <vline x="68" y="32" len="12"       color="$fur_shadow"/>
+
+        <!-- NECK MID — shift -6px X -->
+        <rect x="38" y="22" w="22" h="12"  color="$fur_base"/>
+        <rect x="40" y="22" w="14" h="12"  color="$fur_mid"/>
+        <vline x="38" y="22" len="12"       color="$fur_shadow"/>
+        <vline x="60" y="22" len="12"       color="$fur_shadow"/>
+
+        <!-- NECK TOP — shift -8px X -->
+        <rect x="30" y="12" w="20" h="12"  color="$fur_base"/>
+        <rect x="32" y="12" w="12" h="12"  color="$fur_mid"/>
+        <vline x="30" y="12" len="12"       color="$fur_shadow"/>
+        <vline x="50" y="12" len="12"       color="$fur_shadow"/>
+
+        <!-- THROAT HIGHLIGHT -->
+        <vline x="44" y="12" len="32"       color="$fur_light"/>
+
+        <!-- DEWLAP -->
+        <rect x="36" y="20" w="8"  h="10"  color="$fur_mid"/>
+
+        <!-- SADDLE CONTINUATION — dorsal stripe on neck top -->
+        <hline x="38" y="12" len="16"       color="$saddle_color"/>
+        <hline x="40" y="14" len="12"       color="$saddle_color"/>
+        <hline x="42" y="16" len="10"       color="$saddle_color"/>
+      </pixel-data>
+    </layer>
+
+    <!-- ============================================================ -->
+    <!-- z=7  HEAD                                                    -->
+    <!-- Russet skull. BLACK mask covers muzzle x=4..26 y=18..34.   -->
+    <!-- Saddle stripe on skull top. ONE dark-brown eye, profile.    -->
     <!-- ============================================================ -->
     <layer id="head" replace="true">
       <pixel-data>
-        <!-- CREAM SKULL — upper head -->
-        <rect x="6"  y="0"  w="60" h="28" color="$fur_base"/>
-        <!-- skull top highlight -->
-        <rect x="16" y="0"  w="36" h="12" color="$fur_highlight"/>
-        <hline x="10" y="1" len="44"       color="$fur_highlight"/>
-        <!-- skull back volume -->
-        <rect x="60" y="4"  w="6"  h="20" color="$fur_shadow"/>
-        <!-- occiput bump -->
-        <rect x="58" y="0"  w="8"  h="6"  color="$fur_base"/>
-        <hline x="60" y="0" len="4"        color="$fur_highlight"/>
+        <!-- SKULL — russet -->
+        <rect x="18" y="4"  w="30" h="26"  color="$fur_base"/>
+        <!-- SKULL TOP HIGHLIGHT -->
+        <hline x="22" y="4"  len="20"       color="$fur_light"/>
+        <rect  x="24" y="5"  w="14" h="6"  color="$fur_light"/>
+        <!-- OCCIPUT SHADOW -->
+        <vline x="48" y="6"  len="20"       color="$fur_shadow"/>
+        <vline x="47" y="5"  len="22"       color="$fur_shadow"/>
+        <!-- CHEEKBONE VOLUME -->
+        <rect x="38" y="10" w="8"  h="16"  color="$fur_mid"/>
+        <!-- FRONTAL SHADOW -->
+        <rect x="18" y="10" w="6"  h="14"  color="$fur_shadow"/>
 
-        <!-- SKULL→MASK TRANSITION — y=12..16 -->
-        <hline x="6"  y="12" len="58"      color="$fur_shadow"/>
-        <hline x="6"  y="13" len="58"      color="$fur_shadow"/>
+        <!-- SADDLE STRIPE on skull (continues from neck) -->
+        <hline x="22" y="4"  len="22"       color="$saddle_color"/>
+        <hline x="24" y="6"  len="16"       color="$saddle_color"/>
+        <hline x="26" y="8"  len="12"       color="$saddle_color"/>
 
-        <!-- BLACK MASK — covers y=14..28, x=6..64 (full lower head) -->
-        <rect x="6"  y="14" w="58" h="14" color="$mask_color"/>
-        <!-- mask top feather — 2px blend -->
-        <hline x="6"  y="14" len="58"      color="$mask_color"/>
-        <hline x="6"  y="15" len="58"      color="$mask_color"/>
-        <!-- mask deep shadow at jaw -->
-        <hline x="10" y="26" len="52"      color="$mask_shadow"/>
-        <hline x="8"  y="27" len="54"      color="$mask_shadow"/>
-        <hline x="6"  y="28" len="58"      color="$mask_shadow"/>
-        <!-- cheek jowl in mask -->
-        <rect x="20" y="18" w="12" h="8"  color="$mask_color"/>
+        <!-- BLACK MASK — muzzle fully covered -->
+        <rect x="4"  y="20" w="22" h="14"  color="$mask_color"/>
+        <rect x="14" y="18" w="12" h="10"  color="$mask_color"/>
+        <rect x="18" y="16" w="8"  h="8"   color="$mask_color"/>
 
-        <!-- AMBER EYE — in cream skull zone, above mask (y=8..18, x=14..28) -->
-        <!-- white sclera -->
-        <rect x="14" y="8"  w="14" h="10" color="#FFFFFF"/>
-        <!-- amber iris -->
-        <rect x="18" y="10" w="8"  h="6"  color="$eye_color"/>
-        <!-- iris highlight -->
-        <pixel x="18" y="10"               color="$eye_highlight"/>
-        <pixel x="19" y="10"               color="$eye_highlight"/>
-        <!-- pupil -->
-        <rect x="21" y="11" w="3"  h="4"  color="#000000"/>
-        <!-- eye shine -->
-        <pixel x="21" y="11"               color="#FFFFFF"/>
-        <!-- brow ridge — cream fur over mask boundary -->
-        <hline x="14" y="7"  len="14"      color="$fur_shadow"/>
-        <hline x="16" y="6"  len="10"      color="$fur_shadow"/>
-        <!-- lower lid — sits at mask edge y=18 -->
-        <hline x="14" y="18" len="14"      color="$mask_color"/>
-
-        <!-- muzzle bridge (above nose) in mask -->
-        <rect x="6"  y="16" w="22" h="6"  color="$mask_color"/>
-
-        <!-- stop depression -->
-        <hline x="26" y="14" len="6"       color="$mask_shadow"/>
+        <!-- SINGLE DARK-BROWN EYE — ONE, profile -->
+        <rect  x="20" y="10" w="10" h="8"  color="#FFFFFF"/>
+        <rect  x="22" y="11" w="6"  h="6"  color="$eye_color"/>
+        <rect  x="24" y="12" w="2"  h="4"  color="#0A0A0A"/>
+        <pixel x="21" y="11"                color="#FFFFFF"/>
+        <!-- eyelids -->
+        <hline x="20" y="10" len="10"       color="$fur_shadow"/>
+        <hline x="20" y="18" len="10"       color="$fur_shadow"/>
       </pixel-data>
     </layer>
 
     <!-- ============================================================ -->
-    <!-- FACE DETAILS override                                        -->
-    <!-- Everything inside black mask zone (y=16..28, x=6..30)       -->
-    <!-- Nose: x=28..44 y=20..30 from abstract/dog → adapted to mask  -->
-    <!-- Nose end of muzzle (leftmost): x=6..14, y=18..24            -->
-    <!-- Mouth closed: hline at y=25..26                              -->
-    <!-- No whiskers, no white details                                -->
+    <!-- z=8  EARS                                                    -->
+    <!-- Russet exterior. Dark-russet interior ($ear_inside).        -->
+    <!-- Near: tip y=0. Far: $fur_shadow, tip y=2.                  -->
+    <!-- ============================================================ -->
+    <layer id="ears" replace="true">
+      <pixel-data>
+        <!-- NEAR EAR exterior -->
+        <hline x="20" y="6"  len="12"       color="$fur_base"/>
+        <hline x="22" y="4"  len="8"        color="$fur_base"/>
+        <hline x="24" y="2"  len="5"        color="$fur_base"/>
+        <hline x="25" y="1"  len="3"        color="$fur_base"/>
+        <pixel x="27" y="0"                 color="$fur_base"/>
+        <!-- NEAR EAR interior -->
+        <rect  x="22" y="3"  w="8"  h="5"  color="$ear_inside"/>
+        <hline x="23" y="2"  len="6"        color="$ear_inside"/>
+        <!-- NEAR EAR edge shadow -->
+        <vline x="20" y="3"  len="4"        color="$fur_shadow"/>
+        <vline x="32" y="3"  len="4"        color="$fur_shadow"/>
+        <hline x="20" y="7"  len="14"       color="$fur_shadow"/>
+
+        <!-- FAR EAR exterior -->
+        <hline x="30" y="8"  len="10"       color="$fur_shadow"/>
+        <hline x="32" y="5"  len="6"        color="$fur_shadow"/>
+        <hline x="33" y="3"  len="4"        color="$fur_shadow"/>
+        <pixel x="35" y="2"                 color="$fur_shadow"/>
+        <!-- FAR EAR interior -->
+        <rect  x="31" y="5"  w="6"  h="4"  color="$fur_shadow"/>
+      </pixel-data>
+    </layer>
+
+    <!-- ============================================================ -->
+    <!-- z=9  FACE DETAILS                                            -->
+    <!-- Nose + closed mouth ONLY. Eye is already in head layer.     -->
     <!-- ============================================================ -->
     <layer id="face_details" replace="true">
       <pixel-data>
-        <!-- NOSE — at muzzle tip, inside black mask -->
-        <!-- abstract/dog nose was x=28..44,y=20..30 (frontal);  -->
-        <!-- side-view muzzle tip is leftmost: x=6..14, y=18..24 -->
-        <rect x="6"  y="18" w="8"  h="6"  color="$nose_color"/>
-        <!-- nose shine strip -->
-        <hline x="7"  y="18" len="4"       color="$nose_highlight"/>
-        <hline x="7"  y="19" len="3"       color="$nose_highlight"/>
-        <!-- nostril divider -->
-        <vline x="10" y="19" len="4"       color="$mask_shadow"/>
-        <!-- nose bridge connects to mask -->
-        <rect x="8"  y="14" w="4"  h="5"  color="$mask_shadow"/>
-
-        <!-- CLOSED MOUTH — horizontal line under nose in mask -->
-        <hline x="6"  y="25" len="22"      color="$mask_shadow"/>
-        <hline x="8"  y="26" len="20"      color="$mask_shadow"/>
-        <!-- lip corner folds -->
-        <pixel x="6"  y="24"               color="$mask_shadow"/>
-        <pixel x="28" y="24"               color="$mask_shadow"/>
-
-        <!-- CHIN SHADOW — underside of jaw in mask -->
-        <hline x="8"  y="27" len="18"      color="$mask_shadow"/>
+        <!-- NOSE — black, on black mask -->
+        <rect  x="4"  y="24" w="8"  h="6"  color="$nose_color"/>
+        <hline x="5"  y="24" len="4"        color="$nose_high"/>
+        <hline x="5"  y="25" len="3"        color="$nose_high"/>
+        <pixel x="7"  y="26"                color="#000000"/>
+        <pixel x="9"  y="27"                color="#000000"/>
+        <!-- NOSE BRIDGE -->
+        <rect  x="6"  y="20" w="4"  h="5"  color="$mask_color"/>
+        <!-- MOUTH — closed, on mask -->
+        <hline x="6"  y="30" len="12"       color="$mask_color"/>
+        <pixel x="6"  y="31"                color="$mask_color"/>
+        <pixel x="18" y="31"                color="$mask_color"/>
+        <!-- CHIN -->
+        <hline x="8"  y="32" len="8"        color="$mask_color"/>
       </pixel-data>
     </layer>
 
