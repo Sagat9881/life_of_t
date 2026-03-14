@@ -23,6 +23,12 @@ export interface UseCanvasRendererOptions {
   characterAnimations?: Record<string, string>;
 }
 
+const EMPTY_GAME_STATE: GameStateSnapshot = {
+  player: { energy: 0, mood: 0, hunger: 0, health: 0, money: 0, location: 'home' },
+  context: { time: 'morning', day: 1, hour: 7, timeSlot: 'MORNING' },
+  npc: {},
+};
+
 export function useCanvasRenderer({
   config,
   canvasRef,
@@ -42,14 +48,14 @@ export function useCanvasRenderer({
   const hoveredRef      = useRef<string | null>(hoveredObjectId);
   const charAnimsRef    = useRef<Record<string, string> | undefined>(characterAnimations);
   const rafRef          = useRef<number | undefined>(undefined);
-  const gameStateRef    = useRef<GameStateSnapshot>(gameState ?? { player: {}, context: {} });
+  const gameStateRef    = useRef<GameStateSnapshot>(gameState ?? EMPTY_GAME_STATE);
 
   // Keep refs in sync on every render
   configRef.current    = config;
   selectedRef.current  = selectedObjectId;
   hoveredRef.current   = hoveredObjectId;
   charAnimsRef.current = characterAnimations;
-  gameStateRef.current = gameState ?? { player: {}, context: {} };
+  gameStateRef.current = gameState ?? EMPTY_GAME_STATE;
 
   useCanvasAssets({
     config,

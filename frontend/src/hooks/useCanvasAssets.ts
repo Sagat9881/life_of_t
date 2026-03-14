@@ -20,7 +20,7 @@ export interface UseCanvasAssetsOptions {
   assetsRefs: CanvasAssetsRefs;
 }
 
-// ─── helpers ────────────────────────────────────────────────────────────────────────────
+// ─── helpers ────────────────────────────────────────────────────────────────────
 
 export function atlasUrl(
   category: string,
@@ -53,7 +53,7 @@ async function loadImage(url: string): Promise<HTMLImageElement | null> {
   });
 }
 
-// ─── hook ─────────────────────────────────────────────────────────────────────────────
+// ─── hook ──────────────────────────────────────────────────────────────────────────────
 
 export function useCanvasAssets({
   config,
@@ -109,7 +109,7 @@ export function useCanvasAssets({
         enqueueConfig('furniture', item.entityName);
         // init slot state
         if (!slotStateRef.current.has(item.id)) {
-          slotStateRef.current.set(item.id, { animationName: anim, frameIndex: 0, lastFrameTime: 0 });
+          slotStateRef.current.set(item.id, { animationName: anim, frameIndex: 0, lastFrameTime: 0, activeRowIndex: 0 });
         }
       }
 
@@ -118,7 +118,7 @@ export function useCanvasAssets({
         enqueueImage('characters', slot.entityName, slot.defaultAnimation);
         enqueueConfig('characters', slot.entityName);
         if (!slotStateRef.current.has(slot.id)) {
-          slotStateRef.current.set(slot.id, { animationName: slot.defaultAnimation, frameIndex: 0, lastFrameTime: 0 });
+          slotStateRef.current.set(slot.id, { animationName: slot.defaultAnimation, frameIndex: 0, lastFrameTime: 0, activeRowIndex: 0 });
         }
       }
 
