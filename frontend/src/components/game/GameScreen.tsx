@@ -10,6 +10,7 @@ import { ConflictDialog } from './ConflictDialog';
 import { EventDialog } from './EventDialog';
 import { getLocationConfig, getLocationForTimeSlot } from '../../config/locations';
 import type { ActionOption } from '../../types/game';
+import type { GameStateSnapshot } from '../../hooks/canvasTypes';
 import './GameScreen.css';
 
 export function GameScreen() {
@@ -36,7 +37,7 @@ export function GameScreen() {
   }, [lastActionResult, availableActions]);
 
   const rawTimeSlot = time?.timeSlot ?? 'MORNING';
-  const timeOfDay   = rawTimeSlot.toLowerCase();
+  const timeOfDay   = rawTimeSlot.toLowerCase(); // kept for context.time and locationId deps
 
   const locationId = useMemo(
     () => player?.location ?? getLocationForTimeSlot(rawTimeSlot),
@@ -48,7 +49,7 @@ export function GameScreen() {
     [locationId]
   );
 
-  const gameTime      = time ?? { day: 1, hour: 7, timeSlot: 'MORNING' };
+  const gameTime       = time ?? { day: 1, hour: 7, timeSlot: 'MORNING' };
   const activeConflict = activeConflicts[0] ?? null;
 
   /** Record<characterSlotId, animationName> */
@@ -62,6 +63,26 @@ export function GameScreen() {
     }
     return anims;
   }, [tanyaAnimOverride, locationConfig.characters, npcActivities]);
+
+  const gameState = useMemo((): GameStateSnapshot => ({
+    player: {
+      energy:   player?.stats?.energy   ?? 0,
+      mood:     player?.stats?.mood     ?? 0,
+      hunger:   player?.stats?.hunger   ?? 0,
+      health:   player?.stats?.health   ?? 0,
+      money:    player?.money           ?? 0,
+      location: player?.location        ?? 'home',
+    },
+    context: {
+      time:     timeOfDay,
+      day:      time?.day  ?? 1,
+      hour:     time?.hour ?? 7,
+      timeSlot: rawTimeSlot,
+    },
+    npc: Object.fromEntries(
+      npcActivities.map(n => [n.npcId, { animation: n.animationKey ?? 'idle' }])
+    ),
+  }), [player, time, npcActivities, timeOfDay]);
 
   const handleObjectClick = (objectId: string, actionCode: string): void => {
     setSelectedObjectId(objectId);
@@ -119,7 +140,7 @@ export function GameScreen() {
             selectedObjectId={selectedObjectId}
             onObjectClick={handleObjectClick}
             characterAnimations={characterAnimations}
-            timeOfDay={timeOfDay}
+            gameState={gameState}
           />
         </div>
         <Sidebar

@@ -4,18 +4,19 @@
  * This component is a thin wrapper that maps LocationConfig and interaction
  * props to the Canvas-based renderer. All drawing happens in useCanvasRenderer.
  *
- * ── COORDINATE SYSTEM ──────────────────────────────────────────────
+ * ── COORDINATE SYSTEM ──────────────────────────────────────────────────
  * x, y: 0–100 (percentage of scene dimensions)
  * sceneHeight: 0–100 (percentage of scene height)
  * scale: multiplier on top of sceneHeight (default 1)
  *
- * ── RENDERING PIPELINE ───────────────────────────────────────
+ * ── RENDERING PIPELINE ──────────────────────────────────────────
  * LocationConfig → useCanvasRenderer → Canvas 2D drawImage()
  * No DOM elements for sprites. No CSS transforms. No background-position.
  */
 import { memo, useState } from 'react';
 import { PixelSceneCanvas } from './PixelSceneCanvas';
 import type { LocationConfig, FurniturePlacement } from '../../types/location.types';
+import type { GameStateSnapshot } from '../../hooks/canvasTypes';
 
 export interface LocationRendererProps {
   readonly config: LocationConfig;
@@ -23,7 +24,7 @@ export interface LocationRendererProps {
   readonly onObjectClick?: (objectId: string, actionCode: string) => void;
   /** animationName per character slot id */
   readonly characterAnimations?: Record<string, string>;
-  readonly timeOfDay?: string;
+  readonly gameState: GameStateSnapshot;
 }
 
 export const LocationRenderer = memo(function LocationRenderer(props: LocationRendererProps) {
@@ -32,7 +33,7 @@ export const LocationRenderer = memo(function LocationRenderer(props: LocationRe
   return (
     <PixelSceneCanvas
       config={props.config}
-      timeOfDay={props.timeOfDay ?? 'day'}
+      gameState={props.gameState}
       selectedObjectId={props.selectedObjectId ?? null}
       hoveredObjectId={hoveredObjectId}
       {...(props.characterAnimations !== undefined && { characterAnimations: props.characterAnimations })}

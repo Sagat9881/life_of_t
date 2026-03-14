@@ -6,7 +6,7 @@
  *
  * Coordinate system:
  * - All x/y/sceneHeight values in LocationConfig are 0–100 (% of viewport).
- * - Hit detection mirrors the renderer’s coordinate computation via viewportRef.
+ * - Hit detection mirrors the renderer's coordinate computation via viewportRef.
  *
  * Layers (bottom → top): background → furniture (z-sorted) → characters (z-sorted).
  */
@@ -14,10 +14,11 @@
 import { useRef, useEffect } from 'react';
 import { useCanvasRenderer } from '../../hooks/useCanvasRenderer';
 import type { LocationConfig, FurniturePlacement } from '../../types/location.types';
+import type { GameStateSnapshot } from '../../hooks/canvasTypes';
 
 interface PixelSceneCanvasProps {
   config: LocationConfig;
-  timeOfDay: string;
+  gameState: GameStateSnapshot;
   selectedObjectId: string | null;
   hoveredObjectId: string | null;
   characterAnimations?: Record<string, string>;
@@ -64,7 +65,7 @@ function getFurnitureHitBox(
 
 export function PixelSceneCanvas({
   config,
-  timeOfDay,
+  gameState,
   selectedObjectId,
   hoveredObjectId,
   characterAnimations,
@@ -101,7 +102,7 @@ export function PixelSceneCanvas({
     config,
     canvasRef,
     viewportRef,
-    timeOfDay,
+    gameState,
     selectedObjectId,
     hoveredObjectId,
     ...(characterAnimations !== undefined && { characterAnimations }),
