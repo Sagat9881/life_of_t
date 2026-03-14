@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Generates layered PNG assets and animation atlases from XML-driven AssetSpec.
@@ -28,7 +26,7 @@ import java.util.regex.Pattern;
  *     {layer-id}.png                   ← individual layer PNGs
  *     sprite-atlas.json                ← atlas config (consumed by frontend + AnimationContentService)
  *     animations/
- *       {anim}_atlas.png               ← strip / grid animation atlases
+ *       {anim}_atlas.png               ← grid animation atlases (one per animation name)
  * </pre>
  *
  * URL mapping (Spring Boot static → frontend):
@@ -38,6 +36,9 @@ import java.util.regex.Pattern;
  * Frames are cropped to their non-transparent bounding box before atlas packing.
  * The original crop offset is recorded in sprite-atlas.json so the frontend can
  * position the sprite correctly within the scene.
+ *
+ * All animations are grid-only. An animation without explicit variants gets a
+ * single-row grid (rowIndex=0, condition=default).
  */
 public class LayeredAssetGenerator implements AssetGenerationService {
 
@@ -46,10 +47,6 @@ public class LayeredAssetGenerator implements AssetGenerationService {
     private static final int DEFAULT_HEIGHT = 128;
     private static final double DEFAULT_CHARACTER_DISPLAY_SCALE = 3.0;
     private static final double DEFAULT_LOCATION_DISPLAY_SCALE = 1.0;
-
-    private static final List<String> TOD_SUFFIXES = List.of("morning", "day", "evening", "night");
-    private static final Pattern TOD_PATTERN = Pattern.compile(
-            "^(.+?)_(" + String.join("|", TOD_SUFFIXES) + ")$");
 
     private final UniversalPixelRenderer renderer;
     private final PngLayerWriter pngWriter;
@@ -95,16 +92,12 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             }
         }
 
-        // 3. Animation atlases
-        //    Atlas PNGs → entityDir/animations/
-        //    sprite-atlas.json → entityDir/  (one level up from animations/)
+        // 3. Animation atlases (all grid) + sprite-atlas.json
         Path animDir = entityDir.resolve("animations");
         boolean hasCharacterAnims = !spec.animations().isEmpty();
         boolean hasOverlayLayers = spec.layers().stream().anyMatch(AssetLayer::hasConditions);
 
         if (hasCharacterAnims || hasOverlayLayers) {
-            // entityDir is passed for sprite-atlas.json placement;
-            // animDir is passed for atlas PNG placement inside generateAllAtlases.
             generated.addAll(generateAllAtlases(spec, entityDir, animDir, width, height));
         }
 
@@ -114,97 +107,28 @@ public class LayeredAssetGenerator implements AssetGenerationService {
     }
 
     /**
-     * Generates all animation atlases (PNG strips/grids) into {@code animDir},
+     * Generates all animation atlases (PNG grids) into {@code animDir},
      * and writes sprite-atlas.json into {@code entityDir}.
+     * <p>
+     * Every animation in spec.animations() becomes a grid atlas. An animation without
+     * explicit variants gets a single-row grid keyed by "default".
      *
-     * @param spec       entity asset spec
-     * @param entityDir  root entity directory — sprite-atlas.json goes here
-     * @param animDir    animations sub-directory — atlas PNGs go here
-     * @param bgWidth    canvas width
-     * @param bgHeight   canvas height
+     * @param spec      entity asset spec
+     * @param entityDir root entity directory — sprite-atlas.json goes here
+     * @param animDir   animations sub-directory — atlas PNGs go here
+     * @param bgWidth   canvas width
+     * @param bgHeight  canvas height
      */
     private List<Path> generateAllAtlases(AssetSpec spec, Path entityDir, Path animDir,
                                           int bgWidth, int bgHeight) {
         List<Path> generated = new ArrayList<>();
         List<AssetLayer> layers = spec.layers();
 
-        // --- Character-style animations ---
-        LinkedHashMap<String, LinkedHashMap<String, AnimationSpec>> todGroups = new LinkedHashMap<>();
-        List<AnimationSpec> standaloneAnims = new ArrayList<>();
-
-        for (AnimationSpec animSpec : spec.animations()) {
-            Matcher m = TOD_PATTERN.matcher(animSpec.name());
-            if (m.matches()) {
-                String baseName = m.group(1);
-                String todValue = m.group(2);
-                todGroups.computeIfAbsent(baseName, k -> new LinkedHashMap<>())
-                         .put(todValue, animSpec);
-            } else {
-                standaloneAnims.add(animSpec);
-            }
-        }
-
         Map<String, AtlasConfigWriter.GridAnimDef> gridAnimDefs = new LinkedHashMap<>();
         Map<String, AtlasConfigWriter.CropOffsetDef> cropOffsets = new LinkedHashMap<>();
 
-        for (var entry : todGroups.entrySet()) {
-            String baseName = entry.getKey();
-            LinkedHashMap<String, AnimationSpec> variants = entry.getValue();
-
-            LinkedHashMap<String, AnimationSpec> sorted = new LinkedHashMap<>();
-            for (String tod : TOD_SUFFIXES) {
-                if (variants.containsKey(tod)) sorted.put(tod, variants.get(tod));
-            }
-
-            // Render all rows, collect all frames for crop bounds computation
-            LinkedHashMap<String, List<BufferedImage>> rowFrames = new LinkedHashMap<>();
-            List<BufferedImage> allFramesForCrop = new ArrayList<>();
-            for (var rowEntry : sorted.entrySet()) {
-                List<BufferedImage> frames = renderer.renderAnimationFrames(layers, rowEntry.getValue());
-                rowFrames.put(rowEntry.getKey(), frames);
-                allFramesForCrop.addAll(frames);
-            }
-
-            // Compute crop bounds across ALL rows and crop
-            int[] bounds = renderer.computeCropBounds(allFramesForCrop);
-            boolean needsCrop = bounds[0] != 0 || bounds[1] != 0
-                    || (!allFramesForCrop.isEmpty()
-                        && (bounds[2] != allFramesForCrop.getFirst().getWidth()
-                            || bounds[3] != allFramesForCrop.getFirst().getHeight()));
-
-            if (needsCrop) {
-                LinkedHashMap<String, List<BufferedImage>> croppedRows = new LinkedHashMap<>();
-                for (var rowEntry : rowFrames.entrySet()) {
-                    croppedRows.put(rowEntry.getKey(), renderer.cropFrames(rowEntry.getValue(), bounds));
-                }
-                rowFrames = croppedRows;
-
-                AnimationSpec firstSpec = sorted.values().iterator().next();
-                cropOffsets.put(baseName, new AtlasConfigWriter.CropOffsetDef(
-                        bounds[0], bounds[1],
-                        firstSpec.frameWidth(), firstSpec.frameHeight(),
-                        bounds[2], bounds[3]));
-                log.info("Cropped grid atlas '{}': {}x{} -> {}x{} (offset {}, {})",
-                        baseName,
-                        firstSpec.frameWidth(), firstSpec.frameHeight(),
-                        bounds[2], bounds[3], bounds[0], bounds[1]);
-            }
-
-            try {
-                // Atlas PNGs → animDir
-                Path atlasPath = atlasWriter.writeGridAtlas(rowFrames, baseName, animDir);
-                generated.add(atlasPath);
-                gridAnimDefs.put(baseName,
-                        new AtlasConfigWriter.GridAnimDef("time_of_day", sorted));
-            } catch (IOException e) {
-                throw new UncheckedIOException("Failed to write grid atlas: " + baseName, e);
-            }
-        }
-
-        // Standalone strip animations
-        Map<String, AtlasConfigWriter.CropOffsetDef> stripCropOffsets = new LinkedHashMap<>();
-
-        for (AnimationSpec animSpec : standaloneAnims) {
+        // All animations → single-row grid (one "default" row per animation)
+        for (AnimationSpec animSpec : spec.animations()) {
             List<BufferedImage> frames = renderer.renderAnimationFrames(layers, animSpec);
 
             int[] bounds = renderer.computeCropBounds(frames);
@@ -214,28 +138,38 @@ public class LayeredAssetGenerator implements AssetGenerationService {
                             || bounds[3] != frames.getFirst().getHeight()));
 
             if (needsCrop) {
-                stripCropOffsets.put(animSpec.name(), new AtlasConfigWriter.CropOffsetDef(
+                frames = renderer.cropFrames(frames, bounds);
+                cropOffsets.put(animSpec.name(), new AtlasConfigWriter.CropOffsetDef(
                         bounds[0], bounds[1],
                         animSpec.frameWidth(), animSpec.frameHeight(),
                         bounds[2], bounds[3]));
-                frames = renderer.cropFrames(frames, bounds);
-                log.info("Cropped strip atlas '{}': {}x{} -> {}x{} (offset {}, {})",
+                log.info("Cropped grid atlas '{}': {}x{} -> {}x{} (offset {}, {})",
                         animSpec.name(),
                         animSpec.frameWidth(), animSpec.frameHeight(),
                         bounds[2], bounds[3], bounds[0], bounds[1]);
             }
 
+            // Single-row grid: condition key = "default"
+            LinkedHashMap<String, List<BufferedImage>> rowFrames = new LinkedHashMap<>();
+            rowFrames.put("default", frames);
+
+            // Build a single-entry rowSpecs map for GridAnimDef
+            LinkedHashMap<String, AnimationSpec> rowSpecs = new LinkedHashMap<>();
+            rowSpecs.put("default", animSpec);
+
             try {
-                // Atlas PNGs → animDir
-                Path atlasPath = atlasWriter.writeAtlas(frames, animSpec, animDir);
+                Path atlasPath = atlasWriter.writeGridAtlas(rowFrames, animSpec.name(), animDir);
                 generated.add(atlasPath);
+                gridAnimDefs.put(animSpec.name(),
+                        new AtlasConfigWriter.GridAnimDef("default", rowSpecs));
             } catch (IOException e) {
-                throw new UncheckedIOException("Failed to write atlas: " + animSpec.name(), e);
+                throw new UncheckedIOException("Failed to write grid atlas: " + animSpec.name(), e);
             }
         }
 
         // --- Overlay layers with conditions ---
         Map<String, AtlasConfigWriter.OverlayAnimDef> overlayAnimDefs = new LinkedHashMap<>();
+        List<String> todSuffixes = List.of("morning", "day", "evening", "night");
 
         for (AssetLayer layer : layers) {
             if (!layer.hasConditions()) continue;
@@ -243,7 +177,7 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             LinkedHashMap<String, List<BufferedImage>> overlayRows = new LinkedHashMap<>();
             List<AtlasConfigWriter.OverlayRowDef> rowDefs = new ArrayList<>();
 
-            for (String tod : TOD_SUFFIXES) {
+            for (String tod : todSuffixes) {
                 LayerCondition cond = layer.conditions().stream()
                         .filter(c -> c.timeOfDayValue().equals(tod))
                         .findFirst().orElse(null);
@@ -257,7 +191,6 @@ public class LayeredAssetGenerator implements AssetGenerationService {
 
             if (!overlayRows.isEmpty()) {
                 try {
-                    // Overlay atlas PNGs → animDir
                     Path atlasPath = atlasWriter.writeGridAtlas(overlayRows, layer.id(), animDir);
                     generated.add(atlasPath);
                 } catch (IOException e) {
@@ -270,11 +203,6 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             }
         }
 
-        // Merge all crop offsets
-        Map<String, AtlasConfigWriter.CropOffsetDef> allCropOffsets = new LinkedHashMap<>();
-        allCropOffsets.putAll(cropOffsets);
-        allCropOffsets.putAll(stripCropOffsets);
-
         // Determine displayScale
         double scale = resolveDisplayScale(spec);
         configWriter.withDisplayScale(scale);
@@ -283,8 +211,8 @@ public class LayeredAssetGenerator implements AssetGenerationService {
             // sprite-atlas.json → entityDir (NOT animDir)
             // This matches the frontend URL: /assets/{type}/{name}/sprite-atlas.json
             Path configPath = configWriter.writeSpriteAtlas(
-                    spec.entityName(), standaloneAnims, gridAnimDefs,
-                    overlayAnimDefs, allCropOffsets, entityDir);
+                    spec.entityName(), List.of(), gridAnimDefs,
+                    overlayAnimDefs, cropOffsets, entityDir);
             generated.add(configPath);
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to write sprite-atlas.json for " + spec.entityName(), e);
