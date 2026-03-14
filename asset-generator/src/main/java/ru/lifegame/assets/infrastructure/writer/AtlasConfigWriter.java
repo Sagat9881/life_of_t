@@ -15,7 +15,10 @@ import java.util.*;
 
 /**
  * Writes sprite-atlas.json — the unified, versioned atlas configuration.
- * Output conforms to {@link AtlasConfigSchema} (config version 1.4).
+ * Output conforms to {@link AtlasConfigSchema} (config version 2.0).
+ * <p>
+ * All animations are grid-only. An animation without explicit variant rows
+ * gets a single-row grid with condition { "all": [] } (always true / default).
  */
 public class AtlasConfigWriter {
 
@@ -42,11 +45,17 @@ public class AtlasConfigWriter {
     }
 
     /**
-     * Writes the unified sprite-atlas.json (v1.4 with cropOffset support).
+     * Writes sprite-atlas.json (v2.0) to {@code outputDir/sprite-atlas.json}.
+     *
+     * @param entityName  entity name (e.g. "tanya")
+     * @param gridAnims   map of animation name → GridAnimDef
+     * @param overlayAnims map of overlay layer id → OverlayAnimDef
+     * @param cropOffsets  map of animation name → CropOffsetDef (may be null)
+     * @param outputDir   entity root directory (sprite-atlas.json written here)
+     * @return path to the written config file
      */
     public Path writeSpriteAtlas(
             String entityName,
-            List<AnimationSpec> stripAnims,
             Map<String, GridAnimDef> gridAnims,
             Map<String, OverlayAnimDef> overlayAnims,
             Map<String, CropOffsetDef> cropOffsets,
@@ -76,45 +85,21 @@ public class AtlasConfigWriter {
             }
         }
 
-        if (stripAnims != null) {
-            for (AnimationSpec spec : stripAnims) {
-                CropOffsetDef crop = cropOffsets != null ? cropOffsets.get(spec.name()) : null;
-                entries.add(formatStripEntry(spec, crop));
-            }
-        }
-
         sb.append(String.join(",\n", entries));
         sb.append("\n  }\n");
         sb.append("}\n");
 
         Files.createDirectories(outputDir);
-        Path configPath = outputDir.resolve("animations/sprite-atlas.json");
+        Path configPath = outputDir.resolve("sprite-atlas.json");
         Files.writeString(configPath, sb.toString(), StandardCharsets.UTF_8);
         log.info("Wrote sprite-atlas.json (v{}, rev {}, scale {}): {}",
                 AtlasConfigSchema.CURRENT_VERSION, revision, displayScale, configPath);
         return configPath;
     }
 
-    /** Backward-compat overload without cropOffsets. */
-    public Path writeSpriteAtlas(
-            String entityName,
-            List<AnimationSpec> stripAnims,
-            Map<String, GridAnimDef> gridAnims,
-            Map<String, OverlayAnimDef> overlayAnims,
-            Path outputDir
-    ) throws IOException {
-        return writeSpriteAtlas(entityName, stripAnims, gridAnims, overlayAnims, null, outputDir);
-    }
-
-    /** Backward-compat overload without overlayAnims or cropOffsets. */
-    public Path writeSpriteAtlas(
-            String entityName,
-            List<AnimationSpec> stripAnims,
-            Map<String, GridAnimDef> gridAnims,
-            Path outputDir
-    ) throws IOException {
-        return writeSpriteAtlas(entityName, stripAnims, gridAnims, null, null, outputDir);
-    }
+    // -------------------------------------------------------------------------
+    // Private formatters
+    // -------------------------------------------------------------------------
 
     private String formatCropOffset(CropOffsetDef crop) {
         if (crop == null) return "";
@@ -126,23 +111,34 @@ public class AtlasConfigWriter {
                 + "      },\n";
     }
 
-    private String formatStripEntry(AnimationSpec spec, CropOffsetDef crop) {
-        return "    \"" + spec.name() + "\": {\n"
-                + "      \"file\": \"" + spec.name() + "_atlas.png\",\n"
-                + "      \"layout\": \"strip\",\n"
-                + "      \"renderMode\": \"sprite\",\n"
-                + formatCropOffset(crop)
-                + "      \"columns\": " + spec.frames() + ",\n"
-                + "      \"frameWidth\": " + (crop != null ? crop.croppedWidth() : spec.frameWidth()) + ",\n"
-                + "      \"frameHeight\": " + (crop != null ? crop.croppedHeight() : spec.frameHeight()) + ",\n"
-                + "      \"fps\": " + spec.fps() + ",\n"
-                + "      \"loop\": " + spec.loop() + "\n"
-                + "    }";
-    }
-
-    /** Original overload for backward compat */
-    private String formatStripEntry(AnimationSpec spec) {
-        return formatStripEntry(spec, null);
+    /**
+     * Serialises a list of SingleCondition predicates as a JSON array.
+     * Numbers are written without quotes; all other values are quoted strings.
+     */
+    private String formatConditionArray(List<AtlasConfigSchema.SingleCondition> all) {
+        if (all == null || all.isEmpty()) return "[]";
+        StringBuilder sb = new StringBuilder();
+        sb.append("[\n");
+        for (int i = 0; i < all.size(); i++) {
+            AtlasConfigSchema.SingleCondition c = all.get(i);
+            sb.append("              {");
+            sb.append(" \"space\": \"").append(c.space()).append("\",");
+            if (c.npcId() != null) {
+                sb.append(" \"npcId\": \"").append(c.npcId()).append("\",");
+            }
+            sb.append(" \"stat\": \"").append(c.stat()).append("\",");
+            sb.append(" \"operator\": \"").append(c.operator()).append("\",");
+            if (c.value() instanceof Number) {
+                sb.append(" \"value\": ").append(c.value());
+            } else {
+                sb.append(" \"value\": \"").append(c.value()).append("\"");
+            }
+            sb.append(" }");
+            if (i < all.size() - 1) sb.append(",");
+            sb.append("\n");
+        }
+        sb.append("            ]");
+        return sb.toString();
     }
 
     private String formatGridEntry(String baseName, GridAnimDef def, CropOffsetDef crop) {
@@ -156,33 +152,40 @@ public class AtlasConfigWriter {
             sb.append(formatCropOffset(crop));
         }
 
-        var firstSpec = def.rowSpecs().values().iterator().next();
-        int fw = crop != null ? crop.croppedWidth() : firstSpec.frameWidth();
-        int fh = crop != null ? crop.croppedHeight() : firstSpec.frameHeight();
-        sb.append("      \"columns\": ").append(firstSpec.frames()).append(",\n");
+        AnimationSpec frameSpec = def.frameSpec();
+        int fw = crop != null ? crop.croppedWidth() : frameSpec.frameWidth();
+        int fh = crop != null ? crop.croppedHeight() : frameSpec.frameHeight();
+        sb.append("      \"columns\": ").append(frameSpec.frames()).append(",\n");
         sb.append("      \"frameWidth\": ").append(fw).append(",\n");
         sb.append("      \"frameHeight\": ").append(fh).append(",\n");
         sb.append("      \"rows\": [\n");
 
-        int rowIdx = 0;
-        List<Map.Entry<String, AnimationSpec>> rowList = new ArrayList<>(def.rowSpecs().entrySet());
-        for (int i = 0; i < rowList.size(); i++) {
-            var entry = rowList.get(i);
-            AnimationSpec spec = entry.getValue();
+        List<AtlasConfigSchema.RowDef> rows = def.rows();
+        for (int i = 0; i < rows.size(); i++) {
+            AtlasConfigSchema.RowDef row = rows.get(i);
             sb.append("        {\n");
-            sb.append("          \"rowIndex\": ").append(rowIdx).append(",\n");
-            sb.append("          \"condition\": { \"type\": \"").append(def.conditionType())
-              .append("\", \"value\": \"").append(entry.getKey()).append("\" },\n");
-            sb.append("          \"fps\": ").append(spec.fps()).append(",\n");
-            sb.append("          \"loop\": ").append(spec.loop()).append("\n");
+            sb.append("          \"rowIndex\": ").append(row.rowIndex()).append(",\n");
+            List<AtlasConfigSchema.SingleCondition> all =
+                    row.condition() != null ? row.condition().all() : List.of();
+            sb.append("          \"condition\": { \"all\": ").append(formatConditionArray(all)).append(" },\n");
+            sb.append("          \"fps\": ").append(row.fps()).append(",\n");
+            sb.append("          \"loop\": ").append(row.loop()).append("\n");
             sb.append("        }");
-            if (i < rowList.size() - 1) sb.append(",");
+            if (i < rows.size() - 1) sb.append(",");
             sb.append("\n");
-            rowIdx++;
         }
 
         sb.append("      ],\n");
-        sb.append("      \"defaultRow\": 0\n");
+        // defaultRow: last row index in list that has empty condition, else 0
+        int defaultRow = rows.isEmpty() ? 0 : rows.size() - 1;
+        for (int i = 0; i < rows.size(); i++) {
+            AtlasConfigSchema.RowDef r = rows.get(i);
+            if (r.condition() != null && r.condition().all() != null && r.condition().all().isEmpty()) {
+                defaultRow = r.rowIndex();
+                break;
+            }
+        }
+        sb.append("      \"defaultRow\": ").append(defaultRow).append("\n");
         sb.append("    }");
         return sb.toString();
     }
@@ -203,7 +206,8 @@ public class AtlasConfigWriter {
             OverlayRowDef row = rows.get(i);
             sb.append("        {\n");
             sb.append("          \"rowIndex\": ").append(i).append(",\n");
-            sb.append("          \"condition\": { \"type\": \"time_of_day\", \"value\": \"").append(row.conditionValue()).append("\" },\n");
+            List<AtlasConfigSchema.SingleCondition> all = row.condition() != null ? row.condition() : List.of();
+            sb.append("          \"condition\": { \"all\": ").append(formatConditionArray(all)).append(" },\n");
             sb.append("          \"tint\": \"").append(row.tint()).append("\",\n");
             sb.append("          \"opacity\": ").append(row.opacity()).append(",\n");
             sb.append("          \"fps\": 1,\n");
@@ -219,9 +223,19 @@ public class AtlasConfigWriter {
         return sb.toString();
     }
 
+    // -------------------------------------------------------------------------
+    // Public data records
+    // -------------------------------------------------------------------------
+
+    /**
+     * Grid animation definition.
+     *
+     * @param rows      ordered list of row definitions (each carries its own condition and fps/loop)
+     * @param frameSpec animation spec that carries frame dimensions and count
+     */
     public record GridAnimDef(
-            String conditionType,
-            LinkedHashMap<String, AnimationSpec> rowSpecs
+            List<AtlasConfigSchema.RowDef> rows,
+            AnimationSpec frameSpec
     ) {}
 
     public record OverlayAnimDef(
@@ -231,16 +245,24 @@ public class AtlasConfigWriter {
             int defaultRow
     ) {}
 
+    /**
+     * Overlay row definition.
+     *
+     * @param condition list of SingleCondition predicates for this row
+     * @param tint      tint hex colour (e.g. "#FFFFFF")
+     * @param opacity   opacity 0.0–1.0
+     */
     public record OverlayRowDef(
-            String conditionValue,
+            List<AtlasConfigSchema.SingleCondition> condition,
             String tint,
             double opacity
     ) {}
 
     /**
      * Stores the crop offset and dimensions for a cropped animation.
-     * @param x            X offset of crop region in original canvas
-     * @param y            Y offset of crop region in original canvas
+     *
+     * @param x              X offset of crop region in original canvas
+     * @param y              Y offset of crop region in original canvas
      * @param originalWidth  original (uncropped) frame width
      * @param originalHeight original (uncropped) frame height
      * @param croppedWidth   actual cropped frame width (written to atlas)
