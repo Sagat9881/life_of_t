@@ -17,6 +17,17 @@
     <name>Life of T — Asset Generator</name>
     <description>Universal XML-driven pixel-art asset generator</description>
 
+    <properties>
+        <!--
+            Default path to asset specs for standalone disk-mode execution.
+            Override via -Dspecs.dir=/absolute/path at the command line.
+            When specs.dir is NOT passed, AssetGeneratorRunner switches to
+            ClasspathSpecsSource automatically (classpath mode).
+        -->
+        <specs.dir>${project.basedir}/../game-content/life-of-t/src/main/resources/asset-specs</specs.dir>
+        <output.dir>${project.build.directory}/generated-assets</output.dir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -62,12 +73,10 @@
 
             <!--
               Run asset generation AFTER compilation (process-classes).
-              Input:  game-content/life-of-t/src/main/resources/asset-specs/
-              Output: target/generated-assets/
-              The application module picks up generated assets via the
-              spring-boot repackage and serves them from classpath:/assets/.
-              Assets are NOT copied to frontend/public/ — Vite proxies
-              /assets/** to the backend in dev mode.
+              Input:  ${specs.dir} (disk mode — default points to game-content module).
+              Output: ${output.dir} = target/generated-assets/
+              To run in classpath mode, omit the systemProperty below and
+              ensure game-content jar is on the classpath.
             -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -82,9 +91,18 @@
                         </goals>
                         <configuration>
                             <mainClass>ru.lifegame.assets.AssetGeneratorRunner</mainClass>
+                            <systemProperties>
+                                <systemProperty>
+                                    <key>specs.dir</key>
+                                    <value>${specs.dir}</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>output.dir</key>
+                                    <value>${output.dir}</value>
+                                </systemProperty>
+                            </systemProperties>
                             <arguments>
-                                <argument>${project.basedir}/../game-content/life-of-t/src/main/resources/asset-specs</argument>
-                                <argument>${project.build.directory}/generated-assets</argument>
+                                <argument>${output.dir}</argument>
                             </arguments>
                         </configuration>
                     </execution>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specs-manifest>
+
+    <!-- abstract specs — loaded only as parents, never rendered -->
+    <entity path="abstract/entities/human"       abstract="true"/>
+    <entity path="abstract/entities/cat"          abstract="true"/>
+    <entity path="abstract/entities/dog"          abstract="true"/>
+    <entity path="abstract/environments/indoor_room"  abstract="true"/>
+    <entity path="abstract/environments/outdoor_area" abstract="true"/>
+
+    <!-- characters -->
+    <entity path="characters/tanya"     abstract="false"/>
+    <entity path="characters/aijan"     abstract="false"/>
+    <entity path="characters/alexander" abstract="false"/>
+    <entity path="characters/cirilla"   abstract="false"/>
+    <entity path="characters/duke"      abstract="false"/>
+    <entity path="characters/garfield"  abstract="false"/>
+    <entity path="characters/klop"      abstract="false"/>
+    <entity path="characters/lada"      abstract="false"/>
+    <entity path="characters/persi"     abstract="false"/>
+    <entity path="characters/sam"       abstract="false"/>
+    <entity path="characters/thelma"    abstract="false"/>
+    <entity path="characters/voland"    abstract="false"/>
+
+    <!-- furniture -->
+    <entity path="furniture/bed"          abstract="false"/>
+    <entity path="furniture/campfire"     abstract="false"/>
+    <entity path="furniture/cat_tree"     abstract="false"/>
+    <entity path="furniture/computer"     abstract="false"/>
+    <entity path="furniture/dining_table" abstract="false"/>
+    <entity path="furniture/dog_house"    abstract="false"/>
+    <entity path="furniture/fireplace"    abstract="false"/>
+    <entity path="furniture/fridge"       abstract="false"/>
+    <entity path="furniture/gym_equipment" abstract="false"/>
+    <entity path="furniture/hammock"      abstract="false"/>
+    <entity path="furniture/highway_car"  abstract="false"/>
+    <entity path="furniture/mirror"       abstract="false"/>
+    <entity path="furniture/office_desk"  abstract="false"/>
+    <entity path="furniture/pet_bowl"     abstract="false"/>
+    <entity path="furniture/phone"        abstract="false"/>
+    <entity path="furniture/stove"        abstract="false"/>
+    <entity path="furniture/tent"         abstract="false"/>
+    <entity path="furniture/vet_table"    abstract="false"/>
+
+    <!-- locations -->
+    <entity path="locations/alexander_room" abstract="false"/>
+    <entity path="locations/city_street"    abstract="false"/>
+    <entity path="locations/dacha_yard"     abstract="false"/>
+    <entity path="locations/gym"            abstract="false"/>
+    <entity path="locations/home_room"      abstract="false"/>
+    <entity path="locations/kitchen"        abstract="false"/>
+    <entity path="locations/night_highway"  abstract="false"/>
+    <entity path="locations/parents_cottage" abstract="false"/>
+    <entity path="locations/park"           abstract="false"/>
+    <entity path="locations/summer_camp"    abstract="false"/>
+    <entity path="locations/vet_clinic"     abstract="false"/>
+    <entity path="locations/workplace"      abstract="false"/>
+
+    <!-- ui -->
+    <entity path="ui/notifications" abstract="false"/>
+    <entity path="ui/particles"     abstract="false"/>
+    <entity path="ui/transitions"   abstract="false"/>
+
+</specs-manifest>
