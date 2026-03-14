@@ -67,9 +67,9 @@ export function GameScreen() {
     player: {
       energy:   player?.stats?.energy   ?? 0,
       mood:     player?.stats?.mood     ?? 0,
-      hunger:   player?.stats?.hunger   ?? 0,
+      hunger:   0,
       health:   player?.stats?.health   ?? 0,
-      money:    player?.money           ?? 0,
+      money:    player?.stats?.money    ?? 0,
       location: player?.location        ?? 'home',
     },
     context: {
