@@ -11,7 +11,6 @@ import { EventDialog } from './EventDialog';
 import { getLocationConfig, getLocationForTimeSlot } from '../../config/locations';
 import type { ActionOption } from '../../types/game';
 import type { GameStateSnapshot } from '../../hooks/canvasTypes';
-import './GameScreen.css';
 
 export function GameScreen() {
   const {

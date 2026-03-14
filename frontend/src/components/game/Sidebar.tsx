@@ -11,7 +11,6 @@ import type {
   NpcActivityView,
   DomainEventView,
 } from '../../types/game';
-import './Sidebar.css';
 
 interface SidebarProps {
   readonly player: Player;
@@ -177,6 +176,7 @@ export function Sidebar({
                           />
                         </div>
                         <span className="sb-pet-stat__value">{numericValue}</span>
+ leveraged
                       </div>
                     );
                   })}
