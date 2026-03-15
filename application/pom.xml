@@ -88,6 +88,38 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!--
+                Copy generated visual assets from asset-generator module into
+                this module's static resource root so Spring Boot serves them
+                at /assets/** (classpath:/static/assets/**).
+
+                Phase: prepare-package — runs AFTER asset-generator's process-classes
+                (where assets are generated), and BEFORE spring-boot:repackage (package).
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-generated-assets</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/static/assets</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/../asset-generator/target/generated-assets</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         
         <finalName>life-of-t</finalName>
