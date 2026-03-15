@@ -1,10 +1,12 @@
 /**
  * useCanvasAssets — asset loading for the Canvas pipeline.
  *
- * Effect 1: loads all assets for the current location config (including
- *           prefetch of all backgroundAnimations variants).
+ * Effect 1: loads fallback background + furniture + character assets for the
+ *           current location config. Does NOT prefetch backgroundAnimations
+ *           variants — those are loaded lazily by Effect 3.
  * Effect 2: delta-loads character animation atlases when characterAnimations changes.
- * Effect 3: delta-loads the background atlas for the current timeOfDay if not cached.
+ * Effect 3: delta-loads the background atlas for the current timeOfDay if it
+ *           differs from the already-loaded fallback.
  */
 
 import { useEffect } from 'react';
@@ -91,14 +93,9 @@ export function useCanvasAssets({
         );
       }
 
-      // Background: fallback
+      // Background: fallback only.
+      // Additional timeOfDay variants are loaded lazily by Effect 3.
       enqueueImage('locations', config.locationAsset, config.backgroundAnimation);
-      // Background: prefetch all timeOfDay variants
-      if (config.backgroundAnimations) {
-        Object.values(config.backgroundAnimations).forEach((animName) => {
-          enqueueImage('locations', config.locationAsset, animName);
-        });
-      }
       // Sprite-atlas config (one per location)
       enqueueConfig('locations', config.locationAsset);
 
@@ -157,8 +154,10 @@ export function useCanvasAssets({
     if (!timeOfDay || !config.backgroundAnimations) return;
 
     const animName = config.backgroundAnimations[timeOfDay] ?? config.backgroundAnimation;
-    const url = atlasUrl('locations', config.locationAsset, animName);
+    // If animName is the same as the fallback it's already loaded by Effect 1 — skip.
+    if (animName === config.backgroundAnimation) return;
 
+    const url = atlasUrl('locations', config.locationAsset, animName);
     if (imagesRef.current.has(url)) return;
 
     let cancelled = false;
