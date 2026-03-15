@@ -86,10 +86,10 @@
                 </includes>
             </resource>
             <!--
-              Generated assets (PNG, sprite-atlas.json) → classpath:/assets/
-              StaticResourceConfig maps /assets/** → classpath:/assets/
+              Generated assets (PNG, sprite-atlas.json) -> classpath:/assets/
+              StaticResourceConfig maps /assets/** -> classpath:/assets/
               AssetConfigController reads ClassPathResource("assets/...")
-              Both require classpath:/assets/ — DO NOT use targetPath=static here.
+              Both require classpath:/assets/ -- DO NOT use targetPath=static here.
             -->
             <resource>
                 <directory>${project.build.directory}/generated-assets</directory>
@@ -122,11 +122,16 @@
                         </goals>
                         <configuration>
                             <mainClass>ru.lifegame.assets.AssetGeneratorRunner</mainClass>
-                            <arguments>
-                                <!-- asset-specs moved to game-content module -->
-                                <argument>${project.basedir}/../game-content/life-of-t/src/main/resources/asset-specs</argument>
-                                <argument>${project.build.directory}/generated-assets</argument>
-                            </arguments>
+                            <systemProperties>
+                                <systemProperty>
+                                    <key>specs.dir</key>
+                                    <value>${project.basedir}/../game-content/life-of-t/src/main/resources/asset-specs</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>output.dir</key>
+                                    <value>${project.build.directory}/generated-assets</value>
+                                </systemProperty>
+                            </systemProperties>
                             <classpathScope>compile</classpathScope>
                         </configuration>
                     </execution>
