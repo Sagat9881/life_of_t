@@ -16,6 +16,12 @@
   --color-warning: #ff9800;
   --color-info: #2196f3;
   --color-money: #ffe66d;
+
+  /* ── Layout tokens (desktop) ── */
+  --gs-header-h:  40px;
+  --gs-footer-h:  32px;
+  --gs-sidebar-w: 280px;
+  --gs-scene-bg:  #1a1230;
 }
 
 *,
@@ -108,4 +114,79 @@ input::-webkit-inner-spin-button {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+/* ── GameScreen layout ── */
+.gs {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.gs-header {
+  flex: 0 0 var(--gs-header-h);
+  height: var(--gs-header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: var(--color-panel);
+  border-bottom: 2px solid var(--color-border);
+  font-size: 10px;
+  overflow: hidden;
+}
+
+.gs-header__left  { display: flex; align-items: center; gap: 12px; }
+.gs-header__right { display: flex; align-items: center; gap: 8px; }
+.gs-header__logo  { color: var(--color-accent); font-size: 10px; }
+.gs-header__version { color: var(--color-text-dim); font-size: 8px; }
+.gs-header__time  { color: var(--color-text-dim); font-size: 8px; }
+
+.gs-main {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+.gs-scene {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--gs-scene-bg);
+}
+
+.gs-sidebar {
+  flex: 0 0 var(--gs-sidebar-w);
+  width: var(--gs-sidebar-w);
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--color-panel);
+  border-left: 2px solid var(--color-border);
+}
+
+.gs-footer {
+  flex: 0 0 var(--gs-footer-h);
+  height: var(--gs-footer-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  color: var(--color-text-dim);
+  background: var(--color-panel);
+  border-top: 2px solid var(--color-border);
+  overflow: hidden;
+}
+
+.gs-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100dvh;
+  color: var(--color-text);
+  font-size: 10px;
 }

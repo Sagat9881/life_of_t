@@ -145,19 +145,21 @@ export function GameScreen() {
             gameState={gameState}
           />
         </div>
-        <Sidebar
-          player={player}
-          availableActions={availableActions}
-          activeQuests={activeQuests}
-          relationships={relationships}
-          pets={pets}
-          npcActivities={npcActivities}
-          domainEvents={domainEvents}
-          onActionClick={(action) => {
-            setSelectedObjectId(null);
-            setSelectedAction(action);
-          }}
-        />
+        <div className="gs-sidebar">
+          <Sidebar
+            player={player}
+            availableActions={availableActions}
+            activeQuests={activeQuests}
+            relationships={relationships}
+            pets={pets}
+            npcActivities={npcActivities}
+            domainEvents={domainEvents}
+            onActionClick={(action) => {
+              setSelectedObjectId(null);
+              setSelectedAction(action);
+            }}
+          />
+        </div>
       </div>
 
       <footer className="gs-footer">Кликни на предмет или выбери действие</footer>
