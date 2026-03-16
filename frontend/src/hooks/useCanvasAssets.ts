@@ -1,12 +1,9 @@
 /**
  * useCanvasAssets — asset loading for the Canvas pipeline.
  *
- * Effect 1: loads fallback background + furniture + character assets for the
- *           current location config. Does NOT prefetch backgroundAnimations
- *           variants — those are loaded lazily by Effect 3.
+ * Effect 1: loads background atlas image + sprite-atlas.json + furniture + character assets
+ *           for the current location config.
  * Effect 2: delta-loads character animation atlases when characterAnimations changes.
- * Effect 3: delta-loads the background atlas for the current timeOfDay if it
- *           differs from the already-loaded fallback.
  */
 
 import { useEffect } from 'react';
@@ -18,11 +15,10 @@ export type { CanvasAssetsRefs };
 export interface UseCanvasAssetsOptions {
   config: LocationConfig;
   characterAnimations: Record<string, string>;
-  timeOfDay?: string | undefined;
   assetsRefs: CanvasAssetsRefs;
 }
 
-// ─── helpers ────────────────────────────────────────────────────────────────────
+// ─── helpers ─────────────────────────────────────────────────────────────────
 
 export function atlasUrl(
   category: string,
@@ -55,12 +51,11 @@ async function loadImage(url: string): Promise<HTMLImageElement | null> {
   });
 }
 
-// ─── hook ──────────────────────────────────────────────────────────────────────────────
+// ─── hook ─────────────────────────────────────────────────────────────────────
 
 export function useCanvasAssets({
   config,
   characterAnimations,
-  timeOfDay,
   assetsRefs,
 }: UseCanvasAssetsOptions): void {
   const { imagesRef, atlasConfigsRef, slotStateRef } = assetsRefs;
@@ -93,10 +88,9 @@ export function useCanvasAssets({
         );
       }
 
-      // Background: fallback only.
-      // Additional timeOfDay variants are loaded lazily by Effect 3.
+      // Background: single base animation + one sprite-atlas.json per location.
+      // Row-level variants (time of day, relationships, etc.) live in sprite-atlas.json rows[].
       enqueueImage('locations', config.locationAsset, config.backgroundAnimation);
-      // Sprite-atlas config (one per location)
       enqueueConfig('locations', config.locationAsset);
 
       // Furniture
@@ -104,7 +98,6 @@ export function useCanvasAssets({
         const anim = item.animation ?? item.animationKey ?? 'idle';
         enqueueImage('furniture', item.entityName, anim);
         enqueueConfig('furniture', item.entityName);
-        // init slot state
         if (!slotStateRef.current.has(item.id)) {
           slotStateRef.current.set(item.id, { animationName: anim, frameIndex: 0, lastFrameTime: 0, activeRowIndex: 0 });
         }
@@ -148,23 +141,4 @@ export function useCanvasAssets({
     void Promise.all(tasks);
     return () => { cancelled = true; };
   }, [characterAnimations, config.characters]);
-
-  // Effect 3: delta-load background for current timeOfDay
-  useEffect(() => {
-    if (!timeOfDay || !config.backgroundAnimations) return;
-
-    const animName = config.backgroundAnimations[timeOfDay] ?? config.backgroundAnimation;
-    // If animName is the same as the fallback it's already loaded by Effect 1 — skip.
-    if (animName === config.backgroundAnimation) return;
-
-    const url = atlasUrl('locations', config.locationAsset, animName);
-    if (imagesRef.current.has(url)) return;
-
-    let cancelled = false;
-    loadImage(url).then((img) => {
-      if (img && !cancelled) imagesRef.current.set(url, img);
-    }).catch((e) => console.error('[canvas] timeOfDay delta load error:', e));
-
-    return () => { cancelled = true; };
-  }, [timeOfDay, config.locationAsset, config.backgroundAnimation, config.backgroundAnimations]);
 }

@@ -5,7 +5,7 @@
  * Reads all mutable state via refs to avoid loop teardown.
  *
  * Renders three layers (bottom → top):
- *   1. Background  (animated strip, stretched to viewport)
+ *   1. Background  (sprite-atlas rows resolved via resolveActiveRow)
  *   2. Furniture   (z-sorted, selected/hovered highlight)
  *   3. Characters  (z-sorted, per-slot animation)
  */
@@ -30,7 +30,7 @@ export interface CanvasRenderLoopOptions {
   gameStateRef: React.MutableRefObject<GameStateSnapshot>;
 }
 
-// ── Frame helpers ────────────────────────────────────────────────────────────────
+// ── Frame helpers ─────────────────────────────────────────────────────────────
 
 function frameW(img: HTMLImageElement, cfg: AnimationConfig): number {
   return cfg.frameWidth > 0 ? cfg.frameWidth : Math.floor(img.naturalWidth / cfg.columns);
@@ -40,7 +40,7 @@ function frameH(img: HTMLImageElement, cfg: AnimationConfig): number {
   return cfg.frameHeight > 0 ? cfg.frameHeight : img.naturalHeight;
 }
 
-// ── Hook ───────────────────────────────────────────────────────────────────
+// ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useCanvasRenderLoop({
   canvasRef,
@@ -61,7 +61,7 @@ export function useCanvasRenderLoop({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // ── drawSprite ───────────────────────────────────────────────────────────────
+    // ── drawSprite ────────────────────────────────────────────────────────────
     const drawSprite = (
       img: HTMLImageElement,
       animCfg: AnimationConfig | undefined,
@@ -133,7 +133,6 @@ export function useCanvasRenderLoop({
         }
 
         if (state) {
-          // Resolve active row from game state predicates
           const activeRow = resolveActiveRow(
             animCfg.rows,
             animCfg.defaultRow,
@@ -190,7 +189,7 @@ export function useCanvasRenderLoop({
       if (flipX) ctx.restore();
     };
 
-    // ── drawBackground ────────────────────────────────────────────────────────────
+    // ── drawBackground ────────────────────────────────────────────────────────
     const drawBackground = (
       img: HTMLImageElement,
       animCfg: AnimationConfig | undefined,
@@ -209,25 +208,43 @@ export function useCanvasRenderLoop({
         slotStateRef.current.set('__background__', state);
       }
 
-      const interval = 1000 / (animCfg?.fps ?? 1);
-      if (now - state.lastFrameTime >= interval) {
-        let next = state.frameIndex + 1;
-        const cols = animCfg?.columns ?? 1;
-        if (next >= cols) next = animCfg?.loop !== false ? 0 : cols - 1;
-        state.frameIndex    = next;
-        state.lastFrameTime = now;
-      }
-
       if (!animCfg || animCfg.columns <= 1) {
         ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, vpX, vpY, vpW, vpH);
         return;
       }
 
-      // Backgrounds are always single-row — srcY = 0
-      ctx.drawImage(img, state.frameIndex * fw, 0, fw, fh, vpX, vpY, vpW, vpH);
+      const hasRows = animCfg.rows && animCfg.rows.length > 0;
+
+      let activeRowIndex: number;
+      let fps: number;
+      let loop: boolean;
+
+      if (hasRows) {
+        activeRowIndex = resolveActiveRow(animCfg.rows, animCfg.defaultRow, gameStateRef.current);
+        const playback = getRowPlayback(animCfg.rows, activeRowIndex, animCfg.defaultRow);
+        fps  = playback.fps;
+        loop = playback.loop;
+      } else {
+        activeRowIndex = 0;
+        fps  = animCfg.fps ?? 1;
+        loop = animCfg.loop !== false;
+      }
+
+      state.activeRowIndex = activeRowIndex;
+
+      const interval = 1000 / fps;
+      if (now - state.lastFrameTime >= interval) {
+        let next = state.frameIndex + 1;
+        if (next >= animCfg.columns) next = loop ? 0 : animCfg.columns - 1;
+        state.frameIndex    = next;
+        state.lastFrameTime = now;
+      }
+
+      const srcY = activeRowIndex * fh;
+      ctx.drawImage(img, state.frameIndex * fw, srcY, fw, fh, vpX, vpY, vpW, vpH);
     };
 
-    // ── render ──────────────────────────────────────────────────────────────────
+    // ── render ────────────────────────────────────────────────────────────────
     const render = (now: number): void => {
       const bufW = canvas.width;
       const bufH = canvas.height;
@@ -250,9 +267,7 @@ export function useCanvasRenderLoop({
       ctx.clip();
 
       // Layer 1: Background
-      const gameState  = gameStateRef.current;
-      const timeOfDay  = (gameState.context?.['time'] as string | undefined) ?? 'day';
-      const bgAnimName = cfg.backgroundAnimations?.[timeOfDay] ?? cfg.backgroundAnimation;
+      const bgAnimName = cfg.backgroundAnimation;
       const bgUrl      = atlasUrl('locations', cfg.locationAsset, bgAnimName);
       const bgImg      = imagesRef.current.get(bgUrl);
 

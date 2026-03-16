@@ -8,12 +8,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
     name: 'Комната',
     locationAsset: 'home_room',
     backgroundAnimation: 'idle',
-    backgroundAnimations: {
-      morning: 'morning',
-      day:     'day',
-      evening: 'evening',
-      night:   'night',
-    },
     furniture: [
       {
         id: 'bed',
@@ -117,12 +111,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
     name: 'Кухня',
     locationAsset: 'kitchen',
     backgroundAnimation: 'idle',
-    backgroundAnimations: {
-      morning: 'morning',
-      day:     'day',
-      evening: 'evening',
-      night:   'night',
-    },
     furniture: [
       {
         id: 'stove',
@@ -222,12 +210,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
     name: 'Дача',
     locationAsset: 'dacha_yard',
     backgroundAnimation: 'idle',
-    backgroundAnimations: {
-      morning: 'morning',
-      day:     'day',
-      evening: 'sunset',
-      night:   'night',
-    },
     furniture: [
       {
         id: 'garden_bed',
@@ -311,12 +293,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
     name: 'Дом родителей',
     locationAsset: 'parents_cottage',
     backgroundAnimation: 'idle',
-    backgroundAnimations: {
-      morning: 'morning',
-      day:     'day',
-      evening: 'evening',
-      night:   'night',
-    },
     furniture: [
       {
         id: 'sofa',
@@ -396,12 +372,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
     name: 'Лагерь',
     locationAsset: 'summer_camp',
     backgroundAnimation: 'idle',
-    backgroundAnimations: {
-      morning: 'morning',
-      day:     'day',
-      evening: 'campfire_evening',
-      night:   'campfire_night',
-    },
     furniture: [
       {
         id: 'campfire',
@@ -473,12 +443,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
     name: 'Офис',
     locationAsset: 'office',
     backgroundAnimation: 'idle',
-    backgroundAnimations: {
-      morning: 'morning',
-      day:     'day',
-      evening: 'evening',
-      night:   'idle',
-    },
     furniture: [
       {
         id: 'work_desk',
@@ -562,12 +526,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
     name: 'Парк',
     locationAsset: 'park',
     backgroundAnimation: 'idle',
-    backgroundAnimations: {
-      morning: 'morning',
-      day:     'day',
-      evening: 'sunset',
-      night:   'idle',
-    },
     furniture: [
       {
         id: 'park_bench',

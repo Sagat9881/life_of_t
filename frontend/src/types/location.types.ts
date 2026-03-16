@@ -34,7 +34,6 @@ export interface LocationConfig {
   readonly name: string;
   readonly locationAsset: string;
   readonly backgroundAnimation: string;
-  readonly backgroundAnimations?: Readonly<Record<string, string>>;
   readonly furniture: readonly FurniturePlacement[];
   readonly characters: readonly CharacterSlot[];
 }
