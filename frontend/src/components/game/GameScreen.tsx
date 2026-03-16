@@ -65,23 +65,33 @@ export function GameScreen() {
 
   const gameState = useMemo((): GameStateSnapshot => ({
     player: {
-      energy:   player?.stats?.energy   ?? 0,
-      mood:     player?.stats?.mood     ?? 0,
-      hunger:   0,
-      health:   player?.stats?.health   ?? 0,
-      money:    player?.stats?.money    ?? 0,
-      location: player?.location        ?? 'home',
+      energy:     player?.stats?.energy     ?? 0,
+      mood:       player?.stats?.mood       ?? 0,
+      hunger:     player?.stats?.hunger     ?? 0,
+      health:     player?.stats?.health     ?? 0,
+      money:      player?.stats?.money      ?? 0,
+      stress:     player?.stats?.stress     ?? 0,
+      selfEsteem: player?.stats?.selfEsteem ?? 0,
+      location:   player?.location          ?? 'home',
+      tags:       player?.tags              ?? {},
     },
     context: {
-      time:     timeOfDay,
-      day:      time?.day  ?? 1,
-      hour:     time?.hour ?? 7,
-      timeSlot: rawTimeSlot,
+      time:      timeOfDay,
+      day:       gameTime.day,
+      hour:      gameTime.hour,
+      timeSlot:  rawTimeSlot,
+      dayOfWeek: ((gameTime.day - 1) % 7) + 1,
     },
     npc: Object.fromEntries(
       npcActivities.map(n => [n.npcId, { animation: n.animationKey ?? 'idle' }])
     ),
-  }), [player, time, npcActivities, timeOfDay]);
+    relationships: Object.fromEntries(
+      (relationships ?? []).map(r => [
+        r.npcId,
+        { closeness: r.closeness, trust: r.trust, stability: r.stability, romance: r.romance },
+      ])
+    ),
+  }), [player, time, npcActivities, timeOfDay, relationships, gameTime, rawTimeSlot]);
 
   const handleObjectClick = (objectId: string, actionCode: string): void => {
     setSelectedObjectId(objectId);

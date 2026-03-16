@@ -82,7 +82,10 @@ export interface GameStateSnapshotPlayer {
   hunger: number;
   health: number;
   money: number;
+  stress: number;
+  selfEsteem: number;
   location: string;
+  tags: Record<string, boolean>;
 }
 
 export interface GameStateSnapshotContext {
@@ -90,14 +93,23 @@ export interface GameStateSnapshotContext {
   day: number;
   hour: number;
   timeSlot: string;  // raw backend value, e.g. "MORNING"
+  dayOfWeek: number; // 1=Mon … 7=Sun, computed as ((day - 1) % 7) + 1
 }
 
 export interface GameStateSnapshotNpcEntry {
   animation: string;
 }
 
+export interface GameStateSnapshotRelationship {
+  closeness: number;
+  trust: number;
+  stability: number;
+  romance: number;
+}
+
 export interface GameStateSnapshot {
   player: GameStateSnapshotPlayer;
   context: GameStateSnapshotContext;
   npc: Record<string, GameStateSnapshotNpcEntry>;
+  relationships: Record<string, GameStateSnapshotRelationship>;
 }
