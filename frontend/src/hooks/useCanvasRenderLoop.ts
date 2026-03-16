@@ -11,6 +11,7 @@
  */
 
 import { useEffect } from 'react';
+import type { RefObject, MutableRefObject } from 'react';
 import type { LocationConfig } from '../types/location.types';
 import type { AnimationConfig, GameStateSnapshot, SlotState } from './canvasTypes';
 import {
@@ -22,18 +23,17 @@ import {
 import type { CanvasAssetsRefs } from './useCanvasAssets';
 import { atlasUrl, atlasConfigUrl } from './useCanvasAssets';
 import { resolveActiveRow, getRowPlayback } from './atlasUtils';
-import React from 'react';
 
 export interface CanvasRenderLoopOptions {
-  canvasRef: React.RefObject<HTMLCanvasElement>;
-  viewportRef: React.RefObject<{ vpX: number; vpY: number; vpW: number; vpH: number }>;
-  assetsRefs: CanvasAssetsRefs;
-  configRef: React.MutableRefObject<LocationConfig>;
-  selectedRef: React.MutableRefObject<string | null>;
-  hoveredRef: React.MutableRefObject<string | null>;
-  charAnimsRef: React.MutableRefObject<Record<string, string> | undefined>;
-  rafRef: React.MutableRefObject<number | undefined>;
-  gameStateRef: React.MutableRefObject<GameStateSnapshot>;
+  canvasRef:    RefObject<HTMLCanvasElement>;
+  viewportRef:  RefObject<{ vpX: number; vpY: number; vpW: number; vpH: number }>;
+  assetsRefs:   CanvasAssetsRefs;
+  configRef:    MutableRefObject<LocationConfig>;
+  selectedRef:  MutableRefObject<string | null>;
+  hoveredRef:   MutableRefObject<string | null>;
+  charAnimsRef: MutableRefObject<Record<string, string> | undefined>;
+  rafRef:       MutableRefObject<number | undefined>;
+  gameStateRef: MutableRefObject<GameStateSnapshot>;
 }
 
 // ── Frame dimension helpers ───────────────────────────────────────────────────────
@@ -46,50 +46,44 @@ function frameH(img: HTMLImageElement, cfg: AnimationConfig): number {
   return cfg.frameHeight > 0 ? cfg.frameHeight : img.naturalHeight;
 }
 
-// ── Shared helpers ───────────────────────────────────────────────────────────────
-
-/** Advance a SlotState frame counter by one tick if the interval has elapsed. */
-function advanceFrame(state: SlotState, columns: number, fps: number, loop: boolean, now: number): void {
+/** Advances frameIndex in SlotState based on elapsed time and fps. Mutates in place. */
+function advanceFrame(
+  state: SlotState,
+  columns: number,
+  fps: number,
+  loop: boolean,
+  now: number,
+): void {
   const interval = 1000 / fps;
-  if (now - state.lastFrameTime >= interval) {
-    let next = state.frameIndex + 1;
-    if (next >= columns) next = loop ? 0 : columns - 1;
-    state.frameIndex    = next;
-    state.lastFrameTime = now;
-  }
+  if (now - state.lastFrameTime < interval) return;
+  let next = state.frameIndex + 1;
+  if (next >= columns) next = loop ? 0 : columns - 1;
+  state.frameIndex    = next;
+  state.lastFrameTime = now;
 }
 
 interface DestRect { drawX: number; drawY: number; drawW: number; drawH: number; }
 
-/** Compute destination rect, respecting cropOffset if present. */
+/** Computes destination rect for drawImage, honouring cropOffset if present. */
 function computeDestRect(
-  animCfg: AnimationConfig,
-  fw: number,
-  fh: number,
   destX: number,
   destY: number,
   destH: number,
+  fw: number,
+  fh: number,
+  cropOffset?: AnimationConfig['cropOffset'],
 ): DestRect {
-  if (animCfg.cropOffset) {
-    const crop = animCfg.cropOffset;
-    const scaleFactor = destH / crop.originalHeight;
-    const fullW = crop.originalWidth * scaleFactor;
-    const fullX = destX - fullW / 2;
-    const fullY = destY - destH;
+  if (cropOffset) {
+    const scale = destH / cropOffset.originalHeight;
     return {
-      drawX: fullX + crop.x * scaleFactor,
-      drawY: fullY + crop.y * scaleFactor,
-      drawW: fw * scaleFactor,
-      drawH: fh * scaleFactor,
+      drawX: (destX - (cropOffset.originalWidth * scale) / 2) + cropOffset.x * scale,
+      drawY: (destY - destH) + cropOffset.y * scale,
+      drawW: fw * scale,
+      drawH: fh * scale,
     };
   }
   const dw = fh > 0 ? destH * (fw / fh) : destH;
-  return {
-    drawX: destX - dw / 2,
-    drawY: destY - destH,
-    drawW: dw,
-    drawH: destH,
-  };
+  return { drawX: destX - dw / 2, drawY: destY - destH, drawW: dw, drawH: destH };
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
@@ -155,14 +149,7 @@ export function useCanvasRenderLoop({
       })();
       const srcY = srcRow * fh;
 
-      const { drawX, drawY, drawW, drawH } = animCfg
-        ? computeDestRect(animCfg, fw, fh, destX, destY, destH)
-        : {
-            drawX: destX - (img.naturalWidth > 0 ? destH * (img.naturalWidth / img.naturalHeight) : destH) / 2,
-            drawY: destY - destH,
-            drawW: img.naturalWidth > 0 ? destH * (img.naturalWidth / img.naturalHeight) : destH,
-            drawH: destH,
-          };
+      const { drawX, drawY, drawW, drawH } = computeDestRect(destX, destY, destH, fw, fh, animCfg?.cropOffset);
 
       if (flipX) { ctx.save(); ctx.translate(destX, 0); ctx.scale(-1, 1); ctx.translate(-destX, 0); }
       ctx.drawImage(img, frame * fw, srcY, fw, fh, drawX, drawY, drawW, drawH);

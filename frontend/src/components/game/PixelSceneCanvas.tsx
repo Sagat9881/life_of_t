@@ -5,13 +5,25 @@
  * Canvas buffer is dynamically sized to fill the container with 4:3 letterbox/pillarbox.
  */
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
+import type React from 'react';
 import { useCanvasRenderer } from '../../hooks/useCanvasRenderer';
 import { SCENE_FALLBACK_COLOR } from '../../hooks/canvasTypes';
 import type { LocationConfig, FurniturePlacement } from '../../types/location.types';
 import type { GameStateSnapshot } from '../../hooks/canvasTypes';
 
+export const LOGICAL_W = 640;
+export const LOGICAL_H = 480;
+const ASPECT = LOGICAL_W / LOGICAL_H;
+
 const DEFAULT_HITBOX_ASPECT = 1.2;
+
+const CONTAINER_STYLE: React.CSSProperties = {
+  width:    '100%',
+  height:   '100%',
+  overflow: 'hidden',
+  background: SCENE_FALLBACK_COLOR,
+};
 
 interface PixelSceneCanvasProps {
   config: LocationConfig;
@@ -22,10 +34,6 @@ interface PixelSceneCanvasProps {
   onObjectClick: (objectId: string | null) => void;
   onObjectHover: (objectId: string | null) => void;
 }
-
-const LOGICAL_W = 640;
-const LOGICAL_H = 480;
-const ASPECT = LOGICAL_W / LOGICAL_H;
 
 function computeViewport(cssW: number, cssH: number) {
   const cssAspect = cssW / cssH;
@@ -58,23 +66,23 @@ export function PixelSceneCanvas({
   onObjectClick,
   onObjectHover,
 }: PixelSceneCanvasProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef    = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const viewportRef = useRef({ vpX: 0, vpY: 0, vpW: LOGICAL_W, vpH: LOGICAL_H });
+  const viewportRef  = useRef({ vpX: 0, vpY: 0, vpW: LOGICAL_W, vpH: LOGICAL_H });
 
   useEffect(() => {
     const container = containerRef.current;
-    const canvas = canvasRef.current;
+    const canvas    = canvasRef.current;
     if (!container || !canvas) return;
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (!entry) return;
       const { width, height } = entry.contentRect;
-      const dpr = window.devicePixelRatio ?? 1;
-      const bufW = Math.round(width * dpr);
+      const dpr  = window.devicePixelRatio ?? 1;
+      const bufW = Math.round(width  * dpr);
       const bufH = Math.round(height * dpr);
-      canvas.width = bufW;
+      canvas.width  = bufW;
       canvas.height = bufH;
       viewportRef.current = computeViewport(bufW, bufH);
     });
@@ -93,41 +101,55 @@ export function PixelSceneCanvas({
     ...(characterAnimations !== undefined && { characterAnimations }),
   });
 
-  const toCanvasCoords = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return null;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
-  };
+  const toCanvasCoords = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return null;
+      const rect   = canvas.getBoundingClientRect();
+      const scaleX = canvas.width  / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top)  * scaleY,
+      };
+    },
+    [],
+  );
 
-  const hitTest = (coords: { x: number; y: number }): FurniturePlacement | undefined => {
-    const { vpX, vpY, vpW, vpH } = viewportRef.current;
-    return config.furniture.find((f) => {
-      const hb = getFurnitureHitBox(f, vpX, vpY, vpW, vpH);
-      return coords.x >= hb.x && coords.x <= hb.x + hb.width &&
-             coords.y >= hb.y && coords.y <= hb.y + hb.height;
-    });
-  };
+  const hitTest = useCallback(
+    (coords: { x: number; y: number }): FurniturePlacement | undefined => {
+      const { vpX, vpY, vpW, vpH } = viewportRef.current;
+      return config.furniture.find((f) => {
+        const hb = getFurnitureHitBox(f, vpX, vpY, vpW, vpH);
+        return (
+          coords.x >= hb.x && coords.x <= hb.x + hb.width &&
+          coords.y >= hb.y && coords.y <= hb.y + hb.height
+        );
+      });
+    },
+    [config.furniture],
+  );
 
-  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const coords = toCanvasCoords(e);
-    if (!coords) return;
-    onObjectClick(hitTest(coords)?.id ?? null);
-  };
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      const coords = toCanvasCoords(e);
+      if (!coords) return;
+      onObjectClick(hitTest(coords)?.id ?? null);
+    },
+    [hitTest, onObjectClick, toCanvasCoords],
+  );
 
-  const handleMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const coords = toCanvasCoords(e);
-    if (!coords) return;
-    onObjectHover(hitTest(coords)?.id ?? null);
-  };
+  const handleMove = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      const coords = toCanvasCoords(e);
+      if (!coords) return;
+      onObjectHover(hitTest(coords)?.id ?? null);
+    },
+    [hitTest, onObjectHover, toCanvasCoords],
+  );
 
   return (
-    <div
-      ref={containerRef}
-      style={{ width: '100%', height: '100%', overflow: 'hidden', background: SCENE_FALLBACK_COLOR }}
-    >
+    <div ref={containerRef} style={CONTAINER_STYLE}>
       <canvas
         ref={canvasRef}
         width={LOGICAL_W}
