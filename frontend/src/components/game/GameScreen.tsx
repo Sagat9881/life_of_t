@@ -36,7 +36,7 @@ export function GameScreen() {
   }, [lastActionResult, availableActions]);
 
   const rawTimeSlot = time?.timeSlot ?? 'MORNING';
-  const timeOfDay   = rawTimeSlot.toLowerCase(); // kept for context.time and locationId deps
+  const timeOfDay   = rawTimeSlot.toLowerCase();
 
   const locationId = useMemo(
     () => player?.location ?? getLocationForTimeSlot(rawTimeSlot),
@@ -51,17 +51,11 @@ export function GameScreen() {
   const gameTime       = time ?? { day: 1, hour: 7, timeSlot: 'MORNING' };
   const activeConflict = activeConflicts[0] ?? null;
 
-  /** Record<characterSlotId, animationName> */
-  const characterAnimations = useMemo((): Record<string, string> => {
-    const anims: Record<string, string> = {};
-    anims['tanya'] = tanyaAnimOverride ?? 'idle';
-    for (const slot of locationConfig.characters) {
-      if (slot.id === 'tanya') continue;
-      const npcActivity = npcActivities.find((n) => n.npcId === slot.id);
-      anims[slot.id] = npcActivity?.animationKey ?? 'idle';
-    }
-    return anims;
-  }, [tanyaAnimOverride, locationConfig.characters, npcActivities]);
+  // Point override for Tanya only. NPC animations are driven by sprite-atlas conditions
+  // and GameStateSnapshot.npc[...].animation — no per-slot overrides needed there.
+  const characterAnimations = useMemo((): Record<string, string> => ({
+    tanya: tanyaAnimOverride ?? 'idle',
+  }), [tanyaAnimOverride]);
 
   const gameState = useMemo((): GameStateSnapshot => ({
     player: {
