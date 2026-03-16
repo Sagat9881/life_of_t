@@ -3,18 +3,15 @@
  *
  * Renders a pixel-art game location using the Canvas API.
  * Canvas buffer is dynamically sized to fill the container with 4:3 letterbox/pillarbox.
- *
- * Coordinate system:
- * - All x/y/sceneHeight values in LocationConfig are 0–100 (% of viewport).
- * - Hit detection mirrors the renderer's coordinate computation via viewportRef.
- *
- * Layers (bottom → top): background → furniture (z-sorted) → characters (z-sorted).
  */
 
 import { useRef, useEffect } from 'react';
 import { useCanvasRenderer } from '../../hooks/useCanvasRenderer';
+import { SCENE_FALLBACK_COLOR } from '../../hooks/canvasTypes';
 import type { LocationConfig, FurniturePlacement } from '../../types/location.types';
 import type { GameStateSnapshot } from '../../hooks/canvasTypes';
+
+const DEFAULT_HITBOX_ASPECT = 1.2;
 
 interface PixelSceneCanvasProps {
   config: LocationConfig;
@@ -28,26 +25,15 @@ interface PixelSceneCanvasProps {
 
 const LOGICAL_W = 640;
 const LOGICAL_H = 480;
-const ASPECT = LOGICAL_W / LOGICAL_H; // 4/3
+const ASPECT = LOGICAL_W / LOGICAL_H;
 
-/**
- * Вычисляет viewport в пикселях холста с letterbox/pillarbox для сохранения 4:3.
- */
 function computeViewport(cssW: number, cssH: number) {
   const cssAspect = cssW / cssH;
   let vpW: number, vpH: number, vpX: number, vpY: number;
   if (cssAspect >= ASPECT) {
-    // шире чем 4:3 — pillarbox (полосы по бокам)
-    vpH = cssH;
-    vpW = cssH * ASPECT;
-    vpX = (cssW - vpW) / 2;
-    vpY = 0;
+    vpH = cssH; vpW = cssH * ASPECT; vpX = (cssW - vpW) / 2; vpY = 0;
   } else {
-    // уже чем 4:3 — letterbox (полосы сверху/снизу)
-    vpW = cssW;
-    vpH = cssW / ASPECT;
-    vpX = 0;
-    vpY = (cssH - vpH) / 2;
+    vpW = cssW; vpH = cssW / ASPECT; vpX = 0; vpY = (cssH - vpH) / 2;
   }
   return { vpX, vpY, vpW, vpH };
 }
@@ -59,7 +45,7 @@ function getFurnitureHitBox(
   const cx = vpX + (f.x / 100) * vpW;
   const cy = vpY + (f.y / 100) * vpH;
   const height = (f.sceneHeight / 100) * vpH * f.scale;
-  const width = height * 1.2;
+  const width = height * (f.hitboxAspect ?? DEFAULT_HITBOX_ASPECT);
   return { x: cx - width / 2, y: cy - height, width, height };
 }
 
@@ -76,7 +62,6 @@ export function PixelSceneCanvas({
   const containerRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef({ vpX: 0, vpY: 0, vpW: LOGICAL_W, vpH: LOGICAL_H });
 
-  // ResizeObserver — подстраиваем canvas buffer и viewport под контейнер
   useEffect(() => {
     const container = containerRef.current;
     const canvas = canvasRef.current;
@@ -114,20 +99,15 @@ export function PixelSceneCanvas({
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY,
-    };
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
   };
 
   const hitTest = (coords: { x: number; y: number }): FurniturePlacement | undefined => {
     const { vpX, vpY, vpW, vpH } = viewportRef.current;
     return config.furniture.find((f) => {
       const hb = getFurnitureHitBox(f, vpX, vpY, vpW, vpH);
-      return (
-        coords.x >= hb.x && coords.x <= hb.x + hb.width &&
-        coords.y >= hb.y && coords.y <= hb.y + hb.height
-      );
+      return coords.x >= hb.x && coords.x <= hb.x + hb.width &&
+             coords.y >= hb.y && coords.y <= hb.y + hb.height;
     });
   };
 
@@ -146,7 +126,7 @@ export function PixelSceneCanvas({
   return (
     <div
       ref={containerRef}
-      style={{ width: '100%', height: '100%', overflow: 'hidden', background: '#1a1a2e' }}
+      style={{ width: '100%', height: '100%', overflow: 'hidden', background: SCENE_FALLBACK_COLOR }}
     >
       <canvas
         ref={canvasRef}

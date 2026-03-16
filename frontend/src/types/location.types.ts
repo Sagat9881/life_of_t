@@ -13,6 +13,7 @@ export interface FurniturePlacement {
   readonly actionCode?: string;
   readonly label?: string;
   readonly animation: string;
+  readonly hitboxAspect?: number;
 }
 
 export interface CharacterSlot {

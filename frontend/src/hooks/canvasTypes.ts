@@ -13,12 +13,6 @@ export interface CropOffset {
   originalHeight: number;
 }
 
-/**
- * A single row-condition entry from sprite-atlas.json rows[].
- * conditions: predicate map evaluated against GameStateSnapshot.
- * rowIndex: which grid row to use when conditions match.
- * fps / loop: playback overrides for this row.
- */
 export interface RowDef {
   rowIndex: number;
   fps?: number;
@@ -26,12 +20,6 @@ export interface RowDef {
   conditions?: SingleCondition[];
 }
 
-/**
- * A single predicate condition evaluated against GameStateSnapshot.
- * field: dot-path into snapshot (e.g. "player.energy", "context.timeSlot")
- * op: comparison operator
- * value: right-hand side
- */
 export interface SingleCondition {
   field: string;
   op: 'lt' | 'lte' | 'gt' | 'gte' | 'eq' | 'neq';
@@ -47,9 +35,7 @@ export interface AnimationConfig {
   fps: number;
   loop: boolean;
   cropOffset?: CropOffset;
-  /** Multi-row grid: row definitions with predicate conditions */
   rows: RowDef[];
-  /** Index of the fallback row when no condition matches */
   defaultRow: number;
 }
 
@@ -58,12 +44,40 @@ export interface AtlasConfig {
   animations: Record<string, AnimationConfig>;
 }
 
+// ── Canvas pipeline constants ─────────────────────────────────────────────────────
+
+/** Fallback background color rendered before any atlas loads. */
+export const SCENE_FALLBACK_COLOR = '#1a1a2e';
+
+/** SlotState key reserved for the background layer. */
+export const BACKGROUND_SLOT_KEY = '__background__';
+
+/** Slot key prefix for furniture entities. */
+export const FURNITURE_SLOT_PREFIX = 'furniture_';
+
+/** Default animation FPS when sprite-atlas.json provides no fps value. */
+export const DEFAULT_ANIMATION_FPS = 8;
+
+/**
+ * Discriminates slot categories in the render loop.
+ * Extend here when adding new entity categories (pet, ui-element, etc.).
+ */
+export type SlotKind = 'character' | 'furniture' | 'background';
+
+export function getSlotKind(slotId: string): SlotKind {
+  if (slotId === BACKGROUND_SLOT_KEY)           return 'background';
+  if (slotId.startsWith(FURNITURE_SLOT_PREFIX)) return 'furniture';
+  return 'character';
+}
+
+// ── SlotState ─────────────────────────────────────────────────────────────────────
+
 export interface SlotState {
   animationName: string;
   frameIndex: number;
   lastFrameTime: number;
-  /** Active row index resolved each frame via resolveActiveRow */
   activeRowIndex: number;
+  kind: SlotKind;
 }
 
 export interface CanvasAssetsRefs {
@@ -72,9 +86,7 @@ export interface CanvasAssetsRefs {
   slotStateRef: React.MutableRefObject<Map<string, SlotState>>;
 }
 
-// ── GameStateSnapshot ────────────────────────────────────────────────────────
-// Snapshot of game state for a single render frame.
-// Built in GameScreen via useMemo, passed down to canvas pipeline.
+// ── GameStateSnapshot ───────────────────────────────────────────────────────────
 
 export interface GameStateSnapshotPlayer {
   energy: number;
@@ -89,11 +101,11 @@ export interface GameStateSnapshotPlayer {
 }
 
 export interface GameStateSnapshotContext {
-  time: string;      // e.g. "morning", "evening"
+  time: string;
   day: number;
   hour: number;
-  timeSlot: string;  // raw backend value, e.g. "MORNING"
-  dayOfWeek: number; // 1=Mon … 7=Sun, computed as ((day - 1) % 7) + 1
+  timeSlot: string;
+  dayOfWeek: number;
 }
 
 export interface GameStateSnapshotNpcEntry {

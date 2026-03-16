@@ -1,8 +1,7 @@
 /**
  * useCanvasAssets — asset loading for the Canvas pipeline.
  *
- * Effect 1: loads background atlas image + sprite-atlas.json + furniture + character assets
- *           for the current location config.
+ * Effect 1: loads background + furniture + character assets for the current location.
  * Effect 2: delta-loads atlas images only for slots with explicit overrides in characterAnimations.
  */
 
@@ -18,13 +17,7 @@ export interface UseCanvasAssetsOptions {
   assetsRefs: CanvasAssetsRefs;
 }
 
-// ─── helpers ─────────────────────────────────────────────────────────────────
-
-export function atlasUrl(
-  category: string,
-  assetKey: string,
-  animationName: string,
-): string {
+export function atlasUrl(category: string, assetKey: string, animationName: string): string {
   return `/assets/${category}/${assetKey}/animations/${animationName}_atlas.png`;
 }
 
@@ -51,13 +44,7 @@ async function loadImage(url: string): Promise<HTMLImageElement | null> {
   });
 }
 
-// ─── hook ─────────────────────────────────────────────────────────────────────
-
-export function useCanvasAssets({
-  config,
-  characterAnimations,
-  assetsRefs,
-}: UseCanvasAssetsOptions): void {
+export function useCanvasAssets({ config, characterAnimations, assetsRefs }: UseCanvasAssetsOptions): void {
   const { imagesRef, atlasConfigsRef, slotStateRef } = assetsRefs;
 
   // Effect 1: full location load
@@ -71,43 +58,32 @@ export function useCanvasAssets({
       function enqueueImage(category: string, assetKey: string, animName: string): void {
         const url = atlasUrl(category, assetKey, animName);
         if (imagesRef.current.has(url)) return;
-        toLoad.push(
-          loadImage(url).then((img) => {
-            if (img && !cancelled) imagesRef.current.set(url, img);
-          }),
-        );
+        toLoad.push(loadImage(url).then((img) => { if (img && !cancelled) imagesRef.current.set(url, img); }));
       }
 
       function enqueueConfig(category: string, assetKey: string): void {
         const url = atlasConfigUrl(category, assetKey);
         if (atlasConfigsRef.current.has(url)) return;
-        toLoad.push(
-          fetchAtlasConfig(url).then((cfg) => {
-            if (cfg && !cancelled) atlasConfigsRef.current.set(url, cfg);
-          }),
-        );
+        toLoad.push(fetchAtlasConfig(url).then((cfg) => { if (cfg && !cancelled) atlasConfigsRef.current.set(url, cfg); }));
       }
 
-      // Background: single base animation + one sprite-atlas.json per location.
       enqueueImage('locations', config.locationAsset, config.backgroundAnimation);
       enqueueConfig('locations', config.locationAsset);
 
-      // Furniture
       for (const item of config.furniture) {
         const anim = item.animation ?? 'idle';
         enqueueImage('furniture', item.entityName, anim);
         enqueueConfig('furniture', item.entityName);
         if (!slotStateRef.current.has(item.id)) {
-          slotStateRef.current.set(item.id, { animationName: anim, frameIndex: 0, lastFrameTime: 0, activeRowIndex: 0 });
+          slotStateRef.current.set(item.id, { animationName: anim, frameIndex: 0, lastFrameTime: 0, activeRowIndex: 0, kind: 'furniture' });
         }
       }
 
-      // Characters
       for (const slot of config.characters) {
         enqueueImage('characters', slot.entityName, slot.defaultAnimation);
         enqueueConfig('characters', slot.entityName);
         if (!slotStateRef.current.has(slot.id)) {
-          slotStateRef.current.set(slot.id, { animationName: slot.defaultAnimation, frameIndex: 0, lastFrameTime: 0, activeRowIndex: 0 });
+          slotStateRef.current.set(slot.id, { animationName: slot.defaultAnimation, frameIndex: 0, lastFrameTime: 0, activeRowIndex: 0, kind: 'character' });
         }
       }
 
@@ -122,7 +98,6 @@ export function useCanvasAssets({
   useEffect(() => {
     if (!characterAnimations) return;
     let cancelled = false;
-
     const tasks: Array<Promise<void>> = [];
 
     for (const [slotId, animName] of Object.entries(characterAnimations)) {
@@ -130,11 +105,7 @@ export function useCanvasAssets({
       if (!slot) continue;
       const url = atlasUrl('characters', slot.entityName, animName);
       if (!imagesRef.current.has(url)) {
-        tasks.push(
-          loadImage(url).then((img) => {
-            if (img && !cancelled) imagesRef.current.set(url, img);
-          }),
-        );
+        tasks.push(loadImage(url).then((img) => { if (img && !cancelled) imagesRef.current.set(url, img); }));
       }
     }
 
