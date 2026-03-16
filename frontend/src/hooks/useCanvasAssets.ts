@@ -3,7 +3,7 @@
  *
  * Effect 1: loads background atlas image + sprite-atlas.json + furniture + character assets
  *           for the current location config.
- * Effect 2: delta-loads character animation atlases when characterAnimations changes.
+ * Effect 2: delta-loads atlas images only for slots with explicit overrides in characterAnimations.
  */
 
 import { useEffect } from 'react';
@@ -118,15 +118,16 @@ export function useCanvasAssets({
     return () => { cancelled = true; };
   }, [config]);
 
-  // Effect 2: delta-load character animations
+  // Effect 2: delta-load override animations (e.g. tanya post-action anim)
   useEffect(() => {
     if (!characterAnimations) return;
     let cancelled = false;
 
     const tasks: Array<Promise<void>> = [];
 
-    for (const slot of config.characters) {
-      const animName = characterAnimations[slot.id] ?? slot.defaultAnimation;
+    for (const [slotId, animName] of Object.entries(characterAnimations)) {
+      const slot = config.characters.find((s) => s.id === slotId);
+      if (!slot) continue;
       const url = atlasUrl('characters', slot.entityName, animName);
       if (!imagesRef.current.has(url)) {
         tasks.push(
