@@ -1,0 +1,307 @@
+/* ═══════════════════════════════════════════
+   Sidebar styles — sb-* BEM classes
+   Font: Press Start 2P (inherited)
+   Width: 280px (--gs-sidebar-w)
+   ═══════════════════════════════════════════ */
+
+/* ── Sidebar root ── */
+.sb {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  font-size: 7px;
+  line-height: 1.6;
+  color: var(--color-text);
+}
+
+/* ── Section ── */
+.sb-section {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sb-section__title {
+  font-size: 7px;
+  color: var(--color-accent);
+  letter-spacing: 0.05em;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  font-weight: normal;
+}
+
+/* ── Stats ── */
+.sb-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sb-stat {
+  display: grid;
+  grid-template-columns: 60px 1fr 24px;
+  align-items: center;
+  gap: 4px;
+}
+
+.sb-stat__label {
+  font-size: 6px;
+  color: var(--color-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb-stat__bar {
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.sb-stat__fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.sb-stat__value {
+  font-size: 6px;
+  color: var(--color-text);
+  text-align: right;
+}
+
+/* ── Actions ── */
+.sb-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sb-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px;
+  background: var(--color-border);
+  border: 1px solid transparent;
+  color: var(--color-text);
+  font-size: 6px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s;
+  gap: 4px;
+}
+
+.sb-action:hover:not(:disabled) {
+  background: var(--color-accent);
+  color: var(--color-panel);
+}
+
+.sb-action--disabled,
+.sb-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.sb-action__label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-action__cost {
+  flex: 0 0 auto;
+  color: var(--color-text-dim);
+  font-size: 6px;
+  white-space: nowrap;
+}
+
+/* ── Quests ── */
+.sb-quests {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sb-quest__name {
+  font-size: 6px;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-quest__progress {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sb-quest__bar {
+  flex: 1;
+  height: 5px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.sb-quest__fill {
+  height: 100%;
+  background: var(--color-accent);
+}
+
+.sb-quest__pct {
+  font-size: 6px;
+  color: var(--color-text-dim);
+  flex: 0 0 24px;
+  text-align: right;
+}
+
+/* ── Relationships ── */
+.sb-relationships {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sb-rel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+
+.sb-rel__name {
+  font-size: 6px;
+  color: var(--color-text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-hearts {
+  font-size: 7px;
+  color: var(--color-danger);
+  letter-spacing: -1px;
+  flex: 0 0 auto;
+}
+
+/* ── Pets ── */
+.sb-pets {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sb-pet__name {
+  font-size: 6px;
+  color: var(--color-accent);
+  margin-bottom: 3px;
+}
+
+.sb-pet__stats {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sb-pet-stat {
+  display: grid;
+  grid-template-columns: 52px 1fr 20px;
+  align-items: center;
+  gap: 3px;
+}
+
+.sb-pet-stat__label {
+  font-size: 5px;
+  color: var(--color-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb-pet-stat__bar {
+  height: 5px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.sb-pet-stat__fill {
+  height: 100%;
+}
+
+.sb-pet-stat__value {
+  font-size: 5px;
+  color: var(--color-text);
+  text-align: right;
+}
+
+/* ── NPC activities ── */
+.sb-npc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sb-npc {
+  padding: 3px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sb-npc:last-child { border-bottom: none; }
+
+.sb-npc__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 2px;
+}
+
+.sb-npc__name {
+  font-size: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-npc__status {
+  font-size: 5px;
+  flex: 0 0 auto;
+}
+
+.sb-npc__status--available { color: var(--color-success); }
+.sb-npc__status--busy      { color: var(--color-text-dim); }
+
+.sb-npc__meta,
+.sb-npc__mood {
+  font-size: 5px;
+  color: var(--color-text-dim);
+}
+
+/* ── Domain events ── */
+.sb-events {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sb-event__type {
+  font-size: 5px;
+  color: var(--color-warning);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-event__time {
+  font-size: 5px;
+  color: var(--color-text-dim);
+}
+
+/* ── Empty state ── */
+.sb-empty {
+  font-size: 6px;
+  color: var(--color-text-dim);
+  padding: 2px 0;
+}
