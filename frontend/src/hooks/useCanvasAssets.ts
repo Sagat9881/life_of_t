@@ -89,13 +89,12 @@ export function useCanvasAssets({
       }
 
       // Background: single base animation + one sprite-atlas.json per location.
-      // Row-level variants (time of day, relationships, etc.) live in sprite-atlas.json rows[].
       enqueueImage('locations', config.locationAsset, config.backgroundAnimation);
       enqueueConfig('locations', config.locationAsset);
 
       // Furniture
       for (const item of config.furniture) {
-        const anim = item.animation ?? item.animationKey ?? 'idle';
+        const anim = item.animation ?? 'idle';
         enqueueImage('furniture', item.entityName, anim);
         enqueueConfig('furniture', item.entityName);
         if (!slotStateRef.current.has(item.id)) {

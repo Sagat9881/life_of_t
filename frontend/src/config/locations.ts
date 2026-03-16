@@ -22,7 +22,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'sleep',
         label: 'Кровать',
-        animationKey: 'idle',
         animation: 'idle',
       },
       {
@@ -38,7 +37,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'work_freelance',
         label: 'Рабочий стол',
-        animationKey: 'idle',
         animation: 'idle',
       },
       {
@@ -54,7 +52,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'change_clothes',
         label: 'Шкаф',
-        animationKey: 'idle',
         animation: 'idle',
       },
       {
@@ -70,7 +67,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'read_book',
         label: 'Книжная полка',
-        animationKey: 'idle',
         animation: 'idle',
       },
       {
@@ -86,7 +82,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 1,
         actionCode: 'morning_yoga',
         label: 'Коврик для йоги',
-        animationKey: 'idle',
         animation: 'idle',
       },
     ],
@@ -125,7 +120,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'cook_meal',
         label: 'Плита',
-        animationKey: 'idle',
         animation: 'idle',
       },
       {
@@ -141,7 +135,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'eat_snack',
         label: 'Холодильник',
-        animationKey: 'idle',
         animation: 'idle',
       },
       {
@@ -157,7 +150,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'have_breakfast',
         label: 'Кухонный стол',
-        animationKey: 'idle',
         animation: 'idle',
       },
       {
@@ -173,7 +165,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'make_coffee',
         label: 'Кофемашина',
-        animationKey: 'idle',
         animation: 'idle',
       },
     ],
@@ -224,7 +215,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'garden_work',
         label: 'Грядки',
-        animationKey: 'idle',
         animation: 'idle',
       },
       {
@@ -240,7 +230,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'bbq_with_family',
         label: 'Мангал',
-        animationKey: 'idle',
         animation: 'idle',
       },
       {
@@ -256,7 +245,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'rest_in_hammock',
         label: 'Гамак',
-        animationKey: 'idle',
         animation: 'idle',
       },
     ],
@@ -307,7 +295,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'watch_tv_with_parents',
         label: 'Диван',
-        animationKey: 'idle',
         animation: 'idle',
       },
       {
@@ -323,7 +310,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'family_dinner',
         label: 'Обеденный стол',
-        animationKey: 'idle',
         animation: 'idle',
       },
     ],
@@ -386,7 +372,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'campfire_stories',
         label: 'Костёр',
-        animationKey: 'idle',
         animation: 'idle',
       },
       {
@@ -402,7 +387,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'sleep_in_tent',
         label: 'Палатка',
-        animationKey: 'idle',
         animation: 'idle',
       },
       {
@@ -418,7 +402,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 1,
         actionCode: 'sports_day',
         label: 'Спортплощадка',
-        animationKey: 'idle',
         animation: 'idle',
       },
     ],
@@ -457,7 +440,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'work_office',
         label: 'Рабочее место',
-        animationKey: 'idle',
         animation: 'idle',
       },
       {
@@ -473,7 +455,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'team_meeting',
         label: 'Переговорная',
-        animationKey: 'idle',
         animation: 'idle',
       },
       {
@@ -489,7 +470,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'office_coffee',
         label: 'Кофе-поинт',
-        animationKey: 'idle',
         animation: 'idle',
       },
     ],
@@ -540,7 +520,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'sit_in_park',
         label: 'Скамейка',
-        animationKey: 'idle',
         animation: 'idle',
       },
       {
@@ -556,7 +535,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 1,
         actionCode: 'go_jogging',
         label: 'Беговая дорожка',
-        animationKey: 'idle',
         animation: 'idle',
       },
       {
@@ -572,7 +550,6 @@ const LOCATIONS: Record<string, LocationConfig> = {
         zOrder: 2,
         actionCode: 'buy_ice_cream',
         label: 'Мороженое',
-        animationKey: 'idle',
         animation: 'idle',
       },
     ],

@@ -12,7 +12,6 @@ export interface FurniturePlacement {
   readonly flipX?: boolean;
   readonly actionCode?: string;
   readonly label?: string;
-  readonly animationKey?: string;
   readonly animation: string;
 }
 
