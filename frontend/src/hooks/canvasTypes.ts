@@ -91,7 +91,6 @@ export interface CanvasAssetsRefs {
 export interface GameStateSnapshotPlayer {
   energy: number;
   mood: number;
-  hunger: number;
   health: number;
   money: number;
   stress: number;
