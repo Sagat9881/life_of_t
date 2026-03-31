@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Block manifest for narrative block: conflicts
+  Version: 1.0
+
+  Covers conflict entities. To add a new conflict:
+    1. Create the spec XML.
+    2. Add an <entry> here. No code change needed.
+-->
+<manifest block-id="conflicts" version="1.0">
+  <!-- <entry entity-id="alarm_clock_morning"
+             entity-type="conflict"
+             spec-path="narrative/conflicts/alarm_clock_morning/spec.xml"/> -->
+</manifest>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Block manifest for narrative block: world-events
+  Version: 1.0
+
+  Lists world-event entities. To add a new world event:
+    1. Create the XML spec.
+    2. Add an <entry> here. No code change needed.
+-->
+<manifest block-id="world-events" version="1.0">
+  <!-- <entry entity-id="spring_festival"
+             entity-type="world-event"
+             spec-path="narrative/world-events/spring_festival/spec.xml"/> -->
+</manifest>

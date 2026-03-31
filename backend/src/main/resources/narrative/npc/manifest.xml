@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Block manifest for narrative block: npc
+  Version: 1.0
+
+  Lists all named and filler NPC entities.
+  To add a new NPC spec:
+    1. Create the XML at the spec-path.
+    2. Add an <entry> here. No code change needed.
+-->
+<manifest block-id="npc" version="1.0">
+  <!-- <entry entity-id="aijan"
+             entity-type="npc"
+             spec-path="narrative/npc-behavior/aijan.xml"/> -->
+</manifest>

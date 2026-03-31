@@ -1,9 +1,6 @@
 package ru.lifegame.backend.infrastructure.spec;
 
-import ru.lifegame.backend.domain.narrative.spec.NarrativeSpec;
-import ru.lifegame.backend.domain.narrative.spec.SpecDeserializer;
-import ru.lifegame.backend.domain.narrative.spec.SpecLoadException;
-import ru.lifegame.backend.domain.narrative.spec.SpecPath;
+import ru.lifegame.backend.domain.narrative.spec.*;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -15,119 +12,160 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Generic narrative spec loader.
+ * Generic spec loader.
  *
- * <p>Loads one or many {@link NarrativeSpec} instances from classpath resources
- * described by a {@link SpecPath}. All file discovery and parsing are delegated
- * to an injected {@link SpecDeserializer} — this class contains zero knowledge
- * of concrete spec types, entity names or XML structure.
+ * <p>Supports two loading strategies:
+ * <ol>
+ *   <li><b>SpecPath-based</b> (original) — loads all XMLs matching a classpath glob
+ *       (e.g. {@code classpath:narrative/npc-behavior/*.xml}).
+ *       Preserved for backward compatibility.</li>
+ *   <li><b>Manifest-driven</b> (TASK-BE-016) — receives a {@link BlockManifest}
+ *       and loads each {@link SpecEntry#specPath()} individually from the classpath.
+ *       This is the preferred strategy: no directory traversal, no assumptions
+ *       about subdirectory structure (java-developer-skill.md §5.5).</li>
+ * </ol>
  *
- * <h3>Key design invariants (java-developer-skill.md §5.1, §7)</h3>
- * <ul>
- *   <li>No {@code switch/if} on entity names, block IDs or file names.</li>
- *   <li>No hardcoded classpath strings — all paths come from {@link SpecPath}.</li>
- *   <li>Deserializer is provided via constructor (Dependency Injection).</li>
- *   <li>Lives in {@code infrastructure/spec/} per ADR-001 (was incorrectly in domain).</li>
- * </ul>
+ * <p>The deserializer is injected — no coupling to XML, YAML, or any other format.
  *
- * <h3>Usage examples</h3>
- * <pre>{@code
- * // Load all NPC specs:
- * SpecLoader<NpcSpec> npcLoader = new SpecLoader<>(new XmlNpcSpecDeserializer());
- * List<NpcSpec> npcs = npcLoader.loadAll(SpecPath.allIn("npc-behavior"));
+ * <p>Ref: java-developer-skill.md §5.5, §7. TASK-BE-015, TASK-BE-016.
  *
- * // Load a single quest spec by name:
- * SpecLoader<QuestSpec> questLoader = new SpecLoader<>(new XmlQuestSpecDeserializer());
- * QuestSpec quest = questLoader.load(SpecPath.single("quests", "quest_wedding"));
- * }</pre>
- *
- * @param <T> concrete spec type, must implement {@link NarrativeSpec}
+ * @param <T> type of the spec produced by the deserializer; must implement
+ *            {@link NarrativeSpec}
  */
 public class SpecLoader<T extends NarrativeSpec> {
+
+    private static final String CLASSPATH_PREFIX = "classpath:narrative/";
 
     private final SpecDeserializer<T> deserializer;
     private final PathMatchingResourcePatternResolver resolver;
 
-    /**
-     * Primary constructor — deserializer is injected, no hidden dependencies.
-     *
-     * @param deserializer type-specific XML deserializer; must not be null
-     */
     public SpecLoader(SpecDeserializer<T> deserializer) {
         this.deserializer = Objects.requireNonNull(deserializer, "deserializer must not be null");
-        this.resolver = new PathMatchingResourcePatternResolver();
+        this.resolver     = new PathMatchingResourcePatternResolver();
     }
 
-    /**
-     * Loads exactly one spec from a single-file {@link SpecPath}.
-     *
-     * @param path must point to a single file (no wildcards)
-     * @return the loaded spec
-     * @throws SpecLoadException if the file is not found, or parsing fails,
-     *                           or the file contains zero or multiple specs
-     */
-    public T load(SpecPath path) {
-        Objects.requireNonNull(path, "path must not be null");
-        Resource[] resources = resolve(path);
-        if (resources.length == 0) {
-            throw new SpecLoadException(path.classpathPattern(),
-                    "No resource found for pattern: " + path.classpathPattern());
-        }
-        if (resources.length > 1) {
-            throw new SpecLoadException(path.classpathPattern(),
-                    "Expected exactly 1 resource but found " + resources.length
-                    + " for pattern: " + path.classpathPattern()
-                    + ". Use loadAll() for wildcard paths.");
-        }
-        List<T> specs = readResource(resources[0]);
-        if (specs.isEmpty()) {
-            throw new SpecLoadException(path.classpathPattern(),
-                    "File parsed successfully but contained no spec elements.");
-        }
-        if (specs.size() > 1) {
-            throw new SpecLoadException(path.classpathPattern(),
-                    "Expected 1 spec in file but found " + specs.size()
-                    + ". Use loadAll() if the file contains multiple specs.");
-        }
-        return specs.get(0);
+    /** Test/DI constructor with injectable resolver. */
+    public SpecLoader(SpecDeserializer<T> deserializer,
+                      PathMatchingResourcePatternResolver resolver) {
+        this.deserializer = Objects.requireNonNull(deserializer, "deserializer must not be null");
+        this.resolver     = Objects.requireNonNull(resolver, "resolver must not be null");
     }
 
+    // ── SpecPath-based (original) API ─────────────────────────────────────────
+
     /**
-     * Loads all specs matching the classpath pattern in {@link SpecPath}.
+     * Loads all specs matching the classpath pattern derived from {@code path}.
+     * Pattern: {@code classpath:narrative/<blockId>/*.xml}
+     * (or {@code classpath:narrative/<blockId>/<entityName>.xml} for single).
      *
-     * @param path may contain wildcards (e.g. {@code *.xml})
-     * @return non-null, possibly empty list of all loaded specs
-     * @throws SpecLoadException if any individual file fails to parse
+     * @param path SpecPath describing block and optional entity name
+     * @return all specs found; empty list if no resources match
      */
     public List<T> loadAll(SpecPath path) {
-        Objects.requireNonNull(path, "path must not be null");
-        Resource[] resources = resolve(path);
-        List<T> result = new ArrayList<>(resources.length);
-        for (Resource resource : resources) {
-            result.addAll(readResource(resource));
+        String pattern = buildPattern(path);
+        Resource[] resources;
+        try {
+            resources = resolver.getResources(pattern);
+        } catch (IOException e) {
+            throw new SpecLoadException(pattern,
+                    "Failed to resolve classpath resources for pattern: " + pattern, e);
+        }
+        List<T> result = new ArrayList<>();
+        for (Resource r : resources) {
+            result.addAll(loadResource(r));
         }
         return List.copyOf(result);
     }
 
-    // ── private helpers ──────────────────────────────────────────────────────
-
-    private Resource[] resolve(SpecPath path) {
-        try {
-            return resolver.getResources(path.classpathPattern());
-        } catch (IOException e) {
-            throw new SpecLoadException(path.classpathPattern(),
-                    "Failed to resolve classpath pattern: " + path.classpathPattern(), e);
-        }
+    /**
+     * Loads a single spec. Throws {@link SpecLoadException} if not exactly one
+     * resource matches or if the deserializer returns != 1 spec.
+     */
+    public T load(SpecPath path) {
+        if (!path.isSingle())
+            throw new IllegalArgumentException(
+                    "load(SpecPath) requires a single-entity path; use loadAll for wildcards");
+        List<T> all = loadAll(path);
+        if (all.isEmpty())
+            throw new SpecLoadException(path.toString(), "No spec found at: " + path);
+        if (all.size() > 1)
+            throw new SpecLoadException(path.toString(),
+                    "Expected 1 spec but found " + all.size() + " at: " + path);
+        return all.get(0);
     }
 
-    private List<T> readResource(Resource resource) {
-        String name = resource.getFilename() != null ? resource.getFilename() : resource.getDescription();
+    // ── Manifest-driven API (TASK-BE-016) ─────────────────────────────────────
+
+    /**
+     * Loads all specs listed in the given {@link BlockManifest}.
+     *
+     * <p>Each {@link SpecEntry#specPath()} is resolved as a classpath resource:
+     * {@code classpath:<specPath>}.
+     * No directory scanning occurs — the manifest is the sole source of truth
+     * about which entities exist (java-developer-skill.md §5.5).
+     *
+     * @param manifest the manifest describing the block
+     * @return all specs for the block; order matches manifest entry order
+     */
+    public List<T> loadAll(BlockManifest manifest) {
+        Objects.requireNonNull(manifest, "manifest must not be null");
+        List<T> result = new ArrayList<>(manifest.size());
+        for (SpecEntry entry : manifest.entries()) {
+            String classpathPath = CLASSPATH_PREFIX.endsWith("/")
+                    ? "classpath:" + entry.specPath()
+                    : "classpath:" + entry.specPath();
+            Resource resource = resolver.getResource(classpathPath);
+            if (!resource.exists())
+                throw new SpecLoadException(entry.specPath(),
+                        "Spec file declared in manifest not found on classpath: "
+                        + entry.specPath() + " (entity: " + entry.entityId() + ", block: "
+                        + manifest.blockId() + ")");
+            result.addAll(loadResource(resource));
+        }
+        return List.copyOf(result);
+    }
+
+    /**
+     * Loads a single entity by its {@link SpecEntry}.
+     *
+     * @param entry  the manifest entry pointing to the spec file
+     * @return the loaded spec
+     */
+    public T load(SpecEntry entry) {
+        Objects.requireNonNull(entry, "entry must not be null");
+        Resource resource = resolver.getResource("classpath:" + entry.specPath());
+        if (!resource.exists())
+            throw new SpecLoadException(entry.specPath(),
+                    "Spec file not found on classpath: " + entry.specPath());
+        List<T> all = loadResource(resource);
+        if (all.isEmpty())
+            throw new SpecLoadException(entry.specPath(),
+                    "Deserializer returned empty list for: " + entry.specPath());
+        return all.get(0);
+    }
+
+    // ── shared internals ──────────────────────────────────────────────────────
+
+    private List<T> loadResource(Resource resource) {
+        String name = describeResource(resource);
         try (InputStream is = resource.getInputStream()) {
             return deserializer.deserialize(is, name);
         } catch (SpecLoadException sle) {
             throw sle;
-        } catch (Exception e) {
-            throw new SpecLoadException(name, "Unexpected error reading resource: " + name, e);
+        } catch (IOException e) {
+            throw new SpecLoadException(name, "Cannot open spec resource: " + name, e);
         }
+    }
+
+    private String buildPattern(SpecPath path) {
+        if (path.isSingle()) {
+            return "classpath:narrative/" + path.blockId() + "/" + path.entityName() + ".xml";
+        }
+        return "classpath:narrative/" + path.blockId() + "/*.xml";
+    }
+
+    private String describeResource(Resource resource) {
+        try { return resource.getURI().toString(); }
+        catch (IOException e) { return resource.getDescription(); }
     }
 }
