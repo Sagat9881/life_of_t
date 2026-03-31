@@ -5,23 +5,11 @@ import java.util.List;
 /**
  * Domain model for a narrative event loaded from narrative/events/*.xml.
  *
- * <p>Implements {@link NarrativeSpec} so that {@code SpecLoader<EventSpec>}
- * can operate generically without switch/if on spec types.
+ * <p>Now implements {@link NarrativeSpec} directly.
+ * {@link #getId()} returns the XML {@code id} attribute.
+ * {@link #getBlockId()} returns the fixed block identifier {@code "events"}.
  *
- * <p>Structure mirrors the XML contract:
- * <pre>
- *   &lt;event id="..." type="RANDOM|TRIGGERED|SEASONAL"&gt;
- *     &lt;meta&gt;...&lt;/meta&gt;
- *     &lt;conditions&gt;...&lt;/conditions&gt;
- *     &lt;dialogue&gt;...&lt;/dialogue&gt;
- *     &lt;options&gt;...&lt;/options&gt;
- *   &lt;/event&gt;
- * </pre>
- *
- * <p>Every event has at least one option (even if it is just a single "Ok" button).
- * Options carry their own effects — stat/relationship changes applied on choice.
- *
- * <p>Ref: java-developer-skill.md §3.1, §7, TASK-BE-018.
+ * <p>Ref: java-developer-skill.md §7. TASK-BE-018.
  */
 public record EventSpec(
         String id,
@@ -31,11 +19,15 @@ public record EventSpec(
         List<OptionSpec> options
 ) implements NarrativeSpec {
 
+    // ── NarrativeSpec ─────────────────────────────────────────────────────────
+
     @Override
     public String getId() { return id; }
 
     @Override
     public String getBlockId() { return "events"; }
+
+    // ── nested records ────────────────────────────────────────────────────────
 
     /** Core metadata block. */
     public record EventMeta(
@@ -49,8 +41,6 @@ public record EventSpec(
     /**
      * Trigger condition.
      * type:  time_of_day | stat_min | location | trigger | weather | season
-     * stat:  stat name for stat_min conditions (nullable for non-stat types)
-     * value: the comparison value
      */
     public record ConditionSpec(String type, String stat, String value) {
         public int intValue() {
@@ -62,20 +52,10 @@ public record EventSpec(
     /** A single dialogue line rendered before the choice buttons. */
     public record DialogueLine(String speaker, String textRu) {}
 
-    /**
-     * One choice presented to the player.
-     * id:      machine-readable code sent back on selection
-     * labelRu: button label shown to the player
-     * effects: stat/relationship changes applied when this option is chosen
-     */
+    /** One choice presented to the player. */
     public record OptionSpec(String id, String labelRu, List<EffectSpec> effects) {}
 
-    /**
-     * A single effect inside an option.
-     * type:   "stat-change" | "relationship-change"
-     * target: stat name (for stat-change) OR NPC id (for relationship-change)
-     * value:  numeric string, e.g. "+10" or "-5"
-     */
+    /** A single effect inside an option. */
     public record EffectSpec(String type, String target, String value) {
         public int intValue() {
             try { return Integer.parseInt(value); }

@@ -8,10 +8,13 @@ import java.util.Map;
 /**
  * Domain model for an NPC loaded from narrative/npc-behavior/*.xml.
  *
- * <p>Implements {@link NarrativeSpec} so that {@code SpecLoader<NpcSpec>}
- * can operate generically without switch/if on spec types.
+ * <p>Now implements {@link NarrativeSpec} directly, removing the need for
+ * {@code NpcSpecWrapper} in new code.
+ * {@link #getId()} returns the XML {@code id} attribute.
+ * {@link #getBlockId()} returns the fixed block identifier {@code "npc-behavior"}.
  *
- * <p>Ref: java-developer-skill.md §3.1, §7 (Domain — no outbound deps to infra),
+ * <p>Ref: java-developer-skill.md §7 (domain has no outbound dependencies;
+ *         NarrativeSpec is a domain interface — no violation).
  *         TASK-BE-018.
  */
 public record NpcSpec(
@@ -29,11 +32,15 @@ public record NpcSpec(
     List<String> questLines
 ) implements NarrativeSpec {
 
+    // ── NarrativeSpec ─────────────────────────────────────────────────────────
+
     @Override
     public String getId() { return id; }
 
     @Override
     public String getBlockId() { return "npc-behavior"; }
+
+    // ── helpers ───────────────────────────────────────────────────────────────
 
     public boolean isNamed()  { return "named".equals(type); }
     public boolean isFiller() { return "filler".equals(type); }
@@ -46,7 +53,6 @@ public record NpcSpec(
 
     /**
      * Mood override actions derived from reactions with pattern-type "mood_override".
-     * Falls back to safe defaults when XML parser has not populated new fields.
      */
     public List<MoodOverrideAction> moodOverrideActions() {
         return reactions.stream()
@@ -60,6 +66,8 @@ public record NpcSpec(
                 ))
                 .toList();
     }
+
+    // ── nested records ────────────────────────────────────────────────────────
 
     public record ScheduleSlot(int start, int end, String activity, String location, String animation) {
         public int startHour()       { return start; }
@@ -78,7 +86,8 @@ public record NpcSpec(
             List<ConditionSpec> conditions,
             List<OptionSpec> options) {}
 
-    public record OptionSpec(String optionId, String text, String result, int energy, int stress, int mood, int money, String relationshipTarget, int relationshipDelta) {}
+    public record OptionSpec(String optionId, String text, String result, int energy, int stress,
+                             int mood, int money, String relationshipTarget, int relationshipDelta) {}
 
     public record ReactionSpec(
             String triggerId,
@@ -94,5 +103,6 @@ public record NpcSpec(
 
     public record EffectSpec(String target, String stat, int delta) {}
     public record ConditionSpec(String type, String target, String operator, String value) {}
-    public record MoodOverrideAction(String triggerAxis, String activityId, String locationId, String animationKey, int durationHours) {}
+    public record MoodOverrideAction(String triggerAxis, String activityId, String locationId,
+                                     String animationKey, int durationHours) {}
 }

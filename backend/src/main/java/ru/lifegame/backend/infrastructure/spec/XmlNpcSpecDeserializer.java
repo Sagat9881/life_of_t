@@ -12,11 +12,14 @@ import java.util.List;
  * Adapter: wraps {@link NpcSpecParser} to implement
  * {@link SpecDeserializer}{@code <NpcSpec>}.
  *
- * <p>Now that {@link NpcSpec} directly implements
- * {@link ru.lifegame.backend.domain.narrative.spec.NarrativeSpec} (TASK-BE-018),
- * no wrapper record is needed — the spec itself is the {@code NarrativeSpec}.
+ * <p>Since TASK-BE-018 {@link NpcSpec} implements {@link
+ * ru.lifegame.backend.domain.narrative.spec.NarrativeSpec} directly,
+ * so this deserializer works with {@code NpcSpec} without any wrapper.
  *
- * <p>Ref: java-developer-skill.md §7, TASK-BE-018.
+ * <p>Uses {@link NpcSpecParser} from {@code infrastructure/spec/parser/}
+ * (moved from domain per TASK-BE-026).
+ *
+ * <p>Ref: java-developer-skill.md §7.
  */
 public class XmlNpcSpecDeserializer implements SpecDeserializer<NpcSpec> {
 

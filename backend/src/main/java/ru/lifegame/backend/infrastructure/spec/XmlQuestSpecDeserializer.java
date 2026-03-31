@@ -1,8 +1,8 @@
 package ru.lifegame.backend.infrastructure.spec;
 
+import ru.lifegame.backend.domain.narrative.spec.QuestSpec;
 import ru.lifegame.backend.domain.narrative.spec.SpecDeserializer;
 import ru.lifegame.backend.domain.narrative.spec.SpecLoadException;
-import ru.lifegame.backend.domain.narrative.spec.QuestSpec;
 import ru.lifegame.backend.infrastructure.spec.parser.QuestSpecParser;
 
 import java.io.InputStream;
@@ -12,11 +12,13 @@ import java.util.List;
  * Adapter: wraps {@link QuestSpecParser} to implement
  * {@link SpecDeserializer}{@code <QuestSpec>}.
  *
- * <p>Now that {@link QuestSpec} directly implements
- * {@link ru.lifegame.backend.domain.narrative.spec.NarrativeSpec} (TASK-BE-018),
- * no wrapper record is needed.
+ * <p>Since TASK-BE-018 {@link QuestSpec} implements {@link
+ * ru.lifegame.backend.domain.narrative.spec.NarrativeSpec} directly.
  *
- * <p>Ref: java-developer-skill.md §7, TASK-BE-018.
+ * <p>Uses {@link QuestSpecParser} from {@code infrastructure/spec/parser/}
+ * (moved from domain per TASK-BE-026).
+ *
+ * <p>Ref: java-developer-skill.md §7.
  */
 public class XmlQuestSpecDeserializer implements SpecDeserializer<QuestSpec> {
 

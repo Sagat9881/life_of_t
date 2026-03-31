@@ -15,18 +15,19 @@ import java.io.InputStream;
 import java.util.*;
 
 /**
- * Parses a single NPC XML file into an {@link NpcSpec}.
+ * Parses a single narrative/npc-behavior/*.xml file into an {@link NpcSpec}.
  *
  * <p>Moved from {@code domain/narrative/parser/} to {@code infrastructure/spec/parser/}
- * because XML/DOM parsing is an infrastructure concern, not domain logic.
+ * as part of TASK-BE-026. XML parsing is an infrastructure concern and must not
+ * reside in the domain layer (java-developer-skill.md §7).
  *
- * <p>Ref: java-developer-skill.md §7 (Infrastructure implements Domain interfaces),
- *         ADR-001, TASK-BE-026.
+ * <p>The class in {@code domain/narrative/parser/NpcSpecParser} is now
+ * {@code @Deprecated} and delegates here.
  *
  * <p>Two entry points:
  * <ul>
  *   <li>{@link #parse(InputStream, String)} — preferred; works inside JARs</li>
- *   <li>{@link #parse(File)} — convenience overload for unit tests</li>
+ *   <li>{@link #parse(File)} — delegates to the above; kept for tests</li>
  * </ul>
  */
 public class NpcSpecParser {
@@ -62,7 +63,7 @@ public class NpcSpecParser {
         Map<String, Integer> personality = parseTraits(root, "personality");
         Map<String, Integer> moodInitial = parseMoodInitial(root);
         boolean memoryEnabled = "true".equals(getAttributeFromChild(root, "memory", "enabled"));
-        int     shortTermSize = parseIntAttribute(root, "memory", "short-term-size", 10);
+        int shortTermSize     = parseIntAttribute(root, "memory", "short-term-size", 10);
 
         List<ScheduleSlot> schedule  = parseSchedule(root);
         List<ActionSpec>   actions   = parseActions(root);

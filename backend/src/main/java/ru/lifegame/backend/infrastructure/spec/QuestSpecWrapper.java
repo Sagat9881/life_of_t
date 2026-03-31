@@ -6,14 +6,18 @@ import ru.lifegame.backend.domain.narrative.spec.QuestSpec;
 import java.util.Objects;
 
 /**
- * Transitional wrapper that makes {@link QuestSpec} comply with {@link NarrativeSpec}.
+ * Transitional wrapper — kept for backward compatibility with callers that
+ * were written before {@link QuestSpec} implemented {@link NarrativeSpec} directly.
  *
- * <p>Symmetric to {@link NpcSpecWrapper}. Once TASK-BE-018 adds
- * {@code implements NarrativeSpec} to {@code QuestSpec}, this wrapper is
- * superseded and can be deleted.
+ * <p><b>Deprecated:</b> since TASK-BE-018 {@link QuestSpec} is itself a
+ * {@link NarrativeSpec}. Prefer using {@code QuestSpec} directly.
+ * This class will be removed once all call sites are migrated.
  *
  * <p>Ref: java-developer-skill.md §7, ADR-001 TASK-BE-018.
+ *
+ * @deprecated Use {@link QuestSpec} directly — it now implements {@link NarrativeSpec}.
  */
+@Deprecated(since = "TASK-BE-018", forRemoval = true)
 public record QuestSpecWrapper(QuestSpec spec, String blockId) implements NarrativeSpec {
 
     public QuestSpecWrapper {
@@ -21,18 +25,9 @@ public record QuestSpecWrapper(QuestSpec spec, String blockId) implements Narrat
         Objects.requireNonNull(blockId, "blockId must not be null");
     }
 
-    @Override
-    public String getId() {
-        return spec.id();
-    }
+    @Override public String getId()      { return spec.getId(); }
+    @Override public String getBlockId() { return spec.getBlockId(); }
 
-    @Override
-    public String getBlockId() {
-        return blockId;
-    }
-
-    /** Convenience delegate — returns the underlying {@link QuestSpec}. */
-    public QuestSpec unwrap() {
-        return spec;
-    }
+    /** Returns the underlying {@link QuestSpec}. */
+    public QuestSpec unwrap() { return spec; }
 }
