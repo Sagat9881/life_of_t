@@ -2,11 +2,26 @@ package ru.lifegame.backend.domain.narrative.spec;
 
 import java.util.List;
 
+/**
+ * Domain model for a quest loaded from narrative/quests/*.xml.
+ *
+ * <p>Implements {@link NarrativeSpec} so that {@code SpecLoader<QuestSpec>}
+ * can operate generically without switch/if on spec types.
+ *
+ * <p>Ref: java-developer-skill.md §3.1, §7, TASK-BE-018.
+ */
 public record QuestSpec(
     String id,
     QuestMeta meta,
     List<StepSpec> steps
-) {
+) implements NarrativeSpec {
+
+    @Override
+    public String getId() { return id; }
+
+    @Override
+    public String getBlockId() { return "quests"; }
+
     public record QuestMeta(
         String title,
         String description,
