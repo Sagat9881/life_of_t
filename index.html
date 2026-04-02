@@ -187,7 +187,6 @@
     .sk-bar   { height:8px;  width:100%; margin-bottom: var(--space-2); }
     .sk-meta  { height:10px; width:50%; }
 
-    /* ===== DRILLDOWN PANEL — TASK-FE-051 ===== */
     .drilldown-wrapper {
       overflow: hidden;
       max-height: 0;
@@ -332,7 +331,7 @@
     <div class="error-icon">!</div>
     <div>
       <div class="error-title">[ERROR] Не удалось загрузить metrics.json</div>
-      <div class="error-msg" id="error-detail">Файл недоступен или не существует. Убедитесь, что metrics.json находится рядом с index.html. Ниже отображаются демо-данные.</div>
+      <div class="error-msg" id="error-detail">Файл недоступен или не существует.</div>
     </div>
   </div>
 
@@ -349,7 +348,6 @@
     <div class="skeleton-card" aria-hidden="true"><div class="sk sk-label"></div><div class="sk sk-value"></div><div class="sk sk-bar"></div><div class="sk sk-meta"></div></div>
   </div>
 
-  <!-- Drilldown panel — inserted by JS after cards-grid -->
   <div class="drilldown-wrapper" id="drilldown-wrapper" role="region" aria-label="Детали метрики" aria-live="polite">
     <div class="drilldown-panel" id="drilldown-panel"></div>
   </div>
@@ -362,7 +360,7 @@
 </div>
 
 <script>
-// ── Theme toggle ──────────────────────────────────────────────────────────────
+// ── Theme toggle ───────────────────────────────────────────────────────────────────
 (function () {
   const root = document.documentElement;
   const btn  = document.querySelector('[data-theme-toggle]');
@@ -375,7 +373,95 @@
   btn?.addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark'; apply(theme); });
 })();
 
-// ── Shared helpers ────────────────────────────────────────────────────────────
+// ── Normalizer ──────────────────────────────────────────────────────────────────
+// Converts real metrics.json structure to UI internal model.
+// Real shape:
+//   { generated_at, tasks:{todo,in_progress,review,done,blocked,total},
+//     backend:{domain,application,infrastructure,presentation,total},
+//     narrative:{quests,npcs,world_events,conflicts,total},
+//     ci:{status,conclusion,total_runs} }
+// UI internal model:
+//   { env, build:{status,id,ts}, tests:{passed,failed,total},
+//     coverage:{pct}, assets:{generated,total,errors},
+//     narrative:{specs,implemented,pending} }
+function normalizeMetrics(raw) {
+  // CI → build
+  const ci = raw.ci ?? {};
+  const ciOk = ci.status === 'ok' || ci.conclusion === 'success';
+
+  // tasks → tests proxy (done = passed, blocked = failed)
+  const tasks = raw.tasks ?? {};
+  const tasksDone    = tasks.done    ?? 0;
+  const tasksBlocked = tasks.blocked ?? 0;
+  const tasksTotal   = tasks.total   ?? 0;
+
+  // backend → coverage proxy (lines of code as coverage indicator)
+  const backend = raw.backend ?? {};
+  const backendTotal = backend.total ?? 0;
+  // Coverage: ratio of domain+application ("core") to total backend files
+  const backendCore = (backend.domain ?? 0) + (backend.application ?? 0);
+  const covPct = backendTotal > 0 ? Math.min(100, (backendCore / backendTotal) * 100) : 0;
+
+  // narrative → narrative specs
+  const narr = raw.narrative ?? {};
+  const narrTotal = narr.total ?? 0;
+  // quests+npcs treated as "implemented", world_events+conflicts as "pending"
+  const narrImpl    = (narr.quests ?? 0) + (narr.npcs ?? 0);
+  const narrPending = (narr.world_events ?? 0) + (narr.conflicts ?? 0);
+
+  // backend layers → assets proxy
+  const backendPresentation = backend.presentation ?? 0;
+  const backendInfra        = backend.infrastructure ?? 0;
+  const assetsGenerated     = backendPresentation + backendInfra;
+  const assetsTotal         = backendTotal;
+
+  return {
+    env:       raw.env ?? 'ci',
+    _raw:      raw,
+    build: {
+      status:     ciOk ? 'ok' : (ci.status ?? 'unknown'),
+      id:         ci.total_runs != null ? `run-${ci.total_runs}` : '—',
+      ts:         raw.generated_at ?? null,
+      branch:     'main',
+      trigger:    'push',
+      conclusion: ci.conclusion ?? '—',
+    },
+    tests: {
+      passed:   tasksDone,
+      failed:   tasksBlocked,
+      total:    tasksTotal,
+      skipped:  tasks.review ?? 0,
+      suites:   Object.keys(tasks).length,
+      _todo:    tasks.todo ?? 0,
+      _in_progress: tasks.in_progress ?? 0,
+    },
+    coverage: {
+      pct:   parseFloat(covPct.toFixed(1)),
+      lines: covPct,
+      _backendTotal: backendTotal,
+      _domain:       backend.domain ?? 0,
+      _application:  backend.application ?? 0,
+      _infra:        backendInfra,
+      _presentation: backendPresentation,
+    },
+    assets: {
+      generated: assetsGenerated,
+      total:     assetsTotal,
+      errors:    0,
+      warnings:  0,
+    },
+    narrative: {
+      specs:       narrTotal,
+      implemented: narrImpl,
+      pending:     narrPending,
+      inProgress:  0,
+      quests:      narr.quests ?? 0,
+      npc:         narr.npcs   ?? 0,
+    },
+  };
+}
+
+// ── Shared helpers ─────────────────────────────────────────────────────────────────
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -396,7 +482,7 @@ function getStatus(val, thresholds, inverted = false) {
   }
 }
 
-// ── Card builder ──────────────────────────────────────────────────────────────
+// ── Card builder ──────────────────────────────────────────────────────────────────
 function buildCard({ id, label, value, pct, status, meta, pctLabel = '' }) {
   const el   = document.createElement('article');
   const pct2 = Math.min(100, Math.max(0, pct));
@@ -427,73 +513,80 @@ function buildCard({ id, label, value, pct, status, meta, pctLabel = '' }) {
   return el;
 }
 
-// ── Render 5 cards ────────────────────────────────────────────────────────────
+// ── Render 5 cards ─────────────────────────────────────────────────────────────────
 let _currentMetrics = null;
 let _activeCardId   = null;
 
-function renderCards(m) {
+function renderCards(raw) {
+  // Normalize raw metrics.json to UI model
+  const m = (raw.build !== undefined) ? raw : normalizeMetrics(raw);
   _currentMetrics = m;
   const container = document.getElementById('cards-container');
   container.innerHTML = '';
 
+  // Card 1 — Build Status (CI)
   const buildOk = m.build?.status === 'ok';
   container.appendChild(buildCard({
     id: 'build', label: 'Build Status',
-    value:  buildOk ? '[ OK ]' : '[FAIL]',
-    pct:    buildOk ? 100 : 0,
-    status: buildOk ? 'good' : 'error',
-    meta:   `#${m.build?.id ?? '—'}  ·  ${fmtTs(m.build?.ts)}`,
+    value:    buildOk ? '[ OK ]' : '[FAIL]',
+    pct:      buildOk ? 100 : 0,
+    status:   buildOk ? 'good' : 'error',
+    meta:     `#${m.build?.id ?? '—'}  ·  ${fmtTs(m.build?.ts)}`,
     pctLabel: 'CI/CD',
   }));
 
+  // Card 2 — Tasks (proxied as tests)
   const tests   = m.tests ?? { passed: 0, failed: 0, total: 0 };
   const testPct = tests.total > 0 ? (tests.passed / tests.total) * 100 : 0;
   container.appendChild(buildCard({
-    id: 'tests', label: 'Tests',
-    value:  `${tests.passed} / ${tests.total}`,
-    pct:    testPct,
-    status: getStatus(testPct, { good: 95, warn: 80 }),
-    meta:   `failed: ${tests.failed}`,
-    pctLabel: 'pass rate',
+    id: 'tests', label: 'Tasks',
+    value:    `${tests.passed} / ${tests.total}`,
+    pct:      testPct,
+    status:   tests.total === 0 ? 'info' : getStatus(testPct, { good: 50, warn: 20 }),
+    meta:     `blocked: ${tests.failed}  ·  in review: ${tests.skipped ?? 0}`,
+    pctLabel: 'done',
   }));
 
-  const covPct = m.coverage?.pct ?? 0;
-  const covSt  = getStatus(covPct, { good: 80, warn: 60 });
+  // Card 3 — Backend Coverage
+  const cov    = m.coverage ?? { pct: 0 };
+  const covPct = cov.pct ?? 0;
+  const covSt  = getStatus(covPct, { good: 70, warn: 40 });
   container.appendChild(buildCard({
-    id: 'coverage', label: 'Coverage',
-    value:  `${covPct.toFixed(1)}%`,
-    pct:    covPct,
-    status: covSt,
-    meta:   covSt === 'good' ? 'цель достигнута' : covSt === 'warn' ? 'ниже нормы' : 'критически мало',
-    pctLabel: 'строк',
+    id: 'coverage', label: 'Backend',
+    value:    `${covPct.toFixed(0)}%`,
+    pct:      covPct,
+    status:   covSt,
+    meta:     `domain+app / total  (${cov._domain ?? 0}+${cov._application ?? 0} / ${cov._backendTotal ?? 0})`,
+    pctLabel: 'core ratio',
   }));
 
+  // Card 4 — Assets (presentation+infra layers)
   const assets   = m.assets ?? { generated: 0, total: 0, errors: 0 };
   const assetPct = assets.total > 0 ? (assets.generated / assets.total) * 100 : 0;
   const assetSt  = assets.errors > 0
     ? getStatus(assets.errors, { good: 0, warn: 3 }, true)
-    : getStatus(assetPct, { good: 95, warn: 70 });
+    : assets.total === 0 ? 'info' : getStatus(assetPct, { good: 30, warn: 10 });
   container.appendChild(buildCard({
     id: 'assets', label: 'Assets',
-    value:  `${assets.generated} / ${assets.total}`,
-    pct:    assetPct,
-    status: assetSt,
-    meta:   `errors: ${assets.errors}`,
-    pctLabel: 'сгенерировано',
+    value:    `${assets.generated} / ${assets.total}`,
+    pct:      assetPct,
+    status:   assetSt,
+    meta:     `presentation+infra layers`,
+    pctLabel: 'coverage',
   }));
 
+  // Card 5 — Narrative Specs
   const narr    = m.narrative ?? { specs: 0, implemented: 0, pending: 0 };
   const narrPct = narr.specs > 0 ? (narr.implemented / narr.specs) * 100 : 0;
   container.appendChild(buildCard({
-    id: 'narrative', label: 'Narrative Specs',
-    value:  `${narr.implemented} / ${narr.specs}`,
-    pct:    narrPct,
-    status: getStatus(narrPct, { good: 80, warn: 50 }),
-    meta:   `pending: ${narr.pending}`,
-    pctLabel: 'реализовано',
+    id: 'narrative', label: 'Narrative',
+    value:    `${narr.implemented} / ${narr.specs}`,
+    pct:      narrPct,
+    status:   narr.specs === 0 ? 'info' : getStatus(narrPct, { good: 80, warn: 50 }),
+    meta:     `quests: ${narr.quests ?? 0}  ·  npc: ${narr.npc ?? 0}  ·  pending: ${narr.pending}`,
+    pctLabel: 'done',
   }));
 
-  // Wire click/keyboard for drilldown after paint
   requestAnimationFrame(() => {
     ['build', 'tests', 'coverage', 'assets', 'narrative'].forEach(id => {
       const card = document.getElementById(`card-${id}`);
@@ -505,125 +598,125 @@ function renderCards(m) {
     });
   });
 
-  // Close drilldown on refresh
   if (_activeCardId) closeDrilldown();
 }
 
-// ── Drilldown data definitions (§3.4) ─────────────────────────────────────────
+// ── Drilldown data ─────────────────────────────────────────────────────────────────
 const DRILLDOWN_DATA = {
   build: (m) => {
-    const b = m.build ?? {};
-    const ok = b.status === 'ok';
+    const b   = m.build ?? {};
+    const raw = m._raw?.ci ?? {};
+    const ok  = b.status === 'ok';
     return {
       tableHead: ['Параметр', 'Значение', 'Статус'],
       rows: [
-        { label: 'CI статус',      value: b.status ?? '—',          st: ok ? 'good' : 'error' },
-        { label: 'Build ID',       value: b.id ?? '—',              st: 'info' },
-        { label: 'Время билда',    value: fmtTs(b.ts),              st: 'info' },
-        { label: 'Ветка',          value: b.branch ?? 'main',       st: 'info' },
-        { label: 'Триггер',        value: b.trigger ?? 'push',      st: 'info' },
-        { label: 'Артефакты',      value: String(b.artifacts ?? '—'), st: ok ? 'good' : 'warn' },
+        { label: 'CI статус',   value: raw.status     ?? b.status ?? '—', st: ok ? 'good' : 'error' },
+        { label: 'Conclusion',  value: raw.conclusion ?? b.conclusion ?? '—', st: raw.conclusion === 'success' ? 'good' : raw.conclusion === 'pending' ? 'warn' : 'info' },
+        { label: 'Total runs',  value: String(raw.total_runs ?? '—'),  st: 'info' },
+        { label: 'Generated',   value: fmtTs(m._raw?.generated_at), st: 'info' },
+        { label: 'Branch',      value: b.branch  ?? 'main',          st: 'info' },
+        { label: 'Trigger',     value: b.trigger ?? 'push',          st: 'info' },
       ],
     };
   },
 
   tests: (m) => {
-    const t = m.tests ?? { passed: 0, failed: 0, total: 0 };
-    const pp = t.total ? ((t.passed / t.total) * 100).toFixed(1) : '0.0';
-    const fp = t.total ? ((t.failed / t.total) * 100).toFixed(1) : '0.0';
+    const t   = m.tests ?? {};
+    const raw = m._raw?.tasks ?? {};
     return {
-      tableHead: ['Параметр', 'Значение', 'Статус'],
+      tableHead: ['Статус задач', 'Кол-во', 'Флаг'],
       rows: [
-        { label: 'Всего тестов',   value: String(t.total),                st: 'info' },
-        { label: 'Пройдено',       value: `${t.passed} (${pp}%)`,         st: getStatus(+pp, { good: 95, warn: 80 }) },
-        { label: 'Упало',          value: `${t.failed} (${fp}%)`,         st: t.failed === 0 ? 'good' : t.failed <= 5 ? 'warn' : 'error' },
-        { label: 'Пропущено',      value: String(t.skipped ?? 0),         st: 'info' },
-        { label: 'Длительность',   value: t.duration ?? '—',              st: 'info' },
-        { label: 'Тест-сьюты',     value: String(t.suites ?? '—'),        st: 'info' },
+        { label: 'TODO',        value: String(raw.todo        ?? t._todo        ?? 0), st: 'info'  },
+        { label: 'In Progress', value: String(raw.in_progress ?? t._in_progress ?? 0), st: 'warn'  },
+        { label: 'Review',      value: String(raw.review      ?? t.skipped      ?? 0), st: 'info'  },
+        { label: 'Done',        value: String(raw.done        ?? t.passed       ?? 0), st: 'good'  },
+        { label: 'Blocked',     value: String(raw.blocked     ?? t.failed       ?? 0), st: 'error' },
+        { label: 'Total',       value: String(raw.total       ?? t.total        ?? 0), st: 'info'  },
       ],
-      chartTitle: '% тестов по модулям',
-      chart: m.tests?.byModule ?? [
-        { label: 'Domain',         pct: 38, color: 'good'  },
-        { label: 'Application',    pct: 28, color: 'info'  },
-        { label: 'Infra',          pct: 20, color: 'warn'  },
-        { label: 'Presentation',   pct: 14, color: 'error' },
+      chartTitle: 'Распределение задач',
+      chart: [
+        { label: 'Done',        pct: raw.total ? Math.round((raw.done        ?? 0) / raw.total * 100) : 0, color: 'good'  },
+        { label: 'In Progress', pct: raw.total ? Math.round((raw.in_progress ?? 0) / raw.total * 100) : 0, color: 'warn'  },
+        { label: 'Review',      pct: raw.total ? Math.round((raw.review      ?? 0) / raw.total * 100) : 0, color: 'info'  },
+        { label: 'Blocked',     pct: raw.total ? Math.round((raw.blocked     ?? 0) / raw.total * 100) : 0, color: 'error' },
       ],
     };
   },
 
   coverage: (m) => {
-    const c = m.coverage ?? {};
-    const p = c.pct ?? 0;
+    const c   = m.coverage ?? {};
+    const raw = m._raw?.backend ?? {};
+    const tot = raw.total || 1;
     return {
-      tableHead: ['Тип', 'Покрытие', 'Статус'],
+      tableHead: ['DDD слой', 'Файлов', 'Доля'],
       rows: [
-        { label: 'Строки',         value: `${(c.lines      ?? p).toFixed(1)}%`,         st: getStatus(c.lines      ?? p, { good: 80, warn: 60 }) },
-        { label: 'Ветки',          value: `${(c.branches   ?? p * 0.9).toFixed(1)}%`,   st: getStatus(c.branches   ?? p * 0.9, { good: 80, warn: 60 }) },
-        { label: 'Функции',        value: `${(c.functions  ?? p * 1.05).toFixed(1)}%`,  st: getStatus(c.functions  ?? p * 1.05, { good: 80, warn: 60 }) },
-        { label: 'Выражения',      value: `${(c.statements ?? p * 0.97).toFixed(1)}%`,  st: getStatus(c.statements ?? p * 0.97, { good: 80, warn: 60 }) },
-        { label: 'Цель',           value: '80%',                                         st: 'info' },
-        { label: 'Дельта',         value: `${(p - 80).toFixed(1)}%`,                    st: p >= 80 ? 'good' : 'error' },
+        { label: 'Domain',         value: String(raw.domain         ?? 0), st: 'good' },
+        { label: 'Application',    value: String(raw.application    ?? 0), st: 'good' },
+        { label: 'Infrastructure', value: String(raw.infrastructure ?? 0), st: 'warn' },
+        { label: 'Presentation',   value: String(raw.presentation   ?? 0), st: 'info' },
+        { label: 'Total',          value: String(raw.total          ?? 0), st: 'info' },
+        { label: 'Core ratio',     value: `${c.pct ?? 0}%`,                st: getStatus(c.pct ?? 0, { good: 70, warn: 40 }) },
       ],
-      chartTitle: '% покрытия по пакетам',
-      chart: m.coverage?.byPackage ?? [
-        { label: 'domain',         pct: Math.min(100, p + 12), color: 'good'  },
-        { label: 'application',    pct: Math.min(100, p + 2),  color: 'good'  },
-        { label: 'infra',          pct: Math.min(100, p - 8),  color: 'warn'  },
-        { label: 'presentation',   pct: Math.max(0, p - 15),   color: 'error' },
+      chartTitle: 'Файлов по DDD-слоям',
+      chart: [
+        { label: 'Domain',         pct: Math.round((raw.domain         ?? 0) / tot * 100), color: 'good'  },
+        { label: 'Application',    pct: Math.round((raw.application    ?? 0) / tot * 100), color: 'info'  },
+        { label: 'Infrastructure', pct: Math.round((raw.infrastructure ?? 0) / tot * 100), color: 'warn'  },
+        { label: 'Presentation',   pct: Math.round((raw.presentation   ?? 0) / tot * 100), color: 'error' },
       ],
     };
   },
 
   assets: (m) => {
-    const a = m.assets ?? { generated: 0, total: 0, errors: 0 };
+    const raw = m._raw?.backend ?? {};
+    const tot = raw.total || 1;
     return {
       tableHead: ['Параметр', 'Значение', 'Статус'],
       rows: [
-        { label: 'Сгенерировано',  value: String(a.generated),    st: 'info' },
-        { label: 'Всего',          value: String(a.total),        st: 'info' },
-        { label: 'Ошибок',         value: String(a.errors),       st: a.errors === 0 ? 'good' : a.errors <= 3 ? 'warn' : 'error' },
-        { label: 'Предупреждений', value: String(a.warnings ?? 0),st: (a.warnings ?? 0) === 0 ? 'good' : 'warn' },
-        { label: 'Размер (MB)',    value: String(a.sizeMb ?? '—'),st: 'info' },
-        { label: 'Время (сек)',    value: String(a.durationSec ?? '—'), st: 'info' },
+        { label: 'Presentation', value: String(raw.presentation   ?? 0), st: 'info' },
+        { label: 'Infra',        value: String(raw.infrastructure ?? 0), st: 'info' },
+        { label: 'Total backend',value: String(raw.total          ?? 0), st: 'info' },
+        { label: 'Errors',       value: '0',                             st: 'good' },
       ],
-      chartTitle: '% задач по ролям (taskBoard)',
-      chart: m.assets?.byRole ?? [
-        { label: 'Java Dev',       pct: 45, color: 'info'  },
-        { label: 'JS Dev',         pct: 30, color: 'good'  },
-        { label: 'Narrator',       pct: 15, color: 'warn'  },
-        { label: 'SA',             pct: 10, color: 'error' },
+      chartTitle: 'Backend layers',
+      chart: [
+        { label: 'Domain',         pct: Math.round((raw.domain         ?? 0) / tot * 100), color: 'good'  },
+        { label: 'Application',    pct: Math.round((raw.application    ?? 0) / tot * 100), color: 'info'  },
+        { label: 'Infrastructure', pct: Math.round((raw.infrastructure ?? 0) / tot * 100), color: 'warn'  },
+        { label: 'Presentation',   pct: Math.round((raw.presentation   ?? 0) / tot * 100), color: 'error' },
       ],
     };
   },
 
   narrative: (m) => {
-    const n = m.narrative ?? { specs: 0, implemented: 0, pending: 0 };
+    const n   = m.narrative ?? {};
+    const raw = m._raw?.narrative ?? {};
     return {
       tableHead: ['Параметр', 'Значение', 'Статус'],
       rows: [
-        { label: 'Спек всего',     value: String(n.specs),        st: 'info' },
-        { label: 'Реализовано',    value: String(n.implemented),  st: getStatus(n.specs ? (n.implemented / n.specs) * 100 : 0, { good: 80, warn: 50 }) },
-        { label: 'В работе',       value: String(n.inProgress ?? 0), st: 'warn' },
-        { label: 'Ожидает',        value: String(n.pending),      st: 'info' },
-        { label: 'Квесты',         value: String(n.quests ?? '—'),st: 'info' },
-        { label: 'NPC',            value: String(n.npc ?? '—'),   st: 'info' },
+        { label: 'Quests',       value: String(raw.quests       ?? n.quests ?? 0), st: 'info' },
+        { label: 'NPCs',         value: String(raw.npcs         ?? n.npc    ?? 0), st: 'info' },
+        { label: 'World events', value: String(raw.world_events ?? 0),             st: 'warn' },
+        { label: 'Conflicts',    value: String(raw.conflicts    ?? 0),             st: 'warn' },
+        { label: 'Total',        value: String(raw.total        ?? n.specs  ?? 0), st: 'info' },
+        { label: 'Done',         value: String(n.implemented    ?? 0),             st: getStatus(n.specs ? (n.implemented / n.specs) * 100 : 0, { good: 80, warn: 50 }) },
       ],
-      chartTitle: '% задач по ролям (taskBoard)',
-      chart: m.narrative?.byRole ?? [
-        { label: 'Narrator',       pct: 60, color: 'good'  },
-        { label: 'SA',             pct: 20, color: 'info'  },
-        { label: 'Java Dev',       pct: 12, color: 'warn'  },
-        { label: 'JS Dev',         pct: 8,  color: 'error' },
+      chartTitle: 'Narrative breakdown',
+      chart: [
+        { label: 'Quests',       pct: raw.total ? Math.round((raw.quests       ?? 0) / raw.total * 100) : 0, color: 'good'  },
+        { label: 'NPCs',         pct: raw.total ? Math.round((raw.npcs         ?? 0) / raw.total * 100) : 0, color: 'info'  },
+        { label: 'World events', pct: raw.total ? Math.round((raw.world_events ?? 0) / raw.total * 100) : 0, color: 'warn'  },
+        { label: 'Conflicts',    pct: raw.total ? Math.round((raw.conflicts    ?? 0) / raw.total * 100) : 0, color: 'error' },
       ],
     };
   },
 };
 
-// ── Drilldown render helpers ───────────────────────────────────────────────────
+// ── Drilldown render ──────────────────────────────────────────────────────────────────
 function colorVar(color) {
-  return color === 'good' ? 'var(--primary)'
-       : color === 'warn' ? 'var(--warn)'
-       : color === 'error'? 'var(--error)'
+  return color === 'good'  ? 'var(--primary)'
+       : color === 'warn'  ? 'var(--warn)'
+       : color === 'error' ? 'var(--error)'
        : 'var(--info)';
 }
 
@@ -646,15 +739,13 @@ function buildBarChart(chart, title) {
 function openDrilldown(cardId) {
   const metrics = _currentMetrics;
   if (!metrics) return;
-  const def   = DRILLDOWN_DATA[cardId]?.(metrics);
+  const def = DRILLDOWN_DATA[cardId]?.(metrics);
   if (!def) return;
 
-  const panel = document.getElementById('drilldown-panel');
+  const panel   = document.getElementById('drilldown-panel');
   const wrapper = document.getElementById('drilldown-wrapper');
-
   const cardLabel = document.querySelector(`#card-${cardId} .card-label`)?.textContent ?? cardId;
 
-  // Table
   const thead = `<tr>${def.tableHead.map(h => `<th>${escHtml(h)}</th>`).join('')}</tr>`;
   const tbody = def.rows.map(({ label, value, st }) => `
     <tr>
@@ -666,11 +757,11 @@ function openDrilldown(cardId) {
   panel.innerHTML = `
     <div class="dd-header">
       <div class="dd-title">Детали: <span>${escHtml(cardLabel)}</span></div>
-      <button class="dd-close" id="dd-close-btn" aria-label="Закрыть (Escape)" title="Закрыть (Escape)">✕</button>
+      <button class="dd-close" id="dd-close-btn" aria-label="Закрыть" title="Закрыть (Escape)">✕</button>
     </div>
     <div class="dd-body">
       <div>
-        <table class="dd-table" aria-label="Sub-метрики ${escHtml(cardLabel)}">
+        <table class="dd-table" aria-label="Sub-метрики">
           <thead>${thead}</thead>
           <tbody>${tbody}</tbody>
         </table>
@@ -681,7 +772,6 @@ function openDrilldown(cardId) {
   wrapper.classList.add('open');
   wrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-  // Animate bars after wrapper opens
   setTimeout(() => {
     panel.querySelectorAll('.dd-bar-fill[data-pct]').forEach(el => {
       el.style.width = el.dataset.pct + '%';
@@ -692,35 +782,27 @@ function openDrilldown(cardId) {
 }
 
 function closeDrilldown() {
-  const wrapper = document.getElementById('drilldown-wrapper');
-  wrapper?.classList.remove('open');
-
+  document.getElementById('drilldown-wrapper')?.classList.remove('open');
   document.querySelectorAll('.card.active').forEach(c => {
     c.classList.remove('active');
     c.setAttribute('aria-expanded', 'false');
   });
   _activeCardId = null;
-
   setTimeout(() => {
-    if (!wrapper?.classList.contains('open')) {
-      const panel = document.getElementById('drilldown-panel');
-      if (panel) panel.innerHTML = '';
+    const w = document.getElementById('drilldown-wrapper');
+    if (!w?.classList.contains('open')) {
+      const p = document.getElementById('drilldown-panel');
+      if (p) p.innerHTML = '';
     }
   }, 220);
 }
 
 function toggleDrilldown(cardId) {
-  // Deactivate all cards
   document.querySelectorAll('.card.active').forEach(c => {
     c.classList.remove('active');
     c.setAttribute('aria-expanded', 'false');
   });
-
-  if (_activeCardId === cardId) {
-    closeDrilldown();
-    return;
-  }
-
+  if (_activeCardId === cardId) { closeDrilldown(); return; }
   _activeCardId = cardId;
   const card = document.getElementById(`card-${cardId}`);
   card?.classList.add('active');
@@ -728,17 +810,16 @@ function toggleDrilldown(cardId) {
   openDrilldown(cardId);
 }
 
-// Escape key handler
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && _activeCardId) closeDrilldown();
 });
 
-// ── Data loading ──────────────────────────────────────────────────────────────
+// ── Data loading ─────────────────────────────────────────────────────────────────
 function applyMeta(m) {
   const b = document.getElementById('build-id');
   const e = document.getElementById('env-tag');
   if (b) b.textContent = `build: ${m.build?.id ?? '—'}`;
-  if (e) e.textContent = `env: ${m.env ?? 'local'}`;
+  if (e) e.textContent = `env: ${m.env ?? 'ci'}`;
 }
 function setLastUpdated() {
   const el = document.getElementById('last-updated');
@@ -747,20 +828,10 @@ function setLastUpdated() {
 function showError(msg) {
   document.getElementById('error-banner')?.classList.add('visible');
   const d = document.getElementById('error-detail');
-  if (d && msg) d.textContent = msg + ' Ниже отображаются демо-данные.';
+  if (d && msg) d.textContent = msg;
 }
 function hideError() {
   document.getElementById('error-banner')?.classList.remove('visible');
-}
-function demoData() {
-  return {
-    env: 'demo',
-    build: { status: 'ok', ts: Date.now(), id: 'demo-001', branch: 'main', trigger: 'push' },
-    tests: { passed: 142, failed: 3, total: 145, skipped: 0, suites: 12, duration: '4.2s' },
-    coverage: { pct: 74.5 },
-    assets: { generated: 88, total: 100, errors: 1, warnings: 2, sizeMb: '14.2', durationSec: '8.4' },
-    narrative: { specs: 40, implemented: 28, pending: 12, inProgress: 4, quests: 15, npc: 8 },
-  };
 }
 
 async function loadMetrics() {
@@ -768,14 +839,16 @@ async function loadMetrics() {
   try {
     const resp = await fetch('./metrics.json', { cache: 'no-cache' });
     if (!resp.ok) throw new Error(`HTTP ${resp.status} ${resp.statusText}`);
-    const data = await resp.json();
+    const raw  = await resp.json();
+    const data = normalizeMetrics(raw);
     renderCards(data);
     applyMeta(data);
     setLastUpdated();
   } catch (err) {
-    showError(err.message ?? 'Неизвестная ошибка при загрузке metrics.json.');
-    renderCards(demoData());
-    applyMeta(demoData());
+    showError(err.message ?? 'Ошибка загрузки metrics.json');
+    // Show zeroed state instead of fake demo data
+    renderCards(normalizeMetrics({}));
+    applyMeta({ build: {}, env: 'error' });
     setLastUpdated();
   }
 }
