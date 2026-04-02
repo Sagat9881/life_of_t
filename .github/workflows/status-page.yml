@@ -6,16 +6,24 @@ on:
     types: [completed]
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   build-status-page:
     name: Inject metrics & deploy status page
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout main
         uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      # ─ 1. Collect metrics (pure Python, no heredoc, no cp) ───────────────
+      # ─ 1. Collect metrics (pure Python) ────────────────────────────────
       - name: Collect build metrics
         env:
           RUN_NUMBER: ${{ github.run_number }}
@@ -78,29 +86,37 @@ jobs:
               "narrative": {"specs": specs, "implemented": specs, "pending": 0},
           }
 
-          # Write directly next to index.html — where fetch('./metrics.json') expects it
           out = pathlib.Path("docs/status/metrics.json")
+          out.parent.mkdir(parents=True, exist_ok=True)
           out.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
           print(f"OK: {out} written ({out.stat().st_size} bytes)")
           PYEOF
 
-      # ─ 2. Verify metrics.json was written ───────────────────────────────
+      # ─ 2. Verify metrics.json ───────────────────────────────────────
       - name: Verify docs/status/metrics.json
         run: |
           [ -f docs/status/metrics.json ] || { echo "::error::docs/status/metrics.json missing!"; exit 1; }
-          python3 -c "import json,pathlib; d=json.loads(pathlib.Path('docs/status/metrics.json').read_text()); print('OK: env=' + d.get('env','?'), 'build=' + d.get('build',{}).get('status','?'))"
+          python3 -c "
+import json, pathlib
+d = json.loads(pathlib.Path('docs/status/metrics.json').read_text())
+print('OK: env=' + str(d.get('env')) + ' build=' + str(d.get('build',{}).get('status')))
+"
           echo "OK: metrics.json verified"
 
-      # ─ 3. Commit updated metrics.json back to repo ──────────────────────
+      # ─ 3. Commit metrics.json back to main ──────────────────────────
       - name: Commit metrics.json
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/status/metrics.json
-          git diff --cached --quiet && echo "No changes to commit" || git commit -m "ci: update docs/status/metrics.json [skip ci]"
-          git push
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "ci: update docs/status/metrics.json [skip ci]"
+            git push origin main
+          fi
 
-      # ─ 4. Upload status page as artifact ────────────────────────────────
+      # ─ 4. Upload artifact ──────────────────────────────────────────
       - name: Upload status page artifact
         uses: actions/upload-artifact@v4
         with:
@@ -108,9 +124,9 @@ jobs:
           path: docs/status/
           retention-days: 30
 
-      # ─ 5. Deploy to GitHub Pages (main only) ────────────────────────────
+      # ─ 5. Deploy to GitHub Pages (main only) ──────────────────────────
       - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
