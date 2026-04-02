@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life of T — Status Overview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-body: 'Share Tech Mono', 'Courier New', monospace;
+      --text-xs:   0.75rem;
+      --text-sm:   0.875rem;
+      --text-base: 1rem;
+      --text-lg:   1.25rem;
+      --text-xl:   1.5rem;
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+      --space-4: 1rem;    --space-6: 1.5rem; --space-8: 2rem;
+      --transition: 140ms steps(4, end);
+    }
+    :root, [data-theme="light"] {
+      --bg:           #e8e4d8;
+      --surface:      #f0ede3;
+      --surface-2:    #f5f3ec;
+      --border:       #b8b4a8;
+      --border-dim:   #ccc8bc;
+      --text:         #1a1a14;
+      --text-muted:   #5a5850;
+      --text-faint:   #9a9890;
+      --text-inv:     #f0ede3;
+      --primary:      #2a7a2e;
+      --primary-dim:  #c4d9c5;
+      --warn:         #b87800;
+      --warn-dim:     #e8d9aa;
+      --error:        #b82020;
+      --error-dim:    #e8c5c5;
+      --info:         #1a5a8a;
+      --info-dim:     #c5d9e8;
+      --divider:      #ccc8bc;
+      --shadow:       2px 2px 0 rgba(0,0,0,0.18);
+    }
+    [data-theme="dark"] {
+      --bg:           #12110d;
+      --surface:      #1a1915;
+      --surface-2:    #211f1a;
+      --border:       #3a3830;
+      --border-dim:   #2e2c25;
+      --text:         #ddd9cc;
+      --text-muted:   #8a8880;
+      --text-faint:   #5a5850;
+      --text-inv:     #12110d;
+      --primary:      #4db852;
+      --primary-dim:  #1a3a1c;
+      --warn:         #e8a820;
+      --warn-dim:     #3a2e00;
+      --error:        #e84848;
+      --error-dim:    #3a1010;
+      --info:         #48a8e8;
+      --info-dim:     #0a2038;
+      --divider:      #2e2c25;
+      --shadow:       2px 2px 0 rgba(0,0,0,0.5);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: auto; }
+    body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      line-height: 1.5;
+    }
+    img, svg { display: block; }
+    button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
+
+    .page { max-width: 1100px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 2px solid var(--border); padding-bottom: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+    .header-logo { display: flex; align-items: center; gap: var(--space-3); }
+    .logo-mark {
+      width: 32px; height: 32px; background: var(--primary);
+      display: grid; place-items: center;
+      color: var(--text-inv); font-size: var(--text-sm); font-weight: bold;
+      box-shadow: var(--shadow);
+    }
+    .logo-text { font-size: var(--text-lg); letter-spacing: 0.08em; }
+    .logo-tag  { font-size: var(--text-xs); color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; }
+    .header-actions { display: flex; align-items: center; gap: var(--space-3); }
+    .btn-icon {
+      width: 36px; height: 36px; border: 1px solid var(--border);
+      display: grid; place-items: center; background: var(--surface);
+      color: var(--text-muted); box-shadow: var(--shadow);
+      transition: background var(--transition), color var(--transition);
+    }
+    .btn-icon:hover { background: var(--surface-2); color: var(--text); }
+    .last-updated { font-size: var(--text-xs); color: var(--text-faint); }
+
+    .error-banner {
+      display: none; align-items: flex-start; gap: var(--space-3);
+      padding: var(--space-4); border: 2px solid var(--error);
+      background: var(--error-dim); color: var(--error);
+      margin-bottom: var(--space-6); font-size: var(--text-sm);
+      box-shadow: var(--shadow);
+    }
+    .error-banner.visible { display: flex; }
+    .error-icon { font-size: var(--text-xl); line-height: 1; flex-shrink: 0; }
+    .error-title { font-size: var(--text-base); margin-bottom: var(--space-1); letter-spacing: 0.05em; }
+    .error-msg { color: var(--text-muted); }
+
+    .section-header { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); }
+    .section-title { font-size: var(--text-base); letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+    .section-divider { flex: 1; height: 1px; background: var(--divider); }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+      gap: var(--space-4); margin-bottom: var(--space-8);
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      padding: var(--space-4); box-shadow: var(--shadow);
+      position: relative; overflow: hidden;
+    }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .card.good::before  { background: var(--primary); }
+    .card.warn::before  { background: var(--warn); }
+    .card.error::before { background: var(--error); }
+    .card.info::before  { background: var(--info); }
+
+    .card-label { font-size: var(--text-xs); letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); margin-bottom: var(--space-2); }
+    .card-value { font-size: var(--text-xl); font-weight: bold; margin-bottom: var(--space-3); letter-spacing: 0.04em; }
+    .card-value.good  { color: var(--primary); }
+    .card-value.warn  { color: var(--warn); }
+    .card-value.error { color: var(--error); }
+    .card-value.info  { color: var(--info); }
+
+    .progress-track {
+      height: 8px; background: var(--border-dim); position: relative; margin-bottom: var(--space-2);
+    }
+    .progress-fill {
+      height: 100%; transition: width 0.5s steps(10, end); position: relative;
+    }
+    .progress-fill::after {
+      content: ''; position: absolute; right: 0; top: 0;
+      width: 2px; height: 100%; background: rgba(255,255,255,0.35);
+    }
+    .progress-fill.good  { background: var(--primary); }
+    .progress-fill.warn  { background: var(--warn); }
+    .progress-fill.error { background: var(--error); }
+    .progress-fill.info  { background: var(--info); }
+
+    .progress-labels { display: flex; justify-content: space-between; font-size: var(--text-xs); color: var(--text-faint); }
+    .card-meta { font-size: var(--text-xs); color: var(--text-faint); margin-top: var(--space-2); border-top: 1px solid var(--divider); padding-top: var(--space-2); }
+
+    @keyframes blink { 0%,100%{opacity:.35} 50%{opacity:.7} }
+    .skeleton-card { background: var(--surface); border: 1px solid var(--border-dim); padding: var(--space-4); box-shadow: var(--shadow); }
+    .sk { background: var(--border); animation: blink 1.2s steps(2, end) infinite; }
+    .sk-label { height:10px; width:60%; margin-bottom: var(--space-3); }
+    .sk-value { height:24px; width:80%; margin-bottom: var(--space-3); }
+    .sk-bar   { height:8px;  width:100%; margin-bottom: var(--space-2); }
+    .sk-meta  { height:10px; width:50%; }
+
+    .footer {
+      border-top: 1px solid var(--divider); padding-top: var(--space-4);
+      display: flex; gap: var(--space-4); flex-wrap: wrap;
+      font-size: var(--text-xs); color: var(--text-faint);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .progress-fill { transition: none; }
+      .sk { animation: none; opacity: 0.5; }
+    }
+    @media (max-width: 480px) {
+      .cards-grid { grid-template-columns: 1fr; }
+      .header { flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <div class="header-logo">
+      <div class="logo-mark" aria-hidden="true">T</div>
+      <div>
+        <div class="logo-text">LIFE OF T</div>
+        <div class="logo-tag">Status Dashboard</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span class="last-updated" id="last-updated">загрузка…</span>
+      <button class="btn-icon" id="refresh-btn" aria-label="Обновить метрики" title="Обновить">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M13.65 2.35A8 8 0 1 0 15 8" stroke-linecap="square"/>
+          <polyline points="11,1 15,1 15,5" stroke-linecap="square"/>
+        </svg>
+      </button>
+      <button class="btn-icon" data-theme-toggle aria-label="Переключить тему" title="Тема">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" id="theme-svg" aria-hidden="true">
+          <circle cx="8" cy="8" r="3"/>
+          <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42M11.53 4.47l1.42-1.42M3.05 12.95l1.42-1.42" stroke-linecap="square"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="error-banner" id="error-banner" role="alert" aria-live="assertive">
+    <div class="error-icon">!</div>
+    <div>
+      <div class="error-title">[ERROR] Не удалось загрузить metrics.json</div>
+      <div class="error-msg" id="error-detail">Файл недоступен или не существует. Убедитесь, что metrics.json находится рядом с index.html. Ниже отображаются демо-данные.</div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <span class="section-title">Overview</span>
+    <div class="section-divider" aria-hidden="true"></div>
+  </div>
+
+  <div class="cards-grid" id="cards-container" role="list" aria-label="Метрики проекта">
+    <div class="skeleton-card" aria-hidden="true"><div class="sk sk-label"></div><div class="sk sk-value"></div><div class="sk sk-bar"></div><div class="sk sk-meta"></div></div>
+    <div class="skeleton-card" aria-hidden="true"><div class="sk sk-label"></div><div class="sk sk-value"></div><div class="sk sk-bar"></div><div class="sk sk-meta"></div></div>
+    <div class="skeleton-card" aria-hidden="true"><div class="sk sk-label"></div><div class="sk sk-value"></div><div class="sk sk-bar"></div><div class="sk sk-meta"></div></div>
+    <div class="skeleton-card" aria-hidden="true"><div class="sk sk-label"></div><div class="sk sk-value"></div><div class="sk sk-bar"></div><div class="sk sk-meta"></div></div>
+    <div class="skeleton-card" aria-hidden="true"><div class="sk sk-label"></div><div class="sk sk-value"></div><div class="sk sk-bar"></div><div class="sk sk-meta"></div></div>
+  </div>
+
+  <footer class="footer">
+    <span>LIFE OF T &copy; 2026</span>
+    <span id="build-id">build: —</span>
+    <span id="env-tag">env: —</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  const root = document.documentElement;
+  const btn  = document.querySelector('[data-theme-toggle]');
+  const svg  = document.getElementById('theme-svg');
+  const SUN  = `<circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42M11.53 4.47l1.42-1.42M3.05 12.95l1.42-1.42" stroke-linecap="square"/>`;
+  const MOON = `<path d="M13 9.5A5.5 5.5 0 0 1 6.5 3 7 7 0 1 0 13 9.5z" stroke-linecap="square"/>`;
+  let theme = root.dataset.theme ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const apply = (t) => { root.dataset.theme = t; if (svg) svg.innerHTML = t === 'dark' ? SUN : MOON; };
+  apply(theme);
+  btn?.addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark'; apply(theme); });
+})();
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtTs(ts) {
+  if (!ts) return '—';
+  try { return new Date(ts).toLocaleString('ru-RU', { hour12: false }); }
+  catch { return String(ts); }
+}
+function getStatus(val, thresholds, inverted = false) {
+  if (!inverted) {
+    if (val >= thresholds.good) return 'good';
+    if (val >= thresholds.warn) return 'warn';
+    return 'error';
+  } else {
+    if (val <= thresholds.good) return 'good';
+    if (val <= thresholds.warn) return 'warn';
+    return 'error';
+  }
+}
+
+function buildCard({ id, label, value, pct, status, meta, pctLabel = '' }) {
+  const el   = document.createElement('article');
+  const pct2 = Math.min(100, Math.max(0, pct));
+  el.className = `card ${status}`;
+  el.setAttribute('role', 'listitem');
+  el.setAttribute('aria-label', `${label}: ${value}`);
+  el.id = `card-${id}`;
+  el.innerHTML = `
+    <div class="card-label">${escHtml(label)}</div>
+    <div class="card-value ${status}">${escHtml(value)}</div>
+    <div class="progress-track" role="progressbar" aria-valuenow="${pct2}" aria-valuemin="0" aria-valuemax="100" aria-label="${escHtml(label)}">
+      <div class="progress-fill ${status}" style="width:0%"></div>
+    </div>
+    <div class="progress-labels">
+      <span>${escHtml(pctLabel)}</span>
+      <span>${pct2.toFixed(0)}%</span>
+    </div>
+    <div class="card-meta">${escHtml(meta)}</div>`;
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const fill = el.querySelector('.progress-fill');
+      if (fill) fill.style.width = `${pct2}%`;
+    });
+  });
+  return el;
+}
+
+function renderCards(m) {
+  const container = document.getElementById('cards-container');
+  container.innerHTML = '';
+
+  const buildOk = m.build?.status === 'ok';
+  container.appendChild(buildCard({
+    id: 'build', label: 'Build Status',
+    value:  buildOk ? '[ OK ]' : '[FAIL]',
+    pct:    buildOk ? 100 : 0,
+    status: buildOk ? 'good' : 'error',
+    meta:   `#${m.build?.id ?? '—'}  ·  ${fmtTs(m.build?.ts)}`,
+    pctLabel: 'CI/CD',
+  }));
+
+  const tests   = m.tests ?? { passed: 0, failed: 0, total: 0 };
+  const testPct = tests.total > 0 ? (tests.passed / tests.total) * 100 : 0;
+  container.appendChild(buildCard({
+    id: 'tests', label: 'Tests',
+    value:  `${tests.passed} / ${tests.total}`,
+    pct:    testPct,
+    status: getStatus(testPct, { good: 95, warn: 80 }),
+    meta:   `failed: ${tests.failed}`,
+    pctLabel: 'pass rate',
+  }));
+
+  const covPct = m.coverage?.pct ?? 0;
+  const covSt  = getStatus(covPct, { good: 80, warn: 60 });
+  container.appendChild(buildCard({
+    id: 'coverage', label: 'Coverage',
+    value:  `${covPct.toFixed(1)}%`,
+    pct:    covPct,
+    status: covSt,
+    meta:   covSt === 'good' ? 'цель достигнута' : covSt === 'warn' ? 'ниже нормы' : 'критически мало',
+    pctLabel: 'строк',
+  }));
+
+  const assets   = m.assets ?? { generated: 0, total: 0, errors: 0 };
+  const assetPct = assets.total > 0 ? (assets.generated / assets.total) * 100 : 0;
+  const assetSt  = assets.errors > 0
+    ? getStatus(assets.errors, { good: 0, warn: 3 }, true)
+    : getStatus(assetPct, { good: 95, warn: 70 });
+  container.appendChild(buildCard({
+    id: 'assets', label: 'Assets',
+    value:  `${assets.generated} / ${assets.total}`,
+    pct:    assetPct,
+    status: assetSt,
+    meta:   `errors: ${assets.errors}`,
+    pctLabel: 'сгенерировано',
+  }));
+
+  const narr    = m.narrative ?? { specs: 0, implemented: 0, pending: 0 };
+  const narrPct = narr.specs > 0 ? (narr.implemented / narr.specs) * 100 : 0;
+  container.appendChild(buildCard({
+    id: 'narrative', label: 'Narrative Specs',
+    value:  `${narr.implemented} / ${narr.specs}`,
+    pct:    narrPct,
+    status: getStatus(narrPct, { good: 80, warn: 50 }),
+    meta:   `pending: ${narr.pending}`,
+    pctLabel: 'реализовано',
+  }));
+}
+
+function applyMeta(m) {
+  const b = document.getElementById('build-id');
+  const e = document.getElementById('env-tag');
+  if (b) b.textContent = `build: ${m.build?.id ?? '—'}`;
+  if (e) e.textContent = `env: ${m.env ?? 'local'}`;
+}
+function setLastUpdated() {
+  const el = document.getElementById('last-updated');
+  if (el) el.textContent = 'обновлено ' + new Date().toLocaleTimeString('ru-RU', { hour12: false });
+}
+function showError(msg) {
+  document.getElementById('error-banner')?.classList.add('visible');
+  const d = document.getElementById('error-detail');
+  if (d && msg) d.textContent = msg + ' Ниже отображаются демо-данные.';
+}
+function hideError() {
+  document.getElementById('error-banner')?.classList.remove('visible');
+}
+function demoData() {
+  return {
+    env: 'demo',
+    build: { status: 'ok', ts: Date.now(), id: 'demo-001' },
+    tests: { passed: 142, failed: 3, total: 145 },
+    coverage: { pct: 74.5 },
+    assets: { generated: 88, total: 100, errors: 1 },
+    narrative: { specs: 40, implemented: 28, pending: 12 },
+  };
+}
+
+async function loadMetrics() {
+  hideError();
+  try {
+    const resp = await fetch('./metrics.json', { cache: 'no-cache' });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status} ${resp.statusText}`);
+    const data = await resp.json();
+    renderCards(data);
+    applyMeta(data);
+    setLastUpdated();
+  } catch (err) {
+    showError(err.message ?? 'Неизвестная ошибка при загрузке metrics.json.');
+    renderCards(demoData());
+    applyMeta(demoData());
+    setLastUpdated();
+  }
+}
+
+document.getElementById('refresh-btn')?.addEventListener('click', () => {
+  const btn = document.getElementById('refresh-btn');
+  btn.disabled = true;
+  setTimeout(() => { btn.disabled = false; }, 600);
+  loadMetrics();
+});
+
+loadMetrics();
+</script>
+</body>
+</html>
