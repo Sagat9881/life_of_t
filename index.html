@@ -1,1 +1,793 @@
-<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><title>Life of T — Build Status</title></head><body><pre id="metrics"></pre><script>const d=document.getElementById("metrics");fetch("metrics.json").then(r=>r.json()).then(j=>d.textContent=JSON.stringify(j,null,2));</script></body></html>
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life of T — Status Overview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-body: 'Share Tech Mono', 'Courier New', monospace;
+      --text-xs:   0.75rem;
+      --text-sm:   0.875rem;
+      --text-base: 1rem;
+      --text-lg:   1.25rem;
+      --text-xl:   1.5rem;
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+      --space-4: 1rem;    --space-6: 1.5rem; --space-8: 2rem;
+      --transition: 140ms steps(4, end);
+    }
+    :root, [data-theme="light"] {
+      --bg:           #e8e4d8;
+      --surface:      #f0ede3;
+      --surface-2:    #f5f3ec;
+      --border:       #b8b4a8;
+      --border-dim:   #ccc8bc;
+      --text:         #1a1a14;
+      --text-muted:   #5a5850;
+      --text-faint:   #9a9890;
+      --text-inv:     #f0ede3;
+      --primary:      #2a7a2e;
+      --primary-dim:  #c4d9c5;
+      --warn:         #b87800;
+      --warn-dim:     #e8d9aa;
+      --error:        #b82020;
+      --error-dim:    #e8c5c5;
+      --info:         #1a5a8a;
+      --info-dim:     #c5d9e8;
+      --divider:      #ccc8bc;
+      --shadow:       2px 2px 0 rgba(0,0,0,0.18);
+    }
+    [data-theme="dark"] {
+      --bg:           #12110d;
+      --surface:      #1a1915;
+      --surface-2:    #211f1a;
+      --border:       #3a3830;
+      --border-dim:   #2e2c25;
+      --text:         #ddd9cc;
+      --text-muted:   #8a8880;
+      --text-faint:   #5a5850;
+      --text-inv:     #12110d;
+      --primary:      #4db852;
+      --primary-dim:  #1a3a1c;
+      --warn:         #e8a820;
+      --warn-dim:     #3a2e00;
+      --error:        #e84848;
+      --error-dim:    #3a1010;
+      --info:         #48a8e8;
+      --info-dim:     #0a2038;
+      --divider:      #2e2c25;
+      --shadow:       2px 2px 0 rgba(0,0,0,0.5);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: auto; }
+    body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      line-height: 1.5;
+    }
+    img, svg { display: block; }
+    button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
+
+    .page { max-width: 1100px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 2px solid var(--border); padding-bottom: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+    .header-logo { display: flex; align-items: center; gap: var(--space-3); }
+    .logo-mark {
+      width: 32px; height: 32px; background: var(--primary);
+      display: grid; place-items: center;
+      color: var(--text-inv); font-size: var(--text-sm); font-weight: bold;
+      box-shadow: var(--shadow);
+    }
+    .logo-text { font-size: var(--text-lg); letter-spacing: 0.08em; }
+    .logo-tag  { font-size: var(--text-xs); color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; }
+    .header-actions { display: flex; align-items: center; gap: var(--space-3); }
+    .btn-icon {
+      width: 36px; height: 36px; border: 1px solid var(--border);
+      display: grid; place-items: center; background: var(--surface);
+      color: var(--text-muted); box-shadow: var(--shadow);
+      transition: background var(--transition), color var(--transition);
+    }
+    .btn-icon:hover { background: var(--surface-2); color: var(--text); }
+    .last-updated { font-size: var(--text-xs); color: var(--text-faint); }
+
+    .error-banner {
+      display: none; align-items: flex-start; gap: var(--space-3);
+      padding: var(--space-4); border: 2px solid var(--error);
+      background: var(--error-dim); color: var(--error);
+      margin-bottom: var(--space-6); font-size: var(--text-sm);
+      box-shadow: var(--shadow);
+    }
+    .error-banner.visible { display: flex; }
+    .error-icon { font-size: var(--text-xl); line-height: 1; flex-shrink: 0; }
+    .error-title { font-size: var(--text-base); margin-bottom: var(--space-1); letter-spacing: 0.05em; }
+    .error-msg { color: var(--text-muted); }
+
+    .section-header { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); }
+    .section-title { font-size: var(--text-base); letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+    .section-divider { flex: 1; height: 1px; background: var(--divider); }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+      gap: var(--space-4); margin-bottom: 0;
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      padding: var(--space-4); box-shadow: var(--shadow);
+      position: relative; overflow: visible;
+      cursor: pointer; outline: none;
+    }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .card.good::before  { background: var(--primary); }
+    .card.warn::before  { background: var(--warn); }
+    .card.error::before { background: var(--error); }
+    .card.info::before  { background: var(--info); }
+    .card:hover { background: var(--surface-2); }
+    .card.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px var(--primary), var(--shadow);
+    }
+    .card.active::after {
+      content: '';
+      position: absolute;
+      bottom: -12px; left: 50%;
+      transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 8px solid var(--primary);
+      z-index: 10;
+    }
+    .card:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    .card-label { font-size: var(--text-xs); letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); margin-bottom: var(--space-2); }
+    .card-value { font-size: var(--text-xl); font-weight: bold; margin-bottom: var(--space-3); letter-spacing: 0.04em; }
+    .card-value.good  { color: var(--primary); }
+    .card-value.warn  { color: var(--warn); }
+    .card-value.error { color: var(--error); }
+    .card-value.info  { color: var(--info); }
+
+    .progress-track {
+      height: 8px; background: var(--border-dim); position: relative; margin-bottom: var(--space-2);
+    }
+    .progress-fill {
+      height: 100%; transition: width 0.5s steps(10, end); position: relative;
+    }
+    .progress-fill::after {
+      content: ''; position: absolute; right: 0; top: 0;
+      width: 2px; height: 100%; background: rgba(255,255,255,0.35);
+    }
+    .progress-fill.good  { background: var(--primary); }
+    .progress-fill.warn  { background: var(--warn); }
+    .progress-fill.error { background: var(--error); }
+    .progress-fill.info  { background: var(--info); }
+
+    .progress-labels { display: flex; justify-content: space-between; font-size: var(--text-xs); color: var(--text-faint); }
+    .card-meta { font-size: var(--text-xs); color: var(--text-faint); margin-top: var(--space-2); border-top: 1px solid var(--divider); padding-top: var(--space-2); }
+
+    @keyframes blink { 0%,100%{opacity:.35} 50%{opacity:.7} }
+    .skeleton-card { background: var(--surface); border: 1px solid var(--border-dim); padding: var(--space-4); box-shadow: var(--shadow); }
+    .sk { background: var(--border); animation: blink 1.2s steps(2, end) infinite; }
+    .sk-label { height:10px; width:60%; margin-bottom: var(--space-3); }
+    .sk-value { height:24px; width:80%; margin-bottom: var(--space-3); }
+    .sk-bar   { height:8px;  width:100%; margin-bottom: var(--space-2); }
+    .sk-meta  { height:10px; width:50%; }
+
+    /* ===== DRILLDOWN PANEL — TASK-FE-051 ===== */
+    .drilldown-wrapper {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 200ms ease-out;
+      margin-top: var(--space-3);
+      margin-bottom: var(--space-4);
+    }
+    .drilldown-wrapper.open { max-height: 900px; }
+
+    .drilldown-panel {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--primary);
+      box-shadow: var(--shadow);
+      padding: var(--space-4);
+      position: relative;
+    }
+
+    .dd-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: var(--space-4);
+      border-bottom: 1px solid var(--divider);
+      padding-bottom: var(--space-3);
+    }
+    .dd-title {
+      font-size: var(--text-sm); letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--text-muted);
+    }
+    .dd-title span { color: var(--primary); font-weight: bold; }
+    .dd-close {
+      width: 28px; height: 28px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: grid; place-items: center;
+      font-size: var(--text-base);
+      color: var(--text-muted);
+      box-shadow: var(--shadow);
+      transition: background 140ms steps(2,end), color 140ms steps(2,end), border-color 140ms steps(2,end);
+    }
+    .dd-close:hover { background: var(--error-dim); color: var(--error); border-color: var(--error); }
+
+    .dd-body {
+      display: grid; grid-template-columns: 1fr;
+      gap: var(--space-4);
+    }
+    @media (min-width: 640px) { .dd-body { grid-template-columns: 1fr 1fr; } }
+
+    .dd-table { width: 100%; border-collapse: collapse; font-size: var(--text-xs); }
+    .dd-table th {
+      text-align: left; color: var(--text-faint);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: var(--space-1) var(--space-2);
+      border-bottom: 1px solid var(--divider);
+    }
+    .dd-table td {
+      padding: var(--space-1) var(--space-2);
+      color: var(--text);
+      border-bottom: 1px solid var(--border-dim);
+      vertical-align: middle;
+    }
+    .dd-table tr:last-child td { border-bottom: none; }
+
+    .dd-badge {
+      display: inline-block; padding: 1px 6px;
+      font-size: var(--text-xs); letter-spacing: 0.08em;
+    }
+    .dd-badge.good  { background: var(--primary-dim); color: var(--primary); }
+    .dd-badge.warn  { background: var(--warn-dim);    color: var(--warn); }
+    .dd-badge.error { background: var(--error-dim);   color: var(--error); }
+    .dd-badge.info  { background: var(--info-dim);    color: var(--info); }
+
+    .dd-barchart-title {
+      font-size: var(--text-xs); letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text-faint);
+      margin-bottom: var(--space-3);
+    }
+    .dd-bar-row {
+      display: grid; grid-template-columns: 110px 1fr 42px;
+      align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);
+    }
+    .dd-bar-label {
+      font-size: var(--text-xs); color: var(--text-muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .dd-bar-track { height: 10px; background: var(--border-dim); position: relative; }
+    .dd-bar-fill {
+      height: 100%; transition: width 200ms ease-out; position: relative;
+    }
+    .dd-bar-fill::after {
+      content: ''; position: absolute; right: 0; top: 0;
+      width: 2px; height: 100%; background: rgba(255,255,255,0.3);
+    }
+    .dd-bar-pct { font-size: var(--text-xs); color: var(--text-faint); text-align: right; }
+
+    .footer {
+      border-top: 1px solid var(--divider); padding-top: var(--space-4);
+      display: flex; gap: var(--space-4); flex-wrap: wrap;
+      font-size: var(--text-xs); color: var(--text-faint);
+      margin-top: var(--space-4);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .progress-fill, .drilldown-wrapper, .dd-bar-fill { transition: none; }
+      .sk { animation: none; opacity: 0.5; }
+    }
+    @media (max-width: 480px) {
+      .cards-grid { grid-template-columns: 1fr; }
+      .header { flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+      .dd-bar-row { grid-template-columns: 80px 1fr 36px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <div class="header-logo">
+      <div class="logo-mark" aria-hidden="true">T</div>
+      <div>
+        <div class="logo-text">LIFE OF T</div>
+        <div class="logo-tag">Status Dashboard</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span class="last-updated" id="last-updated">загрузка…</span>
+      <button class="btn-icon" id="refresh-btn" aria-label="Обновить метрики" title="Обновить">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M13.65 2.35A8 8 0 1 0 15 8" stroke-linecap="square"/>
+          <polyline points="11,1 15,1 15,5" stroke-linecap="square"/>
+        </svg>
+      </button>
+      <button class="btn-icon" data-theme-toggle aria-label="Переключить тему" title="Тема">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" id="theme-svg" aria-hidden="true">
+          <circle cx="8" cy="8" r="3"/>
+          <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42M11.53 4.47l1.42-1.42M3.05 12.95l1.42-1.42" stroke-linecap="square"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="error-banner" id="error-banner" role="alert" aria-live="assertive">
+    <div class="error-icon">!</div>
+    <div>
+      <div class="error-title">[ERROR] Не удалось загрузить metrics.json</div>
+      <div class="error-msg" id="error-detail">Файл недоступен или не существует. Убедитесь, что metrics.json находится рядом с index.html. Ниже отображаются демо-данные.</div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <span class="section-title">Overview</span>
+    <div class="section-divider" aria-hidden="true"></div>
+  </div>
+
+  <div class="cards-grid" id="cards-container" role="list" aria-label="Метрики проекта">
+    <div class="skeleton-card" aria-hidden="true"><div class="sk sk-label"></div><div class="sk sk-value"></div><div class="sk sk-bar"></div><div class="sk sk-meta"></div></div>
+    <div class="skeleton-card" aria-hidden="true"><div class="sk sk-label"></div><div class="sk sk-value"></div><div class="sk sk-bar"></div><div class="sk sk-meta"></div></div>
+    <div class="skeleton-card" aria-hidden="true"><div class="sk sk-label"></div><div class="sk sk-value"></div><div class="sk sk-bar"></div><div class="sk sk-meta"></div></div>
+    <div class="skeleton-card" aria-hidden="true"><div class="sk sk-label"></div><div class="sk sk-value"></div><div class="sk sk-bar"></div><div class="sk sk-meta"></div></div>
+    <div class="skeleton-card" aria-hidden="true"><div class="sk sk-label"></div><div class="sk sk-value"></div><div class="sk sk-bar"></div><div class="sk sk-meta"></div></div>
+  </div>
+
+  <!-- Drilldown panel — inserted by JS after cards-grid -->
+  <div class="drilldown-wrapper" id="drilldown-wrapper" role="region" aria-label="Детали метрики" aria-live="polite">
+    <div class="drilldown-panel" id="drilldown-panel"></div>
+  </div>
+
+  <footer class="footer">
+    <span>LIFE OF T &copy; 2026</span>
+    <span id="build-id">build: —</span>
+    <span id="env-tag">env: —</span>
+  </footer>
+</div>
+
+<script>
+// ── Theme toggle ──────────────────────────────────────────────────────────────
+(function () {
+  const root = document.documentElement;
+  const btn  = document.querySelector('[data-theme-toggle]');
+  const svg  = document.getElementById('theme-svg');
+  const SUN  = `<circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42M11.53 4.47l1.42-1.42M3.05 12.95l1.42-1.42" stroke-linecap="square"/>`;
+  const MOON = `<path d="M13 9.5A5.5 5.5 0 0 1 6.5 3 7 7 0 1 0 13 9.5z" stroke-linecap="square"/>`;
+  let theme = root.dataset.theme ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const apply = (t) => { root.dataset.theme = t; if (svg) svg.innerHTML = t === 'dark' ? SUN : MOON; };
+  apply(theme);
+  btn?.addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark'; apply(theme); });
+})();
+
+// ── Shared helpers ────────────────────────────────────────────────────────────
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtTs(ts) {
+  if (!ts) return '—';
+  try { return new Date(ts).toLocaleString('ru-RU', { hour12: false }); }
+  catch { return String(ts); }
+}
+function getStatus(val, thresholds, inverted = false) {
+  if (!inverted) {
+    if (val >= thresholds.good) return 'good';
+    if (val >= thresholds.warn) return 'warn';
+    return 'error';
+  } else {
+    if (val <= thresholds.good) return 'good';
+    if (val <= thresholds.warn) return 'warn';
+    return 'error';
+  }
+}
+
+// ── Card builder ──────────────────────────────────────────────────────────────
+function buildCard({ id, label, value, pct, status, meta, pctLabel = '' }) {
+  const el   = document.createElement('article');
+  const pct2 = Math.min(100, Math.max(0, pct));
+  el.className = `card ${status}`;
+  el.setAttribute('role', 'button');
+  el.setAttribute('tabindex', '0');
+  el.setAttribute('aria-expanded', 'false');
+  el.setAttribute('aria-controls', 'drilldown-wrapper');
+  el.setAttribute('aria-label', `${label}: ${value}. Нажмите для деталей.`);
+  el.id = `card-${id}`;
+  el.innerHTML = `
+    <div class="card-label">${escHtml(label)}</div>
+    <div class="card-value ${status}">${escHtml(value)}</div>
+    <div class="progress-track" role="progressbar" aria-valuenow="${pct2}" aria-valuemin="0" aria-valuemax="100" aria-label="${escHtml(label)}">
+      <div class="progress-fill ${status}" style="width:0%"></div>
+    </div>
+    <div class="progress-labels">
+      <span>${escHtml(pctLabel)}</span>
+      <span>${pct2.toFixed(0)}%</span>
+    </div>
+    <div class="card-meta">${escHtml(meta)}</div>`;
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const fill = el.querySelector('.progress-fill');
+      if (fill) fill.style.width = `${pct2}%`;
+    });
+  });
+  return el;
+}
+
+// ── Render 5 cards ────────────────────────────────────────────────────────────
+let _currentMetrics = null;
+let _activeCardId   = null;
+
+function renderCards(m) {
+  _currentMetrics = m;
+  const container = document.getElementById('cards-container');
+  container.innerHTML = '';
+
+  const buildOk = m.build?.status === 'ok';
+  container.appendChild(buildCard({
+    id: 'build', label: 'Build Status',
+    value:  buildOk ? '[ OK ]' : '[FAIL]',
+    pct:    buildOk ? 100 : 0,
+    status: buildOk ? 'good' : 'error',
+    meta:   `#${m.build?.id ?? '—'}  ·  ${fmtTs(m.build?.ts)}`,
+    pctLabel: 'CI/CD',
+  }));
+
+  const tests   = m.tests ?? { passed: 0, failed: 0, total: 0 };
+  const testPct = tests.total > 0 ? (tests.passed / tests.total) * 100 : 0;
+  container.appendChild(buildCard({
+    id: 'tests', label: 'Tests',
+    value:  `${tests.passed} / ${tests.total}`,
+    pct:    testPct,
+    status: getStatus(testPct, { good: 95, warn: 80 }),
+    meta:   `failed: ${tests.failed}`,
+    pctLabel: 'pass rate',
+  }));
+
+  const covPct = m.coverage?.pct ?? 0;
+  const covSt  = getStatus(covPct, { good: 80, warn: 60 });
+  container.appendChild(buildCard({
+    id: 'coverage', label: 'Coverage',
+    value:  `${covPct.toFixed(1)}%`,
+    pct:    covPct,
+    status: covSt,
+    meta:   covSt === 'good' ? 'цель достигнута' : covSt === 'warn' ? 'ниже нормы' : 'критически мало',
+    pctLabel: 'строк',
+  }));
+
+  const assets   = m.assets ?? { generated: 0, total: 0, errors: 0 };
+  const assetPct = assets.total > 0 ? (assets.generated / assets.total) * 100 : 0;
+  const assetSt  = assets.errors > 0
+    ? getStatus(assets.errors, { good: 0, warn: 3 }, true)
+    : getStatus(assetPct, { good: 95, warn: 70 });
+  container.appendChild(buildCard({
+    id: 'assets', label: 'Assets',
+    value:  `${assets.generated} / ${assets.total}`,
+    pct:    assetPct,
+    status: assetSt,
+    meta:   `errors: ${assets.errors}`,
+    pctLabel: 'сгенерировано',
+  }));
+
+  const narr    = m.narrative ?? { specs: 0, implemented: 0, pending: 0 };
+  const narrPct = narr.specs > 0 ? (narr.implemented / narr.specs) * 100 : 0;
+  container.appendChild(buildCard({
+    id: 'narrative', label: 'Narrative Specs',
+    value:  `${narr.implemented} / ${narr.specs}`,
+    pct:    narrPct,
+    status: getStatus(narrPct, { good: 80, warn: 50 }),
+    meta:   `pending: ${narr.pending}`,
+    pctLabel: 'реализовано',
+  }));
+
+  // Wire click/keyboard for drilldown after paint
+  requestAnimationFrame(() => {
+    ['build', 'tests', 'coverage', 'assets', 'narrative'].forEach(id => {
+      const card = document.getElementById(`card-${id}`);
+      if (!card) return;
+      card.addEventListener('click', () => toggleDrilldown(id));
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDrilldown(id); }
+      });
+    });
+  });
+
+  // Close drilldown on refresh
+  if (_activeCardId) closeDrilldown();
+}
+
+// ── Drilldown data definitions (§3.4) ─────────────────────────────────────────
+const DRILLDOWN_DATA = {
+  build: (m) => {
+    const b = m.build ?? {};
+    const ok = b.status === 'ok';
+    return {
+      tableHead: ['Параметр', 'Значение', 'Статус'],
+      rows: [
+        { label: 'CI статус',      value: b.status ?? '—',          st: ok ? 'good' : 'error' },
+        { label: 'Build ID',       value: b.id ?? '—',              st: 'info' },
+        { label: 'Время билда',    value: fmtTs(b.ts),              st: 'info' },
+        { label: 'Ветка',          value: b.branch ?? 'main',       st: 'info' },
+        { label: 'Триггер',        value: b.trigger ?? 'push',      st: 'info' },
+        { label: 'Артефакты',      value: String(b.artifacts ?? '—'), st: ok ? 'good' : 'warn' },
+      ],
+    };
+  },
+
+  tests: (m) => {
+    const t = m.tests ?? { passed: 0, failed: 0, total: 0 };
+    const pp = t.total ? ((t.passed / t.total) * 100).toFixed(1) : '0.0';
+    const fp = t.total ? ((t.failed / t.total) * 100).toFixed(1) : '0.0';
+    return {
+      tableHead: ['Параметр', 'Значение', 'Статус'],
+      rows: [
+        { label: 'Всего тестов',   value: String(t.total),                st: 'info' },
+        { label: 'Пройдено',       value: `${t.passed} (${pp}%)`,         st: getStatus(+pp, { good: 95, warn: 80 }) },
+        { label: 'Упало',          value: `${t.failed} (${fp}%)`,         st: t.failed === 0 ? 'good' : t.failed <= 5 ? 'warn' : 'error' },
+        { label: 'Пропущено',      value: String(t.skipped ?? 0),         st: 'info' },
+        { label: 'Длительность',   value: t.duration ?? '—',              st: 'info' },
+        { label: 'Тест-сьюты',     value: String(t.suites ?? '—'),        st: 'info' },
+      ],
+      chartTitle: '% тестов по модулям',
+      chart: m.tests?.byModule ?? [
+        { label: 'Domain',         pct: 38, color: 'good'  },
+        { label: 'Application',    pct: 28, color: 'info'  },
+        { label: 'Infra',          pct: 20, color: 'warn'  },
+        { label: 'Presentation',   pct: 14, color: 'error' },
+      ],
+    };
+  },
+
+  coverage: (m) => {
+    const c = m.coverage ?? {};
+    const p = c.pct ?? 0;
+    return {
+      tableHead: ['Тип', 'Покрытие', 'Статус'],
+      rows: [
+        { label: 'Строки',         value: `${(c.lines      ?? p).toFixed(1)}%`,         st: getStatus(c.lines      ?? p, { good: 80, warn: 60 }) },
+        { label: 'Ветки',          value: `${(c.branches   ?? p * 0.9).toFixed(1)}%`,   st: getStatus(c.branches   ?? p * 0.9, { good: 80, warn: 60 }) },
+        { label: 'Функции',        value: `${(c.functions  ?? p * 1.05).toFixed(1)}%`,  st: getStatus(c.functions  ?? p * 1.05, { good: 80, warn: 60 }) },
+        { label: 'Выражения',      value: `${(c.statements ?? p * 0.97).toFixed(1)}%`,  st: getStatus(c.statements ?? p * 0.97, { good: 80, warn: 60 }) },
+        { label: 'Цель',           value: '80%',                                         st: 'info' },
+        { label: 'Дельта',         value: `${(p - 80).toFixed(1)}%`,                    st: p >= 80 ? 'good' : 'error' },
+      ],
+      chartTitle: '% покрытия по пакетам',
+      chart: m.coverage?.byPackage ?? [
+        { label: 'domain',         pct: Math.min(100, p + 12), color: 'good'  },
+        { label: 'application',    pct: Math.min(100, p + 2),  color: 'good'  },
+        { label: 'infra',          pct: Math.min(100, p - 8),  color: 'warn'  },
+        { label: 'presentation',   pct: Math.max(0, p - 15),   color: 'error' },
+      ],
+    };
+  },
+
+  assets: (m) => {
+    const a = m.assets ?? { generated: 0, total: 0, errors: 0 };
+    return {
+      tableHead: ['Параметр', 'Значение', 'Статус'],
+      rows: [
+        { label: 'Сгенерировано',  value: String(a.generated),    st: 'info' },
+        { label: 'Всего',          value: String(a.total),        st: 'info' },
+        { label: 'Ошибок',         value: String(a.errors),       st: a.errors === 0 ? 'good' : a.errors <= 3 ? 'warn' : 'error' },
+        { label: 'Предупреждений', value: String(a.warnings ?? 0),st: (a.warnings ?? 0) === 0 ? 'good' : 'warn' },
+        { label: 'Размер (MB)',    value: String(a.sizeMb ?? '—'),st: 'info' },
+        { label: 'Время (сек)',    value: String(a.durationSec ?? '—'), st: 'info' },
+      ],
+      chartTitle: '% задач по ролям (taskBoard)',
+      chart: m.assets?.byRole ?? [
+        { label: 'Java Dev',       pct: 45, color: 'info'  },
+        { label: 'JS Dev',         pct: 30, color: 'good'  },
+        { label: 'Narrator',       pct: 15, color: 'warn'  },
+        { label: 'SA',             pct: 10, color: 'error' },
+      ],
+    };
+  },
+
+  narrative: (m) => {
+    const n = m.narrative ?? { specs: 0, implemented: 0, pending: 0 };
+    return {
+      tableHead: ['Параметр', 'Значение', 'Статус'],
+      rows: [
+        { label: 'Спек всего',     value: String(n.specs),        st: 'info' },
+        { label: 'Реализовано',    value: String(n.implemented),  st: getStatus(n.specs ? (n.implemented / n.specs) * 100 : 0, { good: 80, warn: 50 }) },
+        { label: 'В работе',       value: String(n.inProgress ?? 0), st: 'warn' },
+        { label: 'Ожидает',        value: String(n.pending),      st: 'info' },
+        { label: 'Квесты',         value: String(n.quests ?? '—'),st: 'info' },
+        { label: 'NPC',            value: String(n.npc ?? '—'),   st: 'info' },
+      ],
+      chartTitle: '% задач по ролям (taskBoard)',
+      chart: m.narrative?.byRole ?? [
+        { label: 'Narrator',       pct: 60, color: 'good'  },
+        { label: 'SA',             pct: 20, color: 'info'  },
+        { label: 'Java Dev',       pct: 12, color: 'warn'  },
+        { label: 'JS Dev',         pct: 8,  color: 'error' },
+      ],
+    };
+  },
+};
+
+// ── Drilldown render helpers ───────────────────────────────────────────────────
+function colorVar(color) {
+  return color === 'good' ? 'var(--primary)'
+       : color === 'warn' ? 'var(--warn)'
+       : color === 'error'? 'var(--error)'
+       : 'var(--info)';
+}
+
+function buildBarChart(chart, title) {
+  if (!chart?.length) return '';
+  const rows = chart.map(({ label, pct, color }) => `
+    <div class="dd-bar-row">
+      <span class="dd-bar-label" title="${escHtml(label)}">${escHtml(label)}</span>
+      <div class="dd-bar-track">
+        <div class="dd-bar-fill" data-pct="${pct}" style="width:0%;background:${colorVar(color)}"></div>
+      </div>
+      <span class="dd-bar-pct">${pct}%</span>
+    </div>`).join('');
+  return `<div>
+    <div class="dd-barchart-title">${escHtml(title ?? 'Распределение')}</div>
+    ${rows}
+  </div>`;
+}
+
+function openDrilldown(cardId) {
+  const metrics = _currentMetrics;
+  if (!metrics) return;
+  const def   = DRILLDOWN_DATA[cardId]?.(metrics);
+  if (!def) return;
+
+  const panel = document.getElementById('drilldown-panel');
+  const wrapper = document.getElementById('drilldown-wrapper');
+
+  const cardLabel = document.querySelector(`#card-${cardId} .card-label`)?.textContent ?? cardId;
+
+  // Table
+  const thead = `<tr>${def.tableHead.map(h => `<th>${escHtml(h)}</th>`).join('')}</tr>`;
+  const tbody = def.rows.map(({ label, value, st }) => `
+    <tr>
+      <td>${escHtml(label)}</td>
+      <td>${escHtml(value)}</td>
+      <td><span class="dd-badge ${st}">${st.toUpperCase()}</span></td>
+    </tr>`).join('');
+
+  panel.innerHTML = `
+    <div class="dd-header">
+      <div class="dd-title">Детали: <span>${escHtml(cardLabel)}</span></div>
+      <button class="dd-close" id="dd-close-btn" aria-label="Закрыть (Escape)" title="Закрыть (Escape)">✕</button>
+    </div>
+    <div class="dd-body">
+      <div>
+        <table class="dd-table" aria-label="Sub-метрики ${escHtml(cardLabel)}">
+          <thead>${thead}</thead>
+          <tbody>${tbody}</tbody>
+        </table>
+      </div>
+      ${buildBarChart(def.chart, def.chartTitle)}
+    </div>`;
+
+  wrapper.classList.add('open');
+  wrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  // Animate bars after wrapper opens
+  setTimeout(() => {
+    panel.querySelectorAll('.dd-bar-fill[data-pct]').forEach(el => {
+      el.style.width = el.dataset.pct + '%';
+    });
+  }, 40);
+
+  document.getElementById('dd-close-btn')?.addEventListener('click', closeDrilldown);
+}
+
+function closeDrilldown() {
+  const wrapper = document.getElementById('drilldown-wrapper');
+  wrapper?.classList.remove('open');
+
+  document.querySelectorAll('.card.active').forEach(c => {
+    c.classList.remove('active');
+    c.setAttribute('aria-expanded', 'false');
+  });
+  _activeCardId = null;
+
+  setTimeout(() => {
+    if (!wrapper?.classList.contains('open')) {
+      const panel = document.getElementById('drilldown-panel');
+      if (panel) panel.innerHTML = '';
+    }
+  }, 220);
+}
+
+function toggleDrilldown(cardId) {
+  // Deactivate all cards
+  document.querySelectorAll('.card.active').forEach(c => {
+    c.classList.remove('active');
+    c.setAttribute('aria-expanded', 'false');
+  });
+
+  if (_activeCardId === cardId) {
+    closeDrilldown();
+    return;
+  }
+
+  _activeCardId = cardId;
+  const card = document.getElementById(`card-${cardId}`);
+  card?.classList.add('active');
+  card?.setAttribute('aria-expanded', 'true');
+  openDrilldown(cardId);
+}
+
+// Escape key handler
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && _activeCardId) closeDrilldown();
+});
+
+// ── Data loading ──────────────────────────────────────────────────────────────
+function applyMeta(m) {
+  const b = document.getElementById('build-id');
+  const e = document.getElementById('env-tag');
+  if (b) b.textContent = `build: ${m.build?.id ?? '—'}`;
+  if (e) e.textContent = `env: ${m.env ?? 'local'}`;
+}
+function setLastUpdated() {
+  const el = document.getElementById('last-updated');
+  if (el) el.textContent = 'обновлено ' + new Date().toLocaleTimeString('ru-RU', { hour12: false });
+}
+function showError(msg) {
+  document.getElementById('error-banner')?.classList.add('visible');
+  const d = document.getElementById('error-detail');
+  if (d && msg) d.textContent = msg + ' Ниже отображаются демо-данные.';
+}
+function hideError() {
+  document.getElementById('error-banner')?.classList.remove('visible');
+}
+function demoData() {
+  return {
+    env: 'demo',
+    build: { status: 'ok', ts: Date.now(), id: 'demo-001', branch: 'main', trigger: 'push' },
+    tests: { passed: 142, failed: 3, total: 145, skipped: 0, suites: 12, duration: '4.2s' },
+    coverage: { pct: 74.5 },
+    assets: { generated: 88, total: 100, errors: 1, warnings: 2, sizeMb: '14.2', durationSec: '8.4' },
+    narrative: { specs: 40, implemented: 28, pending: 12, inProgress: 4, quests: 15, npc: 8 },
+  };
+}
+
+async function loadMetrics() {
+  hideError();
+  try {
+    const resp = await fetch('./metrics.json', { cache: 'no-cache' });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status} ${resp.statusText}`);
+    const data = await resp.json();
+    renderCards(data);
+    applyMeta(data);
+    setLastUpdated();
+  } catch (err) {
+    showError(err.message ?? 'Неизвестная ошибка при загрузке metrics.json.');
+    renderCards(demoData());
+    applyMeta(demoData());
+    setLastUpdated();
+  }
+}
+
+document.getElementById('refresh-btn')?.addEventListener('click', () => {
+  const btn = document.getElementById('refresh-btn');
+  btn.disabled = true;
+  setTimeout(() => { btn.disabled = false; }, 600);
+  loadMetrics();
+});
+
+loadMetrics();
+</script>
+</body>
+</html>
