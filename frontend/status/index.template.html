@@ -1,889 +1,724 @@
 <!DOCTYPE html>
-<!--
-  index.template.html — TASK-FE-054
-  CI-пайплайн заменяет два плейсхолдера перед деплоем:
-
-    sed -i "s|<!-- METRICS_JSON_PLACEHOLDER -->|<script>window.__METRICS__=$(cat metrics.json)<\/script>|" index.template.html
-    sed -i "s|<!-- ASSETS_MANIFEST_PLACEHOLDER -->|<script>window.__ASSETS__=$(cat assets-manifest.json)<\/script>|" index.template.html
-
-  После замены страница рендерит Overview и Assets Gallery
-  без каких-либо fetch-запросов к внешним файлам.
--->
-<html lang="ru" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Life of T — CI Status Dashboard">
+  <meta name="description" content="Life of T — Build Status">
   <title>Life of T — Status</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Share+Tech&display=swap" rel="stylesheet">
 
   <!-- ═══════════════════════════════════════════════════════════════════
-       METRICS_JSON_PLACEHOLDER
-       CI заменяет эту строку на:
-       <script>window.__METRICS__ = { ...metrics.json ... };<\/script>
-       ═══════════════════════════════════════════════════════════════════ -->
+       CI INJECTION POINT: metrics.json
+       Pipeline replaces this comment with:
+         <script id="metrics-data" type="application/json">{...}</script>
+       where {...} is the full content of metrics.json
+  ══════════════════════════════════════════════════════════════════════ -->
   <!-- METRICS_JSON_PLACEHOLDER -->
 
   <!-- ═══════════════════════════════════════════════════════════════════
-       ASSETS_MANIFEST_PLACEHOLDER
-       CI заменяет эту строку на:
-       <script>window.__ASSETS__ = [ ...assets-manifest.json ... ];<\/script>
-       ═══════════════════════════════════════════════════════════════════ -->
+       CI INJECTION POINT: assets-manifest.json
+       Pipeline replaces this comment with:
+         <script id="assets-manifest-data" type="application/json">{...}</script>
+       where {...} is the full content of assets-manifest.json
+  ══════════════════════════════════════════════════════════════════════ -->
   <!-- ASSETS_MANIFEST_PLACEHOLDER -->
 
   <style>
-    /* ── Design tokens ───────────────────────────────────────────────── */
-    :root {
-      --font-body: 'Share Tech Mono', 'Courier New', monospace;
-      --text-xs:   0.75rem;
-      --text-sm:   0.875rem;
-      --text-base: 1rem;
-      --text-lg:   1.25rem;
-      --text-xl:   1.5rem;
-      --space-1: 0.25rem; --space-2: 0.5rem;  --space-3: 0.75rem;
-      --space-4: 1rem;    --space-6: 1.5rem;  --space-8: 2rem;
-      --transition: 140ms steps(4, end);
+    /* ─── Reset & Base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      scroll-behavior: smooth;
     }
-    :root, [data-theme="light"] {
-      --bg:           #e8e4d8;
-      --surface:      #f0ede3;
-      --surface-2:    #f5f3ec;
-      --border:       #b8b4a8;
-      --border-dim:   #ccc8bc;
-      --text:         #1a1a14;
-      --text-muted:   #5a5850;
-      --text-faint:   #9a9890;
-      --text-inv:     #f0ede3;
-      --primary:      #2a7a2e;
-      --primary-dim:  #c4d9c5;
-      --warn:         #b87800;
-      --warn-dim:     #e8d9aa;
-      --error:        #b82020;
-      --error-dim:    #e8c5c5;
-      --info:         #1a5a8a;
-      --info-dim:     #c5d9e8;
-      --divider:      #ccc8bc;
-      --shadow:       2px 2px 0 rgba(0,0,0,0.18);
+
+    /* ─── Design Tokens ────────────────────────────────────────────── */
+    :root, [data-theme="dark"] {
+      --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+      --font-body: 'Share Tech', 'Courier New', monospace;
+
+      --color-bg:            #0d0d0b;
+      --color-surface:       #131311;
+      --color-surface-2:     #1a1a17;
+      --color-surface-3:     #222220;
+      --color-border:        #2e2e2b;
+      --color-divider:       #252522;
+
+      --color-text:          #d4d4c8;
+      --color-text-muted:    #7a7a70;
+      --color-text-faint:    #484840;
+
+      --color-primary:       #4fa89b;
+      --color-primary-dim:   #2a5e56;
+      --color-success:       #6daa45;
+      --color-success-dim:   #304d20;
+      --color-warning:       #e8a930;
+      --color-warning-dim:   #5a3f0e;
+      --color-error:         #d95f5f;
+      --color-error-dim:     #5a1e1e;
+      --color-faint-accent:  #1e2e2c;
+
+      --space-1: 0.25rem;  --space-2: 0.5rem;  --space-3: 0.75rem;
+      --space-4: 1rem;     --space-6: 1.5rem;  --space-8: 2rem;
+      --space-12: 3rem;    --space-16: 4rem;
+
+      --text-xs:   clamp(0.75rem,  0.7rem  + 0.25vw, 0.875rem);
+      --text-sm:   clamp(0.875rem, 0.8rem  + 0.35vw, 1rem);
+      --text-base: clamp(1rem,     0.95rem + 0.25vw, 1.125rem);
+      --text-lg:   clamp(1.125rem, 1rem    + 0.75vw, 1.5rem);
+      --text-xl:   clamp(1.5rem,   1.2rem  + 1.25vw, 2.25rem);
+
+      --transition: 160ms cubic-bezier(0.16, 1, 0.3, 1);
+
+      /* pixel-art: no border radius */
+      --radius: 0px;
     }
-    [data-theme="dark"] {
-      --bg:           #12110d;
-      --surface:      #1a1915;
-      --surface-2:    #211f1a;
-      --border:       #3a3830;
-      --border-dim:   #2e2c25;
-      --text:         #ddd9cc;
-      --text-muted:   #8a8880;
-      --text-faint:   #5a5850;
-      --text-inv:     #12110d;
-      --primary:      #4db852;
-      --primary-dim:  #1a3a1c;
-      --warn:         #e8a820;
-      --warn-dim:     #3a2e00;
-      --error:        #e84848;
-      --error-dim:    #3a1010;
-      --info:         #48a8e8;
-      --info-dim:     #0a2038;
-      --divider:      #2e2c25;
-      --shadow:       2px 2px 0 rgba(0,0,0,0.5);
+
+    [data-theme="light"] {
+      --color-bg:            #f5f4ef;
+      --color-surface:       #fafaf7;
+      --color-surface-2:     #ffffff;
+      --color-surface-3:     #ededea;
+      --color-border:        #d0d0ca;
+      --color-divider:       #e2e2dc;
+      --color-text:          #1e1e18;
+      --color-text-muted:    #6a6a60;
+      --color-text-faint:    #adadaa;
+      --color-primary:       #1e7a70;
+      --color-primary-dim:   #d0ecea;
+      --color-success:       #3a7a18;
+      --color-success-dim:   #d4e8c8;
+      --color-warning:       #9a6800;
+      --color-warning-dim:   #fce8b0;
+      --color-error:         #b82020;
+      --color-error-dim:     #f8d4d4;
+      --color-faint-accent:  #e4f0ee;
     }
+
     @media (prefers-color-scheme: light) {
       :root:not([data-theme]) {
-        --bg: #e8e4d8; --surface: #f0ede3; --surface-2: #f5f3ec;
-        --border: #b8b4a8; --border-dim: #ccc8bc;
-        --text: #1a1a14; --text-muted: #5a5850; --text-faint: #9a9890;
-        --text-inv: #f0ede3; --primary: #2a7a2e; --primary-dim: #c4d9c5;
-        --warn: #b87800; --warn-dim: #e8d9aa; --error: #b82020; --error-dim: #e8c5c5;
-        --info: #1a5a8a; --info-dim: #c5d9e8; --divider: #ccc8bc;
-        --shadow: 2px 2px 0 rgba(0,0,0,.18);
+        --color-bg: #f5f4ef; --color-surface: #fafaf7; --color-surface-2: #ffffff;
+        --color-surface-3: #ededea; --color-border: #d0d0ca; --color-divider: #e2e2dc;
+        --color-text: #1e1e18; --color-text-muted: #6a6a60; --color-text-faint: #adadaa;
+        --color-primary: #1e7a70; --color-primary-dim: #d0ecea;
+        --color-success: #3a7a18; --color-success-dim: #d4e8c8;
+        --color-warning: #9a6800; --color-warning-dim: #fce8b0;
+        --color-error: #b82020; --color-error-dim: #f8d4d4;
+        --color-faint-accent: #e4f0ee;
       }
     }
 
-    /* ── Reset + base ────────────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: auto; }
     body {
+      min-height: 100dvh;
       font-family: var(--font-body);
       font-size: var(--text-base);
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100dvh;
-      line-height: 1.5;
+      color: var(--color-text);
+      background: var(--color-bg);
+      line-height: 1.6;
     }
-    img, svg { display: block; }
+
+    img, svg { display: block; max-width: 100%; }
     button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
-    table  { border-collapse: collapse; }
+    :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
 
-    /* ── Layout ──────────────────────────────────────────────────────── */
-    .page { max-width: 1100px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
 
-    /* ── Header ──────────────────────────────────────────────────────── */
-    .header {
+    /* ─── Layout ───────────────────────────────────────────────────── */
+    .container { max-width: 1200px; margin-inline: auto; padding-inline: var(--space-6); }
+
+    /* ─── Header ───────────────────────────────────────────────────── */
+    .site-header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .site-header__inner {
       display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 2px solid var(--border); padding-bottom: var(--space-4);
-      margin-bottom: var(--space-6);
+      padding-block: var(--space-4);
     }
-    .header-logo   { display: flex; align-items: center; gap: var(--space-3); }
-    .logo-mark {
-      width: 32px; height: 32px; background: var(--primary);
-      display: grid; place-items: center;
-      color: var(--text-inv); font-size: var(--text-sm); font-weight: bold;
-      box-shadow: var(--shadow);
+    .site-header__logo {
+      display: flex; align-items: center; gap: var(--space-3);
+      font-family: var(--font-mono); font-size: var(--text-lg);
+      color: var(--color-primary); letter-spacing: 0.05em;
     }
-    .logo-text { font-size: var(--text-lg); letter-spacing: 0.08em; }
-    .logo-tag  { font-size: var(--text-xs); color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; }
-    .header-actions { display: flex; align-items: center; gap: var(--space-3); }
+    .site-header__logo svg { color: var(--color-primary); }
+    .site-header__meta {
+      font-family: var(--font-mono); font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+    .site-header__actions { display: flex; align-items: center; gap: var(--space-3); }
     .btn-icon {
-      width: 36px; height: 36px; border: 1px solid var(--border);
-      display: grid; place-items: center; background: var(--surface);
-      color: var(--text-muted); box-shadow: var(--shadow);
-      transition: background var(--transition), color var(--transition);
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      color: var(--color-text-muted);
+      transition: color var(--transition), background var(--transition), border-color var(--transition);
     }
-    .btn-icon:hover { background: var(--surface-2); color: var(--text); }
-    .last-updated   { font-size: var(--text-xs); color: var(--text-faint); }
+    .btn-icon:hover { color: var(--color-text); background: var(--color-surface-3); border-color: var(--color-primary); }
+    .btn-icon:active { background: var(--color-faint-accent); }
 
-    /* ── Tabs ────────────────────────────────────────────────────────── */
-    .tabs {
-      display: flex; gap: 0; border-bottom: 2px solid var(--border);
-      margin-bottom: var(--space-6);
-    }
-    .tab {
-      padding: var(--space-2) var(--space-6);
-      font-size: var(--text-sm); letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--text-muted); border: 1px solid transparent;
-      border-bottom: none; cursor: pointer;
-      transition: background var(--transition), color var(--transition);
-      position: relative; bottom: -2px;
-    }
-    .tab:hover  { color: var(--text); background: var(--surface); }
-    .tab.active {
-      color: var(--primary); background: var(--surface);
-      border-color: var(--border); border-bottom-color: var(--surface);
-    }
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
+    /* ─── Main ─────────────────────────────────────────────────────── */
+    main { padding-block: var(--space-8); }
 
-    /* ── Error banner ────────────────────────────────────────────────── */
+    /* ─── Error Banner ─────────────────────────────────────────────── */
     .error-banner {
-      display: none; align-items: flex-start; gap: var(--space-3);
-      padding: var(--space-4); border: 2px solid var(--error);
-      background: var(--error-dim); color: var(--error);
-      margin-bottom: var(--space-6); font-size: var(--text-sm);
-      box-shadow: var(--shadow);
+      display: none;
+      padding: var(--space-4) var(--space-6);
+      margin-bottom: var(--space-6);
+      background: var(--color-error-dim);
+      border: 1px solid var(--color-error);
+      color: var(--color-error);
+      font-family: var(--font-mono); font-size: var(--text-sm);
     }
-    .error-banner.visible { display: flex; }
-    .error-icon  { font-size: var(--text-xl); line-height: 1; flex-shrink: 0; }
-    .error-title { font-size: var(--text-base); margin-bottom: var(--space-1); letter-spacing: 0.05em; }
-    .error-msg   { color: var(--text-muted); }
+    .error-banner.is-visible { display: block; }
+    .error-banner__icon { display: inline; margin-right: var(--space-2); }
 
-    /* ── Section header ──────────────────────────────────────────────── */
-    .section-header { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); }
-    .section-title  { font-size: var(--text-base); letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
-    .section-divider { flex: 1; height: 1px; background: var(--divider); }
-
-    /* ── Overview cards ──────────────────────────────────────────────── */
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
-      gap: var(--space-4);
-    }
-    .card {
-      background: var(--surface); border: 1px solid var(--border);
-      padding: var(--space-4); box-shadow: var(--shadow);
-      position: relative; overflow: visible;
-      cursor: pointer; outline: none;
-      transition: background var(--transition), border-color var(--transition);
-    }
-    .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-    .card.good::before  { background: var(--primary); }
-    .card.warn::before  { background: var(--warn); }
-    .card.error::before { background: var(--error); }
-    .card.info::before  { background: var(--info); }
-    .card:hover        { background: var(--surface-2); }
-    .card.active       { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary), var(--shadow); }
-    .card.active::after {
-      content: ''; position: absolute; bottom: -12px; left: 50%;
-      transform: translateX(-50%);
-      width: 0; height: 0;
-      border-left: 8px solid transparent; border-right: 8px solid transparent;
-      border-top: 8px solid var(--primary); z-index: 10;
-    }
-    .card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-    .card-label  { font-size: var(--text-xs); letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); margin-bottom: var(--space-2); }
-    .card-value  { font-size: var(--text-xl); font-weight: bold; margin-bottom: var(--space-3); letter-spacing: 0.04em; }
-    .card-value.good  { color: var(--primary); }
-    .card-value.warn  { color: var(--warn); }
-    .card-value.error { color: var(--error); }
-    .card-value.info  { color: var(--info); }
-    .progress-track { height: 8px; background: var(--border-dim); position: relative; margin-bottom: var(--space-2); }
-    .progress-fill  { height: 100%; transition: width 0.5s steps(10, end); position: relative; }
-    .progress-fill::after { content: ''; position: absolute; right: 0; top: 0; width: 2px; height: 100%; background: rgba(255,255,255,0.35); }
-    .progress-fill.good  { background: var(--primary); }
-    .progress-fill.warn  { background: var(--warn); }
-    .progress-fill.error { background: var(--error); }
-    .progress-fill.info  { background: var(--info); }
-    .progress-labels { display: flex; justify-content: space-between; font-size: var(--text-xs); color: var(--text-faint); }
-    .card-meta { font-size: var(--text-xs); color: var(--text-faint); margin-top: var(--space-2); border-top: 1px solid var(--divider); padding-top: var(--space-2); }
-
-    /* ── Drilldown panel ─────────────────────────────────────────────── */
-    .drilldown-wrapper {
-      overflow: hidden; max-height: 0;
-      transition: max-height 200ms ease-out;
-      margin-top: var(--space-3); margin-bottom: var(--space-4);
-    }
-    .drilldown-wrapper.open { max-height: 900px; }
-    .drilldown-panel {
-      background: var(--surface-2); border: 1px solid var(--border);
-      border-top: 3px solid var(--primary); box-shadow: var(--shadow);
-      padding: var(--space-4); position: relative;
-    }
-    .dd-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: var(--space-4); border-bottom: 1px solid var(--divider);
+    /* ─── Section heading ──────────────────────────────────────────── */
+    .section-heading {
+      display: flex; align-items: center; gap: var(--space-3);
+      margin-bottom: var(--space-6);
       padding-bottom: var(--space-3);
+      border-bottom: 1px solid var(--color-divider);
+      font-family: var(--font-mono); font-size: var(--text-sm);
+      color: var(--color-text-muted); letter-spacing: 0.12em; text-transform: uppercase;
     }
-    .dd-title { font-size: var(--text-sm); letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); }
-    .dd-title span { color: var(--primary); font-weight: bold; }
-    .dd-close {
-      width: 28px; height: 28px; border: 1px solid var(--border);
-      background: var(--surface); display: grid; place-items: center;
-      font-size: var(--text-base); color: var(--text-muted); box-shadow: var(--shadow);
-      transition: background 140ms steps(2,end), color 140ms steps(2,end), border-color 140ms steps(2,end);
+    .section-heading__dot {
+      width: 8px; height: 8px;
+      background: var(--color-primary);
+      flex-shrink: 0;
     }
-    .dd-close:hover { background: var(--error-dim); color: var(--error); border-color: var(--error); }
-    .dd-body { display: grid; grid-template-columns: 1fr; gap: var(--space-4); }
-    @media (min-width: 640px) { .dd-body { grid-template-columns: 1fr 1fr; } }
-    .dd-table { width: 100%; border-collapse: collapse; font-size: var(--text-xs); }
-    .dd-table th { text-align: left; color: var(--text-faint); letter-spacing: 0.1em; text-transform: uppercase; padding: var(--space-1) var(--space-2); border-bottom: 1px solid var(--divider); }
-    .dd-table td { padding: var(--space-1) var(--space-2); color: var(--text); border-bottom: 1px solid var(--border-dim); vertical-align: middle; }
-    .dd-table tr:last-child td { border-bottom: none; }
-    .dd-badge { display: inline-block; padding: 1px 6px; font-size: var(--text-xs); letter-spacing: 0.08em; }
-    .dd-badge.good  { background: var(--primary-dim); color: var(--primary); }
-    .dd-badge.warn  { background: var(--warn-dim);    color: var(--warn); }
-    .dd-badge.error { background: var(--error-dim);   color: var(--error); }
-    .dd-badge.info  { background: var(--info-dim);    color: var(--info); }
-    .dd-barchart-title { font-size: var(--text-xs); letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: var(--space-3); }
-    .dd-bar-row { display: grid; grid-template-columns: 110px 1fr 42px; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); }
-    .dd-bar-label { font-size: var(--text-xs); color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .dd-bar-track { height: 10px; background: var(--border-dim); position: relative; }
-    .dd-bar-fill  { height: 100%; transition: width 200ms ease-out; position: relative; }
-    .dd-bar-fill::after { content: ''; position: absolute; right: 0; top: 0; width: 2px; height: 100%; background: rgba(255,255,255,0.3); }
-    .dd-bar-pct   { font-size: var(--text-xs); color: var(--text-faint); text-align: right; }
 
-    /* ── Assets gallery ──────────────────────────────────────────────── */
-    .asset-grid {
+    /* ─── Overview Cards ───────────────────────────────────────────── */
+    .overview-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
       gap: var(--space-4);
+      margin-bottom: var(--space-12);
+    }
+    .stat-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      padding: var(--space-6);
+      display: flex; flex-direction: column; gap: var(--space-3);
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .stat-card:hover { border-color: var(--color-primary); background: var(--color-faint-accent); }
+    .stat-card__label {
+      font-family: var(--font-mono); font-size: var(--text-xs);
+      color: var(--color-text-muted); letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .stat-card__value {
+      font-family: var(--font-mono); font-size: var(--text-xl);
+      color: var(--color-text); line-height: 1;
+    }
+    .stat-card__value.is-ok      { color: var(--color-success); }
+    .stat-card__value.is-warn    { color: var(--color-warning); }
+    .stat-card__value.is-error   { color: var(--color-error); }
+    .stat-card__sub {
+      font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-text-muted);
+    }
+
+    /* progress bar */
+    .progress-wrap {
+      width: 100%; height: 8px;
+      background: var(--color-surface-3);
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--color-success);
+      transition: width 600ms steps(10, end);
+    }
+    .progress-bar.is-warn  { background: var(--color-warning); }
+    .progress-bar.is-error { background: var(--color-error); }
+
+    /* ─── Assets Gallery ───────────────────────────────────────────── */
+    .gallery-controls {
+      display: flex; align-items: center; gap: var(--space-3);
+      margin-bottom: var(--space-6); flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: var(--space-1) var(--space-4);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      font-family: var(--font-mono); font-size: var(--text-xs);
+      color: var(--color-text-muted); letter-spacing: 0.08em; text-transform: uppercase;
+      transition: color var(--transition), background var(--transition), border-color var(--transition);
+    }
+    .filter-btn:hover { border-color: var(--color-primary); color: var(--color-text); }
+    .filter-btn.is-active {
+      background: var(--color-primary-dim); border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr));
+      gap: var(--space-4);
     }
     .asset-card {
-      position: relative; display: flex; flex-direction: row;
-      gap: var(--space-3); padding: var(--space-3);
-      background: var(--surface); border: 1px solid var(--border);
-      box-shadow: var(--shadow); cursor: default; outline: none; overflow: visible;
-      transition: background var(--transition), border-color var(--transition);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      display: flex; flex-direction: column;
+      transition: border-color var(--transition);
+      overflow: hidden;
     }
-    .asset-card:hover, .asset-card:focus-visible { background: var(--surface-2); border-color: var(--primary); }
-    .asset-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-    .asset-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-    .asset-card.broken  { border-color: var(--error); }
-    .asset-card.broken::before  { background: var(--error); }
-    .asset-card.no-meta { border-color: var(--warn); }
-    .asset-card.no-meta::before { background: var(--warn); }
-    .asset-thumb { position: relative; flex-shrink: 0; width: 64px; height: 64px; }
-    .asset-thumb img { width: 64px; height: 64px; object-fit: contain; image-rendering: pixelated; background: var(--bg); border: 1px solid var(--border-dim); display: block; }
-    .asset-thumb img.broken-img { opacity: 0.5; }
-    .asset-preview {
-      position: absolute; z-index: 100; top: 0; left: calc(100% + 8px); width: 200px;
-      background: var(--surface-2); border: 1px solid var(--primary);
-      box-shadow: 4px 4px 0 rgba(0,0,0,.6); padding: var(--space-2);
-      opacity: 0; transform: scale(0.92); transform-origin: top left;
-      pointer-events: none; transition: opacity 200ms ease-out, transform 200ms ease-out;
+    .asset-card:hover { border-color: var(--color-primary); }
+    .asset-card__preview {
+      aspect-ratio: 1;
+      background: var(--color-surface-3);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-size: var(--text-xs);
+      color: var(--color-text-faint); letter-spacing: 0.1em;
+      position: relative; overflow: hidden;
     }
-    .asset-card:hover .asset-preview, .asset-card:focus-within .asset-preview { opacity: 1; transform: scale(1); }
-    .asset-preview img { width: 100%; height: auto; max-height: 200px; object-fit: contain; image-rendering: pixelated; background: var(--bg); border: 1px solid var(--border-dim); display: block; margin-bottom: var(--space-2); }
-    .asset-preview-label { font-size: var(--text-xs); color: var(--text-muted); letter-spacing: 0.06em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .asset-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
-    .asset-name { font-size: var(--text-sm); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; letter-spacing: 0.04em; }
-    .asset-badges { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-1); }
-    .asset-badge { display: inline-block; padding: 1px 6px; font-size: var(--text-xs); letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.6; }
-    .asset-badge.good  { background: var(--primary-dim); color: var(--primary); }
-    .asset-badge.warn  { background: var(--warn-dim);    color: var(--warn); }
-    .asset-badge.error { background: var(--error-dim);   color: var(--error); }
-    .asset-badge.info  { background: var(--info-dim);    color: var(--info); }
-    .asset-meta { display: grid; grid-template-columns: auto 1fr; column-gap: var(--space-2); row-gap: 1px; margin-top: var(--space-1); font-size: var(--text-xs); }
-    .asset-meta dt { color: var(--text-faint); letter-spacing: 0.06em; white-space: nowrap; }
-    .asset-meta dd { color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .asset-meta dd.meta-empty { color: var(--text-faint); }
-    .asset-no-meta-warn { display: flex; align-items: center; gap: var(--space-1); padding: 2px var(--space-2); background: var(--warn-dim); border: 1px solid var(--warn); color: var(--warn); font-size: var(--text-xs); letter-spacing: 0.06em; margin-top: var(--space-2); }
-    .asset-no-meta-warn span { color: var(--text-muted); }
-    .asset-empty { grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; padding: var(--space-8) var(--space-4); color: var(--text-faint); text-align: center; gap: var(--space-3); }
-    .asset-empty-icon { font-size: 2rem; opacity: 0.4; }
-    .asset-empty p { font-size: var(--text-sm); letter-spacing: 0.1em; }
+    .asset-card__preview img {
+      width: 100%; height: 100%; object-fit: contain;
+      image-rendering: pixelated;
+    }
+    .asset-card__preview .asset-ext {
+      position: absolute; bottom: var(--space-2); right: var(--space-2);
+      padding: 2px var(--space-1);
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      font-size: 10px; letter-spacing: 0.05em; color: var(--color-text-muted);
+    }
+    .asset-card__info {
+      padding: var(--space-3) var(--space-4);
+      border-top: 1px solid var(--color-divider);
+    }
+    .asset-card__name {
+      font-family: var(--font-mono); font-size: var(--text-xs);
+      color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .asset-card__meta {
+      font-family: var(--font-mono); font-size: 10px; color: var(--color-text-faint);
+      margin-top: var(--space-1);
+    }
+    .asset-card.status-ok    { border-top: 2px solid transparent; }
+    .asset-card.status-error { border-top: 2px solid var(--color-error); }
+    .asset-card.status-warn  { border-top: 2px solid var(--color-warning); }
 
-    /* ── Filter bar ──────────────────────────────────────────────────── */
-    .filter-bar { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-4); align-items: center; }
-    .filter-btn {
-      padding: var(--space-1) var(--space-3); font-size: var(--text-xs);
-      letter-spacing: 0.1em; text-transform: uppercase;
-      border: 1px solid var(--border); background: var(--surface);
-      color: var(--text-muted); box-shadow: var(--shadow);
-      transition: background var(--transition), color var(--transition), border-color var(--transition);
+    /* ─── Empty / Skeleton states ──────────────────────────────────── */
+    @keyframes shimmer {
+      0%   { background-position: -200% 0; }
+      100% { background-position:  200% 0; }
     }
-    .filter-btn:hover  { background: var(--surface-2); color: var(--text); }
-    .filter-btn.active { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); }
-    .filter-count { font-size: var(--text-xs); color: var(--text-faint); margin-left: auto; }
-
-    /* ── Footer ──────────────────────────────────────────────────────── */
-    .footer {
-      border-top: 1px solid var(--divider); padding-top: var(--space-4);
-      display: flex; gap: var(--space-4); flex-wrap: wrap;
-      font-size: var(--text-xs); color: var(--text-faint); margin-top: var(--space-6);
+    .skeleton {
+      background: linear-gradient(90deg,
+        var(--color-surface-2) 25%,
+        var(--color-surface-3) 50%,
+        var(--color-surface-2) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+    .gallery-empty {
+      grid-column: 1 / -1;
+      padding: var(--space-16) var(--space-8);
+      text-align: center;
+      font-family: var(--font-mono); font-size: var(--text-sm);
+      color: var(--color-text-faint);
     }
 
-    /* ── Reduced motion ──────────────────────────────────────────────── */
-    @media (prefers-reduced-motion: reduce) {
-      .progress-fill, .drilldown-wrapper, .dd-bar-fill,
-      .asset-preview, .asset-card { transition: none; }
-      .asset-card:hover .asset-preview, .asset-card:focus-within .asset-preview { opacity: 1; transform: none; }
+    /* ─── Footer ───────────────────────────────────────────────────── */
+    .site-footer {
+      border-top: 1px solid var(--color-divider);
+      padding-block: var(--space-6);
+      font-family: var(--font-mono); font-size: var(--text-xs);
+      color: var(--color-text-faint);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: var(--space-4); flex-wrap: wrap;
     }
-    @media (max-width: 480px) {
-      .cards-grid  { grid-template-columns: 1fr; }
-      .asset-grid  { grid-template-columns: 1fr; }
-      .header { flex-direction: column; align-items: flex-start; gap: var(--space-3); }
-      .dd-bar-row { grid-template-columns: 80px 1fr 36px; }
-      .tab { padding: var(--space-2) var(--space-3); }
+
+    /* ─── Responsive ───────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .overview-grid { grid-template-columns: 1fr 1fr; }
+      .site-header__meta { display: none; }
+    }
+    @media (max-width: 380px) {
+      .overview-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-<div class="page">
 
-  <!-- Header -->
-  <header class="header">
-    <div class="header-logo">
-      <div class="logo-mark" aria-hidden="true">T</div>
-      <div>
-        <div class="logo-text">LIFE OF T</div>
-        <div class="logo-tag">Status Dashboard</div>
+  <a href="#main-content" class="sr-only">Skip to main content</a>
+
+  <!-- ═══ HEADER ═════════════════════════════════════════════════════ -->
+  <header class="site-header" role="banner">
+    <div class="container">
+      <div class="site-header__inner">
+
+        <div class="site-header__logo">
+          <!-- SVG logo: pixel-T mark -->
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="0" y="0" width="24" height="4" fill="currentColor"/>
+            <rect x="10" y="4" width="4" height="20" fill="currentColor"/>
+          </svg>
+          LIFE_OF_T :: STATUS
+        </div>
+
+        <div class="site-header__meta" id="build-ts" aria-live="polite">—</div>
+
+        <div class="site-header__actions">
+          <button class="btn-icon" id="refresh-btn" aria-label="Refresh data" title="Refresh">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+          </button>
+          <button class="btn-icon" data-theme-toggle aria-label="Switch to light mode" title="Toggle theme">
+            <!-- moon icon (dark mode active by default) -->
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          </button>
+        </div>
+
       </div>
-    </div>
-    <div class="header-actions">
-      <span class="last-updated" id="last-updated" aria-live="polite"></span>
-      <button class="btn-icon" data-theme-toggle aria-label="Переключить тему" title="Тема">
-        <svg id="theme-svg" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <circle cx="8" cy="8" r="3"/>
-          <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42M11.53 4.47l1.42-1.42M3.05 12.95l1.42-1.42" stroke-linecap="square"/>
-        </svg>
-      </button>
     </div>
   </header>
 
-  <!-- Error banner -->
-  <div class="error-banner" id="error-banner" role="alert" aria-live="assertive">
-    <div class="error-icon">!</div>
-    <div>
-      <div class="error-title">[WARN] Данные не инжектированы пайплайном</div>
-      <div class="error-msg" id="error-detail">Плейсхолдеры не заменены. Ниже отображаются демо-данные.</div>
+  <!-- ═══ MAIN ════════════════════════════════════════════════════════ -->
+  <main id="main-content">
+    <div class="container">
+
+      <!-- Error banner (aria-live so screen readers announce it) -->
+      <div id="error-banner" class="error-banner" role="alert" aria-live="assertive">
+        <span class="error-banner__icon">[ERROR]</span>
+        <span id="error-message">Data unavailable.</span>
+      </div>
+
+      <!-- ── Overview Section ──────────────────────────────────────── -->
+      <section aria-labelledby="overview-heading">
+        <h2 class="section-heading" id="overview-heading">
+          <span class="section-heading__dot" aria-hidden="true"></span>
+          Overview
+        </h2>
+        <div class="overview-grid" id="overview-grid" role="list">
+          <!-- 5 stat cards injected by JS -->
+        </div>
+      </section>
+
+      <!-- ── Assets Gallery Section ─────────────────────────────────── -->
+      <section aria-labelledby="assets-heading">
+        <h2 class="section-heading" id="assets-heading">
+          <span class="section-heading__dot" aria-hidden="true"></span>
+          Assets Gallery
+        </h2>
+
+        <div class="gallery-controls" id="gallery-controls" role="toolbar" aria-label="Filter assets">
+          <!-- filter buttons injected by JS -->
+        </div>
+
+        <div class="gallery-grid" id="gallery-grid" role="list" aria-label="Asset files">
+          <!-- asset cards injected by JS -->
+        </div>
+      </section>
+
     </div>
-  </div>
+  </main>
 
-  <!-- Tabs -->
-  <nav class="tabs" role="tablist" aria-label="Разделы дашборда">
-    <button class="tab active" role="tab" aria-selected="true"  aria-controls="panel-overview" id="tab-overview">Overview</button>
-    <button class="tab"        role="tab" aria-selected="false" aria-controls="panel-assets"   id="tab-assets">Assets Gallery</button>
-  </nav>
-
-  <!-- ═══ TAB: Overview ═══════════════════════════════════════════════ -->
-  <div class="tab-panel active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview">
-    <div class="section-header">
-      <span class="section-title">Overview</span>
-      <div class="section-divider" aria-hidden="true"></div>
+  <!-- ═══ FOOTER ══════════════════════════════════════════════════════ -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="site-footer" style="padding-block: 0;">
+        <span>LIFE_OF_T &mdash; build status page</span>
+        <span id="footer-env">env: unknown</span>
+        <span>generated by CI pipeline</span>
+      </div>
     </div>
-
-    <div class="cards-grid" id="cards-container" role="list" aria-label="Метрики проекта"></div>
-
-    <div class="drilldown-wrapper" id="drilldown-wrapper"
-         role="region" aria-label="Детали метрики" aria-live="polite">
-      <div class="drilldown-panel" id="drilldown-panel"></div>
-    </div>
-  </div>
-
-  <!-- ═══ TAB: Assets Gallery ═════════════════════════════════════════ -->
-  <div class="tab-panel" id="panel-assets" role="tabpanel" aria-labelledby="tab-assets">
-    <div class="section-header">
-      <span class="section-title">Assets Gallery</span>
-      <div class="section-divider" aria-hidden="true"></div>
-    </div>
-
-    <div class="filter-bar" id="filter-bar" role="group" aria-label="Фильтр по типу">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <!-- динамически добавляются кнопки по типам -->
-      <span class="filter-count" id="filter-count"></span>
-    </div>
-
-    <div class="asset-grid" id="assets-container"></div>
-  </div>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <span>LIFE OF T &copy; 2026</span>
-    <span id="build-id">build: —</span>
-    <span id="env-tag">env: —</span>
-    <span id="generated-at">generated: —</span>
   </footer>
 
-</div><!-- /.page -->
+  <script>
+  /* ═══════════════════════════════════════════════════════════════════
+     STATUS PAGE — Vanilla ES2020
+     Data is injected by CI pipeline via placeholder replacement:
+       <!-- METRICS_JSON_PLACEHOLDER -->        →  <script id="metrics-data" type="application/json">{...}<\/script>
+       <!-- ASSETS_MANIFEST_PLACEHOLDER -->     →  <script id="assets-manifest-data" type="application/json">{...}<\/script>
 
-<script>
-/* ═══════════════════════════════════════════════════════════════════════
-   Runtime script — ES2020, no frameworks, no external fetches.
-   Data arrives via window.__METRICS__ and window.__ASSETS__
-   injected by the CI pipeline before the placeholders above.
-   ═══════════════════════════════════════════════════════════════════════ */
+     NO external fetch() calls are made. All data comes from the
+     injected <script type="application/json"> tags.
+  ═══════════════════════════════════════════════════════════════════ */
 
-'use strict';
+  (function () {
+    'use strict';
 
-// ── Theme toggle ────────────────────────────────────────────────────────
-(function () {
-  const root = document.documentElement;
-  const btn  = document.querySelector('[data-theme-toggle]');
-  const svg  = document.getElementById('theme-svg');
-  const SUN  = `<circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42M11.53 4.47l1.42-1.42M3.05 12.95l1.42-1.42" stroke-linecap="square"/>`;
-  const MOON = `<path d="M13 9.5A5.5 5.5 0 0 1 6.5 3 7 7 0 1 0 13 9.5z" stroke-linecap="square"/>`;
-  let theme = root.dataset.theme ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  const apply = t => { root.dataset.theme = t; if (svg) svg.innerHTML = t === 'dark' ? SUN : MOON; };
-  apply(theme);
-  btn?.addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark'; apply(theme); });
-})();
+    // ── Theme toggle ──────────────────────────────────────────────────
+    const root = document.documentElement;
+    const toggleBtn = document.querySelector('[data-theme-toggle]');
+    let theme = root.getAttribute('data-theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    root.setAttribute('data-theme', theme);
 
-// ── Tab switching ────────────────────────────────────────────────────────
-(function () {
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
-      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-      tab.classList.add('active');
-      tab.setAttribute('aria-selected', 'true');
-      document.getElementById(tab.getAttribute('aria-controls'))?.classList.add('active');
-    });
-  });
-})();
-
-// ── Shared helpers ───────────────────────────────────────────────────────
-function escHtml(s) {
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function fmtTs(ts) {
-  if (!ts) return '—';
-  try { return new Date(ts).toLocaleString('ru-RU', { hour12: false }); } catch { return String(ts); }
-}
-function getStatus(val, thresholds, inverted = false) {
-  if (!inverted) {
-    if (val >= thresholds.good) return 'good';
-    if (val >= thresholds.warn) return 'warn';
-    return 'error';
-  } else {
-    if (val <= thresholds.good) return 'good';
-    if (val <= thresholds.warn) return 'warn';
-    return 'error';
-  }
-}
-function formatBytes(bytes) {
-  if (bytes == null) return '—';
-  const n = Number(bytes);
-  if (!isFinite(n) || n < 0) return '—';
-  if (n === 0) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.min(Math.floor(Math.log2(n) / 10), units.length - 1);
-  return `${(n / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
-}
-
-// ── PLACEHOLDER SVG (broken image fallback) ──────────────────────────────
-const PLACEHOLDER_SVG = (() => {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" fill="#2e2c25"/><line x1="4" y1="4" x2="60" y2="60" stroke="#5a5850" stroke-width="2"/><line x1="60" y1="4" x2="4" y2="60" stroke="#5a5850" stroke-width="2"/><rect x="2" y="2" width="60" height="60" fill="none" stroke="#3a3830" stroke-width="2"/></svg>`;
-  return 'data:image/svg+xml;base64,' + btoa(svg);
-})();
-
-// ═══════════════════════════════════════════════════════════════════════════
-// OVERVIEW — cards + drilldown
-// ═══════════════════════════════════════════════════════════════════════════
-
-let _activeCardId = null;
-
-function buildOverviewCard({ id, label, value, pct, status, meta, pctLabel = '' }) {
-  const el   = document.createElement('article');
-  const pct2 = Math.min(100, Math.max(0, pct));
-  el.className = `card ${status}`;
-  el.setAttribute('role', 'button');
-  el.setAttribute('tabindex', '0');
-  el.setAttribute('aria-expanded', 'false');
-  el.setAttribute('aria-controls', 'drilldown-wrapper');
-  el.setAttribute('aria-label', `${label}: ${value}. Нажмите для деталей.`);
-  el.id = `card-${id}`;
-  el.innerHTML = `
-    <div class="card-label">${escHtml(label)}</div>
-    <div class="card-value ${status}">${escHtml(value)}</div>
-    <div class="progress-track" role="progressbar" aria-valuenow="${pct2}" aria-valuemin="0" aria-valuemax="100">
-      <div class="progress-fill ${status}" style="width:0%"></div>
-    </div>
-    <div class="progress-labels"><span>${escHtml(pctLabel)}</span><span>${pct2.toFixed(0)}%</span></div>
-    <div class="card-meta">${escHtml(meta)}</div>`;
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    const fill = el.querySelector('.progress-fill');
-    if (fill) fill.style.width = `${pct2}%`;
-  }));
-  el.addEventListener('click', () => toggleDrilldown(id));
-  el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDrilldown(id); } });
-  return el;
-}
-
-function renderOverviewCards(m) {
-  const c = document.getElementById('cards-container');
-  c.innerHTML = '';
-
-  const buildOk = m.build?.status === 'ok';
-  c.appendChild(buildOverviewCard({
-    id: 'build', label: 'Build Status',
-    value: buildOk ? '[ OK ]' : '[FAIL]',
-    pct: buildOk ? 100 : 0, status: buildOk ? 'good' : 'error',
-    meta: `#${m.build?.id ?? '—'}  ·  ${fmtTs(m.build?.ts)}`, pctLabel: 'CI/CD',
-  }));
-
-  const t = m.tests ?? {}; const tp = t.total > 0 ? (t.passed / t.total) * 100 : 0;
-  c.appendChild(buildOverviewCard({
-    id: 'tests', label: 'Tests',
-    value: `${t.passed ?? 0} / ${t.total ?? 0}`,
-    pct: tp, status: getStatus(tp, { good: 95, warn: 80 }),
-    meta: `failed: ${t.failed ?? 0}`, pctLabel: 'pass rate',
-  }));
-
-  const cp = m.coverage?.pct ?? 0;
-  c.appendChild(buildOverviewCard({
-    id: 'coverage', label: 'Coverage',
-    value: `${cp.toFixed(1)}%`, pct: cp,
-    status: getStatus(cp, { good: 80, warn: 60 }),
-    meta: getStatus(cp, { good: 80, warn: 60 }) === 'good' ? 'цель достигнута' : 'ниже нормы',
-    pctLabel: 'строк',
-  }));
-
-  const a = m.assets ?? {}; const ap = a.total > 0 ? (a.generated / a.total) * 100 : 0;
-  c.appendChild(buildOverviewCard({
-    id: 'assets', label: 'Assets',
-    value: `${a.generated ?? 0} / ${a.total ?? 0}`,
-    pct: ap, status: a.errors > 0 ? getStatus(a.errors, { good: 0, warn: 3 }, true) : getStatus(ap, { good: 95, warn: 70 }),
-    meta: `errors: ${a.errors ?? 0}`, pctLabel: 'сгенерировано',
-  }));
-
-  const n = m.narrative ?? {}; const np = n.specs > 0 ? (n.implemented / n.specs) * 100 : 0;
-  c.appendChild(buildOverviewCard({
-    id: 'narrative', label: 'Narrative Specs',
-    value: `${n.implemented ?? 0} / ${n.specs ?? 0}`,
-    pct: np, status: getStatus(np, { good: 80, warn: 50 }),
-    meta: `pending: ${n.pending ?? 0}`, pctLabel: 'реализовано',
-  }));
-}
-
-// Drilldown data (§3.4)
-const DD = {
-  build: m => ({ tableHead: ['Параметр','Значение','Статус'], rows: [
-    { l: 'CI статус',   v: m.build?.status ?? '—', s: m.build?.status === 'ok' ? 'good' : 'error' },
-    { l: 'Build ID',   v: m.build?.id ?? '—',     s: 'info' },
-    { l: 'Время',      v: fmtTs(m.build?.ts),     s: 'info' },
-    { l: 'Ветка',      v: m.build?.branch ?? 'main', s: 'info' },
-    { l: 'Триггер',    v: m.build?.trigger ?? 'push', s: 'info' },
-  ]}),
-  tests: m => ({ tableHead: ['Параметр','Значение','Статус'], rows: [
-    { l: 'Всего',      v: String(m.tests?.total ?? 0),   s: 'info' },
-    { l: 'Пройдено',   v: String(m.tests?.passed ?? 0),  s: getStatus(m.tests?.total ? (m.tests.passed/m.tests.total)*100 : 0, {good:95,warn:80}) },
-    { l: 'Упало',      v: String(m.tests?.failed ?? 0),  s: (m.tests?.failed ?? 0) === 0 ? 'good' : 'error' },
-    { l: 'Пропущено',  v: String(m.tests?.skipped ?? 0), s: 'info' },
-  ], chartTitle: '% по модулям', chart: m.tests?.byModule ?? [{label:'Domain',pct:38,color:'good'},{label:'Application',pct:28,color:'info'},{label:'Infra',pct:20,color:'warn'},{label:'Presentation',pct:14,color:'error'}] }),
-  coverage: m => ({ tableHead: ['Тип','Покрытие','Статус'], rows: [
-    { l: 'Строки',     v: `${(m.coverage?.lines      ?? m.coverage?.pct ?? 0).toFixed(1)}%`, s: getStatus(m.coverage?.pct ?? 0, {good:80,warn:60}) },
-    { l: 'Ветки',      v: `${(m.coverage?.branches   ?? (m.coverage?.pct ?? 0)*0.9).toFixed(1)}%`, s: getStatus((m.coverage?.pct ?? 0)*0.9, {good:80,warn:60}) },
-    { l: 'Функции',    v: `${(m.coverage?.functions  ?? (m.coverage?.pct ?? 0)*1.05).toFixed(1)}%`, s: getStatus((m.coverage?.pct ?? 0)*1.05, {good:80,warn:60}) },
-    { l: 'Цель',       v: '80%', s: 'info' },
-  ], chartTitle: '% по пакетам', chart: m.coverage?.byPackage ?? [{label:'domain',pct:80,color:'good'},{label:'application',pct:75,color:'good'},{label:'infra',pct:60,color:'warn'},{label:'presentation',pct:55,color:'error'}] }),
-  assets: m => ({ tableHead: ['Параметр','Значение','Статус'], rows: [
-    { l: 'Сгенерировано', v: String(m.assets?.generated ?? 0), s: 'info' },
-    { l: 'Всего',         v: String(m.assets?.total ?? 0),     s: 'info' },
-    { l: 'Ошибок',        v: String(m.assets?.errors ?? 0),    s: (m.assets?.errors ?? 0) === 0 ? 'good' : 'error' },
-    { l: 'Предупреждений',v: String(m.assets?.warnings ?? 0),  s: (m.assets?.warnings ?? 0) === 0 ? 'good' : 'warn' },
-  ], chartTitle: '% задач по ролям (taskBoard)', chart: m.assets?.byRole ?? [{label:'Java Dev',pct:45,color:'info'},{label:'JS Dev',pct:30,color:'good'},{label:'Narrator',pct:15,color:'warn'},{label:'SA',pct:10,color:'error'}] }),
-  narrative: m => ({ tableHead: ['Параметр','Значение','Статус'], rows: [
-    { l: 'Спек всего',   v: String(m.narrative?.specs ?? 0),       s: 'info' },
-    { l: 'Реализовано',  v: String(m.narrative?.implemented ?? 0), s: getStatus(m.narrative?.specs ? (m.narrative.implemented/m.narrative.specs)*100 : 0, {good:80,warn:50}) },
-    { l: 'В работе',     v: String(m.narrative?.inProgress ?? 0),  s: 'warn' },
-    { l: 'Ожидает',      v: String(m.narrative?.pending ?? 0),     s: 'info' },
-  ], chartTitle: '% задач по ролям (taskBoard)', chart: m.narrative?.byRole ?? [{label:'Narrator',pct:60,color:'good'},{label:'SA',pct:20,color:'info'},{label:'Java Dev',pct:12,color:'warn'},{label:'JS Dev',pct:8,color:'error'}] }),
-};
-
-function colorVar(c) {
-  return c==='good'?'var(--primary)':c==='warn'?'var(--warn)':c==='error'?'var(--error)':'var(--info)';
-}
-
-function openDrilldown(cardId, metrics) {
-  const def = DD[cardId]?.(metrics);
-  if (!def) return;
-  const panel   = document.getElementById('drilldown-panel');
-  const wrapper = document.getElementById('drilldown-wrapper');
-  const label   = document.querySelector(`#card-${cardId} .card-label`)?.textContent ?? cardId;
-
-  const thead = `<tr>${def.tableHead.map(h=>`<th>${escHtml(h)}</th>`).join('')}</tr>`;
-  const tbody = def.rows.map(r=>`<tr><td>${escHtml(r.l)}</td><td>${escHtml(r.v)}</td><td><span class="dd-badge ${r.s}">${r.s.toUpperCase()}</span></td></tr>`).join('');
-
-  let chartHtml = '';
-  if (def.chart?.length) {
-    chartHtml = `<div><div class="dd-barchart-title">${escHtml(def.chartTitle ?? 'Распределение')}</div>` +
-      def.chart.map(({label:bl,pct,color})=>`
-        <div class="dd-bar-row">
-          <span class="dd-bar-label" title="${escHtml(bl)}">${escHtml(bl)}</span>
-          <div class="dd-bar-track"><div class="dd-bar-fill" data-pct="${pct}" style="width:0%;background:${colorVar(color)}"></div></div>
-          <span class="dd-bar-pct">${pct}%</span>
-        </div>`).join('') + '</div>';
-  }
-
-  panel.innerHTML = `
-    <div class="dd-header">
-      <div class="dd-title">Детали: <span>${escHtml(label)}</span></div>
-      <button class="dd-close" id="dd-close-btn" aria-label="Закрыть (Escape)">✕</button>
-    </div>
-    <div class="dd-body">
-      <div><table class="dd-table" aria-label="Sub-метрики ${escHtml(label)}"><thead>${thead}</thead><tbody>${tbody}</tbody></table></div>
-      ${chartHtml}
-    </div>`;
-
-  wrapper.classList.add('open');
-  wrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  setTimeout(() => panel.querySelectorAll('.dd-bar-fill[data-pct]').forEach(el => { el.style.width = el.dataset.pct + '%'; }), 40);
-  document.getElementById('dd-close-btn')?.addEventListener('click', closeDrilldown);
-}
-
-function closeDrilldown() {
-  document.getElementById('drilldown-wrapper')?.classList.remove('open');
-  document.querySelectorAll('.card.active').forEach(c => { c.classList.remove('active'); c.setAttribute('aria-expanded','false'); });
-  _activeCardId = null;
-  setTimeout(() => { const p = document.getElementById('drilldown-panel'); if (p) p.innerHTML = ''; }, 220);
-}
-
-function toggleDrilldown(cardId) {
-  document.querySelectorAll('.card.active').forEach(c => { c.classList.remove('active'); c.setAttribute('aria-expanded','false'); });
-  if (_activeCardId === cardId) { closeDrilldown(); return; }
-  _activeCardId = cardId;
-  const card = document.getElementById(`card-${cardId}`);
-  card?.classList.add('active');
-  card?.setAttribute('aria-expanded','true');
-  openDrilldown(cardId, window.__metrics__);
-}
-
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && _activeCardId) closeDrilldown(); });
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ASSETS GALLERY
-// ═══════════════════════════════════════════════════════════════════════════
-
-function assetStatusClass(s) {
-  return { ok:'good',generated:'good',error:'error',missing:'error',warn:'warn',warning:'warn',pending:'info' }[String(s).toLowerCase()] ?? 'info';
-}
-
-function buildAssetCard(data) {
-  const { id='', name='unknown', src=null, type='asset', status='unknown',
-          fileSizeBytes=null, width=null, height=null, sprites=null,
-          updatedAt=null, noMeta=false } = data ?? {};
-
-  const st      = assetStatusClass(status);
-  const imgSrc  = src || PLACEHOLDER_SVG;
-  const broken  = !src;
-
-  const card = document.createElement('article');
-  card.className = 'asset-card' + (broken?' broken':'') + (noMeta?' no-meta':'');
-  card.dataset.type = type;
-  card.setAttribute('tabindex', '0');
-  card.setAttribute('aria-label', `Ассет ${escHtml(name)}, тип ${escHtml(type)}, статус ${escHtml(status)}`);
-
-  // Thumbnail
-  const thumb = document.createElement('div');
-  thumb.className = 'asset-thumb';
-
-  const img = document.createElement('img');
-  img.src = imgSrc; img.alt = escHtml(name);
-  img.width = 64; img.height = 64;
-  img.loading = 'lazy'; img.decoding = 'async';
-  if (broken) img.classList.add('broken-img');
-  if (src) img.addEventListener('error', () => { img.src = PLACEHOLDER_SVG; card.classList.add('broken'); img.classList.add('broken-img'); }, { once: true });
-
-  // Hover preview
-  const preview = document.createElement('div');
-  preview.className = 'asset-preview';
-  preview.setAttribute('aria-hidden', 'true');
-  const pi = document.createElement('img');
-  pi.src = imgSrc; pi.alt = ''; pi.width = 200; pi.height = 200;
-  pi.decoding = 'async'; pi.style.imageRendering = 'pixelated';
-  if (src) img.addEventListener('error', () => { pi.src = PLACEHOLDER_SVG; }, { once: true });
-  const pl = document.createElement('div');
-  pl.className = 'asset-preview-label'; pl.textContent = name;
-  preview.appendChild(pi); preview.appendChild(pl);
-
-  // Position preview
-  const posPreview = () => {
-    const r = card.getBoundingClientRect();
-    if (r.right + 208 < window.innerWidth) { preview.style.left='calc(100% + 8px)'; preview.style.right=''; preview.style.top='0'; }
-    else if (r.left - 208 > 0) { preview.style.right='calc(100% + 8px)'; preview.style.left=''; preview.style.top='0'; }
-    else { preview.style.left='0'; preview.style.right=''; preview.style.top='calc(100% + 8px)'; }
-  };
-  card.addEventListener('mouseenter', posPreview);
-  card.addEventListener('focusin', posPreview);
-
-  thumb.appendChild(img); thumb.appendChild(preview);
-
-  // Info
-  const info = document.createElement('div');
-  info.className = 'asset-info';
-
-  const nameEl = document.createElement('div');
-  nameEl.className = 'asset-name'; nameEl.textContent = name; nameEl.title = name;
-
-  const badges = document.createElement('div');
-  badges.className = 'asset-badges';
-  const tb = document.createElement('span'); tb.className='asset-badge info'; tb.textContent=type.toUpperCase();
-  const sb = document.createElement('span'); sb.className=`asset-badge ${st}`; sb.textContent=status.toUpperCase();
-  badges.appendChild(tb); badges.appendChild(sb);
-
-  const meta = document.createElement('dl');
-  meta.className = 'asset-meta';
-  [['Размер', formatBytes(fileSizeBytes)],
-   ['Размеры', width!=null&&height!=null?`${width}×${height}`:'—'],
-   ['Спрайты', sprites!=null?String(sprites):'—'],
-   ['Обновлено', updatedAt?new Date(updatedAt).toLocaleDateString('ru-RU'):'—']]
-  .forEach(([label,value]) => {
-    const dt = document.createElement('dt'); dt.textContent = label;
-    const dd = document.createElement('dd'); dd.textContent = value;
-    if (value === '—') dd.classList.add('meta-empty');
-    meta.appendChild(dt); meta.appendChild(dd);
-  });
-
-  info.appendChild(nameEl); info.appendChild(badges); info.appendChild(meta);
-
-  if (noMeta) {
-    const w = document.createElement('div');
-    w.className = 'asset-no-meta-warn'; w.setAttribute('role','alert');
-    w.innerHTML = '⚠&#xFE0E; <span>Метаданные отсутствуют</span>';
-    info.appendChild(w);
-  }
-
-  card.appendChild(thumb); card.appendChild(info);
-  return card;
-}
-
-function renderAssetsGallery(assets) {
-  const container = document.getElementById('assets-container');
-  const filterBar = document.getElementById('filter-bar');
-  const countEl   = document.getElementById('filter-count');
-  container.innerHTML = '';
-
-  if (!assets?.length) {
-    const empty = document.createElement('div');
-    empty.className = 'asset-empty';
-    empty.innerHTML = '<span class="asset-empty-icon">◻</span><p>Нет ассетов</p>';
-    container.appendChild(empty);
-    if (countEl) countEl.textContent = '0 ассетов';
-    return;
-  }
-
-  // Build type filter buttons
-  const types = [...new Set(assets.map(a => a.type).filter(Boolean))];
-  // remove existing type buttons
-  filterBar.querySelectorAll('[data-filter]:not([data-filter="all"])').forEach(b => b.remove());
-  types.forEach(type => {
-    const btn = document.createElement('button');
-    btn.className = 'filter-btn'; btn.dataset.filter = type;
-    btn.textContent = type.toUpperCase();
-    filterBar.insertBefore(btn, filterBar.querySelector('.filter-count'));
-  });
-
-  let activeFilter = 'all';
-  const render = () => {
-    container.innerHTML = '';
-    const filtered = activeFilter === 'all' ? assets : assets.filter(a => a.type === activeFilter);
-    if (countEl) countEl.textContent = `${filtered.length} / ${assets.length} ассетов`;
-    if (!filtered.length) {
-      const empty = document.createElement('div');
-      empty.className = 'asset-empty';
-      empty.innerHTML = `<span class="asset-empty-icon">◻</span><p>Нет ассетов типа ${escHtml(activeFilter)}</p>`;
-      container.appendChild(empty);
-      return;
+    function setThemeIcon(t) {
+      if (!toggleBtn) return;
+      toggleBtn.setAttribute('aria-label', 'Switch to ' + (t === 'dark' ? 'light' : 'dark') + ' mode');
+      toggleBtn.innerHTML = t === 'dark'
+        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+        : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
     }
-    filtered.forEach(a => container.appendChild(buildAssetCard(a)));
-  };
+    setThemeIcon(theme);
+    toggleBtn && toggleBtn.addEventListener('click', () => {
+      theme = theme === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', theme);
+      setThemeIcon(theme);
+    });
 
-  filterBar.addEventListener('click', e => {
-    const btn = e.target.closest('[data-filter]');
-    if (!btn) return;
-    filterBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeFilter = btn.dataset.filter;
-    render();
-  });
+    // ── Read injected JSON data ────────────────────────────────────────
+    function readInjectedData(id) {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      try { return JSON.parse(el.textContent); }
+      catch (e) { console.error('[status-page] Failed to parse ' + id + ':', e); return null; }
+    }
 
-  render();
-}
+    // ── Error banner ──────────────────────────────────────────────────
+    const errorBanner  = document.getElementById('error-banner');
+    const errorMessage = document.getElementById('error-message');
+    function showError(msg) {
+      errorMessage.textContent = msg;
+      errorBanner.classList.add('is-visible');
+    }
+    function hideError() {
+      errorBanner.classList.remove('is-visible');
+    }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// BOOT — read injected data or fall back to demo
-// ═══════════════════════════════════════════════════════════════════════════
+    // ── Helpers ───────────────────────────────────────────────────────
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
 
-function demoMetrics() {
-  return {
-    env: 'demo',
-    build: { status: 'ok', ts: Date.now(), id: 'demo-001', branch: 'main', trigger: 'push' },
-    tests: { passed: 142, failed: 3, total: 145, skipped: 0 },
-    coverage: { pct: 74.5 },
-    assets: { generated: 88, total: 100, errors: 1, warnings: 2 },
-    narrative: { specs: 40, implemented: 28, pending: 12, inProgress: 4 },
-  };
-}
+    function pct(a, b) { return b > 0 ? Math.round((a / b) * 100) : 0; }
 
-function demoAssets() {
-  return [
-    { id:'a1', name:'world-atlas.png', src:'https://picsum.photos/seed/atlas/200/200', type:'atlas', status:'ok', fileSizeBytes:204800, width:512, height:512, sprites:48, updatedAt:'2026-03-28T12:00:00Z' },
-    { id:'a2', name:'npc-sprites.png', src:'https://picsum.photos/seed/npc/200/200',   type:'atlas', status:'ok', fileSizeBytes:102400, width:256, height:512, sprites:32, updatedAt:'2026-04-01T09:30:00Z' },
-    { id:'a3', name:'tile-grass.png',  src:'https://picsum.photos/seed/tile/200/200',  type:'tile',  status:'generated', fileSizeBytes:8192, width:64, height:64, sprites:1, updatedAt:'2026-04-02T07:00:00Z' },
-    { id:'a4', name:'hero-idle.png',   src:null, type:'sprite', status:'missing', fileSizeBytes:null, width:null, height:null, sprites:null, updatedAt:null, noMeta:true },
-    { id:'a5', name:'step-grass.ogg',  src:null, type:'sound',  status:'pending',  fileSizeBytes:45056, width:null, height:null, sprites:null, updatedAt:'2026-03-15T11:00:00Z' },
-  ];
-}
+    function threshold(value, warnAt, errorAt) {
+      if (value <= errorAt) return 'is-error';
+      if (value <= warnAt)  return 'is-warn';
+      return 'is-ok';
+    }
 
-(function boot() {
-  const hasMetrics = typeof window.__METRICS__ !== 'undefined';
-  const hasAssets  = typeof window.__ASSETS__  !== 'undefined';
+    function progressBar(value, warnAt, errorAt) {
+      const cls   = threshold(value, warnAt, errorAt).replace('is-', '');
+      const clsBar = cls !== 'ok' ? 'is-' + cls : '';
+      return `
+        <div class="progress-wrap" role="progressbar" aria-valuenow="${value}" aria-valuemin="0" aria-valuemax="100" aria-label="${value}%">
+          <div class="progress-bar ${clsBar}" style="width:${value}%"></div>
+        </div>`;
+    }
 
-  // Show warning banner if placeholders were NOT replaced
-  if (!hasMetrics && !hasAssets) {
-    document.getElementById('error-banner')?.classList.add('visible');
-  }
+    function fmtTs(ts) {
+      if (!ts) return '—';
+      return new Date(ts).toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+    }
 
-  const metrics = hasMetrics ? window.__METRICS__ : demoMetrics();
-  const assets  = hasAssets  ? window.__ASSETS__  : demoAssets();
+    function fmtBytes(bytes) {
+      if (bytes === undefined || bytes === null) return '—';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
 
-  window.__metrics__ = metrics;
+    // ── Overview rendering ────────────────────────────────────────────
+    function renderOverview(metrics) {
+      const grid = document.getElementById('overview-grid');
+      grid.innerHTML = '';
 
-  // Overview
-  renderOverviewCards(metrics);
+      const cards = [
+        // 1. Build Status
+        (function () {
+          const s   = (metrics.build?.status ?? 'unknown').toLowerCase();
+          const cls = s === 'ok' || s === 'success' ? 'is-ok' : 'is-error';
+          return `
+            <div class="stat-card" role="listitem">
+              <div class="stat-card__label">Build Status</div>
+              <div class="stat-card__value ${cls}">${esc(s.toUpperCase())}</div>
+              <div class="stat-card__sub">#${esc(metrics.build?.id ?? '—')} &mdash; ${esc(fmtTs(metrics.build?.ts))}</div>
+            </div>`;
+        })(),
 
-  // Footer meta
-  const b = document.getElementById('build-id');
-  const e = document.getElementById('env-tag');
-  const g = document.getElementById('generated-at');
-  const u = document.getElementById('last-updated');
-  if (b) b.textContent = `build: ${metrics.build?.id ?? '—'}`;
-  if (e) e.textContent = `env: ${metrics.env ?? 'local'}`;
-  if (g) g.textContent = `generated: ${fmtTs(metrics.build?.ts)}`;
-  if (u) u.textContent = `данные от ${fmtTs(metrics.build?.ts)}`;
+        // 2. Tests
+        (function () {
+          const passed = metrics.tests?.passed ?? 0;
+          const failed = metrics.tests?.failed ?? 0;
+          const total  = metrics.tests?.total  ?? (passed + failed);
+          const p      = pct(passed, total);
+          const cls    = threshold(p, 95, 80);
+          return `
+            <div class="stat-card" role="listitem">
+              <div class="stat-card__label">Tests</div>
+              <div class="stat-card__value ${cls}">${esc(passed)} / ${esc(total)}</div>
+              <div class="stat-card__sub">${p}% passed${failed > 0 ? ' &nbsp;&#9888;&nbsp;' + failed + ' failed' : ''}</div>
+              ${progressBar(p, 95, 80)}
+            </div>`;
+        })(),
 
-  // Assets gallery
-  renderAssetsGallery(assets);
-})();
-</script>
+        // 3. Coverage
+        (function () {
+          const p   = Math.round(metrics.coverage?.pct ?? 0);
+          const cls = threshold(p, 80, 60);
+          return `
+            <div class="stat-card" role="listitem">
+              <div class="stat-card__label">Coverage</div>
+              <div class="stat-card__value ${cls}">${p}%</div>
+              <div class="stat-card__sub">line coverage</div>
+              ${progressBar(p, 80, 60)}
+            </div>`;
+        })(),
+
+        // 4. Assets
+        (function () {
+          const gen    = metrics.assets?.generated ?? 0;
+          const total  = metrics.assets?.total     ?? 0;
+          const errors = metrics.assets?.errors    ?? 0;
+          const p      = pct(gen, total);
+          const cls    = errors > 0 ? 'is-error' : threshold(p, 100, 80);
+          return `
+            <div class="stat-card" role="listitem">
+              <div class="stat-card__label">Assets</div>
+              <div class="stat-card__value ${cls}">${esc(gen)} / ${esc(total)}</div>
+              <div class="stat-card__sub">${errors > 0 ? errors + ' error(s)' : 'no errors'}</div>
+              ${progressBar(p, 100, 80)}
+            </div>`;
+        })(),
+
+        // 5. Narrative Specs
+        (function () {
+          const impl  = metrics.narrative?.implemented ?? 0;
+          const specs = metrics.narrative?.specs       ?? 0;
+          const p     = pct(impl, specs);
+          const cls   = threshold(p, 80, 50);
+          return `
+            <div class="stat-card" role="listitem">
+              <div class="stat-card__label">Narrative Specs</div>
+              <div class="stat-card__value ${cls}">${esc(impl)} / ${esc(specs)}</div>
+              <div class="stat-card__sub">${p}% implemented</div>
+              ${progressBar(p, 80, 50)}
+            </div>`;
+        })()
+      ];
+
+      grid.innerHTML = cards.join('');
+
+      // Update header timestamp and footer env
+      document.getElementById('build-ts').textContent = fmtTs(metrics.build?.ts);
+      document.getElementById('footer-env').textContent = 'env: ' + esc(metrics.env ?? 'unknown');
+    }
+
+    // ── Assets Gallery rendering ──────────────────────────────────────
+    let activeFilter = 'all';
+    let manifestItems = [];
+
+    function imagePreview(item) {
+      const imgExts = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
+      const ext = (item.path ?? '').split('.').pop().toLowerCase();
+      if (imgExts.includes(ext) && item.url) {
+        return `<img src="${esc(item.url)}" alt="${esc(item.name ?? item.path)}" loading="lazy" width="180" height="180">`;
+      }
+      return `<span>${esc(ext.toUpperCase() || 'FILE')}</span>`;
+    }
+
+    function renderGallery(items) {
+      const grid = document.getElementById('gallery-grid');
+      if (!items || items.length === 0) {
+        grid.innerHTML = '<div class="gallery-empty" role="listitem">[NO ASSETS FOUND]</div>';
+        return;
+      }
+      grid.innerHTML = items.map(item => {
+        const statusCls = item.error ? 'status-error' : (item.warn ? 'status-warn' : 'status-ok');
+        const ext = (item.path ?? '').split('.').pop().toLowerCase();
+        return `
+          <div class="asset-card ${statusCls}" role="listitem" title="${esc(item.path ?? '')}">
+            <div class="asset-card__preview">
+              ${imagePreview(item)}
+              <span class="asset-ext">${esc(ext.toUpperCase())}</span>
+            </div>
+            <div class="asset-card__info">
+              <div class="asset-card__name">${esc(item.name ?? item.path ?? '—')}</div>
+              <div class="asset-card__meta">${fmtBytes(item.size)} &bull; ${esc(item.type ?? ext)}</div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function renderFilters(items) {
+      const bar = document.getElementById('gallery-controls');
+      const types = ['all', ...new Set(
+        (items ?? []).map(i => (i.type ?? (i.path ?? '').split('.').pop().toLowerCase()) || 'other')
+      )];
+
+      bar.innerHTML = types.map(t => `
+        <button class="filter-btn${t === activeFilter ? ' is-active' : ''}" data-type="${esc(t)}"
+          aria-pressed="${t === activeFilter}">${esc(t.toUpperCase())}</button>
+      `).join('');
+
+      bar.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeFilter = btn.dataset.type;
+          bar.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.toggle('is-active', b.dataset.type === activeFilter);
+            b.setAttribute('aria-pressed', String(b.dataset.type === activeFilter));
+          });
+          const filtered = activeFilter === 'all'
+            ? manifestItems
+            : manifestItems.filter(i =>
+                (i.type ?? (i.path ?? '').split('.').pop().toLowerCase()) === activeFilter);
+          renderGallery(filtered);
+        });
+      });
+    }
+
+    // ── Bootstrap ─────────────────────────────────────────────────────
+    function boot() {
+      hideError();
+
+      // --- metrics ---
+      const metrics = readInjectedData('metrics-data');
+      if (!metrics) {
+        showError('metrics.json data not injected. Run the CI pipeline to generate this page.');
+        // Render empty overview with zeros so the page isn't blank
+        renderOverview({});
+      } else {
+        renderOverview(metrics);
+      }
+
+      // --- assets manifest ---
+      const manifest = readInjectedData('assets-manifest-data');
+      if (!manifest) {
+        if (!metrics) {
+          // Both missing — single error is enough
+        } else {
+          showError('assets-manifest.json data not injected. Assets Gallery is unavailable.');
+        }
+        renderGallery([]);
+        renderFilters([]);
+      } else {
+        manifestItems = Array.isArray(manifest) ? manifest : (manifest.assets ?? []);
+        renderFilters(manifestItems);
+        renderGallery(manifestItems);
+      }
+    }
+
+    // Refresh button re-reads injected data (useful if pipeline hot-replaces)
+    document.getElementById('refresh-btn').addEventListener('click', boot);
+
+    // Initial render
+    boot();
+
+  })();
+  </script>
+
 </body>
 </html>
