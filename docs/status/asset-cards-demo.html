@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life of T — Asset Cards Demo (TASK-FE-053)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-body: 'Share Tech Mono', 'Courier New', monospace;
+      --text-xs: 0.75rem; --text-sm: 0.875rem; --text-base: 1rem;
+      --text-lg: 1.25rem; --text-xl: 1.5rem;
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+      --space-4: 1rem;    --space-6: 1.5rem;  --space-8: 2rem;
+    }
+    :root, [data-theme="light"] {
+      --bg: #e8e4d8; --surface: #f0ede3; --surface-2: #f5f3ec;
+      --border: #b8b4a8; --border-dim: #ccc8bc;
+      --text: #1a1a14; --text-muted: #5a5850; --text-faint: #9a9890;
+      --text-inv: #f0ede3;
+      --primary: #2a7a2e; --primary-dim: #c4d9c5;
+      --warn: #b87800; --warn-dim: #e8d9aa;
+      --error: #b82020; --error-dim: #e8c5c5;
+      --info: #1a5a8a; --info-dim: #c5d9e8;
+      --shadow: 2px 2px 0 rgba(0,0,0,.18);
+    }
+    [data-theme="dark"] {
+      --bg: #12110d; --surface: #1a1915; --surface-2: #211f1a;
+      --border: #3a3830; --border-dim: #2e2c25;
+      --text: #ddd9cc; --text-muted: #8a8880; --text-faint: #5a5850;
+      --text-inv: #12110d;
+      --primary: #4db852; --primary-dim: #1a3a1c;
+      --warn: #e8a820; --warn-dim: #3a2e00;
+      --error: #e84848; --error-dim: #3a1010;
+      --info: #48a8e8; --info-dim: #0a2038;
+      --shadow: 2px 2px 0 rgba(0,0,0,.5);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body); font-size: var(--text-base);
+      background: var(--bg); color: var(--text); min-height: 100dvh;
+      line-height: 1.5;
+    }
+    button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
+    .page { max-width: 1100px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 2px solid var(--border); padding-bottom: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+    .logo-mark {
+      width: 32px; height: 32px; background: var(--primary);
+      display: grid; place-items: center; color: var(--text-inv);
+      font-size: var(--text-sm); font-weight: bold; box-shadow: var(--shadow);
+    }
+    .logo-area { display: flex; align-items: center; gap: var(--space-3); }
+    .logo-title { font-size: var(--text-lg); letter-spacing: 0.08em; }
+    .logo-sub   { font-size: var(--text-xs); color: var(--text-muted); letter-spacing: 0.14em; text-transform: uppercase; }
+    .btn-icon {
+      width: 36px; height: 36px; border: 1px solid var(--border);
+      display: grid; place-items: center; background: var(--surface);
+      color: var(--text-muted); box-shadow: var(--shadow);
+    }
+    .btn-icon:hover { background: var(--surface-2); color: var(--text); }
+    .section-header {
+      display: flex; align-items: center; gap: var(--space-3);
+      margin-bottom: var(--space-4); margin-top: var(--space-6);
+    }
+    .section-title { font-size: var(--text-sm); letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); }
+    .section-divider { flex: 1; height: 1px; background: var(--border); }
+    .hint {
+      font-size: var(--text-xs); color: var(--text-faint);
+      margin-bottom: var(--space-4); letter-spacing: 0.06em;
+    }
+  </style>
+  <link rel="stylesheet" href="./asset-cards.css">
+</head>
+<body>
+<div class="page">
+  <header class="header">
+    <div class="logo-area">
+      <div class="logo-mark">T</div>
+      <div>
+        <div class="logo-title">LIFE OF T</div>
+        <div class="logo-sub">Asset Cards — Demo (TASK-FE-053)</div>
+      </div>
+    </div>
+    <button class="btn-icon" data-theme-toggle aria-label="Переключить тему">
+      <svg id="theme-svg" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <circle cx="8" cy="8" r="3"/>
+        <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42M11.53 4.47l1.42-1.42M3.05 12.95l1.42-1.42" stroke-linecap="square"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- 1. Normal cards -->
+  <div class="section-header">
+    <span class="section-title">Нормальные карточки</span>
+    <div class="section-divider"></div>
+  </div>
+  <p class="hint">Наведите на карточку — появится hover-preview с увеличенным изображением атласа.</p>
+  <div id="grid-normal"></div>
+
+  <!-- 2. No-meta cards -->
+  <div class="section-header">
+    <span class="section-title">.no-meta — метаданные отсутствуют</span>
+    <div class="section-divider"></div>
+  </div>
+  <p class="hint">Карточка отрисовывается с предупреждением ⚠ Метаданные отсутствуют (§4.1).</p>
+  <div id="grid-nometa"></div>
+
+  <!-- 3. Broken cards -->
+  <div class="section-header">
+    <span class="section-title">.broken — битый PNG</span>
+    <div class="section-divider"></div>
+  </div>
+  <p class="hint">src отсутствует или недоступен → заменяется placeholder.png, добавляется класс .broken.</p>
+  <div id="grid-broken"></div>
+
+  <!-- 4. fileSizeBytes: null -->
+  <div class="section-header">
+    <span class="section-title">fileSizeBytes: null → «—»</span>
+    <div class="section-divider"></div>
+  </div>
+  <p class="hint">Все null-поля должны отображаться как «—».</p>
+  <div id="grid-nulls"></div>
+
+  <!-- 5. Empty grid -->
+  <div class="section-header">
+    <span class="section-title">Пустой грид</span>
+    <div class="section-divider"></div>
+  </div>
+  <div id="grid-empty"></div>
+</div>
+
+<script type="module">
+import { buildAssetCard, initAssetGrid } from './asset-cards.js';
+
+// Theme toggle
+(function () {
+  const root = document.documentElement;
+  const btn  = document.querySelector('[data-theme-toggle]');
+  const svg  = document.getElementById('theme-svg');
+  const SUN  = `<circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42M11.53 4.47l1.42-1.42M3.05 12.95l1.42-1.42" stroke-linecap="square"/>`;
+  const MOON = `<path d="M13 9.5A5.5 5.5 0 0 1 6.5 3 7 7 0 1 0 13 9.5z" stroke-linecap="square"/>`;
+  let theme = root.dataset.theme ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const apply = t => { root.dataset.theme = t; if (svg) svg.innerHTML = t === 'dark' ? SUN : MOON; };
+  apply(theme);
+  btn?.addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark'; apply(theme); });
+})();
+
+// ── Demo data ────────────────────────────────────────────────────────────────
+const DEMO_NORMAL = [
+  {
+    id: 'atlas-world-01', name: 'world-atlas-01.png',
+    src: 'https://picsum.photos/seed/atlas1/200/200',
+    type: 'atlas', status: 'ok',
+    fileSizeBytes: 204800, width: 512, height: 512, sprites: 48,
+    updatedAt: '2026-03-28T12:00:00Z',
+  },
+  {
+    id: 'atlas-npc-01', name: 'npc-sprites.png',
+    src: 'https://picsum.photos/seed/npc1/200/200',
+    type: 'atlas', status: 'ok',
+    fileSizeBytes: 102400, width: 256, height: 512, sprites: 32,
+    updatedAt: '2026-04-01T09:30:00Z',
+  },
+  {
+    id: 'tile-grass', name: 'tile-grass.png',
+    src: 'https://picsum.photos/seed/tile1/200/200',
+    type: 'tile', status: 'generated',
+    fileSizeBytes: 8192, width: 64, height: 64, sprites: 1,
+    updatedAt: '2026-04-02T07:00:00Z',
+  },
+  {
+    id: 'sound-step', name: 'step-grass.ogg',
+    src: null, type: 'sound', status: 'pending',
+    fileSizeBytes: 45056, width: null, height: null, sprites: null,
+    updatedAt: '2026-03-15T11:00:00Z',
+  },
+];
+
+const DEMO_NOMETA = [
+  {
+    id: 'atlas-unknown', name: 'unknown-atlas.png',
+    src: 'https://picsum.photos/seed/unknown/200/200',
+    type: 'atlas', status: 'warn',
+    fileSizeBytes: null, width: null, height: null, sprites: null,
+    updatedAt: null, noMeta: true,
+  },
+  {
+    id: 'sprite-no-meta', name: 'hero-idle.png',
+    src: 'https://picsum.photos/seed/hero/200/200',
+    type: 'sprite', status: 'warn',
+    fileSizeBytes: null, width: null, height: null, sprites: null,
+    updatedAt: null, noMeta: true,
+  },
+];
+
+const DEMO_BROKEN = [
+  {
+    id: 'broken-1', name: 'corrupted-atlas.png',
+    src: 'https://broken-url.invalid/atlas.png',  // will fail to load → fallback
+    type: 'atlas', status: 'error',
+    fileSizeBytes: 0, width: null, height: null, sprites: 0,
+    updatedAt: '2026-03-10T00:00:00Z',
+  },
+  {
+    id: 'broken-2', name: 'missing-tile.png',
+    src: null,  // no src at all
+    type: 'tile', status: 'missing',
+    fileSizeBytes: null, width: null, height: null, sprites: null,
+    updatedAt: null,
+  },
+];
+
+const DEMO_NULLS = [
+  {
+    id: 'nulls-1', name: 'partial-asset.png',
+    src: 'https://picsum.photos/seed/partial/200/200',
+    type: 'sprite', status: 'unknown',
+    fileSizeBytes: null, width: null, height: null, sprites: null,
+    updatedAt: null,
+  },
+];
+
+// ── Mount grids ──────────────────────────────────────────────────────────────
+initAssetGrid('grid-normal', DEMO_NORMAL);
+initAssetGrid('grid-nometa', DEMO_NOMETA);
+initAssetGrid('grid-broken', DEMO_BROKEN);
+initAssetGrid('grid-nulls',  DEMO_NULLS);
+initAssetGrid('grid-empty',  []);
+</script>
+</body>
+</html>

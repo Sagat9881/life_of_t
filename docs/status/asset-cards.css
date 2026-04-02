@@ -1,0 +1,242 @@
+/**
+ * asset-cards.css — TASK-FE-053
+ * Стили компонента .asset-card, hover-preview, состояния.
+ * Pixel-art: border-radius: 0 везде.
+ * Зависит от CSS-переменных из index.html (--bg, --surface, --border, …).
+ */
+
+/* ── Grid ──────────────────────────────────────────────────────────────────── */
+.asset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+  gap: var(--space-4, 1rem);
+}
+
+/* ── Card root (§4.1) ──────────────────────────────────────────────────────── */
+.asset-card {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-3, 0.75rem);
+  background: var(--surface, #1a1915);
+  border: 1px solid var(--border, #3a3830);
+  box-shadow: var(--shadow, 2px 2px 0 rgba(0,0,0,.5));
+  cursor: default;
+  outline: none;
+  overflow: visible;          /* allow preview to overflow */
+  transition: background 140ms steps(3, end),
+              border-color 140ms steps(3, end);
+}
+.asset-card:hover,
+.asset-card:focus-visible {
+  background: var(--surface-2, #211f1a);
+  border-color: var(--primary, #4db852);
+}
+.asset-card:focus-visible {
+  outline: 2px solid var(--primary, #4db852);
+  outline-offset: 2px;
+}
+
+/* Broken state */
+.asset-card.broken {
+  border-color: var(--error, #e84848);
+}
+.asset-card.broken::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--error, #e84848);
+}
+
+/* No-meta state */
+.asset-card.no-meta {
+  border-color: var(--warn, #e8a820);
+}
+.asset-card.no-meta::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--warn, #e8a820);
+}
+
+/* ── Thumbnail ─────────────────────────────────────────────────────────────── */
+.asset-thumb {
+  position: relative;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+}
+.asset-thumb img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: var(--bg, #12110d);
+  border: 1px solid var(--border-dim, #2e2c25);
+  display: block;
+}
+.asset-thumb img.broken-img {
+  opacity: 0.5;
+}
+
+/* ── Hover Preview (§7.2, §7.3) ─────────────────────────────────────────────── */
+.asset-preview {
+  position: absolute;
+  z-index: 100;
+  top: 0;
+  left: calc(100% + 8px);
+  width: 200px;
+
+  background: var(--surface-2, #211f1a);
+  border: 1px solid var(--primary, #4db852);
+  box-shadow: 4px 4px 0 rgba(0,0,0,.6);
+  padding: var(--space-2, 0.5rem);
+
+  /* Initial hidden state */
+  opacity: 0;
+  transform: scale(0.92);
+  transform-origin: top left;
+  pointer-events: none;
+  transition:
+    opacity  200ms ease-out,
+    transform 200ms ease-out;
+}
+.asset-card:hover .asset-preview,
+.asset-card:focus-within .asset-preview {
+  opacity: 1;
+  transform: scale(1);
+}
+.asset-preview img {
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: var(--bg, #12110d);
+  border: 1px solid var(--border-dim, #2e2c25);
+  display: block;
+  margin-bottom: var(--space-2, 0.5rem);
+}
+.asset-preview-label {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--text-muted, #8a8880);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Info block ──────────────────────────────────────────────────────────────── */
+.asset-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1, 0.25rem);
+}
+.asset-name {
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--text, #ddd9cc);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+}
+
+/* Badges */
+.asset-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1, 0.25rem);
+  margin-top: var(--space-1, 0.25rem);
+}
+.asset-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: var(--text-xs, 0.75rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+.asset-badge.good  { background: var(--primary-dim, #1a3a1c); color: var(--primary, #4db852); }
+.asset-badge.warn  { background: var(--warn-dim,    #3a2e00); color: var(--warn,    #e8a820); }
+.asset-badge.error { background: var(--error-dim,   #3a1010); color: var(--error,   #e84848); }
+.asset-badge.info  { background: var(--info-dim,    #0a2038); color: var(--info,    #48a8e8); }
+
+/* Meta DL */
+.asset-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--space-2, 0.5rem);
+  row-gap: 1px;
+  margin-top: var(--space-1, 0.25rem);
+  font-size: var(--text-xs, 0.75rem);
+}
+.asset-meta dt {
+  color: var(--text-faint, #5a5850);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.asset-meta dd {
+  color: var(--text-muted, #8a8880);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.asset-meta dd.meta-empty {
+  color: var(--text-faint, #5a5850);
+}
+
+/* ── No-meta warning (§4.1) ──────────────────────────────────────────────────── */
+.asset-no-meta-warn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1, 0.25rem);
+  padding: 2px var(--space-2, 0.5rem);
+  background: var(--warn-dim, #3a2e00);
+  border: 1px solid var(--warn, #e8a820);
+  color: var(--warn, #e8a820);
+  font-size: var(--text-xs, 0.75rem);
+  letter-spacing: 0.06em;
+  margin-top: var(--space-2, 0.5rem);
+}
+.asset-no-meta-warn span {
+  color: var(--text-muted, #8a8880);
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────────────── */
+.asset-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-8, 2rem) var(--space-4, 1rem);
+  color: var(--text-faint, #5a5850);
+  text-align: center;
+  gap: var(--space-3, 0.75rem);
+}
+.asset-empty-icon {
+  font-size: 2rem;
+  opacity: 0.4;
+}
+.asset-empty p {
+  font-size: var(--text-sm, 0.875rem);
+  letter-spacing: 0.1em;
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .asset-preview,
+  .asset-card {
+    transition: none;
+  }
+  .asset-card:hover .asset-preview,
+  .asset-card:focus-within .asset-preview {
+    opacity: 1;
+    transform: none;
+  }
+}
