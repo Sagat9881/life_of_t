@@ -78,108 +78,41 @@ jobs:
               "narrative": {"specs": specs, "implemented": specs, "pending": 0},
           }
 
-          pathlib.Path("dist").mkdir(exist_ok=True)
-          out = pathlib.Path("dist/metrics.json")
+          # Write directly next to index.html — where fetch('./metrics.json') expects it
+          out = pathlib.Path("docs/status/metrics.json")
           out.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
           print(f"OK: {out} written ({out.stat().st_size} bytes)")
           PYEOF
 
-      # ─ 2. Build assets manifest (pure Python) ───────────────────────
-      - name: Build assets manifest
-        env:
-          ASSET_DIR: /tmp/life-of-t-generated-assets
+      # ─ 2. Verify metrics.json was written ───────────────────────────────
+      - name: Verify docs/status/metrics.json
         run: |
-          python3 - <<'PYEOF'
-          import json, os, pathlib
+          [ -f docs/status/metrics.json ] || { echo "::error::docs/status/metrics.json missing!"; exit 1; }
+          python3 -c "import json,pathlib; d=json.loads(pathlib.Path('docs/status/metrics.json').read_text()); print('OK: env=' + d.get('env','?'), 'build=' + d.get('build',{}).get('status','?'))"
+          echo "OK: metrics.json verified"
 
-          asset_dir = os.environ.get("ASSET_DIR", "")
-          items = []
-
-          if os.path.isdir(asset_dir):
-              for fname in sorted(os.listdir(asset_dir)):
-                  fpath = os.path.join(asset_dir, fname)
-                  if not os.path.isfile(fpath):
-                      continue
-                  ext = pathlib.Path(fname).suffix.lstrip(".").lower()
-                  items.append({
-                      "name":  fname,
-                      "path":  fname,
-                      "type":  ext,
-                      "size":  os.path.getsize(fpath),
-                      "url":   "",
-                      "error": False,
-                      "warn":  False,
-                  })
-
-          manifest = {"assets": items, "total": len(items)}
-          out = pathlib.Path("dist/assets-manifest.json")
-          out.parent.mkdir(exist_ok=True)
-          out.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
-          print(f"OK: {out} — {len(items)} asset(s)")
-          PYEOF
-
-      # ─ 3. Inject JSON into HTML template (pure Python, no cp) ─────────
-      - name: Inject JSON into HTML template
+      # ─ 3. Commit updated metrics.json back to repo ──────────────────────
+      - name: Commit metrics.json
         run: |
-          python3 - <<'PYEOF'
-          import pathlib
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/status/metrics.json
+          git diff --cached --quiet && echo "No changes to commit" || git commit -m "ci: update docs/status/metrics.json [skip ci]"
+          git push
 
-          # SOURCE  : frontend/status/index.template.html  (template, never modified)
-          # OUTPUT  : dist/index.html                      (generated output)
-          # These are ALWAYS different paths — no self-copy possible.
-
-          src  = pathlib.Path("frontend/status/index.template.html")
-          out  = pathlib.Path("dist/index.html")
-          metr = pathlib.Path("dist/metrics.json")
-          mani = pathlib.Path("dist/assets-manifest.json")
-
-          if not src.exists():
-              raise FileNotFoundError(f"Template missing: {src}")
-
-          html     = src.read_text(encoding="utf-8")
-          metrics  = metr.read_text(encoding="utf-8")
-          manifest = mani.read_text(encoding="utf-8")
-
-          html = html.replace(
-              "<!-- METRICS_JSON_PLACEHOLDER -->",
-              f'<script id="metrics-data" type="application/json">{metrics}</script>'
-          ).replace(
-              "<!-- ASSETS_MANIFEST_PLACEHOLDER -->",
-              f'<script id="assets-manifest-data" type="application/json">{manifest}</script>'
-          )
-
-          out.parent.mkdir(exist_ok=True)
-          out.write_text(html, encoding="utf-8")
-          print(f"OK: {out} — {out.stat().st_size} bytes")
-
-          remaining = html.count("_PLACEHOLDER -->")
-          if remaining:
-              raise RuntimeError(f"{remaining} placeholder(s) unreplaced in output!")
-          print("OK: all placeholders replaced")
-          PYEOF
-
-      # ─ 4. Verify output ──────────────────────────────────────────────
-      - name: Verify dist/index.html
-        run: |
-          [ -f dist/index.html ] || { echo "::error::dist/index.html missing!"; exit 1; }
-          grep -q 'id="metrics-data"'         dist/index.html || { echo "::error::metrics-data tag missing!";   exit 1; }
-          grep -q 'id="assets-manifest-data"' dist/index.html || { echo "::error::manifest-data tag missing!";  exit 1; }
-          grep -q '_PLACEHOLDER -->'          dist/index.html && { echo "::error::unreplaced placeholder!";     exit 1; } || true
-          echo "OK: dist/index.html verified"
-
-      # ─ 5. Upload artifact ─────────────────────────────────────────────
+      # ─ 4. Upload status page as artifact ────────────────────────────────
       - name: Upload status page artifact
         uses: actions/upload-artifact@v4
         with:
           name: status-page
-          path: dist/
+          path: docs/status/
           retention-days: 30
 
-      # ─ 6. Deploy to GitHub Pages (main only) ────────────────────────
+      # ─ 5. Deploy to GitHub Pages (main only) ────────────────────────────
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: ./docs/status
           destination_dir: status
