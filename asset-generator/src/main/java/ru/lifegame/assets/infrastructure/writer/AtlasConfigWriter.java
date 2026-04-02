@@ -90,7 +90,7 @@ public class AtlasConfigWriter {
         sb.append("}\n");
 
         Files.createDirectories(outputDir);
-        Path configPath = outputDir.resolve("sprite-atlas.json");
+        Path configPath = outputDir.resolve("animations/sprite-atlas.json");
         Files.writeString(configPath, sb.toString(), StandardCharsets.UTF_8);
         log.info("Wrote sprite-atlas.json (v{}, rev {}, scale {}): {}",
                 AtlasConfigSchema.CURRENT_VERSION, revision, displayScale, configPath);

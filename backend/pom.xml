@@ -89,7 +89,7 @@
               Generated assets (PNG, sprite-atlas.json) -> classpath:/assets/
               StaticResourceConfig maps /assets/** -> classpath:/assets/
               AssetConfigController reads ClassPathResource("assets/...")
-              Both require classpath:/assets/ -- DO NOT use targetPath=static here.
+              Both require classpath:/assets/  DO NOT use targetPath=static here.
             -->
             <resource>
                 <directory>${project.build.directory}/generated-assets</directory>
