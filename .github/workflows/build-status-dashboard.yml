@@ -186,18 +186,42 @@ jobs:
           path: dist/assets
         continue-on-error: true
 
-      - name: inject-data-into-html
+      - name: inject-metrics-into-html
         run: |
-          METRICS=$(cat dist/metrics.json)
-          if [ -f frontend/dashboard/index.html ]; then
-            TEMPLATE="frontend/dashboard/index.html"
-          else
-            echo '<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><title>Life of T — Build Status</title></head><body><pre id="metrics"></pre><script>const d=document.getElementById("metrics");fetch("metrics.json").then(r=>r.json()).then(j=>d.textContent=JSON.stringify(j,null,2));</script></body></html>' > dist/index.html
-            TEMPLATE="dist/index.html"
-          fi
-          ESCAPED=$(echo "$METRICS" | sed 's/\\/\\\\/g; s/`/\\`/g; s/\$/\\$/g')
-          sed -i "s|// __METRICS_PLACEHOLDER__|window.__METRICS__ = ${ESCAPED};|g" "$TEMPLATE" 2>/dev/null || true
-          [ "$TEMPLATE" != "dist/index.html" ] && cp "$TEMPLATE" dist/index.html
+          python3 << 'PYEOF'
+          import json, pathlib, shutil
+
+          metrics_path  = pathlib.Path("dist/metrics.json")
+          template_path = pathlib.Path("frontend/dashboard/index.html")
+          out_path      = pathlib.Path("dist/index.html")
+
+          metrics_json = metrics_path.read_text(encoding="utf-8")
+
+          fallback_html = (
+              '<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">'
+              '<title>Life of T \u2014 Build Status</title></head><body>'
+              '<pre id="metrics"></pre>'
+              '<script>'
+              'const d=document.getElementById("metrics");'
+              'fetch("metrics.json").then(r=>r.json()).then(j=>d.textContent=JSON.stringify(j,null,2));'
+              '</script></body></html>'
+          )
+
+          if template_path.exists() and template_path.is_file():
+              html = template_path.read_text(encoding="utf-8")
+              injection = f"window.__METRICS__ = {metrics_json};"
+              html = html.replace("// __METRICS_PLACEHOLDER__", injection)
+              out_path.parent.mkdir(parents=True, exist_ok=True)
+              out_path.write_text(html, encoding="utf-8")
+              print(f"OK: injected metrics into {template_path} -> {out_path}")
+          else:
+              out_path.parent.mkdir(parents=True, exist_ok=True)
+              out_path.write_text(fallback_html, encoding="utf-8")
+              print(f"OK: template not found, wrote fallback -> {out_path}")
+
+          shutil.copy(str(metrics_path), str(out_path.parent / "metrics.json"))
+          print(f"OK: dist/ contents: {list(out_path.parent.iterdir())}")
+          PYEOF
 
       - name: upload-dist-artifact
         uses: actions/upload-artifact@v4
