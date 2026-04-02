@@ -79,7 +79,26 @@
    CI_TOTAL_RUNS=N
    ```
 
-## §4. Схема данных
+### §3.5 write-metrics.sh
+
+Сборка `metrics.json` из переменных окружения. См. §4.1 для схемы.
+
+### §3.6 scan-assets.sh
+
+1. Принять `ASSETS_DIR` (default: `generated-assets`) и `OUTPUT_FILE` (default: `assets-manifest.json`) из окружения.
+2. Если `ASSETS_DIR` отсутствует или пуст — записать fallback-манифест и выйти 0.
+3. `find "$ASSETS_DIR" -name '*.png' | sort` — найти все PNG.
+4. Для каждого PNG:
+   a. `ID` = имя файла без расширения.
+   b. `category` = первый сегмент пути после `ASSETS_DIR/` через `cut -d'/' -f1`.
+   c. `path` = `assets/<category>/<filename>.png` (относительно от `output/`).
+   d. Проверить `<dir>/sprite-atlas.json`:
+      - Есть → `hasAtlas: true`, `frames` = `.frames` через `jq`.
+      - Нет → `hasAtlas: false`, `frames: []`.
+5. Сборка массива через `jq --argjson entry ... '. + [$entry]'`.
+6. Записать выходной JSON через `jq -n`.
+
+## §4. Схемы данных
 
 ### §4.1 metrics.json
 
@@ -103,6 +122,49 @@
   }
 }
 ```
+
+### §4.2 assets-manifest.json
+
+```json
+{
+  "assets": [
+    {
+      "id":       "tatyana-idle",
+      "category": "characters",
+      "path":     "assets/characters/tatyana-idle.png",
+      "hasAtlas": true,
+      "frames":   ["frame_0", "frame_1"]
+    }
+  ],
+  "fallback":     false,
+  "totalAssets":  1,
+  "generatedAt":  "2026-04-02T06:00:00Z"
+}
+```
+
+**Fallback (пустой или отсутствующий `generated-assets/`):**
+
+```json
+{
+  "assets":      [],
+  "fallback":    true,
+  "totalAssets": 0,
+  "generatedAt": "ISO-8601"
+}
+```
+
+**Поля:**
+
+| Поле | Тип | Описание |
+|---|---|---|
+| `id` | string | Имя файла без `.png` |
+| `category` | string | `characters` / `locations` / `items` / `ui` / `unknown` |
+| `path` | string | `assets/<category>/<file>.png` (отн. от `output/`) |
+| `hasAtlas` | boolean | `true` если `sprite-atlas.json` есть рядом |
+| `frames` | array | Содержимое `.frames` из атласа, либо `[]` |
+| `fallback` | boolean | `true` при отсутствии/пустоте `generated-assets/` |
+| `totalAssets` | number | Общее количество PNG |
+| `generatedAt` | string | ISO-8601 UTC момент запуска |
 
 ## §5. Jobs и зависимости
 
