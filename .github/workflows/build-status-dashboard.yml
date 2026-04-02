@@ -1,0 +1,231 @@
+name: Build Status Dashboard
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *'
+
+jobs:
+
+  # ─────────────────────────────────────────────
+  # Job 1: collect-metrics
+  # ─────────────────────────────────────────────
+  collect-metrics:
+    runs-on: ubuntu-latest
+    outputs:
+      tasks_todo:              ${{ steps.tasks.outputs.TASKS_TODO }}
+      tasks_in_progress:       ${{ steps.tasks.outputs.TASKS_IN_PROGRESS }}
+      tasks_review:            ${{ steps.tasks.outputs.TASKS_REVIEW }}
+      tasks_done:              ${{ steps.tasks.outputs.TASKS_DONE }}
+      tasks_blocked:           ${{ steps.tasks.outputs.TASKS_BLOCKED }}
+      tasks_total:             ${{ steps.tasks.outputs.TASKS_TOTAL }}
+      backend_domain:          ${{ steps.backend.outputs.BACKEND_DOMAIN }}
+      backend_application:     ${{ steps.backend.outputs.BACKEND_APPLICATION }}
+      backend_infrastructure:  ${{ steps.backend.outputs.BACKEND_INFRASTRUCTURE }}
+      backend_presentation:    ${{ steps.backend.outputs.BACKEND_PRESENTATION }}
+      backend_total:           ${{ steps.backend.outputs.BACKEND_TOTAL }}
+      narrative_quests:        ${{ steps.narrative.outputs.NARRATIVE_QUESTS }}
+      narrative_npcs:          ${{ steps.narrative.outputs.NARRATIVE_NPCS }}
+      narrative_world_events:  ${{ steps.narrative.outputs.NARRATIVE_WORLD_EVENTS }}
+      narrative_conflicts:     ${{ steps.narrative.outputs.NARRATIVE_CONFLICTS }}
+      narrative_total:         ${{ steps.narrative.outputs.NARRATIVE_TOTAL }}
+      ci_status:               ${{ steps.ci.outputs.CI_STATUS }}
+      ci_conclusion:           ${{ steps.ci.outputs.CI_CONCLUSION }}
+      ci_total_runs:           ${{ steps.ci.outputs.CI_TOTAL_RUNS }}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: count-tasks
+        id: tasks
+        run: |
+          chmod +x scripts/count-tasks.sh
+          source <(bash scripts/count-tasks.sh tasks)
+          echo "TASKS_TODO=${TASKS_TODO}"             >> "$GITHUB_OUTPUT"
+          echo "TASKS_IN_PROGRESS=${TASKS_IN_PROGRESS}" >> "$GITHUB_OUTPUT"
+          echo "TASKS_REVIEW=${TASKS_REVIEW}"         >> "$GITHUB_OUTPUT"
+          echo "TASKS_DONE=${TASKS_DONE}"             >> "$GITHUB_OUTPUT"
+          echo "TASKS_BLOCKED=${TASKS_BLOCKED}"       >> "$GITHUB_OUTPUT"
+          echo "TASKS_TOTAL=${TASKS_TOTAL}"           >> "$GITHUB_OUTPUT"
+
+      - name: count-backend
+        id: backend
+        run: |
+          chmod +x scripts/count-backend.sh
+          source <(bash scripts/count-backend.sh)
+          echo "BACKEND_DOMAIN=${BACKEND_DOMAIN}"               >> "$GITHUB_OUTPUT"
+          echo "BACKEND_APPLICATION=${BACKEND_APPLICATION}"     >> "$GITHUB_OUTPUT"
+          echo "BACKEND_INFRASTRUCTURE=${BACKEND_INFRASTRUCTURE}" >> "$GITHUB_OUTPUT"
+          echo "BACKEND_PRESENTATION=${BACKEND_PRESENTATION}"   >> "$GITHUB_OUTPUT"
+          echo "BACKEND_TOTAL=${BACKEND_TOTAL}"                 >> "$GITHUB_OUTPUT"
+
+      - name: count-narrative
+        id: narrative
+        run: |
+          chmod +x scripts/count-narrative.sh
+          source <(bash scripts/count-narrative.sh)
+          echo "NARRATIVE_QUESTS=${NARRATIVE_QUESTS}"             >> "$GITHUB_OUTPUT"
+          echo "NARRATIVE_NPCS=${NARRATIVE_NPCS}"                 >> "$GITHUB_OUTPUT"
+          echo "NARRATIVE_WORLD_EVENTS=${NARRATIVE_WORLD_EVENTS}" >> "$GITHUB_OUTPUT"
+          echo "NARRATIVE_CONFLICTS=${NARRATIVE_CONFLICTS}"       >> "$GITHUB_OUTPUT"
+          echo "NARRATIVE_TOTAL=${NARRATIVE_TOTAL}"               >> "$GITHUB_OUTPUT"
+
+      - name: fetch-ci-status
+        id: ci
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          CI_REF: ${{ github.sha }}
+        run: |
+          chmod +x scripts/fetch-ci-status.sh
+          source <(bash scripts/fetch-ci-status.sh)
+          echo "CI_STATUS=${CI_STATUS}"         >> "$GITHUB_OUTPUT"
+          echo "CI_CONCLUSION=${CI_CONCLUSION}" >> "$GITHUB_OUTPUT"
+          echo "CI_TOTAL_RUNS=${CI_TOTAL_RUNS}" >> "$GITHUB_OUTPUT"
+
+      - name: write-metrics-json
+        id: write_metrics
+        env:
+          TASKS_TODO:              ${{ steps.tasks.outputs.TASKS_TODO }}
+          TASKS_IN_PROGRESS:       ${{ steps.tasks.outputs.TASKS_IN_PROGRESS }}
+          TASKS_REVIEW:            ${{ steps.tasks.outputs.TASKS_REVIEW }}
+          TASKS_DONE:              ${{ steps.tasks.outputs.TASKS_DONE }}
+          TASKS_BLOCKED:           ${{ steps.tasks.outputs.TASKS_BLOCKED }}
+          TASKS_TOTAL:             ${{ steps.tasks.outputs.TASKS_TOTAL }}
+          BACKEND_DOMAIN:          ${{ steps.backend.outputs.BACKEND_DOMAIN }}
+          BACKEND_APPLICATION:     ${{ steps.backend.outputs.BACKEND_APPLICATION }}
+          BACKEND_INFRASTRUCTURE:  ${{ steps.backend.outputs.BACKEND_INFRASTRUCTURE }}
+          BACKEND_PRESENTATION:    ${{ steps.backend.outputs.BACKEND_PRESENTATION }}
+          BACKEND_TOTAL:           ${{ steps.backend.outputs.BACKEND_TOTAL }}
+          NARRATIVE_QUESTS:        ${{ steps.narrative.outputs.NARRATIVE_QUESTS }}
+          NARRATIVE_NPCS:          ${{ steps.narrative.outputs.NARRATIVE_NPCS }}
+          NARRATIVE_WORLD_EVENTS:  ${{ steps.narrative.outputs.NARRATIVE_WORLD_EVENTS }}
+          NARRATIVE_CONFLICTS:     ${{ steps.narrative.outputs.NARRATIVE_CONFLICTS }}
+          NARRATIVE_TOTAL:         ${{ steps.narrative.outputs.NARRATIVE_TOTAL }}
+          CI_STATUS:               ${{ steps.ci.outputs.CI_STATUS || 'unknown' }}
+          CI_CONCLUSION:           ${{ steps.ci.outputs.CI_CONCLUSION || 'unknown' }}
+          CI_TOTAL_RUNS:           ${{ steps.ci.outputs.CI_TOTAL_RUNS || '0' }}
+          OUTPUT_FILE: metrics.json
+        run: |
+          chmod +x scripts/write-metrics.sh
+          bash scripts/write-metrics.sh
+
+      - name: upload-metrics-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: metrics
+          path: metrics.json
+
+  # ─────────────────────────────────────────────
+  # Job 2: collect-assets
+  # ─────────────────────────────────────────────
+  collect-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup-java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: build-asset-generator
+        id: build_asset_gen
+        continue-on-error: true
+        run: |
+          if [ -f asset-generator/pom.xml ]; then
+            cd asset-generator && mvn -q package -DskipTests
+          elif [ -f pom.xml ]; then
+            mvn -q package -DskipTests -pl asset-generator -am
+          fi
+
+      - name: run-asset-generator
+        id: run_asset_gen
+        continue-on-error: true
+        run: |
+          JAR=$(find . -name 'asset-generator*.jar' -not -path '*/original*' 2>/dev/null | head -1)
+          if [ -n "$JAR" ]; then
+            mkdir -p dist/assets
+            java -jar "$JAR" --output dist/assets
+          fi
+
+      - name: upload-assets-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: assets
+          path: dist/assets
+          if-no-files-found: ignore
+
+  # ─────────────────────────────────────────────
+  # Job 3: build-html
+  # ─────────────────────────────────────────────
+  build-html:
+    runs-on: ubuntu-latest
+    needs: [collect-metrics, collect-assets]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: download-metrics-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: metrics
+          path: dist
+
+      - name: download-assets-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: assets
+          path: dist/assets
+        continue-on-error: true
+
+      - name: inject-data-into-html
+        run: |
+          METRICS=$(cat dist/metrics.json)
+          if [ -f frontend/dashboard/index.html ]; then
+            TEMPLATE="frontend/dashboard/index.html"
+          else
+            echo '<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><title>Life of T — Build Status</title></head><body><pre id="metrics"></pre><script>const d=document.getElementById("metrics");fetch("metrics.json").then(r=>r.json()).then(j=>d.textContent=JSON.stringify(j,null,2));</script></body></html>' > dist/index.html
+            TEMPLATE="dist/index.html"
+          fi
+          # Embed metrics.json as inline script variable for offline access
+          ESCAPED=$(echo "$METRICS" | sed 's/\\/\\\\/g; s/`/\\`/g; s/\$/\\$/g')
+          sed -i "s|// __METRICS_PLACEHOLDER__|window.__METRICS__ = ${ESCAPED};|g" "$TEMPLATE" 2>/dev/null || true
+          [ "$TEMPLATE" != "dist/index.html" ] && cp "$TEMPLATE" dist/index.html
+          cp dist/metrics.json dist/metrics.json
+
+      - name: upload-dist-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+  # ─────────────────────────────────────────────
+  # Job 4: deploy
+  # ─────────────────────────────────────────────
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build-html]
+    permissions:
+      contents: write
+    steps:
+      - name: download-dist-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: deploy-to-gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
+          commit_message: 'ci: update build-status-dashboard [skip ci]'
