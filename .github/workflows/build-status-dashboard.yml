@@ -189,7 +189,7 @@ jobs:
       - name: inject-metrics-into-html
         run: |
           python3 << 'PYEOF'
-          import json, pathlib, shutil
+          import pathlib
 
           metrics_path  = pathlib.Path("dist/metrics.json")
           template_path = pathlib.Path("frontend/dashboard/index.html")
@@ -209,18 +209,16 @@ jobs:
 
           if template_path.exists() and template_path.is_file():
               html = template_path.read_text(encoding="utf-8")
-              injection = f"window.__METRICS__ = {metrics_json};"
-              html = html.replace("// __METRICS_PLACEHOLDER__", injection)
+              html = html.replace("// __METRICS_PLACEHOLDER__", f"window.__METRICS__ = {metrics_json};")
               out_path.parent.mkdir(parents=True, exist_ok=True)
               out_path.write_text(html, encoding="utf-8")
               print(f"OK: injected metrics into {template_path} -> {out_path}")
           else:
               out_path.parent.mkdir(parents=True, exist_ok=True)
               out_path.write_text(fallback_html, encoding="utf-8")
-              print(f"OK: template not found, wrote fallback -> {out_path}")
+              print(f"OK: fallback -> {out_path}")
 
-          shutil.copy(str(metrics_path), str(out_path.parent / "metrics.json"))
-          print(f"OK: dist/ contents: {list(out_path.parent.iterdir())}")
+          print(f"OK: dist/ = {[p.name for p in out_path.parent.iterdir()]}")
           PYEOF
 
       - name: upload-dist-artifact
