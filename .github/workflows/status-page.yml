@@ -1,0 +1,219 @@
+name: Status Page — Build & Deploy
+
+on:
+  workflow_run:
+    workflows: ["Asset Generation Pipeline", "Asset Generator CI"]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  build-status-page:
+    name: Inject metrics & deploy status page
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 1. Collect metrics ────────────────────────────────────────────────
+      - name: Collect build metrics
+        id: metrics
+        run: |
+          BUILD_TS=$(date +%s%3N)
+          BUILD_ID="build-${{ github.run_number }}"
+          ENV_NAME="${{ github.ref_name }}"
+
+          # Test results from Surefire XML (fallback to zeros if absent)
+          PASSED=0; FAILED=0; TOTAL=0
+          if ls asset-generator/target/surefire-reports/TEST-*.xml 2>/dev/null | head -1 | grep -q .; then
+            PASSED=$(grep -h 'tests=' asset-generator/target/surefire-reports/TEST-*.xml \
+              | grep -oP 'tests="\K[0-9]+' | awk '{s+=$1}END{print s+0}')
+            FAILED=$(grep -h 'failures=\|errors=' asset-generator/target/surefire-reports/TEST-*.xml \
+              | grep -oP '(failures|errors)="\K[0-9]+' | awk '{s+=$1}END{print s+0}')
+            TOTAL=$((PASSED + FAILED))
+          fi
+
+          # Asset counts from ASSET_OUTPUT_DIR artifact directory (if present)
+          ASSET_DIR="/tmp/life-of-t-generated-assets"
+          GEN=0; ASSET_ERRORS=0; ASSET_TOTAL=6
+          if [ -d "$ASSET_DIR" ]; then
+            GEN=$(ls "$ASSET_DIR"/*.png 2>/dev/null | wc -l)
+            ASSET_ERRORS=$(( ASSET_TOTAL - GEN < 0 ? 0 : ASSET_TOTAL - GEN ))
+          fi
+
+          # Narrative specs count from docs/prompts
+          SPECS=$(find docs/prompts -name 'visual-specs.xml' 2>/dev/null | wc -l)
+          IMPL=$SPECS   # treat all present specs as implemented
+
+          # Coverage: placeholder — replace with jacoco report parsing if available
+          COVERAGE=0
+          JACOCO="asset-generator/target/site/jacoco/jacoco.xml"
+          if [ -f "$JACOCO" ]; then
+            COVERED=$(grep -oP 'type="LINE"[^/]* covered="\K[0-9]+' "$JACOCO" | awk '{s+=$1}END{print s+0}')
+            MISSED=$(grep  -oP 'type="LINE"[^/]* missed="\K[0-9]+'  "$JACOCO" | awk '{s+=$1}END{print s+0}')
+            LINES=$(( COVERED + MISSED ))
+            if [ "$LINES" -gt 0 ]; then
+              COVERAGE=$(python3 -c "print(round($COVERED/$LINES*100,1))")
+            fi
+          fi
+
+          BUILD_STATUS="ok"
+          if [ "${{ github.event.workflow_run.conclusion }}" = "failure" ]; then
+            BUILD_STATUS="error"
+          fi
+
+          # Write metrics.json into dist/
+          mkdir -p dist
+          cat > dist/metrics.json <<JSON
+          {
+            "env": "${ENV_NAME}",
+            "build": {
+              "status": "${BUILD_STATUS}",
+              "ts": ${BUILD_TS},
+              "id": "${BUILD_ID}"
+            },
+            "tests": {
+              "passed": ${PASSED},
+              "failed": ${FAILED},
+              "total":  ${TOTAL}
+            },
+            "coverage": { "pct": ${COVERAGE} },
+            "assets": {
+              "generated": ${GEN},
+              "total":     ${ASSET_TOTAL},
+              "errors":    ${ASSET_ERRORS}
+            },
+            "narrative": {
+              "specs":         ${SPECS},
+              "implemented":   ${IMPL},
+              "pending":       0
+            }
+          }
+          JSON
+
+          echo "metrics written to dist/metrics.json"
+          cat dist/metrics.json
+
+      # ── 2. Build assets-manifest.json ────────────────────────────────────
+      - name: Build assets manifest
+        run: |
+          ASSET_DIR="/tmp/life-of-t-generated-assets"
+          mkdir -p dist
+
+          python3 - <<'EOF'
+          import os, json, pathlib, stat
+
+          asset_dir = "/tmp/life-of-t-generated-assets"
+          items = []
+
+          if os.path.isdir(asset_dir):
+              for fname in sorted(os.listdir(asset_dir)):
+                  fpath = os.path.join(asset_dir, fname)
+                  if not os.path.isfile(fpath):
+                      continue
+                  ext  = pathlib.Path(fname).suffix.lstrip('.').lower()
+                  size = os.path.getsize(fpath)
+                  items.append({
+                      "name": fname,
+                      "path": fname,
+                      "type": ext,
+                      "size": size,
+                      "url":  "",
+                      "error": False,
+                      "warn":  False
+                  })
+
+          manifest = {"assets": items, "total": len(items)}
+          out_path = "dist/assets-manifest.json"
+          with open(out_path, "w") as f:
+              json.dump(manifest, f, indent=2)
+
+          print(f"OK: {out_path} — {len(items)} asset(s)")
+          EOF
+
+      # ── 3. Inject data into HTML template (NO cp self-copy) ──────────────
+      - name: Inject JSON into HTML template
+        run: |
+          # Source:      frontend/status/index.template.html
+          # Destination: dist/index.html
+          # They are DIFFERENT paths — no self-copy risk.
+
+          python3 - <<'EOF'
+          import pathlib
+
+          template_path = pathlib.Path("frontend/status/index.template.html")
+          out_path      = pathlib.Path("dist/index.html")
+          metrics_path  = pathlib.Path("dist/metrics.json")
+          manifest_path = pathlib.Path("dist/assets-manifest.json")
+
+          if not template_path.exists():
+              raise FileNotFoundError(f"Template not found: {template_path}")
+
+          template = template_path.read_text(encoding="utf-8")
+          metrics  = metrics_path.read_text(encoding="utf-8")
+          manifest = manifest_path.read_text(encoding="utf-8")
+
+          result = template.replace(
+              "<!-- METRICS_JSON_PLACEHOLDER -->",
+              f'<script id="metrics-data" type="application/json">{metrics}</script>'
+          ).replace(
+              "<!-- ASSETS_MANIFEST_PLACEHOLDER -->",
+              f'<script id="assets-manifest-data" type="application/json">{manifest}</script>'
+          )
+
+          out_path.parent.mkdir(parents=True, exist_ok=True)
+          out_path.write_text(result, encoding="utf-8")
+          print(f"OK: {out_path} generated ({out_path.stat().st_size} bytes)")
+
+          # Verify placeholders were replaced
+          remaining = result.count("_PLACEHOLDER -->")
+          if remaining > 0:
+              raise RuntimeError(f"{remaining} placeholder(s) still present in output!")
+          print("OK: all placeholders replaced")
+          EOF
+
+      # ── 4. Verify output ──────────────────────────────────────────────────
+      - name: Verify dist/index.html
+        run: |
+          if [ ! -f dist/index.html ]; then
+            echo "::error::dist/index.html not found after injection step!"
+            exit 1
+          fi
+
+          SIZE=$(stat -c%s dist/index.html)
+          echo "dist/index.html: ${SIZE} bytes"
+
+          if grep -q "_PLACEHOLDER -->" dist/index.html; then
+            echo "::error::Unreplaced placeholder found in dist/index.html!"
+            grep "_PLACEHOLDER" dist/index.html
+            exit 1
+          fi
+
+          if ! grep -q 'id="metrics-data"' dist/index.html; then
+            echo "::error::metrics-data script tag missing!"
+            exit 1
+          fi
+
+          if ! grep -q 'id="assets-manifest-data"' dist/index.html; then
+            echo "::error::assets-manifest-data script tag missing!"
+            exit 1
+          fi
+
+          echo "OK: dist/index.html verified — all placeholders replaced"
+
+      # ── 5. Upload as artifact ─────────────────────────────────────────────
+      - name: Upload status page artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: status-page
+          path: dist/
+          retention-days: 30
+
+      # ── 6. Deploy to GitHub Pages (main branch only) ──────────────────────
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          destination_dir: status
