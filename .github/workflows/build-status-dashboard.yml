@@ -195,11 +195,9 @@ jobs:
             echo '<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><title>Life of T — Build Status</title></head><body><pre id="metrics"></pre><script>const d=document.getElementById("metrics");fetch("metrics.json").then(r=>r.json()).then(j=>d.textContent=JSON.stringify(j,null,2));</script></body></html>' > dist/index.html
             TEMPLATE="dist/index.html"
           fi
-          # Embed metrics.json as inline script variable for offline access
           ESCAPED=$(echo "$METRICS" | sed 's/\\/\\\\/g; s/`/\\`/g; s/\$/\\$/g')
           sed -i "s|// __METRICS_PLACEHOLDER__|window.__METRICS__ = ${ESCAPED};|g" "$TEMPLATE" 2>/dev/null || true
           [ "$TEMPLATE" != "dist/index.html" ] && cp "$TEMPLATE" dist/index.html
-          cp dist/metrics.json dist/metrics.json
 
       - name: upload-dist-artifact
         uses: actions/upload-artifact@v4
