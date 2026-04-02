@@ -1,28 +1,33 @@
 # TASK-SA-013 — Спецификация GitHub Actions Pipeline
 
-**Тип:** analytics  
-**Приоритет:** HIGH  
-**Статус:** DONE  
-**Роль:** System Analyst  
-**Связанная спецификация:** `docs/specs/PIPELINE_SPEC.md`  
-**ADR:** `docs/decisions/ADR-003-pipeline-publish-tool.md`  
-**Зависимость:** TASK-SA-010, TASK-SA-011, TASK-SA-012
+| Поле | Значение |
+|------|----------|
+| **ID** | TASK-SA-013 |
+| **Тип** | analytics |
+| **Статус** | DONE |
+| **Приоритет** | HIGH |
+| **Роль** | System Analyst |
+| **Дата** | 2026-04-02 |
 
 ## Описание
 
-Создать техническую спецификацию GitHub Actions пайплайна, собирающего и публикующего Project Status Dashboard.
+Спроектировать техническую спецификацию GitHub Actions пайплайна `build-status-dashboard`, который автоматически собирает и публикует Project Status Dashboard при каждом пуше в `main`.
 
-## Результат
+## Связанные спецификации
 
-- [x] Создан `docs/specs/PIPELINE_SPEC.md` с разделами 1–8
-- [x] Специфицированы все 4 jobs: collect-metrics, collect-assets, build-html, deploy
-- [x] Специфицированы 6 bash-скриптов с алгоритмами и контрактами
-- [x] Задокументирована структура `output/`
-- [x] Описана настройка GitHub Pages (Settings → Pages → Source: GitHub Actions)
-- [x] Создан ADR-003 о выборе инструмента публикации
-- [x] Задокументировано решение Bash vs Python
-- [x] Созданы задачи TASK-BE-022, TASK-BE-023, TASK-FE-054, TASK-FE-055
+- `docs/specs/PIPELINE_SPEC.md` — основная спецификация (выходной артефакт)
+- `docs/decisions/ADR-004-pipeline-publish-tool.md` — ADR о выборе инструмента публикации
+- TASK-SA-010 (метрики), TASK-SA-011 (Overview), TASK-SA-012 (Assets Gallery) — зависимости
+
+## Критерии приёмки
+
+- [x] `docs/specs/PIPELINE_SPEC.md` создан и покрывает все 4 jobs
+- [x] Bash-скрипты специфицированы (алгоритм + пример JSON)
+- [x] ADR-004 задокументирован в `docs/decisions/`
+- [x] Задачи TASK-BE-022, TASK-BE-023, TASK-FE-054, TASK-FE-055 созданы
+- [x] Структура `output/` задокументирована
+- [x] Способ настройки GitHub Pages описан
 
 ## Метрики
 
-Связанные метрики: время выполнения workflow (цель ≤ 10 мин), доступность страницы по целевому URL.
+Затрагивает процессную метрику: «доля задач, выполненных без изменений спецификаций».

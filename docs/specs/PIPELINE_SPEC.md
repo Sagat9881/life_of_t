@@ -1,452 +1,649 @@
-# PIPELINE_SPEC — Спецификация GitHub Actions Pipeline для Project Status Dashboard
+# PIPELINE_SPEC.md — GitHub Actions Pipeline: Project Status Dashboard
 
-**ID:** SPEC-SA-013  
+**ID:** TASK-SA-013  
 **Версия:** 1.0  
-**Дата:** 2026-03-31  
-**Зависимости:** SPEC-SA-010, SPEC-SA-011, SPEC-SA-012  
-**Связанные задачи:** TASK-BE-022, TASK-BE-023, TASK-FE-054, TASK-FE-055  
-**ADR:** `docs/decisions/ADR-003-pipeline-publish-tool.md`  
-**Автор:** System Analyst  
-**Методология:** SDD (Specify → Plan → Task → Implement) — см. `system-analyst-skill.md`, раздел 5
+**Дата:** 2026-04-02  
+**Автор:** System Analyst (SDD §5 — Task-фаза)  
+**Зависимости:** TASK-SA-010 (метрики), TASK-SA-011 (Overview), TASK-SA-012 (Assets Gallery)  
+**Связанные решения:** `docs/decisions/ADR-004-pipeline-publish-tool.md`
+
+---
+
+## Содержание
+
+1. [Архитектура пайплайна](#1-архитектура-пайплайна)
+2. [Спецификация jobs](#2-спецификация-jobs)
+3. [Спецификация bash-скриптов](#3-спецификация-bash-скриптов)
+4. [Структура артефактов output/](#4-структура-артефактов-output)
+5. [Конфигурация GitHub Pages](#5-конфигурация-github-pages)
+6. [Стратегия обработки ошибок](#6-стратегия-обработки-ошибок)
+7. [ADR](#7-adr)
 
 ---
 
 ## 1. Архитектура пайплайна
 
-### 1.1. Диаграмма jobs и зависимостей
+### 1.1. Контекст и цель
+
+> **Ссылка на SDD §6 (Технические спецификации):** Каждая техническая спецификация содержит контекст, цель и связь с метриками проекта.
+
+Пайплайн `build-status-dashboard` автоматически собирает метрики проекта и публикует HTML-страницу на GitHub Pages при каждом пуше в `main`. Это обеспечивает актуальное состояние проекта без ручного обновления документации.
+
+**Цель:** сделать Project Status Dashboard (`https://sagat9881.github.io/life_of_t/`) единым окном видимости состояния «Life of T» — задачи, код, нарратив, ассеты.
+
+### 1.2. Триггеры
+
+| Триггер | Условие | Назначение |
+|---------|---------|------------|
+| `push: branches: [main]` | любой пуш в `main` | автоматическая актуализация |
+| `workflow_dispatch` | ручной запуск | отладка, принудительное обновление |
+| `schedule: cron: '0 6 * * *'` | ежедневно в 06:00 UTC | регулярное обновление даже без пушей |
+
+### 1.3. Диаграмма jobs и зависимостей
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  workflow: build-status-dashboard                               │
-│  Триггеры: push[main] | workflow_dispatch | schedule(06:00 UTC) │
-└─────────────────────────────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────┐
-│  job: collect-metrics│
-│  runner: ubuntu-latest│
-│  outputs:            │
-│    metrics-artifact  │
-└─────────┬───────────┘
-          │ needs: collect-metrics
-          ▼
-┌─────────────────────┐
-│  job: collect-assets │
-│  runner: ubuntu-latest│
-│  continue-on-error: false│
-│  outputs:            │
-│    assets-artifact   │
-└─────────┬───────────┘
-          │ needs: [collect-metrics, collect-assets]
-          ▼
-┌─────────────────────┐
-│  job: build-html     │
-│  runner: ubuntu-latest│
-│  outputs:            │
-│    output-dir        │
-└─────────┬───────────┘
-          │ needs: build-html
-          ▼
-┌─────────────────────┐
-│  job: deploy         │
-│  runner: ubuntu-latest│
-│  permissions:        │
-│    pages: write      │
-│    id-token: write   │
-└─────────────────────┘
+workflow: build-status-dashboard
+│
+├── [job-1] collect-metrics
+│   │  runner: ubuntu-latest
+│   │  inputs: репозиторий (tasks/, backend/src/, game-content/, GitHub API)
+│   │  outputs: metrics.json (artifact)
+│   │
+├── [job-2] collect-assets  ──needs: collect-metrics
+│   │  runner: ubuntu-latest
+│   │  inputs: asset-generator/pom.xml, game-content/assets/specs/
+│   │  outputs: assets-manifest.json (artifact), generated-assets/*.png
+│   │
+├── [job-3] build-html  ─────needs: collect-metrics, collect-assets
+│   │  runner: ubuntu-latest
+│   │  inputs: metrics.json, assets-manifest.json, templates/dashboard.html
+│   │  outputs: output/ (artifact)
+│   │
+└── [job-4] deploy  ─────────needs: build-html
+       runner: ubuntu-latest
+       inputs: output/ (artifact)
+       outputs: gh-pages branch → https://sagat9881.github.io/life_of_t/
 ```
 
-### 1.2. Передача данных между jobs
+### 1.4. Нефункциональные требования
 
-Каждый job сохраняет выходные файлы через `actions/upload-artifact@v4`; следующий job загружает через `actions/download-artifact@v4`.
-
-| Артефакт              | Создаётся в job   | Потребляется в job       |
-|-----------------------|-------------------|--------------------------|
-| `metrics-artifact`    | collect-metrics   | build-html               |
-| `assets-artifact`     | collect-assets    | build-html               |
-| `output-artifact`     | build-html        | deploy                   |
+| Требование | Значение |
+|-----------|---------|
+| Runner | `ubuntu-latest` (бесплатный tier) |
+| Платные credits | не требуются |
+| Максимальное время выполнения | ≤ 15 минут |
+| Permissions | `contents: write` (только для job `deploy`) |
+| Secrets | `GITHUB_TOKEN` (встроенный, не требует настройки) |
 
 ---
 
 ## 2. Спецификация jobs
 
-### 2.1. Job `collect-metrics`
+### 2.1. job: `collect-metrics`
 
-**Назначение:** собрать числовые метрики из репозитория и записать `metrics.json`.  
-**Runner:** `ubuntu-latest`  
-**Permissions:** `contents: read`
+**Назначение:** Собрать метрики состояния проекта из репозитория и GitHub API, записать в `metrics.json`.
 
-#### Steps
+**Переменные окружения:**
 
-| # | Step ID | Действие | Входные данные | Выходные данные |
-|---|---------|----------|----------------|-----------------|
+| Переменная | Источник | Назначение |
+|-----------|---------|-----------|
+| `GITHUB_TOKEN` | `secrets.GITHUB_TOKEN` | доступ к GitHub API для CI-статуса |
+| `GITHUB_REPOSITORY` | автоматически | `owner/repo` для API-запросов |
+| `GITHUB_SHA` | автоматически | SHA текущего коммита |
+
+**Steps:**
+
+| # | Имя шага | Действие | Входные файлы | Выходные данные |
+|---|---------|---------|--------------|----------------|
 | 1 | `checkout` | `actions/checkout@v4` | — | рабочая копия репозитория |
-| 2 | `count-tasks` | `bash scripts/ci/count-tasks.sh` | `tasks/**/*.md` | переменные окружения `TASKS_JSON` |
-| 3 | `count-backend` | `bash scripts/ci/count-backend.sh` | `backend/src/**/*.java` | переменная `BACKEND_JSON` |
-| 4 | `count-narrative` | `bash scripts/ci/count-narrative.sh` | `game-content/**/*.xml` | переменная `NARRATIVE_JSON` |
-| 5 | `fetch-ci-status` | `bash scripts/ci/fetch-ci-status.sh` | `GITHUB_TOKEN` (env), `GITHUB_REPOSITORY` (env) | переменная `CI_JSON`; `continue-on-error: true` |
-| 6 | `write-metrics` | `bash scripts/ci/write-metrics.sh` | `TASKS_JSON`, `BACKEND_JSON`, `NARRATIVE_JSON`, `CI_JSON` | файл `artifacts/metrics.json` |
-| 7 | `upload-metrics` | `actions/upload-artifact@v4` | `artifacts/metrics.json` | артефакт `metrics-artifact` |
+| 2 | `count-tasks` | `bash scripts/count-tasks.sh` | `tasks/**/*.md` | env: `TASKS_TODO`, `TASKS_IN_PROGRESS`, `TASKS_DONE` |
+| 3 | `count-backend-classes` | `bash scripts/count-backend.sh` | `backend/src/**/*.java` | env: `BACKEND_AGGREGATES`, `BACKEND_SERVICES`, `BACKEND_CONTROLLERS`, `BACKEND_TESTS` |
+| 4 | `count-narrative-specs` | `bash scripts/count-narrative.sh` | `game-content/**/*.xml` | env: `NARRATIVE_QUESTS`, `NARRATIVE_CONFLICTS`, `NARRATIVE_NPC`, `NARRATIVE_WORLD_EVENTS`, `NARRATIVE_WITH_MANIFEST` |
+| 5 | `fetch-ci-status` | `bash scripts/fetch-ci-status.sh` | GitHub API (`/repos/{owner}/{repo}/commits/{sha}/check-runs`) | env: `CI_STATUS` (`success`/`failure`/`unknown`) |
+| 6 | `write-metrics-json` | `bash scripts/write-metrics.sh` | все переменные выше | `metrics.json` |
+| 7 | `upload-artifact` | `actions/upload-artifact@v4` | `metrics.json` | artifact `metrics-json` |
 
-**Environment variables:**
-
-| Переменная | Источник | Описание |
-|------------|----------|----------|
-| `GITHUB_TOKEN` | GitHub Actions (автоматически) | Для запроса статуса CI через API |
-| `GITHUB_REPOSITORY` | GitHub Actions (автоматически) | `owner/repo` для API-запросов |
+**Условие продолжения:** шаг 5 (`fetch-ci-status`) — `continue-on-error: true`. При недоступности API, `CI_STATUS=unknown`.
 
 ---
 
-### 2.2. Job `collect-assets`
+### 2.2. job: `collect-assets`
 
-**Назначение:** собрать или проверить сгенерированные ассеты и записать `assets-manifest.json`.  
-**Runner:** `ubuntu-latest`  
-**Permissions:** `contents: read`  
-**needs:** `collect-metrics`
+**Зависимость:** `needs: collect-metrics`
 
-> **Важно:** Job НЕ запускает `asset-generator` при каждом CI-прогоне (это дорого и долго).
-> Вместо этого сканирует директорию `generated-assets/` если она присутствует в репозитории.
-> Если `asset-generator` нужен — это отдельный workflow, запускаемый вручную.
+**Назначение:** Скомпилировать и запустить `asset-generator`, отсканировать сгенерированные PNG, записать `assets-manifest.json`.
 
-#### Steps
+**Переменные окружения:**
 
-| # | Step ID | Действие | Входные данные | Выходные данные |
-|---|---------|----------|----------------|-----------------|
+| Переменная | Значение | Назначение |
+|-----------|---------|-----------|
+| `JAVA_VERSION` | `17` | версия JDK для Maven |
+| `ASSET_OUTPUT_DIR` | `generated-assets` | директория для PNG |
+
+**Steps:**
+
+| # | Имя шага | Действие | Входные файлы | Выходные данные |
+|---|---------|---------|--------------|----------------|
 | 1 | `checkout` | `actions/checkout@v4` | — | рабочая копия |
-| 2 | `check-assets-dir` | `bash`: проверить наличие `generated-assets/` | файловая система | переменная `ASSETS_EXIST` (true/false) |
-| 3 | `scan-assets` | `bash scripts/ci/scan-assets.sh` | `generated-assets/` | файл `artifacts/assets-manifest.json`; `continue-on-error: true` |
-| 4 | `fallback-manifest` | `bash`: если `scan-assets` упал — создать пустой манифест | — | файл `artifacts/assets-manifest.json` (fallback) |
-| 5 | `upload-assets` | `actions/upload-artifact@v4` | `artifacts/assets-manifest.json` | артефакт `assets-artifact` |
+| 2 | `setup-java` | `actions/setup-java@v4` с `java-version: 17`, `distribution: temurin` | — | JDK 17 в PATH |
+| 3 | `download-metrics-artifact` | `actions/download-artifact@v4` | artifact `metrics-json` | `metrics.json` в рабочей директории |
+| 4 | `build-asset-generator` | `mvn compile -f asset-generator/pom.xml -q` | `asset-generator/pom.xml` | скомпилированные классы |
+| 5 | `run-asset-generator` | `mvn exec:java -f asset-generator/pom.xml` | XML-спецификации из `game-content/` | PNG-файлы в `generated-assets/` |
+| 6 | `scan-assets` | `bash scripts/scan-assets.sh` | `generated-assets/**/*.png`, `sprite-atlas.json` | `assets-manifest.json` |
+| 7 | `upload-assets-artifact` | `actions/upload-artifact@v4` | `assets-manifest.json`, `generated-assets/` | artifact `assets-bundle` |
 
-**Fallback-манифест** (при отсутствии `generated-assets/`):
-```json
-{
-  "generatedAt": "<ISO-8601 текущего времени>",
-  "categories": {
-    "npc": [], "locations": [], "furniture": [], "pets": [], "ui": []
-  }
-}
+**Обработка ошибок шагов 4–5:** `continue-on-error: true`. При сбое — `assets-manifest.json` = `{"assets": [], "fallback": true}`. HTML-шаблон проверяет флаг `fallback: true` и показывает placeholder в Assets Gallery.
+
+**Контракт выхода (`assets-manifest.json`):** см. раздел 4.2.
+
+---
+
+### 2.3. job: `build-html`
+
+**Зависимость:** `needs: [collect-metrics, collect-assets]`
+
+**Назначение:** Получить оба артефакта, инъецировать данные в HTML-шаблон, скопировать PNG, записать финальный `output/index.html`.
+
+**Steps:**
+
+| # | Имя шага | Действие | Входные файлы | Выходные данные |
+|---|---------|---------|--------------|----------------|
+| 1 | `checkout` | `actions/checkout@v4` | — | рабочая копия (для шаблона) |
+| 2 | `download-metrics-artifact` | `actions/download-artifact@v4` | artifact `metrics-json` | `metrics.json` |
+| 3 | `download-assets-artifact` | `actions/download-artifact@v4` | artifact `assets-bundle` | `assets-manifest.json`, `generated-assets/` |
+| 4 | `inject-data-into-html` | `bash scripts/build-dashboard.sh` | `metrics.json`, `assets-manifest.json`, `frontend/templates/dashboard.html` | `output/index.html` |
+| 5 | `copy-assets` | `cp -r generated-assets/ output/assets/` | `generated-assets/` | `output/assets/` |
+| 6 | `copy-json` | копирование JSON-файлов в `output/` | `metrics.json`, `assets-manifest.json` | `output/metrics.json`, `output/assets-manifest.json` |
+| 7 | `upload-output-artifact` | `actions/upload-artifact@v4` | `output/` | artifact `dashboard-output` |
+
+**Контракт `build-dashboard.sh`:**
+- Скрипт читает `metrics.json` и `assets-manifest.json`
+- Заменяет placeholder-метки в шаблоне (формат: `{{METRICS_JSON_INLINE}}`, `{{ASSETS_MANIFEST_INLINE}}`)
+- Инлайн-вставка JSON в `<script>` тег шаблона для client-side рендеринга
+- Если `assets-manifest.json` содержит `"fallback": true` — оставить placeholder-секцию Assets Gallery нетронутой
+
+---
+
+### 2.4. job: `deploy`
+
+**Зависимость:** `needs: build-html`
+
+**Назначение:** Опубликовать директорию `output/` на GitHub Pages (ветка `gh-pages`).
+
+**Permissions (job-level):**
+```
+permissions:
+  contents: write
 ```
 
----
+**Steps:**
 
-### 2.3. Job `build-html`
+| # | Имя шага | Действие | Входные файлы | Выходные данные |
+|---|---------|---------|--------------|----------------|
+| 1 | `checkout` | `actions/checkout@v4` | — | рабочая копия (для токена) |
+| 2 | `download-output-artifact` | `actions/download-artifact@v4` | artifact `dashboard-output` | `output/` |
+| 3 | `deploy-to-gh-pages` | `peaceiris/actions-gh-pages@v3` | `output/` | ветка `gh-pages` обновлена |
 
-**Назначение:** объединить метрики и ассеты в итоговую HTML-страницу.  
-**Runner:** `ubuntu-latest`  
-**Permissions:** `contents: read`  
-**needs:** `[collect-metrics, collect-assets]`
+**Параметры `peaceiris/actions-gh-pages@v3`:**
 
-#### Steps
+| Параметр | Значение |
+|---------|---------|
+| `github_token` | `${{ secrets.GITHUB_TOKEN }}` |
+| `publish_dir` | `./output` |
+| `publish_branch` | `gh-pages` |
+| `commit_message` | `ci: update dashboard [skip ci]` |
+| `force_orphan` | `true` (чистая история в `gh-pages`) |
 
-| # | Step ID | Действие | Входные данные | Выходные данные |
-|---|---------|----------|----------------|-----------------|
-| 1 | `checkout` | `actions/checkout@v4` | — | рабочая копия |
-| 2 | `download-metrics` | `actions/download-artifact@v4` | артефакт `metrics-artifact` | `artifacts/metrics.json` |
-| 3 | `download-assets` | `actions/download-artifact@v4` | артефакт `assets-artifact` | `artifacts/assets-manifest.json` |
-| 4 | `inject-data` | JS/bash: вставить JSON в HTML-шаблон | `frontend/status/index.template.html`, оба JSON | `output/index.html` |
-| 5 | `copy-assets` | `bash`: `cp -r generated-assets/ output/assets/` | `generated-assets/` (если есть) | `output/assets/` |
-| 6 | `copy-manifests` | `bash`: скопировать JSON-файлы | `artifacts/*.json` | `output/metrics.json`, `output/assets-manifest.json` |
-| 7 | `upload-output` | `actions/upload-artifact@v4` | директория `output/` | артефакт `output-artifact` |
-
-**Контракт инъекции данных (step `inject-data`):**
-- Скрипт читает `index.template.html`.
-- Заменяет плейсхолдер `<!-- METRICS_JSON_PLACEHOLDER -->` на `<script>window.__METRICS__ = {...}</script>`.
-- Заменяет плейсхолдер `<!-- ASSETS_MANIFEST_PLACEHOLDER -->` на `<script>window.__ASSETS_MANIFEST__ = {...}</script>`.
-- Сохраняет результат в `output/index.html`.
-
----
-
-### 2.4. Job `deploy`
-
-**Назначение:** опубликовать директорию `output/` на GitHub Pages.  
-**Runner:** `ubuntu-latest`  
-**Permissions:** `pages: write`, `id-token: write`  
-**needs:** `build-html`  
-**environment:** `github-pages`
-
-#### Steps
-
-| # | Step ID | Действие | Входные данные | Выходные данные |
-|---|---------|----------|----------------|-----------------|
-| 1 | `download-output` | `actions/download-artifact@v4` | артефакт `output-artifact` | директория `output/` |
-| 2 | `setup-pages` | `actions/configure-pages@v5` | — | конфигурация Pages |
-| 3 | `upload-pages` | `actions/upload-pages-artifact@v3` | `path: output/` | Pages-артефакт |
-| 4 | `deploy-pages` | `actions/deploy-pages@v4` | Pages-артефакт | URL `https://sagat9881.github.io/life_of_t/` |
-
-> Решение об инструменте публикации: см. `docs/decisions/ADR-003-pipeline-publish-tool.md`.
+> **Обоснование выбора инструмента:** см. ADR-004 в разделе 7.
 
 ---
 
 ## 3. Спецификация bash-скриптов
 
-Все скрипты располагаются в `scripts/ci/`. Права: `chmod +x`. Shell: `bash` (bash 5+, ubuntu-latest).
+> **Ссылка на SDD §7 (Task Board и декомпозиция):** Каждый скрипт — атомарный артефакт с чётким контрактом входа/выхода, чтобы Java Developer не додумывал скрытые требования.
 
-### 3.1. `count-tasks.sh`
-
-**Входные данные:** `tasks/**/*.md`  
-**Выходные данные:** переменная окружения `TASKS_JSON` (JSON-строка)
-
-**Алгоритм:**
-1. Найти все файлы `find tasks/ -name '*.md' -type f`.
-2. Для каждого файла найти строку, соответствующую паттерну `**Статус:**` или `| **Статус** |`.
-3. Извлечь значение статуса: `TODO`, `IN_PROGRESS`, `DONE`.
-4. Подсчитать количество файлов в каждой группе.
-5. Записать в `$GITHUB_ENV`: `TASKS_JSON={"todo": N, "inProgress": N, "done": N, "total": N}`.
-
-**Пример выходного значения:**
-```json
-{"todo": 5, "inProgress": 2, "done": 8, "total": 15}
-```
-
-**Граничный случай:** если `tasks/` не существует или пуста → все значения `0`, скрипт завершается с кодом `0`.
+Все скрипты размещаются в `scripts/` корня репозитория. Скрипты создаёт **Java Developer** по TASK-BE-022 и TASK-BE-023.
 
 ---
 
-### 3.2. `count-backend.sh`
+### 3.1. `scripts/count-tasks.sh`
 
-**Входные данные:** `backend/src/**/*.java`  
-**Выходные данные:** переменная `BACKEND_JSON`
+**Назначение:** Подсчёт задач в Task Board по статусам.
+
+**Входные файлы:** `tasks/**/*.md`
 
 **Алгоритм:**
-1. `find backend/src -name '*.java' -path '*/domain/model/*'` → `aggregates`
-2. `find backend/src -name '*.java' -path '*/application/service/*'` → `services`
-3. `find backend/src -name '*.java' -path '*/infrastructure/web/controller/*'` → `controllers`
-4. `find backend/src -name '*.java' -path '*/test/*'` → `tests`
-5. Все Java-файлы → `total`
-6. Записать в `$GITHUB_ENV`: `BACKEND_JSON={...}`.
+1. Рекурсивный обход всех `.md` файлов в директории `tasks/`
+2. В каждом файле найти строки вида `| **Статус** | TODO |`, `| **Статус** | IN_PROGRESS |`, `| **Статус** | DONE |`
+3. Паттерн поиска (регистронезависимый): `\|\s*\*\*Статус\*\*\s*\|\s*(TODO|IN_PROGRESS|DONE)\s*\|`
+4. Подсчитать количество совпадений для каждого статуса
+5. Если директория `tasks/` отсутствует или пуста — вернуть нули (не ошибку)
+6. Экспортировать переменные окружения в `$GITHUB_ENV`: `TASKS_TODO`, `TASKS_IN_PROGRESS`, `TASKS_DONE`
 
-**Пример выходного значения:**
+**Выходной формат (в `$GITHUB_ENV`):**
+```
+TASKS_TODO=5
+TASKS_IN_PROGRESS=3
+TASKS_DONE=12
+```
+
+**Пример выходного JSON (для write-metrics.sh):**
 ```json
-{
-  "aggregates": 4,
-  "services": 7,
-  "controllers": 3,
-  "tests": 12,
-  "total": 31
+"taskBoard": {
+  "todo": 5,
+  "inProgress": 3,
+  "done": 12,
+  "total": 20
 }
 ```
 
-**Граничный случай:** если `backend/src` не существует → все `0`, код `0`.
+**Граничные случаи:**
+- `tasks/` не существует → `TASKS_TODO=0`, `TASKS_IN_PROGRESS=0`, `TASKS_DONE=0`
+- Файл без строки статуса → пропустить файл
 
 ---
 
-### 3.3. `count-narrative.sh`
+### 3.2. `scripts/count-backend.sh`
 
-**Входные данные:** `game-content/**/*.xml`  
-**Выходные данные:** переменная `NARRATIVE_JSON`
+**Назначение:** Подсчёт Java-классов по DDD-слоям в `backend/src/`.
+
+**Входные файлы:** `backend/src/**/*.java`
 
 **Алгоритм:**
-1. `find game-content/quest -name '*.xml'` → `quests`
-2. `find game-content/conflicts -name '*.xml'` → `conflicts`
-3. `find game-content/npc -name '*.xml'` → `npc`
-4. `find game-content/world-events -name '*.xml'` → `worldEvents`
-5. Проверить наличие `game-content/manifest.xml` → `withManifest` (true/false)
-6. Записать в `$GITHUB_ENV`.
+1. Поиск файлов: `find backend/src/main -name "*.java"` и `find backend/src/test -name "*.java"`
+2. Классификация по путям:
+   - Путь содержит `/domain/model/` → считать как `aggregates`
+   - Путь содержит `/application/service/` → считать как `services`
+   - Путь содержит `/infrastructure/web/controller/` → считать как `controllers`
+   - Путь начинается с `backend/src/test/` → считать как `tests`
+   - Иначе → категория `other` (не экспортируется в метрики)
+3. Экспортировать переменные в `$GITHUB_ENV`
 
-**Пример выходного значения:**
+**Выходной формат (в `$GITHUB_ENV`):**
+```
+BACKEND_AGGREGATES=8
+BACKEND_SERVICES=12
+BACKEND_CONTROLLERS=6
+BACKEND_TESTS=25
+```
+
+**Пример выходного JSON:**
 ```json
-{
-  "quests": 3,
-  "conflicts": 5,
-  "npc": 8,
-  "worldEvents": 2,
-  "withManifest": true
+"backend": {
+  "aggregates": 8,
+  "services": 12,
+  "controllers": 6,
+  "tests": 25,
+  "totalClasses": 51
 }
 ```
 
-**Граничный случай:** отдельные поддиректории могут отсутствовать → соответствующее поле `0`.
+**Граничные случаи:**
+- `backend/src/` не существует → все нули
+- Java-файлы вне DDD-слоёв → игнорировать (не ломать скрипт)
 
 ---
 
-### 3.4. `fetch-ci-status.sh`
+### 3.3. `scripts/count-narrative.sh`
 
-**Входные данные:** `GITHUB_TOKEN` (env), `GITHUB_REPOSITORY` (env)  
-**Выходные данные:** переменная `CI_JSON`  
-**continue-on-error: true**
+**Назначение:** Подсчёт XML-спецификаций нарратива в `game-content/`.
+
+**Входные файлы:** `game-content/**/*.xml`
 
 **Алгоритм:**
-1. Запросить GitHub API: `GET /repos/{owner}/{repo}/commits/main/check-runs` с заголовком `Authorization: Bearer $GITHUB_TOKEN`.
-2. Из ответа извлечь поля `total_count`, `check_runs[*].conclusion`.
-3. Подсчитать `success` / `failure` / `in_progress`.
-4. Записать в `$GITHUB_ENV`.
+1. `find game-content/quest -name "*.xml" 2>/dev/null | wc -l` → `NARRATIVE_QUESTS`
+2. `find game-content/conflicts -name "*.xml" 2>/dev/null | wc -l` → `NARRATIVE_CONFLICTS`
+3. `find game-content/npc -name "*.xml" 2>/dev/null | wc -l` → `NARRATIVE_NPC`
+4. `find game-content/world-events -name "*.xml" 2>/dev/null | wc -l` → `NARRATIVE_WORLD_EVENTS`
+5. Проверить существование `game-content/manifest.xml` → `NARRATIVE_WITH_MANIFEST=true/false`
+6. Если поддиректория отсутствует → нули для этой категории
 
-**Пример выходного значения:**
+**Выходной формат (в `$GITHUB_ENV`):**
+```
+NARRATIVE_QUESTS=4
+NARRATIVE_CONFLICTS=2
+NARRATIVE_NPC=6
+NARRATIVE_WORLD_EVENTS=1
+NARRATIVE_WITH_MANIFEST=true
+```
+
+**Пример выходного JSON:**
 ```json
-{
-  "lastBuildStatus": "success",
-  "passedChecks": 3,
-  "failedChecks": 0
+"narrative": {
+  "quests": 4,
+  "conflicts": 2,
+  "npc": 6,
+  "worldEvents": 1,
+  "hasManifest": true,
+  "totalSpecs": 13
 }
 ```
 
-**Граничный случай:** API недоступен или `curl` вернул ненулевой код → `CI_JSON={"lastBuildStatus": "unknown", "passedChecks": 0, "failedChecks": 0}`; скрипт завершается кодом `0`.
-
 ---
 
-### 3.5. `write-metrics.sh`
+### 3.4. `scripts/fetch-ci-status.sh`
 
-**Входные данные:** переменные `TASKS_JSON`, `BACKEND_JSON`, `NARRATIVE_JSON`, `CI_JSON`, `GITHUB_SHA`, `GITHUB_RUN_NUMBER`  
-**Выходные данные:** файл `artifacts/metrics.json`
+**Назначение:** Получить статус последнего CI-запуска из GitHub API.
+
+**Входные данные:** `GITHUB_TOKEN`, `GITHUB_REPOSITORY`, `GITHUB_SHA`
 
 **Алгоритм:**
-1. Создать директорию `artifacts/` если не существует.
-2. Объединить все JSON-переменные в итоговый объект согласно схеме из `docs/specs/STATUS_PAGE_OVERVIEW_SPEC.md`.
-3. Добавить `generatedAt` (ISO-8601) и `buildNumber` (`GITHUB_RUN_NUMBER`).
-4. Записать файл `artifacts/metrics.json`.
+1. HTTP GET: `https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/check-runs`
+2. Заголовки: `Authorization: Bearer $GITHUB_TOKEN`, `Accept: application/vnd.github+json`
+3. Парсинг ответа с помощью `jq`:
+   - Если все `check_runs[].conclusion == "success"` → `CI_STATUS=success`
+   - Если хотя бы один `conclusion == "failure"` → `CI_STATUS=failure`
+   - Если ни одного check-run → `CI_STATUS=no_runs`
+4. При любой ошибке (network, HTTP 4xx/5xx, jq parse error) → `CI_STATUS=unknown`
+5. `continue-on-error: true` на уровне шага в workflow
 
-**Пример выходного значения:** см. `docs/specs/STATUS_PAGE_OVERVIEW_SPEC.md`, раздел «Схема metrics.json».
+**Выходной формат (в `$GITHUB_ENV`):**
+```
+CI_STATUS=success
+```
+
+**Пример выходного JSON:**
+```json
+"ciStatus": "success"
+```
 
 ---
 
-### 3.6. `scan-assets.sh`
+### 3.5. `scripts/write-metrics.sh`
 
-**Входные данные:** директория `generated-assets/`  
-**Выходные данные:** файл `artifacts/assets-manifest.json`  
-**continue-on-error: true**
+**Назначение:** Собрать все переменные из `$GITHUB_ENV` и записать итоговый `metrics.json`.
+
+**Входные данные:** Переменные окружения от шагов 2–5 job `collect-metrics`, `GITHUB_SHA`, `GITHUB_REF_NAME`
 
 **Алгоритм:**
-1. Проверить наличие `generated-assets/`; если нет → записать fallback-манифест (раздел 2.2) и завершиться с кодом `0`.
-2. Для каждой категории (`characters`→`npc`, `locations`, `furniture`, `pets`, `ui`):
-   a. Найти все поддиректории в `generated-assets/{category}/`.
-   b. Для каждой поддиректории найти PNG (`find . -maxdepth 1 -name '*.png'`).
-   c. Если есть `sprite-atlas.json` — прочитать поля `animations`.
-   d. Сформировать объект `assetEntry` по схеме из `docs/specs/STATUS_PAGE_ASSETS_SPEC.md`, раздел 2.1.
-3. Собрать итоговый JSON; добавить `generatedAt`.
-4. Записать `artifacts/assets-manifest.json`.
-
-**Граничный случай:** PNG найден, но `sprite-atlas.json` отсутствует → `metaPath: null`, `animations: []`.
+1. Читать переменные окружения
+2. Сформировать JSON-документ (см. раздел 4.1)
+3. Записать в `metrics.json`
 
 ---
 
-## 4. Структура артефактов
+### 3.6. `scripts/scan-assets.sh`
 
-### 4.1. Директория `output/` (публикуется на GitHub Pages)
+**Назначение:** Обойти `generated-assets/` и сформировать `assets-manifest.json`.
+
+**Входные файлы:** `generated-assets/**/*.png`, `generated-assets/**/sprite-atlas.json` (опционально)
+
+**Алгоритм:**
+1. Рекурсивный `find generated-assets -name "*.png"` → список PNG
+2. Для каждого PNG:
+   - Определить категорию по пути (`characters/`, `locations/`, `items/`, `ui/`)
+   - Проверить наличие `sprite-atlas.json` в той же директории
+   - Если атлас есть → прочитать `frames` из JSON
+   - Если атласа нет → `frames: []`
+3. Если `generated-assets/` пуста или не существует → `{"assets": [], "generatedAt": "...", "fallback": true}`
+4. Записать `assets-manifest.json`
+
+**Контракт выхода (`assets-manifest.json`):** см. раздел 4.2.
+
+---
+
+### 3.7. `scripts/build-dashboard.sh`
+
+**Назначение:** Инъекция данных в HTML-шаблон, создание `output/index.html`.
+
+**Входные файлы:** `metrics.json`, `assets-manifest.json`, `frontend/templates/dashboard.html`
+
+**Алгоритм:**
+1. Прочитать `metrics.json` и `assets-manifest.json`
+2. Встроить содержимое как JS-переменные в шаблон (замена плейсхолдера `{{METRICS_JSON_INLINE}}`)
+3. Встроить `assets-manifest.json` (замена `{{ASSETS_MANIFEST_INLINE}}`)
+4. Если `assets-manifest.json` содержит `"fallback": true` — оставить placeholder-секцию Assets Gallery нетронутой
+5. Записать результат в `output/index.html`
+
+**Инструмент замены:** `sed` или `python3 -c` для inline-замены (решение оставлено Java Developer, см. TASK-BE-022).
+
+---
+
+## 4. Структура артефактов `output/`
+
+> **Ссылка на SDD §6.4 (Форматы данных):** Каждый формат описан структурой, схемой полей и ссылками на смежные спецификации.
+
+### 4.1. `output/metrics.json`
+
+```json
+{
+  "generatedAt": "2026-04-02T06:00:00Z",
+  "commitSha": "b284c9d...",
+  "branch": "main",
+  "ciStatus": "success",
+  "taskBoard": {
+    "todo": 5,
+    "inProgress": 3,
+    "done": 12,
+    "total": 20
+  },
+  "backend": {
+    "aggregates": 8,
+    "services": 12,
+    "controllers": 6,
+    "tests": 25,
+    "totalClasses": 51
+  },
+  "narrative": {
+    "quests": 4,
+    "conflicts": 2,
+    "npc": 6,
+    "worldEvents": 1,
+    "hasManifest": true,
+    "totalSpecs": 13
+  }
+}
+```
+
+**Поля:**
+
+| Поле | Тип | Обязательное | Описание |
+|------|-----|-------------|----------|
+| `generatedAt` | ISO 8601 string | да | время генерации (UTC) |
+| `commitSha` | string | да | SHA коммита, вызвавшего пайплайн |
+| `branch` | string | да | ветка (`main`) |
+| `ciStatus` | `"success"` \| `"failure"` \| `"unknown"` \| `"no_runs"` | да | статус CI последнего коммита |
+| `taskBoard.todo` | integer ≥ 0 | да | количество задач в статусе TODO |
+| `taskBoard.inProgress` | integer ≥ 0 | да | количество задач IN_PROGRESS |
+| `taskBoard.done` | integer ≥ 0 | да | количество выполненных задач |
+| `taskBoard.total` | integer ≥ 0 | да | сумма всех задач |
+| `backend.totalClasses` | integer ≥ 0 | да | сумма aggregates+services+controllers |
+| `narrative.totalSpecs` | integer ≥ 0 | да | сумма всех XML-файлов |
+| `narrative.hasManifest` | boolean | да | наличие `manifest.xml` |
+
+---
+
+### 4.2. `output/assets-manifest.json`
+
+```json
+{
+  "generatedAt": "2026-04-02T06:00:12Z",
+  "fallback": false,
+  "totalAssets": 14,
+  "assets": [
+    {
+      "id": "tatyana-idle",
+      "category": "characters",
+      "path": "assets/characters/tatyana-idle.png",
+      "hasAtlas": true,
+      "frames": ["frame_0", "frame_1", "frame_2"]
+    },
+    {
+      "id": "location-home",
+      "category": "locations",
+      "path": "assets/locations/location-home.png",
+      "hasAtlas": false,
+      "frames": []
+    }
+  ]
+}
+```
+
+**Поля:**
+
+| Поле | Тип | Описание |
+|------|-----|---------|
+| `generatedAt` | ISO 8601 string | время генерации |
+| `fallback` | boolean | `true` если asset-generator не запустился |
+| `totalAssets` | integer ≥ 0 | количество PNG-файлов |
+| `assets[].id` | string | уникальный ID ассета (имя файла без расширения) |
+| `assets[].category` | string | `characters` / `locations` / `items` / `ui` |
+| `assets[].path` | string | относительный путь от корня `output/` |
+| `assets[].hasAtlas` | boolean | наличие `sprite-atlas.json` |
+| `assets[].frames` | string[] | имена фреймов из атласа (или `[]`) |
+
+---
+
+### 4.3. Итоговая структура директории `output/`
 
 ```
 output/
-├── index.html              — итоговая страница Dashboard
-├── metrics.json            — данные метрик (для отладки)
-├── assets-manifest.json    — манифест ассетов (для отладки)
-└── assets/
+├── index.html                — главная страница Dashboard (Overview + Assets Gallery)
+├── metrics.json              — данные метрик проекта
+├── assets-manifest.json      — манифест сгенерированных ассетов
+└── assets/                   — PNG-файлы ассетов
     ├── characters/
-    │   └── tanya/
-    │       ├── idle_atlas.png
-    │       └── sprite-atlas.json
+    │   ├── tatyana-idle.png
+    │   └── sprite-atlas.json
     ├── locations/
-    ├── furniture/
-    ├── pets/
+    │   └── location-home.png
+    ├── items/
     └── ui/
-        └── placeholder.png  — ОБЯЗАТЕЛЕН
 ```
-
-### 4.2. Промежуточные артефакты GitHub Actions
-
-| Имя артефакта     | Содержимое                                 | TTL (retention) |
-|-------------------|--------------------------------------------|------------------|
-| `metrics-artifact`| `metrics.json`                             | 7 дней           |
-| `assets-artifact` | `assets-manifest.json`                     | 7 дней           |
-| `output-artifact` | полная директория `output/` (без `assets/`)| 1 день           |
-
-> `assets/` в `output-artifact` не включаются — их размер может быть значительным. Ассеты копируются напрямую в job `build-html` из checkout.
-
-### 4.3. Итоговый URL
-
-```
-https://sagat9881.github.io/life_of_t/
-```
-
-Путь настраивается через Settings → Pages → Source (см. раздел 5).
 
 ---
 
 ## 5. Конфигурация GitHub Pages
 
-### 5.1. Настройка в репозитории
+> **Ссылка на SDD §6 (Нефункциональные требования):** конфигурация должна быть воспроизводима и задокументирована.
 
-1. Перейти в `Settings → Pages` репозитория `Sagat9881/life_of_t`.
-2. В разделе **Source** выбрать: **GitHub Actions** (не ветка).
-3. Сохранить.
+### 5.1. Настройка репозитория
 
-> При выборе Source = «GitHub Actions» публикацию управляет workflow через `actions/deploy-pages@v4`. Ветка `gh-pages` **не нужна**.
+1. Перейти в `https://github.com/Sagat9881/life_of_t/settings/pages`
+2. **Source:** `Deploy from a branch`
+3. **Branch:** `gh-pages` / `/ (root)`
+4. Сохранить → GitHub Pages активированы
 
-### 5.2. Permissions в workflow
+### 5.2. Permissions для workflow
 
-Файл `.github/workflows/build-dashboard.yml` (создаёт Java Developer по TASK-BE-022) обязан содержать:
+В файле workflow (создаётся Java Developer по TASK-BE-022) необходимо добавить на уровне job `deploy`:
 
 ```yaml
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 ```
 
-> `pages: write` и `id-token: write` обязательны для `actions/deploy-pages@v4`.
+> `peaceiris/actions-gh-pages@v3` требует `contents: write` для записи в ветку `gh-pages`. Если репозиторий использует `GITHUB_TOKEN` с ограниченными правами по умолчанию, необходимо также включить **Settings → Actions → Workflow permissions → Read and write permissions**.
 
-### 5.3. Среда (Environment)
+### 5.3. Итоговый URL
 
-Job `deploy` обязан указывать:
-```yaml
-environment:
-  name: github-pages
-  url: ${{ steps.deploy.outputs.page_url }}
+После успешного первого запуска пайплайна Dashboard доступен по:  
+`https://sagat9881.github.io/life_of_t/`
+
+### 5.4. Проверка работоспособности
+
+- После первого пуша в `main` — зайти во вкладку **Actions** и убедиться, что все 4 job завершились зелёным
+- Убедиться, что ветка `gh-pages` создана в репозитории
+- Открыть URL Dashboard и проверить отображение метрик и ассетов
+
+---
+
+## 6. Стратегия обработки ошибок
+
+> **Ссылка на SDD §6 (Нефункциональные требования — надёжность):** система должна деградировать gracefully, не прерывая публикацию при частичных сбоях.
+
+### 6.1. Матрица ошибок и fallback-значений
+
+| Сбой | Шаг | Поведение | Fallback-значение | Флаг в JSON |
+|------|-----|-----------|-------------------|-------------|
+| `tasks/` отсутствует или пуста | `count-tasks` | продолжить | `todo: 0, inProgress: 0, done: 0` | — |
+| `backend/src/` отсутствует | `count-backend` | продолжить | все поля = 0 | — |
+| `game-content/` отсутствует | `count-narrative` | продолжить | все поля = 0, `hasManifest: false` | — |
+| GitHub API недоступен / HTTP ошибка | `fetch-ci-status` | `continue-on-error: true` | `"ciStatus": "unknown"` | — |
+| `asset-generator` не компилируется | `build-asset-generator` | `continue-on-error: true` | пропустить шаги 5–6 | `"fallback": true` в `assets-manifest.json` |
+| `asset-generator` завершается с ошибкой | `run-asset-generator` | `continue-on-error: true` | `generated-assets/` пуста | `"fallback": true` |
+| `generated-assets/` пуста | `scan-assets` | продолжить | `{"assets": [], "fallback": true}` | `"fallback": true` |
+| `assets-manifest.json` содержит `fallback: true` | `inject-data-into-html` | оставить placeholder | Assets Gallery показывает заглушку | — |
+| `output/` пуста | `deploy` | **завершить с ошибкой** (критический сбой) | — | — |
+
+### 6.2. Правила применения `continue-on-error`
+
+```
+continue-on-error: true  → ТОЛЬКО опциональные шаги (asset-generator, GitHub API)
+continue-on-error: false → ВСЕ обязательные шаги (checkout, write-json, deploy)
 ```
 
-Среда `github-pages` создаётся автоматически при первом деплое через официальные Pages-экшены.
+**Опциональные шаги** (graceful degradation):
+- `fetch-ci-status`
+- `build-asset-generator`
+- `run-asset-generator`
+- `scan-assets` (если `generated-assets/` не существует)
 
-### 5.4. Ограничения
+**Обязательные шаги** (failure останавливает пайплайн):
+- `checkout`
+- `write-metrics-json`
+- `inject-data-into-html`
+- `deploy-to-gh-pages`
 
-- Максимальный размер публикуемого сайта: **1 GB** (GitHub Pages limit).
-- Частота публикации: не более **10 деплоев в час** на репозиторий.
-- Workflow использует только `ubuntu-latest` — бесплатные минуты GitHub Actions.
+### 6.3. Отображение ошибок на Dashboard
 
----
-
-## 6. Стратегия обработки ошибок и fallback-значения
-
-| Ситуация | Поведение | Fallback-значение |
-|----------|-----------|-------------------|
-| `tasks/` пуста или отсутствует | Скрипт завершается с `exit 0` | `{"todo":0,"inProgress":0,"done":0,"total":0}` |
-| `backend/src/` отсутствует | Скрипт завершается с `exit 0` | Все поля `0` |
-| `game-content/` отсутствует | Скрипт завершается с `exit 0` | Все поля `0`, `withManifest: false` |
-| GitHub API недоступен | `continue-on-error: true` на step `fetch-ci-status` | `{"lastBuildStatus":"unknown","passedChecks":0,"failedChecks":0}` |
-| `generated-assets/` отсутствует | `scan-assets.sh` пишет пустой манифест | Все категории `[]` |
-| `sprite-atlas.json` отсутствует у ассета | `scan-assets.sh` продолжает | `metaPath: null`, `animations: []` |
-| Job `collect-assets` завершился с ошибкой | Job `build-html` использует fallback-манифест | Assets Gallery показывает placeholder |
-| `index.template.html` не найден | Job `build-html` завершается с **ошибкой** (блокирующий) | Нет fallback — критическая ошибка |
-| Деплой на GitHub Pages завершился ошибкой | Workflow **падает** с ошибкой; предыдущая версия остаётся доступной | — |
-
-### 6.1. Уровни критичности
-
-- **Блокирующие** (failure останавливает весь workflow): отсутствие `index.template.html`, ошибка деплоя.
-- **Некритичные** (`continue-on-error: true`): GitHub API, scan-assets, сборка asset-generator.
-- **Молчаливые** (скрипт возвращает `0` с fallback): пустые директории метрик.
+| Ситуация | Что видит пользователь |
+|----------|----------------------|
+| `ciStatus: "unknown"` | CI/CD секция: «Статус неизвестен (API недоступен)» |
+| `taskBoard.total == 0` | Task Board: «Задачи не найдены» (без ошибки) |
+| `assets-manifest.fallback == true` | Assets Gallery: placeholder «Ассеты генерируются...» |
+| Все данные нулевые | Dashboard отображается с нулевыми значениями (не 500 ошибка) |
 
 ---
 
-## 7. ADR — Выбор инструмента публикации
+## 7. ADR
 
-См. полный текст: `docs/decisions/ADR-003-pipeline-publish-tool.md`
+> Полный текст ADR-004 см. в `docs/decisions/ADR-004-pipeline-publish-tool.md`.
 
-**Кратко:** Принято решение использовать официальный стек `actions/configure-pages` + `actions/upload-pages-artifact` + `actions/deploy-pages@v4` вместо `peaceiris/actions-gh-pages`, поскольку официальный стек поддерживает `environment: github-pages` и OIDC-токены без PAT.
+### ADR-004: Выбор инструмента публикации GitHub Pages
+
+**Статус:** Принято  
+**Дата:** 2026-04-02
+
+**Проблема:** Для публикации `output/` на GitHub Pages доступны два основных варианта:
+1. `peaceiris/actions-gh-pages@v3` — публикует в ветку `gh-pages`
+2. `actions/deploy-pages@v4` + `actions/configure-pages@v4` + `actions/upload-pages-artifact@v3` — официальный стек GitHub Pages deployment
+
+**Сравнение:**
+
+| Критерий | `peaceiris/actions-gh-pages@v3` | `actions/deploy-pages@v4` |
+|---------|--------------------------------|--------------------------|
+| Сложность настройки | низкая (1 шаг) | средняя (3 шага + configure) |
+| Требования к permissions | `contents: write` | `pages: write`, `id-token: write` |
+| Поддержка произвольной ветки | да (`gh-pages`) | нет (только `github-pages` environment) |
+| Совместимость с простыми репозиториями | высокая | требует включить Pages в Settings заранее |
+| Стабильность | v3 — стабильный, >10k stars | v4 — официальный, но требует OIDC-настройки |
+| Флаг `force_orphan` (чистая история) | поддерживается | нет аналога |
+
+**Решение:** Использовать `peaceiris/actions-gh-pages@v3`.
+
+**Обоснование:**
+- Минимальная конфигурация — один шаг против трёх
+- Не требует OIDC-токенов и специальных environment-настроек в репозитории
+- Флаг `force_orphan: true` обеспечивает чистую историю ветки `gh-pages` (не раздувает репозиторий)
+- Широкое сообщество и проверенная стабильность
+
+**Последствия:**
+- Java Developer использует `peaceiris/actions-gh-pages@v3` при написании YAML (TASK-BE-022)
+- В Settings репозитория: Pages source = `gh-pages` branch, `/` (root)
+- При миграции на OIDC-based deployment в будущем — переход на `actions/deploy-pages@v4` без изменения скриптов
 
 ---
 
-## 8. Метрики и критерии готовности
+## Критерии готовности (DoD)
 
-> Согласно `system-analyst-skill.md`, раздел 6 (п.6) и раздел 9.
+> **Ссылка на SDD §10 (Чеклист системного аналитика):** перед завершением фазы аналитик проверяет полноту спецификации.
 
-| Критерий | Проверяет |
-|----------|----------|
-| Workflow завершается успешно на `push[main]` | TASK-BE-022 |
-| `metrics.json` содержит все поля схемы (SPEC-SA-011) | TASK-BE-022 |
-| `assets-manifest.json` валиден по JSON Schema (SPEC-SA-012) | TASK-BE-023 |
-| `index.html` доступен по `https://sagat9881.github.io/life_of_t/` | TASK-FE-055 |
-| При пустом `generated-assets/` страница не падает | TASK-BE-023 + TASK-FE-054 |
-| При недоступном GitHub API workflow не падает | TASK-BE-022 |
-| Время выполнения полного workflow ≤ 10 минут | все |
-
----
-
-*Спецификация создана согласно SDD-фазе **Specify** (`system-analyst-skill.md`, раздел 5).*  
-*Следующий шаг: Java Developer принимает TASK-BE-022 и TASK-BE-023; JS Developer — TASK-FE-054 и TASK-FE-055.*
+- [x] `docs/specs/PIPELINE_SPEC.md` создан и покрывает все 4 jobs
+- [x] Bash-скрипты специфицированы: алгоритм + контракт входа/выхода + пример JSON
+- [x] ADR о выборе инструмента публикации задокументирован (раздел 7 + `docs/decisions/ADR-004`)
+- [x] Задачи TASK-BE-022, TASK-BE-023, TASK-FE-054, TASK-FE-055 созданы
+- [x] Структура `output/` задокументирована (раздел 4.3)
+- [x] Способ настройки GitHub Pages описан (раздел 5.1)
+- [x] Стратегия обработки ошибок и fallback-значения задокументированы (раздел 6)
+- [x] Пайплайн не требует платных credits (только `ubuntu-latest`)
