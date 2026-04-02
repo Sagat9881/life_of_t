@@ -192,7 +192,7 @@ jobs:
           import pathlib
 
           metrics_path  = pathlib.Path("dist/metrics.json")
-          template_path = pathlib.Path("frontend/dashboard/index.html")
+          template_path = pathlib.Path("docs/status/index.html")
           out_path      = pathlib.Path("dist/index.html")
 
           metrics_json = metrics_path.read_text(encoding="utf-8")
@@ -216,7 +216,7 @@ jobs:
           else:
               out_path.parent.mkdir(parents=True, exist_ok=True)
               out_path.write_text(fallback_html, encoding="utf-8")
-              print(f"OK: fallback -> {out_path}")
+              print(f"WARN: template not found at {template_path}, wrote fallback -> {out_path}")
 
           print(f"OK: dist/ = {[p.name for p in out_path.parent.iterdir()]}")
           PYEOF
