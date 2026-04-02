@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-04-02T18:52:06Z",
+  "tasks": {
+    "todo": 0,
+    "in_progress": 0,
+    "review": 0,
+    "done": 0,
+    "blocked": 0,
+    "total": 0
+  },
+  "backend": {
+    "domain": 108,
+    "application": 52,
+    "infrastructure": 41,
+    "presentation": 5,
+    "total": 202
+  },
+  "narrative": {
+    "quests": 0,
+    "npcs": 0,
+    "world_events": 0,
+    "conflicts": 0,
+    "total": 151
+  },
+  "ci": {
+    "status": "in_progress",
+    "conclusion": "pending",
+    "total_runs": 2
+  }
+}
