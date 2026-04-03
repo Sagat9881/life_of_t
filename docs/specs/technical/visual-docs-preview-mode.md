@@ -1,297 +1,170 @@
 # Техспек: output-mode `docs-preview` в генераторе ассетов
 
-| Поле                   | Значение                                                                 |
-|------------------------|--------------------------------------------------------------------------|
-| **Путь**               | `docs/specs/technical/visual-docs-preview-mode.md`                       |
-| **Компонент**          | `asset-generator/` (`ru.lifegame.assets`)                                |
-| **SDD-фаза**           | Task → Implement                                                          |
-| **Дата**               | 2026-04-03                                                               |
-| **Ответственный**      | System Analyst                                                           |
-| **Исполнитель**        | Java Developer                                                           |
-| **ADR**                | [ADR-001](../decisions/ADR-001-visual-docs-data-independence.md)         |
-| **Задачи**             | `tasks/backend/TASK-BE-DOC-001.md`, `tasks/backend/TASK-BE-DOC-002.md`   |
+| Поле | Значение |
+|------|----------|
+| **Путь** | `docs/specs/technical/visual-docs-preview-mode.md` |
+| **Компонент** | `asset-generator/` (`ru.lifegame.assets`) |
+| **SDD-фаза** | Specify |
+| **Дата** | 2026-04-03 |
+| **Ответственный** | System Analyst |
+| **Исполнитель** | Java Developer |
+| **ADR** | [ADR-001](../decisions/ADR-001-visual-docs-data-independence.md) |
+| **Задачи** | `tasks/backend/TASK-BE-DOC-001.md` |
 
 ---
 
 ## 1. Контекст и цель
 
-Генератор ассетов (`ru.lifegame.assets`) в текущей конфигурации запускается с параметрами
-`specs.dir` и `output.dir` (системные свойства, заданные в `asset-generator/pom.xml` через
-`exec-maven-plugin`) и генерирует PNG-спрайт-стрипы + `sprite-atlas.json` для игрового рендера.
-Размеры кадров, количество анимаций и слоёв определяются XML-спеками (`frame-width`, `frame-height`,
-до 50 кадров согласно `unified-asset-schema.xml`).
+Генератор ассетов (`ru.lifegame.assets`) в текущей архитектуре поддерживает один output-mode:
+генерацию PNG + `sprite-atlas.json`. Необходимо добавить второй режим: **`docs-preview`** —
+он генерирует JSON-дескриптор каждой сущности для документационного сайта,
+не затрагивая PNG-пайплайн.
 
-Документационному сайту требуется лёгкий превью-артефакт каждой сущности: статичный PNG 128×128
-и JSON-карточка с метаданными. Этот артефакт **отличается от игрового** по ряду параметров:
-
-| Параметр                  | Стандартный режим                         | `docs-preview` режим                       |
-|---------------------------|-------------------------------------------|--------------------------------------------|
-| Выход                     | PNG-спрайт-стрип + `sprite-atlas.json`    | `preview.png` (128×128) + `card-meta.json` |
-| Количество кадров         | До 50, определяется спекой                | 1 (первый кадр idle-анимации или 1-й слой) |
-| Размер PNG                | Определяется спекой (`frame-width/height`)| Фиксированный: 128×128 px                  |
-| Назначение                | Игровой рендер (Canvas)                   | Документационный сайт                      |
-| Запуск                    | Всегда в пайплайне                        | Дополнительно, через отдельный параметр CLI|
-| Сущности `abstract="true"`| Участвуют как базовые для наследования    | **Пропускаются**                           |
-
-Режим `docs-preview` **не заменяет** и **не изменяет** стандартный режим генерации.
-Добавление новой сущности в `specs-manifest.xml` автоматически включает её в docs-preview без
-изменений в Java-коде (принцип ADR-001, §3.2).
+Цель: предоставить JavaScript-клиенту документационного сайта структурированные данные всех сущностей (имя, тип, палитра, анимации, ограничения) в машиночитаемом формате без участия человека.
 
 ---
 
 ## 2. Функциональные требования
 
-### FR-1 — Новый параметр output.mode
+### FR-1 — Новый CLI-флаг
 
-Генератор принимает системное свойство (Java system property):
-
-```
--Doutput.mode=docs-preview
-```
-
-Передаётся через `exec-maven-plugin` в `asset-generator/pom.xml` аналогично уже существующим
-свойствам `specs.dir` и `output.dir`:
-
-```xml
-<systemProperty>
-    <key>output.mode</key>
-    <value>${output.mode}</value>
-</systemProperty>
-```
-
-Maven-свойство по умолчанию не задаётся (отсутствие свойства = стандартный режим).
-CI-воркфлоу передаёт `-Doutput.mode=docs-preview` только в шаге генерации docs-артефактов.
-
-**Допустимые значения `output.mode`:**
-- *(не задано)* — стандартный режим (без изменений в поведении);
-- `docs-preview` — режим генерации превью-карточек для документации.
-
-### FR-2 — Выходные артефакты для каждой сущности
-
-В режиме `docs-preview` генератор **для каждой не-abstract сущности** из `specs-manifest.xml`
-создаёт в директории `output.dir` следующую структуру:
+Генератор должен поддерживать запуск с параметром:
 
 ```
-{output.dir}/
-  {entityType}/{entityId}/
-    preview.png       ← 128×128 RGBA 32-bit
-    card-meta.json    ← JSON-карточка сущности
+--output-mode=docs-preview
 ```
 
-Пример конкретного пути (иллюстрация только структуры, не имён сущностей):
+Или через Spring Boot application property:
+
 ```
-{output.dir}/characters/{entityId}/preview.png
-{output.dir}/characters/{entityId}/card-meta.json
+assets.output-mode=docs-preview
 ```
 
-Значения `entityType` и `entityId` читаются исключительно из атрибутов элемента `<entity>`
-в `specs-manifest.xml` — никакого хардкода.
+При `docs-preview`:
+- Генерация PNG **не выполняется** (или выполняется параллельно — решает Java Developer).
+- Дополнительно генерируется `docs-preview.json` (directory: тот же `ASSET_OUTPUT_DIR`).
 
-### FR-3 — Генерация preview.png
+### FR-2 — Содержимое `docs-preview.json`
 
-- Размер: **128×128 пикселей**, цвет RGBA 32-bit (`TYPE_INT_ARGB`).
-- Источник: первый кадр анимации с `name="idle"` (или `name` начинается на `idle`) из XML-спеки сущности.
-- Если idle-анимация отсутствует — берётся первый кадр первой анимации в XML-спеке.
-- Если анимации отсутствуют полностью — берётся первый слой (`<layer>`) как источник изображения.
-- Если сущность `abstract="true"` в манифесте — **пропускается целиком** (ни PNG, ни JSON не создаются).
+Файл `docs-preview.json` — массив объектов. Каждый объект описывает одну сущность.
 
-### FR-4 — Источник списка сущностей
+```jsonc
+[
+  {
+    "id": "tanya",
+    "path": "characters/tanya",
+    "type": "characters",
+    "displayName": "Tanya",
+    "spriteAtlasFile": "tanya_idle.png",
+    "animations": ["idle", "walk", "sit"],
+    "colorPalette": [
+      { "name": "skin", "hex": "#F4C89A" },
+      { "name": "hair", "hex": "#8B4513" }
+    ],
+    "constraints": {
+      "maxColors": 8,
+      "pixelSize": 1,
+      "antiAliasing": false
+    },
+    "abstract": false
+  }
+]
+```
 
-Список сущностей для обхода берётся **исключительно из `specs-manifest.xml`**
-(путь фиксируется через `specs.dir`). Генератор не сканирует файловую систему произвольно
-и не содержит хардкода идентификаторов сущностей в Java-коде (ADR-001, §3.2).
+Поля:
+- `id` — последний сегмент `path` (`"characters/tanya"` → `"tanya"`).
+- `path` — полный path из манифеста.
+- `type` — первый сегмент path.
+- `displayName` — первая буква заглавная, остальное как есть.
+- `spriteAtlasFile` — имя PNG idle-анимации (null если PNG не генерируется).
+- `animations` — список из `<animations>` в XML-спеке.
+- `colorPalette` — из `<color-palette>` в XML-спеке.
+- `constraints` — из `<constraints>` в XML-спеке.
+- `abstract` — из атрибута `abstract` в манифесте.
 
-Алгоритм:
-1. Прочитать `{specs.dir}/specs-manifest.xml`.
-2. Итерировать по `<entity abstract="false"/>` элементам.
-3. Для каждого: получить `entityId`, `entityType`, путь к XML-спеке.
-4. Загрузить XML-спеку, извлечь данные для `card-meta.json` и источник первого кадра.
-5. Записать `preview.png` и `card-meta.json`.
+### FR-3 — Источник данных
 
-### FR-5 — Обработка граничных случаев
+Генератор получает список сущностей **исключительно** из `specs-manifest.xml`. Никакого списка ID в Java-коде не хардкодится. Итерация по `<entity abstract="false"/>` элементам. Для каждой сущности читается её XML-спек-файл (`{path}/visual-specs.xml` или аналогично).
 
-| Ситуация                              | Поведение                                                          |
-|---------------------------------------|--------------------------------------------------------------------|
-| Сущность `abstract="true"`            | Пропускается; в лог пишется INFO-сообщение с `entityId`            |
-| XML-спека сущности не найдена         | Пропускается; в лог ERROR с путём; в финальный отчёт добавляется   |
-| `<animations>` отсутствуют           | `preview.png` из первого слоя; `animationCount: 0` в JSON          |
-| Нет idle-анимации, есть другие        | Берётся первый кадр первой анимации в порядке XML                  |
-| `<layers>` отсутствуют               | Генерируется прозрачный PNG 128×128; `layerCount: 0`               |
+### FR-4 — Обработка ошибок
+
+| Ситуация | Поведение |
+|----------|-----------|
+| XML-спек сущности не найден | Запись в отчёт, `abstract` флаг = true, пропуск |
+| `<color-palette>` отсутствует | `colorPalette: []` |
+| `<animations>` отсутствуют | `animations: []` |
+| `<constraints>` отсутствуют | `constraints: null` |
 
 ---
 
 ## 3. Нефункциональные требования
 
-- **NFR-1 — Изображение**: PNG строго 128×128 px, RGBA 32-bit (`BufferedImage.TYPE_INT_ARGB`),
-  без антиалиасинга (интерполяция: `INTERPOLATION_NEAREST_NEIGHBOR`).
-- **NFR-2 — JSON**: кодировка UTF-8, без BOM.
-- **NFR-3 — Производительность**: полная генерация docs-preview для каталога до 100 сущностей —
-  не более **60 секунд** на `ubuntu-latest` (GitHub Actions runner, стандартные ресурсы).
-- **NFR-4 — Изоляция**: режим `docs-preview` не изменяет и не нарушает поведение стандартного режима.
-  Реализуется через отдельный контракт (интерфейс/порт), не через изменение существующих классов.
-- **NFR-5 — Воспроизводимость**: при одинаковых входных данных (XML-спека + манифест) вывод
-  `preview.png` побайтово идентичен между запусками.
+- **NFR-1**: Режим `docs-preview` не должен изменять поведение `standard`-режима (Clean Architecture: через интерфейс, а не изменение класса).
+- **NFR-2**: JSON-вывод должен завершиться за не более **5 секунд** для объёма до 50 сущностей.
+- **NFR-3**: Файл `docs-preview.json` валиден согласно JSON Schema (Java Developer может добавить валидацию).
+- **NFR-4**: `docs-preview` запускается только через CI; не должен участвовать в продакшн.
 
 ---
 
-## 4. Формат `card-meta.json`
+## 4. Архитектура изменений в `ru.lifegame.assets`
 
-Файл `card-meta.json` — плоский JSON-объект. Все значения извлекаются из XML-спеки и манифеста;
-никакое значение не вычисляется хардкодом в Java-коде.
+### 4.1. Слой Domain
 
-### 4.1. Схема полей
+Добавить интерфейс/порт (Java Developer определяет название):
 
-| Поле             | Тип        | Источник в XML                                                       | Обязательное |
-|------------------|------------|----------------------------------------------------------------------|--------------|
-| `entityId`       | `string`   | Атрибут `id` у `<entity>` в `specs-manifest.xml`                    | да           |
-| `entityType`     | `string`   | Атрибут `type` у `<entity>` в `specs-manifest.xml`                  | да           |
-| `caption`        | `string`   | `<meta><entity-name>` из XML-спеки; если отсутствует — `entityId`   | да           |
-| `previewPath`    | `string`   | Относительный путь к `preview.png` от корня `output.dir`            | да           |
-| `animationCount` | `integer`  | Количество элементов `<animation>` в `<animations>` XML-спеки       | да           |
-| `layerCount`     | `integer`  | Количество элементов `<layer>` в `<layers>` XML-спеки               | да           |
-| `specVersion`    | `string`   | Атрибут `version` у `<asset-spec>` в XML-спеке                      | да           |
-| `specPath`       | `string`   | Относительный путь к XML-спеке от `specs.dir`                        | да           |
+```
+DocPreviewPort.generateDocsPreview(List<AssetSpec> specs) : DocsPreviewResult
+```
 
-### 4.2. Пример `card-meta.json`
+`DocsPreviewResult` содержит список `EntityDocsDescriptor`:
 
-```json
-{
-  "entityId": "{entityId}",
-  "entityType": "{entityType}",
-  "caption": "{entity-name из XML-спеки}",
-  "previewPath": "{entityType}/{entityId}/preview.png",
-  "animationCount": 3,
-  "layerCount": 2,
-  "specVersion": "1.0.0",
-  "specPath": "{entityType}/{entityId}/visual-specs.xml"
+```
+EntityDocsDescriptor {
+  id: String
+  path: String
+  type: String
+  displayName: String
+  spriteAtlasFile: String | null
+  animations: List<String>
+  colorPalette: List<ColorEntry>
+  constraints: ConstraintsDescriptor | null
+  abstract: boolean
 }
 ```
 
-> **Замечание по примеру**: фигурные скобки — шаблонные заглушки. Конкретные идентификаторы
-> появляются только в реальных XML-спеках и манифесте. Java-код оперирует только абстрактными
-> значениями из XML, не содержит литеральных имён сущностей.
+### 4.2. Слой Application
 
-### 4.3. Правила валидации
+`DocsPreviewUseCase` — оркестрирует получение списка сущностей из манифеста + парсинг их XML-спеков.
 
-- `entityId` и `entityType` не могут быть пустой строкой.
-- `previewPath` должен заканчиваться на `/preview.png`.
-- `animationCount` и `layerCount` — целые числа ≥ 0.
-- `specVersion` — строка формата `MAJOR.MINOR.PATCH`.
+### 4.3. Слой Infrastructure
+
+`DocsPreviewJsonWriterAdapter` — сериализует `DocsPreviewResult` в `docs-preview.json`.
+
+### 4.4. Слой Presentation (Application module)
+
+Добавить условный запуск `DocsPreviewUseCase` при `assets.output-mode=docs-preview`.
 
 ---
 
-## 5. Контракт CLI: передача `output.mode`
-
-### 5.1. Зафиксированный способ
-
-Параметр передаётся исключительно как **Java system property** (`-D`), согласованно с тем,
-как `specs.dir` и `output.dir` уже передаются в `asset-generator/pom.xml`.
-
-Запуск в CI (пример shell):
-
-```bash
-mvn -pl asset-generator exec:java \
-  -Dspecs.dir="${SPECS_DIR}" \
-  -Doutput.dir="${OUTPUT_DIR}" \
-  -Doutput.mode=docs-preview
-```
-
-### 5.2. Расширение `pom.xml`
-
-В блок `<systemProperties>` существующего `exec-maven-plugin` (execution `generate-assets`)
-добавляется новый элемент:
-
-```xml
-<systemProperty>
-    <key>output.mode</key>
-    <value>${output.mode}</value>
-</systemProperty>
-```
-
-Maven-свойство `output.mode` в `<properties>` блоке pom.xml **не задаётся** — отсутствие
-свойства означает стандартный режим. CI передаёт `-Doutput.mode=docs-preview` явно.
-
-### 5.3. Обнаружение режима в Java-коде
-
-`AssetGeneratorRunner` читает значение через:
+## 5. Сценарий использования
 
 ```
-System.getProperty("output.mode")
+CI workflow:
+  1. Сборка asset-generator
+  2. java -jar life-of-t.jar --output-mode=docs-preview --assets.output-dir=$OUTPUT_DIR
+  3. Проверка: [ -f $OUTPUT_DIR/docs-preview.json ]
+  4. Проверка: кол-во записей == кол-во abstract=false сущностей в манифесте
+  5. Upload docs-preview.json как CI-артефакт
 ```
 
-Если значение равно `"docs-preview"` — запускается ветка docs-preview.
-В противном случае — стандартное поведение без изменений.
-
-Альтернативный вариант (аргумент командной строки `--output-mode=docs-preview`) **отклонён**:
-текущий `pom.xml` уже использует только системные свойства для параметризации запуска;
-добавление аргумента командной строки создаёт два механизма конфигурирования для одного
-компонента, что усложняет тестирование и CI-интеграцию.
-
 ---
 
-## 6. Ограничения для Java Developer
+## 6. Метрики и критерии готовности
 
-Это раздел-контракт: Java Developer обязан соблюдать следующие правила при реализации.
-Нарушение любого правила — критический дефект (java-developer-skill.md §5).
-
-1. **Запрещён хардкод идентификаторов сущностей.** Код генератора не содержит имён персонажей,
-   локаций, предметов или UI-групп. Только абстрактные значения из XML и манифеста.
-
-2. **Добавление сущности в `specs-manifest.xml` не требует изменений в коде.** Весь список
-   обхода строится динамически из манифеста через `SpecsManifestRepository`.
-
-3. **`abstract="true"` сущности пропускаются декларативно** — через атрибут в XML, не через
-   `if (entityId.equals("..."))` в коде.
-
-4. **Нет `switch-case` / `if-else` по именам анимаций, слоёв или типов сущностей**
-   (за исключением системных типов-констант, разрешённых ADR-001 §3.1.5).
-
-5. **Код нового режима изолирован** и не изменяет существующие классы стандартного режима.
-   Реализация через новый порт/интерфейс в соответствии с луковой архитектурой
-   (java-developer-skill.md §7).
-
-6. **Тесты не содержат хардкода имён сущностей.** Тестовые фикстуры используют
-   минималистичные XML-заглушки с синтетическими идентификаторами.
-
----
-
-## 7. Связанные артефакты
-
-| Артефакт | Роль |
-|----------|------|
-| `game-content/life-of-t/src/main/resources/asset-specs/specs-manifest.xml` | Единственный источник списка сущностей (ADR-001 §3.1) |
-| `docs/prompts/_core/unified-asset-schema.xml` | Нормативная схема XML-спек; определяет поля `meta`, `layers`, `animations`, `version` |
-| `asset-generator/pom.xml` | Конфигурация запуска генератора; расширяется новым `<systemProperty>` для `output.mode` |
-| `docs/decisions/ADR-001-visual-docs-data-independence.md` | Архитектурное решение: запрет хардкода сущностей |
-| `tasks/backend/TASK-BE-DOC-001.md` | Задача: реализация docs-preview mode в `ru.lifegame.assets` |
-| `tasks/backend/TASK-BE-DOC-002.md` | Задача: интеграционный тест и CI-шаг проверки docs-preview (детали — промт 06) |
-
----
-
-## 8. Метрики готовности
-
-Реализация считается завершённой при соблюдении всех следующих условий.
-**Ни одно условие не проверяется хардкодом списка сущностей** — только динамически из манифеста.
-
-| # | Критерий | Способ проверки |
-|---|----------|-----------------|
-| M-1 | Для каждой не-abstract сущности из манифеста создан `preview.png` | CI: Python-скрипт парсит `specs-manifest.xml`, проверяет наличие каждого файла |
-| M-2 | Для каждой не-abstract сущности создан `card-meta.json` | CI: аналогично M-1 |
-| M-3 | `preview.png` — 128×128 px, `TYPE_INT_ARGB` | Unit-тест или CI-шаг `python3 PIL.Image.size` |
-| M-4 | `card-meta.json` содержит все обязательные поля (не пустые) | CI: JSON Schema validation |
-| M-5 | Количество сгенерированных пар равно количеству `abstract=false` сущностей | CI: `count(files) == count(manifest entities)` |
-| M-6 | Стандартный режим не нарушен (регрессия) | Существующий CI-шаг asset-generation |
-| M-7 | Время генерации всего каталога ≤ 60 сек на `ubuntu-latest` | CI: `time mvn ...`, проверка exit threshold |
-| M-8 | Ни одна abstract сущность не имеет `preview.png` или `card-meta.json` | CI: отрицательная проверка по `abstract=true` записям манифеста |
-
----
-
-## 9. Задачи для Java Developer
-
-По данной спецификации создаются следующие задачи на Task Board.
-Детальное содержание задач — в промте 06.
-
-| ID задачи          | Тип     | Краткое содержание                                                                   |
-|--------------------|---------|--------------------------------------------------------------------------------------|
-| `TASK-BE-DOC-001`  | backend | Реализация output-mode `docs-preview`: порт, use-case, инфра-адаптер, CLI-обработчик |
-| `TASK-BE-DOC-002`  | backend | Интеграционный тест docs-preview mode + CI-шаг динамической проверки артефактов      |
+| Критерий | Измерение |
+|----------|-----------|
+| `docs-preview.json` сгенерирован без ошибок | CI: `[ -f docs-preview.json ]` |
+| Кол-во объектов == кол-во `abstract=false` в манифесте | CI Python-скрипт |
+| `displayName` не пустой | JSON validation или unit-тест |
+| Текущий `standard`-режим не нарушен | Регрессия CI |
+| Время генерации JSON ≤ 5с | CI-вывод time |

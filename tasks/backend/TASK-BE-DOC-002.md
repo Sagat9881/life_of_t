@@ -1,98 +1,35 @@
-# TASK-BE-DOC-002: Расширение unified-asset-schema.xml секцией `docs-rendering`
+# TASK-BE-DOC-002: Добавить sentinel-сигнал завершения генерации
 
-**Идентификатор:** TASK-BE-DOC-002  
-**Тип задачи:** assets  
-**Статус:** TODO  
-**Приоритет:** High  
-
----
-
-## Контекст
-
-Для корректной генерации карточек документационного сайта XML-спеки сущностей должны опционально содержать секцию `<docs-rendering>` с метаданными для превью. Системный аналитик определяет формат секции; Java Developer обновляет схему и добавляет поддержку парсинга.
-
-> Принцип независимости зафиксирован в `docs/decisions/ADR-001-visual-docs-data-independence.md`. Секция является опциональной — отсутствие секции не должно ломать парсинг.
+| Поле | Значение |
+|------|----------|
+| **ID** | TASK-BE-DOC-002 |
+| **Тип** | backend / assets |
+| **Компонент** | `asset-generator/` + `.github/workflows/asset-generation.yml` |
+| **Исполнитель** | Java Developer |
+| **Приоритет** | Высокий |
+| **Зависимости** | TASK-BE-DOC-001 (частично) |
+| **Связанные спецификации** | [`docs/specs/technical/ci-fix-asset-hardcode.md`](../../docs/specs/technical/ci-fix-asset-hardcode.md) |
+| **ADR** | [ADR-001](../../docs/decisions/ADR-001-visual-docs-data-independence.md) |
 
 ---
 
-## Связанные спецификации
+## Описание
 
-| Артефакт | Описание |
-|---|---|
-| `docs/specs/technical/visual-docs-preview-mode.md` | Поля `card-meta.json` и их источники |
-| `docs/prompts/_core/unified-asset-schema.xml` | Текущая схема XML-спек (только чтение для Java Developer) |
-| `docs/decisions/ADR-001-visual-docs-data-independence.md` | Принцип независимости |
+CI использует `tanya_idle.png` как сигнал завершения генерации — это хардкод, нарушающий ADR-001.
+Требуется определить и реализовать data-driven сигнал завершения.
 
----
+## Задачи реализации
 
-## Что нужно сделать
-
-### 1. Обновить `docs/prompts/_core/unified-asset-schema.xml`
-
-Добавить опциональную секцию `<docs-rendering>` со следующими полями:
-
-| Поле | Тип | Default | Описание |
-|---|---|---|---|
-| `caption` | `string` | `entity-id` | Локализованное название для карточки документационного сайта |
-| `preview-animation` | `string` (animation id) | первая анимация в спеке | Id анимации, кадр которой используется для `preview.png` |
-| `click-action` | `show-animation` \| `open-spec` \| `both` | `show-animation` | Действие при клике на карточку в docs-сайте |
-
-Пример в XML-спеке сущности:
-
-```xml
-<docs-rendering>
-  <caption>Татьяна — idle</caption>
-  <preview-animation>idle</preview-animation>
-  <click-action>both</click-action>
-</docs-rendering>
-```
-
-### 2. Создать value object `DocRenderingConfig`
-
-Пакет: `ru.lifegame.assets.domain.model` (или `domain/value` согласно принятой структуре пакетов).
-
-Поля:
-- `String caption` — из `<caption>`, default = entity id.
-- `String previewAnimationId` — из `<preview-animation>`, default = `null` (означает «первая анимация»).
-- `ClickAction clickAction` — enum: `SHOW_ANIMATION`, `OPEN_SPEC`, `BOTH`; default = `SHOW_ANIMATION`.
-
-`ClickAction` — системный enum, не содержит имён конкретных сущностей.
-
-### 3. Обновить XML-парсер
-
-Место: `infrastructure/parser/` (существующий парсер XML-спек).
-
-- При наличии секции `<docs-rendering>` — заполнить `DocRenderingConfig` из XML.
-- При отсутствии секции — применить значения по умолчанию (не бросать исключение).
-- Некорректное значение `click-action` — логировать предупреждение и применять default `SHOW_ANIMATION`.
-
-### 4. Интеграция с TASK-BE-DOC-001
-
-`DocRenderingConfig` должен быть доступен через `AssetSpec` (или соответствующую доменную модель) и использоваться в `GenerateDocsPreviewUseCase` при формировании `card-meta.json`.
-
----
-
-## Архитектурные ограничения (из `java-developer-skill.md`, раздел 5)
-
-- `ClickAction` enum — системный тип, не содержит имён персонажей или анимаций.
-- Никакого хардкода значений полей `docs-rendering` в коде парсера или usecase.
-- Парсер не знает, какие анимации существуют — `previewAnimationId` передаётся как непрозрачная строка.
-
----
+1. Определить: какой файл гарантированно создаётся **последним** при завершении генерации
+   (кандидаты: `sprite-atlas.json`, `generation-complete.sentinel`).
+2. Если `sprite-atlas.json` уже создаётся последним — задача только в документировании и фиксации
+   этого контракта в `docs/decisions/` или комментарии в коде.
+3. Если нет — добавить создание sentinel-файла в Infrastructure слой генератора.
+4. Обновить `.github/workflows/asset-generation.yml`: заменить проверку `tanya_idle.png`
+   на проверку согласованного sentinel-файла.
 
 ## Критерии приёмки
 
-- [ ] `docs/prompts/_core/unified-asset-schema.xml` содержит документированную секцию `<docs-rendering>` со всеми тремя полями, их типами и значениями по умолчанию.
-- [ ] Парсер корректно читает секцию и заполняет `DocRenderingConfig`.
-- [ ] При отсутствии секции в XML — применяются значения по умолчанию (парсинг не падает).
-- [ ] Тесты парсера покрывают:
-  - Секция присутствует, все поля заполнены — проверить маппинг каждого поля;
-  - Секция отсутствует — проверить, что применены defaults;
-  - `click-action` содержит неизвестное значение — default `SHOW_ANIMATION`, в логах предупреждение.
-- [ ] `DocRenderingConfig` используется в `GenerateDocsPreviewUseCase` (TASK-BE-DOC-001) при генерации `card-meta.json`.
-
----
-
-## Зависимости
-
-- Блокирует полную реализацию **TASK-BE-DOC-001** (поле `card-meta.json` из `<docs-rendering>`). Рекомендуется выполнять параллельно или первой.
+- [ ] В `asset-generation.yml` нет имени `tanya_idle.png` в шаге ожидания.
+- [ ] Используемый сигнал задокументирован в комментарии или ADR.
+- [ ] CI проходит при наличии нового персонажа без `tanya_idle.png`.

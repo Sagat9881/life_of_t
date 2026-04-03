@@ -1,86 +1,34 @@
-# TASK-BE-DOC-003: Обновление `asset-generator-ci.yml` — шаг `validate-docs-specs`
+# TASK-BE-DOC-003: Исправить хардкод в верификационных шагах CI
 
-**Идентификатор:** TASK-BE-DOC-003  
-**Тип задачи:** assets / testing  
-**Статус:** TODO  
-**Приоритет:** Medium  
-
----
-
-## Контекст
-
-Существующий CI (`asset-generator-ci.yml`) валидирует XML-спеки в `docs/prompts/`. Нужно добавить аналогичную валидацию для документационных спек в `docs/visual-specs/`, обеспечив соответствие манифесту без хардкода имён сущностей.
-
-> Принцип: список сущностей берётся динамически из `specs-manifest.xml` — добавление новой сущности не требует изменений YAML.
+| Поле | Значение |
+|------|----------|
+| **ID** | TASK-BE-DOC-003 |
+| **Тип** | backend / devops |
+| **Компонент** | `.github/workflows/asset-generation.yml` |
+| **Исполнитель** | Java Developer (по части Java) + любой (по части YAML/bash) |
+| **Приоритет** | Высокий |
+| **Зависимости** | TASK-BE-DOC-002 |
+| **Связанные спецификации** | [`docs/specs/technical/ci-fix-asset-hardcode.md`](../../docs/specs/technical/ci-fix-asset-hardcode.md) |
+| **ADR** | [ADR-001](../../docs/decisions/ADR-001-visual-docs-data-independence.md) |
 
 ---
 
-## Связанные спецификации
+## Описание
 
-| Артефакт | Описание |
-|---|---|
-| `docs/specs/technical/visual-docs-ci-workflow.md` | Детали требований к CI-workflow |
-| `docs/decisions/ADR-001-visual-docs-data-independence.md` | Принцип отсутствия хардкода имён сущностей |
-| `.github/workflows/asset-generator-ci.yml` | Текущий CI — изучить структуру jobs перед изменением |
+Заменить хардкоды в трёх шагах `asset-generation.yml` на data-driven логику
+согласно спецификации исправлений (раздел 2 техспека `ci-fix-asset-hardcode.md`).
 
----
+## Задачи реализации
 
-## Что нужно сделать
-
-### 1. Добавить job `validate-docs-specs` в `.github/workflows/asset-generator-ci.yml`
-
-Job выполняет два шага:
-
-#### Шаг A: XML-lint всех docs-спек
-
-```yaml
-- name: Validate docs visual specs XML
-  run: |
-    find docs/visual-specs -name '*.xml' | while read f; do
-      xmllint --noout "$f" || exit 1
-    done
-```
-
-> Точный синтаксис может отличаться — придерживаться стиля существующего CI.
-
-#### Шаг B: Проверка полноты — каждая не-abstract сущность из манифеста имеет файл в `docs/visual-specs/`
-
-Алгоритм:
-1. Распарсить `game-content/life-of-t/src/main/resources/asset-specs/specs-manifest.xml`.
-2. Для каждой сущности с `abstract != "true"` — вычислить ожидаемый путь к файлу в `docs/visual-specs/`.
-3. Проверить существование файла. Если хотя бы один отсутствует — завершить с ненулевым exit code и сообщением об ошибке.
-
-**Реализация шага B** — shell-скрипт или Python-скрипт (в зависимости от стиля существующего CI). Скрипт:
-- Не содержит имён конкретных сущностей.
-- Список сущностей извлекается из манифеста на каждом запуске.
-- Правило маппинга `entity-id → путь в docs/visual-specs/` описано в `docs/specs/technical/visual-docs-ci-workflow.md`.
-
-### 2. Правила размещения job
-
-- Job `validate-docs-specs` добавляется **после** существующих lint/validate jobs и **до** jobs генерации.
-- Если в CI есть `needs:`, корректно прописать зависимость.
-
----
-
-## Архитектурные ограничения
-
-- Job не содержит имён конкретных сущностей, NPC, персонажей или ассетов.
-- Список сущностей — только из манифеста; никакого хардкода в YAML или скрипте.
-- Добавление сущности в манифест + создание соответствующего файла в `docs/visual-specs/` — CI проходит **без изменений** YAML.
-
----
+1. Шаг `Verify generated assets exist` — заменить bash-массив `EXPECTED` на Python-скрипт,
+   читающий сущности из `specs-manifest.xml`.
+2. Шаг `Validate atlas dimensions` — заменить Python-словарь на чтение размеров из
+   `sprite-atlas.json` или XML-спека (согласовать с Java Developer).
+3. Шаг `Verify no anti-aliasing` — заменить список `sprites` на `glob *.png`.
+4. Все три шага должны работать без изменений при добавлении новых сущностей.
 
 ## Критерии приёмки
 
-- [ ] Job `validate-docs-specs` добавлен в `.github/workflows/asset-generator-ci.yml`.
-- [ ] **Сценарий провала**: добавить новую сущность в манифест без создания файла в `docs/visual-specs/` → CI падает с понятным сообщением об ошибке.
-- [ ] **Сценарий успеха**: добавить сущность в манифест + создать корректный XML-файл в `docs/visual-specs/` → CI проходит без изменений YAML.
-- [ ] `xmllint` проверяет все `*.xml` в `docs/visual-specs/**`; невалидный XML → CI падает.
-- [ ] Скрипт проверки не содержит имён сущностей (`grep` по известным именам персонажей не находит совпадений).
-
----
-
-## Зависимости
-
-- Для полного прохождения CI необходимо наличие файлов `docs/visual-specs/` для всех сущностей (создаётся в рамках другой задачи).
-- Задача независима от TASK-BE-DOC-001 и TASK-BE-DOC-002 — может выполняться параллельно.
+- [ ] `grep -n 'tanya\|sam\|bed\|home_room\|alexander\|aijan' .github/workflows/asset-generation.yml` возвращает 0 результатов (кроме комментариев).
+- [ ] CI проходит для текущих 12 персонажей, 12 локаций, 18 предметов, 3 UI-групп.
+- [ ] После добавления новой тестовой `<entity>` в манифест (в рамках PR) CI проходит без изменений YAML.
