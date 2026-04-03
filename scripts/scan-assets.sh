@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # TASK-BE-023 | §3.6 — Scan generated-assets/ and write assets-manifest.json
 # §4.2 schema: { assets[], fallback, totalAssets, generatedAt }
+# Supported formats: PNG, WebP, JPEG, GIF, SVG
+# Performance: O(n) — single jq -s call at the end instead of O(n²) accumulation
 set -euo pipefail
 
 ASSETS_DIR="${ASSETS_DIR:-generated-assets}"
 OUTPUT_FILE="${OUTPUT_FILE:-assets-manifest.json}"
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-# ─────────────────────────────────────────────
-# Fallback: directory missing or empty
 # ─────────────────────────────────────────────
 fallback_manifest() {
   jq -n \
@@ -23,92 +23,76 @@ if [ ! -d "$ASSETS_DIR" ]; then
   fallback_manifest
 fi
 
-# Collect all PNG files
-PNG_FILES=$(find "$ASSETS_DIR" -name '*.png' 2>/dev/null | sort)
+# Collect all supported asset files (PNG, WebP, JPEG, GIF, SVG)
+mapfile -d '' ASSET_FILES < <(
+  find "$ASSETS_DIR" \( \
+    -iname '*.png' -o \
+    -iname '*.webp' -o \
+    -iname '*.jpg' -o \
+    -iname '*.jpeg' -o \
+    -iname '*.gif' -o \
+    -iname '*.svg' \
+  \) -print0 2>/dev/null | sort -z
+)
 
-if [ -z "$PNG_FILES" ]; then
+if [ ${#ASSET_FILES[@]} -eq 0 ]; then
   fallback_manifest
 fi
 
 # ─────────────────────────────────────────────
-# Build JSON array of asset entries
+# Build one JSON object per asset, pipe all to jq -s at the end (O(n))
 # ─────────────────────────────────────────────
-# §4.2 per-asset schema:
-# {
-#   "id":       "tatyana-idle",
-#   "category": "characters",
-#   "path":     "assets/characters/tatyana-idle.png",
-#   "hasAtlas": false,
-#   "frames":   []
-# }
+build_entries() {
+  for ASSET_PATH in "${ASSET_FILES[@]}"; do
+    FILENAME=$(basename "$ASSET_PATH")
+    # Strip extension to get id
+    ID="${FILENAME%.*}"
 
-ARRAY='[]'
+    # Category = first path segment after ASSETS_DIR/
+    RELATIVE="${ASSET_PATH#${ASSETS_DIR}/}"
+    CATEGORY=$(echo "$RELATIVE" | cut -d'/' -f1)
+    if [ "$CATEGORY" = "$FILENAME" ]; then
+      CATEGORY="unknown"
+    fi
 
-while IFS= read -r PNG_PATH; do
-  FILENAME=$(basename "$PNG_PATH")            # tatyana-idle.png
-  ID="${FILENAME%.png}"                        # tatyana-idle
+    # Derive format from extension
+    EXT="${FILENAME##*.}"
+    FORMAT=$(echo "$EXT" | tr '[:upper:]' '[:lower:]')
+    case "$FORMAT" in
+      jpg) FORMAT="jpeg" ;;
+    esac
 
-  # Category = first path segment after ASSETS_DIR/
-  # e.g. generated-assets/characters/tatyana-idle.png → characters
-  RELATIVE="${PNG_PATH#${ASSETS_DIR}/}"        # characters/tatyana-idle.png
-  CATEGORY=$(echo "$RELATIVE" | cut -d'/' -f1) # characters
+    ASSET_OUT_PATH="assets/${CATEGORY}/${FILENAME}"
 
-  # Normalise: if no subdirectory the category equals the filename → mark as 'unknown'
-  if [ "$CATEGORY" = "$FILENAME" ]; then
-    CATEGORY="unknown"
-  fi
+    # Check for sprite-atlas.json next to the file
+    ATLAS_FILE="$(dirname "$ASSET_PATH")/sprite-atlas.json"
+    HAS_ATLAS=false
+    FRAMES='[]'
+    if [ -f "$ATLAS_FILE" ]; then
+      HAS_ATLAS=true
+      FRAMES=$(jq -c '.frames // []' "$ATLAS_FILE" 2>/dev/null || echo '[]')
+    fi
 
-  # Validate known categories; keep as-is otherwise (extensible)
-  case "$CATEGORY" in
-    characters|locations|items|ui|unknown) ;;
-    *) ;; # accept any future category without error
-  esac
+    jq -n \
+      --arg     id        "$ID"           \
+      --arg     category  "$CATEGORY"     \
+      --arg     path      "$ASSET_OUT_PATH" \
+      --arg     format    "$FORMAT"       \
+      --argjson hasAtlas  $HAS_ATLAS      \
+      --argjson frames    "$FRAMES"       \
+      '{"id":$id,"category":$category,"path":$path,"format":$format,"hasAtlas":$hasAtlas,"frames":$frames}'
+  done
+}
 
-  # output/assets/<category>/<file> — relative from output/ root (§4.2 path format)
-  ASSET_PATH="assets/${CATEGORY}/${FILENAME}"
-
-  # Check for sprite-atlas.json in the same directory as the PNG
-  PNG_DIR=$(dirname "$PNG_PATH")
-  ATLAS_FILE="${PNG_DIR}/sprite-atlas.json"
-
-  HAS_ATLAS=false
-  FRAMES='[]'
-
-  if [ -f "$ATLAS_FILE" ]; then
-    HAS_ATLAS=true
-    # Read frames array via jq; fall back to [] on parse error
-    FRAMES=$(jq -c '.frames // []' "$ATLAS_FILE" 2>/dev/null || echo '[]')
-  fi
-
-  # Build one entry and append to the array
-  ENTRY=$(jq -n \
-    --arg     id       "$ID"          \
-    --arg     category "$CATEGORY"    \
-    --arg     path     "$ASSET_PATH"  \
-    --argjson hasAtlas $HAS_ATLAS     \
-    --argjson frames   "$FRAMES"      \
-    '{
-      "id":       $id,
-      "category": $category,
-      "path":     $path,
-      "hasAtlas": $hasAtlas,
-      "frames":   $frames
-    }')
-
-  ARRAY=$(echo "$ARRAY" | jq --argjson entry "$ENTRY" '. + [$entry]')
-done <<< "$PNG_FILES"
-
-TOTAL=$(echo "$ARRAY" | jq 'length')
-
-jq -n \
-  --argjson assets "$ARRAY" \
-  --argjson total  "$TOTAL" \
-  --arg     ts     "$TIMESTAMP" \
+# Single jq -s call: collect all newline-separated JSON objects into array
+build_entries | jq -s \
+  --arg ts "$TIMESTAMP" \
   '{
-    "assets":       $assets,
-    "fallback":     false,
-    "totalAssets":  $total,
-    "generatedAt":  $ts
+    "assets":      .,
+    "fallback":    false,
+    "totalAssets": length,
+    "generatedAt": $ts
   }' > "$OUTPUT_FILE"
 
+TOTAL=$(jq '.totalAssets' "$OUTPUT_FILE")
 echo "assets-manifest.json written (fallback=false, totalAssets=${TOTAL})"

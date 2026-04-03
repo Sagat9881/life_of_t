@@ -1,39 +1,55 @@
 #!/usr/bin/env bash
-# §3.2 — Count Java classes by DDD layers
+# §3.2 — Count Java classes by DDD layers across all Maven modules
+# Modules: backend, asset-generator
 # Layers: domain | application | infrastructure | presentation
+# Counts src/main/java only; test classes reported separately
 set -euo pipefail
 
-BACKEND_DIR="${1:-backend/src/main/java}"
+# ─── Configurable roots ────────────────────────────────────────────
+BACKEND_SRC="${BACKEND_SRC:-backend/src/main/java}"
+BACKEND_TEST="${BACKEND_TEST:-backend/src/test/java}"
+ASSET_GEN_SRC="${ASSET_GEN_SRC:-asset-generator/src/main/java}"
 
-count_layer() {
-  local layer_path="$1"
-  if [ ! -d "$layer_path" ]; then
+count_java_in() {
+  local dir="$1"
+  if [ ! -d "$dir" ]; then
     echo 0
     return
   fi
-  find "$layer_path" -name '*.java' 2>/dev/null | wc -l | tr -d ' '
+  find "$dir" -name '*.java' 2>/dev/null | wc -l | tr -d ' '
 }
 
-# Support both flat-layout and package-based layout
-if [ -d "$BACKEND_DIR" ]; then
-  BASE="$BACKEND_DIR"
-else
-  BASE="backend"
-fi
+# Count DDD layer across all src/main roots by finding all dirs named <layer>
+count_layer_across_mains() {
+  local layer="$1"
+  local total=0
+  for src_root in "$BACKEND_SRC" "$ASSET_GEN_SRC"; do
+    [ -d "$src_root" ] || continue
+    while IFS= read -r -d '' layer_dir; do
+      cnt=$(find "$layer_dir" -name '*.java' 2>/dev/null | wc -l | tr -d ' ')
+      total=$((total + cnt))
+    done < <(find "$src_root" -type d -iname "$layer" -print0 2>/dev/null)
+  done
+  echo "$total"
+}
 
-# Try standard DDD layer dirs (ru.lifegame.backend.*)
-DOMAIN=$(find "$BASE" -type d \( -name 'domain' -o -name 'Domain' \) 2>/dev/null \
-  | head -1 | xargs -I{} find {} -name '*.java' 2>/dev/null | wc -l | tr -d ' ')
-APPLICATION=$(find "$BASE" -type d \( -name 'application' -o -name 'Application' \) 2>/dev/null \
-  | head -1 | xargs -I{} find {} -name '*.java' 2>/dev/null | wc -l | tr -d ' ')
-INFRASTRUCTURE=$(find "$BASE" -type d \( -name 'infrastructure' -o -name 'Infrastructure' \) 2>/dev/null \
-  | head -1 | xargs -I{} find {} -name '*.java' 2>/dev/null | wc -l | tr -d ' ')
-PRESENTATION=$(find "$BASE" -type d \( -name 'presentation' -o -name 'Presentation' -o -name 'controller' \) 2>/dev/null \
-  | head -1 | xargs -I{} find {} -name '*.java' 2>/dev/null | wc -l | tr -d ' ')
-TOTAL=$(find "$BASE" -name '*.java' 2>/dev/null | wc -l | tr -d ' ')
+DOMAIN=$(count_layer_across_mains 'domain')
+APPLICATION=$(count_layer_across_mains 'application')
+INFRASTRUCTURE=$(count_layer_across_mains 'infrastructure')
+PRESENTATION=$(count_layer_across_mains 'presentation')
 
-echo "BACKEND_DOMAIN=${DOMAIN:-0}"
-echo "BACKEND_APPLICATION=${APPLICATION:-0}"
-echo "BACKEND_INFRASTRUCTURE=${INFRASTRUCTURE:-0}"
-echo "BACKEND_PRESENTATION=${PRESENTATION:-0}"
-echo "BACKEND_TOTAL=${TOTAL:-0}"
+# Total main-source Java files across both modules
+BACKEND_MAIN_TOTAL=$(count_java_in "$BACKEND_SRC")
+ASSET_GEN_TOTAL=$(count_java_in "$ASSET_GEN_SRC")
+TOTAL=$((BACKEND_MAIN_TOTAL + ASSET_GEN_TOTAL))
+
+# Test classes (informational)
+BACKEND_TEST_TOTAL=$(count_java_in "$BACKEND_TEST")
+
+echo "BACKEND_DOMAIN=${DOMAIN}"
+echo "BACKEND_APPLICATION=${APPLICATION}"
+echo "BACKEND_INFRASTRUCTURE=${INFRASTRUCTURE}"
+echo "BACKEND_PRESENTATION=${PRESENTATION}"
+echo "BACKEND_TOTAL=${TOTAL}"
+echo "BACKEND_TEST_TOTAL=${BACKEND_TEST_TOTAL}"
+echo "ASSET_GENERATOR_TOTAL=${ASSET_GEN_TOTAL}"
