@@ -40,9 +40,11 @@ _run() {
   [[ "$output" == *"NARRATIVE_ASSET_SPECS=2"* ]]
 }
 
+# NARRATIVE_TOTAL = считает только narrative/ без asset-specs
+# quests×2 + npc-behavior×1 + events×1 + confilcts×1 + world×1 + endings×1 + player-actions×1 + reviews×1 = 9
 @test "count-narrative: NARRATIVE_TOTAL равен сумме XML в narrative/" {
   _run
-  [[ "$output" == *"NARRATIVE_TOTAL=8"* ]]
+  [[ "$output" == *"NARRATIVE_TOTAL=9"* ]]
 }
 
 @test "count-narrative: отсутствие директории даёт нулевые значения" {
