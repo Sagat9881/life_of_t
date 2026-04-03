@@ -2,14 +2,16 @@ package ru.lifegame.assets;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.lifegame.assets.application.usecase.DocsPreviewUseCase;
+import ru.lifegame.assets.config.OutputMode;
 import ru.lifegame.assets.domain.model.asset.AssetSpec;
+import ru.lifegame.assets.domain.model.docs.DocsPreviewResult;
 import ru.lifegame.assets.domain.service.AssetGenerationService;
+import ru.lifegame.assets.infrastructure.docs.DocsPreviewJsonWriterAdapter;
+import ru.lifegame.assets.infrastructure.docs.DocsPreviewXmlParser;
 import ru.lifegame.assets.infrastructure.generator.LayeredAssetGenerator;
 import ru.lifegame.assets.infrastructure.generator.UniversalPixelRenderer;
-import ru.lifegame.assets.infrastructure.parser.ClasspathSpecsSource;
-import ru.lifegame.assets.infrastructure.parser.DiskSpecsSource;
-import ru.lifegame.assets.infrastructure.parser.SpecsSource;
-import ru.lifegame.assets.infrastructure.parser.XmlAssetSpecParser;
+import ru.lifegame.assets.infrastructure.parser.*;
 import ru.lifegame.assets.infrastructure.scanner.EntityRef;
 import ru.lifegame.assets.infrastructure.scanner.PromptDirectoryScanner;
 import ru.lifegame.assets.infrastructure.scanner.SpecsManifestReader;
@@ -17,7 +19,6 @@ import ru.lifegame.assets.infrastructure.writer.AtlasConfigWriter;
 import ru.lifegame.assets.infrastructure.writer.PngLayerWriter;
 import ru.lifegame.assets.infrastructure.writer.WebpAtlasWriter;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -26,13 +27,17 @@ import java.util.List;
  *
  * <p>Two modes, selected by the presence of the {@code specs.dir} system property:
  * <ul>
- *   <li><b>Disk mode</b> ({@code -Dspecs.dir=/path/to/asset-specs}): reads specs from
- *       the local filesystem via {@link DiskSpecsSource}.  Falls back to
- *       {@link PromptDirectoryScanner} if {@code specs-manifest.xml} is absent.</li>
- *   <li><b>Classpath mode</b> (no {@code specs.dir}): reads specs bundled inside the
- *       fat JAR (e.g. via the {@code life-of-t} game-content dependency) using
- *       {@link ClasspathSpecsSource} and requires {@code specs-manifest.xml} to be
- *       present on the classpath under {@code asset-specs/}.</li>
+ *   <li><b>Disk mode</b> ({@code -Dspecs.dir=/path/to/asset-specs}).</li>
+ *   <li><b>Classpath mode</b> (no {@code specs.dir}).</li>
+ * </ul>
+ *
+ * <p>Output mode is selected via the system property
+ * {@code -Dassets.output-mode=docs-preview} (default: {@code standard}):
+ * <ul>
+ *   <li>{@code standard} — generates PNG + sprite-atlas.json (original behaviour).</li>
+ *   <li>{@code docs-preview} — generates {@code docs-preview.json} only; no PNG output.
+ *       Reads every non-abstract entity from {@code specs-manifest.xml} and writes one
+ *       JSON entry per entity. Zero hardcoded entity IDs (ADR-001).</li>
  * </ul>
  *
  * <p>Output directory is taken from the first CLI argument, or from the
@@ -42,25 +47,43 @@ public class AssetGeneratorRunner {
 
     private static final Logger log = LoggerFactory.getLogger(AssetGeneratorRunner.class);
 
-    public static void main(String[] args) {
-        String specsDirProp = System.getProperty("specs.dir");
+    public static void main(String[] args) throws Exception {
+        String specsDirProp  = System.getProperty("specs.dir");
+        String outputModeProp = System.getProperty("assets.output-mode", "standard");
         Path outputDir = args.length > 0
                 ? Path.of(args[0])
                 : Path.of(System.getProperty("output.dir", "target/generated-assets"));
 
-        SpecsSource source;
-        if (specsDirProp != null) {
-            log.info("Specs source: DISK [{}]", specsDirProp);
-            source = new DiskSpecsSource(Path.of(specsDirProp), new XmlAssetSpecParser());
-        } else {
-            log.info("Specs source: CLASSPATH [asset-specs/]");
-            source = new ClasspathSpecsSource(
-                    Thread.currentThread().getContextClassLoader(),
-                    "asset-specs/",
-                    new XmlAssetSpecParser());
-        }
+        OutputMode mode = resolveOutputMode(outputModeProp);
+        log.info("Output mode: {}", mode);
 
-        log.info("Asset generation started. output={}", outputDir);
+        SpecsSource source = buildSpecsSource(specsDirProp);
+
+        if (mode == OutputMode.DOCS_PREVIEW) {
+            runDocsPreview(source, outputDir);
+        } else {
+            runStandard(source, specsDirProp, outputDir);
+        }
+    }
+
+    // ── docs-preview mode ───────────────────────────────────────────────────
+
+    private static void runDocsPreview(SpecsSource source, Path outputDir) throws Exception {
+        log.info("Asset generation started in DOCS_PREVIEW mode. output={}", outputDir);
+
+        DocsPreviewUseCase useCase = new DocsPreviewUseCase(source, new DocsPreviewXmlParser());
+        DocsPreviewResult result = useCase.execute();
+
+        DocsPreviewJsonWriterAdapter writer = new DocsPreviewJsonWriterAdapter();
+        Path target = writer.write(result, outputDir);
+
+        log.info("DOCS_PREVIEW complete. {} entities → {}", result.descriptors().size(), target);
+    }
+
+    // ── standard mode ──────────────────────────────────────────────────────────
+
+    private static void runStandard(SpecsSource source, String specsDirProp, Path outputDir) {
+        log.info("Asset generation started in STANDARD mode. output={}", outputDir);
 
         XmlAssetSpecParser parser = new XmlAssetSpecParser(source);
         UniversalPixelRenderer renderer = new UniversalPixelRenderer();
@@ -77,9 +100,9 @@ public class AssetGeneratorRunner {
             return;
         }
 
-        int totalFiles = 0;
+        int totalFiles  = 0;
         int entityCount = 0;
-        int skipped = 0;
+        int skipped     = 0;
         int total = (int) entities.stream().filter(e -> !e.isAbstract()).count();
 
         for (EntityRef ref : entities) {
@@ -115,17 +138,34 @@ public class AssetGeneratorRunner {
                 entityCount, skipped, totalFiles);
     }
 
-    /**
-     * Resolves the list of entity refs.
-     * Prefers {@link SpecsManifestReader} (classpath-safe).
-     * Falls back to {@link PromptDirectoryScanner} in disk mode when manifest is absent.
-     */
+    // ── shared helpers ───────────────────────────────────────────────────────────────
+
+    private static OutputMode resolveOutputMode(String value) {
+        try {
+            return OutputMode.valueOf(value.toUpperCase().replace('-', '_'));
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown assets.output-mode='{}'; falling back to STANDARD.", value);
+            return OutputMode.STANDARD;
+        }
+    }
+
+    private static SpecsSource buildSpecsSource(String specsDirProp) {
+        if (specsDirProp != null) {
+            log.info("Specs source: DISK [{}]", specsDirProp);
+            return new DiskSpecsSource(Path.of(specsDirProp), new XmlAssetSpecParser());
+        }
+        log.info("Specs source: CLASSPATH [asset-specs/]");
+        return new ClasspathSpecsSource(
+                Thread.currentThread().getContextClassLoader(),
+                "asset-specs/",
+                new XmlAssetSpecParser());
+    }
+
     private static List<EntityRef> resolveEntities(SpecsSource source, String specsDirProp) {
         SpecsManifestReader manifestReader = new SpecsManifestReader(source);
         if (source.specExists("specs-manifest.xml")) {
             return manifestReader.readManifest();
         }
-
         if (specsDirProp != null) {
             log.warn("specs-manifest.xml not found — falling back to PromptDirectoryScanner");
             Path specsDir = Path.of(specsDirProp);
@@ -139,7 +179,6 @@ public class AssetGeneratorRunner {
                     })
                     .toList();
         }
-
         log.error("specs-manifest.xml is required in classpath mode but was not found");
         return List.of();
     }
