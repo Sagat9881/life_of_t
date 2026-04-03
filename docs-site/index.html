@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Life of T — Docs</title>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <svg class="logo" aria-label="Life of T" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text x="0" y="24" font-family="monospace" font-size="22" font-weight="700" fill="currentColor">Life of T</text>
+      </svg>
+      <nav class="filter-bar" role="navigation" aria-label="Filter by type">
+        <button class="filter-btn active" data-type="all" aria-pressed="true">All</button>
+        <button class="filter-btn" data-type="characters" aria-pressed="false">Characters</button>
+        <button class="filter-btn" data-type="locations" aria-pressed="false">Locations</button>
+        <button class="filter-btn" data-type="furniture" aria-pressed="false">Furniture</button>
+        <button class="filter-btn" data-type="ui" aria-pressed="false">UI</button>
+      </nav>
+      <div class="search-wrap">
+        <label for="search-input" class="sr-only">Search by name</label>
+        <input id="search-input" class="search-input" type="search" placeholder="Search…" autocomplete="off" />
+      </div>
+      <button class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="container" id="main">
+    <div id="loading" class="loading-state" role="status" aria-live="polite">
+      <div class="skeleton-grid">
+        <div class="skeleton-card"><div class="skeleton skeleton-image"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text" style="width:60%"></div></div>
+        <div class="skeleton-card"><div class="skeleton skeleton-image"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text" style="width:60%"></div></div>
+        <div class="skeleton-card"><div class="skeleton skeleton-image"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text" style="width:60%"></div></div>
+      </div>
+    </div>
+    <div id="error-state" class="error-state" hidden role="alert">
+      <p class="error-message">Failed to load data. Make sure <code>data/docs-preview.json</code> is present.</p>
+    </div>
+    <div id="empty-state" class="empty-state" hidden>
+      <p>No entities match the current filter.</p>
+    </div>
+    <div id="cards-grid" class="cards-grid" role="list" aria-live="polite"></div>
+  </main>
+
+  <!-- Detail panel -->
+  <aside id="detail-panel" class="detail-panel" hidden aria-modal="true" role="dialog" aria-labelledby="detail-title">
+    <div class="detail-backdrop" id="detail-backdrop"></div>
+    <div class="detail-content">
+      <button class="detail-close" id="detail-close" aria-label="Close detail panel">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <div id="detail-body"></div>
+    </div>
+  </aside>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
