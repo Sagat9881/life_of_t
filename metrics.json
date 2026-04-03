@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-04-03T07:34:35Z",
+  "generated_at": "2026-04-03T07:37:16Z",
   "git": {
-    "sha": "7e4c1a5c2294d4d63b934c751ba3bafb9418a5a3",
-    "short_sha": "7e4c1a5c2294d4d63b934c751ba3bafb9418a5a3",
+    "sha": "31d5cf8ca16180e456e094493c46540eeaf50f80",
+    "short_sha": "31d5cf8ca16180e456e094493c46540eeaf50f80",
     "branch": "main"
   },
   "tasks": {
@@ -18,11 +18,11 @@
     "analytics": 4
   },
   "backend": {
-    "domain": 108,
-    "application": 52,
-    "infrastructure": 41,
-    "presentation": 5,
-    "total": 202
+    "domain": 139,
+    "application": 55,
+    "infrastructure": 60,
+    "presentation": 0,
+    "total": 244
   },
   "narrative": {
     "quests": 15,
