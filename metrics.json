@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-04-03T12:30:42Z",
+  "generated_at": "2026-04-03T12:30:59Z",
   "git": {
-    "sha": "c3e2725b84e458313ded9d216a08caa06f7b9f1b",
-    "short_sha": "c3e2725b",
+    "sha": "7cdf74c52589e2ed010c043bb538ef02446af100",
+    "short_sha": "7cdf74c5",
     "branch": "main"
   },
   "tasks": {
-    "in_progress": 3,
+    "in_progress": 2,
     "done": 24,
-    "total": 27
+    "total": 26
   },
   "tasks_by_category": {
     "backend": 14,
     "narrative": 1,
-    "frontend": 10,
+    "frontend": 9,
     "assets": 3,
     "analytics": 4
   },
