@@ -8,8 +8,8 @@
 | **Исполнитель** | JavaScript Developer |
 | **Приоритет** | Высокий |
 | **Зависимости** | TASK-BE-DOC-001, TASK-BE-DOC-002, TASK-FE-DOC-001 |
-| **Связанные спецификации** | [`docs/specs/technical/visual-docs-ci-workflow.md`](../../docs/specs/technical/visual-docs-ci-workflow.md) |
-| **ADR** | [ADR-001](../../docs/decisions/ADR-001-visual-docs-data-independence.md) |
+| **Связанные спецификации** | [`docs/specs/technical/visual-docs-ci-workflow.md`](../../../docs/specs/technical/visual-docs-ci-workflow.md) |
+| **ADR** | [ADR-001](../../../docs/decisions/ADR-001-visual-docs-data-independence.md) |
 
 ---
 

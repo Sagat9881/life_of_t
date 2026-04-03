@@ -8,7 +8,7 @@
 | **Исполнитель** | Нарратор |
 | **Приоритет** | Средний |
 | **Зависимости** | TASK-AS-DOC-001 |
-| **Связанные спецификации** | [`docs/specs/technical/visual-docs-site-structure.md`](../../docs/specs/technical/visual-docs-site-structure.md) |
+| **Связанные спецификации** | [`docs/specs/technical/visual-docs-site-structure.md`](../../../docs/specs/technical/visual-docs-site-structure.md) |
 
 ---
 

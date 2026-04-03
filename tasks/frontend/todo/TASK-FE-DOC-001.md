@@ -8,8 +8,8 @@
 | **Исполнитель** | JavaScript Developer |
 | **Приоритет** | Высокий |
 | **Зависимости** | TASK-BE-DOC-001 (нужен `docs-preview.json` для тестирования) |
-| **Связанные спецификации** | [`docs/specs/technical/visual-docs-site-structure.md`](../../docs/specs/technical/visual-docs-site-structure.md) |
-| **ADR** | [ADR-001](../../docs/decisions/ADR-001-visual-docs-data-independence.md) |
+| **Связанные спецификации** | [`docs/specs/technical/visual-docs-site-structure.md`](../../../docs/specs/technical/visual-docs-site-structure.md) |
+| **ADR** | [ADR-001](../../../docs/decisions/ADR-001-visual-docs-data-independence.md) |
 
 ---
 
