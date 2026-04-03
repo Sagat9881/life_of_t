@@ -1,0 +1,239 @@
+# docs-site.yml
+# Build & Deploy Documentation Site for "Life of T"
+#
+# Architecture: visual-docs-ci-workflow.md
+# ADR: ADR-001-visual-docs-data-independence.md
+#
+# Jobs:
+#   generate-docs-preview  →  build docs-preview.json from specs-manifest.xml
+#   download-sprites        →  fetch generated PNG atlas files
+#   build-docs-site         →  assemble docs-site/ + verify no hardcoded entity names
+#   deploy                  →  publish to GitHub Pages
+#
+# Principle: NO hardcoded entity IDs in YAML steps.
+# All entity-specific logic is delegated to the generator (Java) and data-driven
+# Python validation scripts that read specs-manifest.xml at runtime.
+
+name: Build & Deploy Documentation Site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'game-content/**'
+      - 'asset-generator/**'
+      - 'docs-site/**'
+      - '.github/workflows/docs-site.yml'
+  workflow_dispatch:
+
+# Allow only one concurrent deployment; cancel in-progress runs on new push
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  # ───────────────────────────────────────────────────────────────────────
+  # Job 1: Generate docs-preview.json from specs-manifest.xml via Java generator
+  # ───────────────────────────────────────────────────────────────────────
+  generate-docs-preview:
+    name: Generate docs-preview.json
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+
+      - name: Build project (parent POM + backend + application)
+        run: |
+          mvn -B -N install --no-transfer-progress
+          mvn -B install -DskipTests -f backend/pom.xml --no-transfer-progress
+          mvn -B package -f application/pom.xml -DskipTests --no-transfer-progress
+
+      - name: Generate docs-preview.json
+        run: |
+          OUTPUT_DIR=/tmp/docs-preview-output
+          mkdir -p "$OUTPUT_DIR"
+
+          java --enable-preview \
+            -jar application/target/life-of-t.jar \
+            --assets.output-mode=docs-preview \
+            --assets.output-dir="$OUTPUT_DIR" \
+            --server.port=8099 &
+          APP_PID=$!
+
+          # Data-driven wait: poll for docs-preview.json (no hardcoded entity names)
+          TIMEOUT=60
+          ELAPSED=0
+          until [ -f "$OUTPUT_DIR/docs-preview.json" ] || [ $ELAPSED -ge $TIMEOUT ]; do
+            sleep 2
+            ELAPSED=$((ELAPSED + 2))
+          done
+
+          kill "$APP_PID" 2>/dev/null || true
+
+          if [ ! -f "$OUTPUT_DIR/docs-preview.json" ]; then
+            echo "ERROR: docs-preview.json was not generated within ${TIMEOUT}s"
+            exit 1
+          fi
+          echo "OK: docs-preview.json generated ($(wc -c < "$OUTPUT_DIR/docs-preview.json") bytes)"
+
+      - name: Validate entity count (data-driven, reads specs-manifest.xml)
+        run: |
+          python3 - <<'EOF'
+          import json, xml.etree.ElementTree as ET, sys
+
+          manifest = ET.parse(
+              'game-content/life-of-t/src/main/resources/asset-specs/specs-manifest.xml'
+          )
+          expected = len([
+              e for e in manifest.findall('entity')
+              if e.get('abstract', 'false') == 'false'
+          ])
+          with open('/tmp/docs-preview-output/docs-preview.json') as f:
+              data = json.load(f)
+          actual = len(data)
+          if actual != expected:
+              print(f'FAIL: expected {expected} entities, got {actual}')
+              sys.exit(1)
+          print(f'OK: {actual}/{expected} entities validated')
+          EOF
+
+      - name: Upload docs-preview.json artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-preview-json
+          path: /tmp/docs-preview-output/docs-preview.json
+          retention-days: 7
+
+  # ───────────────────────────────────────────────────────────────────────
+  # Job 2: Download generated sprite atlases from asset-generation workflow
+  # ───────────────────────────────────────────────────────────────────────
+  download-sprites:
+    name: Download generated sprites
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Uses dawidd6/action-download-artifact to fetch latest artifact from
+      # asset-generation.yml without hardcoding run IDs
+      - name: Download sprites artifact from asset-generation workflow
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: asset-generation.yml
+          name: generated-pixel-art-assets
+          path: /tmp/sprites
+        # Continue with empty sprites if asset-generation hasn't run yet
+        continue-on-error: true
+
+      - name: Create empty sprites dir if artifact unavailable
+        run: mkdir -p /tmp/sprites
+
+      - name: Upload sprites artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sprites
+          path: /tmp/sprites/
+          retention-days: 7
+          # Permit empty directory (first run before asset-generation has artifacts)
+          if-no-files-found: warn
+
+  # ───────────────────────────────────────────────────────────────────────
+  # Job 3: Assemble docs-site/ and run ADR-001 hardcode verification
+  # ───────────────────────────────────────────────────────────────────────
+  build-docs-site:
+    name: Build static docs site
+    runs-on: ubuntu-latest
+    needs: [generate-docs-preview, download-sprites]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download docs-preview.json
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-preview-json
+          path: docs-site/data
+
+      - name: Download sprite assets
+        uses: actions/download-artifact@v4
+        with:
+          name: sprites
+          path: docs-site/assets
+
+      # ADR-001 compliance check:
+      # Entity IDs are read from specs-manifest.xml at runtime —
+      # NO hardcoded entity names in this YAML step.
+      - name: Verify no hardcoded entity names in JS (ADR-001)
+        run: |
+          python3 - <<'EOF'
+          import xml.etree.ElementTree as ET, subprocess, sys, os
+
+          manifest_path = 'game-content/life-of-t/src/main/resources/asset-specs/specs-manifest.xml'
+          if not os.path.exists(manifest_path):
+              print('SKIP: specs-manifest.xml not found (dependency not yet available)')
+              sys.exit(0)
+
+          manifest = ET.parse(manifest_path)
+          # Derive entity IDs from path attribute — data-driven, no hardcoded list
+          ids = [
+              e.get('path', '').split('/')[-1]
+              for e in manifest.findall('entity')
+              if e.get('abstract', 'false') == 'false'
+              and e.get('path', '')
+          ]
+
+          violations = []
+          for entity_id in ids:
+              if not entity_id:
+                  continue
+              result = subprocess.run(
+                  ['grep', '-rn', entity_id, 'docs-site/js/'],
+                  capture_output=True, text=True
+              )
+              if result.stdout.strip():
+                  violations.append(f'  [{entity_id}] {result.stdout.strip()}')
+
+          if violations:
+              print('FAIL: hardcoded entity names found in docs-site/js/:')
+              for v in violations:
+                  print(v)
+              sys.exit(1)
+
+          print(f'OK: no hardcoded entity names in JS ({len(ids)} entity IDs checked)')
+          EOF
+
+      - name: Upload docs-site as Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs-site/
+
+  # ───────────────────────────────────────────────────────────────────────
+  # Job 4: Deploy to GitHub Pages
+  # Requires: Settings → Pages → Source: GitHub Actions
+  # ───────────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build-docs-site
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
