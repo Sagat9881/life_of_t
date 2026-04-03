@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-04-03T12:28:43Z",
+  "generated_at": "2026-04-03T12:29:06Z",
   "git": {
-    "sha": "e8f8951edae0ca111ca748a1e6830140dd38aef6",
-    "short_sha": "e8f8951e",
+    "sha": "1a9466c102875f399f6ebf7801e1c35a5f9438b3",
+    "short_sha": "1a9466c1",
     "branch": "main"
   },
   "tasks": {
@@ -11,7 +11,7 @@
     "total": 24
   },
   "tasks_by_category": {
-    "backend": 14,
+    "backend": 13,
     "narrative": 1,
     "frontend": 8,
     "assets": 3,
@@ -41,7 +41,7 @@
   "ci": {
     "status": "in_progress",
     "conclusion": "pending",
-    "total_runs": 3,
+    "total_runs": 2,
     "failed_checks": 0,
     "success_checks": 0
   }
