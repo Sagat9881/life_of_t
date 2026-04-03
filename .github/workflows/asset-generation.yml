@@ -28,6 +28,7 @@ jobs:
         -Xmx1g
         -Djava.awt.headless=true
       ASSET_OUTPUT_DIR: /tmp/life-of-t-generated-assets
+      MANIFEST_PATH: game-content/life-of-t/src/main/resources/asset-specs/specs-manifest.xml
 
     steps:
       - name: Checkout repository
@@ -52,6 +53,31 @@ jobs:
       - name: Run asset-generator tests
         run: mvn -B test -f asset-generator/pom.xml --no-transfer-progress -Dsurefire.useModulePath=false
 
+      # ── NFR-3: validate manifest before any asset checks ─────────────────────
+      - name: Validate specs-manifest.xml
+        run: |
+          if [ ! -f "${{ env.MANIFEST_PATH }}" ]; then
+            echo "::error::specs-manifest.xml not found at ${{ env.MANIFEST_PATH }}"
+            echo "The manifest is the single source of truth for entity list (ADR-001)."
+            echo "Ensure game-content module is present and manifest is committed."
+            exit 1
+          fi
+          # Validate XML is well-formed
+          python3 -c "
+import xml.etree.ElementTree as ET, sys
+try:
+    ET.parse('${{ env.MANIFEST_PATH }}')
+    print('OK: specs-manifest.xml is well-formed XML')
+except ET.ParseError as e:
+    print(f'::error::specs-manifest.xml is malformed: {e}', file=sys.stderr)
+    sys.exit(1)
+"
+          ENTITY_COUNT=$(python3 scripts/ci/parse_manifest.py "${{ env.MANIFEST_PATH }}" | grep -v '^#' | wc -l)
+          echo "Manifest valid. Non-abstract entities: $ENTITY_COUNT"
+          if [ "$ENTITY_COUNT" -eq 0 ]; then
+            echo "::warning::Manifest contains zero non-abstract entities — nothing will be verified."
+          fi
+
       - name: Generate assets via application startup
         run: |
           mvn -B package -f application/pom.xml -DskipTests --no-transfer-progress
@@ -61,9 +87,7 @@ jobs:
             --server.port=8099 &
           APP_PID=$!
 
-          # ── Completion signal: poll for generation-complete.sentinel ─────────
-          # The sentinel file is always the LAST file written by AssetGeneratorRunner
-          # regardless of the entity set (ADR-001: no entity-name hardcode in CI).
+          # ── Completion signal: poll for generation-complete.sentinel (ADR-002) ──
           echo "Waiting for generation-complete.sentinel ..."
           for i in $(seq 1 60); do
             if [ -f "${{ env.ASSET_OUTPUT_DIR }}/generation-complete.sentinel" ]; then
@@ -83,43 +107,179 @@ jobs:
           sleep 2
           kill $APP_PID 2>/dev/null || true
 
+      # ── FR-1: data-driven existence check ────────────────────────────────────
       - name: Verify generated assets exist
         run: |
           echo "=== Generated Assets ==="
           ls -la ${{ env.ASSET_OUTPUT_DIR }}/ || echo "Directory not found!"
 
-          # ── Data-driven verification (ADR-001) ───────────────────────────────
-          # We do NOT hardcode expected filenames here. Instead we verify that:
-          #   1. The sentinel is present (generation completed normally).
-          #   2. At least one PNG was produced (generator produced output).
-          #   3. sprite-atlas.json exists for entities that have animations.
-          # Per-entity dimension checks are delegated to unit tests in the
-          # asset-generator module (run in the previous step).
-
+          # sentinel presence (ADR-002)
           SENTINEL="${{ env.ASSET_OUTPUT_DIR }}/generation-complete.sentinel"
           if [ ! -f "$SENTINEL" ]; then
             echo "::error::generation-complete.sentinel missing — generation did not finish cleanly"
             exit 1
           fi
-          echo "OK: generation-complete.sentinel present ($(cat $SENTINEL | tr -d '\n'))"
+          echo "OK: generation-complete.sentinel ($(cat $SENTINEL | tr -d '\n'))"
 
-          PNG_COUNT=$(find ${{ env.ASSET_OUTPUT_DIR }} -name '*.png' | wc -l)
-          if [ "$PNG_COUNT" -eq 0 ]; then
-            echo "::error::No PNG files found in ${{ env.ASSET_OUTPUT_DIR }}"
-            exit 1
-          fi
-          echo "OK: $PNG_COUNT PNG file(s) generated"
+          # Build expected file list dynamically from manifest (ADR-001 / FR-1)
+          python3 - <<'PYEOF'
+import sys, os
+import xml.etree.ElementTree as ET
 
-          ATLAS_COUNT=$(find ${{ env.ASSET_OUTPUT_DIR }} -name 'sprite-atlas.json' | wc -l)
-          echo "OK: $ATLAS_COUNT sprite-atlas.json file(s) generated"
+MANIFEST  = os.environ["MANIFEST_PATH"]
+OUTPUT    = os.environ["ASSET_OUTPUT_DIR"]
 
-          echo "All structural checks passed."
+ANIM_BY_TYPE = {
+    "characters": "idle",
+    "furniture":  "static",
+    "locations":  "bg",
+    "ui":         "default",
+}
+DEFAULT_ANIM = "static"
 
+tree  = ET.parse(MANIFEST)
+root  = tree.getroot()
+entities = root.findall("entity") or root.findall(".//entity")
+
+expected = []
+for e in entities:
+    if e.get("abstract", "false").strip().lower() == "true":
+        continue
+    path    = e.get("path", "").strip()
+    segs    = [s for s in path.split("/") if s]
+    eid     = segs[-1] if segs else path
+    etype   = segs[0]  if len(segs) > 1 else "unknown"
+    anim    = ANIM_BY_TYPE.get(etype, DEFAULT_ANIM)
+    expected.append(f"{eid}_{anim}.png")
+
+print(f"Expected assets from manifest: {len(expected)}")
+found, missing = [], []
+for name in expected:
+    fpath = os.path.join(OUTPUT, name)
+    if os.path.isfile(fpath):
+        size = os.path.getsize(fpath)
+        found.append((name, size))
+        print(f"  OK  : {name} ({size} bytes)")
+    else:
+        missing.append(name)
+        print(f"  MISS: {name}")
+
+print(f"Found: {len(found)}, Missing: {len(missing)}")
+if missing:
+    for m in missing:
+        print(f"::error::MISSING asset: {m}")
+    sys.exit(1)
+print("All expected assets present.")
+PYEOF
+
+      # ── FR-2: validate atlas dimensions from card-meta.json / sprite-atlas.json
+      - name: Validate atlas dimensions
+        run: |
+          python3 - <<'PYEOF'
+import sys, os, json
+import xml.etree.ElementTree as ET
+
+MANIFEST = os.environ["MANIFEST_PATH"]
+OUTPUT   = os.environ["ASSET_OUTPUT_DIR"]
+
+ANIM_BY_TYPE = {
+    "characters": "idle",
+    "furniture":  "static",
+    "locations":  "bg",
+    "ui":         "default",
+}
+DEFAULT_ANIM = "static"
+
+def read_png_dimensions(path):
+    """Read width/height from PNG IHDR chunk (no external deps)."""
+    import struct
+    with open(path, "rb") as f:
+        f.read(8)           # PNG signature
+        f.read(4)           # IHDR length
+        f.read(4)           # IHDR type
+        data = f.read(8)
+    w, h = struct.unpack(">II", data)
+    return w, h
+
+tree     = ET.parse(MANIFEST)
+root     = tree.getroot()
+entities = root.findall("entity") or root.findall(".//entity")
+
+ANIM_BY_TYPE = {"characters": "idle", "furniture": "static", "locations": "bg", "ui": "default"}
+fail  = False
+checked = 0
+skipped = 0
+
+for entity in entities:
+    if entity.get("abstract", "false").strip().lower() == "true":
+        continue
+    path  = entity.get("path", "").strip()
+    segs  = [s for s in path.split("/") if s]
+    eid   = segs[-1] if segs else path
+    etype = segs[0]  if len(segs) > 1 else "unknown"
+    anim  = ANIM_BY_TYPE.get(etype, "static")
+    png_name = f"{eid}_{anim}.png"
+    png_path = os.path.join(OUTPUT, png_name)
+
+    if not os.path.isfile(png_path):
+        # Already reported in previous step; skip silently here
+        continue
+
+    # FR-2: try card-meta.json first (future Java output)
+    meta_path = os.path.join(OUTPUT, f"{eid}_card-meta.json")
+    exp_w = exp_h = None
+
+    if os.path.isfile(meta_path):
+        with open(meta_path) as mf:
+            meta = json.load(mf)
+        exp_w = meta.get("expectedWidth")
+        exp_h = meta.get("expectedHeight")
+        if exp_w and exp_h:
+            print(f"  [{eid}] using card-meta.json: expected {exp_w}x{exp_h}")
+
+    # FR-2 fallback: sprite-atlas.json frameWidth/frameHeight
+    if exp_w is None or exp_h is None:
+        atlas_path = os.path.join(OUTPUT, eid, "sprite-atlas.json")
+        if not os.path.isfile(atlas_path):
+            # Also try OUTPUT/type/name/sprite-atlas.json
+            atlas_path = os.path.join(OUTPUT, etype, eid, "sprite-atlas.json")
+        if os.path.isfile(atlas_path):
+            with open(atlas_path) as af:
+                atlas = json.load(af)
+            anims = atlas.get("animations", {})
+            if anim in anims:
+                frame_info = anims[anim]
+                exp_w = frame_info.get("frameWidth")
+                exp_h = frame_info.get("frameHeight")
+                if exp_w and exp_h:
+                    print(f"  [{eid}] using sprite-atlas.json: expected {exp_w}x{exp_h}")
+
+    if exp_w is None or exp_h is None:
+        # FR-2 §4: no metadata available → skip with warning (do not fail)
+        print(f"  SKIP [{eid}]: no card-meta.json or sprite-atlas.json — skipping dimension check")
+        skipped += 1
+        continue
+
+    act_w, act_h = read_png_dimensions(png_path)
+    if act_w == exp_w and act_h == exp_h:
+        print(f"  OK   [{eid}]: {png_name} -> {act_w}x{act_h}")
+        checked += 1
+    else:
+        print(f"::error::[{eid}]: {png_name} expected {exp_w}x{exp_h}, got {act_w}x{act_h}")
+        fail = True
+
+print(f"Dimension check: {checked} verified, {skipped} skipped (no metadata).")
+if fail:
+    sys.exit(1)
+print("All checked dimensions correct.")
+PYEOF
+
+      # ── FR-3 + RGBA check: data-driven, no entity name list ──────────────────
       - name: Validate asset PNG format (32-bit ARGB)
         run: |
           for f in $(find ${{ env.ASSET_OUTPUT_DIR }} -name '*.png'); do
             INFO=$(python3 -c "
-import struct, zlib
+import struct
 with open('$f','rb') as fp:
     sig = fp.read(8)
     length = struct.unpack('>I', fp.read(4))[0]
@@ -137,9 +297,9 @@ with open('$f','rb') as fp:
             fi
           done
 
+      # ── FR-3: no empty PNG files (entity-name-independent) ───────────────────
       - name: Verify no empty PNG files
         run: |
-          # Entity-name-independent check: every PNG must be non-empty.
           FAIL=false
           while IFS= read -r -d '' f; do
             SIZE=$(stat -c%s "$f")
