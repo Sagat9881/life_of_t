@@ -1,12 +1,21 @@
 {
-  "generated_at": "2026-04-03T07:33:00Z",
+  "generated_at": "2026-04-03T07:34:35Z",
+  "git": {
+    "sha": "7e4c1a5c2294d4d63b934c751ba3bafb9418a5a3",
+    "short_sha": "7e4c1a5c2294d4d63b934c751ba3bafb9418a5a3",
+    "branch": "main"
+  },
   "tasks": {
-    "todo": 0,
     "in_progress": 0,
-    "review": 0,
     "done": 18,
-    "blocked": 0,
     "total": 18
+  },
+  "tasks_by_category": {
+    "backend": 8,
+    "narrative": 3,
+    "frontend": 6,
+    "assets": 1,
+    "analytics": 4
   },
   "backend": {
     "domain": 108,
@@ -20,6 +29,11 @@
     "npcs": 11,
     "world_events": 15,
     "conflicts": 10,
+    "world": 0,
+    "endings": 10,
+    "player_actions": 14,
+    "reviews": 0,
+    "asset_specs": 63,
     "total": 76
   },
   "ci": {
