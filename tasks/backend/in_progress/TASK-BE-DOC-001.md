@@ -8,8 +8,8 @@
 | **Исполнитель** | Java Developer |
 | **Приоритет** | Высокий |
 | **Зависимости** | — |
-| **Связанные спецификации** | [`docs/specs/technical/visual-docs-preview-mode.md`](../../docs/specs/technical/visual-docs-preview-mode.md) |
-| **ADR** | [ADR-001](../../docs/decisions/ADR-001-visual-docs-data-independence.md) |
+| **Связанные спецификации** | [`docs/specs/technical/visual-docs-preview-mode.md`](../../../docs/specs/technical/visual-docs-preview-mode.md) |
+| **ADR** | [ADR-001](../../../docs/decisions/ADR-001-visual-docs-data-independence.md) |
 
 ---
 

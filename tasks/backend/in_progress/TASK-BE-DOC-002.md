@@ -8,8 +8,8 @@
 | **Исполнитель** | Java Developer |
 | **Приоритет** | Высокий |
 | **Зависимости** | TASK-BE-DOC-001 (частично) |
-| **Связанные спецификации** | [`docs/specs/technical/ci-fix-asset-hardcode.md`](../../docs/specs/technical/ci-fix-asset-hardcode.md) |
-| **ADR** | [ADR-001](../../docs/decisions/ADR-001-visual-docs-data-independence.md) |
+| **Связанные спецификации** | [`docs/specs/technical/ci-fix-asset-hardcode.md`](../../../docs/specs/technical/ci-fix-asset-hardcode.md) |
+| **ADR** | [ADR-001](../../../docs/decisions/ADR-001-visual-docs-data-independence.md) |
 
 ---
 

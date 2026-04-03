@@ -1,57 +1,36 @@
-# TASK-FE-DOC-001: Статический сайт — каркас и data-driven рендер карточек
+# TASK-FE-DOC-001: Создать структуру директории `docs-site/` и `main.js`
 
-**Тип:** frontend  
-**Статус:** todo  
-**Роль:** JavaScript Developer  
-**Skill-файл:** `javascript-developer-skill.md`
-
----
-
-## Контекст
-
-Документационный сайт строится как pure-static приложение. Все данные поступают из `site/data/catalog.json` и `site/data/docs.json`, собранных в CI bash-скриптами. Структура данных описана в `docs/specs/technical/visual-docs-site-structure.md`.
-
----
-
-## Связанные спецификации
-
-- `docs/specs/technical/visual-docs-site-structure.md` — формат `catalog.json`, `docs.json`, компоненты (`EntityCard`, `FilterBar`).
-- `docs/decisions/ADR-001-visual-docs-data-independence.md` — запрет хардкода `entityType`/`entityId`.
-- `javascript-developer-skill.md` — ограничения роли JS Developer.
+| Поле | Значение |
+|------|----------|
+| **ID** | TASK-FE-DOC-001 |
+| **Тип** | frontend |
+| **Компонент** | `docs-site/` (новая директория) |
+| **Исполнитель** | JavaScript Developer |
+| **Приоритет** | Высокий |
+| **Зависимости** | TASK-BE-DOC-001 (нужен `docs-preview.json` для тестирования) |
+| **Связанные спецификации** | [`docs/specs/technical/visual-docs-site-structure.md`](../../../docs/specs/technical/visual-docs-site-structure.md) |
+| **ADR** | [ADR-001](../../../docs/decisions/ADR-001-visual-docs-data-independence.md) |
 
 ---
 
-## Что нужно сделать
+## Описание
 
-1. Создать директорию `site/` с подструктурой:
-   ```
-   site/
-   ├── src/          ← JS-модули
-   ├── data/         ← CI кладёт сюда catalog.json и docs.json
-   ├── public/       ← статические ресурсы (CSS, иконки)
-   └── dist/         ← выходной каталог сборки
-   ```
-2. Реализовать загрузку `catalog.json` при инициализации (`fetch` или `import`).
-3. Итерационно рендерить компонент **EntityCard** для каждой записи каталога. Перебор строго по данным — без `if (type === '...')` или аналогов.
-4. Реализовать компонент **FilterBar**: список фильтров строится из уникальных значений поля `entityType` каталога — динамически, без хардкода типов.
-5. Фильтрация — клиентская, по полю `entityType` из данных.
-6. Точка входа сборки: `npm run build` → результат в `site/dist/`.
+Создать файловую структуру `docs-site/` согласно техспеку и реализовать data-driven
+загрузку данных в `main.js`.
 
----
+## Задачи реализации
 
-## Ограничения (из `javascript-developer-skill.md` и ADR-001)
-
-- Запрещено: `if (type === 'characters')` или любое ветвление по строковым именам типов/id сущностей.
-- Стек: **vanilla JS + vanilla CSS**. Фреймворки (React/Vue/Angular) не допускаются.
-- Принцип «данные управляют рендером» — обязателен во всех компонентах.
-- Не описывать Canvas/DOM для игровых анимаций — это зона игрового клиента, не docs-site.
-
----
+1. Создать `docs-site/index.html` с пустыми контейнерами.
+2. Создать `docs-site/js/main.js`: `fetch('./data/docs-preview.json')` → итерация → вызов `renderer.js`.
+3. Создать `docs-site/js/renderer.js`: `createCard(entity)` без хардкода имён.
+4. Создать `docs-site/js/filter.js`: фильтрация по полю `type`.
+5. Создать `docs-site/css/style.css`: базовая сетка карточек.
+6. Добавить `docs-site/data/.gitkeep` (JSON придёт от CI).
 
 ## Критерии приёмки
 
-- [ ] При добавлении новой сущности в `catalog.json` карточка появляется автоматически без изменений JS-кода.
-- [ ] `FilterBar` корректно отражает все `entityType` из каталога, включая новые.
-- [ ] Нет хардкода `entityType` или `entityId` в коде (CI-grep-проверка пройдена).
-- [ ] Сайт собирается командой `npm run build` в `site/`.
-- [ ] Структура `site/src/`, `site/data/`, `site/public/`, `site/dist/` создана и задокументирована в `README.md` внутри `site/`.
+- [ ] При наличии `docs-site/data/docs-preview.json` сайт отображает N карточек (N из JSON).
+- [ ] `grep -rn 'tanya\|sam\|aijan' docs-site/js/` возвращает 0 результатов.
+- [ ] Фильтр по `type` работает (characters/locations/furniture/ui).
+- [ ] Отсутствие спрайта (`spriteAtlasFile === null`) не вызывает ошибок в console.
+- [ ] Сайт открывается через `npx serve docs-site` без 404.
