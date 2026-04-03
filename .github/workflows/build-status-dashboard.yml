@@ -15,25 +15,32 @@ jobs:
   collect-metrics:
     runs-on: ubuntu-latest
     outputs:
-      tasks_todo:              ${{ steps.tasks.outputs.TASKS_TODO }}
-      tasks_in_progress:       ${{ steps.tasks.outputs.TASKS_IN_PROGRESS }}
-      tasks_review:            ${{ steps.tasks.outputs.TASKS_REVIEW }}
-      tasks_done:              ${{ steps.tasks.outputs.TASKS_DONE }}
-      tasks_blocked:           ${{ steps.tasks.outputs.TASKS_BLOCKED }}
-      tasks_total:             ${{ steps.tasks.outputs.TASKS_TOTAL }}
-      backend_domain:          ${{ steps.backend.outputs.BACKEND_DOMAIN }}
-      backend_application:     ${{ steps.backend.outputs.BACKEND_APPLICATION }}
-      backend_infrastructure:  ${{ steps.backend.outputs.BACKEND_INFRASTRUCTURE }}
-      backend_presentation:    ${{ steps.backend.outputs.BACKEND_PRESENTATION }}
-      backend_total:           ${{ steps.backend.outputs.BACKEND_TOTAL }}
-      narrative_quests:        ${{ steps.narrative.outputs.NARRATIVE_QUESTS }}
-      narrative_npcs:          ${{ steps.narrative.outputs.NARRATIVE_NPCS }}
-      narrative_world_events:  ${{ steps.narrative.outputs.NARRATIVE_WORLD_EVENTS }}
-      narrative_conflicts:     ${{ steps.narrative.outputs.NARRATIVE_CONFLICTS }}
-      narrative_total:         ${{ steps.narrative.outputs.NARRATIVE_TOTAL }}
-      ci_status:               ${{ steps.ci.outputs.CI_STATUS }}
-      ci_conclusion:           ${{ steps.ci.outputs.CI_CONCLUSION }}
-      ci_total_runs:           ${{ steps.ci.outputs.CI_TOTAL_RUNS }}
+      tasks_in_progress:         ${{ steps.tasks.outputs.TASKS_IN_PROGRESS }}
+      tasks_done:                ${{ steps.tasks.outputs.TASKS_DONE }}
+      tasks_total:               ${{ steps.tasks.outputs.TASKS_TOTAL }}
+      tasks_backend:             ${{ steps.tasks.outputs.TASKS_BACKEND }}
+      tasks_narrative:           ${{ steps.tasks.outputs.TASKS_NARRATIVE }}
+      tasks_frontend:            ${{ steps.tasks.outputs.TASKS_FRONTEND }}
+      tasks_assets:              ${{ steps.tasks.outputs.TASKS_ASSETS }}
+      tasks_analytics:           ${{ steps.tasks.outputs.TASKS_ANALYTICS }}
+      backend_domain:            ${{ steps.backend.outputs.BACKEND_DOMAIN }}
+      backend_application:       ${{ steps.backend.outputs.BACKEND_APPLICATION }}
+      backend_infrastructure:    ${{ steps.backend.outputs.BACKEND_INFRASTRUCTURE }}
+      backend_presentation:      ${{ steps.backend.outputs.BACKEND_PRESENTATION }}
+      backend_total:             ${{ steps.backend.outputs.BACKEND_TOTAL }}
+      narrative_quests:          ${{ steps.narrative.outputs.NARRATIVE_QUESTS }}
+      narrative_npcs:            ${{ steps.narrative.outputs.NARRATIVE_NPCS }}
+      narrative_world_events:    ${{ steps.narrative.outputs.NARRATIVE_WORLD_EVENTS }}
+      narrative_conflicts:       ${{ steps.narrative.outputs.NARRATIVE_CONFLICTS }}
+      narrative_world:           ${{ steps.narrative.outputs.NARRATIVE_WORLD }}
+      narrative_endings:         ${{ steps.narrative.outputs.NARRATIVE_ENDINGS }}
+      narrative_player_actions:  ${{ steps.narrative.outputs.NARRATIVE_PLAYER_ACTIONS }}
+      narrative_reviews:         ${{ steps.narrative.outputs.NARRATIVE_REVIEWS }}
+      narrative_asset_specs:     ${{ steps.narrative.outputs.NARRATIVE_ASSET_SPECS }}
+      narrative_total:           ${{ steps.narrative.outputs.NARRATIVE_TOTAL }}
+      ci_status:                 ${{ steps.ci.outputs.CI_STATUS }}
+      ci_conclusion:             ${{ steps.ci.outputs.CI_CONCLUSION }}
+      ci_total_runs:             ${{ steps.ci.outputs.CI_TOTAL_RUNS }}
 
     steps:
       - name: checkout
@@ -44,12 +51,14 @@ jobs:
         run: |
           chmod +x scripts/count-tasks.sh
           source <(bash scripts/count-tasks.sh tasks)
-          echo "TASKS_TODO=${TASKS_TODO}"             >> "$GITHUB_OUTPUT"
-          echo "TASKS_IN_PROGRESS=${TASKS_IN_PROGRESS}" >> "$GITHUB_OUTPUT"
-          echo "TASKS_REVIEW=${TASKS_REVIEW}"         >> "$GITHUB_OUTPUT"
-          echo "TASKS_DONE=${TASKS_DONE}"             >> "$GITHUB_OUTPUT"
-          echo "TASKS_BLOCKED=${TASKS_BLOCKED}"       >> "$GITHUB_OUTPUT"
-          echo "TASKS_TOTAL=${TASKS_TOTAL}"           >> "$GITHUB_OUTPUT"
+          echo "TASKS_IN_PROGRESS=${TASKS_IN_PROGRESS}"   >> "$GITHUB_OUTPUT"
+          echo "TASKS_DONE=${TASKS_DONE}"                 >> "$GITHUB_OUTPUT"
+          echo "TASKS_TOTAL=${TASKS_TOTAL}"               >> "$GITHUB_OUTPUT"
+          echo "TASKS_BACKEND=${TASKS_BACKEND}"           >> "$GITHUB_OUTPUT"
+          echo "TASKS_NARRATIVE=${TASKS_NARRATIVE}"       >> "$GITHUB_OUTPUT"
+          echo "TASKS_FRONTEND=${TASKS_FRONTEND}"         >> "$GITHUB_OUTPUT"
+          echo "TASKS_ASSETS=${TASKS_ASSETS}"             >> "$GITHUB_OUTPUT"
+          echo "TASKS_ANALYTICS=${TASKS_ANALYTICS}"       >> "$GITHUB_OUTPUT"
 
       - name: count-backend
         id: backend
@@ -67,11 +76,16 @@ jobs:
         run: |
           chmod +x scripts/count-narrative.sh
           source <(bash scripts/count-narrative.sh)
-          echo "NARRATIVE_QUESTS=${NARRATIVE_QUESTS}"             >> "$GITHUB_OUTPUT"
-          echo "NARRATIVE_NPCS=${NARRATIVE_NPCS}"                 >> "$GITHUB_OUTPUT"
-          echo "NARRATIVE_WORLD_EVENTS=${NARRATIVE_WORLD_EVENTS}" >> "$GITHUB_OUTPUT"
-          echo "NARRATIVE_CONFLICTS=${NARRATIVE_CONFLICTS}"       >> "$GITHUB_OUTPUT"
-          echo "NARRATIVE_TOTAL=${NARRATIVE_TOTAL}"               >> "$GITHUB_OUTPUT"
+          echo "NARRATIVE_QUESTS=${NARRATIVE_QUESTS}"                   >> "$GITHUB_OUTPUT"
+          echo "NARRATIVE_NPCS=${NARRATIVE_NPCS}"                       >> "$GITHUB_OUTPUT"
+          echo "NARRATIVE_WORLD_EVENTS=${NARRATIVE_WORLD_EVENTS}"       >> "$GITHUB_OUTPUT"
+          echo "NARRATIVE_CONFLICTS=${NARRATIVE_CONFLICTS}"             >> "$GITHUB_OUTPUT"
+          echo "NARRATIVE_WORLD=${NARRATIVE_WORLD}"                     >> "$GITHUB_OUTPUT"
+          echo "NARRATIVE_ENDINGS=${NARRATIVE_ENDINGS}"                 >> "$GITHUB_OUTPUT"
+          echo "NARRATIVE_PLAYER_ACTIONS=${NARRATIVE_PLAYER_ACTIONS}"   >> "$GITHUB_OUTPUT"
+          echo "NARRATIVE_REVIEWS=${NARRATIVE_REVIEWS}"                 >> "$GITHUB_OUTPUT"
+          echo "NARRATIVE_ASSET_SPECS=${NARRATIVE_ASSET_SPECS}"         >> "$GITHUB_OUTPUT"
+          echo "NARRATIVE_TOTAL=${NARRATIVE_TOTAL}"                     >> "$GITHUB_OUTPUT"
 
       - name: fetch-ci-status
         id: ci
@@ -91,25 +105,35 @@ jobs:
       - name: write-metrics-json
         id: write_metrics
         env:
-          TASKS_TODO:              ${{ steps.tasks.outputs.TASKS_TODO }}
-          TASKS_IN_PROGRESS:       ${{ steps.tasks.outputs.TASKS_IN_PROGRESS }}
-          TASKS_REVIEW:            ${{ steps.tasks.outputs.TASKS_REVIEW }}
-          TASKS_DONE:              ${{ steps.tasks.outputs.TASKS_DONE }}
-          TASKS_BLOCKED:           ${{ steps.tasks.outputs.TASKS_BLOCKED }}
-          TASKS_TOTAL:             ${{ steps.tasks.outputs.TASKS_TOTAL }}
-          BACKEND_DOMAIN:          ${{ steps.backend.outputs.BACKEND_DOMAIN }}
-          BACKEND_APPLICATION:     ${{ steps.backend.outputs.BACKEND_APPLICATION }}
-          BACKEND_INFRASTRUCTURE:  ${{ steps.backend.outputs.BACKEND_INFRASTRUCTURE }}
-          BACKEND_PRESENTATION:    ${{ steps.backend.outputs.BACKEND_PRESENTATION }}
-          BACKEND_TOTAL:           ${{ steps.backend.outputs.BACKEND_TOTAL }}
-          NARRATIVE_QUESTS:        ${{ steps.narrative.outputs.NARRATIVE_QUESTS }}
-          NARRATIVE_NPCS:          ${{ steps.narrative.outputs.NARRATIVE_NPCS }}
-          NARRATIVE_WORLD_EVENTS:  ${{ steps.narrative.outputs.NARRATIVE_WORLD_EVENTS }}
-          NARRATIVE_CONFLICTS:     ${{ steps.narrative.outputs.NARRATIVE_CONFLICTS }}
-          NARRATIVE_TOTAL:         ${{ steps.narrative.outputs.NARRATIVE_TOTAL }}
-          CI_STATUS:               ${{ steps.ci.outputs.CI_STATUS || 'unknown' }}
-          CI_CONCLUSION:           ${{ steps.ci.outputs.CI_CONCLUSION || 'unknown' }}
-          CI_TOTAL_RUNS:           ${{ steps.ci.outputs.CI_TOTAL_RUNS || '0' }}
+          GIT_SHA:                   ${{ github.sha }}
+          GIT_SHORT_SHA:             ${{ github.sha }}
+          GIT_BRANCH:                ${{ github.ref_name }}
+          TASKS_IN_PROGRESS:         ${{ steps.tasks.outputs.TASKS_IN_PROGRESS }}
+          TASKS_DONE:                ${{ steps.tasks.outputs.TASKS_DONE }}
+          TASKS_TOTAL:               ${{ steps.tasks.outputs.TASKS_TOTAL }}
+          TASKS_BACKEND:             ${{ steps.tasks.outputs.TASKS_BACKEND }}
+          TASKS_NARRATIVE:           ${{ steps.tasks.outputs.TASKS_NARRATIVE }}
+          TASKS_FRONTEND:            ${{ steps.tasks.outputs.TASKS_FRONTEND }}
+          TASKS_ASSETS:              ${{ steps.tasks.outputs.TASKS_ASSETS }}
+          TASKS_ANALYTICS:           ${{ steps.tasks.outputs.TASKS_ANALYTICS }}
+          BACKEND_DOMAIN:            ${{ steps.backend.outputs.BACKEND_DOMAIN }}
+          BACKEND_APPLICATION:       ${{ steps.backend.outputs.BACKEND_APPLICATION }}
+          BACKEND_INFRASTRUCTURE:    ${{ steps.backend.outputs.BACKEND_INFRASTRUCTURE }}
+          BACKEND_PRESENTATION:      ${{ steps.backend.outputs.BACKEND_PRESENTATION }}
+          BACKEND_TOTAL:             ${{ steps.backend.outputs.BACKEND_TOTAL }}
+          NARRATIVE_QUESTS:          ${{ steps.narrative.outputs.NARRATIVE_QUESTS }}
+          NARRATIVE_NPCS:            ${{ steps.narrative.outputs.NARRATIVE_NPCS }}
+          NARRATIVE_WORLD_EVENTS:    ${{ steps.narrative.outputs.NARRATIVE_WORLD_EVENTS }}
+          NARRATIVE_CONFLICTS:       ${{ steps.narrative.outputs.NARRATIVE_CONFLICTS }}
+          NARRATIVE_WORLD:           ${{ steps.narrative.outputs.NARRATIVE_WORLD }}
+          NARRATIVE_ENDINGS:         ${{ steps.narrative.outputs.NARRATIVE_ENDINGS }}
+          NARRATIVE_PLAYER_ACTIONS:  ${{ steps.narrative.outputs.NARRATIVE_PLAYER_ACTIONS }}
+          NARRATIVE_REVIEWS:         ${{ steps.narrative.outputs.NARRATIVE_REVIEWS }}
+          NARRATIVE_ASSET_SPECS:     ${{ steps.narrative.outputs.NARRATIVE_ASSET_SPECS }}
+          NARRATIVE_TOTAL:           ${{ steps.narrative.outputs.NARRATIVE_TOTAL }}
+          CI_STATUS:                 ${{ steps.ci.outputs.CI_STATUS || 'unknown' }}
+          CI_CONCLUSION:             ${{ steps.ci.outputs.CI_CONCLUSION || 'unknown' }}
+          CI_TOTAL_RUNS:             ${{ steps.ci.outputs.CI_TOTAL_RUNS || '0' }}
           OUTPUT_FILE: metrics.json
         run: |
           chmod +x scripts/write-metrics.sh
