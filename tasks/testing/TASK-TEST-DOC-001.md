@@ -1,39 +1,73 @@
-# TASK-TEST-DOC-001: Написать интеграционный тест data independence
+# TASK-TEST-DOC-001: Рефакторинг `asset-generation.yml` — устранение хардкода
+
+## Метаданные
 
 | Поле | Значение |
-|------|----------|
+|---|---|
 | **ID** | TASK-TEST-DOC-001 |
 | **Тип** | testing |
-| **Компонент** | `.github/workflows/`, `docs-site/`, `asset-generator/` |
-| **Исполнитель** | тестировщик-автоматизатор / System Analyst |
-| **Приоритет** | Средний |
-| **Зависимости** | TASK-BE-DOC-001, TASK-BE-DOC-003, TASK-FE-DOC-001, TASK-FE-DOC-003 |
-| **Связанные спецификации** | [`docs/specs/technical/visual-docs-ci-workflow.md`](../../docs/specs/technical/visual-docs-ci-workflow.md), [ADR-001](../../docs/decisions/ADR-001-visual-docs-data-independence.md) |
+| **Статус** | TODO |
+| **Дата создания** | 2026-04-03 |
+| **Роль-исполнитель** | Тестировщик-автоматизатор / DevOps |
 
 ---
 
-## Описание
+## Контекст
 
-Ключевой интеграционный тест: добавить тестовую `<entity>` в `specs-manifest.xml`,
-запустить CI и убедиться, что сайт и верификации обновляются **без изменений кода**.
+В `.github/workflows/asset-generation.yml` три шага содержат захардкоженные имена ассетов (`tanya_idle.png`, `sam_idle.png` и другие), что нарушает **ADR-001** (принцип data-independence: ни один CI/CD-шаг не должен содержать конкретных имён сущностей).
 
-## Задачи реализации
+Проблема: при добавлении нового персонажа без правки YAML его ассет не попадает в автоматическую проверку — **тихий провал** (silent failure). Полное описание нарушений и алгоритм исправления — в `docs/specs/technical/ci-fix-asset-hardcode.md`.
 
-1. Разработать скрипт `scripts/test-data-independence.sh`:
-   - Добавить тестовую `<entity path="characters/test_char" abstract="false"/>` в манифест.
-   - Запустить `asset-generation.yml` через `workflow_dispatch`.
-   - Проверить, что CI проходит.
-   - Запустить `docs-site.yml`.
-   - Проверить, что `docs-preview.json` содержит `test_char`.
-   - Удалить тестовую сущность, восстановить манифест.
+---
 
-2. Добавить Playwright smoke-тест для `docs-site`:
-   - Открыть сайт.
-   - Проверить: `document.querySelectorAll('.entity-card').length === N` (из JSON).
-   - Проверить: клик на первую карточку открывает панель деталей.
+## Связанные спецификации
+
+- [`docs/specs/technical/ci-fix-asset-hardcode.md`](../../docs/specs/technical/ci-fix-asset-hardcode.md) — алгоритм рефакторинга трёх шагов
+- [`docs/decisions/ADR-001-visual-docs-data-independence.md`](../../docs/decisions/ADR-001-visual-docs-data-independence.md) — принцип, который нарушает текущая реализация
+- [`.github/workflows/asset-generation.yml`](../../.github/workflows/asset-generation.yml) — файл для рефакторинга
+
+---
+
+## Что нужно сделать
+
+1. **Заменить шаг `Verify generated assets exist`**  
+   Хардкодный массив файлов → динамическое построение списка из `specs-manifest.xml`  
+   (инструмент: `python3` или `xmllint` — согласно алгоритму в `ci-fix-asset-hardcode.md`).
+
+2. **Заменить шаг `Validate atlas dimensions`**  
+   Ожидаемые размеры атласа → читать из `card-meta.json` каждого ассета, а не задавать в YAML.
+
+3. **Заменить шаг `Verify no anti-aliasing`**  
+   Список спрайтов для проверки → из манифеста `specs-manifest.xml`.
+
+4. **Все замены должны быть data-driven**:  
+   Добавление новой сущности в `specs-manifest.xml` должно автоматически включать её ассеты во все три проверки — без изменения YAML.
+
+5. **Логику валидации не менять**:  
+   Форматы PNG 32-bit, RGBA, проверка на anti-aliasing остаются прежними — меняется только источник списка проверяемых файлов.
+
+---
 
 ## Критерии приёмки
 
-- [ ] Тест добавления/удаления сущности проходит без изменений YAML/JS.
-- [ ] Playwright smoke завершается успешно.
-- [ ] Тест включён в CI как опциональный шаг (не блокирует merge).
+- [ ] `asset-generation.yml` не содержит имён персонажей, локаций или ассетов:  
+  ```
+  grep -n 'tanya\|sam\|garfield' .github/workflows/asset-generation.yml
+  ```  
+  → результат пустой.
+- [ ] Добавление тестовой сущности в `specs-manifest.xml` → CI корректно включает её ассеты в проверку без изменения YAML.
+- [ ] Валидация PNG-формата (32-bit RGBA) сохраняется в полном объёме.
+- [ ] Workflow не сломан: все существующие проверки успешно проходят.
+
+---
+
+## Метрики
+
+- Снижение количества «тихих провалов» при добавлении ассетов до 0.
+- Время на добавление нового персонажа в CI-покрытие: 0 изменений в YAML (только обновление манифеста).
+
+---
+
+## Примечание системного аналитика
+
+Задача формализует устранение конкретного нарушения ADR-001 в CI-пайплайне. Исполнитель **не должен менять логику валидации** — только источник данных для построения списков. Все архитектурные решения по алгоритму уже описаны в `ci-fix-asset-hardcode.md`.
