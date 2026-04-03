@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-04-03T12:10:12Z",
+  "generated_at": "2026-04-03T12:10:43Z",
   "git": {
-    "sha": "28b3564462faceedc737782edf4810bceb60e410",
-    "short_sha": "28b35644",
+    "sha": "4734ba58f5fd4146e3c0de5fae907b30bc155f26",
+    "short_sha": "4734ba58",
     "branch": "main"
   },
   "tasks": {
@@ -18,13 +18,13 @@
     "analytics": 4
   },
   "backend": {
-    "domain": 139,
+    "domain": 143,
     "application": 55,
     "infrastructure": 60,
     "presentation": 0,
-    "total": 244,
+    "total": 249,
     "test_total": 8,
-    "asset_generator": 42
+    "asset_generator": 47
   },
   "narrative": {
     "quests": 15,
@@ -41,7 +41,7 @@
   "ci": {
     "status": "in_progress",
     "conclusion": "pending",
-    "total_runs": 2,
+    "total_runs": 5,
     "failed_checks": 0,
     "success_checks": 0
   }
