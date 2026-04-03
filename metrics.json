@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-04-03T09:50:08Z",
+  "generated_at": "2026-04-03T09:51:44Z",
   "git": {
-    "sha": "d90592921206d14bc52396234095a43b06490131",
-    "short_sha": "d9059292",
+    "sha": "a7ce31a4c9dcde3527bdffd80a875e3470e0875f",
+    "short_sha": "a7ce31a4",
     "branch": "main"
   },
   "tasks": {
@@ -12,9 +12,9 @@
   },
   "tasks_by_category": {
     "backend": 11,
-    "narrative": 3,
-    "frontend": 9,
-    "assets": 3,
+    "narrative": 4,
+    "frontend": 12,
+    "assets": 4,
     "analytics": 4
   },
   "backend": {
