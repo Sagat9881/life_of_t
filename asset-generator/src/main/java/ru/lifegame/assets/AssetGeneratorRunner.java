@@ -19,36 +19,57 @@ import ru.lifegame.assets.infrastructure.writer.AtlasConfigWriter;
 import ru.lifegame.assets.infrastructure.writer.PngLayerWriter;
 import ru.lifegame.assets.infrastructure.writer.WebpAtlasWriter;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.List;
 
 /**
  * CLI entry point for asset generation.
  *
+ * <h2>Output modes</h2>
+ * <p>Selected via {@code -Dassets.output-mode=<value>} (default: {@code standard}):
+ * <ul>
+ *   <li><b>standard</b> — generates PNG layers + animation atlases + sprite-atlas.json per entity.
+ *       Writes {@value #SENTINEL_FILENAME} as the very last file so that external processes
+ *       (CI, file-watchers) can poll for a stable, entity-name-independent completion signal.</li>
+ *   <li><b>docs-preview</b> — generates {@code docs-preview.json} only; no PNG output.
+ *       Also writes {@value #SENTINEL_FILENAME} at the end.</li>
+ * </ul>
+ *
+ * <h2>Sentinel contract (ADR-001)</h2>
+ * <p>The file {@value #SENTINEL_FILENAME} in {@code ASSET_OUTPUT_DIR}:
+ * <ul>
+ *   <li>is always the <em>last</em> file written by this runner in every mode;</li>
+ *   <li>contains a single ISO-8601 timestamp line so its content is human-readable;</li>
+ *   <li>must <em>not</em> be confused with an asset — CI should only poll for it, then proceed.</li>
+ * </ul>
+ * This replaces the former CI practice of waiting for {@code tanya_idle.png}.
+ *
+ * <h2>Specs source</h2>
  * <p>Two modes, selected by the presence of the {@code specs.dir} system property:
  * <ul>
  *   <li><b>Disk mode</b> ({@code -Dspecs.dir=/path/to/asset-specs}).</li>
  *   <li><b>Classpath mode</b> (no {@code specs.dir}).</li>
  * </ul>
  *
- * <p>Output mode is selected via the system property
- * {@code -Dassets.output-mode=docs-preview} (default: {@code standard}):
- * <ul>
- *   <li>{@code standard} — generates PNG + sprite-atlas.json (original behaviour).</li>
- *   <li>{@code docs-preview} — generates {@code docs-preview.json} only; no PNG output.
- *       Reads every non-abstract entity from {@code specs-manifest.xml} and writes one
- *       JSON entry per entity. Zero hardcoded entity IDs (ADR-001).</li>
- * </ul>
- *
- * <p>Output directory is taken from the first CLI argument, or from the
- * {@code output.dir} system property, defaulting to {@code target/generated-assets}.
+ * <p>Output directory taken from first CLI argument, {@code output.dir} property,
+ * or defaults to {@code target/generated-assets}.
  */
 public class AssetGeneratorRunner {
 
     private static final Logger log = LoggerFactory.getLogger(AssetGeneratorRunner.class);
 
+    /**
+     * Entity-name-independent completion signal.
+     * Always the last file written to {@code ASSET_OUTPUT_DIR}.
+     * CI should poll for this file instead of any specific asset name.
+     */
+    public static final String SENTINEL_FILENAME = "generation-complete.sentinel";
+
     public static void main(String[] args) throws Exception {
-        String specsDirProp  = System.getProperty("specs.dir");
+        String specsDirProp   = System.getProperty("specs.dir");
         String outputModeProp = System.getProperty("assets.output-mode", "standard");
         Path outputDir = args.length > 0
                 ? Path.of(args[0])
@@ -66,7 +87,7 @@ public class AssetGeneratorRunner {
         }
     }
 
-    // ── docs-preview mode ───────────────────────────────────────────────────
+    // ── docs-preview mode ────────────────────────────────────────────────────
 
     private static void runDocsPreview(SpecsSource source, Path outputDir) throws Exception {
         log.info("Asset generation started in DOCS_PREVIEW mode. output={}", outputDir);
@@ -77,10 +98,12 @@ public class AssetGeneratorRunner {
         DocsPreviewJsonWriterAdapter writer = new DocsPreviewJsonWriterAdapter();
         Path target = writer.write(result, outputDir);
 
+        writeSentinel(outputDir);
+
         log.info("DOCS_PREVIEW complete. {} entities → {}", result.descriptors().size(), target);
     }
 
-    // ── standard mode ──────────────────────────────────────────────────────────
+    // ── standard mode ────────────────────────────────────────────────────────
 
     private static void runStandard(SpecsSource source, String specsDirProp, Path outputDir) {
         log.info("Asset generation started in STANDARD mode. output={}", outputDir);
@@ -97,6 +120,7 @@ public class AssetGeneratorRunner {
 
         if (entities.isEmpty()) {
             log.warn("No entity refs found — nothing to generate");
+            writeSentinel(outputDir);
             return;
         }
 
@@ -134,11 +158,34 @@ public class AssetGeneratorRunner {
             }
         }
 
+        // ── Sentinel MUST be written last ─────────────────────────────────────
+        // This is the entity-name-independent completion signal (ADR-001).
+        // CI and any external watcher should poll SENTINEL_FILENAME, not any
+        // specific asset such as tanya_idle.png.
+        writeSentinel(outputDir);
+
         log.info("Asset generation complete. Entities: {}, Skipped abstract: {}, Total files: {}",
                 entityCount, skipped, totalFiles);
     }
 
-    // ── shared helpers ───────────────────────────────────────────────────────────────
+    // ── shared helpers ────────────────────────────────────────────────────────
+
+    /**
+     * Writes {@value #SENTINEL_FILENAME} to {@code dir}.
+     * Content: one ISO-8601 timestamp line (human-readable, easy to diff).
+     * Always called as the very last I/O operation of the runner.
+     */
+    private static void writeSentinel(Path dir) {
+        Path sentinel = dir.resolve(SENTINEL_FILENAME);
+        try {
+            Files.createDirectories(dir);
+            Files.writeString(sentinel, Instant.now().toString() + System.lineSeparator());
+            log.info("Sentinel written: {}", sentinel);
+        } catch (IOException e) {
+            // Non-fatal: log and continue. The sentinel is a convenience signal, not an asset.
+            log.warn("Could not write sentinel file {}: {}", sentinel, e.getMessage());
+        }
+    }
 
     private static OutputMode resolveOutputMode(String value) {
         try {

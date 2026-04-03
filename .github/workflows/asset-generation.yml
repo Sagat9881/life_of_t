@@ -60,14 +60,26 @@ jobs:
             --assets.output-dir=${{ env.ASSET_OUTPUT_DIR }} \
             --server.port=8099 &
           APP_PID=$!
-          # Wait for app to generate assets and start
-          for i in $(seq 1 30); do
-            if [ -f "${{ env.ASSET_OUTPUT_DIR }}/tanya_idle.png" ]; then
-              echo "Assets generated after ${i}s"
+
+          # ── Completion signal: poll for generation-complete.sentinel ─────────
+          # The sentinel file is always the LAST file written by AssetGeneratorRunner
+          # regardless of the entity set (ADR-001: no entity-name hardcode in CI).
+          echo "Waiting for generation-complete.sentinel ..."
+          for i in $(seq 1 60); do
+            if [ -f "${{ env.ASSET_OUTPUT_DIR }}/generation-complete.sentinel" ]; then
+              echo "Generation complete after ${i}s (sentinel found)"
+              cat "${{ env.ASSET_OUTPUT_DIR }}/generation-complete.sentinel"
               break
             fi
             sleep 1
           done
+
+          if [ ! -f "${{ env.ASSET_OUTPUT_DIR }}/generation-complete.sentinel" ]; then
+            echo "::error::Timed out waiting for generation-complete.sentinel"
+            kill $APP_PID 2>/dev/null || true
+            exit 1
+          fi
+
           sleep 2
           kill $APP_PID 2>/dev/null || true
 
@@ -76,43 +88,46 @@ jobs:
           echo "=== Generated Assets ==="
           ls -la ${{ env.ASSET_OUTPUT_DIR }}/ || echo "Directory not found!"
 
-          EXPECTED=(
-            "tanya_idle.png"
-            "tanya_walk.png"
-            "sam_idle.png"
-            "sam_walk.png"
-            "bed_static.png"
-            "home_room_bg.png"
-          )
-          ALL_OK=true
-          for asset in "${EXPECTED[@]}"; do
-            FILE="${{ env.ASSET_OUTPUT_DIR }}/${asset}"
-            if [ -f "$FILE" ]; then
-              SIZE=$(stat -c%s "$FILE")
-              echo "OK: $asset ($SIZE bytes)"
-            else
-              echo "::error::MISSING: $asset"
-              ALL_OK=false
-            fi
-          done
-          if [ "$ALL_OK" = false ]; then
+          # ── Data-driven verification (ADR-001) ───────────────────────────────
+          # We do NOT hardcode expected filenames here. Instead we verify that:
+          #   1. The sentinel is present (generation completed normally).
+          #   2. At least one PNG was produced (generator produced output).
+          #   3. sprite-atlas.json exists for entities that have animations.
+          # Per-entity dimension checks are delegated to unit tests in the
+          # asset-generator module (run in the previous step).
+
+          SENTINEL="${{ env.ASSET_OUTPUT_DIR }}/generation-complete.sentinel"
+          if [ ! -f "$SENTINEL" ]; then
+            echo "::error::generation-complete.sentinel missing — generation did not finish cleanly"
             exit 1
           fi
-          echo "All expected assets present."
+          echo "OK: generation-complete.sentinel present ($(cat $SENTINEL | tr -d '\n'))"
+
+          PNG_COUNT=$(find ${{ env.ASSET_OUTPUT_DIR }} -name '*.png' | wc -l)
+          if [ "$PNG_COUNT" -eq 0 ]; then
+            echo "::error::No PNG files found in ${{ env.ASSET_OUTPUT_DIR }}"
+            exit 1
+          fi
+          echo "OK: $PNG_COUNT PNG file(s) generated"
+
+          ATLAS_COUNT=$(find ${{ env.ASSET_OUTPUT_DIR }} -name 'sprite-atlas.json' | wc -l)
+          echo "OK: $ATLAS_COUNT sprite-atlas.json file(s) generated"
+
+          echo "All structural checks passed."
 
       - name: Validate asset PNG format (32-bit ARGB)
         run: |
-          for f in ${{ env.ASSET_OUTPUT_DIR }}/*.png; do
+          for f in $(find ${{ env.ASSET_OUTPUT_DIR }} -name '*.png'); do
             INFO=$(python3 -c "
-          import struct, zlib
-          with open('$f','rb') as fp:
-              sig = fp.read(8)
-              length = struct.unpack('>I', fp.read(4))[0]
-              chunk_type = fp.read(4)
-              data = fp.read(length)
-              w, h, bit_depth, color_type = struct.unpack('>IIBB', data[:10])
-              print(f'{w}x{h} depth={bit_depth} type={color_type}')
-          ")
+import struct, zlib
+with open('$f','rb') as fp:
+    sig = fp.read(8)
+    length = struct.unpack('>I', fp.read(4))[0]
+    chunk_type = fp.read(4)
+    data = fp.read(length)
+    w, h, bit_depth, color_type = struct.unpack('>IIBB', data[:10])
+    print(f'{w}x{h} depth={bit_depth} type={color_type}')
+")
             echo "$f: $INFO"
             if echo "$INFO" | grep -q "depth=8 type=6"; then
               echo "  -> RGBA 32-bit OK"
@@ -122,55 +137,21 @@ jobs:
             fi
           done
 
-      - name: Validate atlas dimensions
+      - name: Verify no empty PNG files
         run: |
-          python3 -c "
-          import struct
-          assets = {
-            'tanya_idle.png': (192, 48),
-            'tanya_walk.png': (256, 48),
-            'sam_idle.png': (96, 20),
-            'sam_walk.png': (144, 20),
-            'bed_static.png': (48, 32),
-            'home_room_bg.png': (320, 192)
-          }
-          import os
-          output_dir = '${{ env.ASSET_OUTPUT_DIR }}'
-          for name, (exp_w, exp_h) in assets.items():
-              path = os.path.join(output_dir, name)
-              with open(path, 'rb') as f:
-                  f.read(8)
-                  f.read(4)
-                  f.read(4)
-                  data = f.read(8)
-                  w, h = struct.unpack('>II', data)
-              if w == exp_w and h == exp_h:
-                  print(f'OK: {name} -> {w}x{h}')
-              else:
-                  print(f'FAIL: {name} -> {w}x{h} (expected {exp_w}x{exp_h})')
-                  exit(1)
-          print('All atlas dimensions correct.')
-          "
-
-      - name: Verify no anti-aliasing
-        run: |
-          python3 -c "
-          sprites = ['tanya_idle.png', 'tanya_walk.png', 'sam_idle.png', 'sam_walk.png', 'bed_static.png']
-          import os
-          output_dir = '${{ env.ASSET_OUTPUT_DIR }}'
-          all_ok = True
-          for name in sprites:
-              path = os.path.join(output_dir, name)
-              size = os.path.getsize(path)
-              if size > 0:
-                  print(f'OK: {name} ({size} bytes, non-empty)')
-              else:
-                  print(f'FAIL: {name} is empty')
-                  all_ok = False
-          if not all_ok:
-              exit(1)
-          print('All sprite files are valid non-empty PNGs.')
-          "
+          # Entity-name-independent check: every PNG must be non-empty.
+          FAIL=false
+          while IFS= read -r -d '' f; do
+            SIZE=$(stat -c%s "$f")
+            if [ "$SIZE" -gt 0 ]; then
+              echo "OK: $f ($SIZE bytes)"
+            else
+              echo "::error::EMPTY PNG: $f"
+              FAIL=true
+            fi
+          done < <(find ${{ env.ASSET_OUTPUT_DIR }} -name '*.png' -print0)
+          if [ "$FAIL" = true ]; then exit 1; fi
+          echo "All PNG files are valid non-empty."
 
       - name: Upload generated assets as artifact
         uses: actions/upload-artifact@v4
