@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-04-02T19:12:39Z",
+  "generated_at": "2026-04-03T07:33:00Z",
   "tasks": {
     "todo": 0,
     "in_progress": 0,
     "review": 0,
-    "done": 0,
+    "done": 18,
     "blocked": 0,
-    "total": 0
+    "total": 18
   },
   "backend": {
     "domain": 108,
@@ -16,11 +16,11 @@
     "total": 202
   },
   "narrative": {
-    "quests": 0,
-    "npcs": 0,
-    "world_events": 0,
-    "conflicts": 0,
-    "total": 151
+    "quests": 15,
+    "npcs": 11,
+    "world_events": 15,
+    "conflicts": 10,
+    "total": 76
   },
   "ci": {
     "status": "in_progress",
