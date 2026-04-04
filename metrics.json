@@ -1,30 +1,30 @@
 {
-  "generated_at": "2026-04-03T12:35:12Z",
+  "generated_at": "2026-04-04T07:11:54Z",
   "git": {
-    "sha": "e1baf90ebd9e693b6ba547f807e8cafd4319489b",
-    "short_sha": "e1baf90e",
-    "branch": "main"
+    "sha": "ff903ad3765006683ceee43b2fb6a56fb6c31782",
+    "short_sha": "ff903ad3",
+    "branch": "master"
   },
   "tasks": {
-    "in_progress": 3,
-    "done": 24,
-    "total": 27
+    "in_progress": 0,
+    "done": 19,
+    "total": 19
   },
   "tasks_by_category": {
-    "backend": 14,
-    "narrative": 2,
+    "backend": 11,
+    "narrative": 4,
     "frontend": 9,
-    "assets": 3,
+    "assets": 2,
     "analytics": 4
   },
   "backend": {
-    "domain": 143,
-    "application": 56,
-    "infrastructure": 62,
+    "domain": 139,
+    "application": 55,
+    "infrastructure": 60,
     "presentation": 0,
-    "total": 252,
+    "total": 244,
     "test_total": 8,
-    "asset_generator": 50
+    "asset_generator": 42
   },
   "narrative": {
     "quests": 15,
@@ -41,8 +41,8 @@
   "ci": {
     "status": "in_progress",
     "conclusion": "pending",
-    "total_runs": 2,
+    "total_runs": 6,
     "failed_checks": 0,
-    "success_checks": 0
+    "success_checks": 4
   }
 }
